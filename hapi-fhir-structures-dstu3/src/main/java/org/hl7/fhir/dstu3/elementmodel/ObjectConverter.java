@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Factory;
@@ -29,6 +30,8 @@ public class ObjectConverter  {
   }
 
   public Element convert(Resource ig) throws IOException, FHIRFormatError, DefinitionException {
+    if (ig == null)
+      return null;
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
     org.hl7.fhir.dstu3.formats.JsonParser jp = new org.hl7.fhir.dstu3.formats.JsonParser();
     jp.compose(bs, ig);
@@ -82,6 +85,18 @@ public class ObjectConverter  {
       }
     }
     return b;
+  }
+
+  public Resource convert(Element element) throws FHIRException {
+    ByteArrayOutputStream bo = new ByteArrayOutputStream();
+    try {
+      new JsonParser(context).compose(element, bo, OutputStyle.NORMAL, null);
+      return new org.hl7.fhir.dstu3.formats.JsonParser().parse(bo.toByteArray());
+    } catch (IOException e) {
+      // won't happen
+      throw new FHIRException(e);
+    }
+    
   }
 
 

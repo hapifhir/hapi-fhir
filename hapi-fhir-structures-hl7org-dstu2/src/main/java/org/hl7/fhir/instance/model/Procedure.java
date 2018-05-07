@@ -29,17 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.
  */
@@ -67,7 +64,7 @@ public class Procedure extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureStatus fromCode(String codeString) throws Exception {
+        public static ProcedureStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -78,7 +75,7 @@ public class Procedure extends DomainResource {
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown ProcedureStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ProcedureStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -132,6 +129,22 @@ public class Procedure extends DomainResource {
         if ("entered-in-error".equals(codeString))
           return ProcedureStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown ProcedureStatus code '"+codeString+"'");
+        }
+        public Enumeration<ProcedureStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-progress".equals(codeString))
+          return new Enumeration<ProcedureStatus>(this, ProcedureStatus.INPROGRESS);
+        if ("aborted".equals(codeString))
+          return new Enumeration<ProcedureStatus>(this, ProcedureStatus.ABORTED);
+        if ("completed".equals(codeString))
+          return new Enumeration<ProcedureStatus>(this, ProcedureStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ProcedureStatus>(this, ProcedureStatus.ENTEREDINERROR);
+        throw new FHIRException("Unknown ProcedureStatus code '"+codeString+"'");
         }
     public String toCode(ProcedureStatus code) {
       if (code == ProcedureStatus.INPROGRESS)
@@ -245,6 +258,30 @@ public class Procedure extends DomainResource {
           childrenList.add(new Property("role", "CodeableConcept", "For example: surgeon, anaethetist, endoscopist.", 0, java.lang.Integer.MAX_VALUE, role));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("actor"))
+          this.actor = castToReference(value); // Reference
+        else if (name.equals("role"))
+          this.role = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("actor")) {
+          this.actor = new Reference();
+          return this.actor;
+        }
+        else if (name.equals("role")) {
+          this.role = new CodeableConcept();
+          return this.role;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ProcedurePerformerComponent copy() {
         ProcedurePerformerComponent dst = new ProcedurePerformerComponent();
         copyValues(dst);
@@ -277,6 +314,11 @@ public class Procedure extends DomainResource {
         return super.isEmpty() && (actor == null || actor.isEmpty()) && (role == null || role.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Procedure.performer";
+
+  }
 
   }
 
@@ -392,6 +434,30 @@ public class Procedure extends DomainResource {
           childrenList.add(new Property("manipulated", "Reference(Device)", "The device that was manipulated (changed) during the procedure.", 0, java.lang.Integer.MAX_VALUE, manipulated));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("action"))
+          this.action = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("manipulated"))
+          this.manipulated = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("action")) {
+          this.action = new CodeableConcept();
+          return this.action;
+        }
+        else if (name.equals("manipulated")) {
+          this.manipulated = new Reference();
+          return this.manipulated;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ProcedureFocalDeviceComponent copy() {
         ProcedureFocalDeviceComponent dst = new ProcedureFocalDeviceComponent();
         copyValues(dst);
@@ -424,6 +490,11 @@ public class Procedure extends DomainResource {
         return super.isEmpty() && (action == null || action.isEmpty()) && (manipulated == null || manipulated.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Procedure.focalDevice";
+
+  }
 
   }
 
@@ -930,26 +1001,26 @@ public class Procedure extends DomainResource {
     /**
      * @return {@link #reason} (The reason why the procedure was performed. This may be due to a Condition, may be coded entity of some type, or may simply be present as text.)
      */
-    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
       if (!(this.reason instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
-    public boolean hasReasonCodeableConcept() throws Exception { 
+    public boolean hasReasonCodeableConcept() { 
       return this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (The reason why the procedure was performed. This may be due to a Condition, may be coded entity of some type, or may simply be present as text.)
      */
-    public Reference getReasonReference() throws Exception { 
+    public Reference getReasonReference() throws FHIRException { 
       if (!(this.reason instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
-    public boolean hasReasonReference() throws Exception { 
+    public boolean hasReasonReference() { 
       return this.reason instanceof Reference;
     }
 
@@ -1015,26 +1086,26 @@ public class Procedure extends DomainResource {
     /**
      * @return {@link #performed} (The date(time)/period over which the procedure was performed. Allows a period to support complex procedures that span more than one date, and also allows for the length of the procedure to be captured.)
      */
-    public DateTimeType getPerformedDateTimeType() throws Exception { 
+    public DateTimeType getPerformedDateTimeType() throws FHIRException { 
       if (!(this.performed instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.performed.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.performed.getClass().getName()+" was encountered");
       return (DateTimeType) this.performed;
     }
 
-    public boolean hasPerformedDateTimeType() throws Exception { 
+    public boolean hasPerformedDateTimeType() { 
       return this.performed instanceof DateTimeType;
     }
 
     /**
      * @return {@link #performed} (The date(time)/period over which the procedure was performed. Allows a period to support complex procedures that span more than one date, and also allows for the length of the procedure to be captured.)
      */
-    public Period getPerformedPeriod() throws Exception { 
+    public Period getPerformedPeriod() throws FHIRException { 
       if (!(this.performed instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.performed.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.performed.getClass().getName()+" was encountered");
       return (Period) this.performed;
     }
 
-    public boolean hasPerformedPeriod() throws Exception { 
+    public boolean hasPerformedPeriod() { 
       return this.performed instanceof Period;
     }
 
@@ -1495,6 +1566,145 @@ public class Procedure extends DomainResource {
         childrenList.add(new Property("focalDevice", "", "A device that is implanted, removed or otherwise manipulated (calibration, battery replacement, fitting a prosthesis, attaching a wound-vac, etc.) as a focal portion of the Procedure.", 0, java.lang.Integer.MAX_VALUE, focalDevice));
         childrenList.add(new Property("used", "Reference(Device|Medication|Substance)", "Identifies medications, devices and any other substance used as part of the procedure.", 0, java.lang.Integer.MAX_VALUE, used));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new ProcedureStatusEnumFactory().fromType(value); // Enumeration<ProcedureStatus>
+        else if (name.equals("category"))
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("notPerformed"))
+          this.notPerformed = castToBoolean(value); // BooleanType
+        else if (name.equals("reasonNotPerformed"))
+          this.getReasonNotPerformed().add(castToCodeableConcept(value));
+        else if (name.equals("bodySite"))
+          this.getBodySite().add(castToCodeableConcept(value));
+        else if (name.equals("reason[x]"))
+          this.reason = (Type) value; // Type
+        else if (name.equals("performer"))
+          this.getPerformer().add((ProcedurePerformerComponent) value);
+        else if (name.equals("performed[x]"))
+          this.performed = (Type) value; // Type
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("location"))
+          this.location = castToReference(value); // Reference
+        else if (name.equals("outcome"))
+          this.outcome = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("report"))
+          this.getReport().add(castToReference(value));
+        else if (name.equals("complication"))
+          this.getComplication().add(castToCodeableConcept(value));
+        else if (name.equals("followUp"))
+          this.getFollowUp().add(castToCodeableConcept(value));
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("notes"))
+          this.getNotes().add(castToAnnotation(value));
+        else if (name.equals("focalDevice"))
+          this.getFocalDevice().add((ProcedureFocalDeviceComponent) value);
+        else if (name.equals("used"))
+          this.getUsed().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Procedure.status");
+        }
+        else if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("notPerformed")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Procedure.notPerformed");
+        }
+        else if (name.equals("reasonNotPerformed")) {
+          return addReasonNotPerformed();
+        }
+        else if (name.equals("bodySite")) {
+          return addBodySite();
+        }
+        else if (name.equals("reasonCodeableConcept")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("reasonReference")) {
+          this.reason = new Reference();
+          return this.reason;
+        }
+        else if (name.equals("performer")) {
+          return addPerformer();
+        }
+        else if (name.equals("performedDateTime")) {
+          this.performed = new DateTimeType();
+          return this.performed;
+        }
+        else if (name.equals("performedPeriod")) {
+          this.performed = new Period();
+          return this.performed;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("location")) {
+          this.location = new Reference();
+          return this.location;
+        }
+        else if (name.equals("outcome")) {
+          this.outcome = new CodeableConcept();
+          return this.outcome;
+        }
+        else if (name.equals("report")) {
+          return addReport();
+        }
+        else if (name.equals("complication")) {
+          return addComplication();
+        }
+        else if (name.equals("followUp")) {
+          return addFollowUp();
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("notes")) {
+          return addNotes();
+        }
+        else if (name.equals("focalDevice")) {
+          return addFocalDevice();
+        }
+        else if (name.equals("used")) {
+          return addUsed();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Procedure";
+
+  }
 
       public Procedure copy() {
         Procedure dst = new Procedure();

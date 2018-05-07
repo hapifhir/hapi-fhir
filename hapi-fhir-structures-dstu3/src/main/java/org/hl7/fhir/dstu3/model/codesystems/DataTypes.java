@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DataTypes {
 
         /**
-         * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
+         * An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.
          */
         ADDRESS, 
         /**
@@ -81,7 +81,7 @@ public enum DataTypes {
          */
         COUNT, 
         /**
-         * Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.
+         * Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data.
          */
         DATAREQUIREMENT, 
         /**
@@ -89,9 +89,9 @@ public enum DataTypes {
          */
         DISTANCE, 
         /**
-         * Indicates how the medication is to be used by the patient.
+         * Indicates how the medication is/was taken or should be taken by the patient.
          */
-        DOSAGEINSTRUCTION, 
+        DOSAGE, 
         /**
          * A length of time.
          */
@@ -105,7 +105,7 @@ public enum DataTypes {
          */
         ELEMENTDEFINITION, 
         /**
-         * Optional Extensions Element - found in all resources.
+         * Optional Extension Element - found in all resources.
          */
         EXTENSION, 
         /**
@@ -121,7 +121,7 @@ public enum DataTypes {
          */
         META, 
         /**
-         * An amount of economic utility in some recognised currency.
+         * An amount of economic utility in some recognized currency.
          */
         MONEY, 
         /**
@@ -161,7 +161,7 @@ public enum DataTypes {
          */
         SAMPLEDDATA, 
         /**
-         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.
+         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
          */
         SIGNATURE, 
         /**
@@ -169,7 +169,7 @@ public enum DataTypes {
          */
         SIMPLEQUANTITY, 
         /**
-         * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
+         * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
          */
         TIMING, 
         /**
@@ -221,7 +221,7 @@ public enum DataTypes {
          */
         MARKDOWN, 
         /**
-         * An oid represented as a URI
+         * An OID represented as a URI
          */
         OID, 
         /**
@@ -285,8 +285,8 @@ public enum DataTypes {
           return DATAREQUIREMENT;
         if ("Distance".equals(codeString))
           return DISTANCE;
-        if ("DosageInstruction".equals(codeString))
-          return DOSAGEINSTRUCTION;
+        if ("Dosage".equals(codeString))
+          return DOSAGE;
         if ("Duration".equals(codeString))
           return DURATION;
         if ("Element".equals(codeString))
@@ -384,7 +384,7 @@ public enum DataTypes {
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
-            case DOSAGEINSTRUCTION: return "DosageInstruction";
+            case DOSAGE: return "Dosage";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
@@ -433,7 +433,7 @@ public enum DataTypes {
         }
         public String getDefinition() {
           switch (this) {
-            case ADDRESS: return "An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations and which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.";
+            case ADDRESS: return "An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.";
             case AGE: return "A duration of time during which an organism (or a process) has existed.";
             case ANNOTATION: return "A  text note which also  contains information about who made the statement and when.";
             case ATTACHMENT: return "For referring to data content defined in other formats.";
@@ -444,17 +444,17 @@ public enum DataTypes {
             case CONTACTPOINT: return "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.";
             case CONTRIBUTOR: return "A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.";
             case COUNT: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
-            case DATAREQUIREMENT: return "Describes a required data item for evaluation in terms of the type of data, and optional code- or date-based filters of the data.";
+            case DATAREQUIREMENT: return "Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data.";
             case DISTANCE: return "A length - a value with a unit that is a physical distance.";
-            case DOSAGEINSTRUCTION: return "Indicates how the medication is to be used by the patient.";
+            case DOSAGE: return "Indicates how the medication is/was taken or should be taken by the patient.";
             case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
-            case EXTENSION: return "Optional Extensions Element - found in all resources.";
+            case EXTENSION: return "Optional Extension Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
             case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
             case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.";
-            case MONEY: return "An amount of economic utility in some recognised currency.";
+            case MONEY: return "An amount of economic utility in some recognized currency.";
             case NARRATIVE: return "A human-readable formatted text, including images.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
@@ -464,9 +464,9 @@ public enum DataTypes {
             case REFERENCE: return "A reference from one resource to another.";
             case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
-            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.";
+            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
-            case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.";
+            case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
             case TRIGGERDEFINITION: return "A description of a triggering event.";
             case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
@@ -479,7 +479,7 @@ public enum DataTypes {
             case INSTANT: return "An instant in time - known at least to the second";
             case INTEGER: return "A whole number";
             case MARKDOWN: return "A string that may contain markdown syntax for optional processing by a mark down presentation engine";
-            case OID: return "An oid represented as a URI";
+            case OID: return "An OID represented as a URI";
             case POSITIVEINT: return "An integer with a value that is positive (e.g. >0)";
             case STRING: return "A sequence of Unicode characters";
             case TIME: return "A time during the day, with no date specified";
@@ -505,7 +505,7 @@ public enum DataTypes {
             case COUNT: return "Count";
             case DATAREQUIREMENT: return "DataRequirement";
             case DISTANCE: return "Distance";
-            case DOSAGEINSTRUCTION: return "DosageInstruction";
+            case DOSAGE: return "Dosage";
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";

@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.utils;
 
+import java.net.URISyntaxException;
+
 /*
 Copyright (c) 2011+, HL7, Inc
 All rights reserved.
@@ -57,8 +59,9 @@ import org.hl7.fhir.instance.model.UriType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
-import org.hl7.fhir.instance.utilities.Utilities;
-import org.hl7.fhir.instance.validation.ValidationMessage.Source;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
+import org.hl7.fhir.exceptions.FHIRFormatError;
+import org.hl7.fhir.utilities.Utilities;
 
 
 public class ToolingExtensions {
@@ -77,6 +80,8 @@ public class ToolingExtensions {
   public static final String EXT_JSON_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type"; 
   public static final String EXT_XML_TYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type"; 
   public static final String EXT_REGEX = "http://hl7.org/fhir/StructureDefinition/structuredefinition-regex"; 
+  public static final String EXT_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-expression";
+  public static final String EXT_SEARCH_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/searchparameter-expression";
 
   // unregistered?
 
@@ -112,7 +117,7 @@ public class ToolingExtensions {
     return getExtension(e, url) != null;
   }
 
-  public static void addStringExtension(DomainResource dr, String url, String content) throws Exception {
+  public static void addStringExtension(DomainResource dr, String url, String content) {
     if (!Utilities.noString(content)) {
       Extension ex = getExtension(dr, url);
       if (ex != null)
@@ -122,7 +127,7 @@ public class ToolingExtensions {
     }
   }
 
-  public static void addStringExtension(Element e, String url, String content) throws Exception {
+  public static void addStringExtension(Element e, String url, String content) {
     if (!Utilities.noString(content)) {
       Extension ex = getExtension(e, url);
       if (ex != null)
@@ -132,7 +137,7 @@ public class ToolingExtensions {
     }
   }
 
-  public static void addIntegerExtension(DomainResource dr, String url, int value) throws Exception {
+  public static void addIntegerExtension(DomainResource dr, String url, int value) {
     Extension ex = getExtension(dr, url);
     if (ex != null)
       ex.setValue(new IntegerType(value));
@@ -140,30 +145,30 @@ public class ToolingExtensions {
       dr.getExtension().add(Factory.newExtension(url, new IntegerType(value), true));   
   }
 
-  public static void addComment(Element nc, String comment) throws Exception {
+  public static void addComment(Element nc, String comment) {
     if (!Utilities.noString(comment))
       nc.getExtension().add(Factory.newExtension(EXT_COMMENT, Factory.newString_(comment), true));   
   }
 
-  public static void markDeprecated(Element nc) throws Exception {
+  public static void markDeprecated(Element nc) {
     setDeprecated(nc);   
   }
 
-  public static void addSubsumes(ConceptDefinitionComponent nc, String code) throws Exception {
+  public static void addSubsumes(ConceptDefinitionComponent nc, String code) {
     nc.getModifierExtension().add(Factory.newExtension(EXT_SUBSUMES, Factory.newCode(code), true));   
   }
 
-  public static void addDefinition(Element nc, String definition) throws Exception {
+  public static void addDefinition(Element nc, String definition) {
     if (!Utilities.noString(definition))
       nc.getExtension().add(Factory.newExtension(EXT_DEFINITION, Factory.newString_(definition), true));   
   }
 
-  public static void addDisplayHint(Element def, String hint) throws Exception {
+  public static void addDisplayHint(Element def, String hint) {
     if (!Utilities.noString(hint))
       def.getExtension().add(Factory.newExtension(EXT_DISPLAY_HINT, Factory.newString_(hint), true));   
   }
 
-  public static String getDisplayHint(Element def) throws Exception {
+  public static String getDisplayHint(Element def) {
     return readStringExtension(def, EXT_DISPLAY_HINT);    
   }
 
@@ -252,39 +257,39 @@ public class ToolingExtensions {
     return res;
   }
 
-  public static void addFlyOver(GroupComponent group, String text) throws Exception {
+  public static void addFlyOver(GroupComponent group, String text) {
     if (!Utilities.noString(text))
       group.getExtension().add(Factory.newExtension(EXT_FLYOVER, Factory.newString_(text), true));   
 
   }
 
-  public static void setQuestionType(GroupComponent group, String text) throws Exception {
+  public static void setQuestionType(GroupComponent group, String text) {
     if (!Utilities.noString(text))
       group.getExtension().add(Factory.newExtension(EXT_QTYPE, Factory.newString_(text), true));   
   }
 
-  public static void setQuestionReference(GroupComponent group, String text) throws Exception {
+  public static void setQuestionReference(GroupComponent group, String text) {
     if (!Utilities.noString(text))
       group.getExtension().add(Factory.newExtension(EXT_QREF, Factory.newString_(text), true));   
   }
 
-  public static void addFlyOver(Element element, String text) throws Exception {
+  public static void addFlyOver(Element element, String text) {
     element.getExtension().add(Factory.newExtension(EXT_FLYOVER, Factory.newString_(text), true));       
   }
 
-  public static void addFilterOnly(Reference element, boolean value) throws Exception {
+  public static void addFilterOnly(Reference element, boolean value) {
     element.getExtension().add(Factory.newExtension(EXTENSION_FILTER_ONLY, Factory.newBoolean(value), true));       
   }
 
-  public static void addType(GroupComponent group, String value) throws Exception {
+  public static void addType(GroupComponent group, String value) {
     group.getExtension().add(Factory.newExtension(EXT_TYPE, Factory.newString_(value), true));       
   }
 
-  public static void addReference(QuestionComponent group, String value) throws Exception {
+  public static void addReference(QuestionComponent group, String value) {
     group.getExtension().add(Factory.newExtension(EXT_REFERENCE, Factory.newString_(value), true));       
   }
 
-  public static void addIdentifier(Element element, Identifier value) throws Exception {
+  public static void addIdentifier(Element element, Identifier value) {
     element.getExtension().add(Factory.newExtension(EXT_IDENTIFIER, value, true));       
   }
 
@@ -332,18 +337,18 @@ public class ToolingExtensions {
     return readStringExtension(vs, EXT_OID);    
   }
 
-  public static void setOID(ValueSetCodeSystemComponent define, String oid) throws Exception {
+  public static void setOID(ValueSetCodeSystemComponent define, String oid) throws FHIRFormatError, URISyntaxException {
     if (!oid.startsWith("urn:oid:"))
-      throw new Exception("Error in OID format");
+      throw new FHIRFormatError("Error in OID format");
     if (oid.startsWith("urn:oid:urn:oid:"))
-      throw new Exception("Error in OID format");
+      throw new FHIRFormatError("Error in OID format");
     define.getExtension().add(Factory.newExtension(EXT_OID, Factory.newUri(oid), false));       
   }
-  public static void setOID(ValueSet vs, String oid) throws Exception {
+  public static void setOID(ValueSet vs, String oid) throws FHIRFormatError, URISyntaxException {
     if (!oid.startsWith("urn:oid:"))
-      throw new Exception("Error in OID format");
+      throw new FHIRFormatError("Error in OID format");
     if (oid.startsWith("urn:oid:urn:oid:"))
-      throw new Exception("Error in OID format");
+      throw new FHIRFormatError("Error in OID format");
     vs.getExtension().add(Factory.newExtension(EXT_OID, Factory.newUri(oid), false));       
   }
 
@@ -458,4 +463,15 @@ public class ToolingExtensions {
       }
     }
   }
+  
+
+  public static void setStringExtension(Element element, String uri, String value) {
+    Extension ext = getExtension(element, uri);
+    if (ext != null)
+      ext.setValue(new StringType(value));
+    else
+      element.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
+  }
+
+
 }

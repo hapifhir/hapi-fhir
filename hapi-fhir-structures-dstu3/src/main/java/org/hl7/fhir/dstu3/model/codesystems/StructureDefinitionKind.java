@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum StructureDefinitionKind {
 
         /**
-         * A data type, which is a primitive type that has a value and an extension. These can be used throughout Resource and extension definitions. Only tbe base specification can define primitive types.
+         * A primitive type that has a value and an extension. These can be used throughout Resource and extension definitions. Only the base specification can define primitive types.
          */
         PRIMITIVETYPE, 
         /**
-         * A data type - either a complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions, and in logical models.
+         * A  complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions, and in logical models.
          */
         COMPLEXTYPE, 
         /**
@@ -49,7 +49,7 @@ public enum StructureDefinitionKind {
          */
         RESOURCE, 
         /**
-         * A logical model - a conceptual package of data that will be mapped to resources for implementation.
+         * A conceptual package of data that will be mapped to resources for implementation.
          */
         LOGICAL, 
         /**
@@ -83,10 +83,10 @@ public enum StructureDefinitionKind {
         }
         public String getDefinition() {
           switch (this) {
-            case PRIMITIVETYPE: return "A data type, which is a primitive type that has a value and an extension. These can be used throughout Resource and extension definitions. Only tbe base specification can define primitive types.";
-            case COMPLEXTYPE: return "A data type - either a complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions, and in logical models.";
+            case PRIMITIVETYPE: return "A primitive type that has a value and an extension. These can be used throughout Resource and extension definitions. Only the base specification can define primitive types.";
+            case COMPLEXTYPE: return "A  complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions, and in logical models.";
             case RESOURCE: return "A resource defined by the FHIR specification.";
-            case LOGICAL: return "A logical model - a conceptual package of data that will be mapped to resources for implementation.";
+            case LOGICAL: return "A conceptual package of data that will be mapped to resources for implementation.";
             default: return "?";
           }
         }

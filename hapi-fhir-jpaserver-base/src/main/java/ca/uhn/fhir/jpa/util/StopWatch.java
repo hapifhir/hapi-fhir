@@ -1,18 +1,16 @@
 package ca.uhn.fhir.jpa.util;
 
-import java.util.Date;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,49 +20,10 @@ import java.util.Date;
  * #L%
  */
 
-
-public class StopWatch {
-
-	private long myStarted = System.currentTimeMillis();
-	
-	/**
-	 * Constructor
-	 */
-	public StopWatch() {
-		super();
-	}
-	
-	/**
-	 * Constructor
-	 */
-	public StopWatch(Date theNow) {
-		myStarted = theNow.getTime();
-	}
-
-	public long getMillisAndRestart() {
-		long now = System.currentTimeMillis();
-		long retVal = now - myStarted;
-		myStarted = now;
-		return retVal;
-	}
-	
-	public long getMillis() {
-		long now = System.currentTimeMillis();
-		long retVal = now - myStarted;
-		return retVal;
-	}
-	
-	public long getMillis(Date theNow) {
-		long retVal = theNow.getTime() - myStarted;
-		return retVal;
-	}
-
-	public Date getStartedDate() {
-		return new Date(myStarted);
-	}
-	
-	public double getMillisPerOperation(int theNumOperations) {
-		return ((double)getMillis()) / Math.max(1.0, theNumOperations);
-	}
-	
+/**
+ * @deprecated Use {@link ca.uhn.fhir.util.StopWatch} instead
+ */
+@Deprecated
+public class StopWatch extends ca.uhn.fhir.util.StopWatch {
+	// this just exists since existing code may depend on it
 }

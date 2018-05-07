@@ -1,12 +1,12 @@
 package org.hl7.fhir.dstu2016may.validation;
 
-import java.io.InputStream;
-import java.util.List;
-
+import com.google.gson.JsonObject;
 import org.hl7.fhir.dstu2016may.metamodel.Manager.FhirFormat;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 
-import com.google.gson.JsonObject;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * Interface to the instance validator. This takes a resource, in one of many forms, and 

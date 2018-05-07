@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsConformanceProvider;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
@@ -32,7 +32,7 @@ public class JaxRsConformanceProvider extends AbstractJaxRsConformanceProvider {
 	 * Standard Constructor
 	 */
 	public JaxRsConformanceProvider() {
-		super(SERVER_VERSION, SERVER_DESCRIPTION, SERVER_NAME);
+		super(SERVER_DESCRIPTION, SERVER_NAME, SERVER_VERSION);
 	}
 
 	@Override

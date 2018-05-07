@@ -5,6 +5,7 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.DerbyTenSevenDialect;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -56,14 +56,11 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/testDataLibraryStu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/testDataLibraryStu3");
+		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		return retVal;
 	}
 
-	@Bean 
-	public IServerInterceptor securityInterceptor() {
-		return new TdlSecurityInterceptor();
-	}
-	
 	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
@@ -74,7 +71,7 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setPassword("SA");
 		return retVal;
 	}
-
+	
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
@@ -97,6 +94,7 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
+		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", myFhirLuceneLocation);
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
@@ -142,8 +140,13 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		responseValidator.addExcludeOperationType(RestOperationTypeEnum.SEARCH_TYPE);
 		responseValidator.addValidatorModule(instanceValidatorDstu3());
 		responseValidator.setIgnoreValidatorExceptions(true);
-		
+
 		return responseValidator;
+	}
+
+	@Bean
+	public IServerInterceptor securityInterceptor() {
+		return new TdlSecurityInterceptor();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

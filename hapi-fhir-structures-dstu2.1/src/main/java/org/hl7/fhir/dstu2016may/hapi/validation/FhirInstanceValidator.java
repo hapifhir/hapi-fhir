@@ -1,9 +1,7 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -11,22 +9,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
-import org.hl7.fhir.dstu2016may.validation.IResourceValidator;
+import org.hl7.fhir.dstu2016may.validation.*;
 import org.hl7.fhir.dstu2016may.validation.IResourceValidator.BestPracticeWarningLevel;
-import org.hl7.fhir.dstu2016may.validation.InstanceValidator;
-import org.hl7.fhir.dstu2016may.validation.ValidationMessage;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
+import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -152,7 +145,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			} catch (Exception e2) {
 				ourLog.error("Failure to parse XML input", e2);
 				ValidationMessage m = new ValidationMessage();
-				m.setLevel(IssueSeverity.FATAL);
+				m.setLevel(ValidationMessage.IssueSeverity.FATAL);
 				m.setMessage("Failed to parse input, it does not appear to be valid XML:" + e2.getMessage());
 				return Collections.singletonList(m);
 			}

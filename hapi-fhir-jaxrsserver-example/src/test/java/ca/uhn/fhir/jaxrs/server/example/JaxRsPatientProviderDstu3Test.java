@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,32 +9,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Conformance;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.method.SearchStyleEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
 
 public class JaxRsPatientProviderDstu3Test {
@@ -222,9 +203,9 @@ public class JaxRsPatientProviderDstu3Test {
         final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
         final Patient patient = (Patient) results.getResource();
-        client.delete(Patient.class, patient.getId());
+        client.delete().resourceById(patient.getIdElement()).execute();
         try {
-            client.read(Patient.class, patient.getId());
+            client.read().resource(Patient.class).withId(patient.getId()).execute();
             fail();
         }
         catch (final Exception e) {
@@ -255,7 +236,7 @@ public class JaxRsPatientProviderDstu3Test {
     @Test
     @Ignore
     public void testConformance() {
-        final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
+        final CapabilityStatement conf = client.fetchConformance().ofType(CapabilityStatement.class).execute();
         System.out.println(conf.getRest().get(0).getResource().get(0).getType());
         assertEquals(conf.getRest().get(0).getResource().get(0).getType().toString(), "Patient");
     }    

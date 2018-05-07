@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,31 +20,24 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
-
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.exceptions.FHIRException;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderDstu3<CodeSystem> {
 
-	//@formatter:off
 	@SuppressWarnings("unchecked")
-	@Operation(name = "$lookup", idempotent = true, returnParameters= {
+	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 		@OperationParam(name="name", type=StringType.class, min=1),
 		@OperationParam(name="version", type=StringType.class, min=0),
 		@OperationParam(name="display", type=StringType.class, min=1),
@@ -54,26 +47,20 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 			HttpServletRequest theServletRequest,
 			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
-			@OperationParam(name="coding", min=0, max=1) Coding theCoding, 
-			RequestDetails theRequestDetails 
+			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
+			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
+			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
-		
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
-			if (result.isFound()==false) {
-				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
-			}
-			Parameters retVal = new Parameters();
-			retVal.addParameter().setName("name").setValue(new StringType(result.getCodeSystemDisplayName()));
-			if (isNotBlank(result.getCodeSystemVersion())) {
-				retVal.addParameter().setName("version").setValue(new StringType(result.getCodeSystemVersion()));
-			}
-			retVal.addParameter().setName("display").setValue(new StringType(result.getCodeDisplay()));
-			retVal.addParameter().setName("abstract").setValue(new BooleanType(result.isCodeIsAbstract()));			
-			return retVal;
+			result.throwNotFoundIfAppropriate();
+			org.hl7.fhir.r4.model.Parameters parametersR4 = result.toParameters(theProperties);
+			return VersionConvertor_30_40.convertParameters(parametersR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
 		} finally {
 			endRequest(theServletRequest);
 		}

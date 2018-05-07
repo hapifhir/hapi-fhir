@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  ResearchStudies involve the gathering of information about human or animal subjects.
+ * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
  */
 @ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/Profile/ResearchSubject")
 public class ResearchSubject extends DomainResource {
@@ -163,8 +163,10 @@ public class ResearchSubject extends DomainResource {
         throw new IllegalArgumentException("Unknown ResearchSubjectStatus code '"+codeString+"'");
         }
         public Enumeration<ResearchSubjectStatus> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ResearchSubjectStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -206,14 +208,14 @@ public class ResearchSubject extends DomainResource {
      * Identifiers assigned to this research study by the sponsor or other systems.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Business Identifer for event", formalDefinition="Identifiers assigned to this research study by the sponsor or other systems." )
+    @Description(shortDefinition="Business Identifier for research subject", formalDefinition="Identifiers assigned to this research study by the sponsor or other systems." )
     protected Identifier identifier;
 
     /**
-     * The current state of the event.
+     * The current state of the subject.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="candidate | enrolled | active | suspended | withdrawn | completed", formalDefinition="The current state of the event." )
+    @Description(shortDefinition="candidate | enrolled | active | suspended | withdrawn | completed", formalDefinition="The current state of the subject." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/research-subject-status")
     protected Enumeration<ResearchSubjectStatus> status;
 
@@ -318,7 +320,7 @@ public class ResearchSubject extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The current state of the event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The current state of the subject.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<ResearchSubjectStatus> getStatusElement() { 
       if (this.status == null)
@@ -338,7 +340,7 @@ public class ResearchSubject extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (The current state of the event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The current state of the subject.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public ResearchSubject setStatusElement(Enumeration<ResearchSubjectStatus> value) { 
       this.status = value;
@@ -346,14 +348,14 @@ public class ResearchSubject extends DomainResource {
     }
 
     /**
-     * @return The current state of the event.
+     * @return The current state of the subject.
      */
     public ResearchSubjectStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The current state of the event.
+     * @param value The current state of the subject.
      */
     public ResearchSubject setStatus(ResearchSubjectStatus value) { 
         if (this.status == null)
@@ -619,7 +621,7 @@ public class ResearchSubject extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The current state of the event.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("status", "code", "The current state of the subject.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("period", "Period", "The dates the subject began and ended their participation in the study.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("study", "Reference(ResearchStudy)", "Reference to the study the subject is participating in.", 0, java.lang.Integer.MAX_VALUE, study));
         childrenList.add(new Property("individual", "Reference(Patient)", "The record of the person or animal who is involved in the study.", 0, java.lang.Integer.MAX_VALUE, individual));
@@ -645,71 +647,90 @@ public class ResearchSubject extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case -892481550: // status
-          this.status = new ResearchSubjectStatusEnumFactory().fromType(value); // Enumeration<ResearchSubjectStatus>
-          break;
+          value = new ResearchSubjectStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ResearchSubjectStatus>
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
-          break;
+          return value;
         case 109776329: // study
           this.study = castToReference(value); // Reference
-          break;
+          return value;
         case -46292327: // individual
           this.individual = castToReference(value); // Reference
-          break;
+          return value;
         case 1741912494: // assignedArm
           this.assignedArm = castToString(value); // StringType
-          break;
+          return value;
         case 528827886: // actualArm
           this.actualArm = castToString(value); // StringType
-          break;
+          return value;
         case 951500826: // consent
           this.consent = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("status"))
-          this.status = new ResearchSubjectStatusEnumFactory().fromType(value); // Enumeration<ResearchSubjectStatus>
-        else if (name.equals("period"))
+        } else if (name.equals("status")) {
+          value = new ResearchSubjectStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ResearchSubjectStatus>
+        } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
-        else if (name.equals("study"))
+        } else if (name.equals("study")) {
           this.study = castToReference(value); // Reference
-        else if (name.equals("individual"))
+        } else if (name.equals("individual")) {
           this.individual = castToReference(value); // Reference
-        else if (name.equals("assignedArm"))
+        } else if (name.equals("assignedArm")) {
           this.assignedArm = castToString(value); // StringType
-        else if (name.equals("actualArm"))
+        } else if (name.equals("actualArm")) {
           this.actualArm = castToString(value); // StringType
-        else if (name.equals("consent"))
+        } else if (name.equals("consent")) {
           this.consent = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<ResearchSubjectStatus>
-        case -991726143:  return getPeriod(); // Period
-        case 109776329:  return getStudy(); // Reference
-        case -46292327:  return getIndividual(); // Reference
-        case 1741912494: throw new FHIRException("Cannot make property assignedArm as it is not a complex type"); // StringType
-        case 528827886: throw new FHIRException("Cannot make property actualArm as it is not a complex type"); // StringType
-        case 951500826:  return getConsent(); // Reference
+        case -1618432855:  return getIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -991726143:  return getPeriod(); 
+        case 109776329:  return getStudy(); 
+        case -46292327:  return getIndividual(); 
+        case 1741912494:  return getAssignedArmElement();
+        case 528827886:  return getActualArmElement();
+        case 951500826:  return getConsent(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -991726143: /*period*/ return new String[] {"Period"};
+        case 109776329: /*study*/ return new String[] {"Reference"};
+        case -46292327: /*individual*/ return new String[] {"Reference"};
+        case 1741912494: /*assignedArm*/ return new String[] {"string"};
+        case 528827886: /*actualArm*/ return new String[] {"string"};
+        case 951500826: /*consent*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -828,17 +849,17 @@ public class ResearchSubject extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>Business Identifer for event</b><br>
+   * Description: <b>Business Identifier for research subject</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchSubject.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ResearchSubject.identifier", description="Business Identifer for event", type="token" )
+  @SearchParamDefinition(name="identifier", path="ResearchSubject.identifier", description="Business Identifier for research subject", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>Business Identifer for event</b><br>
+   * Description: <b>Business Identifier for research subject</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ResearchSubject.identifier</b><br>
    * </p>

@@ -1,13 +1,15 @@
 package org.hl7.fhir.instance.model;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.UUID;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.utilities.Utilities;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlParser;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 
 /*
 Copyright (c) 2011+, HL7, Inc
@@ -113,8 +115,8 @@ public class Factory {
 	return res;
   }
 
-	public static Extension newExtension(String uri, Type value, boolean evenIfNull) throws Exception {
-		if (!evenIfNull && value == null)
+	public static Extension newExtension(String uri, Type value, boolean evenIfNull) {
+		if (!evenIfNull && (value == null || value.isEmpty()))
 			return null;
 		Extension e = new Extension();
 		e.setUrl(uri);
@@ -122,7 +124,7 @@ public class Factory {
 	  return e;
   }
 
-	public static CodeableConcept newCodeableConcept(String code, String system, String display) throws Exception {
+	public static CodeableConcept newCodeableConcept(String code, String system, String display) {
 		CodeableConcept cc = new CodeableConcept();
 		Coding c = new Coding();
 		c.setCode(code);
@@ -132,20 +134,20 @@ public class Factory {
 	  return cc;
   }
 
-	public static Reference makeReference(String url) throws Exception {
+	public static Reference makeReference(String url) {
 	  Reference rr = new Reference();
 	  rr.setReference(url);
 	  return rr;
 	}
 
-	public static Narrative newNarrative(NarrativeStatus status, String html) throws Exception {
+	public static Narrative newNarrative(NarrativeStatus status, String html) throws IOException, FHIRException {
 		Narrative n = new Narrative();
 		n.setStatus(status);
 		n.setDiv(new XhtmlParser().parseFragment("<div>"+Utilities.escapeXml(html)+"</div>"));
 		return n;
 	}
 
-	public static Coding makeCoding(String code) throws Exception {
+	public static Coding makeCoding(String code) throws FHIRException {
 		String[] parts = code.split("\\|");
 		Coding c = new Coding();
 		if (parts.length == 2) {
@@ -156,7 +158,7 @@ public class Factory {
 			c.setCode(parts[1]);
 			c.setDisplay(parts[2]);
 		} else 
-			throw new Exception("Unable to understand the code '"+code+"'. Use the format system|code(|display)");
+			throw new FHIRException("Unable to understand the code '"+code+"'. Use the format system|code(|display)");
 		return c;
 	}
 
@@ -172,4 +174,74 @@ public class Factory {
     return "urn:uuid:"+UUID.randomUUID().toString().toLowerCase();
   }
 
+  public Type create(String name) throws FHIRException {
+    if (name.equals("boolean"))
+      return new BooleanType();
+    else if (name.equals("integer"))
+      return new IntegerType();
+    else if (name.equals("decimal"))
+      return new DecimalType();
+    else if (name.equals("base64Binary"))
+      return new Base64BinaryType();
+    else if (name.equals("instant"))
+      return new InstantType();
+    else if (name.equals("string"))
+      return new StringType();
+    else if (name.equals("uri"))
+      return new UriType();
+    else if (name.equals("date"))
+      return new DateType();
+    else if (name.equals("dateTime"))
+      return new DateTimeType();
+    else if (name.equals("time"))
+      return new TimeType();
+    else if (name.equals("code"))
+      return new CodeType();
+    else if (name.equals("oid"))
+      return new OidType();
+    else if (name.equals("id"))
+      return new IdType();
+    else if (name.equals("unsignedInt"))
+      return new UnsignedIntType();
+    else if (name.equals("positiveInt"))
+      return new PositiveIntType();
+    else if (name.equals("markdown"))
+      return new MarkdownType();
+    else if (name.equals("Annotation"))
+      return new Annotation();
+    else if (name.equals("Attachment"))
+      return new Attachment();
+    else if (name.equals("Identifier"))
+      return new Identifier();
+    else if (name.equals("CodeableConcept"))
+      return new CodeableConcept();
+    else if (name.equals("Coding"))
+      return new Coding();
+    else if (name.equals("Quantity"))
+      return new Quantity();
+    else if (name.equals("Range"))
+      return new Range();
+    else if (name.equals("Period"))
+      return new Period();
+    else if (name.equals("Ratio"))
+      return new Ratio();
+    else if (name.equals("SampledData"))
+      return new SampledData();
+    else if (name.equals("Signature"))
+      return new Signature();
+    else if (name.equals("HumanName"))
+      return new HumanName();
+    else if (name.equals("Address"))
+      return new Address();
+    else if (name.equals("ContactPoint"))
+      return new ContactPoint();
+    else if (name.equals("Timing"))
+      return new Timing();
+    else if (name.equals("Reference"))
+      return new Reference();
+    else if (name.equals("Meta"))
+      return new Meta();
+    else
+      throw new FHIRException("Unknown data type name "+name);
+  }
 }

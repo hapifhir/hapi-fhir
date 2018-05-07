@@ -31,11 +31,10 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.dstu3.model;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.zip.DataFormatException;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**

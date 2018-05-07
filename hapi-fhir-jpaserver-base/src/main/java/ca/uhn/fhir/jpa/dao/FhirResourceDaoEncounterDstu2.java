@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class FhirResourceDaoEncounterDstu2 extends FhirResourceDaoDstu2<Encounter>implements IFhirResourceDaoEncounter<Encounter> {
 
@@ -52,7 +52,7 @@ public class FhirResourceDaoEncounterDstu2 extends FhirResourceDaoDstu2<Encounte
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		ca.uhn.fhir.rest.server.IBundleProvider retVal = search(paramMap);
+		IBundleProvider retVal = search(paramMap);
 		return retVal;
 	}
 

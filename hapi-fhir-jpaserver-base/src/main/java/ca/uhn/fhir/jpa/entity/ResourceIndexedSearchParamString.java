@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,37 +20,25 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
+import org.hibernate.search.annotations.*;
+
+import javax.persistence.*;
+import javax.persistence.Index;
 
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_STRING", indexes = { 
-	@Index(name = "IDX_SP_STRING", columnList = "RES_TYPE,SP_NAME,SP_VALUE_NORMALIZED"), 
-	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID") 
+@Table(name = "HFJ_SPIDX_STRING", indexes = {
+	@Index(name = "IDX_SP_STRING", columnList = "RES_TYPE,SP_NAME,SP_VALUE_NORMALIZED"),
+	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"),
+	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
 @Indexed()
 //@AnalyzerDefs({
@@ -107,13 +95,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="SEQ_SPIDX_STRING", sequenceName="SEQ_SPIDX_STRING")
+	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
 	@Column(name = "SP_ID")
 	private Long myId;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName="RES_ID", insertable=false, updatable=false)
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
 	@ContainedIn
 	private ResourceTable myResourceTable;
 
@@ -130,6 +118,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private String myValueNormalized;
 
 	public ResourceIndexedSearchParamString() {
+		super();
 	}
 
 
@@ -167,8 +156,22 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return myValueExact;
 	}
 
+	public void setValueExact(String theValueExact) {
+		if (StringUtils.defaultString(theValueExact).length() > MAX_LENGTH) {
+			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
+		}
+		myValueExact = theValueExact;
+	}
+
 	public String getValueNormalized() {
 		return myValueNormalized;
+	}
+
+	public void setValueNormalized(String theValueNormalized) {
+		if (StringUtils.defaultString(theValueNormalized).length() > MAX_LENGTH) {
+			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
+		}
+		myValueNormalized = theValueNormalized;
 	}
 
 	@Override
@@ -180,25 +183,16 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return b.toHashCode();
 	}
 
-	public void setValueExact(String theValueExact) {
-		if (StringUtils.defaultString(theValueExact).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
-		}
-		myValueExact = theValueExact;
-	}
-
-	public void setValueNormalized(String theValueNormalized) {
-		if (StringUtils.defaultString(theValueNormalized).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
-		}
-		myValueNormalized = theValueNormalized;
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return new StringParam(getValueExact());
 	}
 
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("resourceId", getResourcePid());
 		b.append("value", getValueNormalized());
 		return b.build();
 	}

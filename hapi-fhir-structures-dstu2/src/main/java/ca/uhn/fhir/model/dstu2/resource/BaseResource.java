@@ -9,7 +9,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,7 +257,11 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			
 			@Override
 			public IBaseMetaType setLastUpdated(Date theHeaderDateValue) {
-				ResourceMetadataKeyEnum.UPDATED.put(BaseResource.this, new InstantDt(theHeaderDateValue));
+				if (theHeaderDateValue == null) {
+					getResourceMetadata().remove(ResourceMetadataKeyEnum.UPDATED);
+				} else {
+					ResourceMetadataKeyEnum.UPDATED.put(BaseResource.this, new InstantDt(theHeaderDateValue));
+				}
 				return this;
 			}
 			

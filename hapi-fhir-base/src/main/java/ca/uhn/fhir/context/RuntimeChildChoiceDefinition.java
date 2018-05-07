@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,11 +84,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		myResourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 
-		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-			myReferenceSuffix = "Resource";
-		} else {
-			myReferenceSuffix = "Reference";
-		}
+		myReferenceSuffix = "Reference";
 
 		for (Class<? extends IBase> next : myChoiceTypes) {
 

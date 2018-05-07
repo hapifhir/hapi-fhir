@@ -3,8 +3,6 @@ package org.hl7.fhir.instance.model;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 public abstract class BaseResource extends Base implements IAnyResource {
 
 	private static final long serialVersionUID = 1L;
@@ -24,10 +22,5 @@ public abstract class BaseResource extends Base implements IAnyResource {
     }
 
 	public abstract BaseResource setIdElement(IdType theIdType);
-
-  @Override
-  public FhirVersionEnum getStructureFhirVersionEnum() {
-    return FhirVersionEnum.DSTU2_HL7ORG;
-  }
-
+    
 }

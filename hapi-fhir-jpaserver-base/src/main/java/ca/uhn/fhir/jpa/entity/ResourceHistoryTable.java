@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,34 +20,23 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import org.hibernate.annotations.OptimisticLock;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.Constants;
-
 //@formatter:off
 @Entity
 @Table(name = "HFJ_RES_VER", uniqueConstraints = {
-	@UniqueConstraint(name="IDX_RESVER_ID_VER", columnNames = { "RES_ID", "RES_VER" }) 
-}, indexes= {
-	@Index(name="IDX_RESVER_TYPE_DATE", columnList="RES_TYPE,RES_UPDATED"), 
-	@Index(name="IDX_RESVER_ID_DATE", columnList="RES_ID,RES_UPDATED"), 
-	@Index(name="IDX_RESVER_DATE", columnList="RES_UPDATED") 
+	@UniqueConstraint(name = "IDX_RESVER_ID_VER", columnNames = {"RES_ID", "RES_VER"})
+}, indexes = {
+	@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED"),
+	@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
+	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
 })
 //@formatter:on
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
@@ -72,11 +61,20 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
 
+	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = true)
+	@Lob()
+	@OptimisticLock(excluded = true)
+	private byte[] myResource;
+
+	@Column(name = "RES_ENCODING", nullable = false, length = 5)
+	@Enumerated(EnumType.STRING)
+	@OptimisticLock(excluded = true)
+	private ResourceEncodingEnum myEncoding;
+
 	public ResourceHistoryTable() {
 		super();
 	}
-	
-	
+
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
 			if (next.getTag().equals(theTag)) {
@@ -93,15 +91,32 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	@Override
-	public BaseTag addTag(TagDefinition theDef) {
-		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theDef);
+	public ResourceHistoryTag addTag(TagDefinition theTag) {
+		for (ResourceHistoryTag next : getTags()) {
+			if (next.getTag().equals(theTag)) {
+				return next;
+			}
+		}
+		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag);
 		getTags().add(historyTag);
 		return historyTag;
+	}
+
+	public ResourceEncodingEnum getEncoding() {
+		return myEncoding;
+	}
+
+	public void setEncoding(ResourceEncodingEnum theEncoding) {
+		myEncoding = theEncoding;
 	}
 
 	@Override
 	public Long getId() {
 		return myId;
+	}
+
+	public void setId(Long theId) {
+		myId = theId;
 	}
 
 	@Override
@@ -114,13 +129,30 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		}
 	}
 
+	public byte[] getResource() {
+		return myResource;
+	}
+
+	public void setResource(byte[] theResource) {
+		myResource = theResource;
+	}
+
+	@Override
 	public Long getResourceId() {
 		return myResourceId;
+	}
+
+	public void setResourceId(Long theResourceId) {
+		myResourceId = theResourceId;
 	}
 
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 
 	@Override
@@ -136,6 +168,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceVersion;
 	}
 
+	public void setVersion(long theVersion) {
+		myResourceVersion = theVersion;
+	}
+
 	public boolean hasTag(String theTerm, String theScheme) {
 		for (ResourceHistoryTag next : getTags()) {
 			if (next.getTag().getSystem().equals(theScheme) && next.getTag().getCode().equals(theTerm)) {
@@ -143,22 +179,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 			}
 		}
 		return false;
-	}
-
-	public void setId(Long theId) {
-		myId = theId;
-	}
-
-	public void setResourceId(Long theResourceId) {
-		myResourceId = theResourceId;
-	}
-
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
-	}
-
-	public void setVersion(long theVersion) {
-		myResourceVersion = theVersion;
 	}
 
 }

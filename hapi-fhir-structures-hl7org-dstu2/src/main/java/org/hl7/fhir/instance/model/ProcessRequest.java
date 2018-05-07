@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
  */
@@ -69,7 +64,7 @@ public class ProcessRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ActionList fromCode(String codeString) throws Exception {
+        public static ActionList fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("cancel".equals(codeString))
@@ -80,7 +75,7 @@ public class ProcessRequest extends DomainResource {
           return REPROCESS;
         if ("status".equals(codeString))
           return STATUS;
-        throw new Exception("Unknown ActionList code '"+codeString+"'");
+        throw new FHIRException("Unknown ActionList code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -134,6 +129,22 @@ public class ProcessRequest extends DomainResource {
         if ("status".equals(codeString))
           return ActionList.STATUS;
         throw new IllegalArgumentException("Unknown ActionList code '"+codeString+"'");
+        }
+        public Enumeration<ActionList> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("cancel".equals(codeString))
+          return new Enumeration<ActionList>(this, ActionList.CANCEL);
+        if ("poll".equals(codeString))
+          return new Enumeration<ActionList>(this, ActionList.POLL);
+        if ("reprocess".equals(codeString))
+          return new Enumeration<ActionList>(this, ActionList.REPROCESS);
+        if ("status".equals(codeString))
+          return new Enumeration<ActionList>(this, ActionList.STATUS);
+        throw new FHIRException("Unknown ActionList code '"+codeString+"'");
         }
     public String toCode(ActionList code) {
       if (code == ActionList.CANCEL)
@@ -224,6 +235,23 @@ public class ProcessRequest extends DomainResource {
           childrenList.add(new Property("sequenceLinkId", "integer", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("sequenceLinkId"))
+          this.sequenceLinkId = castToInteger(value); // IntegerType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("sequenceLinkId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.sequenceLinkId");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ItemsComponent copy() {
         ItemsComponent dst = new ItemsComponent();
         copyValues(dst);
@@ -254,6 +282,11 @@ public class ProcessRequest extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (sequenceLinkId == null || sequenceLinkId.isEmpty());
       }
+
+  public String fhirType() {
+    return "ProcessRequest.item";
+
+  }
 
   }
 
@@ -1088,6 +1121,111 @@ public class ProcessRequest extends DomainResource {
         childrenList.add(new Property("exclude", "string", "Names of resource types to exclude.", 0, java.lang.Integer.MAX_VALUE, exclude));
         childrenList.add(new Property("period", "Period", "A period of time during which the fulfilling resources would have been created.", 0, java.lang.Integer.MAX_VALUE, period));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("action"))
+          this.action = new ActionListEnumFactory().fromType(value); // Enumeration<ActionList>
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("ruleset"))
+          this.ruleset = castToCoding(value); // Coding
+        else if (name.equals("originalRuleset"))
+          this.originalRuleset = castToCoding(value); // Coding
+        else if (name.equals("created"))
+          this.created = castToDateTime(value); // DateTimeType
+        else if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else if (name.equals("provider"))
+          this.provider = castToReference(value); // Reference
+        else if (name.equals("organization"))
+          this.organization = castToReference(value); // Reference
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("response"))
+          this.response = castToReference(value); // Reference
+        else if (name.equals("nullify"))
+          this.nullify = castToBoolean(value); // BooleanType
+        else if (name.equals("reference"))
+          this.reference = castToString(value); // StringType
+        else if (name.equals("item"))
+          this.getItem().add((ItemsComponent) value);
+        else if (name.equals("include"))
+          this.getInclude().add(castToString(value));
+        else if (name.equals("exclude"))
+          this.getExclude().add(castToString(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("action")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.action");
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("ruleset")) {
+          this.ruleset = new Coding();
+          return this.ruleset;
+        }
+        else if (name.equals("originalRuleset")) {
+          this.originalRuleset = new Coding();
+          return this.originalRuleset;
+        }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.created");
+        }
+        else if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else if (name.equals("provider")) {
+          this.provider = new Reference();
+          return this.provider;
+        }
+        else if (name.equals("organization")) {
+          this.organization = new Reference();
+          return this.organization;
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("response")) {
+          this.response = new Reference();
+          return this.response;
+        }
+        else if (name.equals("nullify")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.nullify");
+        }
+        else if (name.equals("reference")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.reference");
+        }
+        else if (name.equals("item")) {
+          return addItem();
+        }
+        else if (name.equals("include")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.include");
+        }
+        else if (name.equals("exclude")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcessRequest.exclude");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ProcessRequest";
+
+  }
 
       public ProcessRequest copy() {
         ProcessRequest dst = new ProcessRequest();

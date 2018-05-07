@@ -27,7 +27,7 @@ public class JsonLDParser extends ParserBase {
 	}
 
 	@Override
-	public Element parse(InputStream stream) throws Exception {
+	public Element parse(InputStream stream) {
 		throw new NotImplementedException("not done yet");
 	}
 

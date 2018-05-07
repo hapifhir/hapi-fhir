@@ -262,11 +262,13 @@ public class BaseDateTimeDtDstu2Test {
 		verifyFails("1974-A2-25");
 		verifyFails("1974-12-A5");
 
+		
 		// Date shouldn't have a time zone
 		verifyFails("1974-12-25Z");
 		verifyFails("1974-12-25+10:00");
 
 		// Out of range
+		verifyFails("2015-02-30");
 		verifyFails("1974-13-25");
 		verifyFails("1974-12-32");
 		verifyFails("2015-02-29");
@@ -400,7 +402,7 @@ public class BaseDateTimeDtDstu2Test {
 	public void testLargePrecision() {
 		DateTimeDt dt = new DateTimeDt("2014-03-06T22:09:58.9121174+04:30");
 
-		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("Z"));
+		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("GMT"));
 		assertEquals("2014-03-06 17:39:58.912", myDateInstantParser.format(dt.getValue()));
 	}
 
@@ -568,6 +570,28 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
+	public void testParseMinuteShouldFail() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		try {
+			dt.setValueAsString("2013-02-03T11:22");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
+		}
+	}
+
+	@Test
+	public void testParseMinuteZuluShouldFail() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		try {
+			dt.setValueAsString("2013-02-03T11:22Z");
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
+		}
+	}
+
+	@Test
 	public void testParseSecond() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33");
@@ -580,7 +604,7 @@ public class BaseDateTimeDtDstu2Test {
 	}
 
 	@Test
-	public void testParseSecondulu() throws DataFormatException {
+	public void testParseSecondZulu() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33Z");
 

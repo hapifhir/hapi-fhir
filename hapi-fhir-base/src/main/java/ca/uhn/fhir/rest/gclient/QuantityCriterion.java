@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class QuantityCriterion implements ICriterion<QuantityClientParam>, ICriterionIn
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(myValue) || isNotBlank(mySystem) || isNotBlank(myUnits)) {
 			if (myPrefix != null) {
-				b.append(ParameterUtil.escapeWithDefault(myPrefix.getValueForContext(theContext)));
+				b.append(ParameterUtil.escapeWithDefault(myPrefix.getValue()));
 			}
 			b.append(ParameterUtil.escapeWithDefault(myValue));
 			b.append('|');

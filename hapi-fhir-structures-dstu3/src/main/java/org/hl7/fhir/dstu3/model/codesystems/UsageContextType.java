@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,33 +37,37 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum UsageContextType {
 
         /**
-         * The gender of the patient. For this context type, the value should be a code taken from the [AdministrativeGender](valueset-administrative-gender.html) value set
+         * The gender of the patient. For this context type, the value should be a code taken from the http://hl7.org/fhir/ValueSet/administrative-gender value set
          */
         GENDER, 
         /**
-         * The age of the patient. For this context type, the value should be a range the specifies the applicable ages or a code from the MeSH value set AgeGroupObservationValue
+         * The age of the patient. For this context type, the value should be a range the specifies the applicable ages or a code from the MeSH value set http://hl7.org/fhir/ValueSet/v3-AgeGroupObservationValue
          */
         AGE, 
         /**
-         * The clinical concept(s) addressed by the artifact. For example, disease, diagnostic test interpretation, medication ordering.
+         * The clinical concept(s) addressed by the artifact. For example, disease, diagnostic test interpretation, medication ordering as in http://hl7.org/fhir/ValueSet/condition-code.
          */
         FOCUS, 
         /**
-         * The clinical speciality of the context in which the patient is bring treated - For example, PCP, Patient, Cardiologist, Behavioral Professional, Oral Health Professional, Prescriber, etc... taken from the NUCC Health Care provider taxonomyCode system (OID: 2.16.840.1.113883.6.101).
+         * The clinical specialty of the context in which the patient is being treated - For example, PCP, Patient, Cardiologist, Behavioral Professional, Oral Health Professional, Prescriber, etc... taken from the NUCC Health Care provider taxonomy value set http://hl7.org/fhir/ValueSet/provider-taxonomy.
          */
         USER, 
         /**
-         * The settings in which the artifact is intended for use. For example, admission, pre-op, etc
+         * The settings in which the artifact is intended for use. For example, admission, pre-op, etc. For example, the ActEncounterCode value set http://hl7.org/fhir/ValueSet/v3-ActEncounterCode
          */
         WORKFLOW, 
         /**
-         * The context for the clinical task(s) represented by this artifact. Can be any task context represented by the HL7 ActTaskCode value set (OID: 2.16.840.1.113883.1.11.19846). General categories include: order entry, patient documentation and patient information review.
+         * The context for the clinical task(s) represented by this artifact. Can be any task context represented by the HL7 ActTaskCode value set http://hl7.org/fhir/ValueSet/v3-ActTaskCode. General categories include: order entry, patient documentation and patient information review.
          */
         TASK, 
         /**
-         * The venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from either the HL7 ActEncounter (OID: 2.16.840.1.113883.1.11.13955) or NUCC non-individual provider codes OID: 2.16.840.1.113883.1.11.19465.
+         * The venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from either the HL7 ActEncounterCode http://hl7.org/fhir/ValueSet/v3-ActEncounterCode or NUCC non-individual provider codes http://hl7.org/fhir/ValueSet/provider-taxonomy
          */
         VENUE, 
+        /**
+         * The species to which an artifact applies. For example, SNOMED - 387961004 | Kingdom Animalia (organism).
+         */
+        SPECIES, 
         /**
          * added to help the parsers
          */
@@ -85,6 +89,8 @@ public enum UsageContextType {
           return TASK;
         if ("venue".equals(codeString))
           return VENUE;
+        if ("species".equals(codeString))
+          return SPECIES;
         throw new FHIRException("Unknown UsageContextType code '"+codeString+"'");
         }
         public String toCode() {
@@ -96,6 +102,7 @@ public enum UsageContextType {
             case WORKFLOW: return "workflow";
             case TASK: return "task";
             case VENUE: return "venue";
+            case SPECIES: return "species";
             default: return "?";
           }
         }
@@ -104,13 +111,14 @@ public enum UsageContextType {
         }
         public String getDefinition() {
           switch (this) {
-            case GENDER: return "The gender of the patient. For this context type, the value should be a code taken from the [AdministrativeGender](valueset-administrative-gender.html) value set";
-            case AGE: return "The age of the patient. For this context type, the value should be a range the specifies the applicable ages or a code from the MeSH value set AgeGroupObservationValue";
-            case FOCUS: return "The clinical concept(s) addressed by the artifact. For example, disease, diagnostic test interpretation, medication ordering.";
-            case USER: return "The clinical speciality of the context in which the patient is bring treated - For example, PCP, Patient, Cardiologist, Behavioral Professional, Oral Health Professional, Prescriber, etc... taken from the NUCC Health Care provider taxonomyCode system (OID: 2.16.840.1.113883.6.101).";
-            case WORKFLOW: return "The settings in which the artifact is intended for use. For example, admission, pre-op, etc";
-            case TASK: return "The context for the clinical task(s) represented by this artifact. Can be any task context represented by the HL7 ActTaskCode value set (OID: 2.16.840.1.113883.1.11.19846). General categories include: order entry, patient documentation and patient information review.";
-            case VENUE: return "The venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from either the HL7 ActEncounter (OID: 2.16.840.1.113883.1.11.13955) or NUCC non-individual provider codes OID: 2.16.840.1.113883.1.11.19465.";
+            case GENDER: return "The gender of the patient. For this context type, the value should be a code taken from the http://hl7.org/fhir/ValueSet/administrative-gender value set";
+            case AGE: return "The age of the patient. For this context type, the value should be a range the specifies the applicable ages or a code from the MeSH value set http://hl7.org/fhir/ValueSet/v3-AgeGroupObservationValue";
+            case FOCUS: return "The clinical concept(s) addressed by the artifact. For example, disease, diagnostic test interpretation, medication ordering as in http://hl7.org/fhir/ValueSet/condition-code.";
+            case USER: return "The clinical specialty of the context in which the patient is being treated - For example, PCP, Patient, Cardiologist, Behavioral Professional, Oral Health Professional, Prescriber, etc... taken from the NUCC Health Care provider taxonomy value set http://hl7.org/fhir/ValueSet/provider-taxonomy.";
+            case WORKFLOW: return "The settings in which the artifact is intended for use. For example, admission, pre-op, etc. For example, the ActEncounterCode value set http://hl7.org/fhir/ValueSet/v3-ActEncounterCode";
+            case TASK: return "The context for the clinical task(s) represented by this artifact. Can be any task context represented by the HL7 ActTaskCode value set http://hl7.org/fhir/ValueSet/v3-ActTaskCode. General categories include: order entry, patient documentation and patient information review.";
+            case VENUE: return "The venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from either the HL7 ActEncounterCode http://hl7.org/fhir/ValueSet/v3-ActEncounterCode or NUCC non-individual provider codes http://hl7.org/fhir/ValueSet/provider-taxonomy";
+            case SPECIES: return "The species to which an artifact applies. For example, SNOMED - 387961004 | Kingdom Animalia (organism).";
             default: return "?";
           }
         }
@@ -123,6 +131,7 @@ public enum UsageContextType {
             case WORKFLOW: return "Workflow Setting";
             case TASK: return "Workflow Task";
             case VENUE: return "Clinical Venue";
+            case SPECIES: return "Species";
             default: return "?";
           }
     }

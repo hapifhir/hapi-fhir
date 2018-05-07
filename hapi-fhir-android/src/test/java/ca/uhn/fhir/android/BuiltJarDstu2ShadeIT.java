@@ -9,20 +9,20 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 
 public class BuiltJarDstu2ShadeIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2ShadeIT.class);
 
 	@Test
+	@Ignore
 	public void testParserXml() throws Exception {
 
 		FhirContext ctx = FhirContext.forDstu2();
@@ -63,11 +63,12 @@ public class BuiltJarDstu2ShadeIT {
 	 * Disabled for now - TODO: add the old version of the apache client (the one that
 	 * android uses) and see if this passes
 	 */
+	@Test
 	public void testClient() {
 		FhirContext ctx = FhirContext.forDstu2();
 		try {
 			IGenericClient client = ctx.newRestfulGenericClient("http://127.0.0.1:44442/SomeBase");
-			client.conformance();
+			client.capabilities().ofType(Conformance.class).execute();
 		} catch (FhirClientConnectionException e) {
 			// this is good
 		}

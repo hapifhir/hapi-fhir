@@ -10,7 +10,7 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Timing Type"/>
  <requirements value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
  <fhirVersion value="1.0.2"/>
@@ -107,45 +107,30 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="periodMax.empty() or period"/>
-    </extension>
     <key value="tim-6"/>
     <severity value="error"/>
     <human value="If there's a periodMax, there must be a period"/>
     <xpath value="not(exists(f:periodMax)) or exists(f:period)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="durationMax.empty() or duration"/>
-    </extension>
     <key value="tim-7"/>
     <severity value="error"/>
     <human value="If there's a durationMax, there must be a duration"/>
     <xpath value="not(exists(f:durationMax)) or exists(f:duration)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="duration.empty() or durationUnits"/>
-    </extension>
     <key value="tim-1"/>
     <severity value="error"/>
     <human value="if there's a duration, there needs to be duration units"/>
     <xpath value="not(exists(f:duration)) or exists(f:durationUnits)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="Period.empty() or periodUnits"/>
-    </extension>
     <key value="tim-2"/>
     <severity value="error"/>
     <human value="if there's a period, there needs to be period units"/>
     <xpath value="not(exists(f:period)) or exists(f:periodUnits)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="(period.empty() and frequency.empty()) xor when"/>
-    </extension>
     <key value="tim-3"/>
     <severity value="error"/>
     <human value="Either frequency or when can exist, not both"/>
@@ -240,9 +225,6 @@
     <code value="decimal"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="duration.all(value >= 0)"/>
-    </extension>
     <key value="tim-4"/>
     <severity value="error"/>
     <human value="duration SHALL be a non-negative value"/>
@@ -334,9 +316,6 @@
     <code value="decimal"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="period.all(value >= 0)"/>
-    </extension>
     <key value="tim-5"/>
     <severity value="error"/>
     <human value="period SHALL be a non-negative value"/>
@@ -480,45 +459,30 @@
     <code value="Element"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="periodMax.empty() or period"/>
-    </extension>
     <key value="tim-6"/>
     <severity value="error"/>
     <human value="If there's a periodMax, there must be a period"/>
     <xpath value="not(exists(f:periodMax)) or exists(f:period)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="durationMax.empty() or duration"/>
-    </extension>
     <key value="tim-7"/>
     <severity value="error"/>
     <human value="If there's a durationMax, there must be a duration"/>
     <xpath value="not(exists(f:durationMax)) or exists(f:duration)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="duration.empty() or durationUnits"/>
-    </extension>
     <key value="tim-1"/>
     <severity value="error"/>
     <human value="if there's a duration, there needs to be duration units"/>
     <xpath value="not(exists(f:duration)) or exists(f:durationUnits)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="Period.empty() or periodUnits"/>
-    </extension>
     <key value="tim-2"/>
     <severity value="error"/>
     <human value="if there's a period, there needs to be period units"/>
     <xpath value="not(exists(f:period)) or exists(f:periodUnits)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="(period.empty() and frequency.empty()) xor when"/>
-    </extension>
     <key value="tim-3"/>
     <severity value="error"/>
     <human value="Either frequency or when can exist, not both"/>
@@ -581,9 +545,6 @@
     <code value="decimal"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="duration.all(value >= 0)"/>
-    </extension>
     <key value="tim-4"/>
     <severity value="error"/>
     <human value="duration SHALL be a non-negative value"/>
@@ -675,9 +636,6 @@
     <code value="decimal"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="period.all(value >= 0)"/>
-    </extension>
     <key value="tim-5"/>
     <severity value="error"/>
     <human value="period SHALL be a non-negative value"/>

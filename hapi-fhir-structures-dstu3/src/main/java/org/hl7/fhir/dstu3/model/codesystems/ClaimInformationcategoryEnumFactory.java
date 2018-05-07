@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -55,6 +55,8 @@ public class ClaimInformationcategoryEnumFactory implements EnumFactory<ClaimInf
       return ClaimInformationcategory.ATTACHMENT;
     if ("missingtooth".equals(codeString))
       return ClaimInformationcategory.MISSINGTOOTH;
+    if ("prosthesis".equals(codeString))
+      return ClaimInformationcategory.PROSTHESIS;
     if ("other".equals(codeString))
       return ClaimInformationcategory.OTHER;
     throw new IllegalArgumentException("Unknown ClaimInformationcategory code '"+codeString+"'");
@@ -77,6 +79,8 @@ public class ClaimInformationcategoryEnumFactory implements EnumFactory<ClaimInf
       return "attachment";
     if (code == ClaimInformationcategory.MISSINGTOOTH)
       return "missingtooth";
+    if (code == ClaimInformationcategory.PROSTHESIS)
+      return "prosthesis";
     if (code == ClaimInformationcategory.OTHER)
       return "other";
     return "?";

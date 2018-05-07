@@ -4,9 +4,9 @@
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-fhir</artifactId>
-		<version>2.3-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>3.4.0-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-android</artifactId>
@@ -35,13 +35,26 @@
 					<groupId>commons-codec</groupId>
 					<artifactId>commons-codec</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.woodstox</groupId>
+					<artifactId>woodstox-core-asl</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<artifactId>hapi-fhir-client</artifactId>
 			<version>${project.version}</version>
-			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpcore</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -93,216 +106,19 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
 				</configuration>
 				<executions>
 					<execution>
-						<id>dstu2_shade</id>
+						<id>it</id>
 						<goals>
 							<goal>integration-test</goal>
-							<goal>verify</goal>
 						</goals>
 						<configuration>
 							<includes>
-								<include>**/*Dstu2ShadeIT.java</include>
+								<include>**/*IT.java</include>
 							</includes>
-							<additionalClasspathElements>
-								<additionalClasspathElement>${basedir}/target/hapi-fhir-android-${project.version}-dstu2.jar</additionalClasspathElement>
-							</additionalClasspathElements>
-							<classpathDependencyExcludes>
-								<classpathDependencyExclude>ca.uhn.hapi.fhir:*</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
-							</classpathDependencyExcludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>dstu2</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*Dstu2IT.java</include>
-							</includes>
-							<classpathDependencyExcludes>
-								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
-							</classpathDependencyExcludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>dstu3</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<includes>
-								<include>**/*Dstu3IT.java</include>
-							</includes>
-							<classpathDependencyExcludes>
-								<classpathDependencyExclude>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExclude>
-								<classpathDependencyExclude>org.codehaus.woodstox:stax2-api</classpathDependencyExclude>
-							</classpathDependencyExcludes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<configuration>
-					<createDependencyReducedPom>true</createDependencyReducedPom>
-					<createSourcesJar>true</createSourcesJar>
-					<shadedArtifactAttached>true</shadedArtifactAttached>
-					<artifactSet>
-						<includes combine.children="append">
-							<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
-							<include>ca.uhn.hapi.fhir:hapi-fhir-client-okhttp</include>
-							<include>org.codehaus.woodstox:woodstox-core-asl</include>
-							<include>javax.xml.stream:stax-api</include>
-							<include>org.codehaus.woodstox:stax2-api</include>
-						</includes>
-					</artifactSet>
-					<relocations>
-						<relocation>
-							<pattern>javax.xml.stream</pattern>
-							<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>javax.json</pattern>
-							<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>com.ctc.wstx.stax</pattern>
-							<shadedPattern>ca.uhn.fhir.repackage.com.ctc.wstx.stax</shadedPattern>
-						</relocation>
-					</relocations>
-					<filters combine.children="append">
-						<!-- Exclude server side stuff, except exceptions which are used clientside -->
-						<filter>	
-							<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
-							<excludes>
-								<!-- Exclude test stuff which depends on httpservlet -->
-								<exclude>ca/uhn/fhir/util/ITestingUiClientFactory</exclude>
-								<!-- Exclude server side stuff. This could be made nicer if code was divided into shared, server and client -->
-								<!--exclude>ca/uhn/fhir/rest/server/Add*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Apache*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Bundle*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/ETag*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Fifo*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Hard*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/IBundle*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/IDynamic*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Incoming*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/IPaging*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/IServerAdd*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Resource*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Rest*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Search*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/Simple*</exclude>
-								<exclude>ca/uhn/fhir/rest/server/audit/**</exclude>
-								<exclude>ca/uhn/fhir/rest/server/interceptor/**</exclude-->
-								<!-- Exclude Phloc validator to make android libs small -->
-								<exclude>ca/uhn/fhir/validation/schematron/SchematronBaseValidator*</exclude>
-								<!-- Exclude Thymeleaf to make android libs small -->
-								<exclude>ca/uhn/fhir/narrative/*Thymeleaf*</exclude>
-							</excludes>
-						</filter>
-					</filters>
-				</configuration>
-				<executions>
-					<!-- shaded jar -->
-					<execution>
-						<id>shaded</id>
-						<phase>package</phase> 
- 						<goals> 
- 							<goal>shade</goal> 
- 						</goals>
-					</execution>
-					<!-- dstu jar -->
-					<execution>
-						<id>dstu</id>
-						<phase>package</phase> 
- 						<goals> 
- 							<goal>shade</goal> 
- 						</goals>
-						<configuration>
-							<shadedClassifierName>dstu</shadedClassifierName>
-							<artifactSet>
-								<includes>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-								</includes>
-							</artifactSet>
-							<!-- Exclude server side stuff, except exceptions which are used clientside -->
-							<!--filters>
-								<filter>
-									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</artifact>
-									<excludes>
-										<exclude>ca/uhn/fhir/rest/server/**</exclude>
-									</excludes>
-								</filter>
-							</filters-->
-						</configuration>
-					</execution>
-					<!-- dstu2 jar -->
-					<execution>
-						<id>dstu2</id>
-						<phase>package</phase> 
- 						<goals> 
- 							<goal>shade</goal> 
- 						</goals>
-						<configuration>
-							<shadedClassifierName>dstu2</shadedClassifierName>
-							<artifactSet>
-								<includes>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
-								</includes>
-							</artifactSet>
-							<!-- Exclude server side stuff, except exceptions which are used clientside -->
-							<!--filters>
-								<filter>
-									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
-									<excludes>
-										<exclude>ca/uhn/fhir/rest/server/**</exclude>
-									</excludes>
-								</filter>
-							</filters-->
-						</configuration>
-					</execution>
-					<!-- dstu3 jar -->
-					<execution>
-						<id>dstu3</id>
-						<phase>package</phase> 
- 						<goals> 
- 							<goal>shade</goal> 
- 						</goals>
-						<configuration>
-							<shadedClassifierName>dstu3</shadedClassifierName>
-							<artifactSet>
-								<includes>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3</include>
-								</includes>
-							</artifactSet>
-							<!-- Exclude server side stuff, except exceptions which are used clientside -->
-							<!--filters>
-								<filter>
-									<artifact>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</artifact>
-									<excludes>
-										<exclude>ca/uhn/fhir/rest/server/**</exclude>
-									</excludes>
-								</filter>
-							</filters-->
 						</configuration>
 					</execution>
 				</executions>
@@ -332,32 +148,6 @@
 	</build>
 
 	<profiles>
-		<profile>
-			<id>DIST</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>${maven_assembly_plugin_version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<attach>true</attach>
-									<descriptors>
-										<descriptor>${project.basedir}/src/assembly/android-sources.xml</descriptor>
-										<descriptor>${project.basedir}/src/assembly/android-javadoc.xml</descriptor>
-									</descriptors>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 	</profiles>
 
 </project>

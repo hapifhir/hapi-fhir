@@ -9,7 +9,7 @@ import java.lang.reflect.Modifier;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 				if (childOrder != null) {
 					forcedOrder = new HashMap<String, Integer>();
 					for (int i = 0; i < childOrder.names().length; i++) {
-						forcedOrder.put(childOrder.names()[i], i);
+						String nextName = childOrder.names()[i];
+						if (nextName.endsWith("[x]")) {
+							nextName = nextName.substring(0, nextName.length() - 3);
+						}
+						forcedOrder.put(nextName, i);
 					}
 				}
 			}
@@ -529,7 +533,9 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 	protected void validateSealed() {
 		if (!mySealed) {
 			synchronized(myContext) {
-				sealAndInitialize(myContext, myClassToElementDefinitions);
+				if(!mySealed) {
+					sealAndInitialize(myContext, myClassToElementDefinitions);
+				}
 			}
 		}
 	}

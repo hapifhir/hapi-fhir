@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <url value="http://phr.kanta.fi/StructureDefinition/testi" />
+  <name value="testi" />
+  <status value="draft" />
+  <fhirVersion value="1.0.2" />
+  <kind value="datatype" />
+  <constrainedType value="Quantity" />
+  <abstract value="false" />
+  <base value="http://hl7.org/fhir/StructureDefinition/Quantity" />
+  <snapshot>
+    <element>
+      <path value="Quantity" />
+      <short value="A measured or measurable amount" />
+      <definition value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies." />
+      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator." />
+      <min value="0" />
+      <max value="*" />
+      <base>
+        <path value="Quantity" />
+        <min value="0" />
+        <max value="*" />
+      </base>
+      <type>
+        <code value="Quantity" />
+      </type>
+      <constraint>
+        <key value="qty-3" />
+        <severity value="error" />
+        <human value="If a code for the unit is present, the system SHALL also be present" />
+        <xpath value="not(exists(f:code)) or exists(f:system)" />
+      </constraint>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="SN (see also Range) or CQ" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.id" />
+      <representation value="xmlAttr" />
+      <short value="xml:id (or equivalent in JSON)" />
+      <definition value="unique id for the element within a resource (for internal references)." />
+      <min value="0" />
+      <max value="1" />
+      <base>
+        <path value="Quantity.id" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="id" />
+      </type>
+      <mapping>
+        <identity value="rim" />
+        <map value="n/a" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.extension" />
+      <short value="Additional Content defined by implementations" />
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." />
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone." />
+      <alias value="extensions" />
+      <alias value="user content" />
+      <min value="0" />
+      <max value="*" />
+      <base>
+        <path value="Quantity.extension" />
+        <min value="0" />
+        <max value="*" />
+      </base>
+      <type>
+        <code value="Extension" />
+      </type>
+      <mapping>
+        <identity value="rim" />
+        <map value="n/a" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.value" />
+      <short value="Numerical value (with implicit precision)" />
+      <definition value="The value of the measured amount. The value includes an implicit precision in the presentation of the value." />
+      <comments value="The implicit precision in the value should always be honored. Monetary values have their own rules for handling precision (refer to standard accounting text books)." />
+      <requirements value="Precision is handled implicitly in almost all cases of measurement." />
+      <min value="1" />
+      <max value="1" />
+      <base>
+        <path value="Quantity.value" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="decimal" />
+      </type>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="SN.2  / CQ - N/A" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ.value, CO.value, MO.value, IVL.high or IVL.low depending on the value" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.comparator" />
+      <short value="&lt; | &lt;= | &gt;= | &gt; - how to understand the value" />
+      <definition value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value." />
+      <comments value="This is labeled as &quot;Is Modifier&quot; because the comparator modifies the interpretation of the value significantly. If there is no comparator, then there is no modification of the value." />
+      <requirements value="Need a framework for handling measures where the value is &lt;5ug/L or &gt;400mg/L due to the limitations of measuring methodology." />
+      <min value="0" />
+      <max value="1" />
+      <base>
+        <path value="Quantity.comparator" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="code" />
+      </type>
+      <meaningWhenMissing value="If there is no comparator, then there is no modification of the value" />
+      <isModifier value="true" />
+      <isSummary value="true" />
+      <binding>
+        <strength value="required" />
+        <description value="How the Quantity should be understood and represented." />
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/quantity-comparator" />
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2" />
+        <map value="SN.1  / CQ.1" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="IVL properties" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.unit" />
+      <short value="Unit representation" />
+      <definition value="A human-readable form of the unit." />
+      <requirements value="There are many representations for units of measure and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms." />
+      <min value="1" />
+      <max value="1" />
+      <base>
+        <path value="Quantity.unit" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="string" />
+      </type>
+      <fixedString value="L/min" />
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="(see OBX.6 etc.) / CQ.2" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ.unit" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.system" />
+      <short value="System that defines coded unit form" />
+      <definition value="The identification of the system that provides the coded form of the unit." />
+      <requirements value="Need to know the system that defines the coded form of the unit." />
+      <min value="0" />
+      <max value="0" />
+      <base>
+        <path value="Quantity.system" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="uri" />
+      </type>
+      <condition value="qty-3" />
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="(see OBX.6 etc.) / CQ.2" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="CO.codeSystem, PQ.translation.codeSystem" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.code" />
+      <short value="Coded form of the unit" />
+      <definition value="A computer processable form of the unit in some unit representation system." />
+      <comments value="The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.  The context of use may additionally require a code from a particular system." />
+      <requirements value="Need a computable form of the unit that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest." />
+      <min value="0" />
+      <max value="0" />
+      <base>
+        <path value="Quantity.code" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="code" />
+      </type>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="(see OBX.6 etc.) / CQ.2" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ.code, MO.currency, PQ.translation.code" />
+      </mapping>
+    </element>
+  </snapshot>
+  <differential>
+    <element>
+      <path value="Quantity" />
+      <short value="A measured or measurable amount" />
+      <definition value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies." />
+      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator." />
+      <min value="0" />
+      <max value="*" />
+      <base>
+        <path value="Quantity" />
+        <min value="0" />
+        <max value="*" />
+      </base>
+      <type>
+        <code value="Quantity" />
+      </type>
+      <constraint>
+        <key value="qty-3" />
+        <severity value="error" />
+        <human value="If a code for the unit is present, the system SHALL also be present" />
+        <xpath value="not(exists(f:code)) or exists(f:system)" />
+      </constraint>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="SN (see also Range) or CQ" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ, IVL&lt;PQ&gt;, MO, CO, depending on the values" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.value" />
+      <short value="Numerical value (with implicit precision)" />
+      <definition value="The value of the measured amount. The value includes an implicit precision in the presentation of the value." />
+      <comments value="The implicit precision in the value should always be honored. Monetary values have their own rules for handling precision (refer to standard accounting text books)." />
+      <requirements value="Precision is handled implicitly in almost all cases of measurement." />
+      <min value="1" />
+      <max value="1" />
+      <base>
+        <path value="Quantity.value" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="decimal" />
+      </type>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="SN.2  / CQ - N/A" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ.value, CO.value, MO.value, IVL.high or IVL.low depending on the value" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.unit" />
+      <short value="Unit representation" />
+      <definition value="A human-readable form of the unit." />
+      <requirements value="There are many representations for units of measure and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms." />
+      <min value="1" />
+      <max value="1" />
+      <base>
+        <path value="Quantity.unit" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="string" />
+      </type>
+      <fixedString value="L/min" />
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="(see OBX.6 etc.) / CQ.2" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ.unit" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.system" />
+      <short value="System that defines coded unit form" />
+      <definition value="The identification of the system that provides the coded form of the unit." />
+      <requirements value="Need to know the system that defines the coded form of the unit." />
+      <min value="0" />
+      <max value="0" />
+      <base>
+        <path value="Quantity.system" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="uri" />
+      </type>
+      <condition value="qty-3" />
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="(see OBX.6 etc.) / CQ.2" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="CO.codeSystem, PQ.translation.codeSystem" />
+      </mapping>
+    </element>
+    <element>
+      <path value="Quantity.code" />
+      <short value="Coded form of the unit" />
+      <definition value="A computer processable form of the unit in some unit representation system." />
+      <comments value="The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.  The context of use may additionally require a code from a particular system." />
+      <requirements value="Need a computable form of the unit that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest." />
+      <min value="0" />
+      <max value="0" />
+      <base>
+        <path value="Quantity.code" />
+        <min value="0" />
+        <max value="1" />
+      </base>
+      <type>
+        <code value="code" />
+      </type>
+      <isSummary value="true" />
+      <mapping>
+        <identity value="v2" />
+        <map value="(see OBX.6 etc.) / CQ.2" />
+      </mapping>
+      <mapping>
+        <identity value="rim" />
+        <map value="PQ.code, MO.currency, PQ.translation.code" />
+      </mapping>
+    </element>
+  </differential>
+</StructureDefinition>

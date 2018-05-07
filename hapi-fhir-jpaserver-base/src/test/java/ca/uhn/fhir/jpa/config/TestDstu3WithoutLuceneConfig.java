@@ -3,14 +3,26 @@ package ca.uhn.fhir.jpa.config;
 import java.util.Properties;
 
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+
 @Configuration
 @EnableTransactionManagement()
 public class TestDstu3WithoutLuceneConfig extends TestDstu3Config {
+
+	/**
+	 * Disable fulltext searching
+	 */
+	@Override
+	public IFulltextSearchSvc searchDaoDstu3() {
+		return null;
+	}
 
 	@Override
 	@Bean()

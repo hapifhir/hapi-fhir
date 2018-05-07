@@ -204,7 +204,8 @@
 		
 			<p>
 				The HAPI FHIR RESTful Server will automatically export a 
-				<a href="http://hl7.org/implement/standards/fhir/conformance.html">conformance statement</a>, 
+				<a href="http://hl7.org/implement/standards/fhir/capabilitystatement.html">capability statement</a> (or a
+				<a href="https://www.hl7.org/fhir/DSTU2/conformance.html">conformance statement</a> for DSTU2 and prior), 
 				as required by the
 				<a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR Specification</a>.
 			</p>
@@ -531,7 +532,7 @@
 			</p>
 			
 			<p>
-				<b>Pretty Printing:</b> The HAPI RESTful server supports a non-standard parameter called 
+				<b>Pretty Printing:</b> The HAPI RESTful server supports a called
 				<code>_pretty</code>, which can be used to request that responses be pretty-printed (indented for
 				easy reading by humans) by setting the value to <code>true</code>. This can be useful in testing. An example URL for this might be:<br/>
 				<code>http://example.com/fhir/Patient/_search?name=TESTING&amp;_pretty=true</code>  
@@ -611,7 +612,55 @@
                redirectPort="8443" maxHttpHeaderSize="32000" />
 		</section>
 		-->
-		
+
+		<section id="Multitenancy">
+
+			<p>
+				If you wish to allow a single endpoint to support multiple
+				tenants, you may supply the server with a multitenancy provider.
+			</p>
+			<p>
+				This means that additional logic will be performed during request
+				parsing to determine a tenant ID, which will be supplied to
+				resource providers. This can be useful in servers that have
+				multiple distinct logical pools of resources hosted on the
+				same infrastructure.
+			</p>
+
+			<subsection name="URL Base Multitenancy">
+				<p>
+					Using URL Base Multitenancy means that an additional element
+					is added to the path of each resource between the server base
+					URL and the resource name. For example, if your restful server
+					is deployed to <code>http://acme.org:8080/baseDstu3</code>
+					and user wished to access Patient 123 for Tenant "FOO", the
+					resource ID (and URL to fetch that resource) would be
+					<code>http://acme.org:8080/FOO/Patient/123</code>.
+				</p>
+
+				<p>
+					To enable this mode on your server, simply provide the
+					<code>UrlBaseTenantIdentificationStrategy</code> to the
+					server as shown below:
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="enableUrlBaseTenantIdentificationStrategy" />
+					<param name="file" value="examples/src/main/java/example/Multitenancy.java" />
+				</macro>
+
+				<p>
+					Your resource providers can then use a RequestDetails parameter to
+					determine the tenant ID:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="resourceProvider" />
+					<param name="file" value="examples/src/main/java/example/Multitenancy.java" />
+				</macro>
+
+			</subsection>
+
+		</section>
 		
 	</body>
 

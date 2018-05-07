@@ -29,21 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatusEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
@@ -63,14 +58,14 @@ public class TestScript extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ContentType fromCode(String codeString) throws Exception {
+        public static ContentType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("xml".equals(codeString))
           return XML;
         if ("json".equals(codeString))
           return JSON;
-        throw new Exception("Unknown ContentType code '"+codeString+"'");
+        throw new FHIRException("Unknown ContentType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -113,6 +108,18 @@ public class TestScript extends DomainResource {
           return ContentType.JSON;
         throw new IllegalArgumentException("Unknown ContentType code '"+codeString+"'");
         }
+        public Enumeration<ContentType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("xml".equals(codeString))
+          return new Enumeration<ContentType>(this, ContentType.XML);
+        if ("json".equals(codeString))
+          return new Enumeration<ContentType>(this, ContentType.JSON);
+        throw new FHIRException("Unknown ContentType code '"+codeString+"'");
+        }
     public String toCode(ContentType code) {
       if (code == ContentType.XML)
         return "xml";
@@ -135,14 +142,14 @@ public class TestScript extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AssertionDirectionType fromCode(String codeString) throws Exception {
+        public static AssertionDirectionType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("response".equals(codeString))
           return RESPONSE;
         if ("request".equals(codeString))
           return REQUEST;
-        throw new Exception("Unknown AssertionDirectionType code '"+codeString+"'");
+        throw new FHIRException("Unknown AssertionDirectionType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -184,6 +191,18 @@ public class TestScript extends DomainResource {
         if ("request".equals(codeString))
           return AssertionDirectionType.REQUEST;
         throw new IllegalArgumentException("Unknown AssertionDirectionType code '"+codeString+"'");
+        }
+        public Enumeration<AssertionDirectionType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("response".equals(codeString))
+          return new Enumeration<AssertionDirectionType>(this, AssertionDirectionType.RESPONSE);
+        if ("request".equals(codeString))
+          return new Enumeration<AssertionDirectionType>(this, AssertionDirectionType.REQUEST);
+        throw new FHIRException("Unknown AssertionDirectionType code '"+codeString+"'");
         }
     public String toCode(AssertionDirectionType code) {
       if (code == AssertionDirectionType.RESPONSE)
@@ -239,7 +258,7 @@ public class TestScript extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AssertionOperatorType fromCode(String codeString) throws Exception {
+        public static AssertionOperatorType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("equals".equals(codeString))
@@ -262,7 +281,7 @@ public class TestScript extends DomainResource {
           return CONTAINS;
         if ("notContains".equals(codeString))
           return NOTCONTAINS;
-        throw new Exception("Unknown AssertionOperatorType code '"+codeString+"'");
+        throw new FHIRException("Unknown AssertionOperatorType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -353,6 +372,34 @@ public class TestScript extends DomainResource {
           return AssertionOperatorType.NOTCONTAINS;
         throw new IllegalArgumentException("Unknown AssertionOperatorType code '"+codeString+"'");
         }
+        public Enumeration<AssertionOperatorType> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("equals".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.EQUALS);
+        if ("notEquals".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.NOTEQUALS);
+        if ("in".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.IN);
+        if ("notIn".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.NOTIN);
+        if ("greaterThan".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.GREATERTHAN);
+        if ("lessThan".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.LESSTHAN);
+        if ("empty".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.EMPTY);
+        if ("notEmpty".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.NOTEMPTY);
+        if ("contains".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.CONTAINS);
+        if ("notContains".equals(codeString))
+          return new Enumeration<AssertionOperatorType>(this, AssertionOperatorType.NOTCONTAINS);
+        throw new FHIRException("Unknown AssertionOperatorType code '"+codeString+"'");
+        }
     public String toCode(AssertionOperatorType code) {
       if (code == AssertionOperatorType.EQUALS)
         return "equals";
@@ -431,7 +478,7 @@ public class TestScript extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AssertionResponseTypes fromCode(String codeString) throws Exception {
+        public static AssertionResponseTypes fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("okay".equals(codeString))
@@ -458,7 +505,7 @@ public class TestScript extends DomainResource {
           return PRECONDITIONFAILED;
         if ("unprocessable".equals(codeString))
           return UNPROCESSABLE;
-        throw new Exception("Unknown AssertionResponseTypes code '"+codeString+"'");
+        throw new FHIRException("Unknown AssertionResponseTypes code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -560,6 +607,38 @@ public class TestScript extends DomainResource {
         if ("unprocessable".equals(codeString))
           return AssertionResponseTypes.UNPROCESSABLE;
         throw new IllegalArgumentException("Unknown AssertionResponseTypes code '"+codeString+"'");
+        }
+        public Enumeration<AssertionResponseTypes> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("okay".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.OKAY);
+        if ("created".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.CREATED);
+        if ("noContent".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.NOCONTENT);
+        if ("notModified".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.NOTMODIFIED);
+        if ("bad".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.BAD);
+        if ("forbidden".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.FORBIDDEN);
+        if ("notFound".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.NOTFOUND);
+        if ("methodNotAllowed".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.METHODNOTALLOWED);
+        if ("conflict".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.CONFLICT);
+        if ("gone".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.GONE);
+        if ("preconditionFailed".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.PRECONDITIONFAILED);
+        if ("unprocessable".equals(codeString))
+          return new Enumeration<AssertionResponseTypes>(this, AssertionResponseTypes.UNPROCESSABLE);
+        throw new FHIRException("Unknown AssertionResponseTypes code '"+codeString+"'");
         }
     public String toCode(AssertionResponseTypes code) {
       if (code == AssertionResponseTypes.OKAY)
@@ -710,6 +789,28 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptContactComponent copy() {
         TestScriptContactComponent dst = new TestScriptContactComponent();
         copyValues(dst);
@@ -746,6 +847,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.contact";
+
+  }
 
   }
 
@@ -860,6 +966,28 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("capability", "", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("link"))
+          this.getLink().add((TestScriptMetadataLinkComponent) value);
+        else if (name.equals("capability"))
+          this.getCapability().add((TestScriptMetadataCapabilityComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("link")) {
+          return addLink();
+        }
+        else if (name.equals("capability")) {
+          return addCapability();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptMetadataComponent copy() {
         TestScriptMetadataComponent dst = new TestScriptMetadataComponent();
         copyValues(dst);
@@ -900,6 +1028,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (link == null || link.isEmpty()) && (capability == null || capability.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.metadata";
+
+  }
 
   }
 
@@ -1036,6 +1169,28 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("description", "string", "Short description of the link.", 0, java.lang.Integer.MAX_VALUE, description));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.url");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.description");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptMetadataLinkComponent copy() {
         TestScriptMetadataLinkComponent dst = new TestScriptMetadataLinkComponent();
         copyValues(dst);
@@ -1068,6 +1223,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (url == null || url.isEmpty()) && (description == null || description.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.metadata.link";
+
+  }
 
   }
 
@@ -1429,6 +1589,49 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("conformance", "Reference(Conformance)", "Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.", 0, java.lang.Integer.MAX_VALUE, conformance));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("required"))
+          this.required = castToBoolean(value); // BooleanType
+        else if (name.equals("validated"))
+          this.validated = castToBoolean(value); // BooleanType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("destination"))
+          this.destination = castToInteger(value); // IntegerType
+        else if (name.equals("link"))
+          this.getLink().add(castToUri(value));
+        else if (name.equals("conformance"))
+          this.conformance = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("required")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.required");
+        }
+        else if (name.equals("validated")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.validated");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.description");
+        }
+        else if (name.equals("destination")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.destination");
+        }
+        else if (name.equals("link")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.link");
+        }
+        else if (name.equals("conformance")) {
+          this.conformance = new Reference();
+          return this.conformance;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptMetadataCapabilityComponent copy() {
         TestScriptMetadataCapabilityComponent dst = new TestScriptMetadataCapabilityComponent();
         copyValues(dst);
@@ -1473,6 +1676,11 @@ public class TestScript extends DomainResource {
            && (description == null || description.isEmpty()) && (destination == null || destination.isEmpty())
            && (link == null || link.isEmpty()) && (conformance == null || conformance.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.metadata.capability";
+
+  }
 
   }
 
@@ -1649,6 +1857,34 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the resource needed for operations).", 0, java.lang.Integer.MAX_VALUE, resource));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("autocreate"))
+          this.autocreate = castToBoolean(value); // BooleanType
+        else if (name.equals("autodelete"))
+          this.autodelete = castToBoolean(value); // BooleanType
+        else if (name.equals("resource"))
+          this.resource = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("autocreate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.autocreate");
+        }
+        else if (name.equals("autodelete")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.autodelete");
+        }
+        else if (name.equals("resource")) {
+          this.resource = new Reference();
+          return this.resource;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptFixtureComponent copy() {
         TestScriptFixtureComponent dst = new TestScriptFixtureComponent();
         copyValues(dst);
@@ -1684,6 +1920,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (autocreate == null || autocreate.isEmpty()) && (autodelete == null || autodelete.isEmpty())
            && (resource == null || resource.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.fixture";
+
+  }
 
   }
 
@@ -1934,6 +2175,38 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.", 0, java.lang.Integer.MAX_VALUE, sourceId));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("headerField"))
+          this.headerField = castToString(value); // StringType
+        else if (name.equals("path"))
+          this.path = castToString(value); // StringType
+        else if (name.equals("sourceId"))
+          this.sourceId = castToId(value); // IdType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("headerField")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.headerField");
+        }
+        else if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.path");
+        }
+        else if (name.equals("sourceId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.sourceId");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptVariableComponent copy() {
         TestScriptVariableComponent dst = new TestScriptVariableComponent();
         copyValues(dst);
@@ -1970,6 +2243,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (headerField == null || headerField.isEmpty())
            && (path == null || path.isEmpty()) && (sourceId == null || sourceId.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.variable";
+
+  }
 
   }
 
@@ -2068,6 +2346,29 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("metadata"))
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
+        else if (name.equals("action"))
+          this.getAction().add((TestScriptSetupActionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("metadata")) {
+          this.metadata = new TestScriptMetadataComponent();
+          return this.metadata;
+        }
+        else if (name.equals("action")) {
+          return addAction();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptSetupComponent copy() {
         TestScriptSetupComponent dst = new TestScriptSetupComponent();
         copyValues(dst);
@@ -2104,6 +2405,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (metadata == null || metadata.isEmpty()) && (action == null || action.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.setup";
+
+  }
 
   }
 
@@ -2186,6 +2492,30 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("assert", "", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, java.lang.Integer.MAX_VALUE, assert_));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("operation"))
+          this.operation = (TestScriptSetupActionOperationComponent) value; // TestScriptSetupActionOperationComponent
+        else if (name.equals("assert"))
+          this.assert_ = (TestScriptSetupActionAssertComponent) value; // TestScriptSetupActionAssertComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("operation")) {
+          this.operation = new TestScriptSetupActionOperationComponent();
+          return this.operation;
+        }
+        else if (name.equals("assert")) {
+          this.assert_ = new TestScriptSetupActionAssertComponent();
+          return this.assert_;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptSetupActionComponent copy() {
         TestScriptSetupActionComponent dst = new TestScriptSetupActionComponent();
         copyValues(dst);
@@ -2218,6 +2548,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (operation == null || operation.isEmpty()) && (assert_ == null || assert_.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.setup.action";
+
+  }
 
   }
 
@@ -2992,6 +3327,89 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("url", "string", "Complete request URL.", 0, java.lang.Integer.MAX_VALUE, url));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("resource"))
+          this.resource = castToCode(value); // CodeType
+        else if (name.equals("label"))
+          this.label = castToString(value); // StringType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("accept"))
+          this.accept = new ContentTypeEnumFactory().fromType(value); // Enumeration<ContentType>
+        else if (name.equals("contentType"))
+          this.contentType = new ContentTypeEnumFactory().fromType(value); // Enumeration<ContentType>
+        else if (name.equals("destination"))
+          this.destination = castToInteger(value); // IntegerType
+        else if (name.equals("encodeRequestUrl"))
+          this.encodeRequestUrl = castToBoolean(value); // BooleanType
+        else if (name.equals("params"))
+          this.params = castToString(value); // StringType
+        else if (name.equals("requestHeader"))
+          this.getRequestHeader().add((TestScriptSetupActionOperationRequestHeaderComponent) value);
+        else if (name.equals("responseId"))
+          this.responseId = castToId(value); // IdType
+        else if (name.equals("sourceId"))
+          this.sourceId = castToId(value); // IdType
+        else if (name.equals("targetId"))
+          this.targetId = castToId(value); // IdType
+        else if (name.equals("url"))
+          this.url = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("resource")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.resource");
+        }
+        else if (name.equals("label")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.label");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.description");
+        }
+        else if (name.equals("accept")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.accept");
+        }
+        else if (name.equals("contentType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.contentType");
+        }
+        else if (name.equals("destination")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.destination");
+        }
+        else if (name.equals("encodeRequestUrl")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.encodeRequestUrl");
+        }
+        else if (name.equals("params")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.params");
+        }
+        else if (name.equals("requestHeader")) {
+          return addRequestHeader();
+        }
+        else if (name.equals("responseId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.responseId");
+        }
+        else if (name.equals("sourceId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.sourceId");
+        }
+        else if (name.equals("targetId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.targetId");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptSetupActionOperationComponent copy() {
         TestScriptSetupActionOperationComponent dst = new TestScriptSetupActionOperationComponent();
         copyValues(dst);
@@ -3054,6 +3472,11 @@ public class TestScript extends DomainResource {
            && (sourceId == null || sourceId.isEmpty()) && (targetId == null || targetId.isEmpty()) && (url == null || url.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.setup.action.operation";
+
+  }
 
   }
 
@@ -3187,6 +3610,28 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("value", "string", "The value of the header e.g. \"application/xml\".", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("field"))
+          this.field = castToString(value); // StringType
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("field")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.field");
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptSetupActionOperationRequestHeaderComponent copy() {
         TestScriptSetupActionOperationRequestHeaderComponent dst = new TestScriptSetupActionOperationRequestHeaderComponent();
         copyValues(dst);
@@ -3219,6 +3664,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (field == null || field.isEmpty()) && (value == null || value.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.setup.action.operation.requestHeader";
+
+  }
 
   }
 
@@ -4255,6 +4705,108 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("warningOnly", "boolean", "Whether or not the test execution will produce a warning only on error for this assert.", 0, java.lang.Integer.MAX_VALUE, warningOnly));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("label"))
+          this.label = castToString(value); // StringType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("direction"))
+          this.direction = new AssertionDirectionTypeEnumFactory().fromType(value); // Enumeration<AssertionDirectionType>
+        else if (name.equals("compareToSourceId"))
+          this.compareToSourceId = castToString(value); // StringType
+        else if (name.equals("compareToSourcePath"))
+          this.compareToSourcePath = castToString(value); // StringType
+        else if (name.equals("contentType"))
+          this.contentType = new ContentTypeEnumFactory().fromType(value); // Enumeration<ContentType>
+        else if (name.equals("headerField"))
+          this.headerField = castToString(value); // StringType
+        else if (name.equals("minimumId"))
+          this.minimumId = castToString(value); // StringType
+        else if (name.equals("navigationLinks"))
+          this.navigationLinks = castToBoolean(value); // BooleanType
+        else if (name.equals("operator"))
+          this.operator = new AssertionOperatorTypeEnumFactory().fromType(value); // Enumeration<AssertionOperatorType>
+        else if (name.equals("path"))
+          this.path = castToString(value); // StringType
+        else if (name.equals("resource"))
+          this.resource = castToCode(value); // CodeType
+        else if (name.equals("response"))
+          this.response = new AssertionResponseTypesEnumFactory().fromType(value); // Enumeration<AssertionResponseTypes>
+        else if (name.equals("responseCode"))
+          this.responseCode = castToString(value); // StringType
+        else if (name.equals("sourceId"))
+          this.sourceId = castToId(value); // IdType
+        else if (name.equals("validateProfileId"))
+          this.validateProfileId = castToId(value); // IdType
+        else if (name.equals("value"))
+          this.value = castToString(value); // StringType
+        else if (name.equals("warningOnly"))
+          this.warningOnly = castToBoolean(value); // BooleanType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("label")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.label");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.description");
+        }
+        else if (name.equals("direction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.direction");
+        }
+        else if (name.equals("compareToSourceId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.compareToSourceId");
+        }
+        else if (name.equals("compareToSourcePath")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.compareToSourcePath");
+        }
+        else if (name.equals("contentType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.contentType");
+        }
+        else if (name.equals("headerField")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.headerField");
+        }
+        else if (name.equals("minimumId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.minimumId");
+        }
+        else if (name.equals("navigationLinks")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.navigationLinks");
+        }
+        else if (name.equals("operator")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.operator");
+        }
+        else if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.path");
+        }
+        else if (name.equals("resource")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.resource");
+        }
+        else if (name.equals("response")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.response");
+        }
+        else if (name.equals("responseCode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.responseCode");
+        }
+        else if (name.equals("sourceId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.sourceId");
+        }
+        else if (name.equals("validateProfileId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.validateProfileId");
+        }
+        else if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
+        }
+        else if (name.equals("warningOnly")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.warningOnly");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptSetupActionAssertComponent copy() {
         TestScriptSetupActionAssertComponent dst = new TestScriptSetupActionAssertComponent();
         copyValues(dst);
@@ -4324,6 +4876,11 @@ public class TestScript extends DomainResource {
            && (validateProfileId == null || validateProfileId.isEmpty()) && (value == null || value.isEmpty())
            && (warningOnly == null || warningOnly.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.setup.action.assert";
+
+  }
 
   }
 
@@ -4536,6 +5093,39 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("metadata"))
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
+        else if (name.equals("action"))
+          this.getAction().add((TestScriptTestActionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.description");
+        }
+        else if (name.equals("metadata")) {
+          this.metadata = new TestScriptMetadataComponent();
+          return this.metadata;
+        }
+        else if (name.equals("action")) {
+          return addAction();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptTestComponent copy() {
         TestScriptTestComponent dst = new TestScriptTestComponent();
         copyValues(dst);
@@ -4575,6 +5165,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
            && (metadata == null || metadata.isEmpty()) && (action == null || action.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.test";
+
+  }
 
   }
 
@@ -4657,6 +5252,30 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("assert", "@TestScript.setup.action.assert", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, java.lang.Integer.MAX_VALUE, assert_));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("operation"))
+          this.operation = (TestScriptSetupActionOperationComponent) value; // TestScriptSetupActionOperationComponent
+        else if (name.equals("assert"))
+          this.assert_ = (TestScriptSetupActionAssertComponent) value; // TestScriptSetupActionAssertComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("operation")) {
+          this.operation = new TestScriptSetupActionOperationComponent();
+          return this.operation;
+        }
+        else if (name.equals("assert")) {
+          this.assert_ = new TestScriptSetupActionAssertComponent();
+          return this.assert_;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptTestActionComponent copy() {
         TestScriptTestActionComponent dst = new TestScriptTestActionComponent();
         copyValues(dst);
@@ -4689,6 +5308,11 @@ public class TestScript extends DomainResource {
         return super.isEmpty() && (operation == null || operation.isEmpty()) && (assert_ == null || assert_.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "TestScript.test.action";
+
+  }
 
   }
 
@@ -4755,6 +5379,23 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("action"))
+          this.getAction().add((TestScriptTeardownActionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("action")) {
+          return addAction();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptTeardownComponent copy() {
         TestScriptTeardownComponent dst = new TestScriptTeardownComponent();
         copyValues(dst);
@@ -4789,6 +5430,11 @@ public class TestScript extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (action == null || action.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.teardown";
+
+  }
 
   }
 
@@ -4839,6 +5485,24 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, java.lang.Integer.MAX_VALUE, operation));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("operation"))
+          this.operation = (TestScriptSetupActionOperationComponent) value; // TestScriptSetupActionOperationComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("operation")) {
+          this.operation = new TestScriptSetupActionOperationComponent();
+          return this.operation;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TestScriptTeardownActionComponent copy() {
         TestScriptTeardownActionComponent dst = new TestScriptTeardownActionComponent();
         copyValues(dst);
@@ -4869,6 +5533,11 @@ public class TestScript extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (operation == null || operation.isEmpty());
       }
+
+  public String fhirType() {
+    return "TestScript.teardown.action";
+
+  }
 
   }
 
@@ -5931,6 +6600,132 @@ public class TestScript extends DomainResource {
         childrenList.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));
         childrenList.add(new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, java.lang.Integer.MAX_VALUE, teardown));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url"))
+          this.url = castToUri(value); // UriType
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new ConformanceResourceStatusEnumFactory().fromType(value); // Enumeration<ConformanceResourceStatus>
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("experimental"))
+          this.experimental = castToBoolean(value); // BooleanType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("contact"))
+          this.getContact().add((TestScriptContactComponent) value);
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("useContext"))
+          this.getUseContext().add(castToCodeableConcept(value));
+        else if (name.equals("requirements"))
+          this.requirements = castToString(value); // StringType
+        else if (name.equals("copyright"))
+          this.copyright = castToString(value); // StringType
+        else if (name.equals("metadata"))
+          this.metadata = (TestScriptMetadataComponent) value; // TestScriptMetadataComponent
+        else if (name.equals("multiserver"))
+          this.multiserver = castToBoolean(value); // BooleanType
+        else if (name.equals("fixture"))
+          this.getFixture().add((TestScriptFixtureComponent) value);
+        else if (name.equals("profile"))
+          this.getProfile().add(castToReference(value));
+        else if (name.equals("variable"))
+          this.getVariable().add((TestScriptVariableComponent) value);
+        else if (name.equals("setup"))
+          this.setup = (TestScriptSetupComponent) value; // TestScriptSetupComponent
+        else if (name.equals("test"))
+          this.getTest().add((TestScriptTestComponent) value);
+        else if (name.equals("teardown"))
+          this.teardown = (TestScriptTeardownComponent) value; // TestScriptTeardownComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.url");
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.version");
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.status");
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("experimental")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.experimental");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.publisher");
+        }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.date");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.description");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("requirements")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.requirements");
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.copyright");
+        }
+        else if (name.equals("metadata")) {
+          this.metadata = new TestScriptMetadataComponent();
+          return this.metadata;
+        }
+        else if (name.equals("multiserver")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.multiserver");
+        }
+        else if (name.equals("fixture")) {
+          return addFixture();
+        }
+        else if (name.equals("profile")) {
+          return addProfile();
+        }
+        else if (name.equals("variable")) {
+          return addVariable();
+        }
+        else if (name.equals("setup")) {
+          this.setup = new TestScriptSetupComponent();
+          return this.setup;
+        }
+        else if (name.equals("test")) {
+          return addTest();
+        }
+        else if (name.equals("teardown")) {
+          this.teardown = new TestScriptTeardownComponent();
+          return this.teardown;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "TestScript";
+
+  }
 
       public TestScript copy() {
         TestScript dst = new TestScript();

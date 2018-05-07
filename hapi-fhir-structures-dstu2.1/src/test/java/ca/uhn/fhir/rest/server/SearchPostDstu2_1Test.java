@@ -25,18 +25,13 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
@@ -71,7 +66,7 @@ public class SearchPostDstu2_1Test {
 		ourLastMethod = null;
 		ourLastSortSpec = null;
 		ourLastName = null;
-		
+
 		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
 			ourServlet.unregisterInterceptor(next);
 		}
@@ -82,14 +77,14 @@ public class SearchPostDstu2_1Test {
 	 */
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsYesParams() throws Exception {
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=application/fhir+json");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format="+Constants.CT_FHIR_JSON);
 		httpPost.addHeader("Cache-Control","no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -101,7 +96,7 @@ public class SearchPostDstu2_1Test {
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
 			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(Constants.CT_FHIR_JSON, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -120,7 +115,7 @@ public class SearchPostDstu2_1Test {
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -145,15 +140,15 @@ public class SearchPostDstu2_1Test {
 	@Test
 	public void testSearchWithMixedParamsYesInterceptorsYesParams() throws Exception {
 		ourServlet.registerInterceptor(new ParamLoggingInterceptor());
-		
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format=application/fhir+json");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?_format="+Constants.CT_FHIR_JSON);
 		httpPost.addHeader("Cache-Control","no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
 		parameters.add(new BasicNameValuePair("name", "Smith"));
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -165,7 +160,7 @@ public class SearchPostDstu2_1Test {
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
 			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
 			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertEquals(Constants.CT_FHIR_JSON, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -178,7 +173,7 @@ public class SearchPostDstu2_1Test {
 	@Test
 	public void testSearchWithMixedParamsYesInterceptorsNoParams() throws Exception {
 		ourServlet.registerInterceptor(new ParamLoggingInterceptor());
-		
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
 		httpPost.addHeader("Cache-Control","no-cache");
 		List<NameValuePair> parameters = Lists.newArrayList();
@@ -186,7 +181,7 @@ public class SearchPostDstu2_1Test {
 		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
 
 		ourLog.info("Outgoing post: {}", httpPost);
-		
+
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -204,7 +199,7 @@ public class SearchPostDstu2_1Test {
 		}
 
 	}
-	
+
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		ourServer.stop();

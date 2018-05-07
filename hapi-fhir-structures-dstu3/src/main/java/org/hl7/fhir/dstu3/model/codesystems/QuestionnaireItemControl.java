@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -73,7 +73,7 @@ public enum QuestionnaireItemControl {
          */
         UNIT, 
         /**
-         * Text is displayed to the left of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the 'lower' bound.  E.g. 'Strongly diagree'
+         * Text is displayed to the left of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the 'lower' bound.  E.g. 'Strongly disagree'
          */
         LOWER, 
         /**
@@ -218,7 +218,7 @@ public enum QuestionnaireItemControl {
             case INLINE: return "Text is displayed as a paragraph in a sequential position between sibling items (default behavior)";
             case PROMPT: return "Text is displayed immediately below or within the answer-entry area of the containing question item (typically as a guide for what to enter)";
             case UNIT: return "Text is displayed adjacent (horizontally or vertically) to the answer space for the parent question, typically to indicate a unit of measure";
-            case LOWER: return "Text is displayed to the left of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the 'lower' bound.  E.g. 'Strongly diagree'";
+            case LOWER: return "Text is displayed to the left of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the 'lower' bound.  E.g. 'Strongly disagree'";
             case UPPER: return "Text is displayed to the right of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the 'upper' bound.  E.g. 'Strongly agree'";
             case FLYOVER: return "Text is temporarily visible over top of an item if the mouse is positioned over top of the text for the containing item";
             case HELP: return "Text is displayed in a dialog box or similar control if invoked by pushing a button or some other UI-appropriate action to request 'help' for a question, group or the questionnaire as a whole (depending what the text is nested within)";

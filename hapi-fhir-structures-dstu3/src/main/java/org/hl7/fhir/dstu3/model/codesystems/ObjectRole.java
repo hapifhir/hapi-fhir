@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -93,7 +93,7 @@ public enum ObjectRole {
          */
         _14, 
         /**
-         * Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note, the distinction between practitioners and the doctor that actually provided the care to the patient.
+         * Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note the distinction between practitioner and the doctor that actually provided the care to the patient.
          */
         _15, 
         /**
@@ -237,7 +237,7 @@ public enum ObjectRole {
             case _12: return "A person or system object involved in the event with the authority to modify security roles of other objects.";
             case _13: return "A passive object, such as a role table, that is relevant to the event.";
             case _14: return "(deprecated)  Relevant to certain RBAC security methodologies.";
-            case _15: return "Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note, the distinction between practitioners and the doctor that actually provided the care to the patient.";
+            case _15: return "Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note the distinction between practitioner and the doctor that actually provided the care to the patient.";
             case _16: return "The source or destination for data transfer, when it does not match some other role.";
             case _17: return "A source or destination for data transfer that acts as an archive, database, or similar role.";
             case _18: return "An object that holds schedule information.  This could be an appointment book, availability information, etc.";

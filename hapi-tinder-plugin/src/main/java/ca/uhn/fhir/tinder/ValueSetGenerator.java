@@ -1,24 +1,16 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystem;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
+import ca.uhn.fhir.tinder.model.ValueSetTm;
+import ca.uhn.fhir.tinder.parser.TargetType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -27,25 +19,9 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.dstu.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.resource.ValueSet.ComposeInclude;
-import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
-import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystem;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.model.BaseRootType;
-import ca.uhn.fhir.tinder.model.ValueSetTm;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.TargetType;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
 
 public class ValueSetGenerator {
 
@@ -77,15 +53,6 @@ public class ValueSetGenerator {
 		}
 	}
 
-	private void addDefinedConcept(ValueSetTm vs, String system, DefineConcept nextConcept) {
-		String nextCodeValue = nextConcept.getCode().getValue();
-		String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay().getValue());
-		String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition().getValue());
-		vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
-		for (DefineConcept nextChild : nextConcept.getConcept()) {
-			addDefinedConcept(vs, system, nextChild);
-		}
-	}
 
 	public String getClassForValueSetIdAndMarkAsNeeded(String theId) {
 		ValueSetTm vs = myValueSets.get(theId);
@@ -102,7 +69,7 @@ public class ValueSetGenerator {
 	}
 
 	public void parse() throws FileNotFoundException, IOException {
-		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDstu2();
+		FhirContext ctx = FhirContext.forDstu2();
 		IParser newXmlParser = ctx.newXmlParser();
 		newXmlParser.setParserErrorHandler(new LenientErrorHandler(false));
 
@@ -117,7 +84,7 @@ public class ValueSetGenerator {
 			name = "/org/hl7/fhir/instance/model/valueset/valuesets.xml";
 		}
 		if (version.equals("dstu3")) {
-			name = "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml";
+			name = "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml";
 		}
 		ourLog.info("Loading valuesets from: {}", name);
 		InputStream is = ValueSetGenerator.class.getResourceAsStream(name);
@@ -126,18 +93,14 @@ public class ValueSetGenerator {
 			throw new FileNotFoundException(name);
 		}
 		String vs = IOUtils.toString(is, Charset.defaultCharset());
-		if ("dstu".equals(myVersion)) {
-			Bundle bundle = newXmlParser.parseBundle(vs);
-			for (BundleEntry next : bundle.getEntries()) {
-				ValueSet nextVs = (ValueSet) next.getResource();
-				parseValueSet(nextVs);
-			}
-		} else {
+		if ("dstu2".equals(myVersion)) {
 			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, vs);
 			for (Entry nextEntry : bundle.getEntry()) {
 				ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) nextEntry.getResource();
 				parseValueSet(nextVs);
 			}
+		} else {
+			throw new IllegalStateException("Fhir version not supported");
 		}
 
 		if (myResourceValueSetFiles != null) {
@@ -232,57 +195,32 @@ public class ValueSetGenerator {
 		return vs;
 	}
 
-	private ValueSetTm parseValueSet(ValueSet nextVs) {
-		myConceptCount += nextVs.getDefine().getConcept().size();
-		ourLog.debug("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName().getValue(), myConceptCount);
-		// output.addConcept(next.getCode().getValue(),
-		// next.getDisplay().getValue(), next.getDefinition());
+	public void setFilenamePrefix(String theFilenamePrefix) {
+		myFilenamePrefix = theFilenamePrefix;
+	}
 
-		ValueSetTm vs = new ValueSetTm();
-
-		vs.setName(nextVs.getName().getValue());
-		vs.setDescription(nextVs.getDescription().getValue());
-		vs.setId(nextVs.getIdentifier().getValue());
-		vs.setClassName(toClassName(nextVs.getName().getValue()));
-
-		{
-			Define define = nextVs.getDefine();
-			String system = define.getSystem().getValueAsString();
-			for (DefineConcept nextConcept : define.getConcept()) {
-				addDefinedConcept(vs, system, nextConcept);
-			}
-		}
-
-		for (ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
-			String system = nextInclude.getSystem().getValueAsString();
-			for (CodeDt nextConcept : nextInclude.getCode()) {
-				String nextCodeValue = nextConcept.getValue();
-				vs.addConcept(system, nextCodeValue, null, null);
-			}
-		}
-
-//		if (vs.getCodes().isEmpty()) {
-//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
-//			return null;
-//		}
-		
-		if (myValueSets.containsKey(vs.getName())) {
-			ourLog.warn("Duplicate Name: " + vs.getName());
-		} else {
-			myValueSets.put(vs.getName(), vs);
-		}
-
-		// This is hackish, but deals with "Administrative Gender Codes" vs "AdministrativeGender"
-		if (vs.getName().endsWith(" Codes")) {
-			myValueSets.put(vs.getName().substring(0, vs.getName().length() - 6).replace(" ", ""), vs);
-		}
-		myValueSets.put(vs.getName().replace(" ", ""), vs);
-
-		return vs;
+	public void setFilenameSuffix(String theFilenameSuffix) {
+		myFilenameSuffix = theFilenameSuffix;
 	}
 
 	public void setResourceValueSetFiles(List<ValueSetFileDefinition> theResourceValueSetFiles) {
 		myResourceValueSetFiles = theResourceValueSetFiles;
+	}
+
+	public void setTemplate(String theTemplate) {
+		myTemplate = theTemplate;
+	}
+
+	public void setTemplateFile (File theTemplateFile) {
+		myTemplateFile = theTemplateFile;
+	}
+
+	public void setVelocityPath(String theVelocityPath) {
+		myVelocityPath = theVelocityPath;
+	}
+
+	public void setVelocityProperties(String theVelocityProperties) {
+		myVelocityProperties = theVelocityProperties;
 	}
 
 	private String toClassName(String theValue) {
@@ -307,30 +245,6 @@ public class ValueSetGenerator {
 
 		b.append("Enum");
 		return b.toString();
-	}
-
-	public void setFilenamePrefix(String theFilenamePrefix) {
-		myFilenamePrefix = theFilenamePrefix;
-	}
-
-	public void setFilenameSuffix(String theFilenameSuffix) {
-		myFilenameSuffix = theFilenameSuffix;
-	}
-
-	public void setTemplate(String theTemplate) {
-		myTemplate = theTemplate;
-	}
-
-	public void setTemplateFile (File theTemplateFile) {
-		myTemplateFile = theTemplateFile;
-	}
-
-	public void setVelocityPath(String theVelocityPath) {
-		myVelocityPath = theVelocityPath;
-	}
-
-	public void setVelocityProperties(String theVelocityProperties) {
-		myVelocityProperties = theVelocityProperties;
 	}
 
 	public void write(Collection<ValueSetTm> theValueSets, File theOutputDirectory, String thePackageBase) throws IOException {

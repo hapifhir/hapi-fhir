@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum SearchModifierCode {
          */
         CONTAINS, 
         /**
-         * The search parameter returns resources that do not contain a match .
+         * The search parameter returns resources that do not contain a match.
          */
         NOT, 
         /**
@@ -128,7 +128,7 @@ public enum SearchModifierCode {
             case MISSING: return "The search parameter returns resources that have a value or not.";
             case EXACT: return "The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents).";
             case CONTAINS: return "The search parameter returns resources that include the supplied parameter value anywhere within the field being searched.";
-            case NOT: return "The search parameter returns resources that do not contain a match .";
+            case NOT: return "The search parameter returns resources that do not contain a match.";
             case TEXT: return "The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text.";
             case IN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set.";
             case NOTIN: return "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.";

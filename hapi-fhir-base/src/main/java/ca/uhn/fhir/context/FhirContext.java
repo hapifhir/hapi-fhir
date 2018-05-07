@@ -1,18 +1,19 @@
 package ca.uhn.fhir.context;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,28 +28,19 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IFhirVersion;
-import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.*;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.VersionUtil;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.util.*;
 import ca.uhn.fhir.validation.FhirValidator;
 
 /**
@@ -81,8 +73,8 @@ public class FhirContext {
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
 	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
-	private boolean myInitialized;
-	private boolean myInitializing;
+	private volatile boolean myInitialized;
+	private volatile boolean myInitializing = false;
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
@@ -95,22 +87,23 @@ public class FhirContext {
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IContextValidationSupport<?, ?, ?, ?, ?, ?> myValidationSupport;
+
 	private final IFhirVersion myVersion;
-	
+
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext() {
 		this(EMPTY_LIST);
 	}
-	
+
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Class<? extends IBaseResource> theResourceType) {
@@ -119,7 +112,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Class<?>... theResourceTypes) {
@@ -128,7 +121,7 @@ public class FhirContext {
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
-	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}
+	 *             of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}
 	 */
 	@Deprecated
 	public FhirContext(Collection<Class<? extends IBaseResource>> theResourceTypes) {
@@ -137,7 +130,7 @@ public class FhirContext {
 
 	/**
 	 * In most cases it is recommended that you use one of the static initializer methods instead
-	 * of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()}, but
+	 * of this method, e.g. {@link #forDstu2()} or {@link #forDstu3()} or {@link #forR4()}, but
 	 * this method can also be used if you wish to supply the version programmatically.
 	 */
 	public FhirContext(FhirVersionEnum theVersion) {
@@ -152,26 +145,29 @@ public class FhirContext {
 				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
 			}
 			myVersion = theVersion.getVersionImplementation();
-		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
-			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
+		} else if (FhirVersionEnum.DSTU2_1.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU2_1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU3.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU3.getVersionImplementation();
+		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.R4.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
 
 		if (theVersion == null) {
-			ourLog.info("Creating new FhirContext with auto-detected version [{}]. It is recommended to explicitly select a version for future compatibility by invoking FhirContext.forDstuX()", myVersion.getVersion().name());
+			ourLog.info("Creating new FhirContext with auto-detected version [{}]. It is recommended to explicitly select a version for future compatibility by invoking FhirContext.forDstuX()",
+					myVersion.getVersion().name());
 		} else {
 			ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
 		}
-		
+
 		myResourceTypesToScan = theResourceTypes;
-		
+
 		/*
 		 * Check if we're running in Android mode and configure the context appropriately if so
 		 */
@@ -187,8 +183,7 @@ public class FhirContext {
 		} catch (ClassNotFoundException e) {
 			ourLog.trace("Android mode not detected");
 		}
-		
-		
+
 	}
 
 	private String createUnknownResourceNameError(String theResourceName, FhirVersionEnum theVersion) {
@@ -267,7 +262,7 @@ public class FhirContext {
 		validateInitialized();
 		return Collections.unmodifiableCollection(myClassToElementDefinition.values());
 	}
-	
+
 	/**
 	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with
 	 * caution
@@ -330,11 +325,11 @@ public class FhirContext {
 
 		Map<String, Class<? extends IBaseResource>> nameToType = myVersionToNameToResourceType.get(theVersion);
 		if (nameToType == null) {
-			nameToType = new HashMap<String, Class<? extends IBaseResource>>();
-			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
+			nameToType = new HashMap<>();
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = new HashMap<>();
 			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion, existing);
 
-			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>>();
+			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<>();
 			newVersionToNameToResourceType.putAll(myVersionToNameToResourceType);
 			newVersionToNameToResourceType.put(theVersion, nameToType);
 			myVersionToNameToResourceType = newVersionToNameToResourceType;
@@ -385,6 +380,20 @@ public class FhirContext {
 		return retVal;
 	}
 
+	// /**
+	// * Return an unmodifiable collection containing all known resource definitions
+	// */
+	// public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
+	//
+	// Set<Class<? extends IBase>> datatypes = Collections.emptySet();
+	// Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
+	// HashMap<String, Class<? extends IBaseResource>> types = new HashMap<String, Class<? extends IBaseResource>>();
+	// ModelScanner.scanVersionPropertyFile(datatypes, types, myVersion.getVersion(), existing);
+	// for (int next : types.)
+	//
+	// return Collections.unmodifiableCollection(myIdToResourceDefinition.values());
+	// }
+
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
@@ -393,20 +402,6 @@ public class FhirContext {
 		validateInitialized();
 		return myIdToResourceDefinition.get(theId);
 	}
-
-//	/**
-//	 * Return an unmodifiable collection containing all known resource definitions
-//	 */
-//	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
-//		
-//		Set<Class<? extends IBase>> datatypes = Collections.emptySet();
-//		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> existing = Collections.emptyMap();
-//		HashMap<String, Class<? extends IBaseResource>> types = new HashMap<String, Class<? extends IBaseResource>>();
-//		ModelScanner.scanVersionPropertyFile(datatypes, types, myVersion.getVersion(), existing);
-//		for (int next : types.)
-//		
-//		return Collections.unmodifiableCollection(myIdToResourceDefinition.values());
-//	}
 
 	/**
 	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
@@ -425,7 +420,11 @@ public class FhirContext {
 	 */
 	public IRestfulClientFactory getRestfulClientFactory() {
 		if (myRestfulClientFactory == null) {
-			myRestfulClientFactory = new ApacheRestfulClientFactory(this);
+			try {
+				myRestfulClientFactory = (IRestfulClientFactory) ReflectionUtil.newInstance(Class.forName("ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory"), FhirContext.class, this);
+			} catch (ClassNotFoundException e) {
+				throw new ConfigurationException("hapi-fhir-client does not appear to be on the classpath");
+			}
 		}
 		return myRestfulClientFactory;
 	}
@@ -439,6 +438,7 @@ public class FhirContext {
 	 * Returns the validation support module configured for this context, creating a default
 	 * implementation if no module has been passed in via the {@link #setValidationSupport(IContextValidationSupport)}
 	 * method
+	 * 
 	 * @see #setValidationSupport(IContextValidationSupport)
 	 */
 	public IContextValidationSupport<?, ?, ?, ?, ?, ?> getValidationSupport() {
@@ -464,10 +464,6 @@ public class FhirContext {
 		return !myDefaultTypeForProfile.isEmpty();
 	}
 
-	/**
-	 * This method should be considered experimental and will likely change in future releases
-	 * of HAPI. Use with caution!
-	 */
 	public IVersionSpecificBundleFactory newBundleFactory() {
 		return myVersion.newBundleFactory(this);
 	}
@@ -475,7 +471,7 @@ public class FhirContext {
 	/**
 	 * Creates a new FluentPath engine which can be used to exvaluate
 	 * path expressions over FHIR resources. Note that this engine will use the
-	 * {@link IContextValidationSupport context validation support} module which is 
+	 * {@link IContextValidationSupport context validation support} module which is
 	 * configured on the context at the time this method is called.
 	 * <p>
 	 * In other words, call {@link #setValidationSupport(IContextValidationSupport)} before
@@ -524,12 +520,12 @@ public class FhirContext {
 	 * </p>
 	 * 
 	 * @param theClientType
-	 *           The client type, which is an interface type to be instantiated
+	 *          The client type, which is an interface type to be instantiated
 	 * @param theServerBase
-	 *           The URL of the base for the restful FHIR server to connect to
+	 *          The URL of the base for the restful FHIR server to connect to
 	 * @return A newly created client
 	 * @throws ConfigurationException
-	 *            If the interface type is not an interface
+	 *           If the interface type is not an interface
 	 */
 	public <T extends IRestfulClient> T newRestfulClient(Class<T> theClientType, String theServerBase) {
 		return getRestfulClientFactory().newClient(theClientType, theServerBase);
@@ -546,7 +542,7 @@ public class FhirContext {
 	 * </p>
 	 * 
 	 * @param theServerBase
-	 *           The URL of the base for the restful FHIR server to connect to
+	 *          The URL of the base for the restful FHIR server to connect to
 	 */
 	public IGenericClient newRestfulGenericClient(String theServerBase) {
 		return getRestfulClientFactory().newGenericClient(theServerBase);
@@ -598,7 +594,7 @@ public class FhirContext {
 	 * </p>
 	 * 
 	 * @param theType
-	 *           The custom type to add (must not be <code>null</code>)
+	 *          The custom type to add (must not be <code>null</code>)
 	 */
 	public void registerCustomType(Class<? extends IBase> theType) {
 		Validate.notNull(theType, "theType must not be null");
@@ -618,7 +614,7 @@ public class FhirContext {
 	 * </p>
 	 * 
 	 * @param theTypes
-	 *           The custom types to add (must not be <code>null</code> or contain null elements in the collection)
+	 *          The custom types to add (must not be <code>null</code> or contain null elements in the collection)
 	 */
 	public void registerCustomTypes(Collection<Class<? extends IBase>> theTypes) {
 		Validate.notNull(theTypes, "theTypes must not be null");
@@ -644,8 +640,6 @@ public class FhirContext {
 	}
 
 	private synchronized Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IElement>> theResourceTypes) {
-		myInitializing = true;
-		
 		List<Class<? extends IBase>> typesToScan = new ArrayList<Class<? extends IBase>>();
 		if (theResourceTypes != null) {
 			typesToScan.addAll(theResourceTypes);
@@ -722,7 +716,7 @@ public class FhirContext {
 	 * </p>
 	 * 
 	 * @param theAddProfileTagWhenEncoding
-	 *           The add profile mode (must not be <code>null</code>)
+	 *          The add profile mode (must not be <code>null</code>)
 	 */
 	public void setAddProfileTagWhenEncoding(AddProfileTagEnum theAddProfileTagWhenEncoding) {
 		Validate.notNull(theAddProfileTagWhenEncoding, "theAddProfileTagWhenEncoding must not be null");
@@ -740,10 +734,10 @@ public class FhirContext {
 	 * </p>
 	 * 
 	 * @param theProfile
-	 *           The profile string, e.g. <code>"http://example.com/some_patient_profile"</code>. Must not be
-	 *           <code>null</code> or empty.
+	 *          The profile string, e.g. <code>"http://example.com/some_patient_profile"</code>. Must not be
+	 *          <code>null</code> or empty.
 	 * @param theClass
-	 *           The resource type, or <code>null</code> to clear any existing type
+	 *          The resource type, or <code>null</code> to clear any existing type
 	 */
 	public void setDefaultTypeForProfile(String theProfile, Class<? extends IBaseResource> theClass) {
 		Validate.notBlank(theProfile, "theProfile must not be null or empty");
@@ -770,7 +764,7 @@ public class FhirContext {
 	 * Sets a parser error handler to use by default on all parsers
 	 * 
 	 * @param theParserErrorHandler
-	 *           The error handler
+	 *          The error handler
 	 */
 	public void setParserErrorHandler(IParserErrorHandler theParserErrorHandler) {
 		Validate.notNull(theParserErrorHandler, "theParserErrorHandler must not be null");
@@ -780,8 +774,9 @@ public class FhirContext {
 	/**
 	 * Sets the parser options object which will be used to supply default
 	 * options to newly created parsers
-	 *  
-	 * @param theParserOptions The parser options object - Must not be <code>null</code>
+	 * 
+	 * @param theParserOptions
+	 *          The parser options object - Must not be <code>null</code>
 	 */
 	public void setParserOptions(ParserOptions theParserOptions) {
 		Validate.notNull(theParserOptions, "theParserOptions must not be null");
@@ -826,12 +821,12 @@ public class FhirContext {
 	/**
 	 * Sets the validation support module to use for this context. The validation support module
 	 * is used to supply underlying infrastructure such as conformance resources (StructureDefinition, ValueSet, etc)
-	 * as well as to provide terminology services to modules such as the validator and FluentPath executor 
+	 * as well as to provide terminology services to modules such as the validator and FluentPath executor
 	 */
 	public void setValidationSupport(IContextValidationSupport<?, ?, ?, ?, ?, ?> theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
-
+	
 	@SuppressWarnings({ "cast" })
 	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theResourceTypes == null) {
@@ -845,16 +840,15 @@ public class FhirContext {
 	}
 
 	private void validateInitialized() {
-		if (!myInitialized && !myInitializing) {
-			scanResourceTypes(toElementList(myResourceTypesToScan));
+		// See #610
+		if (!myInitialized) {
+			synchronized (this) {
+				if (!myInitialized && !myInitializing) {
+					myInitializing = true;
+					scanResourceTypes(toElementList(myResourceTypesToScan));
+				}
+			}
 		}
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1 DSTU1}
-	 */
-	public static FhirContext forDstu1() {
-		return new FhirContext(FhirVersionEnum.DSTU1);
 	}
 
 	/**
@@ -888,6 +882,16 @@ public class FhirContext {
 		return new FhirContext(FhirVersionEnum.DSTU3);
 	}
 
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU3 DSTU3}
+	 * 
+	 * @since 3.0.0
+	 */
+	public static FhirContext forR4() {
+		return new FhirContext(FhirVersionEnum.R4);
+	}
+
+
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		retVal.add(theResourceType);
@@ -906,4 +910,33 @@ public class FhirContext {
 		return retVal;
 	}
 
+	/**
+	 * Returns an unmodifiable set containing all resource names known to this
+	 * context
+	 */
+	public Set<String> getResourceNames() {
+		Set<String> resourceNames= new HashSet<>();
+
+		if (myNameToResourceDefinition.isEmpty()) {
+			Properties props = new Properties();
+			try {
+				props.load(myVersion.getFhirVersionPropertiesFile());
+			} catch (IOException theE) {
+				throw new ConfigurationException("Failed to load version properties file");
+			}
+			Enumeration<?> propNames = props.propertyNames();
+			while (propNames.hasMoreElements()){
+				String next = (String) propNames.nextElement();
+				if (next.startsWith("resource.")) {
+					resourceNames.add(next.substring("resource.".length()).trim());
+				}
+			}
+		}
+
+		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
+			resourceNames.add(next.getName());
+		}
+
+		return Collections.unmodifiableSet(resourceNames);
+	}
 }

@@ -1,0 +1,11 @@
+"LoincNumber","LongCommonName"                                                                                          ,"AnswerListId","AnswerListName"          ,"AnswerListLinkType","ApplicableContext"
+"61438-8"    ,"Each time you ate bread, toast or dinner rolls, how much did you usually eat in the past 30 days [PhenX]","LL1000-0"    ,"PhenX05_13_30D bread amt","NORMATIVE"         ,
+"10061-0"    ,"S' wave amplitude in lead I"                                                                             ,"LL1311-1"    ,"PhenX12_44"              ,"EXAMPLE"           ,
+"10331-7"    ,"Rh [Type] in Blood"                                                                                      ,"LL360-9"     ,"Pos|Neg"                 ,"EXAMPLE"           ,
+"10389-5"    ,"Blood product.other [Type]"                                                                              ,"LL2413-4"    ,"Othr bld prod"           ,"EXAMPLE"           ,
+"10390-3"    ,"Blood product special preparation [Type]"                                                                ,"LL2422-5"    ,"Blood prod treatment"    ,"EXAMPLE"           ,
+"10393-7"    ,"Factor IX given [Type]"                                                                                  ,"LL2420-9"    ,"Human/Recomb"            ,"EXAMPLE"           ,
+"10395-2"    ,"Factor VIII given [Type]"                                                                                ,"LL2420-9"    ,"Human/Recomb"            ,"EXAMPLE"           ,
+"10401-8"    ,"Immune serum globulin given [Type]"                                                                      ,"LL2421-7"    ,"IM/IV"                   ,"EXAMPLE"           ,
+"10410-9"    ,"Plasma given [Type]"                                                                                     ,"LL2417-5"    ,"Plasma type"             ,"EXAMPLE"           ,
+"10568-4"    ,"Clarity of Semen"                                                                                        ,"LL2427-4"    ,"Clear/Opales/Milky"      ,"EXAMPLE"           ,

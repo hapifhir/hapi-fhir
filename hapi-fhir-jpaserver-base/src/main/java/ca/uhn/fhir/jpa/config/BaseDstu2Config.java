@@ -1,10 +1,29 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.validation.IValidatorModule;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.instance.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +38,6 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
-
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.SearchParamExtractorDstu2;
-import ca.uhn.fhir.jpa.dao.SearchParamRegistryDstu2;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 
 @Configuration
 @EnableTransactionManagement
@@ -67,6 +68,15 @@ public class BaseDstu2Config extends BaseConfig {
 			ourFhirContextDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
 		}
 		return ourFhirContextDstu2Hl7Org;
+	}
+
+	@Bean(name = "myInstanceValidatorDstu2")
+	@Lazy
+	public IValidatorModule instanceValidatorDstu2() {
+		FhirInstanceValidator retVal = new FhirInstanceValidator();
+		retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		retVal.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2()));
+		return retVal;
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
@@ -102,6 +112,13 @@ public class BaseDstu2Config extends BaseConfig {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
 		retVal.setDao(systemDaoDstu2());
 		retVal.setContext(fhirContextDstu2());
+		return retVal;
+	}
+
+	@Bean(name = "myResourceCountsCache")
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu2().getResourceCounts());
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 

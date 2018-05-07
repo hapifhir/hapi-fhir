@@ -1,0 +1,890 @@
+{
+	"resourceType": "StructureDefinition",
+	"id": "fiphr-medicationcontext",
+	"meta": {
+		"lastUpdated": "2017-09-01T05:15:12.474+00:00"
+	},
+	"url": "http://phr.kanta.fi/StructureDefinition/fiphr-medicationcontext",
+	"version": "0.05",
+	"name": "Finnish PHR medicationcontext extension",
+	"title": "Finnish PHR medicationcontext extension",
+	"status": "draft",
+	"experimental": true,
+	"date": "2017-08-31T06:09:42.264+00:00",
+	"publisher": "Kela",
+	"description": "Finnish PHR Medication Context Extension to express observation timing related to medication.",
+	"fhirVersion": "3.0.1",
+	"kind": "complex-type",
+	"abstract": false,
+	"contextType": "resource",
+	"context": [
+		"Observation"
+	],
+	"type": "Extension",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+	"derivation": "constraint",
+	"snapshot": {
+		"element": [
+			{
+				"id": "Extension",
+				"path": "Extension",
+				"short": "Finnish PHR medicationcontext extension",
+				"definition": "Finnish PHR Medication Context Extension to express observation timing related to medication.",
+				"min": "0",
+				"max": "*",
+				"base": {
+					"path": "Element",
+					"min": "0",
+					"max": "*"
+				},
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.id",
+				"path": "Extension.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.extension",
+				"path": "Extension.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": "0",
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": "0",
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.url",
+				"path": "Extension.url",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "identifies the meaning of the extension",
+				"definition": "Source of the definition for the extension code - a logical name or a URL.",
+				"comment": "The definition may point directly to a computable or human-readable definition of the extensibility codes, or it may be a logical URI as declared in some other specification. The definition SHALL be a URI for the Structure Definition defining the extension.",
+				"min": "1",
+				"max": "1",
+				"base": {
+					"path": "Extension.url",
+					"min": "1",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "uri"
+					}
+				],
+				"fixedUri": "http://phr.kanta.fi/StructureDefinition/fiphr-medicationcontext",
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept",
+				"path": "Extension.valueCodeableConcept",
+				"sliceName": "valueCodeableConcept",
+				"short": "Value of extension",
+				"definition": "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).",
+				"comment": "A stream of bytes, base64 encoded",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Extension.value[x]",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"binding": {
+					"strength": "required",
+					"valueSetUri": "http://phr.kanta.fi/ValueSet/fiphr-vs-medicationcontext"
+				},
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.id",
+				"path": "Extension.valueCodeableConcept.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.extension",
+				"path": "Extension.valueCodeableConcept.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": "0",
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": "0",
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.coding",
+				"path": "Extension.valueCodeableConcept.coding",
+				"short": "Code defined by a terminology system",
+				"definition": "A reference to a code defined by a terminology system.",
+				"comment": "Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the HL7 v3 Core Principles for more information.  Ordering of codings is undefined and SHALL NOT be used to infer meaning. Generally, at most only one of the coding values will be labeled as UserSelected = true.",
+				"requirements": "Allows for translations and alternate encodings within a code system.  Also supports communication of the same instance to systems requiring different encodings.",
+				"min": "0",
+				"max": "*",
+				"base": {
+					"path": "CodeableConcept.coding",
+					"min": "0",
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Coding"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "CE/CNE/CWE subset one of the sets of component 1-3 or 4-6"
+					},
+					{
+						"identity": "rim",
+						"map": "CV"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:Coding rdfs:subClassOf dt:CDCoding"
+					},
+					{
+						"identity": "v2",
+						"map": "C*E.1-8, C*E.10-22"
+					},
+					{
+						"identity": "rim",
+						"map": "union(., ./translation)"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:CodeableConcept.coding rdfs:subPropertyOf dt:CD.coding"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.coding.id",
+				"path": "Extension.valueCodeableConcept.coding.id",
+				"representation": [
+					"xmlAttr"
+				],
+				"short": "xml:id (or equivalent in JSON)",
+				"definition": "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Element.id",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.coding.extension",
+				"path": "Extension.valueCodeableConcept.coding.extension",
+				"slicing": {
+					"discriminator": [
+						{
+							"type": "value",
+							"path": "url"
+						}
+					],
+					"description": "Extensions are always sliced by (at least) url",
+					"rules": "open"
+				},
+				"short": "Additional Content defined by implementations",
+				"definition": "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+				"comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+				"alias": [
+					"extensions",
+					"user content"
+				],
+				"min": "0",
+				"max": "*",
+				"base": {
+					"path": "Element.extension",
+					"min": "0",
+					"max": "*"
+				},
+				"type": [
+					{
+						"code": "Extension"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					},
+					{
+						"key": "ext-1",
+						"severity": "error",
+						"human": "Must have either extensions or value[x], not both",
+						"expression": "extension.exists() != value.exists()",
+						"xpath": "exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])"
+					}
+				],
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "rim",
+						"map": "N/A"
+					}
+				]
+			},
+			{
+				"id": "valueCodeableConcept:valueCodeableConcept.coding.system",
+				"path": "Extension.valueCodeableConcept.coding.system",
+				"short": "Identity of the terminology system",
+				"definition": "The identification of the code system that defines the meaning of the symbol in the code.",
+				"comment": "The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously.",
+				"requirements": "Need to be unambiguous about the source of the definition of the symbol.",
+				"min": "1",
+				"max": "1",
+				"base": {
+					"path": "Coding.system",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "uri"
+					}
+				],
+				"fixedUri": "http://phr.kanta.fi/fiphr-cs-medicationcontext",
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "C*E.3"
+					},
+					{
+						"identity": "rim",
+						"map": "./codeSystem"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:Coding.system rdfs:subPropertyOf dt:CDCoding.codeSystem"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.coding.version",
+				"path": "Extension.valueCodeableConcept.coding.version",
+				"short": "Version of the system - if relevant",
+				"definition": "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
+				"comment": "Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date.",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Coding.version",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "C*E.7"
+					},
+					{
+						"identity": "rim",
+						"map": "./codeSystemVersion"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:Coding.version rdfs:subPropertyOf dt:CDCoding.codeSystemVersion"
+					}
+				]
+			},
+			{
+				"id": "valueCodeableConcept:valueCodeableConcept.coding.code",
+				"path": "Extension.valueCodeableConcept.coding.code",
+				"short": "Symbol in syntax defined by the system",
+				"definition": "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"requirements": "Need to refer to a particular code in the system.",
+				"min": "1",
+				"max": "1",
+				"base": {
+					"path": "Coding.code",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "code"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "C*E.1"
+					},
+					{
+						"identity": "rim",
+						"map": "./code"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:Coding.code rdfs:subPropertyOf dt:CDCoding.code"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.coding.display",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable",
+						"valueBoolean": true
+					}
+				],
+				"path": "Extension.valueCodeableConcept.coding.display",
+				"short": "Representation defined by the system",
+				"definition": "A representation of the meaning of the code in the system, following the rules of the system.",
+				"comment": "Note that FHIR strings may not exceed 1MB in size",
+				"requirements": "Need to be able to carry a human-readable meaning of the code for readers that do not know  the system.",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Coding.display",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "C*E.2 - but note this is not well followed"
+					},
+					{
+						"identity": "rim",
+						"map": "CV.displayName"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:Coding.display rdfs:subPropertyOf dt:CDCoding.displayName"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.coding.userSelected",
+				"path": "Extension.valueCodeableConcept.coding.userSelected",
+				"short": "If this coding was chosen directly by the user",
+				"definition": "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).",
+				"comment": "Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly 'directly chosen' implies, and trading partner agreement may be needed to clarify the use of this element and its consequences more completely.",
+				"requirements": "This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing.",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "Coding.userSelected",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "boolean"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "Sometimes implied by being first"
+					},
+					{
+						"identity": "rim",
+						"map": "CD.codingRationale"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:Coding.userSelected fhir:mapsTo dt:CDCoding.codingRationale. fhir:Coding.userSelected fhir:hasMap fhir:Coding.userSelected.map. fhir:Coding.userSelected.map a fhir:Map;   fhir:target dt:CDCoding.codingRationale. fhir:Coding.userSelectedtrue a [     fhir:sourcefhir:target dt:CDCoding.codingRationaleO   ]"
+					}
+				]
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept.text",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable",
+						"valueBoolean": true
+					}
+				],
+				"path": "Extension.valueCodeableConcept.text",
+				"short": "Plain text representation of the concept",
+				"definition": "A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+				"comment": "Very often the text is the same as a displayName of one of the codings.",
+				"requirements": "The codes from the terminologies do not always capture the correct meaning with all the nuances of the human using them, or sometimes there is no appropriate code at all. In these cases, the text is used to capture the full meaning of the source.",
+				"min": "0",
+				"max": "1",
+				"base": {
+					"path": "CodeableConcept.text",
+					"min": "0",
+					"max": "1"
+				},
+				"type": [
+					{
+						"code": "string"
+					}
+				],
+				"condition": [
+					"ele-1"
+				],
+				"constraint": [
+					{
+						"key": "ele-1",
+						"severity": "error",
+						"human": "All FHIR elements must have a @value or children",
+						"expression": "hasValue() | (children().count() > id.count())",
+						"xpath": "@value|f:*|h:div"
+					}
+				],
+				"isSummary": true,
+				"mapping": [
+					{
+						"identity": "rim",
+						"map": "n/a"
+					},
+					{
+						"identity": "v2",
+						"map": "C*E.9. But note many systems use C*E.2 for this"
+					},
+					{
+						"identity": "rim",
+						"map": "./originalText[mediaType/code=/data"
+					},
+					{
+						"identity": "orim",
+						"map": "fhir:CodeableConcept.text rdfs:subPropertyOf dt:CD.originalText"
+					}
+				]
+			}
+		]
+	},
+	"differential": {
+		"element": [
+			{
+				"id": "Extension",
+				"path": "Extension",
+				"short": "Finnish PHR medicationcontext extension",
+				"definition": "Finnish PHR Medication Context Extension to express observation timing related to medication."
+			},
+			{
+				"id": "Extension.url",
+				"path": "Extension.url",
+				"fixedUri": "http://phr.kanta.fi/StructureDefinition/fiphr-medicationcontext"
+			},
+			{
+				"id": "Extension.value[x]:valueCodeableConcept",
+				"path": "Extension.valueCodeableConcept",
+				"sliceName": "valueCodeableConcept",
+				"type": [
+					{
+						"code": "CodeableConcept"
+					}
+				],
+				"binding": {
+					"strength": "required",
+					"valueSetUri": "http://phr.kanta.fi/ValueSet/fiphr-vs-medicationcontext"
+				}
+			},
+			{
+				"id": "valueCodeableConcept:valueCodeableConcept.coding.system",
+				"path": "Extension.valueCodeableConcept.coding.system",
+				"min": "1",
+				"fixedUri": "http://phr.kanta.fi/fiphr-cs-medicationcontext"
+			},
+			{
+				"id": "valueCodeableConcept:valueCodeableConcept.coding.code",
+				"path": "Extension.valueCodeableConcept.coding.code",
+				"min": "1"
+			}
+		]
+	}
+}

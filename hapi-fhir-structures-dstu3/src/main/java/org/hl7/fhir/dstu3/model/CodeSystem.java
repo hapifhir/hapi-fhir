@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -47,24 +47,24 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A code system resource specifies a set of codes drawn from one or more code systems.
  */
 @ResourceDef(name="CodeSystem", profile="http://hl7.org/fhir/Profile/CodeSystem")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "jurisdiction", "purpose", "copyright", "caseSensitive", "valueSet", "hierarchyMeaning", "compositional", "versionNeeded", "content", "count", "filter", "property", "concept"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "caseSensitive", "valueSet", "hierarchyMeaning", "compositional", "versionNeeded", "content", "count", "filter", "property", "concept"})
 public class CodeSystem extends MetadataResource {
 
     public enum CodeSystemHierarchyMeaning {
         /**
-         * No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the heirarchy have different meanings)
+         * No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings)
          */
         GROUPEDBY, 
         /**
-         * A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for it's child concepts
+         * A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts
          */
         ISA, 
         /**
-         * Child elements list the individual parts of a composite whole (e.g. bodysite)
+         * Child elements list the individual parts of a composite whole (e.g. body site)
          */
         PARTOF, 
         /**
-         * Child concepts in the hierarchy may have only one parent and there is a presumption that the code system is a "closed world" meaning all things must be in the hierarchy. This results in concepts such as "not otherwise clasified."
+         * Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a "closed world" meaning all things must be in the hierarchy. This results in concepts such as "not otherwise classified."
          */
         CLASSIFIEDWITH, 
         /**
@@ -107,10 +107,10 @@ public class CodeSystem extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case GROUPEDBY: return "No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the heirarchy have different meanings)";
-            case ISA: return "A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for it's child concepts";
-            case PARTOF: return "Child elements list the individual parts of a composite whole (e.g. bodysite)";
-            case CLASSIFIEDWITH: return "Child concepts in the hierarchy may have only one parent and there is a presumption that the code system is a \"closed world\" meaning all things must be in the hierarchy. This results in concepts such as \"not otherwise clasified.\"";
+            case GROUPEDBY: return "No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings)";
+            case ISA: return "A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts";
+            case PARTOF: return "Child elements list the individual parts of a composite whole (e.g. body site)";
+            case CLASSIFIEDWITH: return "Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a \"closed world\" meaning all things must be in the hierarchy. This results in concepts such as \"not otherwise classified.\"";
             default: return "?";
           }
         }
@@ -141,8 +141,10 @@ public class CodeSystem extends MetadataResource {
         throw new IllegalArgumentException("Unknown CodeSystemHierarchyMeaning code '"+codeString+"'");
         }
         public Enumeration<CodeSystemHierarchyMeaning> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<CodeSystemHierarchyMeaning>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -180,7 +182,7 @@ public class CodeSystem extends MetadataResource {
         /**
          * A few representative concepts are included in the code system resource
          */
-        EXAMPLAR, 
+        EXAMPLE, 
         /**
          * A subset of the code system concepts are included in the code system resource
          */
@@ -198,8 +200,8 @@ public class CodeSystem extends MetadataResource {
                 return null;
         if ("not-present".equals(codeString))
           return NOTPRESENT;
-        if ("examplar".equals(codeString))
-          return EXAMPLAR;
+        if ("example".equals(codeString))
+          return EXAMPLE;
         if ("fragment".equals(codeString))
           return FRAGMENT;
         if ("complete".equals(codeString))
@@ -212,7 +214,7 @@ public class CodeSystem extends MetadataResource {
         public String toCode() {
           switch (this) {
             case NOTPRESENT: return "not-present";
-            case EXAMPLAR: return "examplar";
+            case EXAMPLE: return "example";
             case FRAGMENT: return "fragment";
             case COMPLETE: return "complete";
             default: return "?";
@@ -221,7 +223,7 @@ public class CodeSystem extends MetadataResource {
         public String getSystem() {
           switch (this) {
             case NOTPRESENT: return "http://hl7.org/fhir/codesystem-content-mode";
-            case EXAMPLAR: return "http://hl7.org/fhir/codesystem-content-mode";
+            case EXAMPLE: return "http://hl7.org/fhir/codesystem-content-mode";
             case FRAGMENT: return "http://hl7.org/fhir/codesystem-content-mode";
             case COMPLETE: return "http://hl7.org/fhir/codesystem-content-mode";
             default: return "?";
@@ -230,7 +232,7 @@ public class CodeSystem extends MetadataResource {
         public String getDefinition() {
           switch (this) {
             case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource";
-            case EXAMPLAR: return "A few representative concepts are included in the code system resource";
+            case EXAMPLE: return "A few representative concepts are included in the code system resource";
             case FRAGMENT: return "A subset of the code system concepts are included in the code system resource";
             case COMPLETE: return "All the concepts defined by the code system are included in the code system resource";
             default: return "?";
@@ -239,7 +241,7 @@ public class CodeSystem extends MetadataResource {
         public String getDisplay() {
           switch (this) {
             case NOTPRESENT: return "Not Present";
-            case EXAMPLAR: return "Examplar";
+            case EXAMPLE: return "Example";
             case FRAGMENT: return "Fragment";
             case COMPLETE: return "Complete";
             default: return "?";
@@ -254,8 +256,8 @@ public class CodeSystem extends MetadataResource {
                 return null;
         if ("not-present".equals(codeString))
           return CodeSystemContentMode.NOTPRESENT;
-        if ("examplar".equals(codeString))
-          return CodeSystemContentMode.EXAMPLAR;
+        if ("example".equals(codeString))
+          return CodeSystemContentMode.EXAMPLE;
         if ("fragment".equals(codeString))
           return CodeSystemContentMode.FRAGMENT;
         if ("complete".equals(codeString))
@@ -263,15 +265,17 @@ public class CodeSystem extends MetadataResource {
         throw new IllegalArgumentException("Unknown CodeSystemContentMode code '"+codeString+"'");
         }
         public Enumeration<CodeSystemContentMode> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<CodeSystemContentMode>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
         if ("not-present".equals(codeString))
           return new Enumeration<CodeSystemContentMode>(this, CodeSystemContentMode.NOTPRESENT);
-        if ("examplar".equals(codeString))
-          return new Enumeration<CodeSystemContentMode>(this, CodeSystemContentMode.EXAMPLAR);
+        if ("example".equals(codeString))
+          return new Enumeration<CodeSystemContentMode>(this, CodeSystemContentMode.EXAMPLE);
         if ("fragment".equals(codeString))
           return new Enumeration<CodeSystemContentMode>(this, CodeSystemContentMode.FRAGMENT);
         if ("complete".equals(codeString))
@@ -281,8 +285,8 @@ public class CodeSystem extends MetadataResource {
     public String toCode(CodeSystemContentMode code) {
       if (code == CodeSystemContentMode.NOTPRESENT)
         return "not-present";
-      if (code == CodeSystemContentMode.EXAMPLAR)
-        return "examplar";
+      if (code == CodeSystemContentMode.EXAMPLE)
+        return "example";
       if (code == CodeSystemContentMode.FRAGMENT)
         return "fragment";
       if (code == CodeSystemContentMode.COMPLETE)
@@ -445,8 +449,10 @@ public class CodeSystem extends MetadataResource {
         throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
         }
         public Enumeration<FilterOperator> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<FilterOperator>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -611,8 +617,10 @@ public class CodeSystem extends MetadataResource {
         throw new IllegalArgumentException("Unknown PropertyType code '"+codeString+"'");
         }
         public Enumeration<PropertyType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<PropertyType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -920,47 +928,62 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -500553564: // operator
-          this.getOperator().add(new FilterOperatorEnumFactory().fromType(value)); // Enumeration<FilterOperator>
-          break;
+          value = new FilterOperatorEnumFactory().fromType(castToCode(value));
+          this.getOperator().add((Enumeration) value); // Enumeration<FilterOperator>
+          return value;
         case 111972721: // value
           this.value = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("operator"))
-          this.getOperator().add(new FilterOperatorEnumFactory().fromType(value));
-        else if (name.equals("value"))
+        } else if (name.equals("operator")) {
+          value = new FilterOperatorEnumFactory().fromType(castToCode(value));
+          this.getOperator().add((Enumeration) value);
+        } else if (name.equals("value")) {
           this.value = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -500553564: throw new FHIRException("Cannot make property operator as it is not a complex type"); // Enumeration<FilterOperator>
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        case 3059181:  return getCodeElement();
+        case -1724546052:  return getDescriptionElement();
+        case -500553564:  return addOperatorElement();
+        case 111972721:  return getValueElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -500553564: /*operator*/ return new String[] {"code"};
+        case 111972721: /*value*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1048,10 +1071,10 @@ public class CodeSystem extends MetadataResource {
         protected UriType uri;
 
         /**
-         * A description of the property- why it is defined, and how it's value might be used.
+         * A description of the property- why it is defined, and how its value might be used.
          */
         @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Why the property is defined, and/or what it conveys", formalDefinition="A description of the property- why it is defined, and how it's value might be used." )
+        @Description(shortDefinition="Why the property is defined, and/or what it conveys", formalDefinition="A description of the property- why it is defined, and how its value might be used." )
         protected StringType description;
 
         /**
@@ -1175,7 +1198,7 @@ public class CodeSystem extends MetadataResource {
         }
 
         /**
-         * @return {@link #description} (A description of the property- why it is defined, and how it's value might be used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @return {@link #description} (A description of the property- why it is defined, and how its value might be used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public StringType getDescriptionElement() { 
           if (this.description == null)
@@ -1195,7 +1218,7 @@ public class CodeSystem extends MetadataResource {
         }
 
         /**
-         * @param value {@link #description} (A description of the property- why it is defined, and how it's value might be used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @param value {@link #description} (A description of the property- why it is defined, and how its value might be used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public PropertyComponent setDescriptionElement(StringType value) { 
           this.description = value;
@@ -1203,14 +1226,14 @@ public class CodeSystem extends MetadataResource {
         }
 
         /**
-         * @return A description of the property- why it is defined, and how it's value might be used.
+         * @return A description of the property- why it is defined, and how its value might be used.
          */
         public String getDescription() { 
           return this.description == null ? null : this.description.getValue();
         }
 
         /**
-         * @param value A description of the property- why it is defined, and how it's value might be used.
+         * @param value A description of the property- why it is defined, and how its value might be used.
          */
         public PropertyComponent setDescription(String value) { 
           if (Utilities.noString(value))
@@ -1272,7 +1295,7 @@ public class CodeSystem extends MetadataResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("uri", "uri", "Reference to the formal meaning of the property. One possible source of meaning is the [Concept Properties](codesystem-concept-properties.html) code system.", 0, java.lang.Integer.MAX_VALUE, uri));
-          childrenList.add(new Property("description", "string", "A description of the property- why it is defined, and how it's value might be used.", 0, java.lang.Integer.MAX_VALUE, description));
+          childrenList.add(new Property("description", "string", "A description of the property- why it is defined, and how its value might be used.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("type", "code", "The type of the property value. Properties of type \"code\" contain a code defined by the code system (e.g. a reference to anotherr defined concept).", 0, java.lang.Integer.MAX_VALUE, type));
         }
 
@@ -1289,47 +1312,62 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 116076: // uri
           this.uri = castToUri(value); // UriType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
-          this.type = new PropertyTypeEnumFactory().fromType(value); // Enumeration<PropertyType>
-          break;
-        default: super.setProperty(hash, name, value);
+          value = new PropertyTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<PropertyType>
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("uri"))
+        } else if (name.equals("uri")) {
           this.uri = castToUri(value); // UriType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("type"))
-          this.type = new PropertyTypeEnumFactory().fromType(value); // Enumeration<PropertyType>
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("type")) {
+          value = new PropertyTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<PropertyType>
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case 116076: throw new FHIRException("Cannot make property uri as it is not a complex type"); // UriType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // Enumeration<PropertyType>
+        case 3059181:  return getCodeElement();
+        case 116076:  return getUriElement();
+        case -1724546052:  return getDescriptionElement();
+        case 3575610:  return getTypeElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 116076: /*uri*/ return new String[] {"uri"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1784,59 +1822,74 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 1671764162: // display
           this.display = castToString(value); // StringType
-          break;
+          return value;
         case -1014418093: // definition
           this.definition = castToString(value); // StringType
-          break;
+          return value;
         case -900931593: // designation
           this.getDesignation().add((ConceptDefinitionDesignationComponent) value); // ConceptDefinitionDesignationComponent
-          break;
+          return value;
         case -993141291: // property
           this.getProperty().add((ConceptPropertyComponent) value); // ConceptPropertyComponent
-          break;
+          return value;
         case 951024232: // concept
           this.getConcept().add((ConceptDefinitionComponent) value); // ConceptDefinitionComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("display"))
+        } else if (name.equals("display")) {
           this.display = castToString(value); // StringType
-        else if (name.equals("definition"))
+        } else if (name.equals("definition")) {
           this.definition = castToString(value); // StringType
-        else if (name.equals("designation"))
+        } else if (name.equals("designation")) {
           this.getDesignation().add((ConceptDefinitionDesignationComponent) value);
-        else if (name.equals("property"))
+        } else if (name.equals("property")) {
           this.getProperty().add((ConceptPropertyComponent) value);
-        else if (name.equals("concept"))
+        } else if (name.equals("concept")) {
           this.getConcept().add((ConceptDefinitionComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case 1671764162: throw new FHIRException("Cannot make property display as it is not a complex type"); // StringType
-        case -1014418093: throw new FHIRException("Cannot make property definition as it is not a complex type"); // StringType
-        case -900931593:  return addDesignation(); // ConceptDefinitionDesignationComponent
-        case -993141291:  return addProperty(); // ConceptPropertyComponent
-        case 951024232:  return addConcept(); // ConceptDefinitionComponent
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
+        case -1014418093:  return getDefinitionElement();
+        case -900931593:  return addDesignation(); 
+        case -993141291:  return addProperty(); 
+        case 951024232:  return addConcept(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case -1014418093: /*definition*/ return new String[] {"string"};
+        case -900931593: /*designation*/ return new String[] {};
+        case -993141291: /*property*/ return new String[] {};
+        case 951024232: /*concept*/ return new String[] {"@CodeSystem.concept"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2103,41 +2156,53 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1613589672: // language
           this.language = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
           this.use = castToCoding(value); // Coding
-          break;
+          return value;
         case 111972721: // value
           this.value = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("language"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("language")) {
           this.language = castToCode(value); // CodeType
-        else if (name.equals("use"))
+        } else if (name.equals("use")) {
           this.use = castToCoding(value); // Coding
-        else if (name.equals("value"))
+        } else if (name.equals("value")) {
           this.value = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // CodeType
-        case 116103:  return getUse(); // Coding
-        case 111972721: throw new FHIRException("Cannot make property value as it is not a complex type"); // StringType
+        case -1613589672:  return getLanguageElement();
+        case 116103:  return getUse(); 
+        case 111972721:  return getValueElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1613589672: /*language*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"Coding"};
+        case 111972721: /*value*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2392,35 +2457,47 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 111972721: // value
           this.value = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("value[x]"))
+        } else if (name.equals("value[x]")) {
           this.value = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case -1410166417:  return getValue(); // Type
+        case 3059181:  return getCodeElement();
+        case -1410166417:  return getValue(); 
+        case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 111972721: /*value*/ return new String[] {"code", "Coding", "string", "integer", "boolean", "dateTime"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2505,10 +2582,10 @@ public class CodeSystem extends MetadataResource {
     protected Identifier identifier;
 
     /**
-     * Explains why this code system is needed and why it has been designed as it has.
+     * Explaination of why this code system is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this code system is defined", formalDefinition="Explains why this code system is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this code system is defined", formalDefinition="Explaination of why this code system is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -2533,10 +2610,10 @@ public class CodeSystem extends MetadataResource {
     protected UriType valueSet;
 
     /**
-     * The meaning of the heirarchy of concepts.
+     * The meaning of the hierarchy of concepts.
      */
     @Child(name = "hierarchyMeaning", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="grouped-by | is-a | part-of | classified-with", formalDefinition="The meaning of the heirarchy of concepts." )
+    @Description(shortDefinition="grouped-by | is-a | part-of | classified-with", formalDefinition="The meaning of the hierarchy of concepts." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/codesystem-hierarchy-meaning")
     protected Enumeration<CodeSystemHierarchyMeaning> hierarchyMeaning;
 
@@ -2558,7 +2635,7 @@ public class CodeSystem extends MetadataResource {
      * How much of the content of the code system - the concepts and codes it defines - are represented in this resource.
      */
     @Child(name = "content", type = {CodeType.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="not-present | examplar | fragment | complete", formalDefinition="How much of the content of the code system - the concepts and codes it defines - are represented in this resource." )
+    @Description(shortDefinition="not-present | example | fragment | complete", formalDefinition="How much of the content of the code system - the concepts and codes it defines - are represented in this resource." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/codesystem-content-mode")
     protected Enumeration<CodeSystemContentMode> content;
 
@@ -2609,7 +2686,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2629,7 +2706,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public CodeSystem setUrlElement(UriType value) { 
       this.url = value;
@@ -2637,14 +2714,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.
+     * @return An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.
+     * @param value An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.
      */
     public CodeSystem setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2682,7 +2759,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. This is used in [Coding]{datatypes.html#Coding}.version.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -2702,7 +2779,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. This is used in [Coding]{datatypes.html#Coding}.version.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public CodeSystem setVersionElement(StringType value) { 
       this.version = value;
@@ -2710,14 +2787,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. This is used in [Coding]{datatypes.html#Coding}.version.
+     * @return The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. This is used in [Coding]{datatypes.html#Coding}.version.
+     * @param value The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.
      */
     public CodeSystem setVersion(String value) { 
       if (Utilities.noString(value))
@@ -2874,7 +2951,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2894,7 +2971,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public CodeSystem setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2902,19 +2979,68 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public CodeSystem setExperimental(boolean value) { 
         if (this.experimental == null)
           this.experimental = new BooleanType();
         this.experimental.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create CodeSystem.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public CodeSystem setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.
+     */
+    public CodeSystem setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
       return this;
     }
 
@@ -3021,56 +3147,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the code system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CodeSystem.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date  (and optionally time) when the code system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public CodeSystem setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date  (and optionally time) when the code system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date  (and optionally time) when the code system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.
-     */
-    public CodeSystem setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (A free text natural language description of the code system from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the code system from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -3090,7 +3167,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the code system from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the code system from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public CodeSystem setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -3098,14 +3175,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the code system from the consumer's perspective.
+     * @return A free text natural language description of the code system from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the code system from the consumer's perspective.
+     * @param value A free text natural language description of the code system from a consumer's perspective.
      */
     public CodeSystem setDescription(String value) { 
       if (value == null)
@@ -3119,7 +3196,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate code system instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -3172,7 +3249,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the code system is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the code system is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -3225,7 +3302,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this code system is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this code system is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -3245,7 +3322,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this code system is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this code system is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public CodeSystem setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -3253,14 +3330,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return Explains why this code system is needed and why it has been designed as it has.
+     * @return Explaination of why this code system is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this code system is needed and why it has been designed as it has.
+     * @param value Explaination of why this code system is needed and why it has been designed as it has.
      */
     public CodeSystem setPurpose(String value) { 
       if (value == null)
@@ -3417,7 +3494,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #hierarchyMeaning} (The meaning of the heirarchy of concepts.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
+     * @return {@link #hierarchyMeaning} (The meaning of the hierarchy of concepts.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
      */
     public Enumeration<CodeSystemHierarchyMeaning> getHierarchyMeaningElement() { 
       if (this.hierarchyMeaning == null)
@@ -3437,7 +3514,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #hierarchyMeaning} (The meaning of the heirarchy of concepts.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
+     * @param value {@link #hierarchyMeaning} (The meaning of the hierarchy of concepts.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
      */
     public CodeSystem setHierarchyMeaningElement(Enumeration<CodeSystemHierarchyMeaning> value) { 
       this.hierarchyMeaning = value;
@@ -3445,14 +3522,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return The meaning of the heirarchy of concepts.
+     * @return The meaning of the hierarchy of concepts.
      */
     public CodeSystemHierarchyMeaning getHierarchyMeaning() { 
       return this.hierarchyMeaning == null ? null : this.hierarchyMeaning.getValue();
     }
 
     /**
-     * @param value The meaning of the heirarchy of concepts.
+     * @param value The meaning of the hierarchy of concepts.
      */
     public CodeSystem setHierarchyMeaning(CodeSystemHierarchyMeaning value) { 
       if (value == null)
@@ -3806,24 +3883,24 @@ public class CodeSystem extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable. This is used in [Coding]{datatypes.html#Coding}.version.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the code system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the code system.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this code system. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the code system.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the code system was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the code system from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the code system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this code system is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the code system from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate code system instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the code system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this code system is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, java.lang.Integer.MAX_VALUE, caseSensitive));
         childrenList.add(new Property("valueSet", "uri", "Canonical URL of value set that contains the entire code system.", 0, java.lang.Integer.MAX_VALUE, valueSet));
-        childrenList.add(new Property("hierarchyMeaning", "code", "The meaning of the heirarchy of concepts.", 0, java.lang.Integer.MAX_VALUE, hierarchyMeaning));
+        childrenList.add(new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts.", 0, java.lang.Integer.MAX_VALUE, hierarchyMeaning));
         childrenList.add(new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, java.lang.Integer.MAX_VALUE, compositional));
         childrenList.add(new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, java.lang.Integer.MAX_VALUE, versionNeeded));
         childrenList.add(new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, java.lang.Integer.MAX_VALUE, content));
@@ -3843,9 +3920,9 @@ public class CodeSystem extends MetadataResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
@@ -3867,173 +3944,213 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
-        case 1447404028: // publisher
-          this.publisher = castToString(value); // StringType
-          break;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -35616442: // caseSensitive
           this.caseSensitive = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case -1410174671: // valueSet
           this.valueSet = castToUri(value); // UriType
-          break;
+          return value;
         case 1913078280: // hierarchyMeaning
-          this.hierarchyMeaning = new CodeSystemHierarchyMeaningEnumFactory().fromType(value); // Enumeration<CodeSystemHierarchyMeaning>
-          break;
+          value = new CodeSystemHierarchyMeaningEnumFactory().fromType(castToCode(value));
+          this.hierarchyMeaning = (Enumeration) value; // Enumeration<CodeSystemHierarchyMeaning>
+          return value;
         case 1248023381: // compositional
           this.compositional = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 617270957: // versionNeeded
           this.versionNeeded = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 951530617: // content
-          this.content = new CodeSystemContentModeEnumFactory().fromType(value); // Enumeration<CodeSystemContentMode>
-          break;
+          value = new CodeSystemContentModeEnumFactory().fromType(castToCode(value));
+          this.content = (Enumeration) value; // Enumeration<CodeSystemContentMode>
+          return value;
         case 94851343: // count
           this.count = castToUnsignedInt(value); // UnsignedIntType
-          break;
+          return value;
         case -1274492040: // filter
           this.getFilter().add((CodeSystemFilterComponent) value); // CodeSystemFilterComponent
-          break;
+          return value;
         case -993141291: // property
           this.getProperty().add((PropertyComponent) value); // PropertyComponent
-          break;
+          return value;
         case 951024232: // concept
           this.getConcept().add((ConceptDefinitionComponent) value); // ConceptDefinitionComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("publisher"))
-          this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
-          this.getContact().add(castToContactDetail(value));
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("description"))
+        } else if (name.equals("publisher")) {
+          this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("copyright"))
+        } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        else if (name.equals("caseSensitive"))
+        } else if (name.equals("caseSensitive")) {
           this.caseSensitive = castToBoolean(value); // BooleanType
-        else if (name.equals("valueSet"))
+        } else if (name.equals("valueSet")) {
           this.valueSet = castToUri(value); // UriType
-        else if (name.equals("hierarchyMeaning"))
-          this.hierarchyMeaning = new CodeSystemHierarchyMeaningEnumFactory().fromType(value); // Enumeration<CodeSystemHierarchyMeaning>
-        else if (name.equals("compositional"))
+        } else if (name.equals("hierarchyMeaning")) {
+          value = new CodeSystemHierarchyMeaningEnumFactory().fromType(castToCode(value));
+          this.hierarchyMeaning = (Enumeration) value; // Enumeration<CodeSystemHierarchyMeaning>
+        } else if (name.equals("compositional")) {
           this.compositional = castToBoolean(value); // BooleanType
-        else if (name.equals("versionNeeded"))
+        } else if (name.equals("versionNeeded")) {
           this.versionNeeded = castToBoolean(value); // BooleanType
-        else if (name.equals("content"))
-          this.content = new CodeSystemContentModeEnumFactory().fromType(value); // Enumeration<CodeSystemContentMode>
-        else if (name.equals("count"))
+        } else if (name.equals("content")) {
+          value = new CodeSystemContentModeEnumFactory().fromType(castToCode(value));
+          this.content = (Enumeration) value; // Enumeration<CodeSystemContentMode>
+        } else if (name.equals("count")) {
           this.count = castToUnsignedInt(value); // UnsignedIntType
-        else if (name.equals("filter"))
+        } else if (name.equals("filter")) {
           this.getFilter().add((CodeSystemFilterComponent) value);
-        else if (name.equals("property"))
+        } else if (name.equals("property")) {
           this.getProperty().add((PropertyComponent) value);
-        else if (name.equals("concept"))
+        } else if (name.equals("concept")) {
           this.getConcept().add((ConceptDefinitionComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
-        case -35616442: throw new FHIRException("Cannot make property caseSensitive as it is not a complex type"); // BooleanType
-        case -1410174671: throw new FHIRException("Cannot make property valueSet as it is not a complex type"); // UriType
-        case 1913078280: throw new FHIRException("Cannot make property hierarchyMeaning as it is not a complex type"); // Enumeration<CodeSystemHierarchyMeaning>
-        case 1248023381: throw new FHIRException("Cannot make property compositional as it is not a complex type"); // BooleanType
-        case 617270957: throw new FHIRException("Cannot make property versionNeeded as it is not a complex type"); // BooleanType
-        case 951530617: throw new FHIRException("Cannot make property content as it is not a complex type"); // Enumeration<CodeSystemContentMode>
-        case 94851343: throw new FHIRException("Cannot make property count as it is not a complex type"); // UnsignedIntType
-        case -1274492040:  return addFilter(); // CodeSystemFilterComponent
-        case -993141291:  return addProperty(); // PropertyComponent
-        case 951024232:  return addConcept(); // ConceptDefinitionComponent
+        case 116079:  return getUrlElement();
+        case -1618432855:  return getIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case 110371416:  return getTitleElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
+        case 1522889671:  return getCopyrightElement();
+        case -35616442:  return getCaseSensitiveElement();
+        case -1410174671:  return getValueSetElement();
+        case 1913078280:  return getHierarchyMeaningElement();
+        case 1248023381:  return getCompositionalElement();
+        case 617270957:  return getVersionNeededElement();
+        case 951530617:  return getContentElement();
+        case 94851343:  return getCountElement();
+        case -1274492040:  return addFilter(); 
+        case -993141291:  return addProperty(); 
+        case 951024232:  return addConcept(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
+        case -35616442: /*caseSensitive*/ return new String[] {"boolean"};
+        case -1410174671: /*valueSet*/ return new String[] {"uri"};
+        case 1913078280: /*hierarchyMeaning*/ return new String[] {"code"};
+        case 1248023381: /*compositional*/ return new String[] {"boolean"};
+        case 617270957: /*versionNeeded*/ return new String[] {"boolean"};
+        case 951530617: /*content*/ return new String[] {"code"};
+        case 94851343: /*count*/ return new String[] {"unsignedInt"};
+        case -1274492040: /*filter*/ return new String[] {};
+        case -993141291: /*property*/ return new String[] {};
+        case 951024232: /*concept*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -4062,14 +4179,14 @@ public class CodeSystem extends MetadataResource {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.experimental");
         }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.date");
+        }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.publisher");
         }
         else if (name.equals("contact")) {
           return addContact();
-        }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.date");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.description");
@@ -4135,13 +4252,13 @@ public class CodeSystem extends MetadataResource {
         dst.title = title == null ? null : title.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
-        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
@@ -4246,17 +4363,17 @@ public class CodeSystem extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the code system</b><br>
+   * Description: <b>External identifier for the code system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CodeSystem.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="CodeSystem.identifier", description="External identifiers for the code system", type="token" )
+  @SearchParamDefinition(name="identifier", path="CodeSystem.identifier", description="External identifier for the code system", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the code system</b><br>
+   * Description: <b>External identifier for the code system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CodeSystem.identifier</b><br>
    * </p>
@@ -4284,19 +4401,39 @@ public class CodeSystem extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
+   * Search parameter: <b>content-mode</b>
+   * <p>
+   * Description: <b>not-present | example | fragment | complete</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.content</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="content-mode", path="CodeSystem.content", description="not-present | example | fragment | complete", type="token" )
+  public static final String SP_CONTENT_MODE = "content-mode";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>content-mode</b>
+   * <p>
+   * Description: <b>not-present | example | fragment | complete</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.content</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTENT_MODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTENT_MODE);
+
+ /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for code system</b><br>
+   * Description: <b>Intended jurisdiction for the code system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CodeSystem.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="CodeSystem.jurisdiction", description="Intended jurisdiction for code system", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="CodeSystem.jurisdiction", description="Intended jurisdiction for the code system", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for code system</b><br>
+   * Description: <b>Intended jurisdiction for the code system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CodeSystem.jurisdiction</b><br>
    * </p>
@@ -4306,17 +4443,17 @@ public class CodeSystem extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the code system</b><br>
+   * Description: <b>The description of the code system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CodeSystem.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="CodeSystem.description", description="Text search against the description of the code system", type="string" )
+  @SearchParamDefinition(name="description", path="CodeSystem.description", description="The description of the code system", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the code system</b><br>
+   * Description: <b>The description of the code system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CodeSystem.description</b><br>
    * </p>
@@ -4346,17 +4483,17 @@ public class CodeSystem extends MetadataResource {
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the code system</b><br>
+   * Description: <b>The human-friendly name of the code system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CodeSystem.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="CodeSystem.title", description="Text search against the title of the code system", type="string" )
+  @SearchParamDefinition(name="title", path="CodeSystem.title", description="The human-friendly name of the code system", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the code system</b><br>
+   * Description: <b>The human-friendly name of the code system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CodeSystem.title</b><br>
    * </p>
@@ -4366,17 +4503,17 @@ public class CodeSystem extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the code system</b><br>
+   * Description: <b>The business version of the code system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CodeSystem.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="CodeSystem.version", description="The version identifier of the code system", type="token" )
+  @SearchParamDefinition(name="version", path="CodeSystem.version", description="The business version of the code system", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the code system</b><br>
+   * Description: <b>The business version of the code system</b><br>
    * Type: <b>token</b><br>
    * Path: <b>CodeSystem.version</b><br>
    * </p>
@@ -4404,26 +4541,6 @@ public class CodeSystem extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
-   * Search parameter: <b>content</b>
-   * <p>
-   * Description: <b>not-present | examplar | fragment | complete</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>CodeSystem.content</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="content", path="CodeSystem.content", description="not-present | examplar | fragment | complete", type="token" )
-  public static final String SP_CONTENT = "content";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>content</b>
-   * <p>
-   * Description: <b>not-present | examplar | fragment | complete</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>CodeSystem.content</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTENT);
-
- /**
    * Search parameter: <b>system</b>
    * <p>
    * Description: <b>The system for any codes defined by this code system (same as 'url')</b><br>
@@ -4446,17 +4563,17 @@ public class CodeSystem extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the code system</b><br>
+   * Description: <b>Computationally friendly name of the code system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CodeSystem.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="CodeSystem.name", description="Name of the code system", type="string" )
+  @SearchParamDefinition(name="name", path="CodeSystem.name", description="Computationally friendly name of the code system", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the code system</b><br>
+   * Description: <b>Computationally friendly name of the code system</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CodeSystem.name</b><br>
    * </p>

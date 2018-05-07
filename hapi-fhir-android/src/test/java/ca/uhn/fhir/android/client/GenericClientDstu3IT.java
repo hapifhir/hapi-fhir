@@ -1,25 +1,14 @@
 package ca.uhn.fhir.android.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Date;
 
-import org.apache.http.client.ClientProtocolException;
-import org.hl7.fhir.dstu3.model.Binary;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.dstu3.model.*;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -28,12 +17,12 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import okhttp3.*;
@@ -74,7 +63,7 @@ public class GenericClientDstu3IT {
 	}
 
 	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp/3.4.1)";
+		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3; okhttp/3.8.1)";
 	}
 
 
@@ -92,6 +81,7 @@ public class GenericClientDstu3IT {
 	 * TODO: narratives don't work without stax
 	 */
 	@Test
+	@Ignore
 	public void testBinaryCreateWithFhirContentType() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -104,6 +94,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_XML + "; charset=UTF-8"), respString))
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -141,7 +132,6 @@ public class GenericClientDstu3IT {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		//@formatter:off
       client
       	.search()
       	.forResource(Patient.class)
@@ -151,9 +141,8 @@ public class GenericClientDstu3IT {
       	.and(Patient.ORGANIZATION.hasId((String)null))
       	.returnBundle(Bundle.class)
       	.execute();
-		//@formatter:on
 
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).url().toString());
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(idx).url().toString());
 		idx++;
 		
 	}
@@ -176,6 +165,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"), respString))
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -187,12 +177,12 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertEquals("http://example.com/fhir/Binary", request.url().toString());
+		assertEquals("http://example.com/fhir/Binary?_format=json", request.url().toString());
 		validateUserAgent(capt);
 
-		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, request.header("Accept"));
-		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
+		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
 
 	}
 
@@ -207,6 +197,7 @@ public class GenericClientDstu3IT {
 				.protocol(myProtocol)
 				.code(200)
 				.body(body)
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -252,6 +243,7 @@ public class GenericClientDstu3IT {
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8"), respString))
 				.headers(Headers.of(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3"))
+				.message("")
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -265,11 +257,11 @@ public class GenericClientDstu3IT {
 		assertNotNull(outcome.getResource());
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).url().toString());
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(0).url().toString());
 	}
 
 	
-	private ArgumentCaptor<Request> prepareClientForSearchResponse() throws IOException, ClientProtocolException {
+	private ArgumentCaptor<Request> prepareClientForSearchResponse() throws IOException {
 		final String respString = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 		myHttpResponse = new Response.Builder()
 				.request(myRequest)
@@ -277,6 +269,7 @@ public class GenericClientDstu3IT {
 				.code(200)
 				.body(ResponseBody.create(MediaType.parse(Constants.CT_FHIR_JSON + "; charset=UTF-8"), respString))
 				.headers(Headers.of(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3"))
+				.message("")
 				.build();
 
 		return capt;

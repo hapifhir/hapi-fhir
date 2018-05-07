@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.MediaType;
@@ -37,10 +33,8 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.method.ParseAction;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.ParseAction;
 import ca.uhn.fhir.rest.server.RestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
@@ -97,7 +91,7 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 		StringWriter writer = new StringWriter();
 		if (outcome != null) {
 			FhirContext fhirContext = getRequestDetails().getServer().getFhirContext();
-			IParser parser = RestfulServerUtils.getNewParser(fhirContext, getRequestDetails());
+			IParser parser = RestfulServerUtils.getNewParser(fhirContext, fhirContext.getVersion().getVersion(), getRequestDetails());
 			outcome.execute(parser, writer);
 		}
 		return sendWriterResponse(operationStatus, getParserType(), null, writer);

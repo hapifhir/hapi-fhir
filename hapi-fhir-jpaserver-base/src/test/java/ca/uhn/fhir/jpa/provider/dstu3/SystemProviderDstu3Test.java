@@ -1,25 +1,15 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -29,39 +19,24 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.OperationDefinition;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
-import ca.uhn.fhir.jpa.rp.dstu3.ObservationResourceProvider;
-import ca.uhn.fhir.jpa.rp.dstu3.OrganizationResourceProvider;
-import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu3.*;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -80,6 +55,7 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu3Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
+	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@Test
 	public void testTransactionWithInlineConditionalUrl() throws Exception {
@@ -200,7 +176,6 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 			organizationRp.setDao(myOrganizationDao);
 
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
 			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
 			restServer.setPlainProviders(mySystemProvider);
@@ -235,12 +210,20 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		}
 		
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
+		myRestServer.setPagingProvider(myPagingProvider);
 	}
 
+	@Before
+	public void before() {
+		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
+	}
+	
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
 		myRestServer.setUseBrowserFriendlyContentTypes(true);
+		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -630,6 +613,44 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(20, respSub.getTotal());
 		assertEquals(0, respSub.getEntry().size());
+	}
+
+	@Test
+	public void testTransactionCreateWithPreferHeader() throws Exception {
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle req;
+		Bundle resp;
+		
+		// No prefer header
+		req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		resp = ourClient.transaction().withBundle(req).execute();
+		assertEquals(null, resp.getEntry().get(0).getResource());
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+
+		// Prefer return=minimal
+		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
+		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		resp = ourClient.transaction().withBundle(req).execute();
+		assertEquals(null, resp.getEntry().get(0).getResource());
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		
+		// Prefer return=representation
+		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
+		mySimpleHeaderInterceptor.setHeaderValue(Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		resp = ourClient.transaction().withBundle(req).execute();
+		assertEquals(Patient.class, resp.getEntry().get(0).getResource().getClass());
+		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
 
 	@AfterClass

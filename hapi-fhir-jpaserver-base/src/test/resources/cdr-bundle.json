@@ -152,7 +152,7 @@
 					"code": "IMP",
 					"display": "Inpatient"
 				},
-				"patient": {
+				"subject": {
 					"reference": "urn:uuid:47521791-e0f9-4eb4-b65d-be4ec2b602bf"
 				},
 				"participant": [

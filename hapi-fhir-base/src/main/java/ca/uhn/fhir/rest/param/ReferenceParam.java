@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,11 +74,11 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	@Override
 	String doGetQueryParameterQualifier() {
 		StringBuilder b = new StringBuilder();
-		if (isNotBlank(getResourceType())) {
-			b.append(':');
-			b.append(getResourceType());
-		}
 		if (isNotBlank(myChain)) {
+			if (isNotBlank(getResourceType())) {
+				b.append(':');
+				b.append(getResourceType());
+			}
 			b.append('.');
 			b.append(myChain);
 		}
@@ -92,32 +92,45 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (isBlank(myId.getResourceType())) {
 			return myId.getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
+		} else {
+			if (isBlank(getChain())) {
+				return getResourceType() + "/" + myId.getIdPart();
+			}
+			return myId.getIdPart();
 		}
-		return myId.getIdPart();
 	}
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		String q = theQualifier;
 		String resourceType = null;
+		boolean skipSetValue = false;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');
 				if (nextIdx != -1) {
 					resourceType = q.substring(1, nextIdx);
 					myChain = q.substring(nextIdx + 1);
+					// type is explicitly defined so use it
+					myId.setParts(null, resourceType, theValue, null);
+					skipSetValue = true;
 				} else {
 					resourceType = q.substring(1);
 				}
 			} else if (q.startsWith(".")) {
 				myChain = q.substring(1);
+				// type not defined but this is a chain, so treat value as opaque
+				myId.setParts(null, null, theValue, null);
+				skipSetValue = true;
 			}
 		}
 
-		setValue(theValue);
+		if (!skipSetValue) {
+			setValue(theValue);
 
-		if (isNotBlank(resourceType) && isBlank(getResourceType())) {
-			setValue(resourceType + '/' + theValue);
+			if (isNotBlank(resourceType) && isBlank(getResourceType())) {
+				setValue(resourceType + '/' + theValue);
+			}
 		}
 	}
 
@@ -173,12 +186,14 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		return true;
 	}
 
-	public void setChain(String theChain) {
+	public ReferenceParam setChain(String theChain) {
 		myChain = theChain;
+		return this;
 	}
 
-	public void setValue(String theValue) {
+	public ReferenceParam setValue(String theValue) {
 		myId.setValue(theValue);
+		return this;
 	}
 
 	/**

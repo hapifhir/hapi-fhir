@@ -31,15 +31,14 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */
@@ -67,7 +66,7 @@ public class Quantity extends Type implements ICompositeType {
          * added to help the parsers
          */
         NULL;
-        public static QuantityComparator fromCode(String codeString) throws Exception {
+        public static QuantityComparator fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("<".equals(codeString))
@@ -78,7 +77,7 @@ public class Quantity extends Type implements ICompositeType {
           return GREATER_OR_EQUAL;
         if (">".equals(codeString))
           return GREATER_THAN;
-        throw new Exception("Unknown QuantityComparator code '"+codeString+"'");
+        throw new FHIRException("Unknown QuantityComparator code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -132,6 +131,22 @@ public class Quantity extends Type implements ICompositeType {
         if (">".equals(codeString))
           return QuantityComparator.GREATER_THAN;
         throw new IllegalArgumentException("Unknown QuantityComparator code '"+codeString+"'");
+        }
+        public Enumeration<QuantityComparator> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("<".equals(codeString))
+          return new Enumeration<QuantityComparator>(this, QuantityComparator.LESS_THAN);
+        if ("<=".equals(codeString))
+          return new Enumeration<QuantityComparator>(this, QuantityComparator.LESS_OR_EQUAL);
+        if (">=".equals(codeString))
+          return new Enumeration<QuantityComparator>(this, QuantityComparator.GREATER_OR_EQUAL);
+        if (">".equals(codeString))
+          return new Enumeration<QuantityComparator>(this, QuantityComparator.GREATER_THAN);
+        throw new FHIRException("Unknown QuantityComparator code '"+codeString+"'");
         }
     public String toCode(QuantityComparator code) {
       if (code == QuantityComparator.LESS_THAN)
@@ -443,6 +458,48 @@ public class Quantity extends Type implements ICompositeType {
         childrenList.add(new Property("system", "uri", "The identification of the system that provides the coded form of the unit.", 0, java.lang.Integer.MAX_VALUE, system));
         childrenList.add(new Property("code", "code", "A computer processable form of the unit in some unit representation system.", 0, java.lang.Integer.MAX_VALUE, code));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("value"))
+          this.value = castToDecimal(value); // DecimalType
+        else if (name.equals("comparator"))
+          this.comparator = new QuantityComparatorEnumFactory().fromType(value); // Enumeration<QuantityComparator>
+        else if (name.equals("unit"))
+          this.unit = castToString(value); // StringType
+        else if (name.equals("system"))
+          this.system = castToUri(value); // UriType
+        else if (name.equals("code"))
+          this.code = castToCode(value); // CodeType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("value")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Quantity.value");
+        }
+        else if (name.equals("comparator")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Quantity.comparator");
+        }
+        else if (name.equals("unit")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Quantity.unit");
+        }
+        else if (name.equals("system")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Quantity.system");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Quantity.code");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Quantity";
+
+  }
 
       public Quantity copy() {
         Quantity dst = new Quantity();

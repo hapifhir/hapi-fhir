@@ -239,12 +239,12 @@ public class XMLUtil {
 
 	
 	/**
-	 * Converts the raw characters to XML escape characters.
+	 * Converts the raw characters to XML escapeUrlParam characters.
 	 * 
 	 * @param rawContent
 	 * @param charset Null when charset is not known, so we assume it's unicode
 	 * @param isNoLines
-	 * @return escape string
+	 * @return escapeUrlParam string
 	 */
 	public static String escapeXML(String rawContent, String charset, boolean isNoLines) {
 		if (rawContent == null)

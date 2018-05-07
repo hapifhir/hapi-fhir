@@ -29,12 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -173,10 +174,52 @@ public abstract class Element extends Base implements IBaseHasExtensions {
      }
      return java.util.Collections.unmodifiableList(retVal);
    }
+  public boolean hasExtension(String theUrl) {
+    return !getExtensionsByUrl(theUrl).isEmpty(); 
+  }
+
+  public String getExtensionString(String theUrl) throws FHIRException {
+    List<Extension> ext = getExtensionsByUrl(theUrl); 
+    if (ext.isEmpty()) 
+      return null; 
+    if (ext.size() > 1) 
+      throw new FHIRException("Multiple matching extensions found");
+    if (!ext.get(0).getValue().isPrimitive())
+      throw new FHIRException("Extension could not be converted to a string");
+    return ext.get(0).getValue().primitiveValue();
+  }
+
       protected void listChildren(List<Property> childrenList) {
         childrenList.add(new Property("id", "id", "unique id for the element within a resource (for internal references).", 0, java.lang.Integer.MAX_VALUE, id));
         childrenList.add(new Property("extension", "Extension", "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", 0, java.lang.Integer.MAX_VALUE, extension));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("id"))
+          this.id = castToId(value); // IdType
+        else if (name.equals("extension"))
+          this.getExtension().add(castToExtension(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("id")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Element.id");
+        }
+        else if (name.equals("extension")) {
+          return addExtension();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Element";
+
+  }
 
       public abstract Element copy();
 

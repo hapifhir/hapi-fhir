@@ -57,7 +57,7 @@
 		</breadcrumbs>
 		
 		<links>
-			<item name="Blog" href="https://smilecdr.com/blog" />
+			<item name="Support" href="https://smilecdr.com/" />
 			<item name="Download" href="./download.html" />
 			<item name="GitHub Project" href="https://github.com/jamesagnew/hapi-fhir/" />
 		</links>
@@ -86,6 +86,7 @@
 				<item name="Tags" href="./doc_tags.html" />
 				<item name="Validation" href="./doc_validation.html" />
 				<item name="Custom Structures" href="./doc_custom_structures.html" />
+				<item name="Version Converter" href="./doc_converter.html" />
 			</item>
 			<item name="RESTful Client" href="./doc_rest_client.html" >
 				<item name="Fluent/Generic Client" href="./doc_rest_client.html" />
@@ -111,9 +112,9 @@
 			<item name="Android Support" href="./doc_android.html" />
 			<item name="JavaDocs" href="./apidocs/index.html">
 				<item name="Core API" href="./apidocs/index.html" />
-				<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 				<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
 				<item name="Model API (DSTU3)" href="./apidocs-dstu3/index.html" />
+				<item name="Model API (R4)" href="./apidocs-r4/index.html" />
 				<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 			</item>
 			<item name="Command Line Tool (hapi-fhir-cli)" href="./doc_cli.html" />

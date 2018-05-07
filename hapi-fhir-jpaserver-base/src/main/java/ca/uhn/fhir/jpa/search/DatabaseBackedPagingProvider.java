@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,32 +22,35 @@ package ca.uhn.fhir.jpa.search;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 
 public class DatabaseBackedPagingProvider extends BasePagingProvider implements IPagingProvider {
 
 	@Autowired
-	private PlatformTransactionManager thePlatformTransactionManager;
+	private FhirContext myContext;
 	@Autowired
-	private ISearchResultDao theSearchResultDao;
+	private IFhirSystemDao<?, ?> myDao;
 	@Autowired
-	private EntityManager theEntityManager;
+	private EntityManager myEntityManager;
 	@Autowired
-	private FhirContext theContext;
+	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
-	private IFhirSystemDao<?, ?> theDao;
+	private ISearchResultDao mySearchResultDao;
+
+	/**
+	 * Constructor
+	 */
+	public DatabaseBackedPagingProvider() {
+		super();
+	}
 
 	/**
 	 * Constructor
@@ -58,16 +61,9 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 		this();
 	}
 
-	/**
-	 * Constructor
-	 */
-	public DatabaseBackedPagingProvider() {
-		super();
-	}
-
 	@Override
 	public synchronized IBundleProvider retrieveResultList(String theId) {
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, theDao);
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, myDao);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}
@@ -77,7 +73,6 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	@Override
 	public synchronized String storeResultList(IBundleProvider theList) {
 		String uuid = theList.getUuid();
-		Validate.notNull(uuid);
 		return uuid;
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,10 @@ package ca.uhn.fhir.rest.server.exceptions;
  * limitations under the License.
  * #L%
  */
+import org.hl7.fhir.instance.model.api.*;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
@@ -52,7 +49,7 @@ public class ResourceGoneException extends BaseServerResponseException {
 	 *             1.6 - 2016-07-02
 	 */
 	@Deprecated
-	public ResourceGoneException(Class<? extends IResource> theClass, BaseIdentifierDt thePatientId) {
+	public ResourceGoneException(Class<? extends IBaseResource> theClass, BaseIdentifierDt thePatientId) {
 		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is gone/deleted");
 	}
 
@@ -64,7 +61,7 @@ public class ResourceGoneException extends BaseServerResponseException {
 	 * @param theResourceId
 	 *           The ID of the resource that could not be found
 	 */
-	public ResourceGoneException(Class<? extends IResource> theClass, IIdType theResourceId) {
+	public ResourceGoneException(Class<? extends IBaseResource> theClass, IIdType theResourceId) {
 		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + theResourceId + " is gone/deleted");
 	}
 

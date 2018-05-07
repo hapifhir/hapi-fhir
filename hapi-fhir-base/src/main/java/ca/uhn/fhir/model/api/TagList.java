@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,9 +104,9 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	 * Add a new tag instance
 	 * 
 	 * @param theScheme
-	 *           The tag scheme
+	 *           The tag scheme (the system)
 	 * @param theTerm
-	 *           The tag term
+	 *           The tag term (the code)
 	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you
 	 *         generally do not need to interact directly with the added tag.
 	 */

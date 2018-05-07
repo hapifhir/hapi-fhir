@@ -10,8 +10,9 @@
    <value value="http://hl7.org/fhir"/>
   </telecom>
  </contact>
- <date value="2015-09-01T19:08:30-04:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for base64Binary Type: A stream of bytes"/>
+ <fhirVersion value="1.0.2"/>
  <kind value="datatype"/>
  <abstract value="false"/>
  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
@@ -63,6 +64,19 @@
    <definition value="The actual value"/>
    <min value="0"/>
    <max value="1"/>
+   <!-- Note: primitive values do not have an assigned type
+e.g. this is compiler magic
+XML and JSON types provided by extension -->
+   <type>
+    <code>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
+      <valueString value="string"/>
+     </extension>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+      <valueString value="base64Binary"/>
+     </extension>
+    </code>
+   </type>
   </element>
  </snapshot>
  <differential>
@@ -84,6 +98,19 @@
    <definition value="Primitive value for base64Binary"/>
    <min value="0"/>
    <max value="1"/>
+   <!-- Note: primitive values do not have an assigned type
+e.g. this is compiler magic
+XML and JSON types provided by extension -->
+   <type>
+    <code>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type">
+      <valueString value="string"/>
+     </extension>
+     <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+      <valueString value="base64Binary"/>
+     </extension>
+    </code>
+   </type>
   </element>
  </differential>
 </StructureDefinition>

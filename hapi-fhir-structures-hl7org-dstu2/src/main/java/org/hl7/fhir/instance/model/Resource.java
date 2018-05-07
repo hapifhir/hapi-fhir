@@ -29,12 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 /**
@@ -49,7 +51,8 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     @Description(shortDefinition="Logical id of this artifact", formalDefinition="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes." )
     protected IdType id;
 
-    /**
+
+	/**
      * The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
      */
     @Child(name = "meta", type = {Meta.class}, order=1, min=0, max=1, modifier=false, summary=true)
@@ -257,6 +260,44 @@ public abstract class Resource extends BaseResource implements IAnyResource {
         childrenList.add(new Property("language", "code", "The base language in which the resource is written.", 0, java.lang.Integer.MAX_VALUE, language));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("id"))
+          this.id = castToId(value); // IdType
+        else if (name.equals("meta"))
+          this.meta = castToMeta(value); // Meta
+        else if (name.equals("implicitRules"))
+          this.implicitRules = castToUri(value); // UriType
+        else if (name.equals("language"))
+          this.language = castToCode(value); // CodeType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("id")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Resource.id");
+        }
+        else if (name.equals("meta")) {
+          this.meta = new Meta();
+          return this.meta;
+        }
+        else if (name.equals("implicitRules")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Resource.implicitRules");
+        }
+        else if (name.equals("language")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Resource.language");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Resource";
+
+  }
+
       public abstract Resource copy();
 
       public void copyValues(Resource dst) {
@@ -294,6 +335,11 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       }
 
   public abstract ResourceType getResourceType();
+
+  @Override
+	public FhirVersionEnum getStructureFhirVersionEnum() {
+		return FhirVersionEnum.DSTU2_HL7ORG;
+	}
 
 }
 

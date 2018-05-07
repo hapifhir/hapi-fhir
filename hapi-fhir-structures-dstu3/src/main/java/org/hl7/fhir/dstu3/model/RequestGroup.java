@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -47,6 +47,492 @@ import org.hl7.fhir.exceptions.FHIRException;
  */
 @ResourceDef(name="RequestGroup", profile="http://hl7.org/fhir/Profile/RequestGroup")
 public class RequestGroup extends DomainResource {
+
+    public enum RequestStatus {
+        /**
+         * The request has been created but is not yet complete or ready for action
+         */
+        DRAFT, 
+        /**
+         * The request is ready to be acted upon
+         */
+        ACTIVE, 
+        /**
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
+         */
+        SUSPENDED, 
+        /**
+         * The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.
+         */
+        CANCELLED, 
+        /**
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester
+         */
+        COMPLETED, 
+        /**
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         */
+        ENTEREDINERROR, 
+        /**
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.
+         */
+        UNKNOWN, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestStatus fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("draft".equals(codeString))
+          return DRAFT;
+        if ("active".equals(codeString))
+          return ACTIVE;
+        if ("suspended".equals(codeString))
+          return SUSPENDED;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("completed".equals(codeString))
+          return COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestStatus code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case DRAFT: return "draft";
+            case ACTIVE: return "active";
+            case SUSPENDED: return "suspended";
+            case CANCELLED: return "cancelled";
+            case COMPLETED: return "completed";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case DRAFT: return "http://hl7.org/fhir/request-status";
+            case ACTIVE: return "http://hl7.org/fhir/request-status";
+            case SUSPENDED: return "http://hl7.org/fhir/request-status";
+            case CANCELLED: return "http://hl7.org/fhir/request-status";
+            case COMPLETED: return "http://hl7.org/fhir/request-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/request-status";
+            case UNKNOWN: return "http://hl7.org/fhir/request-status";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case DRAFT: return "The request has been created but is not yet complete or ready for action";
+            case ACTIVE: return "The request is ready to be acted upon";
+            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
+            case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case DRAFT: return "Draft";
+            case ACTIVE: return "Active";
+            case SUSPENDED: return "Suspended";
+            case CANCELLED: return "Cancelled";
+            case COMPLETED: return "Completed";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestStatusEnumFactory implements EnumFactory<RequestStatus> {
+    public RequestStatus fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("draft".equals(codeString))
+          return RequestStatus.DRAFT;
+        if ("active".equals(codeString))
+          return RequestStatus.ACTIVE;
+        if ("suspended".equals(codeString))
+          return RequestStatus.SUSPENDED;
+        if ("cancelled".equals(codeString))
+          return RequestStatus.CANCELLED;
+        if ("completed".equals(codeString))
+          return RequestStatus.COMPLETED;
+        if ("entered-in-error".equals(codeString))
+          return RequestStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return RequestStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown RequestStatus code '"+codeString+"'");
+        }
+        public Enumeration<RequestStatus> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestStatus>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("draft".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.DRAFT);
+        if ("active".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.ACTIVE);
+        if ("suspended".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.SUSPENDED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.CANCELLED);
+        if ("completed".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<RequestStatus>(this, RequestStatus.UNKNOWN);
+        throw new FHIRException("Unknown RequestStatus code '"+codeString+"'");
+        }
+    public String toCode(RequestStatus code) {
+      if (code == RequestStatus.DRAFT)
+        return "draft";
+      if (code == RequestStatus.ACTIVE)
+        return "active";
+      if (code == RequestStatus.SUSPENDED)
+        return "suspended";
+      if (code == RequestStatus.CANCELLED)
+        return "cancelled";
+      if (code == RequestStatus.COMPLETED)
+        return "completed";
+      if (code == RequestStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == RequestStatus.UNKNOWN)
+        return "unknown";
+      return "?";
+      }
+    public String toSystem(RequestStatus code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum RequestIntent {
+        /**
+         * The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act
+         */
+        PROPOSAL, 
+        /**
+         * The request represents an intension to ensure something occurs without providing an authorization for others to act
+         */
+        PLAN, 
+        /**
+         * The request represents a request/demand and authorization for action
+         */
+        ORDER, 
+        /**
+         * The request represents an original authorization for action
+         */
+        ORIGINALORDER, 
+        /**
+         * The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization
+         */
+        REFLEXORDER, 
+        /**
+         * The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order
+         */
+        FILLERORDER, 
+        /**
+         * An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.
+         */
+        INSTANCEORDER, 
+        /**
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.
+
+Refer to [[[RequestGroup]]] for additional information on how this status is used
+         */
+        OPTION, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestIntent fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("proposal".equals(codeString))
+          return PROPOSAL;
+        if ("plan".equals(codeString))
+          return PLAN;
+        if ("order".equals(codeString))
+          return ORDER;
+        if ("original-order".equals(codeString))
+          return ORIGINALORDER;
+        if ("reflex-order".equals(codeString))
+          return REFLEXORDER;
+        if ("filler-order".equals(codeString))
+          return FILLERORDER;
+        if ("instance-order".equals(codeString))
+          return INSTANCEORDER;
+        if ("option".equals(codeString))
+          return OPTION;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestIntent code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case PROPOSAL: return "proposal";
+            case PLAN: return "plan";
+            case ORDER: return "order";
+            case ORIGINALORDER: return "original-order";
+            case REFLEXORDER: return "reflex-order";
+            case FILLERORDER: return "filler-order";
+            case INSTANCEORDER: return "instance-order";
+            case OPTION: return "option";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case PROPOSAL: return "http://hl7.org/fhir/request-intent";
+            case PLAN: return "http://hl7.org/fhir/request-intent";
+            case ORDER: return "http://hl7.org/fhir/request-intent";
+            case ORIGINALORDER: return "http://hl7.org/fhir/request-intent";
+            case REFLEXORDER: return "http://hl7.org/fhir/request-intent";
+            case FILLERORDER: return "http://hl7.org/fhir/request-intent";
+            case INSTANCEORDER: return "http://hl7.org/fhir/request-intent";
+            case OPTION: return "http://hl7.org/fhir/request-intent";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case PROPOSAL: return "The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act";
+            case PLAN: return "The request represents an intension to ensure something occurs without providing an authorization for others to act";
+            case ORDER: return "The request represents a request/demand and authorization for action";
+            case ORIGINALORDER: return "The request represents an original authorization for action";
+            case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization";
+            case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order";
+            case INSTANCEORDER: return "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.\n\nRefer to [[[RequestGroup]]] for additional information on how this status is used";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case PROPOSAL: return "Proposal";
+            case PLAN: return "Plan";
+            case ORDER: return "Order";
+            case ORIGINALORDER: return "Original Order";
+            case REFLEXORDER: return "Reflex Order";
+            case FILLERORDER: return "Filler Order";
+            case INSTANCEORDER: return "Instance Order";
+            case OPTION: return "Option";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestIntentEnumFactory implements EnumFactory<RequestIntent> {
+    public RequestIntent fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("proposal".equals(codeString))
+          return RequestIntent.PROPOSAL;
+        if ("plan".equals(codeString))
+          return RequestIntent.PLAN;
+        if ("order".equals(codeString))
+          return RequestIntent.ORDER;
+        if ("original-order".equals(codeString))
+          return RequestIntent.ORIGINALORDER;
+        if ("reflex-order".equals(codeString))
+          return RequestIntent.REFLEXORDER;
+        if ("filler-order".equals(codeString))
+          return RequestIntent.FILLERORDER;
+        if ("instance-order".equals(codeString))
+          return RequestIntent.INSTANCEORDER;
+        if ("option".equals(codeString))
+          return RequestIntent.OPTION;
+        throw new IllegalArgumentException("Unknown RequestIntent code '"+codeString+"'");
+        }
+        public Enumeration<RequestIntent> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestIntent>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposal".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.PROPOSAL);
+        if ("plan".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.PLAN);
+        if ("order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.ORDER);
+        if ("original-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.ORIGINALORDER);
+        if ("reflex-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.REFLEXORDER);
+        if ("filler-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.FILLERORDER);
+        if ("instance-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.INSTANCEORDER);
+        if ("option".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.OPTION);
+        throw new FHIRException("Unknown RequestIntent code '"+codeString+"'");
+        }
+    public String toCode(RequestIntent code) {
+      if (code == RequestIntent.PROPOSAL)
+        return "proposal";
+      if (code == RequestIntent.PLAN)
+        return "plan";
+      if (code == RequestIntent.ORDER)
+        return "order";
+      if (code == RequestIntent.ORIGINALORDER)
+        return "original-order";
+      if (code == RequestIntent.REFLEXORDER)
+        return "reflex-order";
+      if (code == RequestIntent.FILLERORDER)
+        return "filler-order";
+      if (code == RequestIntent.INSTANCEORDER)
+        return "instance-order";
+      if (code == RequestIntent.OPTION)
+        return "option";
+      return "?";
+      }
+    public String toSystem(RequestIntent code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum RequestPriority {
+        /**
+         * The request has normal priority
+         */
+        ROUTINE, 
+        /**
+         * The request should be actioned promptly - higher priority than routine
+         */
+        URGENT, 
+        /**
+         * The request should be actioned as soon as possible - higher priority than urgent
+         */
+        ASAP, 
+        /**
+         * The request should be actioned immediately - highest possible priority.  E.g. an emergency
+         */
+        STAT, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestPriority fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("routine".equals(codeString))
+          return ROUTINE;
+        if ("urgent".equals(codeString))
+          return URGENT;
+        if ("asap".equals(codeString))
+          return ASAP;
+        if ("stat".equals(codeString))
+          return STAT;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestPriority code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ROUTINE: return "routine";
+            case URGENT: return "urgent";
+            case ASAP: return "asap";
+            case STAT: return "stat";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ROUTINE: return "http://hl7.org/fhir/request-priority";
+            case URGENT: return "http://hl7.org/fhir/request-priority";
+            case ASAP: return "http://hl7.org/fhir/request-priority";
+            case STAT: return "http://hl7.org/fhir/request-priority";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ROUTINE: return "The request has normal priority";
+            case URGENT: return "The request should be actioned promptly - higher priority than routine";
+            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent";
+            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ROUTINE: return "Routine";
+            case URGENT: return "Urgent";
+            case ASAP: return "ASAP";
+            case STAT: return "STAT";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestPriorityEnumFactory implements EnumFactory<RequestPriority> {
+    public RequestPriority fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("routine".equals(codeString))
+          return RequestPriority.ROUTINE;
+        if ("urgent".equals(codeString))
+          return RequestPriority.URGENT;
+        if ("asap".equals(codeString))
+          return RequestPriority.ASAP;
+        if ("stat".equals(codeString))
+          return RequestPriority.STAT;
+        throw new IllegalArgumentException("Unknown RequestPriority code '"+codeString+"'");
+        }
+        public Enumeration<RequestPriority> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestPriority>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("routine".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.ROUTINE);
+        if ("urgent".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.URGENT);
+        if ("asap".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.ASAP);
+        if ("stat".equals(codeString))
+          return new Enumeration<RequestPriority>(this, RequestPriority.STAT);
+        throw new FHIRException("Unknown RequestPriority code '"+codeString+"'");
+        }
+    public String toCode(RequestPriority code) {
+      if (code == RequestPriority.ROUTINE)
+        return "routine";
+      if (code == RequestPriority.URGENT)
+        return "urgent";
+      if (code == RequestPriority.ASAP)
+        return "asap";
+      if (code == RequestPriority.STAT)
+        return "stat";
+      return "?";
+      }
+    public String toSystem(RequestPriority code) {
+      return code.getSystem();
+      }
+    }
 
     public enum ActionConditionKind {
         /**
@@ -127,8 +613,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionConditionKind code '"+codeString+"'");
         }
         public Enumeration<ActionConditionKind> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionConditionKind>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -305,8 +793,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionRelationshipType code '"+codeString+"'");
         }
         public Enumeration<ActionRelationshipType> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionRelationshipType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -435,8 +925,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionGroupingBehavior code '"+codeString+"'");
         }
         public Enumeration<ActionGroupingBehavior> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionGroupingBehavior>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -577,8 +1069,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionSelectionBehavior code '"+codeString+"'");
         }
         public Enumeration<ActionSelectionBehavior> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionSelectionBehavior>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -695,8 +1189,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionRequiredBehavior code '"+codeString+"'");
         }
         public Enumeration<ActionRequiredBehavior> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionRequiredBehavior>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -789,8 +1285,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionPrecheckBehavior code '"+codeString+"'");
         }
         public Enumeration<ActionPrecheckBehavior> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionPrecheckBehavior>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -879,8 +1377,10 @@ public class RequestGroup extends DomainResource {
         throw new IllegalArgumentException("Unknown ActionCardinalityBehavior code '"+codeString+"'");
         }
         public Enumeration<ActionCardinalityBehavior> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ActionCardinalityBehavior>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -905,83 +1405,76 @@ public class RequestGroup extends DomainResource {
     @Block()
     public static class RequestGroupActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.
-         */
-        @Child(name = "actionIdentifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Unique identifier", formalDefinition="A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique." )
-        protected Identifier actionIdentifier;
-
-        /**
          * A user-visible label for the action.
          */
-        @Child(name = "label", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="User-visible label for the action (e.g. 1. or A.)", formalDefinition="A user-visible label for the action." )
         protected StringType label;
 
         /**
          * The title of the action displayed to a user.
          */
-        @Child(name = "title", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "title", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="User-visible title", formalDefinition="The title of the action displayed to a user." )
         protected StringType title;
 
         /**
          * A short description of the action used to provide a summary to display to the user.
          */
-        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Short description of the action", formalDefinition="A short description of the action used to provide a summary to display to the user." )
         protected StringType description;
 
         /**
          * A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.
          */
-        @Child(name = "textEquivalent", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "textEquivalent", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Static text equivalent of the action, used if the dynamic aspects cannot be interpreted by the receiving system", formalDefinition="A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically." )
         protected StringType textEquivalent;
 
         /**
-         * The concept represented by this action or its sub-actions.
+         * A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="The meaning of the action or its sub-actions", formalDefinition="The concept represented by this action or its sub-actions." )
+        @Child(name = "code", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Code representing the meaning of the action or sub-actions", formalDefinition="A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template." )
         protected List<CodeableConcept> code;
 
         /**
          * Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.
          */
-        @Child(name = "documentation", type = {RelatedArtifact.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "documentation", type = {RelatedArtifact.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Supporting documentation for the intended performer of the action", formalDefinition="Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources." )
         protected List<RelatedArtifact> documentation;
 
         /**
          * An expression that describes applicability criteria, or start/stop conditions for the action.
          */
-        @Child(name = "condition", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "condition", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria, or start/stop conditions for the action." )
         protected List<RequestGroupActionConditionComponent> condition;
 
         /**
          * A relationship to another action such as "before" or "30-60 minutes after start of".
          */
-        @Child(name = "relatedAction", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "relatedAction", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Relationship to another action", formalDefinition="A relationship to another action such as \"before\" or \"30-60 minutes after start of\"." )
         protected List<RequestGroupActionRelatedActionComponent> relatedAction;
 
         /**
          * An optional value describing when the action should be performed.
          */
-        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "timing", type = {DateTimeType.class, Period.class, Duration.class, Range.class, Timing.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
         protected Type timing;
 
         /**
-         * The participant in the action.
+         * The participant that should perform or be responsible for this action.
          */
-        @Child(name = "participant", type = {Patient.class, Person.class, Practitioner.class, RelatedPerson.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Participant", formalDefinition="The participant in the action." )
+        @Child(name = "participant", type = {Patient.class, Person.class, Practitioner.class, RelatedPerson.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Who should perform the action", formalDefinition="The participant that should perform or be responsible for this action." )
         protected List<Reference> participant;
         /**
-         * The actual objects that are the target of the reference (The participant in the action.)
+         * The actual objects that are the target of the reference (The participant that should perform or be responsible for this action.)
          */
         protected List<Resource> participantTarget;
 
@@ -989,7 +1482,7 @@ public class RequestGroup extends DomainResource {
         /**
          * The type of action to perform (create, update, remove).
          */
-        @Child(name = "type", type = {Coding.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {Coding.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-type")
         protected Coding type;
@@ -997,7 +1490,7 @@ public class RequestGroup extends DomainResource {
         /**
          * Defines the grouping behavior for the action and its children.
          */
-        @Child(name = "groupingBehavior", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "groupingBehavior", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="visual-group | logical-group | sentence-group", formalDefinition="Defines the grouping behavior for the action and its children." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-grouping-behavior")
         protected Enumeration<ActionGroupingBehavior> groupingBehavior;
@@ -1005,7 +1498,7 @@ public class RequestGroup extends DomainResource {
         /**
          * Defines the selection behavior for the action and its children.
          */
-        @Child(name = "selectionBehavior", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "selectionBehavior", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="any | all | all-or-none | exactly-one | at-most-one | one-or-more", formalDefinition="Defines the selection behavior for the action and its children." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-selection-behavior")
         protected Enumeration<ActionSelectionBehavior> selectionBehavior;
@@ -1013,7 +1506,7 @@ public class RequestGroup extends DomainResource {
         /**
          * Defines the requiredness behavior for the action.
          */
-        @Child(name = "requiredBehavior", type = {CodeType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "requiredBehavior", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="must | could | must-unless-documented", formalDefinition="Defines the requiredness behavior for the action." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-required-behavior")
         protected Enumeration<ActionRequiredBehavior> requiredBehavior;
@@ -1021,7 +1514,7 @@ public class RequestGroup extends DomainResource {
         /**
          * Defines whether the action should usually be preselected.
          */
-        @Child(name = "precheckBehavior", type = {CodeType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "precheckBehavior", type = {CodeType.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="yes | no", formalDefinition="Defines whether the action should usually be preselected." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-precheck-behavior")
         protected Enumeration<ActionPrecheckBehavior> precheckBehavior;
@@ -1029,7 +1522,7 @@ public class RequestGroup extends DomainResource {
         /**
          * Defines whether the action can be selected multiple times.
          */
-        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=17, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="single | multiple", formalDefinition="Defines whether the action can be selected multiple times." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-cardinality-behavior")
         protected Enumeration<ActionCardinalityBehavior> cardinalityBehavior;
@@ -1037,7 +1530,7 @@ public class RequestGroup extends DomainResource {
         /**
          * The resource that is the target of the action (e.g. CommunicationRequest).
          */
-        @Child(name = "resource", type = {Reference.class}, order=18, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "resource", type = {Reference.class}, order=17, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The target of the action", formalDefinition="The resource that is the target of the action (e.g. CommunicationRequest)." )
         protected Reference resource;
 
@@ -1049,11 +1542,11 @@ public class RequestGroup extends DomainResource {
         /**
          * Sub actions.
          */
-        @Child(name = "action", type = {RequestGroupActionComponent.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "action", type = {RequestGroupActionComponent.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Sub action", formalDefinition="Sub actions." )
         protected List<RequestGroupActionComponent> action;
 
-        private static final long serialVersionUID = -1273051530L;
+        private static final long serialVersionUID = 362859874L;
 
     /**
      * Constructor
@@ -1061,30 +1554,6 @@ public class RequestGroup extends DomainResource {
       public RequestGroupActionComponent() {
         super();
       }
-
-        /**
-         * @return {@link #actionIdentifier} (A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.)
-         */
-        public Identifier getActionIdentifier() { 
-          if (this.actionIdentifier == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RequestGroupActionComponent.actionIdentifier");
-            else if (Configuration.doAutoCreate())
-              this.actionIdentifier = new Identifier(); // cc
-          return this.actionIdentifier;
-        }
-
-        public boolean hasActionIdentifier() { 
-          return this.actionIdentifier != null && !this.actionIdentifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #actionIdentifier} (A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.)
-         */
-        public RequestGroupActionComponent setActionIdentifier(Identifier value) { 
-          this.actionIdentifier = value;
-          return this;
-        }
 
         /**
          * @return {@link #label} (A user-visible label for the action.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
@@ -1283,7 +1752,7 @@ public class RequestGroup extends DomainResource {
         }
 
         /**
-         * @return {@link #code} (The concept represented by this action or its sub-actions.)
+         * @return {@link #code} (A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.)
          */
         public List<CodeableConcept> getCode() { 
           if (this.code == null)
@@ -1579,7 +2048,7 @@ public class RequestGroup extends DomainResource {
         }
 
         /**
-         * @return {@link #participant} (The participant in the action.)
+         * @return {@link #participant} (The participant that should perform or be responsible for this action.)
          */
         public List<Reference> getParticipant() { 
           if (this.participant == null)
@@ -2004,17 +2473,16 @@ public class RequestGroup extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("actionIdentifier", "Identifier", "A unique identifier for the action. The identifier SHALL be unique within the container in which it appears, and MAY be universally unique.", 0, java.lang.Integer.MAX_VALUE, actionIdentifier));
           childrenList.add(new Property("label", "string", "A user-visible label for the action.", 0, java.lang.Integer.MAX_VALUE, label));
           childrenList.add(new Property("title", "string", "The title of the action displayed to a user.", 0, java.lang.Integer.MAX_VALUE, title));
           childrenList.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that may not be capable of interpreting it dynamically.", 0, java.lang.Integer.MAX_VALUE, textEquivalent));
-          childrenList.add(new Property("code", "CodeableConcept", "The concept represented by this action or its sub-actions.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
           childrenList.add(new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
           childrenList.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
           childrenList.add(new Property("timing[x]", "dateTime|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, java.lang.Integer.MAX_VALUE, timing));
-          childrenList.add(new Property("participant", "Reference(Patient|Person|Practitioner|RelatedPerson)", "The participant in the action.", 0, java.lang.Integer.MAX_VALUE, participant));
+          childrenList.add(new Property("participant", "Reference(Patient|Person|Practitioner|RelatedPerson)", "The participant that should perform or be responsible for this action.", 0, java.lang.Integer.MAX_VALUE, participant));
           childrenList.add(new Property("type", "Coding", "The type of action to perform (create, update, remove).", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("groupingBehavior", "code", "Defines the grouping behavior for the action and its children.", 0, java.lang.Integer.MAX_VALUE, groupingBehavior));
           childrenList.add(new Property("selectionBehavior", "code", "Defines the selection behavior for the action and its children.", 0, java.lang.Integer.MAX_VALUE, selectionBehavior));
@@ -2028,7 +2496,6 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -889046145: /*actionIdentifier*/ return this.actionIdentifier == null ? new Base[0] : new Base[] {this.actionIdentifier}; // Identifier
         case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
@@ -2053,148 +2520,176 @@ public class RequestGroup extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -889046145: // actionIdentifier
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-          break;
         case 102727412: // label
           this.label = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -900391049: // textEquivalent
           this.textEquivalent = castToString(value); // StringType
-          break;
+          return value;
         case 3059181: // code
           this.getCode().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 1587405498: // documentation
           this.getDocumentation().add(castToRelatedArtifact(value)); // RelatedArtifact
-          break;
+          return value;
         case -861311717: // condition
           this.getCondition().add((RequestGroupActionConditionComponent) value); // RequestGroupActionConditionComponent
-          break;
+          return value;
         case -384107967: // relatedAction
           this.getRelatedAction().add((RequestGroupActionRelatedActionComponent) value); // RequestGroupActionRelatedActionComponent
-          break;
+          return value;
         case -873664438: // timing
           this.timing = castToType(value); // Type
-          break;
+          return value;
         case 767422259: // participant
           this.getParticipant().add(castToReference(value)); // Reference
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCoding(value); // Coding
-          break;
+          return value;
         case 586678389: // groupingBehavior
-          this.groupingBehavior = new ActionGroupingBehaviorEnumFactory().fromType(value); // Enumeration<ActionGroupingBehavior>
-          break;
+          value = new ActionGroupingBehaviorEnumFactory().fromType(castToCode(value));
+          this.groupingBehavior = (Enumeration) value; // Enumeration<ActionGroupingBehavior>
+          return value;
         case 168639486: // selectionBehavior
-          this.selectionBehavior = new ActionSelectionBehaviorEnumFactory().fromType(value); // Enumeration<ActionSelectionBehavior>
-          break;
+          value = new ActionSelectionBehaviorEnumFactory().fromType(castToCode(value));
+          this.selectionBehavior = (Enumeration) value; // Enumeration<ActionSelectionBehavior>
+          return value;
         case -1163906287: // requiredBehavior
-          this.requiredBehavior = new ActionRequiredBehaviorEnumFactory().fromType(value); // Enumeration<ActionRequiredBehavior>
-          break;
+          value = new ActionRequiredBehaviorEnumFactory().fromType(castToCode(value));
+          this.requiredBehavior = (Enumeration) value; // Enumeration<ActionRequiredBehavior>
+          return value;
         case -1174249033: // precheckBehavior
-          this.precheckBehavior = new ActionPrecheckBehaviorEnumFactory().fromType(value); // Enumeration<ActionPrecheckBehavior>
-          break;
+          value = new ActionPrecheckBehaviorEnumFactory().fromType(castToCode(value));
+          this.precheckBehavior = (Enumeration) value; // Enumeration<ActionPrecheckBehavior>
+          return value;
         case -922577408: // cardinalityBehavior
-          this.cardinalityBehavior = new ActionCardinalityBehaviorEnumFactory().fromType(value); // Enumeration<ActionCardinalityBehavior>
-          break;
+          value = new ActionCardinalityBehaviorEnumFactory().fromType(castToCode(value));
+          this.cardinalityBehavior = (Enumeration) value; // Enumeration<ActionCardinalityBehavior>
+          return value;
         case -341064690: // resource
           this.resource = castToReference(value); // Reference
-          break;
+          return value;
         case -1422950858: // action
           this.getAction().add((RequestGroupActionComponent) value); // RequestGroupActionComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("actionIdentifier"))
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-        else if (name.equals("label"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("label")) {
           this.label = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("textEquivalent"))
+        } else if (name.equals("textEquivalent")) {
           this.textEquivalent = castToString(value); // StringType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.getCode().add(castToCodeableConcept(value));
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.getDocumentation().add(castToRelatedArtifact(value));
-        else if (name.equals("condition"))
+        } else if (name.equals("condition")) {
           this.getCondition().add((RequestGroupActionConditionComponent) value);
-        else if (name.equals("relatedAction"))
+        } else if (name.equals("relatedAction")) {
           this.getRelatedAction().add((RequestGroupActionRelatedActionComponent) value);
-        else if (name.equals("timing[x]"))
+        } else if (name.equals("timing[x]")) {
           this.timing = castToType(value); // Type
-        else if (name.equals("participant"))
+        } else if (name.equals("participant")) {
           this.getParticipant().add(castToReference(value));
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCoding(value); // Coding
-        else if (name.equals("groupingBehavior"))
-          this.groupingBehavior = new ActionGroupingBehaviorEnumFactory().fromType(value); // Enumeration<ActionGroupingBehavior>
-        else if (name.equals("selectionBehavior"))
-          this.selectionBehavior = new ActionSelectionBehaviorEnumFactory().fromType(value); // Enumeration<ActionSelectionBehavior>
-        else if (name.equals("requiredBehavior"))
-          this.requiredBehavior = new ActionRequiredBehaviorEnumFactory().fromType(value); // Enumeration<ActionRequiredBehavior>
-        else if (name.equals("precheckBehavior"))
-          this.precheckBehavior = new ActionPrecheckBehaviorEnumFactory().fromType(value); // Enumeration<ActionPrecheckBehavior>
-        else if (name.equals("cardinalityBehavior"))
-          this.cardinalityBehavior = new ActionCardinalityBehaviorEnumFactory().fromType(value); // Enumeration<ActionCardinalityBehavior>
-        else if (name.equals("resource"))
+        } else if (name.equals("groupingBehavior")) {
+          value = new ActionGroupingBehaviorEnumFactory().fromType(castToCode(value));
+          this.groupingBehavior = (Enumeration) value; // Enumeration<ActionGroupingBehavior>
+        } else if (name.equals("selectionBehavior")) {
+          value = new ActionSelectionBehaviorEnumFactory().fromType(castToCode(value));
+          this.selectionBehavior = (Enumeration) value; // Enumeration<ActionSelectionBehavior>
+        } else if (name.equals("requiredBehavior")) {
+          value = new ActionRequiredBehaviorEnumFactory().fromType(castToCode(value));
+          this.requiredBehavior = (Enumeration) value; // Enumeration<ActionRequiredBehavior>
+        } else if (name.equals("precheckBehavior")) {
+          value = new ActionPrecheckBehaviorEnumFactory().fromType(castToCode(value));
+          this.precheckBehavior = (Enumeration) value; // Enumeration<ActionPrecheckBehavior>
+        } else if (name.equals("cardinalityBehavior")) {
+          value = new ActionCardinalityBehaviorEnumFactory().fromType(castToCode(value));
+          this.cardinalityBehavior = (Enumeration) value; // Enumeration<ActionCardinalityBehavior>
+        } else if (name.equals("resource")) {
           this.resource = castToReference(value); // Reference
-        else if (name.equals("action"))
+        } else if (name.equals("action")) {
           this.getAction().add((RequestGroupActionComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -889046145:  return getActionIdentifier(); // Identifier
-        case 102727412: throw new FHIRException("Cannot make property label as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -900391049: throw new FHIRException("Cannot make property textEquivalent as it is not a complex type"); // StringType
-        case 3059181:  return addCode(); // CodeableConcept
-        case 1587405498:  return addDocumentation(); // RelatedArtifact
-        case -861311717:  return addCondition(); // RequestGroupActionConditionComponent
-        case -384107967:  return addRelatedAction(); // RequestGroupActionRelatedActionComponent
-        case 164632566:  return getTiming(); // Type
-        case 767422259:  return addParticipant(); // Reference
-        case 3575610:  return getType(); // Coding
-        case 586678389: throw new FHIRException("Cannot make property groupingBehavior as it is not a complex type"); // Enumeration<ActionGroupingBehavior>
-        case 168639486: throw new FHIRException("Cannot make property selectionBehavior as it is not a complex type"); // Enumeration<ActionSelectionBehavior>
-        case -1163906287: throw new FHIRException("Cannot make property requiredBehavior as it is not a complex type"); // Enumeration<ActionRequiredBehavior>
-        case -1174249033: throw new FHIRException("Cannot make property precheckBehavior as it is not a complex type"); // Enumeration<ActionPrecheckBehavior>
-        case -922577408: throw new FHIRException("Cannot make property cardinalityBehavior as it is not a complex type"); // Enumeration<ActionCardinalityBehavior>
-        case -341064690:  return getResource(); // Reference
-        case -1422950858:  return addAction(); // RequestGroupActionComponent
+        case 102727412:  return getLabelElement();
+        case 110371416:  return getTitleElement();
+        case -1724546052:  return getDescriptionElement();
+        case -900391049:  return getTextEquivalentElement();
+        case 3059181:  return addCode(); 
+        case 1587405498:  return addDocumentation(); 
+        case -861311717:  return addCondition(); 
+        case -384107967:  return addRelatedAction(); 
+        case 164632566:  return getTiming(); 
+        case -873664438:  return getTiming(); 
+        case 767422259:  return addParticipant(); 
+        case 3575610:  return getType(); 
+        case 586678389:  return getGroupingBehaviorElement();
+        case 168639486:  return getSelectionBehaviorElement();
+        case -1163906287:  return getRequiredBehaviorElement();
+        case -1174249033:  return getPrecheckBehaviorElement();
+        case -922577408:  return getCardinalityBehaviorElement();
+        case -341064690:  return getResource(); 
+        case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("actionIdentifier")) {
-          this.actionIdentifier = new Identifier();
-          return this.actionIdentifier;
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 102727412: /*label*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -900391049: /*textEquivalent*/ return new String[] {"string"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 1587405498: /*documentation*/ return new String[] {"RelatedArtifact"};
+        case -861311717: /*condition*/ return new String[] {};
+        case -384107967: /*relatedAction*/ return new String[] {};
+        case -873664438: /*timing*/ return new String[] {"dateTime", "Period", "Duration", "Range", "Timing"};
+        case 767422259: /*participant*/ return new String[] {"Reference"};
+        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 586678389: /*groupingBehavior*/ return new String[] {"code"};
+        case 168639486: /*selectionBehavior*/ return new String[] {"code"};
+        case -1163906287: /*requiredBehavior*/ return new String[] {"code"};
+        case -1174249033: /*precheckBehavior*/ return new String[] {"code"};
+        case -922577408: /*cardinalityBehavior*/ return new String[] {"code"};
+        case -341064690: /*resource*/ return new String[] {"Reference"};
+        case -1422950858: /*action*/ return new String[] {"@RequestGroup.action"};
+        default: return super.getTypesForProperty(hash, name);
         }
-        else if (name.equals("label")) {
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("label")) {
           throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.label");
         }
         else if (name.equals("title")) {
@@ -2274,7 +2769,6 @@ public class RequestGroup extends DomainResource {
       public RequestGroupActionComponent copy() {
         RequestGroupActionComponent dst = new RequestGroupActionComponent();
         copyValues(dst);
-        dst.actionIdentifier = actionIdentifier == null ? null : actionIdentifier.copy();
         dst.label = label == null ? null : label.copy();
         dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
@@ -2327,11 +2821,11 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroupActionComponent))
           return false;
         RequestGroupActionComponent o = (RequestGroupActionComponent) other;
-        return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(label, o.label, true)
-           && compareDeep(title, o.title, true) && compareDeep(description, o.description, true) && compareDeep(textEquivalent, o.textEquivalent, true)
-           && compareDeep(code, o.code, true) && compareDeep(documentation, o.documentation, true) && compareDeep(condition, o.condition, true)
-           && compareDeep(relatedAction, o.relatedAction, true) && compareDeep(timing, o.timing, true) && compareDeep(participant, o.participant, true)
-           && compareDeep(type, o.type, true) && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
+        return compareDeep(label, o.label, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
+           && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(code, o.code, true) && compareDeep(documentation, o.documentation, true)
+           && compareDeep(condition, o.condition, true) && compareDeep(relatedAction, o.relatedAction, true)
+           && compareDeep(timing, o.timing, true) && compareDeep(participant, o.participant, true) && compareDeep(type, o.type, true)
+           && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
            && compareDeep(requiredBehavior, o.requiredBehavior, true) && compareDeep(precheckBehavior, o.precheckBehavior, true)
            && compareDeep(cardinalityBehavior, o.cardinalityBehavior, true) && compareDeep(resource, o.resource, true)
            && compareDeep(action, o.action, true);
@@ -2352,10 +2846,10 @@ public class RequestGroup extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, label, title
-          , description, textEquivalent, code, documentation, condition, relatedAction, timing
-          , participant, type, groupingBehavior, selectionBehavior, requiredBehavior, precheckBehavior
-          , cardinalityBehavior, resource, action);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, title, description
+          , textEquivalent, code, documentation, condition, relatedAction, timing, participant
+          , type, groupingBehavior, selectionBehavior, requiredBehavior, precheckBehavior, cardinalityBehavior
+          , resource, action);
       }
 
   public String fhirType() {
@@ -2626,47 +3120,62 @@ public class RequestGroup extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3292052: // kind
-          this.kind = new ActionConditionKindEnumFactory().fromType(value); // Enumeration<ActionConditionKind>
-          break;
+          value = new ActionConditionKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<ActionConditionKind>
+          return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
-          break;
+          return value;
         case -1613589672: // language
           this.language = castToString(value); // StringType
-          break;
+          return value;
         case -1795452264: // expression
           this.expression = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("kind"))
-          this.kind = new ActionConditionKindEnumFactory().fromType(value); // Enumeration<ActionConditionKind>
-        else if (name.equals("description"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("kind")) {
+          value = new ActionConditionKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<ActionConditionKind>
+        } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        else if (name.equals("language"))
+        } else if (name.equals("language")) {
           this.language = castToString(value); // StringType
-        else if (name.equals("expression"))
+        } else if (name.equals("expression")) {
           this.expression = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<ActionConditionKind>
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // StringType
-        case -1613589672: throw new FHIRException("Cannot make property language as it is not a complex type"); // StringType
-        case -1795452264: throw new FHIRException("Cannot make property expression as it is not a complex type"); // StringType
+        case 3292052:  return getKindElement();
+        case -1724546052:  return getDescriptionElement();
+        case -1613589672:  return getLanguageElement();
+        case -1795452264:  return getExpressionElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3292052: /*kind*/ return new String[] {"code"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -1613589672: /*language*/ return new String[] {"string"};
+        case -1795452264: /*expression*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2736,11 +3245,11 @@ public class RequestGroup extends DomainResource {
     @Block()
     public static class RequestGroupActionRelatedActionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The unique identifier of the related action.
+         * The element id of the action this is related to.
          */
-        @Child(name = "actionIdentifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Identifier of the related action", formalDefinition="The unique identifier of the related action." )
-        protected Identifier actionIdentifier;
+        @Child(name = "actionId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="What action this is related to", formalDefinition="The element id of the action this is related to." )
+        protected IdType actionId;
 
         /**
          * The relationship of this action to the related action.
@@ -2757,7 +3266,7 @@ public class RequestGroup extends DomainResource {
         @Description(shortDefinition="Time offset for the relationship", formalDefinition="A duration or range of durations to apply to the relationship. For example, 30-60 minutes before." )
         protected Type offset;
 
-        private static final long serialVersionUID = 1011239532L;
+        private static final long serialVersionUID = 1063306770L;
 
     /**
      * Constructor
@@ -2769,33 +3278,54 @@ public class RequestGroup extends DomainResource {
     /**
      * Constructor
      */
-      public RequestGroupActionRelatedActionComponent(Identifier actionIdentifier, Enumeration<ActionRelationshipType> relationship) {
+      public RequestGroupActionRelatedActionComponent(IdType actionId, Enumeration<ActionRelationshipType> relationship) {
         super();
-        this.actionIdentifier = actionIdentifier;
+        this.actionId = actionId;
         this.relationship = relationship;
       }
 
         /**
-         * @return {@link #actionIdentifier} (The unique identifier of the related action.)
+         * @return {@link #actionId} (The element id of the action this is related to.). This is the underlying object with id, value and extensions. The accessor "getActionId" gives direct access to the value
          */
-        public Identifier getActionIdentifier() { 
-          if (this.actionIdentifier == null)
+        public IdType getActionIdElement() { 
+          if (this.actionId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RequestGroupActionRelatedActionComponent.actionIdentifier");
+              throw new Error("Attempt to auto-create RequestGroupActionRelatedActionComponent.actionId");
             else if (Configuration.doAutoCreate())
-              this.actionIdentifier = new Identifier(); // cc
-          return this.actionIdentifier;
+              this.actionId = new IdType(); // bb
+          return this.actionId;
         }
 
-        public boolean hasActionIdentifier() { 
-          return this.actionIdentifier != null && !this.actionIdentifier.isEmpty();
+        public boolean hasActionIdElement() { 
+          return this.actionId != null && !this.actionId.isEmpty();
+        }
+
+        public boolean hasActionId() { 
+          return this.actionId != null && !this.actionId.isEmpty();
         }
 
         /**
-         * @param value {@link #actionIdentifier} (The unique identifier of the related action.)
+         * @param value {@link #actionId} (The element id of the action this is related to.). This is the underlying object with id, value and extensions. The accessor "getActionId" gives direct access to the value
          */
-        public RequestGroupActionRelatedActionComponent setActionIdentifier(Identifier value) { 
-          this.actionIdentifier = value;
+        public RequestGroupActionRelatedActionComponent setActionIdElement(IdType value) { 
+          this.actionId = value;
+          return this;
+        }
+
+        /**
+         * @return The element id of the action this is related to.
+         */
+        public String getActionId() { 
+          return this.actionId == null ? null : this.actionId.getValue();
+        }
+
+        /**
+         * @param value The element id of the action this is related to.
+         */
+        public RequestGroupActionRelatedActionComponent setActionId(String value) { 
+            if (this.actionId == null)
+              this.actionId = new IdType();
+            this.actionId.setValue(value);
           return this;
         }
 
@@ -2891,7 +3421,7 @@ public class RequestGroup extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("actionIdentifier", "Identifier", "The unique identifier of the related action.", 0, java.lang.Integer.MAX_VALUE, actionIdentifier));
+          childrenList.add(new Property("actionId", "id", "The element id of the action this is related to.", 0, java.lang.Integer.MAX_VALUE, actionId));
           childrenList.add(new Property("relationship", "code", "The relationship of this action to the related action.", 0, java.lang.Integer.MAX_VALUE, relationship));
           childrenList.add(new Property("offset[x]", "Duration|Range", "A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.", 0, java.lang.Integer.MAX_VALUE, offset));
         }
@@ -2899,7 +3429,7 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -889046145: /*actionIdentifier*/ return this.actionIdentifier == null ? new Base[0] : new Base[] {this.actionIdentifier}; // Identifier
+        case -1656172047: /*actionId*/ return this.actionId == null ? new Base[0] : new Base[] {this.actionId}; // IdType
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // Enumeration<ActionRelationshipType>
         case -1019779949: /*offset*/ return this.offset == null ? new Base[0] : new Base[] {this.offset}; // Type
         default: return super.getProperty(hash, name, checkValid);
@@ -2908,50 +3438,64 @@ public class RequestGroup extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -889046145: // actionIdentifier
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-          break;
+        case -1656172047: // actionId
+          this.actionId = castToId(value); // IdType
+          return value;
         case -261851592: // relationship
-          this.relationship = new ActionRelationshipTypeEnumFactory().fromType(value); // Enumeration<ActionRelationshipType>
-          break;
+          value = new ActionRelationshipTypeEnumFactory().fromType(castToCode(value));
+          this.relationship = (Enumeration) value; // Enumeration<ActionRelationshipType>
+          return value;
         case -1019779949: // offset
           this.offset = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("actionIdentifier"))
-          this.actionIdentifier = castToIdentifier(value); // Identifier
-        else if (name.equals("relationship"))
-          this.relationship = new ActionRelationshipTypeEnumFactory().fromType(value); // Enumeration<ActionRelationshipType>
-        else if (name.equals("offset[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("actionId")) {
+          this.actionId = castToId(value); // IdType
+        } else if (name.equals("relationship")) {
+          value = new ActionRelationshipTypeEnumFactory().fromType(castToCode(value));
+          this.relationship = (Enumeration) value; // Enumeration<ActionRelationshipType>
+        } else if (name.equals("offset[x]")) {
           this.offset = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -889046145:  return getActionIdentifier(); // Identifier
-        case -261851592: throw new FHIRException("Cannot make property relationship as it is not a complex type"); // Enumeration<ActionRelationshipType>
-        case -1960684787:  return getOffset(); // Type
+        case -1656172047:  return getActionIdElement();
+        case -261851592:  return getRelationshipElement();
+        case -1960684787:  return getOffset(); 
+        case -1019779949:  return getOffset(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1656172047: /*actionId*/ return new String[] {"id"};
+        case -261851592: /*relationship*/ return new String[] {"code"};
+        case -1019779949: /*offset*/ return new String[] {"Duration", "Range"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("actionIdentifier")) {
-          this.actionIdentifier = new Identifier();
-          return this.actionIdentifier;
+        if (name.equals("actionId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.actionId");
         }
         else if (name.equals("relationship")) {
           throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.relationship");
@@ -2971,7 +3515,7 @@ public class RequestGroup extends DomainResource {
       public RequestGroupActionRelatedActionComponent copy() {
         RequestGroupActionRelatedActionComponent dst = new RequestGroupActionRelatedActionComponent();
         copyValues(dst);
-        dst.actionIdentifier = actionIdentifier == null ? null : actionIdentifier.copy();
+        dst.actionId = actionId == null ? null : actionId.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
         dst.offset = offset == null ? null : offset.copy();
         return dst;
@@ -2984,7 +3528,7 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroupActionRelatedActionComponent))
           return false;
         RequestGroupActionRelatedActionComponent o = (RequestGroupActionRelatedActionComponent) other;
-        return compareDeep(actionIdentifier, o.actionIdentifier, true) && compareDeep(relationship, o.relationship, true)
+        return compareDeep(actionId, o.actionId, true) && compareDeep(relationship, o.relationship, true)
            && compareDeep(offset, o.offset, true);
       }
 
@@ -2995,12 +3539,13 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroupActionRelatedActionComponent))
           return false;
         RequestGroupActionRelatedActionComponent o = (RequestGroupActionRelatedActionComponent) other;
-        return compareValues(relationship, o.relationship, true);
+        return compareValues(actionId, o.actionId, true) && compareValues(relationship, o.relationship, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionIdentifier, relationship
-          , offset);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(actionId, relationship, offset
+          );
       }
 
   public String fhirType() {
@@ -3011,17 +3556,84 @@ public class RequestGroup extends DomainResource {
   }
 
     /**
-     * Allows a service to provide a unique, business identifier for the response.
+     * Allows a service to provide a unique, business identifier for the request.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide a unique, business identifier for the response." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide a unique, business identifier for the request." )
+    protected List<Identifier> identifier;
+
+    /**
+     * A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.
+     */
+    @Child(name = "definition", type = {Reference.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Instantiates protocol or definition", formalDefinition="A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request." )
+    protected List<Reference> definition;
+    /**
+     * The actual objects that are the target of the reference (A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.)
+     */
+    protected List<Resource> definitionTarget;
+
+
+    /**
+     * A plan, proposal or order that is fulfilled in whole or in part by this request.
+     */
+    @Child(name = "basedOn", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Fulfills plan, proposal, or order", formalDefinition="A plan, proposal or order that is fulfilled in whole or in part by this request." )
+    protected List<Reference> basedOn;
+    /**
+     * The actual objects that are the target of the reference (A plan, proposal or order that is fulfilled in whole or in part by this request.)
+     */
+    protected List<Resource> basedOnTarget;
+
+
+    /**
+     * Completed or terminated request(s) whose function is taken by this new request.
+     */
+    @Child(name = "replaces", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Request(s) replaced by this request", formalDefinition="Completed or terminated request(s) whose function is taken by this new request." )
+    protected List<Reference> replaces;
+    /**
+     * The actual objects that are the target of the reference (Completed or terminated request(s) whose function is taken by this new request.)
+     */
+    protected List<Resource> replacesTarget;
+
+
+    /**
+     * A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.
+     */
+    @Child(name = "groupIdentifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Composite request this is part of", formalDefinition="A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form." )
+    protected Identifier groupIdentifier;
+
+    /**
+     * The current state of the request. For request groups, the status reflects the status of all the requests in the group.
+     */
+    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="draft | active | suspended | cancelled | completed | entered-in-error | unknown", formalDefinition="The current state of the request. For request groups, the status reflects the status of all the requests in the group." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-status")
+    protected Enumeration<RequestStatus> status;
+
+    /**
+     * Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.
+     */
+    @Child(name = "intent", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="proposal | plan | order", formalDefinition="Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-intent")
+    protected Enumeration<RequestIntent> intent;
+
+    /**
+     * Indicates how quickly the request should be addressed with respect to other requests.
+     */
+    @Child(name = "priority", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="routine | urgent | asap | stat", formalDefinition="Indicates how quickly the request should be addressed with respect to other requests." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-priority")
+    protected Enumeration<RequestPriority> priority;
 
     /**
      * The subject for which the request group was created.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Subject of the request group", formalDefinition="The subject for which the request group was created." )
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Who the request group is about", formalDefinition="The subject for which the request group was created." )
     protected Reference subject;
 
     /**
@@ -3032,7 +3644,7 @@ public class RequestGroup extends DomainResource {
     /**
      * Describes the context of the request group, if any.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Encounter or Episode for the request group", formalDefinition="Describes the context of the request group, if any." )
     protected Reference context;
 
@@ -3044,14 +3656,14 @@ public class RequestGroup extends DomainResource {
     /**
      * Indicates when the request group was created.
      */
-    @Child(name = "occurrenceDateTime", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "authoredOn", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the request group was authored", formalDefinition="Indicates when the request group was created." )
-    protected DateTimeType occurrenceDateTime;
+    protected DateTimeType authoredOn;
 
     /**
      * Provides a reference to the author of the request group.
      */
-    @Child(name = "author", type = {Device.class, Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "author", type = {Device.class, Practitioner.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Device or practitioner that authored the request group", formalDefinition="Provides a reference to the author of the request group." )
     protected Reference author;
 
@@ -3063,25 +3675,25 @@ public class RequestGroup extends DomainResource {
     /**
      * Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reason for the request group", formalDefinition="Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response." )
     protected Type reason;
 
     /**
      * Provides a mechanism to communicate additional information about the response.
      */
-    @Child(name = "note", type = {Annotation.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional notes about the response", formalDefinition="Provides a mechanism to communicate additional information about the response." )
     protected List<Annotation> note;
 
     /**
      * The actions, if any, produced by the evaluation of the artifact.
      */
-    @Child(name = "action", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "action", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Proposed actions, if any", formalDefinition="The actions, if any, produced by the evaluation of the artifact." )
     protected List<RequestGroupActionComponent> action;
 
-    private static final long serialVersionUID = 334451815L;
+    private static final long serialVersionUID = -1812083587L;
 
   /**
    * Constructor
@@ -3090,27 +3702,417 @@ public class RequestGroup extends DomainResource {
       super();
     }
 
+  /**
+   * Constructor
+   */
+    public RequestGroup(Enumeration<RequestStatus> status, Enumeration<RequestIntent> intent) {
+      super();
+      this.status = status;
+      this.intent = intent;
+    }
+
     /**
-     * @return {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     * @return {@link #identifier} (Allows a service to provide a unique, business identifier for the request.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RequestGroup.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public RequestGroup addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public RequestGroup setIdentifier(Identifier value) { 
-      this.identifier = value;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #definition} (A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.)
+     */
+    public List<Reference> getDefinition() { 
+      if (this.definition == null)
+        this.definition = new ArrayList<Reference>();
+      return this.definition;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setDefinition(List<Reference> theDefinition) { 
+      this.definition = theDefinition;
+      return this;
+    }
+
+    public boolean hasDefinition() { 
+      if (this.definition == null)
+        return false;
+      for (Reference item : this.definition)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addDefinition() { //3
+      Reference t = new Reference();
+      if (this.definition == null)
+        this.definition = new ArrayList<Reference>();
+      this.definition.add(t);
+      return t;
+    }
+
+    public RequestGroup addDefinition(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.definition == null)
+        this.definition = new ArrayList<Reference>();
+      this.definition.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #definition}, creating it if it does not already exist
+     */
+    public Reference getDefinitionFirstRep() { 
+      if (getDefinition().isEmpty()) {
+        addDefinition();
+      }
+      return getDefinition().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getDefinitionTarget() { 
+      if (this.definitionTarget == null)
+        this.definitionTarget = new ArrayList<Resource>();
+      return this.definitionTarget;
+    }
+
+    /**
+     * @return {@link #basedOn} (A plan, proposal or order that is fulfilled in whole or in part by this request.)
+     */
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
+      return this;
+    }
+
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
+        return false;
+      for (Reference item : this.basedOn)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addBasedOn() { //3
+      Reference t = new Reference();
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return t;
+    }
+
+    public RequestGroup addBasedOn(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
+     */
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
+      }
+      return getBasedOn().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<Resource>();
+      return this.basedOnTarget;
+    }
+
+    /**
+     * @return {@link #replaces} (Completed or terminated request(s) whose function is taken by this new request.)
+     */
+    public List<Reference> getReplaces() { 
+      if (this.replaces == null)
+        this.replaces = new ArrayList<Reference>();
+      return this.replaces;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RequestGroup setReplaces(List<Reference> theReplaces) { 
+      this.replaces = theReplaces;
+      return this;
+    }
+
+    public boolean hasReplaces() { 
+      if (this.replaces == null)
+        return false;
+      for (Reference item : this.replaces)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addReplaces() { //3
+      Reference t = new Reference();
+      if (this.replaces == null)
+        this.replaces = new ArrayList<Reference>();
+      this.replaces.add(t);
+      return t;
+    }
+
+    public RequestGroup addReplaces(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.replaces == null)
+        this.replaces = new ArrayList<Reference>();
+      this.replaces.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #replaces}, creating it if it does not already exist
+     */
+    public Reference getReplacesFirstRep() { 
+      if (getReplaces().isEmpty()) {
+        addReplaces();
+      }
+      return getReplaces().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReplacesTarget() { 
+      if (this.replacesTarget == null)
+        this.replacesTarget = new ArrayList<Resource>();
+      return this.replacesTarget;
+    }
+
+    /**
+     * @return {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.)
+     */
+    public Identifier getGroupIdentifier() { 
+      if (this.groupIdentifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.groupIdentifier");
+        else if (Configuration.doAutoCreate())
+          this.groupIdentifier = new Identifier(); // cc
+      return this.groupIdentifier;
+    }
+
+    public boolean hasGroupIdentifier() { 
+      return this.groupIdentifier != null && !this.groupIdentifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #groupIdentifier} (A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.)
+     */
+    public RequestGroup setGroupIdentifier(Identifier value) { 
+      this.groupIdentifier = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The current state of the request. For request groups, the status reflects the status of all the requests in the group.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<RequestStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<RequestStatus>(new RequestStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The current state of the request. For request groups, the status reflects the status of all the requests in the group.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public RequestGroup setStatusElement(Enumeration<RequestStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The current state of the request. For request groups, the status reflects the status of all the requests in the group.
+     */
+    public RequestStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The current state of the request. For request groups, the status reflects the status of all the requests in the group.
+     */
+    public RequestGroup setStatus(RequestStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<RequestStatus>(new RequestStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #intent} (Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.). This is the underlying object with id, value and extensions. The accessor "getIntent" gives direct access to the value
+     */
+    public Enumeration<RequestIntent> getIntentElement() { 
+      if (this.intent == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.intent");
+        else if (Configuration.doAutoCreate())
+          this.intent = new Enumeration<RequestIntent>(new RequestIntentEnumFactory()); // bb
+      return this.intent;
+    }
+
+    public boolean hasIntentElement() { 
+      return this.intent != null && !this.intent.isEmpty();
+    }
+
+    public boolean hasIntent() { 
+      return this.intent != null && !this.intent.isEmpty();
+    }
+
+    /**
+     * @param value {@link #intent} (Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.). This is the underlying object with id, value and extensions. The accessor "getIntent" gives direct access to the value
+     */
+    public RequestGroup setIntentElement(Enumeration<RequestIntent> value) { 
+      this.intent = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.
+     */
+    public RequestIntent getIntent() { 
+      return this.intent == null ? null : this.intent.getValue();
+    }
+
+    /**
+     * @param value Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.
+     */
+    public RequestGroup setIntent(RequestIntent value) { 
+        if (this.intent == null)
+          this.intent = new Enumeration<RequestIntent>(new RequestIntentEnumFactory());
+        this.intent.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #priority} (Indicates how quickly the request should be addressed with respect to other requests.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+     */
+    public Enumeration<RequestPriority> getPriorityElement() { 
+      if (this.priority == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RequestGroup.priority");
+        else if (Configuration.doAutoCreate())
+          this.priority = new Enumeration<RequestPriority>(new RequestPriorityEnumFactory()); // bb
+      return this.priority;
+    }
+
+    public boolean hasPriorityElement() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    public boolean hasPriority() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    /**
+     * @param value {@link #priority} (Indicates how quickly the request should be addressed with respect to other requests.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
+     */
+    public RequestGroup setPriorityElement(Enumeration<RequestPriority> value) { 
+      this.priority = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates how quickly the request should be addressed with respect to other requests.
+     */
+    public RequestPriority getPriority() { 
+      return this.priority == null ? null : this.priority.getValue();
+    }
+
+    /**
+     * @param value Indicates how quickly the request should be addressed with respect to other requests.
+     */
+    public RequestGroup setPriority(RequestPriority value) { 
+      if (value == null)
+        this.priority = null;
+      else {
+        if (this.priority == null)
+          this.priority = new Enumeration<RequestPriority>(new RequestPriorityEnumFactory());
+        this.priority.setValue(value);
+      }
       return this;
     }
 
@@ -3193,50 +4195,50 @@ public class RequestGroup extends DomainResource {
     }
 
     /**
-     * @return {@link #occurrenceDateTime} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getOccurrenceDateTime" gives direct access to the value
+     * @return {@link #authoredOn} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getAuthoredOn" gives direct access to the value
      */
-    public DateTimeType getOccurrenceDateTimeElement() { 
-      if (this.occurrenceDateTime == null)
+    public DateTimeType getAuthoredOnElement() { 
+      if (this.authoredOn == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RequestGroup.occurrenceDateTime");
+          throw new Error("Attempt to auto-create RequestGroup.authoredOn");
         else if (Configuration.doAutoCreate())
-          this.occurrenceDateTime = new DateTimeType(); // bb
-      return this.occurrenceDateTime;
+          this.authoredOn = new DateTimeType(); // bb
+      return this.authoredOn;
     }
 
-    public boolean hasOccurrenceDateTimeElement() { 
-      return this.occurrenceDateTime != null && !this.occurrenceDateTime.isEmpty();
+    public boolean hasAuthoredOnElement() { 
+      return this.authoredOn != null && !this.authoredOn.isEmpty();
     }
 
-    public boolean hasOccurrenceDateTime() { 
-      return this.occurrenceDateTime != null && !this.occurrenceDateTime.isEmpty();
+    public boolean hasAuthoredOn() { 
+      return this.authoredOn != null && !this.authoredOn.isEmpty();
     }
 
     /**
-     * @param value {@link #occurrenceDateTime} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getOccurrenceDateTime" gives direct access to the value
+     * @param value {@link #authoredOn} (Indicates when the request group was created.). This is the underlying object with id, value and extensions. The accessor "getAuthoredOn" gives direct access to the value
      */
-    public RequestGroup setOccurrenceDateTimeElement(DateTimeType value) { 
-      this.occurrenceDateTime = value;
+    public RequestGroup setAuthoredOnElement(DateTimeType value) { 
+      this.authoredOn = value;
       return this;
     }
 
     /**
      * @return Indicates when the request group was created.
      */
-    public Date getOccurrenceDateTime() { 
-      return this.occurrenceDateTime == null ? null : this.occurrenceDateTime.getValue();
+    public Date getAuthoredOn() { 
+      return this.authoredOn == null ? null : this.authoredOn.getValue();
     }
 
     /**
      * @param value Indicates when the request group was created.
      */
-    public RequestGroup setOccurrenceDateTime(Date value) { 
+    public RequestGroup setAuthoredOn(Date value) { 
       if (value == null)
-        this.occurrenceDateTime = null;
+        this.authoredOn = null;
       else {
-        if (this.occurrenceDateTime == null)
-          this.occurrenceDateTime = new DateTimeType();
-        this.occurrenceDateTime.setValue(value);
+        if (this.authoredOn == null)
+          this.authoredOn = new DateTimeType();
+        this.authoredOn.setValue(value);
       }
       return this;
     }
@@ -3433,10 +4435,17 @@ public class RequestGroup extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the request.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("definition", "Reference(Any)", "A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, definition));
+        childrenList.add(new Property("basedOn", "Reference(Any)", "A plan, proposal or order that is fulfilled in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        childrenList.add(new Property("replaces", "Reference(Any)", "Completed or terminated request(s) whose function is taken by this new request.", 0, java.lang.Integer.MAX_VALUE, replaces));
+        childrenList.add(new Property("groupIdentifier", "Identifier", "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
+        childrenList.add(new Property("status", "code", "The current state of the request. For request groups, the status reflects the status of all the requests in the group.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("intent", "code", "Indicates the level of authority/intentionality associated with the request and where the request fits into the workflow chain.", 0, java.lang.Integer.MAX_VALUE, intent));
+        childrenList.add(new Property("priority", "code", "Indicates how quickly the request should be addressed with respect to other requests.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("subject", "Reference(Patient|Group)", "The subject for which the request group was created.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Describes the context of the request group, if any.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("occurrenceDateTime", "dateTime", "Indicates when the request group was created.", 0, java.lang.Integer.MAX_VALUE, occurrenceDateTime));
+        childrenList.add(new Property("authoredOn", "dateTime", "Indicates when the request group was created.", 0, java.lang.Integer.MAX_VALUE, authoredOn));
         childrenList.add(new Property("author", "Reference(Device|Practitioner)", "Provides a reference to the author of the request group.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request group was created. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, java.lang.Integer.MAX_VALUE, reason));
         childrenList.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
@@ -3446,10 +4455,17 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : this.definition.toArray(new Base[this.definition.size()]); // Reference
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
+        case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // Reference
+        case -445338488: /*groupIdentifier*/ return this.groupIdentifier == null ? new Base[0] : new Base[] {this.groupIdentifier}; // Identifier
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<RequestStatus>
+        case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<RequestIntent>
+        case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<RequestPriority>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
-        case -298443636: /*occurrenceDateTime*/ return this.occurrenceDateTime == null ? new Base[0] : new Base[] {this.occurrenceDateTime}; // DateTimeType
+        case -1500852503: /*authoredOn*/ return this.authoredOn == null ? new Base[0] : new Base[] {this.authoredOn}; // DateTimeType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
@@ -3460,71 +4476,144 @@ public class RequestGroup extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
-          break;
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          return value;
+        case -1014418093: // definition
+          this.getDefinition().add(castToReference(value)); // Reference
+          return value;
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
+          return value;
+        case -430332865: // replaces
+          this.getReplaces().add(castToReference(value)); // Reference
+          return value;
+        case -445338488: // groupIdentifier
+          this.groupIdentifier = castToIdentifier(value); // Identifier
+          return value;
+        case -892481550: // status
+          value = new RequestStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<RequestStatus>
+          return value;
+        case -1183762788: // intent
+          value = new RequestIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<RequestIntent>
+          return value;
+        case -1165461084: // priority
+          value = new RequestPriorityEnumFactory().fromType(castToCode(value));
+          this.priority = (Enumeration) value; // Enumeration<RequestPriority>
+          return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
-          break;
+          return value;
         case 951530927: // context
           this.context = castToReference(value); // Reference
-          break;
-        case -298443636: // occurrenceDateTime
-          this.occurrenceDateTime = castToDateTime(value); // DateTimeType
-          break;
+          return value;
+        case -1500852503: // authoredOn
+          this.authoredOn = castToDateTime(value); // DateTimeType
+          return value;
         case -1406328437: // author
           this.author = castToReference(value); // Reference
-          break;
+          return value;
         case -934964668: // reason
           this.reason = castToType(value); // Type
-          break;
+          return value;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
-          break;
+          return value;
         case -1422950858: // action
           this.getAction().add((RequestGroupActionComponent) value); // RequestGroupActionComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier"))
-          this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("subject"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("definition")) {
+          this.getDefinition().add(castToReference(value));
+        } else if (name.equals("basedOn")) {
+          this.getBasedOn().add(castToReference(value));
+        } else if (name.equals("replaces")) {
+          this.getReplaces().add(castToReference(value));
+        } else if (name.equals("groupIdentifier")) {
+          this.groupIdentifier = castToIdentifier(value); // Identifier
+        } else if (name.equals("status")) {
+          value = new RequestStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<RequestStatus>
+        } else if (name.equals("intent")) {
+          value = new RequestIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<RequestIntent>
+        } else if (name.equals("priority")) {
+          value = new RequestPriorityEnumFactory().fromType(castToCode(value));
+          this.priority = (Enumeration) value; // Enumeration<RequestPriority>
+        } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        else if (name.equals("context"))
+        } else if (name.equals("context")) {
           this.context = castToReference(value); // Reference
-        else if (name.equals("occurrenceDateTime"))
-          this.occurrenceDateTime = castToDateTime(value); // DateTimeType
-        else if (name.equals("author"))
+        } else if (name.equals("authoredOn")) {
+          this.authoredOn = castToDateTime(value); // DateTimeType
+        } else if (name.equals("author")) {
           this.author = castToReference(value); // Reference
-        else if (name.equals("reason[x]"))
+        } else if (name.equals("reason[x]")) {
           this.reason = castToType(value); // Type
-        else if (name.equals("note"))
+        } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
-        else if (name.equals("action"))
+        } else if (name.equals("action")) {
           this.getAction().add((RequestGroupActionComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -1867885268:  return getSubject(); // Reference
-        case 951530927:  return getContext(); // Reference
-        case -298443636: throw new FHIRException("Cannot make property occurrenceDateTime as it is not a complex type"); // DateTimeType
-        case -1406328437:  return getAuthor(); // Reference
-        case -669418564:  return getReason(); // Type
-        case 3387378:  return addNote(); // Annotation
-        case -1422950858:  return addAction(); // RequestGroupActionComponent
+        case -1618432855:  return addIdentifier(); 
+        case -1014418093:  return addDefinition(); 
+        case -332612366:  return addBasedOn(); 
+        case -430332865:  return addReplaces(); 
+        case -445338488:  return getGroupIdentifier(); 
+        case -892481550:  return getStatusElement();
+        case -1183762788:  return getIntentElement();
+        case -1165461084:  return getPriorityElement();
+        case -1867885268:  return getSubject(); 
+        case 951530927:  return getContext(); 
+        case -1500852503:  return getAuthoredOnElement();
+        case -1406328437:  return getAuthor(); 
+        case -669418564:  return getReason(); 
+        case -934964668:  return getReason(); 
+        case 3387378:  return addNote(); 
+        case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1014418093: /*definition*/ return new String[] {"Reference"};
+        case -332612366: /*basedOn*/ return new String[] {"Reference"};
+        case -430332865: /*replaces*/ return new String[] {"Reference"};
+        case -445338488: /*groupIdentifier*/ return new String[] {"Identifier"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -1183762788: /*intent*/ return new String[] {"code"};
+        case -1165461084: /*priority*/ return new String[] {"code"};
+        case -1867885268: /*subject*/ return new String[] {"Reference"};
+        case 951530927: /*context*/ return new String[] {"Reference"};
+        case -1500852503: /*authoredOn*/ return new String[] {"dateTime"};
+        case -1406328437: /*author*/ return new String[] {"Reference"};
+        case -934964668: /*reason*/ return new String[] {"CodeableConcept", "Reference"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
+        case -1422950858: /*action*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3532,8 +4621,29 @@ public class RequestGroup extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
+        }
+        else if (name.equals("definition")) {
+          return addDefinition();
+        }
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
+        }
+        else if (name.equals("replaces")) {
+          return addReplaces();
+        }
+        else if (name.equals("groupIdentifier")) {
+          this.groupIdentifier = new Identifier();
+          return this.groupIdentifier;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.status");
+        }
+        else if (name.equals("intent")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.intent");
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.priority");
         }
         else if (name.equals("subject")) {
           this.subject = new Reference();
@@ -3543,8 +4653,8 @@ public class RequestGroup extends DomainResource {
           this.context = new Reference();
           return this.context;
         }
-        else if (name.equals("occurrenceDateTime")) {
-          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.occurrenceDateTime");
+        else if (name.equals("authoredOn")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RequestGroup.authoredOn");
         }
         else if (name.equals("author")) {
           this.author = new Reference();
@@ -3576,10 +4686,33 @@ public class RequestGroup extends DomainResource {
       public RequestGroup copy() {
         RequestGroup dst = new RequestGroup();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
+        if (definition != null) {
+          dst.definition = new ArrayList<Reference>();
+          for (Reference i : definition)
+            dst.definition.add(i.copy());
+        };
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
+        };
+        if (replaces != null) {
+          dst.replaces = new ArrayList<Reference>();
+          for (Reference i : replaces)
+            dst.replaces.add(i.copy());
+        };
+        dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
+        dst.status = status == null ? null : status.copy();
+        dst.intent = intent == null ? null : intent.copy();
+        dst.priority = priority == null ? null : priority.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
-        dst.occurrenceDateTime = occurrenceDateTime == null ? null : occurrenceDateTime.copy();
+        dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
         dst.author = author == null ? null : author.copy();
         dst.reason = reason == null ? null : reason.copy();
         if (note != null) {
@@ -3606,10 +4739,12 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroup))
           return false;
         RequestGroup o = (RequestGroup) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
-           && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true) && compareDeep(author, o.author, true)
-           && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true) && compareDeep(action, o.action, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
+           && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
+           && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(authoredOn, o.authoredOn, true)
+           && compareDeep(author, o.author, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
+           && compareDeep(action, o.action, true);
       }
 
       @Override
@@ -3619,12 +4754,14 @@ public class RequestGroup extends DomainResource {
         if (!(other instanceof RequestGroup))
           return false;
         RequestGroup o = (RequestGroup) other;
-        return compareValues(occurrenceDateTime, o.occurrenceDateTime, true);
+        return compareValues(status, o.status, true) && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true)
+           && compareValues(authoredOn, o.authoredOn, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, context
-          , occurrenceDateTime, author, reason, note, action);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, definition, basedOn
+          , replaces, groupIdentifier, status, intent, priority, subject, context, authoredOn
+          , author, reason, note, action);
       }
 
   @Override
@@ -3633,30 +4770,44 @@ public class RequestGroup extends DomainResource {
    }
 
  /**
-   * Search parameter: <b>patient</b>
+   * Search parameter: <b>authored</b>
    * <p>
-   * Description: <b>The identity of a patient to search for request groups</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.subject</b><br>
+   * Description: <b>The date the request group was authored</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>RequestGroup.authoredOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="RequestGroup.subject", description="The identity of a patient to search for request groups", type="reference", target={Patient.class } )
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="authored", path="RequestGroup.authoredOn", description="The date the request group was authored", type="date" )
+  public static final String SP_AUTHORED = "authored";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <b>Fluent Client</b> search parameter constant for <b>authored</b>
    * <p>
-   * Description: <b>The identity of a patient to search for request groups</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.subject</b><br>
+   * Description: <b>The date the request group was authored</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>RequestGroup.authoredOn</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam AUTHORED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_AUTHORED);
 
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>RequestGroup:patient</b>".
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>External identifiers for the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.identifier</b><br>
+   * </p>
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("RequestGroup:patient").toLocked();
+  @SearchParamDefinition(name="identifier", path="RequestGroup.identifier", description="External identifiers for the request group", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>External identifiers for the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
    * Search parameter: <b>subject</b>
@@ -3711,32 +4862,6 @@ public class RequestGroup extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("RequestGroup:author").toLocked();
 
  /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>The context the request group applies to</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.context</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="RequestGroup.context", description="The context the request group applies to", type="reference", target={Encounter.class, EpisodeOfCare.class } )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>The context the request group applies to</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>RequestGroup.context</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>RequestGroup:context</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("RequestGroup:context").toLocked();
-
- /**
    * Search parameter: <b>encounter</b>
    * <p>
    * Description: <b>The encounter the request group applies to</b><br>
@@ -3763,6 +4888,46 @@ public class RequestGroup extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("RequestGroup:encounter").toLocked();
 
  /**
+   * Search parameter: <b>priority</b>
+   * <p>
+   * Description: <b>The priority of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.priority</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="priority", path="RequestGroup.priority", description="The priority of the request group", type="token" )
+  public static final String SP_PRIORITY = "priority";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>priority</b>
+   * <p>
+   * Description: <b>The priority of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.priority</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PRIORITY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PRIORITY);
+
+ /**
+   * Search parameter: <b>intent</b>
+   * <p>
+   * Description: <b>The intent of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.intent</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="intent", path="RequestGroup.intent", description="The intent of the request group", type="token" )
+  public static final String SP_INTENT = "intent";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>intent</b>
+   * <p>
+   * Description: <b>The intent of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.intent</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INTENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INTENT);
+
+ /**
    * Search parameter: <b>participant</b>
    * <p>
    * Description: <b>The participant in the requests in the group</b><br>
@@ -3787,6 +4952,124 @@ public class RequestGroup extends DomainResource {
    * the path value of "<b>RequestGroup:participant</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTICIPANT = new ca.uhn.fhir.model.api.Include("RequestGroup:participant").toLocked();
+
+ /**
+   * Search parameter: <b>group-identifier</b>
+   * <p>
+   * Description: <b>The group identifier for the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.groupIdentifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="group-identifier", path="RequestGroup.groupIdentifier", description="The group identifier for the request group", type="token" )
+  public static final String SP_GROUP_IDENTIFIER = "group-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>group-identifier</b>
+   * <p>
+   * Description: <b>The group identifier for the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.groupIdentifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam GROUP_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_GROUP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to search for request groups</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.subject</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="patient", path="RequestGroup.subject", description="The identity of a patient to search for request groups", type="reference", target={Patient.class } )
+  public static final String SP_PATIENT = "patient";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+   * <p>
+   * Description: <b>The identity of a patient to search for request groups</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PATIENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PATIENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>RequestGroup:patient</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("RequestGroup:patient").toLocked();
+
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>The context the request group applies to</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.context</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context", path="RequestGroup.context", description="The context the request group applies to", type="reference", target={Encounter.class, EpisodeOfCare.class } )
+  public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>The context the request group applies to</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.context</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>RequestGroup:context</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("RequestGroup:context").toLocked();
+
+ /**
+   * Search parameter: <b>definition</b>
+   * <p>
+   * Description: <b>The definition from which the request group is realized</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.definition</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="definition", path="RequestGroup.definition", description="The definition from which the request group is realized", type="reference" )
+  public static final String SP_DEFINITION = "definition";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>definition</b>
+   * <p>
+   * Description: <b>The definition from which the request group is realized</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>RequestGroup.definition</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEFINITION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEFINITION);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>RequestGroup:definition</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_DEFINITION = new ca.uhn.fhir.model.api.Include("RequestGroup:definition").toLocked();
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.status</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="status", path="RequestGroup.status", description="The status of the request group", type="token" )
+  public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the request group</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>RequestGroup.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
 
 }

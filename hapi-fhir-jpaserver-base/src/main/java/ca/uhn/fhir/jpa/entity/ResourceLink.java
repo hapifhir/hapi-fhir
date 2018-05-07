@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,22 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -50,7 +55,8 @@ public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
@@ -59,7 +65,7 @@ public class ResourceLink implements Serializable {
 	private String mySourcePath;
 
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
-	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false)
+	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey=@ForeignKey(name="FK_RESLINK_SOURCE"))
 //	@ContainedIn()
 	private ResourceTable mySourceResource;
 
@@ -72,7 +78,7 @@ public class ResourceLink implements Serializable {
 	private String mySourceResourceType;
 
 	@ManyToOne(optional = true, fetch=FetchType.LAZY)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true)
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, foreignKey=@ForeignKey(name="FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
 	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = true)
@@ -88,22 +94,29 @@ public class ResourceLink implements Serializable {
 	@Field()
 	private String myTargetResourceUrl;
 
+	@Field()
+	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdated;
+
 	public ResourceLink() {
 		super();
 	}
 
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource) {
-		super();
-		setSourcePath(theSourcePath);
-		setSourceResource(theSourceResource);
-		setTargetResource(theTargetResource);
-	}
-
-	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl) {
+	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, IIdType theTargetResourceUrl, Date theUpdated) {
 		super();
 		setSourcePath(theSourcePath);
 		setSourceResource(theSourceResource);
 		setTargetResourceUrl(theTargetResourceUrl);
+		setUpdated(theUpdated);
+	}
+
+	public ResourceLink(String theSourcePath, ResourceTable theSourceResource, ResourceTable theTargetResource, Date theUpdated) {
+		super();
+		setSourcePath(theSourcePath);
+		setSourceResource(theSourceResource);
+		setTargetResource(theTargetResource);
+		setUpdated(theUpdated);
 	}
 
 	@Override
@@ -150,6 +163,10 @@ public class ResourceLink implements Serializable {
 		return myTargetResourceUrl;
 	}
 
+	public Date getUpdated() {
+		return myUpdated;
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
@@ -180,10 +197,22 @@ public class ResourceLink implements Serializable {
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
-		Validate.isTrue(theTargetResourceUrl.hasIdPart());
-		
+
+		if (theTargetResourceUrl.hasIdPart()) {
+			// do nothing
+		} else {
+			// Must have set an url like http://example.org/something
+			// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
+			// treated as the id and 'example.org' was treated as the resource type
+			// TODO: log a warning?
+		}
+
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
+	}
+
+	public void setUpdated(Date theUpdated) {
+		myUpdated = theUpdated;
 	}
 
 	@Override

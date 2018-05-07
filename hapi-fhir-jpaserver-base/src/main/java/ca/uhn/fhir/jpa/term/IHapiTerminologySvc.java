@@ -1,12 +1,20 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ValueSet;
+
 import java.util.List;
+import java.util.Set;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,31 +30,29 @@ import java.util.List;
  * #L%
  */
 
-import java.util.Set;
-
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.rest.method.RequestDetails;
-
 public interface IHapiTerminologySvc {
 
+	void deleteCodeSystem(TermCodeSystem thePersCs);
+
+	ValueSet expandValueSet(ValueSet theValueSetToExpand);
+
+	List<VersionIndependentConcept> expandValueSet(String theValueSet);
+
+	TermConcept findCode(String theCodeSystem, String theCode);
+
+	List<TermConcept> findCodes(String theSystem);
+
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
+
+	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
+
+	List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode);
 
 	Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
 	List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, TermCodeSystemVersion theCodeSytemVersion);
-
-	public boolean supportsSystem(String theCodeSystem);
-
-	List<VersionIndependentConcept> expandValueSet(String theValueSet);
-
-	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
-
-	void storeNewCodeSystemVersion(String theSystem, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails);
-
-	List<TermConcept> findCodes(String theSystem);
+	List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
 
 	void saveDeferred();
 
@@ -55,5 +61,14 @@ public interface IHapiTerminologySvc {
 	 * by changing this flag
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
+
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
+
+	/**
+	 * @return Returns the ID of the created/updated code system
+	 */
+	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+
+	boolean supportsSystem(String theCodeSystem);
 
 }

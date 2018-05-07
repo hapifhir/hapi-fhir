@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -84,9 +84,9 @@ public enum ReportParticipantType {
         }
         public String getDisplay() {
           switch (this) {
-            case TESTENGINE: return "test-engine";
-            case CLIENT: return "client";
-            case SERVER: return "server";
+            case TESTENGINE: return "Test Engine";
+            case CLIENT: return "Client";
+            case SERVER: return "Server";
             default: return "?";
           }
     }

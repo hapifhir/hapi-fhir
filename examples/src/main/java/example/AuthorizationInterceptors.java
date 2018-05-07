@@ -8,21 +8,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
-import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.interceptor.auth.*;
 
+@SuppressWarnings("unused")
 public class AuthorizationInterceptors {
 
    public class PatientResourceProvider implements IResourceProvider
@@ -41,7 +36,8 @@ public class AuthorizationInterceptors {
    }
    
    //START SNIPPET: patientAndAdmin
-   public class PatientAndAdminAuthorizationInterceptor extends AuthorizationInterceptor {
+   @SuppressWarnings("ConstantConditions")
+	public class PatientAndAdminAuthorizationInterceptor extends AuthorizationInterceptor {
       
       @Override
       public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -133,5 +129,16 @@ public class AuthorizationInterceptors {
    }
    //END SNIPPET: conditionalUpdate
 
-   
+	public void authorizeTenantAction() {
+		//START SNIPPET: authorizeTenantAction
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().forTenantIds("TENANTA").andThen()
+					.build();
+			}
+		};
+		//END SNIPPET: authorizeTenantAction
+	}
 }

@@ -50,21 +50,21 @@
         "section": [
           {
             "title": "Reason for admission",
-            "content": {
+            "entry": [{
               "reference": "urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a"
-            }
+            }]
           },
           {
             "title": "Medications on Discharge",
-            "content": {
+            "entry": [{
               "reference": "urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1"
-            }
+            }]
           },
           {
             "title": "Known allergies",
-            "content": {
+            "entry": [{
               "reference": "urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b"
-            }
+            }]
           }
         ]
       }
@@ -86,7 +86,7 @@
             "value": "23"
           }
         ],
-        "name": {
+        "name": [{
           "family": [
             "Careful"
           ],
@@ -96,26 +96,7 @@
           "prefix": [
             "Dr"
           ]
-        },
-        "practitionerRole": [
-          {
-            "managingOrganization": {
-              "reference": "Organization/1"
-            },
-            "role": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/v2/0286",
-                  "code": "RP"
-                }
-              ]
-            },
-            "period": {
-              "start": "2012-01-01",
-              "end": "2012-03-31"
-            }
-          }
-        ]
+        }]
       }
     },
     {
@@ -174,13 +155,12 @@
           }
         ],
         "status": "finished",
-        "class": "inpatient",
         "type": [
           {
             "text": "Orthopedic Admission"
           }
         ],
-        "patient": {
+        "subject": {
           "reference": "Patient/d1"
         },
         "period": {
@@ -250,8 +230,7 @@
           "text": "Reason for admission"
         },
         "valueString": "Acute Asthmatic attack. Was wheezing for days prior to admission.",
-        "status": "final",
-        "reliability": "ok"
+        "status": "final"
       }
     },
     {
@@ -331,7 +310,6 @@
           {
             "resourceType": "Medication",
             "id": "med1",
-            "name": "Theophylline 200mg",
             "code": {
               "coding": [
                 {
@@ -342,16 +320,9 @@
             }
           }
         ],
-        "patient": {
+        "subject": {
           "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
           "display": "Peter Patient"
-        },
-        "prescriber": {
-          "reference": "Practitioner/example",
-          "display": "Peter Practitioner"
-        },
-        "reasonCodeableConcept": {
-          "text": "Management of Asthma"
         },
         "medicationReference": {
           "reference": "#med1",
@@ -359,16 +330,6 @@
         },
         "dosageInstruction": [
           {
-            "additionalInstructions": {
-              "text": "Take with Food"
-            },
-            "scheduledTiming": {
-              "repeat": {
-                "frequency": 2,
-                "period": 1,
-                "periodUnits": "d"
-              }
-            },
             "route": {
               "coding": [
                 {
@@ -380,7 +341,7 @@
             },
             "doseQuantity": {
               "value": 1,
-              "units": "tablet",
+              "unit": "tablet",
               "system": "http://unitsofmeasure.org",
               "code": "tbl"
             }
@@ -424,7 +385,7 @@
       }
     },
     {
-      "base": "urn:uuid:47600e0f-b6b5-4308-84b5-5dec157f7637",
+      "fullUrl": "urn:uuid:47600e0f-b6b5-4308-84b5-5dec157f7637",
       "resource": {
         "resourceType": "AllergyIntolerance",
         "meta": {
@@ -434,33 +395,12 @@
           "status": "generated",
           "div": "<div>Sensitivity to Doxycycline :\n                        Hives</div>"
         },
-        "recordedDate": "2012-09-17",
         "patient": {
           "reference": "http://fhir.healthintersections.com.au/open/Patient/d1",
           "display": "Eve Everywoman"
         },
-        "substance": {
-          "text": "Doxycycline"
-        },
-        "status": "active-confirmed",
         "criticality": "high",
-        "type": "allergy",
-        "event": [
-          {
-            "manifestation": [
-              {
-                "coding": [
-                  {
-                    "system": "http://example.org/system",
-                    "code": "xxx",
-                    "display": "Hives"
-                  }
-                ],
-                "text": "Hives"
-              }
-            ]
-          }
-        ]
+        "type": "allergy"
       }
     }
   ]

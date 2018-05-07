@@ -1,16 +1,39 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,30 +43,170 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.util.UrlUtil;
-
 public class ParameterUtil {
 
-	private static final Set<Class<?>> BINDABLE_INTEGER_TYPES;
+	@SuppressWarnings("unchecked")
+	public static <T extends IIdType> T convertIdToType(IIdType value, Class<T> theIdParamType) {
+		if (value != null && !theIdParamType.isAssignableFrom(value.getClass())) {
+			IIdType newValue = ReflectionUtil.newInstance(theIdParamType);
+			newValue.setValue(value.getValue());
+			value = newValue;
+		}
+		return (T) value;
+	}
 
-	static {
-		HashSet<Class<?>> intTypes = new HashSet<Class<?>>();
-		intTypes.add(IntegerDt.class);
-		intTypes.add(Integer.class);
-		BINDABLE_INTEGER_TYPES = Collections.unmodifiableSet(intTypes);
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		QueryParameterAndBinder binder = null;
+		switch (paramType) {
+		case COMPOSITE:
+			throw new UnsupportedOperationException();
+		case DATE:
+			binder = new QueryParameterAndBinder(DateAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case NUMBER:
+			binder = new QueryParameterAndBinder(NumberAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case QUANTITY:
+			binder = new QueryParameterAndBinder(QuantityAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case REFERENCE:
+			binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case STRING:
+			binder = new QueryParameterAndBinder(StringAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case TOKEN:
+			binder = new QueryParameterAndBinder(TokenAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case URI:
+			binder = new QueryParameterAndBinder(UriAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case HAS:
+			binder = new QueryParameterAndBinder(HasAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		}
 
+		// FIXME null access
+		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
+	}
+
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
+		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
+	}
+
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escape(String theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		StringBuilder b = new StringBuilder();
+
+		for (int i = 0; i < theValue.length(); i++) {
+			char next = theValue.charAt(i);
+			switch (next) {
+			case '$':
+			case ',':
+			case '|':
+			case '\\':
+				b.append('\\');
+				break;
+			default:
+				break;
+			}
+			b.append(next);
+		}
+
+		return b.toString();
+	}
+
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escapeWithDefault(Object theValue) {
+		if (theValue == null) {
+			return "";
+		}
+		return escape(theValue.toString());
+	}
+
+	/**
+	 * Applies {@link #escapeWithDefault(Object)} followed by {@link UrlUtil#escapeUrlParam(String)}
+	 */
+	public static String escapeAndUrlEncode(String theInput) {
+		return UrlUtil.escapeUrlParam(escapeWithDefault(theInput));
+	}
+
+	public static Integer findIdParameterIndex(Method theMethod, FhirContext theContext) {
+		Integer index = findParamAnnotationIndex(theMethod, IdParam.class);
+		if (index != null) {
+			Class<?> paramType = theMethod.getParameterTypes()[index];
+			if (IIdType.class.equals(paramType)) {
+				return index;
+			}
+			boolean isRi = theContext.getVersion().getVersion().isRi();
+			boolean usesHapiId = IdDt.class.equals(paramType);
+			if (isRi == usesHapiId) {
+				throw new ConfigurationException("Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
+			}
+		}
+		return index;
 	}
 
 	// public static Integer findSinceParameterIndex(Method theMethod) {
 	// return findParamIndex(theMethod, Since.class);
 	// }
+
+	public static Integer findParamAnnotationIndex(Method theMethod, Class<?> toFind) {
+		int paramIndex = 0;
+		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
+			for (Annotation nextAnnotation : annotations) {
+				Class<? extends Annotation> class1 = nextAnnotation.annotationType();
+				if (toFind.isAssignableFrom(class1)) {
+					return paramIndex;
+				}
+			}
+			paramIndex++;
+		}
+		return null;
+	}
+
+	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
+		if (theArgument == null) {
+			return null;
+		}
+		if (theType.equals(Integer.class)) {
+			return theArgument.getValue();
+		}
+		IPrimitiveType<?> retVal = (IPrimitiveType<?>) ReflectionUtil.newInstance(theType);
+		retVal.setValueAsString(theArgument.getValueAsString());
+		return retVal;
+	}
+
+	public static boolean isBindableIntegerType(Class<?> theClass) {
+		return Integer.class.isAssignableFrom(theClass)
+				|| IPrimitiveType.class.isAssignableFrom(theClass);
+	}
 
 	public static int nonEscapedIndexOf(String theString, char theCharacter) {
 		for (int i = 0; i < theString.length(); i++) {
@@ -56,44 +219,56 @@ public class ParameterUtil {
 		return -1;
 	}
 
-
-	public static Object fromInteger(Class<?> theType, IntegerDt theArgument) {
-		if (theType.equals(IntegerDt.class)) {
-			if (theArgument == null) {
-				return null;
+	public static String parseETagValue(String value) {
+		String eTagVersion;
+		value = value.trim();
+		if (value.length() > 1) {
+			if (value.charAt(value.length() - 1) == '"') {
+				if (value.charAt(0) == '"') {
+					eTagVersion = value.substring(1, value.length() - 1);
+				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/'
+						&& value.charAt(2) == '"') {
+					eTagVersion = value.substring(3, value.length() - 1);
+				} else {
+					eTagVersion = value;
+				}
+			} else {
+				eTagVersion = value;
 			}
-			return theArgument;
+		} else {
+			eTagVersion = value;
 		}
-		if (theType.equals(Integer.class)) {
-			if (theArgument == null) {
-				return null;
+		return eTagVersion;
+	}
+
+	public static IQueryParameterOr<?> singleton(final IQueryParameterType theParam, final String theParamName) {
+		return new IQueryParameterOr<IQueryParameterType>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<IQueryParameterType> getValuesAsQueryTokens() {
+				return Collections.singletonList(theParam);
 			}
-			return theArgument.getValue();
-		}
-		throw new IllegalArgumentException("Invalid Integer type:" + theType);
-	}
 
-	public static Set<Class<?>> getBindableIntegerTypes() {
-		return BINDABLE_INTEGER_TYPES;
-	}
-
-
-	public static IntegerDt toInteger(Object theArgument) {
-		if (theArgument instanceof IntegerDt) {
-			return (IntegerDt) theArgument;
-		}
-		if (theArgument instanceof Integer) {
-			return new IntegerDt((Integer) theArgument);
-		}
-		return null;
-	}
-
-	static List<String> splitParameterString(String theInput, boolean theUnescapeComponents) {
-		return splitParameterString(theInput, ',', theUnescapeComponents);
+			@Override
+			public void setValuesAsQueryTokens(FhirContext theContext, String theParamName,
+					QualifiedParamList theParameters) {
+				if (theParameters.isEmpty()) {
+					return;
+				}
+				if (theParameters.size() > 1) {
+					throw new IllegalArgumentException(
+							"Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
+				}
+				theParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(),
+						theParameters.get(0));
+			}
+		};
 	}
 
 	static List<String> splitParameterString(String theInput, char theDelimiter, boolean theUnescapeComponents) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		if (theInput != null) {
 			StringBuilder b = new StringBuilder();
 			for (int i = 0; i < theInput.length(); i++) {
@@ -132,56 +307,18 @@ public class ParameterUtil {
 		return retVal;
 	}
 
-	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
-	 * Section</a>
-	 */
-	public static String escapeWithDefault(Object theValue) {
-		if (theValue == null) {
-			return "";
+	public static IntegerDt toInteger(Object theArgument) {
+		if (theArgument instanceof IntegerDt) {
+			return (IntegerDt) theArgument;
 		}
-		return escape(theValue.toString());
-	}
-
-	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
-	 * Section</a>
-	 */
-	public static String escape(String theValue) {
-		if (theValue == null) {
-			return null;
+		if (theArgument instanceof Integer) {
+			return new IntegerDt((Integer) theArgument);
 		}
-		StringBuilder b = new StringBuilder();
-
-		for (int i = 0; i < theValue.length(); i++) {
-			char next = theValue.charAt(i);
-			switch (next) {
-			case '$':
-			case ',':
-			case '|':
-			case '\\':
-				b.append('\\');
-				break;
-			default:
-				break;
-			}
-			b.append(next);
+		if (theArgument instanceof IPrimitiveType) {
+			IPrimitiveType<?> pt = (IPrimitiveType<?>) theArgument;
+			return new IntegerDt(pt.getValueAsString());
 		}
-
-		return b.toString();
-	}
-
-	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
-	 * Section</a>
-	 */
-	public static String escapeAndUrlEncode(String theValue) {
-		if (theValue == null) {
-			return null;
-		}
-		
-		String escaped = escape(theValue);
-		return UrlUtil.escape(escaped);
+		return null;
 	}
 
 	/**
@@ -190,7 +327,7 @@ public class ParameterUtil {
 	 */
 	public static String unescape(String theValue) {
 		if (theValue == null) {
-			return theValue;
+			return null;
 		}
 		if (theValue.indexOf('\\') == -1) {
 			return theValue;

@@ -1,32 +1,23 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu2016may.model.Bundle;
+import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.DomainResource;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.dstu2016may.model.StructureDefinition;
-import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
@@ -56,6 +47,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
 	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
+		retVal.addAll(myCodeSystems.values());
+		retVal.addAll(myStructureDefinitions.values());
+		retVal.addAll(myValueSets.values());
+		return retVal;
+	}
+
+	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 		return new ArrayList<StructureDefinition>(provideStructureDefinitionMap(theContext).values());
 	}
@@ -69,12 +69,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		Map<String, CodeSystem> codeSystems = myCodeSystems;
 		Map<String, ValueSet> valueSets = myValueSets;
 		if (codeSystems == null) {
-			codeSystems = new HashMap<String, CodeSystem>();
-			valueSets = new HashMap<String, ValueSet>();
+			codeSystems = new HashMap<>();
+			valueSets = new HashMap<>();
 
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/valuesets.xml");
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/v2-tables.xml");
-			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/instance/model/dstu3/valueset/v3-codesystems.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/model/valueset/valuesets.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/model/valueset/v2-tables.xml");
+			loadCodeSystems(theContext, codeSystems, valueSets, "/org/hl7/fhir/dstu2016may/model/valueset/v3-codesystems.xml");
 
 			myCodeSystems = codeSystems;
 			myValueSets = valueSets;
@@ -91,7 +91,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		Validate.notBlank(theUri, "theUri must not be null or blank");
-		
+
 		if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 			return (T) fetchStructureDefinition(theContext, theUri);
 		}
@@ -156,27 +156,33 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
 		ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
-		InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
-		if (valuesetText != null) {
-			InputStreamReader reader = new InputStreamReader(valuesetText, Charsets.UTF_8);
+		InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
+		InputStreamReader reader = null;
+		if (inputStream != null) {
+			try {
+				reader = new InputStreamReader(inputStream, Charsets.UTF_8);
 
-			Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
-			for (BundleEntryComponent next : bundle.getEntry()) {
-				if (next.getResource() instanceof CodeSystem) {
-					CodeSystem nextValueSet = (CodeSystem) next.getResource();
-					nextValueSet.getText().setDivAsString("");
-					String system = nextValueSet.getUrl();
-					if (isNotBlank(system)) {
-						theCodeSystems.put(system, nextValueSet);
-					}
-				} else if (next.getResource() instanceof ValueSet) {
-					ValueSet nextValueSet = (ValueSet) next.getResource();
-					nextValueSet.getText().setDivAsString("");
-					String system = nextValueSet.getUrl();
-					if (isNotBlank(system)) {
-						theValueSets.put(system, nextValueSet);
+				Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
+				for (BundleEntryComponent next : bundle.getEntry()) {
+					if (next.getResource() instanceof CodeSystem) {
+						CodeSystem nextValueSet = (CodeSystem) next.getResource();
+						nextValueSet.getText().setDivAsString("");
+						String system = nextValueSet.getUrl();
+						if (isNotBlank(system)) {
+							theCodeSystems.put(system, nextValueSet);
+						}
+					} else if (next.getResource() instanceof ValueSet) {
+						ValueSet nextValueSet = (ValueSet) next.getResource();
+						nextValueSet.getText().setDivAsString("");
+						String system = nextValueSet.getUrl();
+						if (isNotBlank(system)) {
+							theValueSets.put(system, nextValueSet);
+						}
 					}
 				}
+			} finally {
+				IOUtils.closeQuietly(reader);
+				IOUtils.closeQuietly(inputStream);
 			}
 		} else {
 			ourLog.warn("Unable to load resource: {}", theClasspath);
@@ -208,34 +214,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	private Map<String, StructureDefinition> provideStructureDefinitionMap(FhirContext theContext) {
 		Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
 		if (structureDefinitions == null) {
-			structureDefinitions = new HashMap<String, StructureDefinition>();
+			structureDefinitions = new HashMap<>();
 
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-resources.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-types.xml");
-			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/instance/model/dstu3/profile/profiles-others.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/model/profile/profiles-resources.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/model/profile/profiles-types.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/model/profile/profiles-others.xml");
 
 			myStructureDefinitions = structureDefinitions;
 		}
 		return structureDefinitions;
-	}
-
-	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
-		if (cs != null) {
-			boolean caseSensitive = true;
-			if (cs.hasCaseSensitive()) {
-				caseSensitive = cs.getCaseSensitive();
-			}
-			
-			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
-			
-			if (retVal != null) {
-				return retVal;
-			}
-		}
-
-		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
 	private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
@@ -243,7 +230,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		if (theCaseSensitive == false) {
 			code = code.toUpperCase();
 		}
-		
+
 		return testIfConceptIsInListInner(conceptList, theCaseSensitive, code);
 	}
 
@@ -265,8 +252,27 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 				break;
 			}
 		}
-		
+
 		return retVal;
+	}
+
+	@Override
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		CodeSystem cs = fetchCodeSystem(theContext, theCodeSystem);
+		if (cs != null) {
+			boolean caseSensitive = true;
+			if (cs.hasCaseSensitive()) {
+				caseSensitive = cs.getCaseSensitive();
+			}
+
+			CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
+
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+
+		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
 }

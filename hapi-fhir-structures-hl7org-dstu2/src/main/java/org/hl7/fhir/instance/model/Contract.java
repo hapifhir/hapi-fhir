@@ -31,19 +31,14 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
  */
@@ -173,6 +168,29 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("role", "CodeableConcept", "Role type of actors assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, role));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity"))
+          this.entity = castToReference(value); // Reference
+        else if (name.equals("role"))
+          this.getRole().add(castToCodeableConcept(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("entity")) {
+          this.entity = new Reference();
+          return this.entity;
+        }
+        else if (name.equals("role")) {
+          return addRole();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ActorComponent copy() {
         ActorComponent dst = new ActorComponent();
         copyValues(dst);
@@ -209,6 +227,11 @@ public class Contract extends DomainResource {
         return super.isEmpty() && (entity == null || entity.isEmpty()) && (role == null || role.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Contract.actor";
+
+  }
 
   }
 
@@ -289,26 +312,26 @@ public class Contract extends DomainResource {
         /**
          * @return {@link #entity} (Specific type of Contract Valued Item that may be priced.)
          */
-        public CodeableConcept getEntityCodeableConcept() throws Exception { 
+        public CodeableConcept getEntityCodeableConcept() throws FHIRException { 
           if (!(this.entity instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (CodeableConcept) this.entity;
         }
 
-        public boolean hasEntityCodeableConcept() throws Exception { 
+        public boolean hasEntityCodeableConcept() { 
           return this.entity instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #entity} (Specific type of Contract Valued Item that may be priced.)
          */
-        public Reference getEntityReference() throws Exception { 
+        public Reference getEntityReference() throws FHIRException { 
           if (!(this.entity instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
         }
 
-        public boolean hasEntityReference() throws Exception { 
+        public boolean hasEntityReference() { 
           return this.entity instanceof Reference;
         }
 
@@ -579,6 +602,67 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("net", "Money", "Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity[x]"))
+          this.entity = (Type) value; // Type
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("effectiveTime"))
+          this.effectiveTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("unitPrice"))
+          this.unitPrice = castToMoney(value); // Money
+        else if (name.equals("factor"))
+          this.factor = castToDecimal(value); // DecimalType
+        else if (name.equals("points"))
+          this.points = castToDecimal(value); // DecimalType
+        else if (name.equals("net"))
+          this.net = castToMoney(value); // Money
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("entityCodeableConcept")) {
+          this.entity = new CodeableConcept();
+          return this.entity;
+        }
+        else if (name.equals("entityReference")) {
+          this.entity = new Reference();
+          return this.entity;
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("effectiveTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.effectiveTime");
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("unitPrice")) {
+          this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+        else if (name.equals("factor")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.factor");
+        }
+        else if (name.equals("points")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.points");
+        }
+        else if (name.equals("net")) {
+          this.net = new Money();
+          return this.net;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ValuedItemComponent copy() {
         ValuedItemComponent dst = new ValuedItemComponent();
         copyValues(dst);
@@ -622,6 +706,11 @@ public class Contract extends DomainResource {
            && (unitPrice == null || unitPrice.isEmpty()) && (factor == null || factor.isEmpty()) && (points == null || points.isEmpty())
            && (net == null || net.isEmpty());
       }
+
+  public String fhirType() {
+    return "Contract.valuedItem";
+
+  }
 
   }
 
@@ -787,6 +876,35 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("signature", "string", "Legally binding Contract DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("party"))
+          this.party = castToReference(value); // Reference
+        else if (name.equals("signature"))
+          this.signature = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("party")) {
+          this.party = new Reference();
+          return this.party;
+        }
+        else if (name.equals("signature")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.signature");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public SignatoryComponent copy() {
         SignatoryComponent dst = new SignatoryComponent();
         copyValues(dst);
@@ -821,6 +939,11 @@ public class Contract extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (party == null || party.isEmpty())
            && (signature == null || signature.isEmpty());
       }
+
+  public String fhirType() {
+    return "Contract.signer";
+
+  }
 
   }
 
@@ -1373,6 +1496,83 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("group", "@Contract.term", "Nested group of Contract Provisions.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("issued"))
+          this.issued = castToDateTime(value); // DateTimeType
+        else if (name.equals("applies"))
+          this.applies = castToPeriod(value); // Period
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subType"))
+          this.subType = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("action"))
+          this.getAction().add(castToCodeableConcept(value));
+        else if (name.equals("actionReason"))
+          this.getActionReason().add(castToCodeableConcept(value));
+        else if (name.equals("actor"))
+          this.getActor().add((TermActorComponent) value);
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("valuedItem"))
+          this.getValuedItem().add((TermValuedItemComponent) value);
+        else if (name.equals("group"))
+          this.getGroup().add((TermComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("issued")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.issued");
+        }
+        else if (name.equals("applies")) {
+          this.applies = new Period();
+          return this.applies;
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("subType")) {
+          this.subType = new CodeableConcept();
+          return this.subType;
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("action")) {
+          return addAction();
+        }
+        else if (name.equals("actionReason")) {
+          return addActionReason();
+        }
+        else if (name.equals("actor")) {
+          return addActor();
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.text");
+        }
+        else if (name.equals("valuedItem")) {
+          return addValuedItem();
+        }
+        else if (name.equals("group")) {
+          return addGroup();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TermComponent copy() {
         TermComponent dst = new TermComponent();
         copyValues(dst);
@@ -1442,6 +1642,11 @@ public class Contract extends DomainResource {
            && (actor == null || actor.isEmpty()) && (text == null || text.isEmpty()) && (valuedItem == null || valuedItem.isEmpty())
            && (group == null || group.isEmpty());
       }
+
+  public String fhirType() {
+    return "Contract.term";
+
+  }
 
   }
 
@@ -1568,6 +1773,29 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("role", "CodeableConcept", "Role played by the actor assigned this role in this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, role));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity"))
+          this.entity = castToReference(value); // Reference
+        else if (name.equals("role"))
+          this.getRole().add(castToCodeableConcept(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("entity")) {
+          this.entity = new Reference();
+          return this.entity;
+        }
+        else if (name.equals("role")) {
+          return addRole();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TermActorComponent copy() {
         TermActorComponent dst = new TermActorComponent();
         copyValues(dst);
@@ -1604,6 +1832,11 @@ public class Contract extends DomainResource {
         return super.isEmpty() && (entity == null || entity.isEmpty()) && (role == null || role.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Contract.term.actor";
+
+  }
 
   }
 
@@ -1684,26 +1917,26 @@ public class Contract extends DomainResource {
         /**
          * @return {@link #entity} (Specific type of Contract Provision Valued Item that may be priced.)
          */
-        public CodeableConcept getEntityCodeableConcept() throws Exception { 
+        public CodeableConcept getEntityCodeableConcept() throws FHIRException { 
           if (!(this.entity instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (CodeableConcept) this.entity;
         }
 
-        public boolean hasEntityCodeableConcept() throws Exception { 
+        public boolean hasEntityCodeableConcept() { 
           return this.entity instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #entity} (Specific type of Contract Provision Valued Item that may be priced.)
          */
-        public Reference getEntityReference() throws Exception { 
+        public Reference getEntityReference() throws FHIRException { 
           if (!(this.entity instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
         }
 
-        public boolean hasEntityReference() throws Exception { 
+        public boolean hasEntityReference() { 
           return this.entity instanceof Reference;
         }
 
@@ -1974,6 +2207,67 @@ public class Contract extends DomainResource {
           childrenList.add(new Property("net", "Money", "Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("entity[x]"))
+          this.entity = (Type) value; // Type
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("effectiveTime"))
+          this.effectiveTime = castToDateTime(value); // DateTimeType
+        else if (name.equals("quantity"))
+          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("unitPrice"))
+          this.unitPrice = castToMoney(value); // Money
+        else if (name.equals("factor"))
+          this.factor = castToDecimal(value); // DecimalType
+        else if (name.equals("points"))
+          this.points = castToDecimal(value); // DecimalType
+        else if (name.equals("net"))
+          this.net = castToMoney(value); // Money
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("entityCodeableConcept")) {
+          this.entity = new CodeableConcept();
+          return this.entity;
+        }
+        else if (name.equals("entityReference")) {
+          this.entity = new Reference();
+          return this.entity;
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("effectiveTime")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.effectiveTime");
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("unitPrice")) {
+          this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+        else if (name.equals("factor")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.factor");
+        }
+        else if (name.equals("points")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.points");
+        }
+        else if (name.equals("net")) {
+          this.net = new Money();
+          return this.net;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public TermValuedItemComponent copy() {
         TermValuedItemComponent dst = new TermValuedItemComponent();
         copyValues(dst);
@@ -2018,6 +2312,11 @@ public class Contract extends DomainResource {
            && (net == null || net.isEmpty());
       }
 
+  public String fhirType() {
+    return "Contract.term.valuedItem";
+
+  }
+
   }
 
     @Block()
@@ -2056,26 +2355,26 @@ public class Contract extends DomainResource {
         /**
          * @return {@link #content} (Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.)
          */
-        public Attachment getContentAttachment() throws Exception { 
+        public Attachment getContentAttachment() throws FHIRException { 
           if (!(this.content instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
-        public boolean hasContentAttachment() throws Exception { 
+        public boolean hasContentAttachment() { 
           return this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.)
          */
-        public Reference getContentReference() throws Exception { 
+        public Reference getContentReference() throws FHIRException { 
           if (!(this.content instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
-        public boolean hasContentReference() throws Exception { 
+        public boolean hasContentReference() { 
           return this.content instanceof Reference;
         }
 
@@ -2095,6 +2394,28 @@ public class Contract extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, java.lang.Integer.MAX_VALUE, content));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]"))
+          this.content = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("contentAttachment")) {
+          this.content = new Attachment();
+          return this.content;
+        }
+        else if (name.equals("contentReference")) {
+          this.content = new Reference();
+          return this.content;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public FriendlyLanguageComponent copy() {
         FriendlyLanguageComponent dst = new FriendlyLanguageComponent();
@@ -2126,6 +2447,11 @@ public class Contract extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (content == null || content.isEmpty());
       }
+
+  public String fhirType() {
+    return "Contract.friendly";
+
+  }
 
   }
 
@@ -2165,26 +2491,26 @@ public class Contract extends DomainResource {
         /**
          * @return {@link #content} (Contract legal text in human renderable form.)
          */
-        public Attachment getContentAttachment() throws Exception { 
+        public Attachment getContentAttachment() throws FHIRException { 
           if (!(this.content instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
-        public boolean hasContentAttachment() throws Exception { 
+        public boolean hasContentAttachment() { 
           return this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (Contract legal text in human renderable form.)
          */
-        public Reference getContentReference() throws Exception { 
+        public Reference getContentReference() throws FHIRException { 
           if (!(this.content instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
-        public boolean hasContentReference() throws Exception { 
+        public boolean hasContentReference() { 
           return this.content instanceof Reference;
         }
 
@@ -2204,6 +2530,28 @@ public class Contract extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, java.lang.Integer.MAX_VALUE, content));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]"))
+          this.content = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("contentAttachment")) {
+          this.content = new Attachment();
+          return this.content;
+        }
+        else if (name.equals("contentReference")) {
+          this.content = new Reference();
+          return this.content;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public LegalLanguageComponent copy() {
         LegalLanguageComponent dst = new LegalLanguageComponent();
@@ -2235,6 +2583,11 @@ public class Contract extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (content == null || content.isEmpty());
       }
+
+  public String fhirType() {
+    return "Contract.legal";
+
+  }
 
   }
 
@@ -2274,26 +2627,26 @@ public class Contract extends DomainResource {
         /**
          * @return {@link #content} (Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).)
          */
-        public Attachment getContentAttachment() throws Exception { 
+        public Attachment getContentAttachment() throws FHIRException { 
           if (!(this.content instanceof Attachment))
-            throw new Exception("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
-        public boolean hasContentAttachment() throws Exception { 
+        public boolean hasContentAttachment() { 
           return this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).)
          */
-        public Reference getContentReference() throws Exception { 
+        public Reference getContentReference() throws FHIRException { 
           if (!(this.content instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
-        public boolean hasContentReference() throws Exception { 
+        public boolean hasContentReference() { 
           return this.content instanceof Reference;
         }
 
@@ -2313,6 +2666,28 @@ public class Contract extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, java.lang.Integer.MAX_VALUE, content));
         }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("content[x]"))
+          this.content = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("contentAttachment")) {
+          this.content = new Attachment();
+          return this.content;
+        }
+        else if (name.equals("contentReference")) {
+          this.content = new Reference();
+          return this.content;
+        }
+        else
+          return super.addChild(name);
+      }
 
       public ComputableLanguageComponent copy() {
         ComputableLanguageComponent dst = new ComputableLanguageComponent();
@@ -2344,6 +2719,11 @@ public class Contract extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (content == null || content.isEmpty());
       }
+
+  public String fhirType() {
+    return "Contract.rule";
+
+  }
 
   }
 
@@ -3079,26 +3459,26 @@ public class Contract extends DomainResource {
     /**
      * @return {@link #binding} (Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.)
      */
-    public Attachment getBindingAttachment() throws Exception { 
+    public Attachment getBindingAttachment() throws FHIRException { 
       if (!(this.binding instanceof Attachment))
-        throw new Exception("Type mismatch: the type Attachment was expected, but "+this.binding.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.binding.getClass().getName()+" was encountered");
       return (Attachment) this.binding;
     }
 
-    public boolean hasBindingAttachment() throws Exception { 
+    public boolean hasBindingAttachment() { 
       return this.binding instanceof Attachment;
     }
 
     /**
      * @return {@link #binding} (Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.)
      */
-    public Reference getBindingReference() throws Exception { 
+    public Reference getBindingReference() throws FHIRException { 
       if (!(this.binding instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.binding.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.binding.getClass().getName()+" was encountered");
       return (Reference) this.binding;
     }
 
-    public boolean hasBindingReference() throws Exception { 
+    public boolean hasBindingReference() { 
       return this.binding instanceof Reference;
     }
 
@@ -3255,6 +3635,121 @@ public class Contract extends DomainResource {
         childrenList.add(new Property("legal", "", "List of Legal expressions or representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, legal));
         childrenList.add(new Property("rule", "", "List of Computable Policy Rule Language Representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, rule));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("issued"))
+          this.issued = castToDateTime(value); // DateTimeType
+        else if (name.equals("applies"))
+          this.applies = castToPeriod(value); // Period
+        else if (name.equals("subject"))
+          this.getSubject().add(castToReference(value));
+        else if (name.equals("authority"))
+          this.getAuthority().add(castToReference(value));
+        else if (name.equals("domain"))
+          this.getDomain().add(castToReference(value));
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("subType"))
+          this.getSubType().add(castToCodeableConcept(value));
+        else if (name.equals("action"))
+          this.getAction().add(castToCodeableConcept(value));
+        else if (name.equals("actionReason"))
+          this.getActionReason().add(castToCodeableConcept(value));
+        else if (name.equals("actor"))
+          this.getActor().add((ActorComponent) value);
+        else if (name.equals("valuedItem"))
+          this.getValuedItem().add((ValuedItemComponent) value);
+        else if (name.equals("signer"))
+          this.getSigner().add((SignatoryComponent) value);
+        else if (name.equals("term"))
+          this.getTerm().add((TermComponent) value);
+        else if (name.equals("binding[x]"))
+          this.binding = (Type) value; // Type
+        else if (name.equals("friendly"))
+          this.getFriendly().add((FriendlyLanguageComponent) value);
+        else if (name.equals("legal"))
+          this.getLegal().add((LegalLanguageComponent) value);
+        else if (name.equals("rule"))
+          this.getRule().add((ComputableLanguageComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("issued")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Contract.issued");
+        }
+        else if (name.equals("applies")) {
+          this.applies = new Period();
+          return this.applies;
+        }
+        else if (name.equals("subject")) {
+          return addSubject();
+        }
+        else if (name.equals("authority")) {
+          return addAuthority();
+        }
+        else if (name.equals("domain")) {
+          return addDomain();
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("subType")) {
+          return addSubType();
+        }
+        else if (name.equals("action")) {
+          return addAction();
+        }
+        else if (name.equals("actionReason")) {
+          return addActionReason();
+        }
+        else if (name.equals("actor")) {
+          return addActor();
+        }
+        else if (name.equals("valuedItem")) {
+          return addValuedItem();
+        }
+        else if (name.equals("signer")) {
+          return addSigner();
+        }
+        else if (name.equals("term")) {
+          return addTerm();
+        }
+        else if (name.equals("bindingAttachment")) {
+          this.binding = new Attachment();
+          return this.binding;
+        }
+        else if (name.equals("bindingReference")) {
+          this.binding = new Reference();
+          return this.binding;
+        }
+        else if (name.equals("friendly")) {
+          return addFriendly();
+        }
+        else if (name.equals("legal")) {
+          return addLegal();
+        }
+        else if (name.equals("rule")) {
+          return addRule();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Contract";
+
+  }
 
       public Contract copy() {
         Contract dst = new Contract();

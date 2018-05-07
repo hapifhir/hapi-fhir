@@ -1,17 +1,32 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.persistence.EntityManager;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu3Config;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
@@ -28,39 +43,29 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.TestDstu3Config;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.TestUtil;
+import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
-//@formatter:off
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {TestDstu3Config.class})
-//@formatter:on
+@ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	private static JpaValidationSupportChainDstu3 ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
-	
 	@Autowired
-	@Qualifier("mySearchParameterDaoDstu3")
-	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Qualifier("myResourceCountsCache")
+	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
-	protected ISearchParamRegistry mySearchParamRegsitry;
-//	@Autowired
-//	protected HapiWorkerContext myHapiWorkerContext;
+	@Qualifier("myCoverageDaoDstu3")
+	protected IFhirResourceDao<Coverage> myCoverageDao;
+	@Autowired
+	protected IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
@@ -96,11 +101,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myDeviceDaoDstu3")
 	protected IFhirResourceDao<Device> myDeviceDao;
 	@Autowired
-	@Qualifier("myDiagnosticRequestDaoDstu3")
-	protected IFhirResourceDao<DiagnosticRequest> myDiagnosticRequestDao;
-	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu3")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
+	@Autowired
+	@Qualifier("myBinaryDaoDstu3")
+	protected IFhirResourceDao<Binary> myBinaryDao;
 	@Autowired
 	@Qualifier("myEncounterDaoDstu3")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
@@ -110,11 +115,15 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected FhirContext myFhirCtx;
 	@Autowired
+	@Qualifier("myGroupDaoDstu3")
+	protected IFhirResourceDao<Group> myGroupDao;
+	@Autowired
 	@Qualifier("myImmunizationDaoDstu3")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
-	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	@Qualifier("myImmunizationRecommendationDaoDstu3")
+	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
+	protected IServerInterceptor myInterceptor;
 	@Autowired
 	@Qualifier("myLocationDaoDstu3")
 	protected IFhirResourceDao<Location> myLocationDao;
@@ -122,14 +131,17 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myMediaDaoDstu3")
 	protected IFhirResourceDao<Media> myMediaDao;
 	@Autowired
-	@Qualifier("myMedicationDaoDstu3")
-	protected IFhirResourceDao<Medication> myMedicationDao;
-	@Autowired
 	@Qualifier("myMedicationAdministrationDaoDstu3")
 	protected IFhirResourceDao<MedicationAdministration> myMedicationAdministrationDao;
 	@Autowired
+	@Qualifier("myMedicationDaoDstu3")
+	protected IFhirResourceDao<Medication> myMedicationDao;
+	@Autowired
 	@Qualifier("myMedicationRequestDaoDstu3")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
+	@Autowired
+	@Qualifier("myMedicationStatementDaoDstu3")
+	protected IFhirResourceDao<MedicationStatement> myMedicationStatementDao;
 	@Autowired
 	@Qualifier("myNamingSystemDaoDstu3")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
@@ -143,11 +155,16 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
+	protected DatabaseBackedPagingProvider myPagingProvider;
+	@Autowired
 	@Qualifier("myPatientDaoDstu3")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
 	@Qualifier("myPractitionerDaoDstu3")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
+	@Autowired
+	@Qualifier("myProcedureRequestDaoDstu3")
+	protected IFhirResourceDao<ProcedureRequest> myProcedureRequestDao;
 	@Autowired
 	@Qualifier("myQuestionnaireDaoDstu3")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
@@ -158,9 +175,24 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myResourceProvidersDstu3")
 	protected Object myResourceProviders;
 	@Autowired
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
+	protected IResourceTagDao myResourceTagDao;
+	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
+	@Autowired
+	protected ISearchDao mySearchEntityDao;
+	@Autowired
+	@Qualifier("mySearchParameterDaoDstu3")
+	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
+	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegsitry;
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	@Autowired
@@ -179,7 +211,14 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("mySystemProviderDstu3")
 	protected JpaSystemProviderDstu3 mySystemProvider;
 	@Autowired
+	protected ITagDefinitionDao myTagDefinitionDao;
+	@Autowired
+	@Qualifier("myTaskDaoDstu3")
+	protected IFhirResourceDao<Task> myTaskDao;
+	@Autowired
 	protected IHapiTerminologySvc myTermSvc;
+	@Autowired
+	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
@@ -189,7 +228,17 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
-	protected PlatformTransactionManager myTransactionMgr;
+	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+
+	@After()
+	public void afterCleanupDao() {
+		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
+		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+		myDaoConfig.getInterceptors().clear();
+	}
+
 	@After()
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
@@ -199,7 +248,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
+		myDaoConfig.getInterceptors().add(myInterceptor);
 	}
 
 	@Before
@@ -211,13 +260,13 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		ftem.flushToIndexes();
 
 		myDaoConfig.setSchedulingDisabled(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager);
+		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}
 
 	@Before
@@ -225,6 +274,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setHardSearchLimit(1000);
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
+		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 	}
 
 	@Override
@@ -238,7 +288,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 			fail("Unable to load resource: " + resourceName);
 		}
 		String string = IOUtils.toString(stream, "UTF-8");
-		IParser newJsonParser = MethodUtil.detectEncodingNoDefault(string).newParser(myFhirCtx);
+		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
 	}
 
@@ -254,6 +304,15 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainDstu3.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
+		String linkNext = theBundle.getLink("next").getUrl();
+		linkNext = linkNext.substring(linkNext.indexOf('?'));
+		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
+		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
+		String uuid = uuidParams[0];
+		return uuid;
 	}
 
 }

@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import ca.uhn.fhir.jpa.util.JpaConstants;
+import org.hl7.fhir.dstu3.model.*;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +26,19 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.Constants;
 
 public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDstu3<Encounter> {
 
 	/**
 	 * Encounter/123/$everything
 	 */
-	//@formatter:off
-	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public ca.uhn.fhir.rest.server.IBundleProvider EncounterInstanceEverything(
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+	public IBundleProvider EncounterInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -60,7 +56,6 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 			@Sort
 			SortSpec theSortSpec
 			) {
-		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
@@ -72,9 +67,8 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 		/**
 		 * /Encounter/$everything
 		 */
-		//@formatter:off
-		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-		public ca.uhn.fhir.rest.server.IBundleProvider EncounterTypeEverything(
+		@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+		public IBundleProvider EncounterTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -89,7 +83,6 @@ public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDs
 				@Sort
 				SortSpec theSortSpec
 				) {
-			//@formatter:on
 
 			startRequest(theServletRequest);
 			try {

@@ -10,7 +10,7 @@ package org.hl7.fhir.dstu2016may.hapi.rest.server;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,50 +21,26 @@ package org.hl7.fhir.dstu2016may.hapi.rest.server;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu2016may.model.Bundle;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.dstu2016may.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu2016may.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.dstu2016may.model.DomainResource;
-import org.hl7.fhir.dstu2016may.model.IdType;
-import org.hl7.fhir.dstu2016may.model.Resource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.Bundle.*;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.server.BundleInclusionRule;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServer;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 
+	private String myBase;
 	private Bundle myBundle;
 	private FhirContext myContext;
-	private String myBase;
 
 	public Dstu2_1BundleFactory(FhirContext theContext) {
 		myContext = theContext;
@@ -84,13 +60,13 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			Resource next = (Resource) nextBaseRes;
 			Set<String> containedIds = new HashSet<String>();
 			if (next instanceof DomainResource) {
-				for (Resource nextContained : ((DomainResource)next).getContained()) {
+				for (Resource nextContained : ((DomainResource) next).getContained()) {
 					if (nextContained.getIdElement().isEmpty() == false) {
 						containedIds.add(nextContained.getIdElement().getValue());
 					}
 				}
 			}
-			
+
 			List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
 			do {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
@@ -156,9 +132,7 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 
 	@Override
 	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
-		if (myBundle == null) {
-			myBundle = new Bundle();
-		}
+		ensureBundle();
 
 		List<IAnyResource> includedResources = new ArrayList<IAnyResource>();
 		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
@@ -172,9 +146,9 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 		for (IBaseResource next : theResult) {
 
 			Set<String> containedIds = new HashSet<String>();
-			
+
 			if (next instanceof DomainResource) {
-				for (Resource nextContained : ((DomainResource)next).getContained()) {
+				for (Resource nextContained : ((DomainResource) next).getContained()) {
 					if (isNotBlank(nextContained.getId())) {
 						containedIds.add(nextContained.getId());
 					}
@@ -187,7 +161,7 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
 					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
-						continue; 
+						continue;
 					}
 
 					IAnyResource nextRes = (IAnyResource) nextRefInfo.getResourceReference().getResource();
@@ -224,7 +198,7 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			} while (references.isEmpty() == false);
 
 			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
-			Resource nextAsResource = (Resource)next;
+			Resource nextAsResource = (Resource) next;
 			IIdType id = populateBundleEntryFullUrl(next, entry);
 			String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
 			if (httpVerb != null) {
@@ -233,7 +207,7 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 					entry.getRequest().setUrl(id.getValue());
 				}
 			}
-			
+
 			String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
 			if (searchMode != null) {
 				entry.getSearch().getModeElement().setValueAsString(searchMode);
@@ -251,26 +225,16 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 
 	}
 
-	private IIdType populateBundleEntryFullUrl(IBaseResource next, BundleEntryComponent entry) {
-		IIdType idElement = null;
-		if (next.getIdElement().hasBaseUrl()) {
-			idElement = next.getIdElement();
-			entry.setFullUrl(idElement.toVersionless().getValue());
-		} else {
-			if (isNotBlank(myBase) && next.getIdElement().hasIdPart()) {
-				idElement = next.getIdElement();
-				idElement = idElement.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
-				entry.setFullUrl(idElement.toVersionless().getValue());
-			}
-		}
-		return idElement;
-	}
-
 	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
+	public void addRootPropertiesToBundle(String theId, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType,
+													  IPrimitiveType<Date> theLastUpdated) {
+		ensureBundle();
 
 		myBase = theServerBase;
-		
+
+		if (myBundle.getIdElement().isEmpty()) {
+			myBundle.setId(theId);
+		}
 		if (myBundle.getIdElement().isEmpty()) {
 			myBundle.setId(UUID.randomUUID().toString());
 		}
@@ -279,8 +243,14 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			myBundle.getMeta().getLastUpdatedElement().setValueAsString(theLastUpdated.getValueAsString());
 		}
 
-		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theCompleteUrl)) {
-			myBundle.addLink().setRelation("self").setUrl(theCompleteUrl);
+		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkSelf)) {
+			myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theLinkSelf);
+		}
+		if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theLinkNext)) {
+			myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theLinkNext);
+		}
+		if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theLinkPrev)) {
+			myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theLinkPrev);
 		}
 
 		if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
@@ -292,9 +262,10 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 		}
 	}
 
-	@Override
-	public ca.uhn.fhir.model.api.Bundle getDstu1Bundle() {
-		return null;
+	private void ensureBundle() {
+		if (myBundle == null) {
+			myBundle = new Bundle();
+		}
 	}
 
 	@Override
@@ -312,82 +283,9 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(IRestfulServer<?> theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
-			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
-		myBase = theServerBase;
-		
-		int numToReturn;
-		String searchId = null;
-		List<IBaseResource> resourceList;
-		if (theServer.getPagingProvider() == null) {
-			numToReturn = theResult.size();
-			if (numToReturn > 0) {
-				resourceList = theResult.getResources(0, numToReturn);
-			} else {
-				resourceList = Collections.emptyList();
-			}
-			RestfulServerUtils.validateResourceListNotNull(resourceList);
-
-		} else {
-			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null) {
-				numToReturn = pagingProvider.getDefaultPageSize();
-			} else {
-				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
-			}
-
-			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
-			if (numToReturn > 0) {
-				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
-			} else {
-				resourceList = Collections.emptyList();
-			}
-			RestfulServerUtils.validateResourceListNotNull(resourceList);
-
-			if (theSearchId != null) {
-				searchId = theSearchId;
-			} else {
-				if (theResult.size() > numToReturn) {
-					searchId = pagingProvider.storeResultList(theResult);
-					Validate.notNull(searchId, "Paging provider returned null searchId");
-				}
-			}
-		}
-
-		for (IBaseResource next : resourceList) {
-			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
-				if (!(next instanceof BaseOperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-				}
-			}
-		}
-
-		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
-
-		if (theServer.getPagingProvider() != null) {
-			int limit;
-			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-			if (searchId != null) {
-				if (theOffset + numToReturn < theResult.size()) {
-					myBundle.addLink().setRelation(Constants.LINK_NEXT)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint, theBundleType));
-				}
-				if (theOffset > 0) {
-					int start = Math.max(0, theOffset - limit);
-					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint, theBundleType));
-				}
-			}
-		}
-	}
-
-	@Override
 	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
 			BundleTypeEnum theBundleType) {
-		myBundle = new Bundle();
+		ensureBundle();
 
 		myBundle.setId(UUID.randomUUID().toString());
 
@@ -425,6 +323,21 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 	@Override
 	public void initializeWithBundleResource(IBaseResource theBundle) {
 		myBundle = (Bundle) theBundle;
+	}
+
+	private IIdType populateBundleEntryFullUrl(IBaseResource next, BundleEntryComponent entry) {
+		IIdType idElement = null;
+		if (next.getIdElement().hasBaseUrl()) {
+			idElement = next.getIdElement();
+			entry.setFullUrl(idElement.toVersionless().getValue());
+		} else {
+			if (isNotBlank(myBase) && next.getIdElement().hasIdPart()) {
+				idElement = next.getIdElement();
+				idElement = idElement.withServerBase(myBase, myContext.getResourceDefinition(next).getName());
+				entry.setFullUrl(idElement.toVersionless().getValue());
+			}
+		}
+		return idElement;
 	}
 
 	@Override

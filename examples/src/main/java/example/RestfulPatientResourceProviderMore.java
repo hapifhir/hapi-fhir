@@ -2,89 +2,31 @@ package example;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.AddTags;
-import ca.uhn.fhir.rest.annotation.At;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.DeleteTags;
-import ca.uhn.fhir.rest.annotation.Elements;
-import ca.uhn.fhir.rest.annotation.GetTags;
-import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.Metadata;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.TagListParam;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 
 @SuppressWarnings("unused")
 public abstract class RestfulPatientResourceProviderMore implements IResourceProvider {
@@ -142,13 +84,13 @@ public List<Patient> search(
 public class PatientRp implements IResourceProvider {
    
    @Override
-   public Class<? extends IResource> getResourceType() {
+   public Class<? extends IBaseResource> getResourceType() {
       return Patient.class;
    }
    
    @Search(compartmentName="Condition")
-   public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
-      List<IResource> retVal=new ArrayList<IResource>(); 
+   public List<IBaseResource> searchCompartment(@IdParam IdType thePatientId) {
+      List<IBaseResource> retVal=new ArrayList<IBaseResource>(); 
       
       // populate this with resources of any type that are a part of the
       // "Condition" compartment for the Patient with ID "thePatientId"
@@ -200,26 +142,27 @@ public List<Patient> findPatients(
 
 //START SNIPPET: referenceSimple
 @Search
-public List<Patient> findPatientsWithSimpleReference(
-		@OptionalParam(name=Patient.SP_CAREPROVIDER) ReferenceParam theProvider
+public List<DiagnosticReport> findDiagnosticReportsWithSubjet(
+		@OptionalParam(name=DiagnosticReport.SP_SUBJECT) ReferenceParam theSubject
 		) {
-   List<Patient> retVal=new ArrayList<Patient>();
+   List<DiagnosticReport> retVal=new ArrayList<DiagnosticReport>();
 
-   // If the parameter passed in includes a resource type (e.g. ?provider:Patient=123)
-   // that resoruce type is available. Here we just check that it is either not provided
+   // If the parameter passed in includes a resource type (e.g. ?subject:Patient=123)
+   // that resource type is available. Here we just check that it is either not provided
    // or set to "Patient"
-   if (theProvider.hasResourceType()) {
-      String resourceType = theProvider.getResourceType();
+   if (theSubject.hasResourceType()) {
+      String resourceType = theSubject.getResourceType();
       if ("Patient".equals(resourceType) == false) {
-         throw new InvalidRequestException("Invalid resource type for parameter 'provider': " + resourceType);
+         throw new InvalidRequestException("Invalid resource type for parameter 'subject': " + resourceType);
       }
    }
    
-   if (theProvider != null) {
-      // ReferenceParam extends IdDt so all of the resource ID methods are available
-      String providerId = theProvider.getIdPart();
+   if (theSubject != null) {
+      // ReferenceParam extends IdType so all of the resource ID methods are available
+      String subjectId = theSubject.getIdPart();
       
-      // .. populate retVal will Patient resources having provider with id "providerId" ..
+      // .. populate retVal with DiagnosticReport resources having 
+      // subject with id "subjectId" ..
       
    }
    
@@ -314,7 +257,7 @@ public List<Observation> findBySubject(
           // Because the chained parameter "subject.birthdate" is actually of type
           // "date", we convert the value to a date before processing it. 
           DateParam dateSubject = subject.toDateParam(myContext);
-          DateTimeDt birthDate = dateSubject.getValueAsDateTimeDt();
+          DateTimeType birthDate = new DateTimeType(dateSubject.getValueAsString());
           
           // TODO: populate all the observations for the birthdate
           
@@ -332,17 +275,17 @@ public List<Observation> findBySubject(
 
 //START SNIPPET: read
 @Read()
-public Patient getResourceById(@IdParam IdDt theId) {
+public Patient getResourceById(@IdParam IdType theId) {
    Patient retVal = new Patient();
    
    // ...populate...
    retVal.addIdentifier().setSystem("urn:mrns").setValue("12345");
-   retVal.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
+   retVal.addName().setFamily("Smith").addGiven("Tester").addGiven("Q");
    // ...etc...
    
    // if you know the version ID of the resource, you should set it and HAPI will 
    // include it in a Content-Location header
-   retVal.setId(new IdDt("Patient", "123", "2"));
+   retVal.setId(new IdType("Patient", "123", "2"));
    
    return retVal;
 }
@@ -350,7 +293,7 @@ public Patient getResourceById(@IdParam IdDt theId) {
 
 //START SNIPPET: delete
 @Delete()
-public void deletePatient(@IdParam IdDt theId) {
+public void deletePatient(@IdParam IdType theId) {
 	// .. Delete the patient ..
 	if (couldntFindThisId) {
 		throw new ResourceNotFoundException("Unknown version");
@@ -366,7 +309,7 @@ public void deletePatient(@IdParam IdDt theId) {
 
 //START SNIPPET: deleteConditional
 @Delete()
-public void deletePatientConditional(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
+public void deletePatientConditional(@IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl) {
    // Only one of theId or theConditionalUrl will have a value depending
    // on whether the URL receieved was a logical ID, or a conditional
    // search string
@@ -384,14 +327,14 @@ public void deletePatientConditional(@IdParam IdDt theId, @ConditionalUrlParam S
 //START SNIPPET: history
 @History()
 public List<Patient> getPatientHistory(
-      @IdParam IdDt theId,
-      @Since InstantDt theSince,
+      @IdParam IdType theId,
+      @Since InstantType theSince,
       @At DateRangeParam theAt
       ) {
    List<Patient> retVal = new ArrayList<Patient>();
    
    Patient patient = new Patient();
-   patient.addName().addFamily("Smith");
+   patient.addName().setFamily("Smith");
    
    // Set the ID and version
    patient.setId(theId.withVersion("1"));
@@ -404,7 +347,7 @@ public List<Patient> getPatientHistory(
 
 //START SNIPPET: vread
 @Read(version=true)
-public Patient readOrVread(@IdParam IdDt theId) {
+public Patient readOrVread(@IdParam IdType theId) {
    Patient retVal = new Patient();
 
    if (theId.hasVersionIdPart()) {
@@ -433,14 +376,14 @@ public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) Str
    // ...populate...
    Patient patient = new Patient();
    patient.addIdentifier().setSystem("urn:mrns").setValue("12345");
-   patient.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
+   patient.addName().setFamily("Smith").addGiven("Tester").addGiven("Q");
    // ...etc...
 
    //  Every returned resource must have its logical ID set. If the server
    //  supports versioning, that should be set too
    String logicalId = "4325";
    String versionId = "2"; // optional
-   patient.setId(new IdDt("Patient", logicalId, versionId));
+   patient.setId(new IdType("Patient", logicalId, versionId));
    
    /*
     * This is obviously a fairly contrived example since we are always
@@ -531,7 +474,7 @@ public List<Observation> searchByObservationNames(
 
    // The list here will contain 0..* codings, and any observations which match any of the 
    // given codings should be returned
-   List<BaseCodingDt> wantedCodings = theCodings.getListAsCodings();
+   List<TokenParam> wantedCodings = theCodings.getValuesAsQueryTokens();
    
    List<Observation> retVal = new ArrayList<Observation>();
    // ...populate...
@@ -605,7 +548,7 @@ private ITestClient provideTc() {
 	return null;
 }
 @Override
-public Class<? extends IResource> getResourceType() {
+public Class<? extends IBaseResource> getResourceType() {
    return null;
 }
 
@@ -629,7 +572,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   if (theIncludes.contains(new Include("DiagnosticReport:subject"))) {
 	 
     // The resource reference should contain the ID of the patient
-    IdDt subjectId = report.getSubject().getReference();
+    IIdType subjectId = report.getSubject().getReferenceElement();
 	
     // So load the patient ID and return it
     Patient subject = loadSomePatientFromDatabase(subjectId);
@@ -677,7 +620,7 @@ public List<DiagnosticReport> getDiagnosticReport(
   if ("DiagnosticReport:subject".equals(theInclude)) {
 	 
     // The resource reference should contain the ID of the patient
-    IdDt subjectId = report.getSubject().getReference();
+    IIdType subjectId = report.getSubject().getReferenceElement();
 	
     // So load the patient ID and return it
     Patient subject = loadSomePatientFromDatabase(subjectId);
@@ -711,7 +654,7 @@ private DiagnosticReport loadSomeDiagnosticReportFromDatabase(TokenParam theIden
 	return null;
 }
 
-private Patient loadSomePatientFromDatabase(IdDt theId) {
+private Patient loadSomePatientFromDatabase(IIdType theId) {
 	return null;
 }
 
@@ -740,7 +683,7 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
   // the ID (composed of the type Patient, the logical ID 3746, and the
   // version ID 1)
   MethodOutcome retVal = new MethodOutcome();
-  retVal.setId(new IdDt("Patient", "3746", "1"));
+  retVal.setId(new IdType("Patient", "3746", "1"));
   
   // You can also add an OperationOutcome resource to return
   // This part is optional though:
@@ -785,7 +728,7 @@ public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient
 @Update
 public MethodOutcome updatePatientConditional(
       @ResourceParam Patient thePatient, 
-      @IdParam IdDt theId, 
+      @IdParam IdType theId, 
       @ConditionalUrlParam String theConditional) {
 
    // Only one of theId or theConditional will have a value and the other will be null,
@@ -804,15 +747,15 @@ public MethodOutcome updatePatientConditional(
 @Update
 public MethodOutcome updatePatientPrefer(
     @ResourceParam Patient thePatient, 
-    @IdParam IdDt theId) {
+    @IdParam IdType theId) {
 
    // Save the patient to the database
    
    // Update the version and last updated time on the resource
-   IdDt updatedId = theId.withVersion("123");
+   IdType updatedId = theId.withVersion("123");
    thePatient.setId(updatedId);
-   InstantDt lastUpdated = InstantDt.withCurrentTime();
-   ResourceMetadataKeyEnum.UPDATED.put(thePatient, lastUpdated);
+   InstantType lastUpdated = InstantType.withCurrentTime();
+   thePatient.getMeta().setLastUpdatedElement(lastUpdated);
    
    // Add the resource to the outcome, so that it can be returned by the server
    // if the client requests it
@@ -827,7 +770,7 @@ public MethodOutcome updatePatientPrefer(
 @Update
 public MethodOutcome updatePatientWithRawValue (
     @ResourceParam Patient thePatient, 
-    @IdParam IdDt theId, 
+    @IdParam IdType theId, 
     @ResourceParam String theRawBody,
     @ResourceParam EncodingEnum theEncodingEnum) {
 
@@ -842,7 +785,7 @@ public MethodOutcome updatePatientWithRawValue (
 
 //START SNIPPET: update
 @Update
-public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient thePatient) {
 
   /* 
    * First we might want to do business validation. The UnprocessableEntityException
@@ -895,7 +838,7 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
 
 //START SNIPPET: updateClient
 @Update
-public abstract MethodOutcome updateSomePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient);
+public abstract MethodOutcome updateSomePatient(@IdParam IdType theId, @ResourceParam Patient thePatient);
 //END SNIPPET: updateClient
 
 //START SNIPPET: validate
@@ -921,7 +864,7 @@ public MethodOutcome validatePatient(@ResourceParam Patient thePatient,
   // You may also add an OperationOutcome resource to return
   // This part is optional though:
   OperationOutcome outcome = new OperationOutcome();
-  outcome.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDiagnostics("One minor issue detected");
+  outcome.addIssue().setSeverity(IssueSeverity.WARNING).setDiagnostics("One minor issue detected");
   retVal.setOperationOutcome(outcome);  
 
   return retVal;
@@ -939,16 +882,16 @@ public static void main(String[] args) throws DataFormatException, IOException {
 private void savePatientToDatabase(Patient thePatient) {
 	// nothing
 }
-private void savePatientToDatabase(IdDt theId, Patient thePatient) {
+private void savePatientToDatabase(IdType theId, Patient thePatient) {
 	// nothing
 }
 
 //START SNIPPET: metadataProvider
-public class ConformanceProvider {
+public class CapabilityStatementProvider {
 
   @Metadata
-  public Conformance getServerMetadata() {
-    Conformance retVal = new Conformance();
+  public CapabilityStatement getServerMetadata() {
+	  CapabilityStatement retVal = new CapabilityStatement();
     // ..populate..
     return retVal;
   }
@@ -962,7 +905,7 @@ public class ConformanceProvider {
 public interface MetadataClient extends IRestfulClient {
   
   @Metadata
-  Conformance getServerMetadata();
+  CapabilityStatement getServerMetadata();
   
   // ....Other methods can also be added as usual....
   
@@ -981,7 +924,7 @@ public interface HistoryClient extends IBasicClient {
 
   /** Instance level (history of a specific resource instance by type and ID) */
   @History(type=Patient.class)
-  Bundle getHistoryPatientInstance(@IdParam IdDt theId);
+  Bundle getHistoryPatientInstance(@IdParam IdType theId);
 
   /**
    * Either (or both) of the "since" and "count" paramaters can
@@ -998,26 +941,22 @@ public void bbbbb() throws DataFormatException, IOException {
 //START SNIPPET: metadataClientUsage
 FhirContext ctx = FhirContext.forDstu2();
 MetadataClient client = ctx.newRestfulClient(MetadataClient.class, "http://spark.furore.com/fhir");
-Conformance metadata = client.getServerMetadata();
+CapabilityStatement metadata = client.getServerMetadata();
 System.out.println(ctx.newXmlParser().encodeResourceToString(metadata));
 //END SNIPPET: metadataClientUsage
 }
 
 //START SNIPPET: readTags
 @Read()
-public Patient readPatient(@IdParam IdDt theId) {
+public Patient readPatient(@IdParam IdType theId) {
   Patient retVal = new Patient();
  
   // ..populate demographics, contact, or anything else you usually would..
- 
-  // Create a TagList and place a complete list of the patient's tags inside
-  TagList tags = new TagList();
-  tags.addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
-  tags.addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
+
+  // Populate some tags
+  retVal.getMeta().addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
+  retVal.getMeta().addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
   
-  // The tags are then stored in the Patient resource instance
-  retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
- 
   return retVal;
 }
 //END SNIPPET: readTags
@@ -1027,7 +966,7 @@ private interface IPatientClient extends IBasicClient
 {
   /** Read a patient from a server by ID */
   @Read
-  Patient readPatient(@IdParam IdDt theId);
+  Patient readPatient(@IdParam IdType theId);
 
   // Only one method is shown here, but many methods may be 
   // added to the same client interface!
@@ -1037,11 +976,11 @@ private interface IPatientClient extends IBasicClient
 public void clientRead() {
 //START SNIPPET: clientReadTags
 IPatientClient client = FhirContext.forDstu2().newRestfulClient(IPatientClient.class, "http://foo/fhir");
-Patient patient = client.readPatient(new IdDt("1234"));
+Patient patient = client.readPatient(new IdType("1234"));
   
 // Access the tag list
-TagList tagList = (TagList) patient.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-for (Tag next : tagList) {
+List<Coding> tagList = patient.getMeta().getTag();
+for (Coding next : tagList) {
   // ..process the tags somehow..
 }
 //END SNIPPET: clientReadTags
@@ -1050,14 +989,12 @@ for (Tag next : tagList) {
 Patient newPatient = new Patient();
 
 // Populate the resource object
-newPatient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setValue("123");
-newPatient.addName().addFamily("Jones").addGiven("Frank");
+newPatient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setValue("123");
+newPatient.addName().setFamily("Jones").addGiven("Frank");
 
-// Populate tags
-TagList tags = new TagList();
-tags.addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
-tags.addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
-newPatient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
+// Populate some tags
+newPatient.getMeta().addTag("http://animals", "Dog", "Canine Patient"); // TODO: more realistic example
+newPatient.getMeta().addTag("http://personality", "Friendly", "Friendly"); // TODO: more realistic example
 
 // ...invoke the create method on the client...
 //END SNIPPET: clientCreateTags
@@ -1068,11 +1005,11 @@ newPatient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tags);
 public MethodOutcome createPatientResource(@ResourceParam Patient thePatient) {
 
   // ..save the resouce..
-  IdDt id = new IdDt("123"); // the new databse primary key for this resource
+  IdType id = new IdType("123"); // the new databse primary key for this resource
 
   // Get the tag list
-  TagList tags = (TagList) thePatient.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-  for (Tag tag : tags) {
+  List<Coding> tags = thePatient.getMeta().getTag();
+  for (Coding tag : tags) {
     // process/save each tag somehow	
   }
   
@@ -1080,64 +1017,10 @@ public MethodOutcome createPatientResource(@ResourceParam Patient thePatient) {
 }
 //END SNIPPET: createTags
 
-//START SNIPPET: tagMethodProvider
-public class TagMethodProvider 
-{
-  /** Return a list of all tags that exist on the server */
-  @GetTags
-  public TagList getAllTagsOnServer() {
-    return new TagList(); // populate this
-  }
-
-  /** Return a list of all tags that exist on at least one instance
-   *  of the given resource type */
-  @GetTags(type=Patient.class)
-  public TagList getTagsForAllResourcesOfResourceType() {
-    return new TagList(); // populate this
-  }
-
-  /** Return a list of all tags that exist on a specific instance
-   *  of the given resource type */
-  @GetTags(type=Patient.class)
-  public TagList getTagsForResources(@IdParam IdDt theId) {
-    return new TagList(); // populate this
-  }
-
-  /** Return a list of all tags that exist on a specific version
-   *  of the given resource type */
-  @GetTags(type=Patient.class)
-  public TagList getTagsForResourceVersion(@IdParam IdDt theId) {
-    return new TagList(); // populate this
-  }
-
-  /** Add tags to a resource */
-  @AddTags(type=Patient.class)
-  public void getTagsForResourceVersion(@IdParam IdDt theId, 
-                                        @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-  /** Add tags to a resource version */
-  @AddTags(type=Patient.class)
-  public void addTagsToResourceVersion(@IdParam IdDt theId,
-                                       @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-  /** Remove tags from a resource */
-  @DeleteTags(type=Patient.class)
-  public void deleteTagsFromResourceVersion(@IdParam IdDt theId,
-                                            @TagListParam TagList theTagList) {
-    // add tags
-  }
-
-}
-//END SNIPPET: tagMethodProvider
-
 //START SNIPPET: transaction
 @Transaction
 public Bundle transaction(@TransactionParam Bundle theInput) {
-   for (BundleEntry nextEntry : theInput.getEntries()) {
+   for (BundleEntryComponent nextEntry : theInput.getEntry()) {
       // Process entry
    }
 

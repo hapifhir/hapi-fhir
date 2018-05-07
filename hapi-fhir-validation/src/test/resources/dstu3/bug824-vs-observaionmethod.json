@@ -1,0 +1,24 @@
+{
+	"resourceType": "ValueSet",
+	"id": "fiphr-vs-observationmethod",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"
+		]
+	},
+	"url": "http://phr.kanta.fi/ValueSet/fiphr-vs-observationmethod",
+	"version": "0.01",
+	"name": "Value Set Finnish PHR Observation Method",
+	"status": "draft",
+	"experimental": true,
+	"date": "2016-11-23T06:00:00+00:00",
+	"publisher": "Kela",
+	"description": "Finnish PHR Observation Method value set",
+	"compose": {
+		"include": [
+			{
+				"system": "http://phr.kanta.fi/fiphr-cs-observationmethod"
+			}
+		]
+	}
+}

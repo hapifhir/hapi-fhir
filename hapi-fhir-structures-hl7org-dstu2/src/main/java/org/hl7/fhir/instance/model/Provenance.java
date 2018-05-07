@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
  */
@@ -69,7 +64,7 @@ public class Provenance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProvenanceEntityRole fromCode(String codeString) throws Exception {
+        public static ProvenanceEntityRole fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("derivation".equals(codeString))
@@ -80,7 +75,7 @@ public class Provenance extends DomainResource {
           return QUOTATION;
         if ("source".equals(codeString))
           return SOURCE;
-        throw new Exception("Unknown ProvenanceEntityRole code '"+codeString+"'");
+        throw new FHIRException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -134,6 +129,22 @@ public class Provenance extends DomainResource {
         if ("source".equals(codeString))
           return ProvenanceEntityRole.SOURCE;
         throw new IllegalArgumentException("Unknown ProvenanceEntityRole code '"+codeString+"'");
+        }
+        public Enumeration<ProvenanceEntityRole> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("derivation".equals(codeString))
+          return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.DERIVATION);
+        if ("revision".equals(codeString))
+          return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.REVISION);
+        if ("quotation".equals(codeString))
+          return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.QUOTATION);
+        if ("source".equals(codeString))
+          return new Enumeration<ProvenanceEntityRole>(this, ProvenanceEntityRole.SOURCE);
+        throw new FHIRException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
     public String toCode(ProvenanceEntityRole code) {
       if (code == ProvenanceEntityRole.DERIVATION)
@@ -335,6 +346,41 @@ public class Provenance extends DomainResource {
           childrenList.add(new Property("relatedAgent", "", "A relationship between two the agents referenced in this resource. This is defined to allow for explicit description of the delegation between agents.  For example, this human author used this device, or one person acted on another's behest.", 0, java.lang.Integer.MAX_VALUE, relatedAgent));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("role"))
+          this.role = castToCoding(value); // Coding
+        else if (name.equals("actor"))
+          this.actor = castToReference(value); // Reference
+        else if (name.equals("userId"))
+          this.userId = castToIdentifier(value); // Identifier
+        else if (name.equals("relatedAgent"))
+          this.getRelatedAgent().add((ProvenanceAgentRelatedAgentComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("role")) {
+          this.role = new Coding();
+          return this.role;
+        }
+        else if (name.equals("actor")) {
+          this.actor = new Reference();
+          return this.actor;
+        }
+        else if (name.equals("userId")) {
+          this.userId = new Identifier();
+          return this.userId;
+        }
+        else if (name.equals("relatedAgent")) {
+          return addRelatedAgent();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ProvenanceAgentComponent copy() {
         ProvenanceAgentComponent dst = new ProvenanceAgentComponent();
         copyValues(dst);
@@ -375,6 +421,11 @@ public class Provenance extends DomainResource {
            && (userId == null || userId.isEmpty()) && (relatedAgent == null || relatedAgent.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Provenance.agent";
+
+  }
 
   }
 
@@ -487,6 +538,29 @@ public class Provenance extends DomainResource {
           childrenList.add(new Property("target", "uri", "An internal reference to another agent listed in this provenance by its identifier.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("target"))
+          this.target = castToUri(value); // UriType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("target")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Provenance.target");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ProvenanceAgentRelatedAgentComponent copy() {
         ProvenanceAgentRelatedAgentComponent dst = new ProvenanceAgentRelatedAgentComponent();
         copyValues(dst);
@@ -519,6 +593,11 @@ public class Provenance extends DomainResource {
         return super.isEmpty() && (type == null || type.isEmpty()) && (target == null || target.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Provenance.agent.relatedAgent";
+
+  }
 
   }
 
@@ -774,6 +853,45 @@ public class Provenance extends DomainResource {
           childrenList.add(new Property("agent", "@Provenance.agent", "The entity is attributed to an agent to express the agent's responsibility for that entity, possibly along with other agents. This description can be understood as shorthand for saying that the agent was responsible for the activity which generated the entity.", 0, java.lang.Integer.MAX_VALUE, agent));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("role"))
+          this.role = new ProvenanceEntityRoleEnumFactory().fromType(value); // Enumeration<ProvenanceEntityRole>
+        else if (name.equals("type"))
+          this.type = castToCoding(value); // Coding
+        else if (name.equals("reference"))
+          this.reference = castToUri(value); // UriType
+        else if (name.equals("display"))
+          this.display = castToString(value); // StringType
+        else if (name.equals("agent"))
+          this.agent = (ProvenanceAgentComponent) value; // ProvenanceAgentComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("role")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Provenance.role");
+        }
+        else if (name.equals("type")) {
+          this.type = new Coding();
+          return this.type;
+        }
+        else if (name.equals("reference")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Provenance.reference");
+        }
+        else if (name.equals("display")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Provenance.display");
+        }
+        else if (name.equals("agent")) {
+          this.agent = new ProvenanceAgentComponent();
+          return this.agent;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ProvenanceEntityComponent copy() {
         ProvenanceEntityComponent dst = new ProvenanceEntityComponent();
         copyValues(dst);
@@ -812,6 +930,11 @@ public class Provenance extends DomainResource {
            && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty()) && (agent == null || agent.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Provenance.entity";
+
+  }
 
   }
 
@@ -1325,6 +1448,76 @@ public class Provenance extends DomainResource {
         childrenList.add(new Property("entity", "", "An entity used in this activity.", 0, java.lang.Integer.MAX_VALUE, entity));
         childrenList.add(new Property("signature", "Signature", "A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated.", 0, java.lang.Integer.MAX_VALUE, signature));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("target"))
+          this.getTarget().add(castToReference(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("recorded"))
+          this.recorded = castToInstant(value); // InstantType
+        else if (name.equals("reason"))
+          this.getReason().add(castToCodeableConcept(value));
+        else if (name.equals("activity"))
+          this.activity = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("location"))
+          this.location = castToReference(value); // Reference
+        else if (name.equals("policy"))
+          this.getPolicy().add(castToUri(value));
+        else if (name.equals("agent"))
+          this.getAgent().add((ProvenanceAgentComponent) value);
+        else if (name.equals("entity"))
+          this.getEntity().add((ProvenanceEntityComponent) value);
+        else if (name.equals("signature"))
+          this.getSignature().add(castToSignature(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("target")) {
+          return addTarget();
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("recorded")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Provenance.recorded");
+        }
+        else if (name.equals("reason")) {
+          return addReason();
+        }
+        else if (name.equals("activity")) {
+          this.activity = new CodeableConcept();
+          return this.activity;
+        }
+        else if (name.equals("location")) {
+          this.location = new Reference();
+          return this.location;
+        }
+        else if (name.equals("policy")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Provenance.policy");
+        }
+        else if (name.equals("agent")) {
+          return addAgent();
+        }
+        else if (name.equals("entity")) {
+          return addEntity();
+        }
+        else if (name.equals("signature")) {
+          return addSignature();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Provenance";
+
+  }
 
       public Provenance copy() {
         Provenance dst = new Provenance();

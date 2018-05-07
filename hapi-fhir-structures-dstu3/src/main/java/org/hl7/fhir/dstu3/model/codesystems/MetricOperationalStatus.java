@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,6 +49,10 @@ public enum MetricOperationalStatus {
          */
         STANDBY, 
         /**
+         * The DeviceMetric was entered in error.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -61,6 +65,8 @@ public enum MetricOperationalStatus {
           return OFF;
         if ("standby".equals(codeString))
           return STANDBY;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown MetricOperationalStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum MetricOperationalStatus {
             case ON: return "on";
             case OFF: return "off";
             case STANDBY: return "standby";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -79,6 +86,7 @@ public enum MetricOperationalStatus {
             case ON: return "The DeviceMetric is operating and will generate DeviceObservations.";
             case OFF: return "The DeviceMetric is not operating.";
             case STANDBY: return "The DeviceMetric is operating, but will not generate any DeviceObservations.";
+            case ENTEREDINERROR: return "The DeviceMetric was entered in error.";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum MetricOperationalStatus {
             case ON: return "On";
             case OFF: return "Off";
             case STANDBY: return "Standby";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
     }

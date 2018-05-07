@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +19,26 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+import javax.persistence.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.*;
 
 @Entity
-@Table(name = "HFJ_RES_TAG")
+@Table(name = "HFJ_RES_TAG", uniqueConstraints= {
+		@UniqueConstraint(name="IDX_RESTAG_TAGID", columnNames= {"RES_ID","TAG_ID"})
+})
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "SEQ_RESTAG_ID", sequenceName = "SEQ_RESTAG_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESTAG_ID")
 	@Id
 	@Column(name = "PID")
 	private Long myId;
 
 	@ManyToOne(cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", foreignKey=@ForeignKey(name="FK_RESTAG_RESOURCE"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
@@ -111,6 +105,14 @@ public class ResourceTag extends BaseTag {
 		b.append(getResourceId());
 		b.append(getTag());
 		return b.toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resId", getResourceId());
+		b.append("tag", getTag().getId());
+		return b.build();
 	}
 
 }

@@ -1,0 +1,442 @@
+<!--
+LOINC is a well maintained, version independent code system
+
+This CodeSystem resource describes 'LOINC' independent of 
+any particular version. There are notes about changes for
+version specific LOINC code system resources. 
+
+Note that the following set of codes constitute the 
+LOINC code systems:
+ - the main LOINC codes
+ - the LOINC answer codes (LA-) and the LOINC answer list codes (LL-)
+ - the Part codes in the Multiaxial Hierarchy
+ - the Part codes for the properties. 
+    Note: there are license restrictions on the use of LOINC Part codes
+ 
+Servers may generate variants of this for the LOINC version(s) and features they support.
+-->
+<!--
+Version History of this specification
+0.1 | published 2016 11 18
+0.2 | published 2017 03 10 (fixed rad properties, removed list-specific LA properties, typos)
+0.3 | published 2017 05 09 (removed CHNGE_TYP based on LOINC Committee recommendation, change filter types from code vs coding -> which allows use of the LP codes or the Part names)
+0.4 | published 2018 02 09 (fixed multiaxial hierarchy relationship, added clarifying statement about English as the language for filters)
+-->
+<CodeSystem xmlns="http://hl7.org/fhir">
+  <id value="loinc"/>
+  
+  <!-- This url is unchanged for all versions of LOINC. There
+    can only be one correct Code System resource for each value of the
+    version attribute (at least, only one per server) -->
+  <url value="http://loinc.org"/> 
+  
+  <!-- the HL7 v3 OID assigned to LOINC -->
+  <identifier>
+    <system value="urn:ietf:rfc:3986"/>
+    <value value="urn:oid:2.16.840.1.113883.6.1"/>
+  </identifier>
+  
+  <!--  
+  // if a version is specified:
+  <version value="2.59"/> 
+  -->
+
+  <!-- if a specific version is specified, the name should carry this information should be in the name (e.g. LOINC_259) and title -->
+  <name value="LOINC"/> 
+  <title value="LOINC Code System"/>
+  <status value="active"/>
+  <experimental value="false"/>
+  
+  <publisher value="Regenstrief Institute, Inc."/>
+  <contact>
+    <telecom>
+      <value value="http://loinc.org"/>
+    </telecom>
+  </contact>
+  
+  <!--  
+  <date value=[date for this version]"/> 
+  -->
+  <description value="LOINC is a freely available international standard for tests, measurements, and observations"/>
+  <copyright value="This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use"/>
+  <caseSensitive  value="false"/>
+  
+  <valueSet value=" http://loinc.org/vs"/>
+   <!--
+    for a version specific reference:
+    <valueSet value="http://loinc.org/2.56/vs"/>
+  -->
+            
+  <!-- 
+    It's at the discretion of servers whether to present fragments of LOINC heirarchically or not, when 
+    using the code system resource. But, if they are heirarchical, the Hierarchy SHALL be based on the is-a relationship that is derived from the LOINC Multiaxial Hierarchy.
+    -->
+  <HierarchyMeaning value="is-a"/> 
+  <compositional value="false"/> <!-- no compositional grammar in LOINC -->
+  <versionNeeded value="false"/>
+  
+  <!-- this canonical definition of LOINC does not include the content. 
+    Servers may choose to include fragments (but not, due to size constraints, all of LOINC) -->
+  <content value="not-present"/>
+  
+<!-- <count value="65000"/>... if working with a specific version, you could nominate a count of the total number of concepts (including the answers, Hierarchy, etc.) -->  
+
+  <!-- 
+    Generally defined filters for specifying value sets
+    In LOINC, all the properties can be used as filters too, but they are not defined explicitly as filters as well. 
+    Note that parent/child/ancestor/descendant are defined by FHIR, but repeated here to document them clearly.
+   
+    For illustration purposes, consider this slice of the LOINC Multiaxial Hierarchy when reading the descriptions:
+    
+    Microbiology [LP31755-9]
+      Microorganism	[LP14559-6]
+        Virus [LP14855-8]
+          Zika virus [LP200137-0]
+            Zika virus RNA | XXX [LP203413-2]
+              Zika virus RNA [Presence] in Unspecified specimen by Probe and target amplification method [79190-5]
+
+    Language Note: The filters defined here are specified using the default LOINC language - English (US). Requests are meant to be specified and interpreted on the English version. The return can be in a specified language (if supported by the server). But note that not all filters/properties have language translations available. 
+    -->
+  <filter>
+    <code value="parent"/> 
+    <description value="Allows for the selection of a set of codes based on their appearance in the LOINC Multiaxial Hierarchy. parent selects immediate children only. For example, the code '79190-5' has the parent 'LP203413-2'"/>
+    <operator value="="/>
+    <value value="A Part code"/>
+  </filter>
+  <filter>
+    <code value="child"/> 
+    <description value="Allows for the selection of a set of codes based on their appearance in the LOINC Multiaxial Hierarchy. child selects immediate children only. For example, the code 'LP203413-2' has the child '79190-5'"/>
+    <operator value="in"/>
+    <value value="A comma separated list of Part codes"/>
+  </filter>
+  <filter>
+    <code value="ancestor"/> 
+    <description value="Allows for the selection of a set of codes based on their appearance in the LOINC Multiaxial Hierarchy. ancestor includes parents transitively, e.g. 'LP203413-2' eventually has an ancestor 'LP14559-6', so the code '79190-5' is in the set of codes that have ancestor=LP14559-6"/>
+    <operator value="="/>
+    <value value="A Part code"/>
+  </filter>
+  <filter>
+    <code value="descendant"/> 
+    <description value="Allows for the selection of a set of codes based on their appearance in the LOINC Multiaxial Hierarchy. descendant includes children transitively, e.g. 'LP14559-6' eventually has a descendant 'LP203413-2', so the code '79190-5' is in the set of codes that have descendant=LP14559-6"/>
+    <operator value="in"/>
+    <value value="A comma separated list of Part codes"/>
+  </filter>
+  <filter>
+    <code value="copyright"/> 
+    <description value="Allows for the inclusion or exclusion of LOINC codes that include 3rd party copyright notices. LOINC = only codes with a sole copyright by Regenstrief. 3rdParty = only codes with a 3rd party copyright in addition to the one from Regenstrief"/>
+    <operator value="="/>
+    <value value="LOINC | 3rdParty"/>
+  </filter>
+  <!-- properties. There are 3 kinds of properties:
+    fhir: display, designation; these are not described here since they are inherent in the specification
+    infrastructural: defined by FHIR, but documented here for LOINC 
+    LOINC properties: defined by the main LOINC table
+    concept model: defined by the LOINC Multiaxial Hierarchy 
+  -->
+  <!-- first, the infrastructural properties - inherited from FHIR, but documented here -->
+  <property>
+    <code value="parent"/>
+    <uri value="http://hl7.org/fhir/concept-properties#parent"/> 
+    <description value="A parent code in the Multiaxial Hierarchy"/>
+    <type value=""/>
+  </property>
+  <property>
+    <code value="child"/>
+    <uri value="http://hl7.org/fhir/concept-properties#child"/>
+    <description value="A child code in the Multiaxial Hierarchy"/>
+    <type value=""/>
+  </property>
+  <!-- 
+    LOINC properties. 
+    These apply to the main LOINC codes, but not the Multiaxial Hierarchy, the answer lists, or the part codes.
+   
+    Notes:
+      SHORTNAME = display & LONG_COMMON_NAME = definition
+      Properties are specified as type "code", which are LOINC Part codes (LP-). 
+      It is anticipated that the LOINC Part codes to be used in these properties will be published in the June 2017 LOINC release.
+  -->
+  <property>
+    <code value="STATUS"/>
+    <uri value="http://loinc.org/property/STATUS"/>
+    <description value="Status of the term. Within LOINC, codes with STATUS=DEPRECATED are considered inactive. Current values: ACTIVE, TRIAL, DISCOURAGED, and DEPRECATED"/>
+    <!-- DV NOTE: changed this from boolean to string -->
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="COMPONENT"/>
+    <uri value="http://loinc.org/property/COMPONENT"/>
+    <description value="First major axis-component or analyte: Analyte Name, Analyte sub-class, Challenge"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="PROPERTY"/>
+    <uri value="http://loinc.org/property/PROPERTY"/>
+    <description value="Second major axis-property observed: Kind of Property (also called kind of quantity)"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="TIME_ASPCT"/>
+    <uri value="http://loinc.org/property/TIME_ASPCT"/>
+    <description value="Third major axis-timing of the measurement: Time Aspect (Point or moment in time vs. time interval)"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="SYSTEM"/>
+    <uri value="http://loinc.org/property/SYSTEM"/>
+    <description value="Fourth major axis-type of specimen or system: System (Sample) Type"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="SCALE_TYP"/>
+    <uri value="http://loinc.org/property/SCALE_TYP"/>
+    <description value="Fifth major axis-scale of measurement: Type of Scale"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="METHOD_TYP"/>
+    <uri value="http://loinc.org/property/METHOD_TYP"/>
+    <description value="Sixth major axis-method of measurement: Type of Method"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="CLASS"/>
+    <uri value="http://loinc.org/property/CLASS"/>
+    <description value="An arbitrary classification of the terms for grouping related observations together"/>
+    <type value="string"/>
+  </property>
+  <!-- Note: removed in 0.3
+  <property>
+    <code value="CHNG_TYPE"/>
+    <uri value="http://loinc.org/property/CHNG_TYPE"/>
+    <description value="A classification of the type of change made to a LOINC term, e.g. DEL=deprecated, ADD=add"/>
+    <type value="string"/>
+  </property>
+  -->
+  <property>
+    <code value="VersionLastChanged"/>
+    <uri value="http://loinc.org/property/VersionLastChanged"/>
+    <description value="The LOINC version number in which the record has last changed. For new records, this field contains the same value as the FirstPublishedRelease property."/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="CONSUMER_NAME"/>
+    <uri value="http://loinc.org/property/CONSUMER_NAME"/>
+    <description value="An experimental (beta) consumer friendly name for this item. The intent is to provide a test name that health care consumers will recognize; it will be similar to the names that might appear on a lab report"/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="CLASSTYPE"/>
+    <uri value="http://loinc.org/property/CLASSTYPE"/>
+    <description value="1=Laboratory class; 2=Clinical class; 3=Claims attachments; 4=Surveys"/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="ORDER_OBS"/>
+    <uri value="http://loinc.org/property/ORDER_OBS"/>
+    <description value="Provides users with an idea of the intended use of the term by categorizing it as an order only, observation only, or both"/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="HL7_ATTACHMENT_STRUCTURE"/>
+    <uri value="http://loinc.org/property/HL7_ATTACHMENT_STRUCTURE"/>
+    <description value="This property is populated in collaboration with the HL7 Attachments Work Group as described in the HL7 Attachment Specification: Supplement to Consolidated CDA Templated Guide."/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="VersionFirstReleased"/>
+    <uri value="http://loinc.org/property/VersionFirstReleased"/>
+    <description value="This is the LOINC version number in which this LOINC term was first published."/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="PanelType"/>
+    <uri value="http://loinc.org/property/PanelType"/>
+    <description value="For LOINC terms that are panels, this attribute classifies them as a 'Convenience group', 'Organizer', or 'Panel'"/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="ValidHL7AttachmentRequest"/>
+    <uri value="http://loinc.org/property/ValidHL7AttachmentRequest"/>
+    <description value="A value of Y in this field indicates that this LOINC code can be sent by a payer as part of an HL7 Attachment request for additional information."/>
+    <type value="string"/>
+  </property>
+
+  <!-- LOINC/RSNA Radiology Playbook properties. These apply only to terms in the LOINC/RSNA Radiology Playbook File.
+       Notes:
+        Properties are specified as type "code", which are LOINC Part codes (LP-) 
+        Converted the attribute names from LOINC style to FHIR style b/c they contained periods
+        Maneuver sub-attributes are being released in 2016 12.
+  -->
+  <property>
+    <code value="rad-modality-modality-type"/>
+    <uri value="http://loinc.org/property/rad-modality-type"/>
+    <description value="Modality is used to represent the device used to acquire imaging information."/>
+    <type value="Coding"/>
+  </property> 
+  <property>
+    <code value="rad-modality-modality-subtype"/>
+    <uri value="http://loinc.org/property/rad-modality-subtype"/>
+    <description value="Modality subtype may be optionally included to signify a particularly common or evocative configuration of the modality."/>
+    <type value="Coding"/>
+  </property> 
+  <property>
+    <code value="rad-anatomic-location-region-imaged"/>
+    <uri value="http://loinc.org/property/rad-anatomic-location-region-imaged"/>
+    <description value="The Anatomic Location Region Imaged attribute is used in two ways: as a coarse-grained descriptor of the area imaged and a grouper for finding related imaging exams; or, it is used just as a grouper."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-anatomic-location-imaging-focus"/>
+    <uri value="http://loinc.org/property/rad-anatomic-location-imaging-focus"/>
+    <description value="The Anatomic Location Imaging Focus is a more fine-grained descriptor of the specific target structure of an imaging exam. In many areas, the focus should be a specific organ."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-anatomic-location-laterality-presence"/>
+    <uri value="http://loinc.org/property/rad-anatomic-location-laterality-presence"/>
+    <description value="Radiology Exams that require laterality to be specified in order to be performed are signified with an Anatomic Location Laterality Presence attribute set to 'True'"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-anatomic-location-laterality"/>
+    <uri value="http://loinc.org/property/rad-anatomic-location-laterality"/>
+    <description value="Radiology exam Laterality is specified as one of: Left, Right, Bilateral, Unilateral, Unspecified"/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-view-view-aggregation"/>
+    <uri value="http://loinc.org/property/rad-view-aggregation"/>
+    <description value="Aggregation describes the extent of the imaging performed, whether in quantitative terms (e.g., '3 or more views') or subjective terms (e.g., 'complete')."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-view-view-type"/>
+    <uri value="http://loinc.org/property/rad-view-view-type"/>
+    <description value="View type names specific views, such as 'lateral' or 'AP'."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-maneuver-maneuver-type"/>
+    <uri value="http://loinc.org/property/rad-maneuver-maneuver-type"/>
+    <description value="Maneuver type indicates an action taken with the goal of elucidating or testing a dynamic aspect of the anatomy."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-timing"/>
+    <uri value="http://loinc.org/property/rad-timing"/>
+    <description value="The Timing/Existence property used in conjunction with pharmaceutical and manueuver properties. It specifies whether or not the imaging occurs in the presence of the administered pharmaceutical or a manuever designed to test some dynamic aspect of anatomy or physiology ."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-pharmaceutical-substance-given"/>
+    <uri value="http://loinc.org/property/rad-pharmaceutical-substance-given"/>
+    <description value="The Pharmaceutical Substance Given specifies administered contrast agents, radiopharmaceuticals, medications, or other clinically important agents and challenges during the imaging procedure."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-pharmaceutical-route"/>
+    <uri value="http://loinc.org/property/rad-pharmaceutical-route"/>
+    <description value="Route specifies the route of administration of the pharmeceutical."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-reason-for-exam"/>
+    <uri value="http://loinc.org/property/rad-reason-for-exam"/>
+    <description value="Reason for exam is used to describe a clinical indication or a purpose for the study."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-guidance-for-presence"/>
+    <uri value="http://loinc.org/property/rad-guidance-for-presence"/>
+    <description value="Guidance for.Presence indicates when a procedure is guided by imaging."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-guidance-for-approach"/>
+    <uri value="http://loinc.org/property/rad-guidance-for-approach"/>
+    <description value="Guidance for.Approach refers to the primary route of access used, such as percutaneous, transcatheter, or transhepatic."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-guidance-for-action"/>
+    <uri value="http://loinc.org/property/rad-guidance-for-action"/>
+    <description value="Guidance for.Action indicates the intervention performed, such as biopsy, aspiration, or ablation."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-guidance-for-object"/>
+    <uri value="http://loinc.org/property/rad-guidance-for-object"/>
+    <description value="Guidance for.Object specifies the target of the action, such as mass, abscess or cyst."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="rad-subject"/>
+    <uri value="http://loinc.org/property/rad-subject"/>
+    <description value="Subject is intended for use when there is a need to distinguish between the patient associated with an imaging study, and the target of the study."/>
+    <type value="Coding"/>
+  </property>
+  <!-- Document Ontology properties. These apply only to terms in the LOINC Document Ontology File
+       Notes:
+        Properties are specified as type "code", which are LOINC Part codes (LP-) 
+        Converted the attribute names from LOINC style to FHIR style b/c they contained periods
+   -->
+  <property>
+    <code value="document-kind"/>
+    <uri value="http://loinc.org/property/document-kind"/>
+    <description value="Characterizes the general structure of the document at a macro level."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="document-role"/>
+    <uri value="http://loinc.org/property/document-role"/>
+    <description value="Characterizes the training or professional level of the author of the document, but does not break down to specialty or subspecialty.."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="document-setting"/>
+    <uri value="http://loinc.org/property/document-setting"/>
+    <description value="Setting is a modest extension of CMS’s coarse definition of care settings, such as outpatient, hospital, etc. Setting is not equivalent to location, which typically has more locally defined meanings."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="document-subject-matter-domain"/>
+    <uri value="http://loinc.org/property/document-subject-matter-domain"/>
+    <description value="Characterizes the clinical domain that is the subject of the document. For example, Internal Medicine, Neurology, Physical Therapy, etc."/>
+    <type value="Coding"/>
+  </property>
+  <property>
+    <code value="document-type-of-service"/>
+    <uri value="http://loinc.org/property/document-type-of-service"/>
+    <description value="Characterizes the kind of service or activity provided to/for the patient (or other subject of the service) that is described in the document."/>
+    <type value="Coding"/>
+  </property>
+  <!-- Answer list related properties -->
+  <property>
+    <code value="answer-list"/>
+    <uri value="http://loinc.org/property/answer-list"/>
+    <description value="An answer list associated with this LOINC code (if there are matching answer lists defined). Only on normal LOINC Codes"/>
+    <type value="Coding"/>
+  </property>
+  <!-- Note: We expect to add an AnswerListType property when LOINC publishes new answer list file format in June 2017 -->
+  <property>
+    <code value="answers-for"/>
+    <uri value="http://loinc.org/property/answers-for"/>
+    <description value="A LOINC Code for which this answer list is used. Only on normal LL- Codes"/>
+    <type value="Coding"/>
+  </property>
+  <!-- Note for future consideration. These are properties of LA codes in the context of a particular list. Not global properties
+  <property>
+    <code value="sequence"/>
+    <uri value="http://loinc.org/property/sequence"/>
+    <description value="Sequence Number of a answer in a set of answers (LA- codes only)"/>
+    <type value="integer"/>
+  </property>  
+  <property>
+    <code value="score"/>
+    <uri value="http://loinc.org/property/score"/>
+    <description value="Score assigned to an answer (LA- codes only)"/>
+    <type value="integer"/>
+  </property>  
+   -->
+</CodeSystem>
+

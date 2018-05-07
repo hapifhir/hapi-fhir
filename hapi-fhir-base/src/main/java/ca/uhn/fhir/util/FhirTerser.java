@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * #L%
  */
 import java.util.*;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -200,7 +201,8 @@ public class FhirTerser {
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 		Object currentObj = theTarget;
 
-		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<String> parts = parsePath(currentDef, thePath);
+
 		List<T> retVal = getValues(currentDef, currentObj, parts, theWantedType);
 		if (retVal.isEmpty()) {
 			return null;
@@ -211,10 +213,43 @@ public class FhirTerser {
 	@SuppressWarnings("unchecked")
 	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		String name = theSubList.get(0);
-				
+		List<T> retVal = new ArrayList<>();
+
+		if (name.startsWith("extension('")) {
+			String extensionUrl = name.substring("extension('".length());
+			int endIndex = extensionUrl.indexOf('\'');
+			if (endIndex != -1) {
+				extensionUrl = extensionUrl.substring(0, endIndex);
+			}
+
+			List<ExtensionDt> extensions= Collections.emptyList();
+			if (theCurrentObj instanceof ISupportsUndeclaredExtensions) {
+				extensions = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredExtensionsByUrl(extensionUrl);
+			} else if (theCurrentObj instanceof IBaseExtension) {
+				extensions = ((IBaseExtension)theCurrentObj).getExtension();
+			}
+
+			for (ExtensionDt next : extensions) {
+				if (theWantedClass.isAssignableFrom(next.getClass())) {
+					retVal.add((T) next);
+				}
+			}
+
+			if (theSubList.size() > 1) {
+				List<T> values = retVal;
+				retVal = new ArrayList<>();
+				for (T nextElement : values) {
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+					retVal.addAll(foundValues);
+				}
+			}
+
+			return retVal;
+		}
+
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
-		List<T> retVal = new ArrayList<T>();
 
 		if (theSubList.size() == 1) {
 			if (nextDef instanceof RuntimeChildChoiceDefinition) {
@@ -262,16 +297,41 @@ public class FhirTerser {
 
 	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		List<String> parts = parsePath(def, thePath);
+		return getValues(def, theResource, parts, theWantedClass);
+	}
 
-		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
-		Object currentObj = theResource;
+	private List<String> parsePath(BaseRuntimeElementCompositeDefinition<?> theElementDef, String thePath) {
+		List<String> parts = new ArrayList<>();
 
-		List<String> parts = Arrays.asList(thePath.split("\\."));
-		List<String> subList = parts.subList(1, parts.size());
-		if (subList.size() < 1) {
+		int currentStart = 0;
+		boolean inSingleQuote = false;
+		for (int i = 0; i < thePath.length(); i++) {
+			switch (thePath.charAt(i)) {
+				case '\'':
+					inSingleQuote = !inSingleQuote;
+					break;
+				case '.':
+					if (!inSingleQuote) {
+						parts.add(thePath.substring(currentStart, i));
+						currentStart = i + 1;
+					}
+					break;
+			}
+		}
+
+		parts.add(thePath.substring(currentStart));
+
+		if (theElementDef instanceof RuntimeResourceDefinition) {
+			if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+				parts = parts.subList(1, parts.size());
+			}
+		}
+
+		if (parts.size() < 1) {
 			throw new ConfigurationException("Invalid path: " + thePath);
 		}
-		return getValues(currentDef, currentObj, subList, theWantedClass);
+		return parts;
 	}
 
 	/**

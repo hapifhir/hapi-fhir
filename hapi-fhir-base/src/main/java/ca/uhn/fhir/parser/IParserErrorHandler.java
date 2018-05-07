@@ -7,7 +7,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public interface IParserErrorHandler {
 	void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpectedValueType, ScalarType theExpectedScalarType, ValueType theFoundValueType, ScalarType theFoundScalarType);
 
 	/**
-	 * The parser detected an atttribute value that was invalid (such as: empty "" values are not permitted)
+	 * The parser detected an attribute value that was invalid (such as: empty "" values are not permitted)
 	 * 
 	 * @param theLocation
 	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
@@ -70,7 +70,7 @@ public interface IParserErrorHandler {
 	 * 
 	 * @param theLocation
 	 *           The location in the document. Note that this may be <code>null</code> as the ParseLocation feature is experimental. Use with caution, as the API may change. 
-	 * @param theReference The actual invalid reference (e.g. "#3")
+	 * @param theElementName The missing element name
 	 * @since 2.1
 	 */
 	void missingRequiredElement(IParseLocation theLocation, String theElementName);
@@ -123,7 +123,7 @@ public interface IParserErrorHandler {
 	 * type which will currently always be set to null. This interface is included here so that
 	 * locations can be added to the API in a future release without changing the API.
 	 */
-	public interface IParseLocation {
+	interface IParseLocation {
 
 		/**
 		 * Returns the name of the parent element (the element containing the element currently being parsed)

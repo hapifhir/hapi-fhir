@@ -29,17 +29,15 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+import java.util.Date;
+import java.util.List;
 
-import java.util.*;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ChildOrder;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A time period defined by a start and end date and optionally time.
  */
@@ -210,35 +208,46 @@ public class Period extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 109757538: // start
           this.start = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 100571: // end
           this.end = castToDateTime(value); // DateTimeType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("start"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("start")) {
           this.start = castToDateTime(value); // DateTimeType
-        else if (name.equals("end"))
+        } else if (name.equals("end")) {
           this.end = castToDateTime(value); // DateTimeType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 109757538: throw new FHIRException("Cannot make property start as it is not a complex type"); // DateTimeType
-        case 100571: throw new FHIRException("Cannot make property end as it is not a complex type"); // DateTimeType
+        case 109757538:  return getStartElement();
+        case 100571:  return getEndElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 109757538: /*start*/ return new String[] {"dateTime"};
+        case 100571: /*end*/ return new String[] {"dateTime"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

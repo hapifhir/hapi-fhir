@@ -1,7 +1,5 @@
 package org.hl7.fhir.dstu3.model;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -30,20 +28,14 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
   POSSIBILITY OF SUCH DAMAGE.
 
 */
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
@@ -52,9 +44,9 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * identity is known. In FHIR, every resource must have a "logical ID" which is
  * defined by the FHIR specification as:
  * <p>
- * <code>A whole number in the range 0 to 2^64-1 (optionally represented in hex), 
- * a uuid, an oid, or any other combination of lowercase letters, numerals, "-" 
- * and ".", with a length limit of 36 characters</code>
+ * <code>
+ * Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.)
+ * </code>
  * </p>
  * <p>
  * This class contains that logical ID, and can optionally also contain a
@@ -74,6 +66,10 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * </li>
  * </ul>
  * <p>
+ * Note that the 64 character
+ * limit applies only to the ID portion ("123" in the examples above).
+ * </p>
+ * <p>
  * In most situations, you only need to populate the resource's ID (e.g.
  * <code>123</code>) in resources you are constructing and the encoder will
  * infer the rest from the context in which the object is being used. On the
@@ -81,11 +77,13 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * identity on objects it creates as a convenience.
  * </p>
  * <p>
- * Regex for ID: [a-z0-9\-\.]{1,36}
+ * Regex for ID: [a-z0-9\-\.]{1,64}
  * </p>
  */
 @DatatypeDef(name = "id", profileOf=StringType.class)
 public final class IdType extends UriType implements IPrimitiveType<String>, IIdType {
+  public static final String URN_PREFIX = "urn:";
+
   /**
    * This is the maximum length for the ID
    */
@@ -357,11 +355,16 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
         b.append(myResourceType);
       }
 
-      if (b.length() > 0) {
+      if (b.length() > 0 && isNotBlank(myUnqualifiedId)) {
         b.append('/');
       }
 
-      b.append(myUnqualifiedId);
+      if (isNotBlank(myUnqualifiedId)) {
+        b.append(myUnqualifiedId);
+      } else if (isNotBlank(myUnqualifiedVersionId)) {
+        b.append('/');
+      }
+
       if (isNotBlank(myUnqualifiedVersionId)) {
         b.append('/');
         b.append("_history");
@@ -437,7 +440,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 
   @Override
   public boolean isEmpty() {
-    return isBlank(getValue());
+    return super.isEmpty() && isBlank(getValue());
   }
 
   @Override
@@ -486,8 +489,8 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     return defaultString(myUnqualifiedId).startsWith("#");
   }
 
-  private boolean isUrn() {
-    return defaultString(myUnqualifiedId).startsWith("urn:");
+  public boolean isUrn() {
+    return defaultString(myUnqualifiedId).startsWith(URN_PREFIX);
   }
 
   @Override
@@ -526,7 +529,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       myUnqualifiedVersionId = null;
       myResourceType = null;
       myHaveComponentParts = true;
-    } else if (theValue.startsWith("urn:")) {
+    } else if (theValue.startsWith(URN_PREFIX)) {
       myBaseUrl = null;
       myUnqualifiedId = theValue;
       myUnqualifiedVersionId = null;
@@ -553,7 +556,21 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
         if (typeIndex == -1) {
           myResourceType = theValue.substring(0, idIndex);
         } else {
-          myResourceType = theValue.substring(typeIndex + 1, idIndex);
+          if (typeIndex > 0 && '/' == theValue.charAt(typeIndex - 1)) {
+            typeIndex = theValue.indexOf('/', typeIndex + 1);
+          }
+          if (typeIndex >= idIndex) {
+            // e.g. http://example.org/foo
+            // 'foo' was the id but we're making that the resource type. Nullify the id part because we don't have an id.
+            // Also set null value to the super.setValue() and enable myHaveComponentParts so it forces getValue() to properly
+            // recreate the url
+            myResourceType = myUnqualifiedId;
+            myUnqualifiedId = null;
+            super.setValue(null);
+            myHaveComponentParts = true;
+          } else {
+            myResourceType = theValue.substring(typeIndex + 1, idIndex);
+          }
 
           if (typeIndex > 4) {
             myBaseUrl = theValue.substring(0, typeIndex);
@@ -652,14 +669,15 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
    * Creates a new instance of this ID which is identical, but refers to the
    * specific version of this resource ID noted by theVersion.
    * 
-   * @param theVersion
-   *          The actual version string, e.g. "1"
+   * @param theVersion The actual version string, e.g. "1". If theVersion is blank or null, returns the same as {@link #toVersionless()}}
    * @return A new instance of IdType which is identical, but refers to the
    *         specific version of this resource ID noted by theVersion.
    */
   @Override
   public IdType withVersion(String theVersion) {
-    Validate.notBlank(theVersion, "Version may not be null or empty");
+    if (isBlank(theVersion)) {
+      return toVersionless();
+    }
 
     if (isLocal() || isUrn()) {
        return new IdType(getValueAsString());
@@ -739,6 +757,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 		return "id";
 	}
 	
+	@Override
 	public IIdType setParts(String theBaseUrl, String theResourceType, String theIdPart, String theVersionIdPart) {
 		if (isNotBlank(theVersionIdPart)) {
 			Validate.notBlank(theResourceType, "If theVersionIdPart is populated, theResourceType and theIdPart must be populated");

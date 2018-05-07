@@ -29,13 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
-import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -123,6 +122,18 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
       return false;
     }
 
+    // syntactic sugar
+    public DomainResource addContained(Resource t) { //3
+      if (t == null)
+        return this;
+      if (this.contained == null)
+        this.contained = new ArrayList<Resource>();
+      this.contained.add(t);
+      return this;
+    }
+
+
+    
     /**
      * @return {@link #contained} (These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.)
      */
@@ -213,9 +224,48 @@ public abstract class DomainResource extends Resource implements IBaseHasExtensi
         childrenList.add(new Property("modifierExtension", "Extension", "May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.", 0, java.lang.Integer.MAX_VALUE, modifierExtension));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("text"))
+          this.text = castToNarrative(value); // Narrative
+        else if (name.equals("contained"))
+          this.getContained().add(castToResource(value));
+        else if (name.equals("extension"))
+          this.getExtension().add(castToExtension(value));
+        else if (name.equals("modifierExtension"))
+          this.getModifierExtension().add(castToExtension(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("text")) {
+          this.text = new Narrative();
+          return this.text;
+        }
+        else if (name.equals("contained")) {
+          throw new FHIRException("Cannot call addChild on an abstract type DomainResource.contained");
+        }
+        else if (name.equals("extension")) {
+          return addExtension();
+        }
+        else if (name.equals("modifierExtension")) {
+          return addModifierExtension();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DomainResource";
+
+  }
+
       public abstract DomainResource copy();
 
       public void copyValues(DomainResource dst) {
+        super.copyValues(dst);
         dst.text = text == null ? null : text.copy();
         if (contained != null) {
           dst.contained = new ArrayList<Resource>();

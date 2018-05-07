@@ -1,12 +1,29 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ElementUtil;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.dstu3.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.util.List;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +39,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #L%
  */
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-
-import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ElementUtil;
-
 public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSearchParameterDstu3.class);
@@ -49,15 +50,9 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	protected void markAffectedResources(SearchParameter theResource) {
-		if (theResource != null) {
-			String expression = theResource.getExpression();
-			String resourceType = expression.substring(0, expression.indexOf('.'));
-			ourLog.info("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", expression);
-			int updatedCount = myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
-			ourLog.info("Marked {} resources for reindexing", updatedCount);
-		}
-
-		mySearchParamRegistry.forceRefresh();
+		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
+		String expression = theResource != null ? theResource.getExpression() : null;
+		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
 	}
 
 	/**
@@ -107,49 +102,13 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
-		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid: " + theResource.getStatusElement().getValueAsString());
-		}
-
+		Enum<?> status = theResource.getStatus();
+		List<CodeType> base = theResource.getBase();
 		String expression = theResource.getExpression();
-		if (isBlank(expression)) {
-			throw new UnprocessableEntityException("SearchParameter.expression is missing");
-		}
+		FhirContext context = getContext();
+		Enumerations.SearchParamType type = theResource.getType();
 
-		if (ElementUtil.isEmpty(theResource.getBase())) {
-			throw new UnprocessableEntityException("SearchParameter.base is missing");
-		}
-
-		expression = expression.trim();
-		theResource.setExpression(expression);
-
-		String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(expression);
-		String allResourceName = null;
-		for (String nextPath : expressionSplit) {
-			nextPath = nextPath.trim();
-
-			int dotIdx = nextPath.indexOf('.');
-			if (dotIdx == -1) {
-				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
-			}
-
-			String resourceName = nextPath.substring(0, dotIdx);
-			try {
-				getContext().getResourceDefinition(resourceName);
-			} catch (DataFormatException e) {
-				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
-			}
-
-			if (allResourceName == null) {
-				allResourceName = resourceName;
-			} else {
-				if (!allResourceName.equals(resourceName)) {
-					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". All paths in a single SearchParameter must match the same resource type");
-				}
-			}
-
-		}
-
+		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
 	}
 
 }

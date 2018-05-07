@@ -1,11 +1,7 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -16,9 +12,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ProfileParser;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Mojo(name = "generate-structures", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderStructuresMojo extends AbstractMojo {
@@ -39,9 +37,6 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	@Parameter(alias = "version", required = true, defaultValue="dstu")
 	private String version = "dstu";
-
-	@Parameter(required = false)
-	private List<ProfileFileDefinition> resourceProfileFiles;
 
 	@Parameter(required = false)
 	private List<ValueSetFileDefinition> resourceValueSetFiles;
@@ -128,29 +123,9 @@ public class TinderStructuresMojo extends AbstractMojo {
 			rp.writeAll(resSubDirectoryBase, resDirectoryBase, packageName);
 		}
 
-		ProfileParser pp = new ProfileParser(version, baseDir);
-		if (resourceProfileFiles != null) {
-			ourLog.info("Loading profiles...");
-			for (ProfileFileDefinition next : resourceProfileFiles) {
-				ourLog.info("Parsing file: {}", next.profileFile);
-				pp.parseSingleProfile(new File(next.profileFile), next.profileSourceUrl);
-			}
-
-			pp.bindValueSets(vsp);
-			pp.markResourcesForImports();
-			pp.getLocalImports().putAll(datatypeLocalImports);
-			datatypeLocalImports.putAll(pp.getLocalImports());
-
-			pp.combineContentMaps(rp);
-			pp.combineContentMaps(dtp);
-			pp.writeAll(new File(directoryBase, "resource"), resDirectoryBase, packageName);
-		}
-
-		
 		if (dtp != null) {
 			ourLog.info("Writing Composite Datatypes...");
 			
-			dtp.combineContentMaps(pp);
 			dtp.combineContentMaps(rp);
 			dtp.writeAll(new File(directoryBase, "composite"), resDirectoryBase, packageName);
 		}
@@ -165,48 +140,40 @@ public class TinderStructuresMojo extends AbstractMojo {
 		return baseResourceNames;
 	}
 
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public List<ProfileFileDefinition> getResourceProfileFiles() {
-		return resourceProfileFiles;
-	}
-
-	public List<ValueSetFileDefinition> getResourceValueSetFiles() {
-		return resourceValueSetFiles;
-	}
-
-	public String getTargetDirectory() {
-		return targetDirectory;
-	}
-
-	public boolean isBuildDatatypes() {
-		return buildDatatypes;
-	}
-
 	public void setBaseResourceNames(List<String> theBaseResourceNames) {
 		baseResourceNames = theBaseResourceNames;
 	}
 
-	public void setBuildDatatypes(boolean theBuildDatatypes) {
-		buildDatatypes = theBuildDatatypes;
+	public String getPackageName() {
+		return packageName;
 	}
 
 	public void setPackageName(String thePackageName) {
 		packageName = thePackageName;
 	}
 
-	public void setResourceProfileFiles(List<ProfileFileDefinition> theResourceProfileFiles) {
-		resourceProfileFiles = theResourceProfileFiles;
+	public List<ValueSetFileDefinition> getResourceValueSetFiles() {
+		return resourceValueSetFiles;
 	}
 
 	public void setResourceValueSetFiles(List<ValueSetFileDefinition> theResourceValueSetFiles) {
 		resourceValueSetFiles = theResourceValueSetFiles;
 	}
 
+	public String getTargetDirectory() {
+		return targetDirectory;
+	}
+
 	public void setTargetDirectory(String theTargetDirectory) {
 		targetDirectory = theTargetDirectory;
+	}
+
+	public boolean isBuildDatatypes() {
+		return buildDatatypes;
+	}
+
+	public void setBuildDatatypes(boolean theBuildDatatypes) {
+		buildDatatypes = theBuildDatatypes;
 	}
 
 	public static void main(String[] args) throws Exception {

@@ -175,7 +175,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Reference medRef = new Reference(med);
 		mp.setMedication(medRef);
 		mp.setStatus(MedicationRequestStatus.ACTIVE);
-		mp.setDateWrittenElement(new DateTimeType("2014-09-01"));
+		mp.setAuthoredOnElement(new DateTimeType("2014-09-01"));
 
 		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, mp, narrative);

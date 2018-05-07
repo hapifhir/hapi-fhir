@@ -2,14 +2,12 @@ package ca.uhn.fhir.validation;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
-
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +39,5 @@ public interface IValidatorModule {
 	 * and is populated with the results.
 	 */
 	void validateResource(IValidationContext<IBaseResource> theCtx);
-
-	/**
-	 * This method applies only to DSTU1 Atom Bundles. All other validation will pass through
-	 * {@link #validateResource(IValidationContext)} inclusing DSTU2+ Bundle resources. If you
-	 * will not be validating DSTU1 Bundles, you may implement this method as
-	 * a NO-OP.
-	 */
-	void validateBundle(IValidationContext<Bundle> theContext);
 
 }

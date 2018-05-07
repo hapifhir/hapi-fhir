@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsConformanceProvider;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
@@ -27,7 +27,7 @@ public class JaxRsConformanceProvider extends AbstractJaxRsConformanceProvider {
   private JaxRsPatientRestProvider provider;
 
   public JaxRsConformanceProvider() {
-    super("My Server Version", "My Server Description", "My Server Name");
+    super("My Server Description", "My Server Name", "My Server Version");
   }
 
   @Override

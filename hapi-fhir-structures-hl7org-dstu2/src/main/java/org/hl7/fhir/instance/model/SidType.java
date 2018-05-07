@@ -32,4 +32,7 @@ public class SidType extends UriType {
 
   private static final long serialVersionUID = 5486832330986493589L;
 	
+	public String fhirType() {
+		return "sid";
+	}
 }

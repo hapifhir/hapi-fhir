@@ -1,0 +1,31 @@
+{
+	"resourceType": "Bundle",
+	"type": "document",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Composition",
+				"author": [
+					{
+						"display": "Jane C. Jackson"
+					}
+				],
+				"date": "2016-09-02T20:59:41Z",
+				"status": "final",
+				"subject": {
+					"reference": "Patient/1000"
+				},
+				"title": "Test evaluation",
+				"type": {
+					"coding": [
+						{
+							"code": "intake-exam",
+							"display": "Intake Exam",
+							"system": "http://test.org"
+						}
+					]
+				}
+			}
+		}
+	]
+}

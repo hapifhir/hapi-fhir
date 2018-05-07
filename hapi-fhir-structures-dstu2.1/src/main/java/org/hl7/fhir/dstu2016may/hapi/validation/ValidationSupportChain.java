@@ -1,19 +1,18 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -50,6 +49,32 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return myChain.get(0).expandValueSet(theCtx, theInclude);
+	}
+
+	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		List<IBaseResource> retVal = new ArrayList<>();
+		for (IValidationSupport next : myChain) {
+			List<IBaseResource> candidates = next.fetchAllConformanceResources(theContext);
+			if (candidates != null) {
+				retVal.addAll(candidates);
+			}
+		}
+		return retVal;
+	}
+
+	@Override
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		ArrayList<StructureDefinition> retVal = new ArrayList<StructureDefinition>();
+		Set<String> urls = new HashSet<String>();
+		for (IValidationSupport nextSupport : myChain) {
+			for (StructureDefinition next : nextSupport.fetchAllStructureDefinitions(theContext)) {
+				if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
+					retVal.add(next);
+				}
+			}
+		}
+		return retVal;
 	}
 
 	@Override
@@ -103,20 +128,6 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
-	}
-
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		ArrayList<StructureDefinition> retVal = new ArrayList<StructureDefinition>();
-		Set<String> urls= new HashSet<String>();
-		for (IValidationSupport nextSupport : myChain) {
-			for (StructureDefinition next : nextSupport.fetchAllStructureDefinitions(theContext)) {
-				if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
-					retVal.add(next);
-				}
-			}
-		}
-		return retVal;
 	}
 
 }

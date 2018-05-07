@@ -19,28 +19,19 @@ package ca.uhn.fhir.tinder;
  * #L%
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeSet;
-
-import org.apache.maven.plugin.MojoFailureException;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.tinder.GeneratorContext.ProfileFileDefinition;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ProfileParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+
+import java.io.IOException;
+import java.util.*;
 
 public abstract class AbstractGenerator {
 
-	protected abstract void logInfo (String message);
 	protected abstract void logDebug (String message);
+
+	protected abstract void logInfo (String message);
 	
 	public void prepare (GeneratorContext context) throws ExecutionException, FailureException {
 
@@ -49,9 +40,7 @@ public abstract class AbstractGenerator {
 		 */
 		FhirContext fhirContext;
 		String packageSuffix = "";
-		if ("dstu".equals(context.getVersion())) {
-			fhirContext = FhirContext.forDstu1();
-		} else if ("dstu2".equals(context.getVersion())) {
+		if ("dstu2".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu2();
 		} else if ("dstu3".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu3();
@@ -91,14 +80,6 @@ public abstract class AbstractGenerator {
 				}
 			}
 			
-			/*
-			 * No spreadsheet existed for Binary in DSTU1 so we don't generate it.. this
-			 * is something we could work around, but at this point why bother since it's 
-			 * only an issue for DSTU1
-			 */
-			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				includeResources.remove("binary");
-			}
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 				includeResources.remove("conformance");
 			}
@@ -124,7 +105,6 @@ public abstract class AbstractGenerator {
 		 */
 		ValueSetGenerator vsp = null;
 		DatatypeGeneratorUsingSpreadsheet dtp = null;
-		ProfileParser pp = null;
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
 
 		vsp = new ValueSetGenerator(context.getVersion());
@@ -176,28 +156,6 @@ public abstract class AbstractGenerator {
 		rp.combineContentMaps(dtp);
 		dtp.combineContentMaps(rp);
 
-		if (context.getProfileFiles() != null) {
-			logInfo("Loading profiles...");
-			pp = new ProfileParser(context.getVersion(), context.getBaseDir());
-			context.setProfileParser(pp);
-			for (ProfileFileDefinition next : context.getProfileFiles()) {
-				logInfo("Parsing file: "+next.profileFile);
-				try {
-					pp.parseSingleProfile(new File(next.profileFile), next.profileSourceUrl);
-				} catch (MojoFailureException e) {
-					throw new FailureException(e);
-				}
-			}
-
-			pp.bindValueSets(vsp);
-			pp.markResourcesForImports();
-			pp.getLocalImports().putAll(datatypeLocalImports);
-			datatypeLocalImports.putAll(pp.getLocalImports());
-
-			pp.combineContentMaps(rp);
-			pp.combineContentMaps(dtp);
-			dtp.combineContentMaps(pp);
-		}
 	}
 
 	public class FailureException extends Exception {

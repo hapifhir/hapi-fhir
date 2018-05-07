@@ -29,15 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import org.hl7.fhir.exceptions.FHIRException;
+
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A request for a procedure to be performed. May be a proposal or an order.
  */
@@ -89,7 +86,7 @@ public class ProcedureRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureRequestStatus fromCode(String codeString) throws Exception {
+        public static ProcedureRequestStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("proposed".equals(codeString))
@@ -112,7 +109,7 @@ public class ProcedureRequest extends DomainResource {
           return REJECTED;
         if ("aborted".equals(codeString))
           return ABORTED;
-        throw new Exception("Unknown ProcedureRequestStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown ProcedureRequestStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -203,6 +200,34 @@ public class ProcedureRequest extends DomainResource {
           return ProcedureRequestStatus.ABORTED;
         throw new IllegalArgumentException("Unknown ProcedureRequestStatus code '"+codeString+"'");
         }
+        public Enumeration<ProcedureRequestStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposed".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.PROPOSED);
+        if ("draft".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.DRAFT);
+        if ("requested".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.REQUESTED);
+        if ("received".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.RECEIVED);
+        if ("accepted".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.ACCEPTED);
+        if ("in-progress".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.INPROGRESS);
+        if ("completed".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.COMPLETED);
+        if ("suspended".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.SUSPENDED);
+        if ("rejected".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.REJECTED);
+        if ("aborted".equals(codeString))
+          return new Enumeration<ProcedureRequestStatus>(this, ProcedureRequestStatus.ABORTED);
+        throw new FHIRException("Unknown ProcedureRequestStatus code '"+codeString+"'");
+        }
     public String toCode(ProcedureRequestStatus code) {
       if (code == ProcedureRequestStatus.PROPOSED)
         return "proposed";
@@ -249,7 +274,7 @@ public class ProcedureRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureRequestPriority fromCode(String codeString) throws Exception {
+        public static ProcedureRequestPriority fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("routine".equals(codeString))
@@ -260,7 +285,7 @@ public class ProcedureRequest extends DomainResource {
           return STAT;
         if ("asap".equals(codeString))
           return ASAP;
-        throw new Exception("Unknown ProcedureRequestPriority code '"+codeString+"'");
+        throw new FHIRException("Unknown ProcedureRequestPriority code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -314,6 +339,22 @@ public class ProcedureRequest extends DomainResource {
         if ("asap".equals(codeString))
           return ProcedureRequestPriority.ASAP;
         throw new IllegalArgumentException("Unknown ProcedureRequestPriority code '"+codeString+"'");
+        }
+        public Enumeration<ProcedureRequestPriority> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("routine".equals(codeString))
+          return new Enumeration<ProcedureRequestPriority>(this, ProcedureRequestPriority.ROUTINE);
+        if ("urgent".equals(codeString))
+          return new Enumeration<ProcedureRequestPriority>(this, ProcedureRequestPriority.URGENT);
+        if ("stat".equals(codeString))
+          return new Enumeration<ProcedureRequestPriority>(this, ProcedureRequestPriority.STAT);
+        if ("asap".equals(codeString))
+          return new Enumeration<ProcedureRequestPriority>(this, ProcedureRequestPriority.ASAP);
+        throw new FHIRException("Unknown ProcedureRequestPriority code '"+codeString+"'");
         }
     public String toCode(ProcedureRequestPriority code) {
       if (code == ProcedureRequestPriority.ROUTINE)
@@ -617,26 +658,26 @@ public class ProcedureRequest extends DomainResource {
     /**
      * @return {@link #reason} (The reason why the procedure is being proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
       if (!(this.reason instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
-    public boolean hasReasonCodeableConcept() throws Exception { 
+    public boolean hasReasonCodeableConcept() { 
       return this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (The reason why the procedure is being proposed or ordered. This procedure request may be motivated by a Condition for instance.)
      */
-    public Reference getReasonReference() throws Exception { 
+    public Reference getReasonReference() throws FHIRException { 
       if (!(this.reason instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
-    public boolean hasReasonReference() throws Exception { 
+    public boolean hasReasonReference() { 
       return this.reason instanceof Reference;
     }
 
@@ -662,39 +703,39 @@ public class ProcedureRequest extends DomainResource {
     /**
      * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions.  E.g. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
-    public DateTimeType getScheduledDateTimeType() throws Exception { 
+    public DateTimeType getScheduledDateTimeType() throws FHIRException { 
       if (!(this.scheduled instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
       return (DateTimeType) this.scheduled;
     }
 
-    public boolean hasScheduledDateTimeType() throws Exception { 
+    public boolean hasScheduledDateTimeType() { 
       return this.scheduled instanceof DateTimeType;
     }
 
     /**
      * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions.  E.g. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
-    public Period getScheduledPeriod() throws Exception { 
+    public Period getScheduledPeriod() throws FHIRException { 
       if (!(this.scheduled instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
       return (Period) this.scheduled;
     }
 
-    public boolean hasScheduledPeriod() throws Exception { 
+    public boolean hasScheduledPeriod() { 
       return this.scheduled instanceof Period;
     }
 
     /**
      * @return {@link #scheduled} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions.  E.g. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
-    public Timing getScheduledTiming() throws Exception { 
+    public Timing getScheduledTiming() throws FHIRException { 
       if (!(this.scheduled instanceof Timing))
-        throw new Exception("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
       return (Timing) this.scheduled;
     }
 
-    public boolean hasScheduledTiming() throws Exception { 
+    public boolean hasScheduledTiming() { 
       return this.scheduled instanceof Timing;
     }
 
@@ -892,26 +933,26 @@ public class ProcedureRequest extends DomainResource {
     /**
      * @return {@link #asNeeded} (If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.)
      */
-    public BooleanType getAsNeededBooleanType() throws Exception { 
+    public BooleanType getAsNeededBooleanType() throws FHIRException { 
       if (!(this.asNeeded instanceof BooleanType))
-        throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (BooleanType) this.asNeeded;
     }
 
-    public boolean hasAsNeededBooleanType() throws Exception { 
+    public boolean hasAsNeededBooleanType() { 
       return this.asNeeded instanceof BooleanType;
     }
 
     /**
      * @return {@link #asNeeded} (If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.)
      */
-    public CodeableConcept getAsNeededCodeableConcept() throws Exception { 
+    public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
       if (!(this.asNeeded instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;
     }
 
-    public boolean hasAsNeededCodeableConcept() throws Exception { 
+    public boolean hasAsNeededCodeableConcept() { 
       return this.asNeeded instanceof CodeableConcept;
     }
 
@@ -1081,6 +1122,117 @@ public class ProcedureRequest extends DomainResource {
         childrenList.add(new Property("orderer", "Reference(Practitioner|Patient|RelatedPerson|Device)", "The healthcare professional responsible for proposing or ordering the procedure.", 0, java.lang.Integer.MAX_VALUE, orderer));
         childrenList.add(new Property("priority", "code", "The clinical priority associated with this order.", 0, java.lang.Integer.MAX_VALUE, priority));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("code"))
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("bodySite"))
+          this.getBodySite().add(castToCodeableConcept(value));
+        else if (name.equals("reason[x]"))
+          this.reason = (Type) value; // Type
+        else if (name.equals("scheduled[x]"))
+          this.scheduled = (Type) value; // Type
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("performer"))
+          this.performer = castToReference(value); // Reference
+        else if (name.equals("status"))
+          this.status = new ProcedureRequestStatusEnumFactory().fromType(value); // Enumeration<ProcedureRequestStatus>
+        else if (name.equals("notes"))
+          this.getNotes().add(castToAnnotation(value));
+        else if (name.equals("asNeeded[x]"))
+          this.asNeeded = (Type) value; // Type
+        else if (name.equals("orderedOn"))
+          this.orderedOn = castToDateTime(value); // DateTimeType
+        else if (name.equals("orderer"))
+          this.orderer = castToReference(value); // Reference
+        else if (name.equals("priority"))
+          this.priority = new ProcedureRequestPriorityEnumFactory().fromType(value); // Enumeration<ProcedureRequestPriority>
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("bodySite")) {
+          return addBodySite();
+        }
+        else if (name.equals("reasonCodeableConcept")) {
+          this.reason = new CodeableConcept();
+          return this.reason;
+        }
+        else if (name.equals("reasonReference")) {
+          this.reason = new Reference();
+          return this.reason;
+        }
+        else if (name.equals("scheduledDateTime")) {
+          this.scheduled = new DateTimeType();
+          return this.scheduled;
+        }
+        else if (name.equals("scheduledPeriod")) {
+          this.scheduled = new Period();
+          return this.scheduled;
+        }
+        else if (name.equals("scheduledTiming")) {
+          this.scheduled = new Timing();
+          return this.scheduled;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("performer")) {
+          this.performer = new Reference();
+          return this.performer;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcedureRequest.status");
+        }
+        else if (name.equals("notes")) {
+          return addNotes();
+        }
+        else if (name.equals("asNeededBoolean")) {
+          this.asNeeded = new BooleanType();
+          return this.asNeeded;
+        }
+        else if (name.equals("asNeededCodeableConcept")) {
+          this.asNeeded = new CodeableConcept();
+          return this.asNeeded;
+        }
+        else if (name.equals("orderedOn")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcedureRequest.orderedOn");
+        }
+        else if (name.equals("orderer")) {
+          this.orderer = new Reference();
+          return this.orderer;
+        }
+        else if (name.equals("priority")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProcedureRequest.priority");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "ProcedureRequest";
+
+  }
 
       public ProcedureRequest copy() {
         ProcedureRequest dst = new ProcedureRequest();

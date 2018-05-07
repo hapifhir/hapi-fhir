@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from e.g. the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
  */
@@ -69,7 +64,7 @@ public class MedicationStatement extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationStatementStatus fromCode(String codeString) throws Exception {
+        public static MedicationStatementStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -80,7 +75,7 @@ public class MedicationStatement extends DomainResource {
           return ENTEREDINERROR;
         if ("intended".equals(codeString))
           return INTENDED;
-        throw new Exception("Unknown MedicationStatementStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown MedicationStatementStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -134,6 +129,22 @@ public class MedicationStatement extends DomainResource {
         if ("intended".equals(codeString))
           return MedicationStatementStatus.INTENDED;
         throw new IllegalArgumentException("Unknown MedicationStatementStatus code '"+codeString+"'");
+        }
+        public Enumeration<MedicationStatementStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.ACTIVE);
+        if ("completed".equals(codeString))
+          return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.COMPLETED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.ENTEREDINERROR);
+        if ("intended".equals(codeString))
+          return new Enumeration<MedicationStatementStatus>(this, MedicationStatementStatus.INTENDED);
+        throw new FHIRException("Unknown MedicationStatementStatus code '"+codeString+"'");
         }
     public String toCode(MedicationStatementStatus code) {
       if (code == MedicationStatementStatus.ACTIVE)
@@ -311,13 +322,13 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
 
 Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.)
          */
-        public BooleanType getAsNeededBooleanType() throws Exception { 
+        public BooleanType getAsNeededBooleanType() throws FHIRException { 
           if (!(this.asNeeded instanceof BooleanType))
-            throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
           return (BooleanType) this.asNeeded;
         }
 
-        public boolean hasAsNeededBooleanType() throws Exception { 
+        public boolean hasAsNeededBooleanType() { 
           return this.asNeeded instanceof BooleanType;
         }
 
@@ -326,13 +337,13 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
 
 Specifically if 'boolean' datatype is selected, then the following logic applies:  If set to True, this indicates that the medication is only taken when needed, within the specified schedule.)
          */
-        public CodeableConcept getAsNeededCodeableConcept() throws Exception { 
+        public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
           if (!(this.asNeeded instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
           return (CodeableConcept) this.asNeeded;
         }
 
-        public boolean hasAsNeededCodeableConcept() throws Exception { 
+        public boolean hasAsNeededCodeableConcept() { 
           return this.asNeeded instanceof CodeableConcept;
         }
 
@@ -360,26 +371,26 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         /**
          * @return {@link #site} (A coded specification of or a reference to the anatomic site where the medication first enters the body.)
          */
-        public CodeableConcept getSiteCodeableConcept() throws Exception { 
+        public CodeableConcept getSiteCodeableConcept() throws FHIRException { 
           if (!(this.site instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
           return (CodeableConcept) this.site;
         }
 
-        public boolean hasSiteCodeableConcept() throws Exception { 
+        public boolean hasSiteCodeableConcept() { 
           return this.site instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #site} (A coded specification of or a reference to the anatomic site where the medication first enters the body.)
          */
-        public Reference getSiteReference() throws Exception { 
+        public Reference getSiteReference() throws FHIRException { 
           if (!(this.site instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
           return (Reference) this.site;
         }
 
-        public boolean hasSiteReference() throws Exception { 
+        public boolean hasSiteReference() { 
           return this.site instanceof Reference;
         }
 
@@ -453,26 +464,26 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         /**
          * @return {@link #quantity} (The amount of therapeutic or other substance given at one administration event.)
          */
-        public SimpleQuantity getQuantitySimpleQuantity() throws Exception { 
+        public SimpleQuantity getQuantitySimpleQuantity() throws FHIRException { 
           if (!(this.quantity instanceof SimpleQuantity))
-            throw new Exception("Type mismatch: the type SimpleQuantity was expected, but "+this.quantity.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.quantity.getClass().getName()+" was encountered");
           return (SimpleQuantity) this.quantity;
         }
 
-        public boolean hasQuantitySimpleQuantity() throws Exception { 
+        public boolean hasQuantitySimpleQuantity() { 
           return this.quantity instanceof SimpleQuantity;
         }
 
         /**
          * @return {@link #quantity} (The amount of therapeutic or other substance given at one administration event.)
          */
-        public Range getQuantityRange() throws Exception { 
+        public Range getQuantityRange() throws FHIRException { 
           if (!(this.quantity instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.quantity.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.quantity.getClass().getName()+" was encountered");
           return (Range) this.quantity;
         }
 
-        public boolean hasQuantityRange() throws Exception { 
+        public boolean hasQuantityRange() { 
           return this.quantity instanceof Range;
         }
 
@@ -498,26 +509,26 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         /**
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Currently we do not specify a default of '1' in the denominator, but this is being discussed. Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
-        public Ratio getRateRatio() throws Exception { 
+        public Ratio getRateRatio() throws FHIRException { 
           if (!(this.rate instanceof Ratio))
-            throw new Exception("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
         }
 
-        public boolean hasRateRatio() throws Exception { 
+        public boolean hasRateRatio() { 
           return this.rate instanceof Ratio;
         }
 
         /**
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient. Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.   Currently we do not specify a default of '1' in the denominator, but this is being discussed. Other examples: 200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
-        public Range getRateRange() throws Exception { 
+        public Range getRateRange() throws FHIRException { 
           if (!(this.rate instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Range) this.rate;
         }
 
-        public boolean hasRateRange() throws Exception { 
+        public boolean hasRateRange() { 
           return this.rate instanceof Range;
         }
 
@@ -570,6 +581,87 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
           childrenList.add(new Property("maxDosePerPeriod", "Ratio", "The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time.  For example, 1000mg in 24 hours.", 0, java.lang.Integer.MAX_VALUE, maxDosePerPeriod));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("timing"))
+          this.timing = castToTiming(value); // Timing
+        else if (name.equals("asNeeded[x]"))
+          this.asNeeded = (Type) value; // Type
+        else if (name.equals("site[x]"))
+          this.site = (Type) value; // Type
+        else if (name.equals("route"))
+          this.route = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("method"))
+          this.method = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("quantity[x]"))
+          this.quantity = (Type) value; // Type
+        else if (name.equals("rate[x]"))
+          this.rate = (Type) value; // Type
+        else if (name.equals("maxDosePerPeriod"))
+          this.maxDosePerPeriod = castToRatio(value); // Ratio
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.text");
+        }
+        else if (name.equals("timing")) {
+          this.timing = new Timing();
+          return this.timing;
+        }
+        else if (name.equals("asNeededBoolean")) {
+          this.asNeeded = new BooleanType();
+          return this.asNeeded;
+        }
+        else if (name.equals("asNeededCodeableConcept")) {
+          this.asNeeded = new CodeableConcept();
+          return this.asNeeded;
+        }
+        else if (name.equals("siteCodeableConcept")) {
+          this.site = new CodeableConcept();
+          return this.site;
+        }
+        else if (name.equals("siteReference")) {
+          this.site = new Reference();
+          return this.site;
+        }
+        else if (name.equals("route")) {
+          this.route = new CodeableConcept();
+          return this.route;
+        }
+        else if (name.equals("method")) {
+          this.method = new CodeableConcept();
+          return this.method;
+        }
+        else if (name.equals("quantitySimpleQuantity")) {
+          this.quantity = new SimpleQuantity();
+          return this.quantity;
+        }
+        else if (name.equals("quantityRange")) {
+          this.quantity = new Range();
+          return this.quantity;
+        }
+        else if (name.equals("rateRatio")) {
+          this.rate = new Ratio();
+          return this.rate;
+        }
+        else if (name.equals("rateRange")) {
+          this.rate = new Range();
+          return this.rate;
+        }
+        else if (name.equals("maxDosePerPeriod")) {
+          this.maxDosePerPeriod = new Ratio();
+          return this.maxDosePerPeriod;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public MedicationStatementDosageComponent copy() {
         MedicationStatementDosageComponent dst = new MedicationStatementDosageComponent();
         copyValues(dst);
@@ -614,6 +706,11 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
            && (method == null || method.isEmpty()) && (quantity == null || quantity.isEmpty()) && (rate == null || rate.isEmpty())
            && (maxDosePerPeriod == null || maxDosePerPeriod.isEmpty());
       }
+
+  public String fhirType() {
+    return "MedicationStatement.dosage";
+
+  }
 
   }
 
@@ -1054,26 +1151,26 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * @return {@link #reasonForUse} (A reason for why the medication is being/was taken.)
      */
-    public CodeableConcept getReasonForUseCodeableConcept() throws Exception { 
+    public CodeableConcept getReasonForUseCodeableConcept() throws FHIRException { 
       if (!(this.reasonForUse instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reasonForUse;
     }
 
-    public boolean hasReasonForUseCodeableConcept() throws Exception { 
+    public boolean hasReasonForUseCodeableConcept() { 
       return this.reasonForUse instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reasonForUse} (A reason for why the medication is being/was taken.)
      */
-    public Reference getReasonForUseReference() throws Exception { 
+    public Reference getReasonForUseReference() throws FHIRException { 
       if (!(this.reasonForUse instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
       return (Reference) this.reasonForUse;
     }
 
-    public boolean hasReasonForUseReference() throws Exception { 
+    public boolean hasReasonForUseReference() { 
       return this.reasonForUse instanceof Reference;
     }
 
@@ -1099,26 +1196,26 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * @return {@link #effective} (The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the wasNotGiven element is true).)
      */
-    public DateTimeType getEffectiveDateTimeType() throws Exception { 
+    public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
       if (!(this.effective instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
-    public boolean hasEffectiveDateTimeType() throws Exception { 
+    public boolean hasEffectiveDateTimeType() { 
       return this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the wasNotGiven element is true).)
      */
-    public Period getEffectivePeriod() throws Exception { 
+    public Period getEffectivePeriod() throws FHIRException { 
       if (!(this.effective instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
-    public boolean hasEffectivePeriod() throws Exception { 
+    public boolean hasEffectivePeriod() { 
       return this.effective instanceof Period;
     }
 
@@ -1242,26 +1339,26 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public CodeableConcept getMedicationCodeableConcept() throws Exception { 
+    public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
       if (!(this.medication instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (CodeableConcept) this.medication;
     }
 
-    public boolean hasMedicationCodeableConcept() throws Exception { 
+    public boolean hasMedicationCodeableConcept() { 
       return this.medication instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public Reference getMedicationReference() throws Exception { 
+    public Reference getMedicationReference() throws FHIRException { 
       if (!(this.medication instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
     }
 
-    public boolean hasMedicationReference() throws Exception { 
+    public boolean hasMedicationReference() { 
       return this.medication instanceof Reference;
     }
 
@@ -1333,6 +1430,105 @@ Specifically if 'boolean' datatype is selected, then the following logic applies
         childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("dosage", "", "Indicates how the medication is/was used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosage));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("informationSource"))
+          this.informationSource = castToReference(value); // Reference
+        else if (name.equals("dateAsserted"))
+          this.dateAsserted = castToDateTime(value); // DateTimeType
+        else if (name.equals("status"))
+          this.status = new MedicationStatementStatusEnumFactory().fromType(value); // Enumeration<MedicationStatementStatus>
+        else if (name.equals("wasNotTaken"))
+          this.wasNotTaken = castToBoolean(value); // BooleanType
+        else if (name.equals("reasonNotTaken"))
+          this.getReasonNotTaken().add(castToCodeableConcept(value));
+        else if (name.equals("reasonForUse[x]"))
+          this.reasonForUse = (Type) value; // Type
+        else if (name.equals("effective[x]"))
+          this.effective = (Type) value; // Type
+        else if (name.equals("note"))
+          this.note = castToString(value); // StringType
+        else if (name.equals("supportingInformation"))
+          this.getSupportingInformation().add(castToReference(value));
+        else if (name.equals("medication[x]"))
+          this.medication = (Type) value; // Type
+        else if (name.equals("dosage"))
+          this.getDosage().add((MedicationStatementDosageComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("informationSource")) {
+          this.informationSource = new Reference();
+          return this.informationSource;
+        }
+        else if (name.equals("dateAsserted")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.dateAsserted");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.status");
+        }
+        else if (name.equals("wasNotTaken")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.wasNotTaken");
+        }
+        else if (name.equals("reasonNotTaken")) {
+          return addReasonNotTaken();
+        }
+        else if (name.equals("reasonForUseCodeableConcept")) {
+          this.reasonForUse = new CodeableConcept();
+          return this.reasonForUse;
+        }
+        else if (name.equals("reasonForUseReference")) {
+          this.reasonForUse = new Reference();
+          return this.reasonForUse;
+        }
+        else if (name.equals("effectiveDateTime")) {
+          this.effective = new DateTimeType();
+          return this.effective;
+        }
+        else if (name.equals("effectivePeriod")) {
+          this.effective = new Period();
+          return this.effective;
+        }
+        else if (name.equals("note")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicationStatement.note");
+        }
+        else if (name.equals("supportingInformation")) {
+          return addSupportingInformation();
+        }
+        else if (name.equals("medicationCodeableConcept")) {
+          this.medication = new CodeableConcept();
+          return this.medication;
+        }
+        else if (name.equals("medicationReference")) {
+          this.medication = new Reference();
+          return this.medication;
+        }
+        else if (name.equals("dosage")) {
+          return addDosage();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "MedicationStatement";
+
+  }
 
       public MedicationStatement copy() {
         MedicationStatement dst = new MedicationStatement();

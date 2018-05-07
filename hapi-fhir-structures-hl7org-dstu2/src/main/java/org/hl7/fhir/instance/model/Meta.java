@@ -29,17 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
  */
@@ -330,6 +327,48 @@ public class Meta extends Type implements IBaseMetaType {
         childrenList.add(new Property("security", "Coding", "Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.", 0, java.lang.Integer.MAX_VALUE, security));
         childrenList.add(new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("versionId"))
+          this.versionId = castToId(value); // IdType
+        else if (name.equals("lastUpdated"))
+          this.lastUpdated = castToInstant(value); // InstantType
+        else if (name.equals("profile"))
+          this.getProfile().add(castToUri(value));
+        else if (name.equals("security"))
+          this.getSecurity().add(castToCoding(value));
+        else if (name.equals("tag"))
+          this.getTag().add(castToCoding(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("versionId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Meta.versionId");
+        }
+        else if (name.equals("lastUpdated")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Meta.lastUpdated");
+        }
+        else if (name.equals("profile")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Meta.profile");
+        }
+        else if (name.equals("security")) {
+          return addSecurity();
+        }
+        else if (name.equals("tag")) {
+          return addTag();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Meta";
+
+  }
 
       public Meta copy() {
         Meta dst = new Meta();

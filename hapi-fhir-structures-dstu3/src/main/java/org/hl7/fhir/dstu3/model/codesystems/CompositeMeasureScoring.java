@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum CompositeMeasureScoring {
          */
         LINEAR, 
         /**
-         * Weighted scoring gives an individual a score based on a weigthed factor for each component numerator in which they appear
+         * Weighted scoring gives an individual a score based on a weighted factor for each component numerator in which they appear
          */
         WEIGHTED, 
         /**
@@ -86,7 +86,7 @@ public enum CompositeMeasureScoring {
             case OPPORTUNITY: return "Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component";
             case ALLORNOTHING: return "All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator";
             case LINEAR: return "Linear scoring gives an individual a score based on the number of numerators in which they appear";
-            case WEIGHTED: return "Weighted scoring gives an individual a score based on a weigthed factor for each component numerator in which they appear";
+            case WEIGHTED: return "Weighted scoring gives an individual a score based on a weighted factor for each component numerator in which they appear";
             default: return "?";
           }
         }

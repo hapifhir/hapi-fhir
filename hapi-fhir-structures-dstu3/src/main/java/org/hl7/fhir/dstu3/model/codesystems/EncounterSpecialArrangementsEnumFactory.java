@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -41,8 +41,8 @@ public class EncounterSpecialArrangementsEnumFactory implements EnumFactory<Enco
       return null;
     if ("wheel".equals(codeString))
       return EncounterSpecialArrangements.WHEEL;
-    if ("stret".equals(codeString))
-      return EncounterSpecialArrangements.STRET;
+    if ("add-bed".equals(codeString))
+      return EncounterSpecialArrangements.ADDBED;
     if ("int".equals(codeString))
       return EncounterSpecialArrangements.INT;
     if ("att".equals(codeString))
@@ -55,8 +55,8 @@ public class EncounterSpecialArrangementsEnumFactory implements EnumFactory<Enco
   public String toCode(EncounterSpecialArrangements code) {
     if (code == EncounterSpecialArrangements.WHEEL)
       return "wheel";
-    if (code == EncounterSpecialArrangements.STRET)
-      return "stret";
+    if (code == EncounterSpecialArrangements.ADDBED)
+      return "add-bed";
     if (code == EncounterSpecialArrangements.INT)
       return "int";
     if (code == EncounterSpecialArrangements.ATT)

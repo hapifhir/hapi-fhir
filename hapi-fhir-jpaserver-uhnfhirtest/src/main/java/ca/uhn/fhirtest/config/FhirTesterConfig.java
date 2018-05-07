@@ -1,10 +1,7 @@
 package ca.uhn.fhirtest.config;
 
 import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
@@ -46,42 +43,47 @@ public class FhirTesterConfig {
 		TesterConfig retVal = new TesterConfig();
 		retVal
 			.addServer()
-				.withId("hapi_dev")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
-				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu2")
-				.withName("UHN/HAPI Server (DSTU2 FHIR)")
-			.addServer()
 				.withId("home_21")
 				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu3")
+				.withBaseUrl("http://hapi.fhir.org/baseDstu3")
 				.withName("UHN/HAPI Server (STU3 FHIR)")
 			.addServer()
-				.withId("home")
-				.withFhirVersion(FhirVersionEnum.DSTU1)
-				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu1")
-				.withName("UHN/HAPI Server (DSTU1 FHIR)")
+				.withId("hapi_dev")
+				.withFhirVersion(FhirVersionEnum.DSTU2)
+				.withBaseUrl("http://hapi.fhir.org/baseDstu2")
+				.withName("UHN/HAPI Server (DSTU2 FHIR)")
+			.addServer()
+				.withId("home_r4")
+				.withFhirVersion(FhirVersionEnum.R4)
+				.withBaseUrl("http://hapi.fhir.org/baseR4")
+				.withName("UHN/HAPI Server (R4 FHIR)")
 //			.addServer()
 //				.withId("tdl_d2")
 //				.withFhirVersion(FhirVersionEnum.DSTU2)
-//				.withBaseUrl("http://fhirtest.uhn.ca/testDataLibraryDstu2")
+//				.withBaseUrl("http://hapi.fhir.org/testDataLibraryDstu2")
 //				.withName("Test Data Library (DSTU2 FHIR)")
 //				.allowsApiKey()
 //			.addServer()
 //				.withId("tdl_d3")
 //				.withFhirVersion(FhirVersionEnum.DSTU3)
-//				.withBaseUrl("http://fhirtest.uhn.ca/testDataLibraryStu3")
+//				.withBaseUrl("http://hapi.fhir.org/testDataLibraryStu3")
 //				.withName("Test Data Library (DSTU3 FHIR)")
 //				.allowsApiKey()
 			.addServer()
-				.withId("hi2")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
-				.withBaseUrl("http://fhir2.healthintersections.com.au/open")
-				.withName("Health Intersections (DSTU2 FHIR)")
+				.withId("hi4")
+				.withFhirVersion(FhirVersionEnum.DSTU3)
+				.withBaseUrl("http://test.fhir.org/r4")
+				.withName("Health Intersections (R4 FHIR)")
 			.addServer()
 				.withId("hi3")
 				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://fhir3.healthintersections.com.au/open")
+				.withBaseUrl("http://test.fhir.org/r3")
 				.withName("Health Intersections (STU3 FHIR)")
+			.addServer()
+				.withId("hi2")
+				.withFhirVersion(FhirVersionEnum.DSTU2)
+				.withBaseUrl("http://test.fhir.org/r2")
+				.withName("Health Intersections (DSTU2 FHIR)")
 			.addServer()
 				.withId("spark2")
 				.withFhirVersion(FhirVersionEnum.DSTU2)

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,10 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
@@ -38,58 +32,23 @@ import javax.measure.unit.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
-import org.hl7.fhir.dstu3.model.Address;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.BaseDateTimeType;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Conformance.ConformanceRestSecurityComponent;
-import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.Duration;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
 import org.hl7.fhir.dstu3.model.Enumeration;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Location.LocationPositionComponent;
 import org.hl7.fhir.dstu3.model.Patient.PatientCommunicationComponent;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.Range;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Timing;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
-import ca.uhn.fhir.jpa.dao.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.PathAndRef;
-import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -97,8 +56,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorDstu3.class);
 
 	@Autowired
-	private org.hl7.fhir.dstu3.hapi.validation.IValidationSupport myValidationSupport;
-	
+	private org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport myValidationSupport;
+
 	/**
 	 * Constructor
 	 */
@@ -175,29 +134,33 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue(), nextValue.getValueAsString());
 				} else if (nextObject instanceof Period) {
 					Period nextValue = (Period) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd(), nextValue.getStartElement().getValueAsString());
 				} else if (nextObject instanceof Timing) {
 					Timing nextValue = (Timing) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					TreeSet<Date> dates = new TreeSet<Date>();
+					String firstValue = null;
+					TreeSet<Date> dates = new TreeSet<>();
 					for (DateTimeType nextEvent : nextValue.getEvent()) {
 						if (nextEvent.getValue() != null) {
 							dates.add(nextEvent.getValue());
+							if (firstValue == null) {
+								firstValue = nextEvent.getValueAsString();
+							}
 						}
 					}
 					if (dates.isEmpty()) {
 						continue;
 					}
 
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last());
+					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last(), firstValue);
 				} else if (nextObject instanceof StringType) {
 					// CarePlan.activitydate can be a string
 					continue;
@@ -299,6 +262,15 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, new BigDecimal(nextValue.getValue()));
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
+				} else if (nextObject instanceof DecimalType) {
+					DecimalType nextValue = (DecimalType) nextObject;
+					if (nextValue.getValue() == null) {
+						continue;
+					}
+
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue());
+					nextEntity.setResource(theEntity);
+					retVal.add(nextEntity);
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
@@ -347,7 +319,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					Quantity nextValue = (Quantity) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue);
 				} else if (nextObject instanceof Range) {
-					Range nextValue = (Range)nextObject;
+					Range nextValue = (Range) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
 					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
 				} else if (nextObject instanceof LocationPositionComponent) {
@@ -398,15 +370,15 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 			if (isBlank(nextPath)) {
 
-//				// TODO: implement phonetic, and any others that have no path
-//
-//				// TODO: do we still need this check?
-//				if ("Questionnaire".equals(nextSpName) && nextSpDef.getName().equals("title")) {
-//					Questionnaire q = (Questionnaire) theResource;
-//					String title = "";// q.getGroup().getTitle();
-//					addSearchTerm(theEntity, retVal, nextSpName, title);
-//				}
-				
+				// // TODO: implement phonetic, and any others that have no path
+				//
+				// // TODO: do we still need this check?
+				// if ("Questionnaire".equals(nextSpName) && nextSpDef.getName().equals("title")) {
+				// Questionnaire q = (Questionnaire) theResource;
+				// String title = "";// q.getGroup().getTitle();
+				// addSearchTerm(theEntity, retVal, nextSpName, title);
+				// }
+
 				continue;
 			}
 
@@ -507,8 +479,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 				multiType = true;
 			}
 
-			List<String> systems = new ArrayList<String>();
-			List<String> codes = new ArrayList<String>();
+			List<String> systems = new ArrayList<>();
+			List<String> codes = new ArrayList<>();
 
 			// String needContactPointSystem = null;
 			// if (nextPath.contains(".where(system='phone')")) {
@@ -521,16 +493,11 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			// }
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				
-				if (nextObject instanceof Extension) {
-					Extension nextExtension = (Extension)nextObject;
-					nextObject  = nextExtension.getValue();
-				}
 
 				if (nextObject == null) {
 					continue;
 				}
-				
+
 				// Patient:language
 				if (nextObject instanceof PatientCommunicationComponent) {
 					PatientCommunicationComponent nextValue = (PatientCommunicationComponent) nextObject;
@@ -589,10 +556,10 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					}
 
 					extractTokensFromCodeableConcept(systems, codes, nextCC, theEntity, retVal, nextSpDef);
-				} else if (nextObject instanceof ConformanceRestSecurityComponent) {
+				} else if (nextObject instanceof CapabilityStatementRestSecurityComponent) {
 					// Conformance.security search param points to something kind of useless right now - This should probably
 					// be fixed.
-					ConformanceRestSecurityComponent sec = (ConformanceRestSecurityComponent) nextObject;
+					CapabilityStatementRestSecurityComponent sec = (CapabilityStatementRestSecurityComponent) nextObject;
 					for (CodeableConcept nextCC : sec.getService()) {
 						extractTokensFromCodeableConcept(systems, codes, nextCC, theEntity, retVal, nextSpDef);
 					}
@@ -724,14 +691,14 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	 */
 	@Override
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext(getContext(), myValidationSupport);
+		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
 		FHIRPathEngine fp = new FHIRPathEngine(worker);
 
-		List<Object> values = new ArrayList<Object>();
+		List<Object> values = new ArrayList<>();
 		try {
 			String[] nextPathsSplit = SPLIT.split(thePaths);
 			for (String nextPath : nextPathsSplit) {
-				List<Base> allValues = fp.evaluate((Base) theResource, nextPath);
+				List<Base> allValues = fp.evaluate((Base) theResource, trim(nextPath));
 				if (allValues.isEmpty() == false) {
 					values.addAll(allValues);
 				}
@@ -739,6 +706,16 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+
+		for (int i = 0; i < values.size(); i++) {
+			Object nextObject = values.get(i);
+			if (nextObject instanceof Extension) {
+				Extension nextExtension = (Extension) nextObject;
+				nextObject = nextExtension.getValue();
+				values.set(i, nextObject);
+			}
+		}
+
 		return values;
 	}
 
@@ -760,7 +737,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 	@VisibleForTesting
-	void setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.validation.IValidationSupport theValidationSupport) {
+	void setValidationSupportForTesting(org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 	}
 

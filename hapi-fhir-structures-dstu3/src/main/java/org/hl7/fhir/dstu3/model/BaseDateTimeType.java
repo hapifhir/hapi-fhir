@@ -12,6 +12,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseDateTimeType extends PrimitiveType<Date> {
@@ -44,9 +45,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 	 */
 	public BaseDateTimeType(Date theDate, TemporalPrecisionEnum thePrecision) {
 		setValue(theDate, thePrecision);
-		if (isPrecisionAllowed(thePrecision) == false) {
-			throw new IllegalArgumentException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theDate);
-		}
+		validatePrecisionAndThrowDataFormatException(getValueAsString(), getPrecision());
 	}
 
 	/**
@@ -55,6 +54,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 	public BaseDateTimeType(Date theDate, TemporalPrecisionEnum thePrecision, TimeZone theTimeZone) {
 		this(theDate, thePrecision);
 		setTimeZone(theTimeZone);
+		validatePrecisionAndThrowDataFormatException(getValueAsString(), getPrecision());
 	}
 
 	/**
@@ -65,12 +65,10 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 	 */
 	public BaseDateTimeType(String theString) {
 		setValueAsString(theString);
-		if (isPrecisionAllowed(getPrecision()) == false) {
-			throw new IllegalArgumentException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + getPrecision() + " precision): " + theString);
-		}
+		validatePrecisionAndThrowDataFormatException(theString, getPrecision());
 	}
 
-	/**
+  /**
 	 * Adds the given amount to the field specified by theField
 	 *
 	 * @param theField
@@ -307,7 +305,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 	 */
 	public TimeZone getTimeZone() {
 		if (myTimeZoneZulu) {
-			return TimeZone.getTimeZone("Z");
+			return TimeZone.getTimeZone("GMT");
 		}
 		return myTimeZone;
 	}
@@ -404,7 +402,7 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 				cal.set(Calendar.DAY_OF_MONTH, parseInt(value, value.substring(8, 10), 1, actualMaximum));
 				precision = TemporalPrecisionEnum.DAY;
 				if (length > 10) {
-					validateLengthIsAtLeast(value, 17);
+					validateLengthIsAtLeast(value, 16);
 					validateCharAtIndexIs(value, 10, 'T'); // yyyy-mm-ddThh:mm:ss
 					int offsetIdx = getOffsetIndex(value);
 					String time;
@@ -469,6 +467,10 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 
 		if (fractionalSecondsSet == false) {
 			myFractionalSeconds = "";
+		}
+
+		if (precision == TemporalPrecisionEnum.MINUTE) {
+		  validatePrecisionAndThrowDataFormatException(value, precision);
 		}
 
 		myPrecision = precision;
@@ -817,6 +819,12 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 			throwBadDateFormat(theValue);
 		}
 	}
+
+	private void validatePrecisionAndThrowDataFormatException(String theValue, TemporalPrecisionEnum thePrecision) {
+    if (isPrecisionAllowed(thePrecision) == false) {
+      throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theValue);
+    }
+  }
 
 	private void validateValueInRange(long theValue, long theMinimum, long theMaximum) {
 		if (theValue < theMinimum || theValue > theMaximum) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -47,6 +47,8 @@ public class ObservationStatusEnumFactory implements EnumFactory<ObservationStat
       return ObservationStatus.FINAL;
     if ("amended".equals(codeString))
       return ObservationStatus.AMENDED;
+    if ("corrected".equals(codeString))
+      return ObservationStatus.CORRECTED;
     if ("cancelled".equals(codeString))
       return ObservationStatus.CANCELLED;
     if ("entered-in-error".equals(codeString))
@@ -65,6 +67,8 @@ public class ObservationStatusEnumFactory implements EnumFactory<ObservationStat
       return "final";
     if (code == ObservationStatus.AMENDED)
       return "amended";
+    if (code == ObservationStatus.CORRECTED)
+      return "corrected";
     if (code == ObservationStatus.CANCELLED)
       return "cancelled";
     if (code == ObservationStatus.ENTEREDINERROR)

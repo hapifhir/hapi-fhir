@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
@@ -159,6 +154,28 @@ public class Immunization extends DomainResource {
           childrenList.add(new Property("reasonNotGiven", "CodeableConcept", "Reason why a vaccine was not administered.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("reason"))
+          this.getReason().add(castToCodeableConcept(value));
+        else if (name.equals("reasonNotGiven"))
+          this.getReasonNotGiven().add(castToCodeableConcept(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("reason")) {
+          return addReason();
+        }
+        else if (name.equals("reasonNotGiven")) {
+          return addReasonNotGiven();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImmunizationExplanationComponent copy() {
         ImmunizationExplanationComponent dst = new ImmunizationExplanationComponent();
         copyValues(dst);
@@ -200,6 +217,11 @@ public class Immunization extends DomainResource {
         return super.isEmpty() && (reason == null || reason.isEmpty()) && (reasonNotGiven == null || reasonNotGiven.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Immunization.explanation";
+
+  }
 
   }
 
@@ -385,6 +407,34 @@ public class Immunization extends DomainResource {
           childrenList.add(new Property("reported", "boolean", "Self-reported indicator.", 0, java.lang.Integer.MAX_VALUE, reported));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("detail"))
+          this.detail = castToReference(value); // Reference
+        else if (name.equals("reported"))
+          this.reported = castToBoolean(value); // BooleanType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.date");
+        }
+        else if (name.equals("detail")) {
+          this.detail = new Reference();
+          return this.detail;
+        }
+        else if (name.equals("reported")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.reported");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImmunizationReactionComponent copy() {
         ImmunizationReactionComponent dst = new ImmunizationReactionComponent();
         copyValues(dst);
@@ -419,6 +469,11 @@ public class Immunization extends DomainResource {
         return super.isEmpty() && (date == null || date.isEmpty()) && (detail == null || detail.isEmpty())
            && (reported == null || reported.isEmpty());
       }
+
+  public String fhirType() {
+    return "Immunization.reaction";
+
+  }
 
   }
 
@@ -835,6 +890,61 @@ public class Immunization extends DomainResource {
           childrenList.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("doseSequence"))
+          this.doseSequence = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("authority"))
+          this.authority = castToReference(value); // Reference
+        else if (name.equals("series"))
+          this.series = castToString(value); // StringType
+        else if (name.equals("seriesDoses"))
+          this.seriesDoses = castToPositiveInt(value); // PositiveIntType
+        else if (name.equals("targetDisease"))
+          this.getTargetDisease().add(castToCodeableConcept(value));
+        else if (name.equals("doseStatus"))
+          this.doseStatus = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("doseStatusReason"))
+          this.doseStatusReason = castToCodeableConcept(value); // CodeableConcept
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("doseSequence")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.doseSequence");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.description");
+        }
+        else if (name.equals("authority")) {
+          this.authority = new Reference();
+          return this.authority;
+        }
+        else if (name.equals("series")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.series");
+        }
+        else if (name.equals("seriesDoses")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.seriesDoses");
+        }
+        else if (name.equals("targetDisease")) {
+          return addTargetDisease();
+        }
+        else if (name.equals("doseStatus")) {
+          this.doseStatus = new CodeableConcept();
+          return this.doseStatus;
+        }
+        else if (name.equals("doseStatusReason")) {
+          this.doseStatusReason = new CodeableConcept();
+          return this.doseStatusReason;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public ImmunizationVaccinationProtocolComponent copy() {
         ImmunizationVaccinationProtocolComponent dst = new ImmunizationVaccinationProtocolComponent();
         copyValues(dst);
@@ -883,6 +993,11 @@ public class Immunization extends DomainResource {
            && (targetDisease == null || targetDisease.isEmpty()) && (doseStatus == null || doseStatus.isEmpty())
            && (doseStatusReason == null || doseStatusReason.isEmpty());
       }
+
+  public String fhirType() {
+    return "Immunization.vaccinationProtocol";
+
+  }
 
   }
 
@@ -1934,6 +2049,139 @@ public class Immunization extends DomainResource {
         childrenList.add(new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction));
         childrenList.add(new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = castToCode(value); // CodeType
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("vaccineCode"))
+          this.vaccineCode = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("wasNotGiven"))
+          this.wasNotGiven = castToBoolean(value); // BooleanType
+        else if (name.equals("reported"))
+          this.reported = castToBoolean(value); // BooleanType
+        else if (name.equals("performer"))
+          this.performer = castToReference(value); // Reference
+        else if (name.equals("requester"))
+          this.requester = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("manufacturer"))
+          this.manufacturer = castToReference(value); // Reference
+        else if (name.equals("location"))
+          this.location = castToReference(value); // Reference
+        else if (name.equals("lotNumber"))
+          this.lotNumber = castToString(value); // StringType
+        else if (name.equals("expirationDate"))
+          this.expirationDate = castToDate(value); // DateType
+        else if (name.equals("site"))
+          this.site = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("route"))
+          this.route = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("doseQuantity"))
+          this.doseQuantity = castToSimpleQuantity(value); // SimpleQuantity
+        else if (name.equals("note"))
+          this.getNote().add(castToAnnotation(value));
+        else if (name.equals("explanation"))
+          this.explanation = (ImmunizationExplanationComponent) value; // ImmunizationExplanationComponent
+        else if (name.equals("reaction"))
+          this.getReaction().add((ImmunizationReactionComponent) value);
+        else if (name.equals("vaccinationProtocol"))
+          this.getVaccinationProtocol().add((ImmunizationVaccinationProtocolComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.status");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.date");
+        }
+        else if (name.equals("vaccineCode")) {
+          this.vaccineCode = new CodeableConcept();
+          return this.vaccineCode;
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("wasNotGiven")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.wasNotGiven");
+        }
+        else if (name.equals("reported")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.reported");
+        }
+        else if (name.equals("performer")) {
+          this.performer = new Reference();
+          return this.performer;
+        }
+        else if (name.equals("requester")) {
+          this.requester = new Reference();
+          return this.requester;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("manufacturer")) {
+          this.manufacturer = new Reference();
+          return this.manufacturer;
+        }
+        else if (name.equals("location")) {
+          this.location = new Reference();
+          return this.location;
+        }
+        else if (name.equals("lotNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.lotNumber");
+        }
+        else if (name.equals("expirationDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Immunization.expirationDate");
+        }
+        else if (name.equals("site")) {
+          this.site = new CodeableConcept();
+          return this.site;
+        }
+        else if (name.equals("route")) {
+          this.route = new CodeableConcept();
+          return this.route;
+        }
+        else if (name.equals("doseQuantity")) {
+          this.doseQuantity = new SimpleQuantity();
+          return this.doseQuantity;
+        }
+        else if (name.equals("note")) {
+          return addNote();
+        }
+        else if (name.equals("explanation")) {
+          this.explanation = new ImmunizationExplanationComponent();
+          return this.explanation;
+        }
+        else if (name.equals("reaction")) {
+          return addReaction();
+        }
+        else if (name.equals("vaccinationProtocol")) {
+          return addVaccinationProtocol();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Immunization";
+
+  }
 
       public Immunization copy() {
         Immunization dst = new Immunization();

@@ -29,20 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGenderEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * Demographics and administrative information about a person independent of a specific health-related context.
  */
@@ -70,7 +65,7 @@ public class Person extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static IdentityAssuranceLevel fromCode(String codeString) throws Exception {
+        public static IdentityAssuranceLevel fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("level1".equals(codeString))
@@ -81,7 +76,7 @@ public class Person extends DomainResource {
           return LEVEL3;
         if ("level4".equals(codeString))
           return LEVEL4;
-        throw new Exception("Unknown IdentityAssuranceLevel code '"+codeString+"'");
+        throw new FHIRException("Unknown IdentityAssuranceLevel code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -135,6 +130,22 @@ public class Person extends DomainResource {
         if ("level4".equals(codeString))
           return IdentityAssuranceLevel.LEVEL4;
         throw new IllegalArgumentException("Unknown IdentityAssuranceLevel code '"+codeString+"'");
+        }
+        public Enumeration<IdentityAssuranceLevel> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("level1".equals(codeString))
+          return new Enumeration<IdentityAssuranceLevel>(this, IdentityAssuranceLevel.LEVEL1);
+        if ("level2".equals(codeString))
+          return new Enumeration<IdentityAssuranceLevel>(this, IdentityAssuranceLevel.LEVEL2);
+        if ("level3".equals(codeString))
+          return new Enumeration<IdentityAssuranceLevel>(this, IdentityAssuranceLevel.LEVEL3);
+        if ("level4".equals(codeString))
+          return new Enumeration<IdentityAssuranceLevel>(this, IdentityAssuranceLevel.LEVEL4);
+        throw new FHIRException("Unknown IdentityAssuranceLevel code '"+codeString+"'");
         }
     public String toCode(IdentityAssuranceLevel code) {
       if (code == IdentityAssuranceLevel.LEVEL1)
@@ -281,6 +292,29 @@ public class Person extends DomainResource {
           childrenList.add(new Property("assurance", "code", "Level of assurance that this link is actually associated with the target resource.", 0, java.lang.Integer.MAX_VALUE, assurance));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("target"))
+          this.target = castToReference(value); // Reference
+        else if (name.equals("assurance"))
+          this.assurance = new IdentityAssuranceLevelEnumFactory().fromType(value); // Enumeration<IdentityAssuranceLevel>
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("target")) {
+          this.target = new Reference();
+          return this.target;
+        }
+        else if (name.equals("assurance")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Person.assurance");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public PersonLinkComponent copy() {
         PersonLinkComponent dst = new PersonLinkComponent();
         copyValues(dst);
@@ -313,6 +347,11 @@ public class Person extends DomainResource {
         return super.isEmpty() && (target == null || target.isEmpty()) && (assurance == null || assurance.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Person.link";
+
+  }
 
   }
 
@@ -825,6 +864,75 @@ public class Person extends DomainResource {
         childrenList.add(new Property("link", "", "Link to a resource that concerns the same actual person.", 0, java.lang.Integer.MAX_VALUE, link));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("name"))
+          this.getName().add(castToHumanName(value));
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else if (name.equals("gender"))
+          this.gender = new AdministrativeGenderEnumFactory().fromType(value); // Enumeration<AdministrativeGender>
+        else if (name.equals("birthDate"))
+          this.birthDate = castToDate(value); // DateType
+        else if (name.equals("address"))
+          this.getAddress().add(castToAddress(value));
+        else if (name.equals("photo"))
+          this.photo = castToAttachment(value); // Attachment
+        else if (name.equals("managingOrganization"))
+          this.managingOrganization = castToReference(value); // Reference
+        else if (name.equals("active"))
+          this.active = castToBoolean(value); // BooleanType
+        else if (name.equals("link"))
+          this.getLink().add((PersonLinkComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("name")) {
+          return addName();
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else if (name.equals("gender")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Person.gender");
+        }
+        else if (name.equals("birthDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Person.birthDate");
+        }
+        else if (name.equals("address")) {
+          return addAddress();
+        }
+        else if (name.equals("photo")) {
+          this.photo = new Attachment();
+          return this.photo;
+        }
+        else if (name.equals("managingOrganization")) {
+          this.managingOrganization = new Reference();
+          return this.managingOrganization;
+        }
+        else if (name.equals("active")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Person.active");
+        }
+        else if (name.equals("link")) {
+          return addLink();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Person";
+
+  }
+
       public Person copy() {
         Person dst = new Person();
         copyValues(dst);
@@ -923,7 +1031,7 @@ public class Person extends DomainResource {
   public static final String SP_ADDRESSCOUNTRY = "address-country";
   @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
-  @SearchParamDefinition(name="phone", path="Person.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  @SearchParamDefinition(name="phone", path="Person.telecom.where(system='phone')", description="A value in a phone contact", type="token" )
   public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
@@ -937,7 +1045,7 @@ public class Person extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESSCITY = "address-city";
-  @SearchParamDefinition(name="email", path="Person.telecom(system=email)", description="A value in an email contact", type="token" )
+  @SearchParamDefinition(name="email", path="Person.telecom.where(system='email')", description="A value in an email contact", type="token" )
   public static final String SP_EMAIL = "email";
 
 }

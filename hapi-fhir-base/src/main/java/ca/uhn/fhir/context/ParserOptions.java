@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ public class ParserOptions {
 
 	private boolean myStripVersionsFromReferences = true;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths = Collections.emptySet();
+	private boolean myOverrideResourceIdWithBundleEntryFullUrl = true;
 	
 	/**
 	 * If supplied value(s), any resource references at the specified paths will have their
@@ -144,4 +145,33 @@ public class ParserOptions {
 		return myDontStripVersionsFromReferencesAtPaths;
 	}
 
+	/**
+	 * If set to <code>true</code> (which is the default), the Bundle.entry.fullUrl will override the Bundle.entry.resource's
+	 * resource id if the fullUrl is defined. This behavior happens when parsing the source data into a Bundle object. Set this
+	 * to <code>false</code> if this is not the desired behavior (e.g. the client code wishes to perform additional
+	 * validation checks between the fullUrl and the resource id).
+	 *
+	 * @return Returns the parser instance's configuration setting for overriding resource ids with Bundle.entry.fullUrl when
+	 *         parsing the source data into a Bundle object. Default is <code>true</code>.
+	 */
+	public boolean isOverrideResourceIdWithBundleEntryFullUrl() {
+		return myOverrideResourceIdWithBundleEntryFullUrl;
+	}
+
+	/**
+	 * If set to <code>true</code> (which is the default), the Bundle.entry.fullUrl will override the Bundle.entry.resource's
+	 * resource id if the fullUrl is defined. This behavior happens when parsing the source data into a Bundle object. Set this
+	 * to <code>false</code> if this is not the desired behavior (e.g. the client code wishes to perform additional
+	 * validation checks between the fullUrl and the resource id).
+	 *
+	 * @param theOverrideResourceIdWithBundleEntryFullUrl
+	 *           Set this to <code>false</code> to prevent the parser from overriding resource ids with the
+	 *           Bundle.entry.fullUrl
+	 *
+	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
+	 */
+	public ParserOptions setOverrideResourceIdWithBundleEntryFullUrl(boolean theOverrideResourceIdWithBundleEntryFullUrl) {
+		myOverrideResourceIdWithBundleEntryFullUrl = theOverrideResourceIdWithBundleEntryFullUrl;
+		return this;
+	}
 }

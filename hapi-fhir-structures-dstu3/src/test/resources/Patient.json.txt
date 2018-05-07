@@ -1,0 +1,128 @@
+{
+  "resourceType": "Patient",
+  "id": "patient1",
+  "contained": [{
+    "resourceType": "Practitioner",
+    "id": "p1",
+    "identifier": [{
+      "system": "urn:oid:2.16.840.1.113883.3.566",
+      "value": "145148",
+      "assigner": "UHC"
+    }],
+    "name": [{
+      "text": " Richard J Y Ha MD",
+      "given": ["Richard",
+        "J Y"],
+      "family": "Ha",
+      "suffix": ["MD"]
+    }]
+  }],
+  "identifier": [{
+    "use": "official",
+    "type": {
+      "coding": [{
+        "system": "http://hl7.org/fhir/identifier-type",
+        "code": "MR",
+        "display": "Medical Record Number",
+        "userSelected": true
+      }]
+    },
+    "system": "urn:oid:2.16.840.1.113883.3.566",
+    "value": "220457511",
+    "assigner": "MU"
+  },
+    {
+      "type": {
+        "coding": [{
+          "system": "http://hl7.org/fhir/identifier-type",
+          "code": "MR",
+          "display": "UHC ID",
+          "userSelected": true
+        }]
+      },
+      "system": "urn:oid:2.16.840.1.113883.3.566",
+      "value": "15246931",
+      "assigner": "UHC"
+    },
+    {
+      "type": {
+        "coding": [{
+          "system": "http://hl7.org/fhir/identifier-type",
+          "code": "MR",
+          "display": "ACCT NUM",
+          "userSelected": true
+        }]
+      },
+      "system": "urn:oid:2.16.840.1.113883.3.566",
+      "value": "226274321",
+      "assigner": "MU"
+    },
+    {
+      "type": {
+        "coding": [{
+          "system": "http://hl7.org/fhir/identifier-type",
+          "code": "MR",
+          "display": "HNAMPERSON_ID",
+          "userSelected": true
+        }]
+      },
+      "system": "urn:oid:2.16.840.1.113883.3.566",
+      "value": "25296343"
+    }],
+  "active": true,
+  "name": [{
+    "use": "official",
+    "text": " MOM TWO CERNER",
+    "given": ["MOM",
+      "TWO"],
+    "family": "CERNER"
+  }],
+  "gender": "female",
+  "birthDate": "1990-10-18",
+  "address": [{
+    "use": "home",
+    "text": "2401 LEMONE INDUSTRIAL BLVD, COLUMBIA, MO 65201 ",
+    "line": "2401 LEMONE INDUSTRIAL BLVD",
+    "city": "COLUMBIA",
+    "state": "MO",
+    "postalCode": "65201"
+  }],
+  "maritalStatus": {
+    "coding": [{
+      "system": "urn:oid:2.16.840.1.113883.3.566",
+      "code": "M",
+      "display": "Married",
+      "userSelected": true
+    }]
+  },
+  "contact": [{
+    "name": {
+      "text": "BABY TWO CERNER",
+      "given": ["BABY",
+        "TWO"],
+      "family": "CERNER"
+    },
+    "address": {
+      "text": "2401 LEMONE INDUSTRIAL BLVD, COLUMBIA MO 65201 ",
+      "line": "2401 LEMONE INDUSTRIAL BLVD",
+      "city": "COLUMBIA",
+      "state": "MO",
+      "postalCode": "65201"
+    }
+  }],
+  "communication": [{
+    "language": {
+      "coding": [{
+        "system": "urn:oid:2.16.840.1.113883.3.566",
+        "code": "ENG",
+        "userSelected": true
+      }]
+    }
+  }],
+  "generalPractitioner": [{
+    "reference": "#p1"
+  }],
+  "managingOrganization": {
+    "display": "Organization/UHC"
+  }
+}

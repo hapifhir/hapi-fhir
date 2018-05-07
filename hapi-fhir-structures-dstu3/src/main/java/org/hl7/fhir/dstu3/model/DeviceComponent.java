@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
+ * The characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
 @ResourceDef(name="DeviceComponent", profile="http://hl7.org/fhir/Profile/DeviceComponent")
 public class DeviceComponent extends DomainResource {
@@ -224,8 +224,10 @@ public class DeviceComponent extends DomainResource {
         throw new IllegalArgumentException("Unknown MeasmntPrinciple code '"+codeString+"'");
         }
         public Enumeration<MeasmntPrinciple> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<MeasmntPrinciple>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -286,24 +288,25 @@ public class DeviceComponent extends DomainResource {
     @Block()
     public static class DeviceComponentProductionSpecificationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc.
+         * The specification type, such as, serial number, part number, hardware revision, software revision, etc.
          */
         @Child(name = "specType", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Specification type", formalDefinition="Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc." )
+        @Description(shortDefinition="Type or kind of production specification, for example serial number or software revision", formalDefinition="The specification type, such as, serial number, part number, hardware revision, software revision, etc." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specification-type")
         protected CodeableConcept specType;
 
         /**
-         * Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of.
+         * The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.
          */
         @Child(name = "componentId", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Internal component unique identification", formalDefinition="Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of." )
+        @Description(shortDefinition="Internal component unique identification", formalDefinition="The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of." )
         protected Identifier componentId;
 
         /**
-         * Describes the printable string defining the component.
+         * The printable string defining the component.
          */
         @Child(name = "productionSpec", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="A printable string defining the component", formalDefinition="Describes the printable string defining the component." )
+        @Description(shortDefinition="A printable string defining the component", formalDefinition="The printable string defining the component." )
         protected StringType productionSpec;
 
         private static final long serialVersionUID = -1476597516L;
@@ -316,7 +319,7 @@ public class DeviceComponent extends DomainResource {
       }
 
         /**
-         * @return {@link #specType} (Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc.)
+         * @return {@link #specType} (The specification type, such as, serial number, part number, hardware revision, software revision, etc.)
          */
         public CodeableConcept getSpecType() { 
           if (this.specType == null)
@@ -332,7 +335,7 @@ public class DeviceComponent extends DomainResource {
         }
 
         /**
-         * @param value {@link #specType} (Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc.)
+         * @param value {@link #specType} (The specification type, such as, serial number, part number, hardware revision, software revision, etc.)
          */
         public DeviceComponentProductionSpecificationComponent setSpecType(CodeableConcept value) { 
           this.specType = value;
@@ -340,7 +343,7 @@ public class DeviceComponent extends DomainResource {
         }
 
         /**
-         * @return {@link #componentId} (Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of.)
+         * @return {@link #componentId} (The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.)
          */
         public Identifier getComponentId() { 
           if (this.componentId == null)
@@ -356,7 +359,7 @@ public class DeviceComponent extends DomainResource {
         }
 
         /**
-         * @param value {@link #componentId} (Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of.)
+         * @param value {@link #componentId} (The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.)
          */
         public DeviceComponentProductionSpecificationComponent setComponentId(Identifier value) { 
           this.componentId = value;
@@ -364,7 +367,7 @@ public class DeviceComponent extends DomainResource {
         }
 
         /**
-         * @return {@link #productionSpec} (Describes the printable string defining the component.). This is the underlying object with id, value and extensions. The accessor "getProductionSpec" gives direct access to the value
+         * @return {@link #productionSpec} (The printable string defining the component.). This is the underlying object with id, value and extensions. The accessor "getProductionSpec" gives direct access to the value
          */
         public StringType getProductionSpecElement() { 
           if (this.productionSpec == null)
@@ -384,7 +387,7 @@ public class DeviceComponent extends DomainResource {
         }
 
         /**
-         * @param value {@link #productionSpec} (Describes the printable string defining the component.). This is the underlying object with id, value and extensions. The accessor "getProductionSpec" gives direct access to the value
+         * @param value {@link #productionSpec} (The printable string defining the component.). This is the underlying object with id, value and extensions. The accessor "getProductionSpec" gives direct access to the value
          */
         public DeviceComponentProductionSpecificationComponent setProductionSpecElement(StringType value) { 
           this.productionSpec = value;
@@ -392,14 +395,14 @@ public class DeviceComponent extends DomainResource {
         }
 
         /**
-         * @return Describes the printable string defining the component.
+         * @return The printable string defining the component.
          */
         public String getProductionSpec() { 
           return this.productionSpec == null ? null : this.productionSpec.getValue();
         }
 
         /**
-         * @param value Describes the printable string defining the component.
+         * @param value The printable string defining the component.
          */
         public DeviceComponentProductionSpecificationComponent setProductionSpec(String value) { 
           if (Utilities.noString(value))
@@ -414,9 +417,9 @@ public class DeviceComponent extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("specType", "CodeableConcept", "Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc.", 0, java.lang.Integer.MAX_VALUE, specType));
-          childrenList.add(new Property("componentId", "Identifier", "Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of.", 0, java.lang.Integer.MAX_VALUE, componentId));
-          childrenList.add(new Property("productionSpec", "string", "Describes the printable string defining the component.", 0, java.lang.Integer.MAX_VALUE, productionSpec));
+          childrenList.add(new Property("specType", "CodeableConcept", "The specification type, such as, serial number, part number, hardware revision, software revision, etc.", 0, java.lang.Integer.MAX_VALUE, specType));
+          childrenList.add(new Property("componentId", "Identifier", "The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.", 0, java.lang.Integer.MAX_VALUE, componentId));
+          childrenList.add(new Property("productionSpec", "string", "The printable string defining the component.", 0, java.lang.Integer.MAX_VALUE, productionSpec));
         }
 
       @Override
@@ -431,41 +434,53 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -2133482091: // specType
           this.specType = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case -985933064: // componentId
           this.componentId = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 182147092: // productionSpec
           this.productionSpec = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("specType"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("specType")) {
           this.specType = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("componentId"))
+        } else if (name.equals("componentId")) {
           this.componentId = castToIdentifier(value); // Identifier
-        else if (name.equals("productionSpec"))
+        } else if (name.equals("productionSpec")) {
           this.productionSpec = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -2133482091:  return getSpecType(); // CodeableConcept
-        case -985933064:  return getComponentId(); // Identifier
-        case 182147092: throw new FHIRException("Cannot make property productionSpec as it is not a complex type"); // StringType
+        case -2133482091:  return getSpecType(); 
+        case -985933064:  return getComponentId(); 
+        case 182147092:  return getProductionSpecElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -2133482091: /*specType*/ return new String[] {"CodeableConcept"};
+        case -985933064: /*componentId*/ return new String[] {"Identifier"};
+        case 182147092: /*productionSpec*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -530,88 +545,91 @@ public class DeviceComponent extends DomainResource {
   }
 
     /**
-     * Describes the specific component type as defined in the object-oriented or metric nomenclature partition.
+     * The locally assigned unique identification by the software. For example: handle ID.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="What kind of component it is", formalDefinition="Describes the specific component type as defined in the object-oriented or metric nomenclature partition." )
-    protected CodeableConcept type;
-
-    /**
-     * Describes the local assigned unique identification by the software. For example: handle ID.
-     */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Instance id assigned by the software stack", formalDefinition="Describes the local assigned unique identification by the software. For example: handle ID." )
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Instance id assigned by the software stack", formalDefinition="The locally assigned unique identification by the software. For example: handle ID." )
     protected Identifier identifier;
 
     /**
-     * Describes the timestamp for the most recent system change which includes device configuration or setting change.
+     * The component type as defined in the object-oriented or metric nomenclature partition.
      */
-    @Child(name = "lastSystemChange", type = {InstantType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Recent system change timestamp", formalDefinition="Describes the timestamp for the most recent system change which includes device configuration or setting change." )
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="What kind of component it is", formalDefinition="The component type as defined in the object-oriented or metric nomenclature partition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-kind")
+    protected CodeableConcept type;
+
+    /**
+     * The timestamp for the most recent system change which includes device configuration or setting change.
+     */
+    @Child(name = "lastSystemChange", type = {InstantType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Recent system change timestamp", formalDefinition="The timestamp for the most recent system change which includes device configuration or setting change." )
     protected InstantType lastSystemChange;
 
     /**
-     * Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.
+     * The link to the source Device that contains administrative device information such as manufacture, serial number, etc.
      */
     @Child(name = "source", type = {Device.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A source device of this component", formalDefinition="Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc." )
+    @Description(shortDefinition="Top-level device resource link", formalDefinition="The link to the source Device that contains administrative device information such as manufacture, serial number, etc." )
     protected Reference source;
 
     /**
-     * The actual object that is the target of the reference (Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
+     * The actual object that is the target of the reference (The link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
      */
     protected Device sourceTarget;
 
     /**
-     * Describes the link to the parent resource. For example: Channel is linked to its VMD parent.
+     * The link to the parent resource. For example: Channel is linked to its VMD parent.
      */
     @Child(name = "parent", type = {DeviceComponent.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Parent resource link", formalDefinition="Describes the link to the parent resource. For example: Channel is linked to its VMD parent." )
+    @Description(shortDefinition="Parent resource link", formalDefinition="The link to the parent resource. For example: Channel is linked to its VMD parent." )
     protected Reference parent;
 
     /**
-     * The actual object that is the target of the reference (Describes the link to the parent resource. For example: Channel is linked to its VMD parent.)
+     * The actual object that is the target of the reference (The link to the parent resource. For example: Channel is linked to its VMD parent.)
      */
     protected DeviceComponent parentTarget;
 
     /**
-     * Indicates current operational status of the device. For example: On, Off, Standby, etc.
+     * The current operational status of the device. For example: On, Off, Standby, etc.
      */
     @Child(name = "operationalStatus", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Component operational status", formalDefinition="Indicates current operational status of the device. For example: On, Off, Standby, etc." )
+    @Description(shortDefinition="Current operational status of the component, for example On, Off or Standby", formalDefinition="The current operational status of the device. For example: On, Off, Standby, etc." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operational-status")
     protected List<CodeableConcept> operationalStatus;
 
     /**
-     * Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.
+     * The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.
      */
     @Child(name = "parameterGroup", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Current supported parameter group", formalDefinition="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular." )
+    @Description(shortDefinition="Current supported parameter group", formalDefinition="The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/parameter-group")
     protected CodeableConcept parameterGroup;
 
     /**
-     * Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
+     * The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
      */
     @Child(name = "measurementPrinciple", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="other | chemical | electrical | impedance | nuclear | optical | thermal | biological | mechanical | acoustical | manual+", formalDefinition="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc." )
+    @Description(shortDefinition="other | chemical | electrical | impedance | nuclear | optical | thermal | biological | mechanical | acoustical | manual+", formalDefinition="The physical principle of the measurement. For example: thermal, chemical, acoustical, etc." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measurement-principle")
     protected Enumeration<MeasmntPrinciple> measurementPrinciple;
 
     /**
-     * Describes the production specification such as component revision, serial number, etc.
+     * The production specification such as component revision, serial number, etc.
      */
     @Child(name = "productionSpecification", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Production specification of the component", formalDefinition="Describes the production specification such as component revision, serial number, etc." )
+    @Description(shortDefinition="Specification details such as Component Revisions, or Serial Numbers", formalDefinition="The production specification such as component revision, serial number, etc." )
     protected List<DeviceComponentProductionSpecificationComponent> productionSpecification;
 
     /**
-     * Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.
+     * The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.
      */
     @Child(name = "languageCode", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Language code for the human-readable text strings produced by the device", formalDefinition="Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US." )
+    @Description(shortDefinition="Language code for the human-readable text strings produced by the device", formalDefinition="The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected CodeableConcept languageCode;
 
-    private static final long serialVersionUID = -1742890034L;
+    private static final long serialVersionUID = 32987426L;
 
   /**
    * Constructor
@@ -623,39 +641,14 @@ public class DeviceComponent extends DomainResource {
   /**
    * Constructor
    */
-    public DeviceComponent(CodeableConcept type, Identifier identifier, InstantType lastSystemChange) {
+    public DeviceComponent(Identifier identifier, CodeableConcept type) {
       super();
-      this.type = type;
       this.identifier = identifier;
-      this.lastSystemChange = lastSystemChange;
+      this.type = type;
     }
 
     /**
-     * @return {@link #type} (Describes the specific component type as defined in the object-oriented or metric nomenclature partition.)
-     */
-    public CodeableConcept getType() { 
-      if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DeviceComponent.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
-    }
-
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
-    }
-
-    /**
-     * @param value {@link #type} (Describes the specific component type as defined in the object-oriented or metric nomenclature partition.)
-     */
-    public DeviceComponent setType(CodeableConcept value) { 
-      this.type = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #identifier} (Describes the local assigned unique identification by the software. For example: handle ID.)
+     * @return {@link #identifier} (The locally assigned unique identification by the software. For example: handle ID.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -671,7 +664,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #identifier} (Describes the local assigned unique identification by the software. For example: handle ID.)
+     * @param value {@link #identifier} (The locally assigned unique identification by the software. For example: handle ID.)
      */
     public DeviceComponent setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -679,7 +672,31 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #lastSystemChange} (Describes the timestamp for the most recent system change which includes device configuration or setting change.). This is the underlying object with id, value and extensions. The accessor "getLastSystemChange" gives direct access to the value
+     * @return {@link #type} (The component type as defined in the object-oriented or metric nomenclature partition.)
+     */
+    public CodeableConcept getType() { 
+      if (this.type == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DeviceComponent.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new CodeableConcept(); // cc
+      return this.type;
+    }
+
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    /**
+     * @param value {@link #type} (The component type as defined in the object-oriented or metric nomenclature partition.)
+     */
+    public DeviceComponent setType(CodeableConcept value) { 
+      this.type = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #lastSystemChange} (The timestamp for the most recent system change which includes device configuration or setting change.). This is the underlying object with id, value and extensions. The accessor "getLastSystemChange" gives direct access to the value
      */
     public InstantType getLastSystemChangeElement() { 
       if (this.lastSystemChange == null)
@@ -699,7 +716,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #lastSystemChange} (Describes the timestamp for the most recent system change which includes device configuration or setting change.). This is the underlying object with id, value and extensions. The accessor "getLastSystemChange" gives direct access to the value
+     * @param value {@link #lastSystemChange} (The timestamp for the most recent system change which includes device configuration or setting change.). This is the underlying object with id, value and extensions. The accessor "getLastSystemChange" gives direct access to the value
      */
     public DeviceComponent setLastSystemChangeElement(InstantType value) { 
       this.lastSystemChange = value;
@@ -707,24 +724,28 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return Describes the timestamp for the most recent system change which includes device configuration or setting change.
+     * @return The timestamp for the most recent system change which includes device configuration or setting change.
      */
     public Date getLastSystemChange() { 
       return this.lastSystemChange == null ? null : this.lastSystemChange.getValue();
     }
 
     /**
-     * @param value Describes the timestamp for the most recent system change which includes device configuration or setting change.
+     * @param value The timestamp for the most recent system change which includes device configuration or setting change.
      */
     public DeviceComponent setLastSystemChange(Date value) { 
+      if (value == null)
+        this.lastSystemChange = null;
+      else {
         if (this.lastSystemChange == null)
           this.lastSystemChange = new InstantType();
         this.lastSystemChange.setValue(value);
+      }
       return this;
     }
 
     /**
-     * @return {@link #source} (Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
+     * @return {@link #source} (The link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
      */
     public Reference getSource() { 
       if (this.source == null)
@@ -740,7 +761,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #source} (Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
+     * @param value {@link #source} (The link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
      */
     public DeviceComponent setSource(Reference value) { 
       this.source = value;
@@ -748,7 +769,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
+     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
      */
     public Device getSourceTarget() { 
       if (this.sourceTarget == null)
@@ -760,7 +781,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
+     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
      */
     public DeviceComponent setSourceTarget(Device value) { 
       this.sourceTarget = value;
@@ -768,7 +789,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} (Describes the link to the parent resource. For example: Channel is linked to its VMD parent.)
+     * @return {@link #parent} (The link to the parent resource. For example: Channel is linked to its VMD parent.)
      */
     public Reference getParent() { 
       if (this.parent == null)
@@ -784,7 +805,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #parent} (Describes the link to the parent resource. For example: Channel is linked to its VMD parent.)
+     * @param value {@link #parent} (The link to the parent resource. For example: Channel is linked to its VMD parent.)
      */
     public DeviceComponent setParent(Reference value) { 
       this.parent = value;
@@ -792,7 +813,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #parent} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Describes the link to the parent resource. For example: Channel is linked to its VMD parent.)
+     * @return {@link #parent} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The link to the parent resource. For example: Channel is linked to its VMD parent.)
      */
     public DeviceComponent getParentTarget() { 
       if (this.parentTarget == null)
@@ -804,7 +825,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #parent} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Describes the link to the parent resource. For example: Channel is linked to its VMD parent.)
+     * @param value {@link #parent} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The link to the parent resource. For example: Channel is linked to its VMD parent.)
      */
     public DeviceComponent setParentTarget(DeviceComponent value) { 
       this.parentTarget = value;
@@ -812,7 +833,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #operationalStatus} (Indicates current operational status of the device. For example: On, Off, Standby, etc.)
+     * @return {@link #operationalStatus} (The current operational status of the device. For example: On, Off, Standby, etc.)
      */
     public List<CodeableConcept> getOperationalStatus() { 
       if (this.operationalStatus == null)
@@ -865,7 +886,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
+     * @return {@link #parameterGroup} (The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
      */
     public CodeableConcept getParameterGroup() { 
       if (this.parameterGroup == null)
@@ -881,7 +902,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
+     * @param value {@link #parameterGroup} (The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
      */
     public DeviceComponent setParameterGroup(CodeableConcept value) { 
       this.parameterGroup = value;
@@ -889,7 +910,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #measurementPrinciple} (Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.). This is the underlying object with id, value and extensions. The accessor "getMeasurementPrinciple" gives direct access to the value
+     * @return {@link #measurementPrinciple} (The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.). This is the underlying object with id, value and extensions. The accessor "getMeasurementPrinciple" gives direct access to the value
      */
     public Enumeration<MeasmntPrinciple> getMeasurementPrincipleElement() { 
       if (this.measurementPrinciple == null)
@@ -909,7 +930,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #measurementPrinciple} (Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.). This is the underlying object with id, value and extensions. The accessor "getMeasurementPrinciple" gives direct access to the value
+     * @param value {@link #measurementPrinciple} (The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.). This is the underlying object with id, value and extensions. The accessor "getMeasurementPrinciple" gives direct access to the value
      */
     public DeviceComponent setMeasurementPrincipleElement(Enumeration<MeasmntPrinciple> value) { 
       this.measurementPrinciple = value;
@@ -917,14 +938,14 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
+     * @return The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
      */
     public MeasmntPrinciple getMeasurementPrinciple() { 
       return this.measurementPrinciple == null ? null : this.measurementPrinciple.getValue();
     }
 
     /**
-     * @param value Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
+     * @param value The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
      */
     public DeviceComponent setMeasurementPrinciple(MeasmntPrinciple value) { 
       if (value == null)
@@ -938,7 +959,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #productionSpecification} (Describes the production specification such as component revision, serial number, etc.)
+     * @return {@link #productionSpecification} (The production specification such as component revision, serial number, etc.)
      */
     public List<DeviceComponentProductionSpecificationComponent> getProductionSpecification() { 
       if (this.productionSpecification == null)
@@ -991,7 +1012,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @return {@link #languageCode} (Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.)
+     * @return {@link #languageCode} (The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.)
      */
     public CodeableConcept getLanguageCode() { 
       if (this.languageCode == null)
@@ -1007,7 +1028,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     /**
-     * @param value {@link #languageCode} (Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.)
+     * @param value {@link #languageCode} (The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.)
      */
     public DeviceComponent setLanguageCode(CodeableConcept value) { 
       this.languageCode = value;
@@ -1016,23 +1037,23 @@ public class DeviceComponent extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("type", "CodeableConcept", "Describes the specific component type as defined in the object-oriented or metric nomenclature partition.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("identifier", "Identifier", "Describes the local assigned unique identification by the software. For example: handle ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("lastSystemChange", "instant", "Describes the timestamp for the most recent system change which includes device configuration or setting change.", 0, java.lang.Integer.MAX_VALUE, lastSystemChange));
-        childrenList.add(new Property("source", "Reference(Device)", "Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("parent", "Reference(DeviceComponent)", "Describes the link to the parent resource. For example: Channel is linked to its VMD parent.", 0, java.lang.Integer.MAX_VALUE, parent));
-        childrenList.add(new Property("operationalStatus", "CodeableConcept", "Indicates current operational status of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
-        childrenList.add(new Property("parameterGroup", "CodeableConcept", "Describes the parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.", 0, java.lang.Integer.MAX_VALUE, parameterGroup));
-        childrenList.add(new Property("measurementPrinciple", "code", "Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, java.lang.Integer.MAX_VALUE, measurementPrinciple));
-        childrenList.add(new Property("productionSpecification", "", "Describes the production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
-        childrenList.add(new Property("languageCode", "CodeableConcept", "Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, java.lang.Integer.MAX_VALUE, languageCode));
+        childrenList.add(new Property("identifier", "Identifier", "The locally assigned unique identification by the software. For example: handle ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("type", "CodeableConcept", "The component type as defined in the object-oriented or metric nomenclature partition.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("lastSystemChange", "instant", "The timestamp for the most recent system change which includes device configuration or setting change.", 0, java.lang.Integer.MAX_VALUE, lastSystemChange));
+        childrenList.add(new Property("source", "Reference(Device)", "The link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("parent", "Reference(DeviceComponent)", "The link to the parent resource. For example: Channel is linked to its VMD parent.", 0, java.lang.Integer.MAX_VALUE, parent));
+        childrenList.add(new Property("operationalStatus", "CodeableConcept", "The current operational status of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
+        childrenList.add(new Property("parameterGroup", "CodeableConcept", "The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.", 0, java.lang.Integer.MAX_VALUE, parameterGroup));
+        childrenList.add(new Property("measurementPrinciple", "code", "The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, java.lang.Integer.MAX_VALUE, measurementPrinciple));
+        childrenList.add(new Property("productionSpecification", "", "The production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
+        childrenList.add(new Property("languageCode", "CodeableConcept", "The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, java.lang.Integer.MAX_VALUE, languageCode));
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -2072475531: /*lastSystemChange*/ return this.lastSystemChange == null ? new Base[0] : new Base[] {this.lastSystemChange}; // InstantType
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
         case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Reference
@@ -1047,96 +1068,117 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
-          break;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case -2072475531: // lastSystemChange
           this.lastSystemChange = castToInstant(value); // InstantType
-          break;
+          return value;
         case -896505829: // source
           this.source = castToReference(value); // Reference
-          break;
+          return value;
         case -995424086: // parent
           this.parent = castToReference(value); // Reference
-          break;
+          return value;
         case -2103166364: // operationalStatus
           this.getOperationalStatus().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case 1111110742: // parameterGroup
           this.parameterGroup = castToCodeableConcept(value); // CodeableConcept
-          break;
+          return value;
         case 24324384: // measurementPrinciple
-          this.measurementPrinciple = new MeasmntPrincipleEnumFactory().fromType(value); // Enumeration<MeasmntPrinciple>
-          break;
+          value = new MeasmntPrincipleEnumFactory().fromType(castToCode(value));
+          this.measurementPrinciple = (Enumeration) value; // Enumeration<MeasmntPrinciple>
+          return value;
         case -455527222: // productionSpecification
           this.getProductionSpecification().add((DeviceComponentProductionSpecificationComponent) value); // DeviceComponentProductionSpecificationComponent
-          break;
+          return value;
         case -2092349083: // languageCode
           this.languageCode = castToCodeableConcept(value); // CodeableConcept
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type"))
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("identifier"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("lastSystemChange"))
+        } else if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("lastSystemChange")) {
           this.lastSystemChange = castToInstant(value); // InstantType
-        else if (name.equals("source"))
+        } else if (name.equals("source")) {
           this.source = castToReference(value); // Reference
-        else if (name.equals("parent"))
+        } else if (name.equals("parent")) {
           this.parent = castToReference(value); // Reference
-        else if (name.equals("operationalStatus"))
+        } else if (name.equals("operationalStatus")) {
           this.getOperationalStatus().add(castToCodeableConcept(value));
-        else if (name.equals("parameterGroup"))
+        } else if (name.equals("parameterGroup")) {
           this.parameterGroup = castToCodeableConcept(value); // CodeableConcept
-        else if (name.equals("measurementPrinciple"))
-          this.measurementPrinciple = new MeasmntPrincipleEnumFactory().fromType(value); // Enumeration<MeasmntPrinciple>
-        else if (name.equals("productionSpecification"))
+        } else if (name.equals("measurementPrinciple")) {
+          value = new MeasmntPrincipleEnumFactory().fromType(castToCode(value));
+          this.measurementPrinciple = (Enumeration) value; // Enumeration<MeasmntPrinciple>
+        } else if (name.equals("productionSpecification")) {
           this.getProductionSpecification().add((DeviceComponentProductionSpecificationComponent) value);
-        else if (name.equals("languageCode"))
+        } else if (name.equals("languageCode")) {
           this.languageCode = castToCodeableConcept(value); // CodeableConcept
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); // CodeableConcept
-        case -1618432855:  return getIdentifier(); // Identifier
-        case -2072475531: throw new FHIRException("Cannot make property lastSystemChange as it is not a complex type"); // InstantType
-        case -896505829:  return getSource(); // Reference
-        case -995424086:  return getParent(); // Reference
-        case -2103166364:  return addOperationalStatus(); // CodeableConcept
-        case 1111110742:  return getParameterGroup(); // CodeableConcept
-        case 24324384: throw new FHIRException("Cannot make property measurementPrinciple as it is not a complex type"); // Enumeration<MeasmntPrinciple>
-        case -455527222:  return addProductionSpecification(); // DeviceComponentProductionSpecificationComponent
-        case -2092349083:  return getLanguageCode(); // CodeableConcept
+        case -1618432855:  return getIdentifier(); 
+        case 3575610:  return getType(); 
+        case -2072475531:  return getLastSystemChangeElement();
+        case -896505829:  return getSource(); 
+        case -995424086:  return getParent(); 
+        case -2103166364:  return addOperationalStatus(); 
+        case 1111110742:  return getParameterGroup(); 
+        case 24324384:  return getMeasurementPrincipleElement();
+        case -455527222:  return addProductionSpecification(); 
+        case -2092349083:  return getLanguageCode(); 
         default: return super.makeProperty(hash, name);
         }
 
       }
 
       @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -2072475531: /*lastSystemChange*/ return new String[] {"instant"};
+        case -896505829: /*source*/ return new String[] {"Reference"};
+        case -995424086: /*parent*/ return new String[] {"Reference"};
+        case -2103166364: /*operationalStatus*/ return new String[] {"CodeableConcept"};
+        case 1111110742: /*parameterGroup*/ return new String[] {"CodeableConcept"};
+        case 24324384: /*measurementPrinciple*/ return new String[] {"code"};
+        case -455527222: /*productionSpecification*/ return new String[] {};
+        case -2092349083: /*languageCode*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
         }
-        else if (name.equals("identifier")) {
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
           this.identifier = new Identifier();
           return this.identifier;
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
         }
         else if (name.equals("lastSystemChange")) {
           throw new FHIRException("Cannot call addChild on a primitive type DeviceComponent.lastSystemChange");
@@ -1178,8 +1220,8 @@ public class DeviceComponent extends DomainResource {
       public DeviceComponent copy() {
         DeviceComponent dst = new DeviceComponent();
         copyValues(dst);
-        dst.type = type == null ? null : type.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
+        dst.type = type == null ? null : type.copy();
         dst.lastSystemChange = lastSystemChange == null ? null : lastSystemChange.copy();
         dst.source = source == null ? null : source.copy();
         dst.parent = parent == null ? null : parent.copy();
@@ -1210,7 +1252,7 @@ public class DeviceComponent extends DomainResource {
         if (!(other instanceof DeviceComponent))
           return false;
         DeviceComponent o = (DeviceComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(identifier, o.identifier, true) && compareDeep(lastSystemChange, o.lastSystemChange, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(lastSystemChange, o.lastSystemChange, true)
            && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalStatus, o.operationalStatus, true)
            && compareDeep(parameterGroup, o.parameterGroup, true) && compareDeep(measurementPrinciple, o.measurementPrinciple, true)
            && compareDeep(productionSpecification, o.productionSpecification, true) && compareDeep(languageCode, o.languageCode, true)
@@ -1229,7 +1271,7 @@ public class DeviceComponent extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, identifier, lastSystemChange
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, lastSystemChange
           , source, parent, operationalStatus, parameterGroup, measurementPrinciple, productionSpecification
           , languageCode);
       }
@@ -1264,6 +1306,26 @@ public class DeviceComponent extends DomainResource {
    * the path value of "<b>DeviceComponent:parent</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("DeviceComponent:parent").toLocked();
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier of the component</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceComponent.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="DeviceComponent.identifier", description="The identifier of the component", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>The identifier of the component</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>DeviceComponent.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
    * Search parameter: <b>source</b>

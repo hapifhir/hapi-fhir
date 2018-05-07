@@ -13,7 +13,7 @@ import ca.uhn.fhir.model.api.Include;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ public interface IBaseResource extends IBase, IElement {
 	/**
 	 * Include constant for <code>*</code> (return all includes)
 	 */
-	public static final Include INCLUDE_ALL = new Include("*", false).toLocked();
+	Include INCLUDE_ALL = new Include("*", false).toLocked();
 
 	/**
 	 * Include set containing only {@link #INCLUDE_ALL}
 	 */
-	public static final Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<Include>(Arrays.asList(INCLUDE_ALL)));
+	Set<Include> WILDCARD_ALL_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(INCLUDE_ALL)));
 
 	IIdType getIdElement();
 	

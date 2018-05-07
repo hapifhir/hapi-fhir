@@ -245,7 +245,7 @@
 															<span th:unless="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' / ' + ${riBundle.totalElement.value} + ' entries'"/>
 														</a>
 
-														<th:block th:if="${riBundle.getLink('next') != null} or ${riBundle.getLink('prev') != null}">
+														<th:block th:if="${riBundle.getLink('next') != null} or ${riBundle.getLink('prev') != null} or ${riBundle.getLink('previous') != null}">
 														
 															<!-- Prev/Next Page Buttons -->
 															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	
@@ -254,13 +254,16 @@
 																Prev Page
 															</button>
 															<script type="text/javascript" th:inline="javascript">
-																if ([[${riBundle.getLink('prev') == null}]]) {
+																if ([[${riBundle.getLink('prev') == null && riBundle.getLink('previous') == null}]]) {
 																	$('#page-prev-btn').prop('disabled', true);
 																}
 																$('#page-prev-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:if="${riBundle.getLink('prev') != null}"  th:text="${riBundle.getLink('prev').url}"/>' }));
+																	var prev = [[${riBundle.getLinkOrCreate('prev').url}]];
+																	var previous = [[${riBundle.getLinkOrCreate('previous').url}]];
+																	var url = prev != null ? prev : previous;
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: url }));
 																	$("#outerForm").attr("action", "page").submit();
 	
 																});
@@ -277,7 +280,7 @@
 																$('#page-next-btn').click(function() {
 																	var btn = $(this);
 																	handleActionButtonClick($(this));
-																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: '<th:block th:if="${riBundle.getLink('next') != null}" th:text="${riBundle.getLink('next').url}"/>' }));
+																	btn.append($('<input />', { type: 'hidden', name: 'page-url', value: [[${riBundle.getLinkOrCreate('next').url}]] }));
 																	$("#outerForm").attr("action", "page").submit();
 																});
 															</script>
@@ -311,9 +314,14 @@
 																<td>
 																	<a th:if="${entry.resource} != null" th:href="${entry.resource.id}" th:text="${entry.resource.idElement.toUnqualified()}" style="font-size: 0.8em"/>
 																</td>
-																<td th:if="${entry.resource} == null or ${entry.resource.meta.lastUpdatedElement.value} == null"></td>
-																<td th:if="${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == true" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'HH:mm:ss')}"></td>
-																<td th:if="${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == false" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                                <th:block th:if="${ri}">
+                                                   <td th:if="${entry.resource} == null or ${entry.resource.meta.lastUpdatedElement.value} == null"></td>
+                                                   <td th:if="${entry.resource} != null and ${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == true" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'HH:mm:ss')}"></td>
+                                                   <td th:if="${entry.resource} != null and ${entry.resource.meta.lastUpdatedElement.value} != null and ${entry.resource.meta.lastUpdatedElement.today} == false" th:text="${#dates.format(entry.resource.meta.lastUpdated, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                                </th:block>
+                                                <th:block th:unless="${ri}">
+                                                   <td></td>
+                                                </th:block>
 															</tr>
 															</tbody>
 														</table>

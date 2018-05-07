@@ -2,13 +2,14 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -28,26 +29,31 @@ public class SearchParamExtractorDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static IValidationSupport ourValidationSupport;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourValidationSupport = new DefaultProfileValidationSupport();
-	}
-	
 	@Test
 	public void testParamWithOrInPath() {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
-		
+
 		ISearchParamRegistry searchParamRegistry = new ISearchParamRegistry() {
+			@Override
+			public void forceRefresh() {
+				// nothing
+			}
+
+			@Override
+			public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+				throw new UnsupportedOperationException();
+			}
+
 			@Override
 			public Map<String,RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-				Map<String, RuntimeSearchParam> sps = new HashMap<String, RuntimeSearchParam>();
+				Map<String, RuntimeSearchParam> sps = new HashMap<>();
 				for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 					sps.put(nextSp.getName(), nextSp);
 				}
@@ -55,16 +61,26 @@ public class SearchParamExtractorDstu3Test {
 			}
 
 			@Override
-			public void forceRefresh() {
+			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void refreshCacheIfNecessary() {
 				// nothing
 			}
 
 			@Override
-			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
-				throw new UnsupportedOperationException();
+			public void requestRefresh() {
+				// nothing
 			}
 		};
-		
+
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(ourCtx, ourValidationSupport, searchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
 		assertEquals(1, tokens.size());
@@ -72,6 +88,16 @@ public class SearchParamExtractorDstu3Test {
 		assertEquals("category", token.getParamName());
 		assertEquals("SYSTEM", token.getSystem());
 		assertEquals("CODE", token.getValue());
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+	
+	@BeforeClass
+	public static void beforeClass() {
+		ourValidationSupport = new DefaultProfileValidationSupport();
 	}
 	
 }

@@ -1,0 +1,45 @@
+{
+	"resourceType": "Medication",
+	"code": {
+		"coding": [
+			{
+				"system": "urn:2.16.840.1.113883.6.88",
+				"code": "1191",
+				"display": "aspirin"
+			}
+		],
+		"text": "ASPIRIN 325 MG TABLET"
+	},
+	"form": {
+		"coding": [
+			{
+				"system": "http://upmc.com/enterprises/rakia/rakida/cerner/h1/medication/form/code",
+				"code": "687545",
+				"display": "Tab"
+			}
+		],
+		"text": "Tab"
+	},
+	"ingredient": [
+		{
+			"item": {
+				"reference": "medication/613168",
+				"display": "aspirin"
+			},
+			"amount": {
+				"numerator": {
+					"value": "650",
+					"unit": "mg",
+					"system": "http://upmc.com/enterprises/rakia/rakida/cerner/h1/medication/strength/unit",
+					"code": "MG"
+				},
+				"denominator": {
+					"value": "2",
+					"unit": "tab(s)",
+					"system": "http://upmc.com/enterprises/rakia/rakida/cerner/h1/medication/volume/unit",
+					"code": "TAB"
+				}
+			}
+		}
+	]
+}

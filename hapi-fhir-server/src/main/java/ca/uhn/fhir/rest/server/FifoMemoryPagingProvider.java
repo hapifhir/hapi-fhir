@@ -1,0 +1,58 @@
+package ca.uhn.fhir.rest.server;
+
+/*
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2018 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import java.util.LinkedHashMap;
+import java.util.UUID;
+
+import org.apache.commons.lang3.Validate;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+
+public class FifoMemoryPagingProvider extends BasePagingProvider implements IPagingProvider {
+
+	private LinkedHashMap<String, IBundleProvider> myBundleProviders;
+	private int mySize;
+
+	public FifoMemoryPagingProvider(int theSize) {
+		Validate.isTrue(theSize > 0, "theSize must be greater than 0");
+
+		mySize = theSize;
+		myBundleProviders = new LinkedHashMap<String, IBundleProvider>(mySize);
+	}
+
+	@Override
+	public synchronized IBundleProvider retrieveResultList(String theId) {
+		return myBundleProviders.get(theId);
+	}
+
+	@Override
+	public synchronized String storeResultList(IBundleProvider theList) {
+		while (myBundleProviders.size() > mySize) {
+			myBundleProviders.remove(myBundleProviders.keySet().iterator().next());
+		}
+
+		String key = UUID.randomUUID().toString();
+		myBundleProviders.put(key, theList);
+		return key;
+	}
+
+}

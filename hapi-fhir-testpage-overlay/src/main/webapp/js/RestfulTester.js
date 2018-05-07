@@ -70,14 +70,88 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		    )
 		);
 	} else if (theSearchParamType == 'token') {
+		
+		var tokenQualifiers = new Array();
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[0].name='Matches';
+		tokenQualifiers[0].value='';
+	
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[1].name='Text';
+		tokenQualifiers[1].value=':text';
+		tokenQualifiers[1].description='The search parameter is processed as a string that searches text associated with the code/value.';
+		
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[2].name='Not';
+		tokenQualifiers[2].value=':not';
+		tokenQualifiers[2].description='Reverse the code matching described in the paragraph above. Note that this includes resources that have no value for the parameter.';
+		
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[3].name='Above';
+		tokenQualifiers[3].value=':above';
+		tokenQualifiers[3].description='The search parameter is a concept with the form [system]|[code], and the search parameter tests whether the coding in a resource subsumes the specified search code. For example, the search concept has an is-a relationship with the coding in the resource, and this includes the coding itself.';
+
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[4].name='Below';
+		tokenQualifiers[4].value=':below';
+		tokenQualifiers[4].description='The search parameter is a concept with the form [system]|[code], and the search parameter tests whether the coding in a resource is subsumed by the specified search code. For example, the coding in the resource has an is-a relationship with the search concept, and this includes the coding itself.';
+
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[5].name='In';
+		tokenQualifiers[5].value=':in';
+		tokenQualifiers[5].description='The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set. The reference may be literal (to an address where the value set can be found) or logical (a reference to ValueSet.url). If the server can treat the reference as a literal URL, it does, else it tries to match known logical ValueSet.url values.';
+
+		tokenQualifiers.push(new Object());
+		tokenQualifiers[6].name='Not-in';
+		tokenQualifiers[6].value=':not-in';
+		tokenQualifiers[6].description='The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.';
+
+		
+		var tokenQualifierInput = $('<input />', { id: 'param.' + theRowNum + '.qualifier', type: 'hidden' });
 		$('#search-param-rowopts-' + theContainerRowNum).append(
-			$('<div />', { 'class': 'col-sm-3' }).append(
-				$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
-		    ),
-			$('<div />', { 'class': 'col-sm-3' }).append(
-				$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: 'value', type: 'text', 'class': 'form-control' })
+				tokenQualifierInput
+		);
+		
+		function clickTokenFunction(value, name){
+			return function(){
+				tokenQualifierInput.val(value);
+				tokenQualifierLabel.text(name);
+				}
+		};
+		var tokenQualifierLabel = $('<span>' + tokenQualifiers[0].name + '</span>');
+		var tokenQualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
+		for (var i = 0; i < tokenQualifiers.length; i++) {
+			var qualName = tokenQualifiers[i].name;
+			var nextValue = tokenQualifiers[i].value;
+			var	nextLink = $('<a>' + tokenQualifiers[i].name+'</a>');
+			tokenQualifierDropdown.append($('<li />').append(nextLink));
+			nextLink.click(clickTokenFunction(nextValue, qualName)); 
+		}
+		
+		
+		
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<div />', { 'class': 'col-sm-6' }).append(
+				$('<div />', { 'class':'input-group'}).append(
+					$('<div />', {'class':'input-group-btn'}).append(
+							$('<button />', {'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown'}).append(
+									tokenQualifierLabel,
+									$('<span class="caret" style="margin-left: 5px;"></span>')
+								),
+								tokenQualifierDropdown
+							),
+					$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
+							$('<span>System</span>')
+						),
+					$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.0', placeholder: "(opt)" }),
+					$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
+						$('<span>Code</span>')
+					),
+					$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "(opt)" })
+				)
 		    )
 		);
+		
 	} else if (theSearchParamType == 'string') {
 		var placeholderText = 'value';
 		var qualifiers = new Array();
@@ -93,17 +167,23 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 			qualifierInput
 		);
 	
+		
 		var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
 		var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
+		
+		function clickFunction(value, name){
+			return function(){
+				qualifierInput.val(value);
+				matchesLabel.text(name);
+				}
+		};
+		
 		for (var i = 0; i < qualifiers.length; i++) {
 			var nextLink = $('<a>' + qualifiers[i].name+'</a>');
 			var qualName = qualifiers[i].name;
 			var nextValue = qualifiers[i].value;
 			qualifierDropdown.append($('<li />').append(nextLink));
-			nextLink.click(function(){ 
-				qualifierInput.val(nextValue);
-				matchesLabel.text(qualName);
-			});
+			nextLink.click(clickFunction(nextValue, qualName));
 		}
 	
 		$('#search-param-rowopts-' + theContainerRowNum).append(
@@ -464,5 +544,7 @@ function updateSortDirection(value) {
 }
 
 $( document ).ready(function() {
-	addSearchParamRow();
+	if (conformance) {
+		addSearchParamRow();
+	}
 });	

@@ -9,8 +9,8 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 @SuppressWarnings("null")
@@ -39,7 +39,7 @@ public class PagingPatientProvider implements IResourceProvider {
       return new IBundleProvider() {
 
          @Override
-         public int size() {
+         public Integer size() {
             return matchingResourceIds.size();
          }
 

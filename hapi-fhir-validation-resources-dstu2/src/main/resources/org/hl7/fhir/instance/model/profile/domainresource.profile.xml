@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="DomainResource"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="2"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for DomainResource Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -44,36 +44,24 @@
     <code value="Resource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.contained.empty"/>
-    </extension>
     <key value="dom-2"/>
     <severity value="error"/>
     <human value="If the resource is contained in another resource, it SHALL NOT contain nested Resources"/>
     <xpath value="not(parent::f:contained and f:contained)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.text.empty"/>
-    </extension>
     <key value="dom-1"/>
     <severity value="error"/>
     <human value="If the resource is contained in another resource, it SHALL NOT contain any narrative"/>
     <xpath value="not(parent::f:contained and f:text)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()"/>
-    </extension>
     <key value="dom-4"/>
     <severity value="error"/>
     <human value="If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"/>
     <xpath value="not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.all(&quot;#&quot;+id in **.reference)"/>
-    </extension>
     <key value="dom-3"/>
     <severity value="error"/>
     <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>
@@ -221,36 +209,24 @@
     <code value="Resource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.contained.empty"/>
-    </extension>
     <key value="dom-2"/>
     <severity value="error"/>
     <human value="If the resource is contained in another resource, it SHALL NOT contain nested Resources"/>
     <xpath value="not(parent::f:contained and f:contained)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.text.empty"/>
-    </extension>
     <key value="dom-1"/>
     <severity value="error"/>
     <human value="If the resource is contained in another resource, it SHALL NOT contain any narrative"/>
     <xpath value="not(parent::f:contained and f:text)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()"/>
-    </extension>
     <key value="dom-4"/>
     <severity value="error"/>
     <human value="If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"/>
     <xpath value="not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="contained.all(&quot;#&quot;+id in **.reference)"/>
-    </extension>
     <key value="dom-3"/>
     <severity value="error"/>
     <human value="If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"/>

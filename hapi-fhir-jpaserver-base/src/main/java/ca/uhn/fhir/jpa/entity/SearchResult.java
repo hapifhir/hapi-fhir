@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,10 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-//@formatter:off
 @Entity
 @Table(name = "HFJ_SEARCH_RESULT", uniqueConstraints= {
 	@UniqueConstraint(name="IDX_SEARCHRES_ORDER", columnNames= {"SEARCH_PID", "SEARCH_ORDER"})
 })
-//@formatter:on
 public class SearchResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -106,7 +104,8 @@ public class SearchResult implements Serializable {
 		myOrder = theOrder;
 	}
 
-	public void setResourcePid(Long theResourcePid) {
+	public SearchResult setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
+		return this;
 	}
 }

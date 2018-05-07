@@ -12,9 +12,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
@@ -22,27 +20,12 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.composite.TimingDt;
-import ca.uhn.fhir.model.dstu2.resource.Condition;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.ConditionVerificationStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
-import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
-import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.dstu2.composite.*;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.valueset.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.parser.*;
 import ca.uhn.fhir.parser.XmlParserDstu2Test.TestPatientFor327;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
@@ -102,13 +85,13 @@ public class ResourceValidatorDstu2Test {
 	@Test
 	public void testSchemaBundleValidator() throws IOException {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
-		Bundle b = ourCtx.newJsonParser().parseBundle(res);
+		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
 		FhirValidator val = createFhirValidator();
 
 		val.validate(b);
 
-		MedicationOrder p = (MedicationOrder) b.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
 		timing.getRepeat().setDuration(123);
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum) null);
@@ -127,20 +110,26 @@ public class ResourceValidatorDstu2Test {
 	@Test
 	public void testSchemaBundleValidatorFails() throws IOException {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
-		Bundle b = ourCtx.newJsonParser().parseBundle(res);
+		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
+
 
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult validationResult = val.validateWithResult(b);
 		assertTrue(validationResult.isSuccessful());
 
-		MedicationOrder p = (MedicationOrder) b.getEntries().get(0).getResource();
+		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
 		timing.getRepeat().setDuration(123);
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum) null);
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b));
+
 		validationResult = val.validateWithResult(b);
+		
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
+		
 		assertFalse(validationResult.isSuccessful());
 		
 		String encoded = logOperationOutcome(validationResult);
@@ -150,9 +139,9 @@ public class ResourceValidatorDstu2Test {
 	@Test
 	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
-		Bundle b = ourCtx.newJsonParser().parseBundle(res);
+		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		FhirValidator val = createFhirValidator();
 

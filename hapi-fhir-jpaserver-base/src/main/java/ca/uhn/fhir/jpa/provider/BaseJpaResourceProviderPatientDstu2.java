@@ -8,7 +8,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,31 +25,25 @@ import java.util.List;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.*;
 
 public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
 
 	/**
 	 * Patient/123/$everything
-	 * @param theRequestDetails 
 	 */
-	//@formatter:off
-	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public ca.uhn.fhir.rest.server.IBundleProvider patientInstanceEverything(
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+	public IBundleProvider patientInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -77,7 +71,6 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 			
 			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
@@ -89,11 +82,9 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 	/**
 	 * /Patient/$everything
-	 * @param theRequestDetails 
 	 */
-	//@formatter:off
-		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-		public ca.uhn.fhir.rest.server.IBundleProvider patientTypeEverything(
+		@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+		public IBundleProvider patientTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -118,7 +109,6 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 				
 				RequestDetails theRequestDetails
 				) {
-			//@formatter:on
 
 		startRequest(theServletRequest);
 		try {

@@ -9,6 +9,7 @@
 	<body>
 		<form action="" method="get" id="outerForm">
 		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"></input> 
+		<input th:if="${_csrf} != null" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
 		<div th:replace="tmpl-navbar-top :: top" ></div>
 		
@@ -33,11 +34,11 @@
 								<col class="col-xs-7" />
 							</colgroup>
 							<tbody>
-								<tr th:if="#{!strings.isEmpty(conf.implementation.description.value)}">
+								<tr th:if="${!#strings.isEmpty(conf.implementation.description)}">
 									<td>Server</td>
 									<td th:utext="'' + ${conf.implementation.description}">HAPI Restful Server</td>
 								</tr>
-								<tr th:if="#{!strings.isEmpty(conf.software.name.value)} or #{!strings.isEmpty(conf.software.version.value)}">
+								<tr th:if="${!#strings.isEmpty(conf.software.name)} or ${!#strings.isEmpty(conf.software.version)}">
 									<td>Software</td>
 									<td>
 										<th:block th:utext="'' + ${conf.software.name}"/> - <th:block th:utext="'' + ${conf.software.version}"/>
@@ -127,9 +128,8 @@
 								            $(function () {
 								                $('#server-history-datetime').datetimepicker({
 								                	sideBySide: true,
-								                	use24hours: true,
-								                	showToday: true,
-								                	keepInvalid: true
+								                	keepInvalid: true,
+								                	format: 'YYYY-MM-DDTHH:mm:ssZ'
 								                });
 								            });
 								            $('#server-history-btn').click(
@@ -167,9 +167,7 @@
 								                    Bundle
 								                    <span class="loadingStar">*</span>
 								                    </div>
-								                    <textarea class="form-control" id="transaction-body" style="white-space: nowrap; overflow: auto;" placeholder="(place transaction bundle body here)" rows="1">
-								                    	<th:block th:if="${transactionBundle} != null" th:text="${transactionBundle}"/>
-								                    </textarea>
+								                    <textarea class="form-control" id="transaction-body" style="white-space: nowrap; overflow: auto;" placeholder="(place transaction bundle body here)" rows="1"><th:block th:if="${transactionBundle} != null" th:text="${transactionBundle}"/></textarea>
 								                </div>
 								            </div>
 								        </div>											
@@ -201,6 +199,7 @@
 								    </div>
 
 								<!-- Get Tags -->
+								<!-- 
 								
 									<br clear="all"/>
 									<div class="row-fluid">
@@ -223,6 +222,7 @@
 										</div>
 									</div>
 
+								-->
 								<!-- Next Server Action? -->
 								    
 								</div>

@@ -1,12 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
-
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -20,20 +23,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.CompositeAndListParam;
-import ca.uhn.fhir.rest.param.CompositeOrListParam;
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -48,7 +42,7 @@ public class CompositeParameterTest {
 	@Test
 	public void testSearchWithDateValue() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?" + Observation.SP_NAME_VALUE_DATE + "=" + URLEncoder.encode("foo\\$bar$2001-01-01", "UTF-8"));
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?" + Observation.SP_NAME_VALUE_DATE + "=" + UrlUtil.escape("foo\\$bar$2001-01-01"));
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -66,7 +60,7 @@ public class CompositeParameterTest {
 	@Test
 	public void testSearchWithMultipleValue() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?" + Observation.SP_NAME_VALUE_STRING + "=" + URLEncoder.encode("l1$r1,l2$r2", "UTF-8") + "&" + Observation.SP_NAME_VALUE_STRING + "=" + URLEncoder.encode("l3$r3,l4$r4", "UTF-8"));
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?" + Observation.SP_NAME_VALUE_STRING + "=" + UrlUtil.escape("l1$r1,l2$r2") + "&" + Observation.SP_NAME_VALUE_STRING + "=" + UrlUtil.escape("l3$r3,l4$r4"));
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());

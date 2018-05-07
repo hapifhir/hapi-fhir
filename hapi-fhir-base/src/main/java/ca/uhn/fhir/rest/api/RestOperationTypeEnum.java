@@ -5,7 +5,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,14 @@ public enum RestOperationTypeEnum {
 	GET_TAGS("get-tags"),
 
 	GET_PAGE("get-page"),
+
+	/**
+	 * <b>
+	 * Use this value with caution, this may
+	 * change as the GraphQL interface matures
+	 * </b>
+	 */
+	GRAPHQL_REQUEST("graphql-request"),
 
 	/**
 	 * E.g. $everything, $validate, etc.

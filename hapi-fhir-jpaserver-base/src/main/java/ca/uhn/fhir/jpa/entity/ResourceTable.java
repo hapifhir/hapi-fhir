@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,127 +19,50 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
+import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.search.annotations.*;
+
+import javax.persistence.*;
+import javax.persistence.Index;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
-import org.apache.lucene.analysis.core.StopFilterFactory;
-import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
-import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
-import org.apache.lucene.analysis.ngram.NGramFilterFactory;
-import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
-import org.apache.lucene.analysis.phonetic.PhoneticFilterFactory;
-import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
-import org.apache.lucene.analysis.standard.StandardFilterFactory;
-import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.AnalyzerDef;
-import org.hibernate.search.annotations.AnalyzerDefs;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.IndexedEmbedded;
-import org.hibernate.search.annotations.Parameter;
-import org.hibernate.search.annotations.Store;
-import org.hibernate.search.annotations.TokenFilterDef;
-import org.hibernate.search.annotations.TokenizerDef;
-
-import ca.uhn.fhir.jpa.search.IndexNonDeletedInterceptor;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-
-//@formatter:off
-@Indexed(interceptor=IndexNonDeletedInterceptor.class)	
+@Indexed(interceptor = IndexNonDeletedInterceptor.class)
 @Entity
-@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes= {
-	@Index(name = "IDX_RES_DATE", columnList="RES_UPDATED"), 
-	@Index(name = "IDX_RES_LANG", columnList="RES_TYPE,RES_LANGUAGE"), 
-	@Index(name = "IDX_RES_PROFILE", columnList="RES_PROFILE"),
-	@Index(name = "IDX_RES_TYPE", columnList="RES_TYPE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList="SP_INDEX_STATUS")
+@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
+	@Index(name = "IDX_RES_LANG", columnList = "RES_TYPE,RES_LANGUAGE"),
+	@Index(name = "IDX_RES_PROFILE", columnList = "RES_PROFILE"),
+	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
+	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
-@AnalyzerDefs({
-	@AnalyzerDef(name = "autocompleteEdgeAnalyzer",
-		tokenizer = @TokenizerDef(factory = PatternTokenizerFactory.class, params= {
-			@Parameter(name="pattern", value="(.*)"),
-			@Parameter(name="group", value="1")
-		}),
-		filters = {
-			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-			@TokenFilterDef(factory = StopFilterFactory.class),
-			@TokenFilterDef(factory = EdgeNGramFilterFactory.class, params = {
-				@Parameter(name = "minGramSize", value = "3"),
-				@Parameter(name = "maxGramSize", value = "50") 
-			}), 
-		}),
-	@AnalyzerDef(name = "autocompletePhoneticAnalyzer",
-		tokenizer = @TokenizerDef(factory=StandardTokenizerFactory.class),
-		filters = {
-			@TokenFilterDef(factory=StandardFilterFactory.class),
-			@TokenFilterDef(factory=StopFilterFactory.class),
-			@TokenFilterDef(factory=PhoneticFilterFactory.class, params = {
-				@Parameter(name="encoder", value="DoubleMetaphone")
-			}),
-			@TokenFilterDef(factory=SnowballPorterFilterFactory.class, params = {
-				@Parameter(name="language", value="English") 
-			})
-		}),
-	@AnalyzerDef(name = "autocompleteNGramAnalyzer",
-		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-		filters = {
-			@TokenFilterDef(factory = WordDelimiterFilterFactory.class),
-			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-			@TokenFilterDef(factory = NGramFilterFactory.class, params = {
-				@Parameter(name = "minGramSize", value = "3"),
-				@Parameter(name = "maxGramSize", value = "20") 
-			}),
-		}),
-	@AnalyzerDef(name = "standardAnalyzer",
-		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-		filters = {
-			@TokenFilterDef(factory = LowerCaseFilterFactory.class),
-		}),
-	@AnalyzerDef(name = "exactAnalyzer",
-		tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
-		filters = {
-		})
-	}
-)
-//@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
+	static final int RESTYPE_LEN = 30;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
-
-	static final int RESTYPE_LEN = 30;
-
 	private static final long serialVersionUID = 1L;
+
+//	@Transient
+//	private transient byte[] myResource;
+//
+//	@Transient
+//	private transient ResourceEncodingEnum myEncoding;
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-	//@formatter:off
 	@Transient()
 	@Fields({
 		@Field(name = "myContentText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
@@ -147,10 +70,15 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		@Field(name = "myContentTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
 		@Field(name = "myContentTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
-	//@formatter:on
+	@OptimisticLock(excluded = true)
 	private String myContentText;
 
+	@Column(name = "HASH_SHA256", length = 64, nullable = true)
+	@OptimisticLock(excluded = true)
+	private String myHashSha256;
+
 	@Column(name = "SP_HAS_LINKS")
+	@OptimisticLock(excluded = true)
 	private boolean myHasLinks;
 
 	@Id
@@ -160,12 +88,15 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private Long myId;
 
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myIncomingResourceLinks;
 
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
+	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
 
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
+	@OptimisticLock(excluded = true)
 	private String myLanguage;
 
 	/**
@@ -178,77 +109,139 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		@Field(name = "myNarrativeTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
 		@Field(name = "myNarrativeTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
+	@OptimisticLock(excluded = true)
 	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
 
 	@Column(name = "SP_COORDS_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsCoordsPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamDate> myParamsDate;
 
 	@Column(name = "SP_DATE_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsDatePopulated;
 
+	@OptimisticLock(excluded = true)
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	private Collection<ResourceIndexedSearchParamNumber> myParamsNumber;
 
 	@Column(name = "SP_NUMBER_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsNumberPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamQuantity> myParamsQuantity;
 
 	@Column(name = "SP_QUANTITY_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamString> myParamsString;
 
 	@Column(name = "SP_STRING_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsStringPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamToken> myParamsToken;
 
 	@Column(name = "SP_TOKEN_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsTokenPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamUri> myParamsUri;
 
 	@Column(name = "SP_URI_PRESENT")
+	@OptimisticLock(excluded = true)
 	private boolean myParamsUriPopulated;
 
 	@Column(name = "RES_PROFILE", length = MAX_PROFILE_LENGTH, nullable = true)
+	@OptimisticLock(excluded = true)
 	private String myProfile;
+
+	// Added in 3.0.0 - Should make this a primitive Boolean at some point
+	@OptimisticLock(excluded = true)
+	@Column(name = "SP_CMPSTR_UNIQ_PRESENT")
+	private Boolean myParamsCompositeStringUniquePresent = false;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
 
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@IndexedEmbedded()
+	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;
 
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	@Field
+	@OptimisticLock(excluded = true)
 	private String myResourceType;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OptimisticLock(excluded = true)
+	private Collection<SearchParamPresent> mySearchParamPresents;
+
+	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
 
+	@Transient
+	private transient boolean myUnchangedInCurrentOperation;
+
+	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
 
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {
+		for (ResourceTag next : getTags()) {
+			if (next.getTag().equals(theTag)) {
+				return next;
+			}
+		}
 		ResourceTag tag = new ResourceTag(this, theTag);
 		getTags().add(tag);
 		return tag;
 	}
 
+//	public ResourceEncodingEnum getEncoding() {
+//		Validate.notNull(myEncoding, "myEncoding is null");
+//		return myEncoding;
+//	}
+//
+//	public void setEncoding(ResourceEncodingEnum theEncoding) {
+//		myEncoding = theEncoding;
+//	}
+
+	public String getHashSha256() {
+		return myHashSha256;
+	}
+
+	public void setHashSha256(String theHashSha256) {
+		myHashSha256 = theHashSha256;
+	}
+
 	@Override
 	public Long getId() {
 		return myId;
+	}
+
+	public void setId(Long theId) {
+		myId = theId;
 	}
 
 	@Override
@@ -265,143 +258,12 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myIndexStatus;
 	}
 
-	public String getLanguage() {
-		return myLanguage;
-	}
-
-	public Collection<ResourceIndexedSearchParamCoords> getParamsCoords() {
-		if (myParamsCoords == null) {
-			myParamsCoords = new ArrayList<ResourceIndexedSearchParamCoords>();
-		}
-		return myParamsCoords;
-	}
-
-	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
-		if (myParamsDate == null) {
-			myParamsDate = new ArrayList<ResourceIndexedSearchParamDate>();
-		}
-		return myParamsDate;
-	}
-
-	public Collection<ResourceIndexedSearchParamNumber> getParamsNumber() {
-		if (myParamsNumber == null) {
-			myParamsNumber = new ArrayList<ResourceIndexedSearchParamNumber>();
-		}
-		return myParamsNumber;
-	}
-
-	public Collection<ResourceIndexedSearchParamQuantity> getParamsQuantity() {
-		if (myParamsQuantity == null) {
-			myParamsQuantity = new ArrayList<ResourceIndexedSearchParamQuantity>();
-		}
-		return myParamsQuantity;
-	}
-
-	public Collection<ResourceIndexedSearchParamString> getParamsString() {
-		if (myParamsString == null) {
-			myParamsString = new ArrayList<ResourceIndexedSearchParamString>();
-		}
-		return myParamsString;
-	}
-
-	public Collection<ResourceIndexedSearchParamToken> getParamsToken() {
-		if (myParamsToken == null) {
-			myParamsToken = new ArrayList<ResourceIndexedSearchParamToken>();
-		}
-		return myParamsToken;
-	}
-
-	public Collection<ResourceIndexedSearchParamUri> getParamsUri() {
-		if (myParamsUri == null) {
-			myParamsUri = new ArrayList<ResourceIndexedSearchParamUri>();
-		}
-		return myParamsUri;
-	}
-
-	public String getProfile() {
-		return myProfile;
-	}
-
-	public Collection<ResourceLink> getResourceLinks() {
-		if (myResourceLinks == null) {
-			myResourceLinks = new ArrayList<ResourceLink>();
-		}
-		return myResourceLinks;
-	}
-
-	@Override
-	public String getResourceType() {
-		return myResourceType;
-	}
-
-	@Override
-	public Collection<ResourceTag> getTags() {
-		if (myTags == null) {
-			myTags = new HashSet<ResourceTag>();
-		}
-		return myTags;
-	}
-
-	@Override
-	public long getVersion() {
-		return myVersion;
-	}
-
-	public boolean hasTag(System theSystem, String theTerm) {
-		for (ResourceTag next : getTags()) {
-			if (next.getTag().getSystem().equals(theSystem) && next.getTag().getCode().equals(theTerm)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean isHasLinks() {
-		return myHasLinks;
-	}
-
-	public boolean isParamsCoordsPopulated() {
-		return myParamsCoordsPopulated;
-	}
-
-	public boolean isParamsDatePopulated() {
-		return myParamsDatePopulated;
-	}
-
-	public boolean isParamsNumberPopulated() {
-		return myParamsNumberPopulated;
-	}
-
-	public boolean isParamsQuantityPopulated() {
-		return myParamsQuantityPopulated;
-	}
-
-	public boolean isParamsStringPopulated() {
-		return myParamsStringPopulated;
-	}
-
-	public boolean isParamsTokenPopulated() {
-		return myParamsTokenPopulated;
-	}
-
-	public boolean isParamsUriPopulated() {
-		return myParamsUriPopulated;
-	}
-
-	public void setContentTextParsedIntoWords(String theContentText) {
-		myContentText = theContentText;
-	}
-
-	public void setHasLinks(boolean theHasLinks) {
-		myHasLinks = theHasLinks;
-	}
-
-	public void setId(Long theId) {
-		myId = theId;
-	}
-
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
+	}
+
+	public String getLanguage() {
+		return myLanguage;
 	}
 
 	public void setLanguage(String theLanguage) {
@@ -411,8 +273,22 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myLanguage = theLanguage;
 	}
 
-	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
-		myNarrativeText = theNarrativeText;
+	public Collection<ResourceIndexedCompositeStringUnique> getParamsCompositeStringUnique() {
+		if (myParamsCompositeStringUnique == null) {
+			myParamsCompositeStringUnique = new ArrayList<>();
+		}
+		return myParamsCompositeStringUnique;
+	}
+
+	public void setParamsCompositeStringUnique(Collection<ResourceIndexedCompositeStringUnique> theParamsCompositeStringUnique) {
+		myParamsCompositeStringUnique = theParamsCompositeStringUnique;
+	}
+
+	public Collection<ResourceIndexedSearchParamCoords> getParamsCoords() {
+		if (myParamsCoords == null) {
+			myParamsCoords = new ArrayList<>();
+		}
+		return myParamsCoords;
 	}
 
 	public void setParamsCoords(Collection<ResourceIndexedSearchParamCoords> theParamsCoords) {
@@ -423,8 +299,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsCoords().addAll(theParamsCoords);
 	}
 
-	public void setParamsCoordsPopulated(boolean theParamsCoordsPopulated) {
-		myParamsCoordsPopulated = theParamsCoordsPopulated;
+	public Collection<ResourceIndexedSearchParamDate> getParamsDate() {
+		if (myParamsDate == null) {
+			myParamsDate = new ArrayList<>();
+		}
+		return myParamsDate;
 	}
 
 	public void setParamsDate(Collection<ResourceIndexedSearchParamDate> theParamsDate) {
@@ -435,8 +314,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsDate().addAll(theParamsDate);
 	}
 
-	public void setParamsDatePopulated(boolean theParamsDatePopulated) {
-		myParamsDatePopulated = theParamsDatePopulated;
+	public Collection<ResourceIndexedSearchParamNumber> getParamsNumber() {
+		if (myParamsNumber == null) {
+			myParamsNumber = new ArrayList<>();
+		}
+		return myParamsNumber;
 	}
 
 	public void setParamsNumber(Collection<ResourceIndexedSearchParamNumber> theNumberParams) {
@@ -447,8 +329,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsNumber().addAll(theNumberParams);
 	}
 
-	public void setParamsNumberPopulated(boolean theParamsNumberPopulated) {
-		myParamsNumberPopulated = theParamsNumberPopulated;
+	public Collection<ResourceIndexedSearchParamQuantity> getParamsQuantity() {
+		if (myParamsQuantity == null) {
+			myParamsQuantity = new ArrayList<>();
+		}
+		return myParamsQuantity;
 	}
 
 	public void setParamsQuantity(Collection<ResourceIndexedSearchParamQuantity> theQuantityParams) {
@@ -459,8 +344,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsQuantity().addAll(theQuantityParams);
 	}
 
-	public void setParamsQuantityPopulated(boolean theParamsQuantityPopulated) {
-		myParamsQuantityPopulated = theParamsQuantityPopulated;
+	public Collection<ResourceIndexedSearchParamString> getParamsString() {
+		if (myParamsString == null) {
+			myParamsString = new ArrayList<>();
+		}
+		return myParamsString;
 	}
 
 	public void setParamsString(Collection<ResourceIndexedSearchParamString> theParamsString) {
@@ -471,8 +359,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsString().addAll(theParamsString);
 	}
 
-	public void setParamsStringPopulated(boolean theParamsStringPopulated) {
-		myParamsStringPopulated = theParamsStringPopulated;
+	public Collection<ResourceIndexedSearchParamToken> getParamsToken() {
+		if (myParamsToken == null) {
+			myParamsToken = new ArrayList<>();
+		}
+		return myParamsToken;
 	}
 
 	public void setParamsToken(Collection<ResourceIndexedSearchParamToken> theParamsToken) {
@@ -483,8 +374,11 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsToken().addAll(theParamsToken);
 	}
 
-	public void setParamsTokenPopulated(boolean theParamsTokenPopulated) {
-		myParamsTokenPopulated = theParamsTokenPopulated;
+	public Collection<ResourceIndexedSearchParamUri> getParamsUri() {
+		if (myParamsUri == null) {
+			myParamsUri = new ArrayList<>();
+		}
+		return myParamsUri;
 	}
 
 	public void setParamsUri(Collection<ResourceIndexedSearchParamUri> theParamsUri) {
@@ -495,8 +389,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getParamsUri().addAll(theParamsUri);
 	}
 
-	public void setParamsUriPopulated(boolean theParamsUriPopulated) {
-		myParamsUriPopulated = theParamsUriPopulated;
+	public String getProfile() {
+		return myProfile;
 	}
 
 	public void setProfile(String theProfile) {
@@ -504,6 +398,27 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
 		}
 		myProfile = theProfile;
+	}
+
+	@Override
+	public Long getResourceId() {
+		return getId();
+	}
+
+//	public byte[] getResource() {
+//		Validate.notNull(myEncoding, "myEncoding is null");
+//		return myResource;
+//	}
+//
+//	public void setResource(byte[] theResource) {
+//		myResource = theResource;
+//	}
+
+	public Collection<ResourceLink> getResourceLinks() {
+		if (myResourceLinks == null) {
+			myResourceLinks = new ArrayList<>();
+		}
+		return myResourceLinks;
 	}
 
 	public void setResourceLinks(Collection<ResourceLink> theLinks) {
@@ -514,27 +429,143 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		getResourceLinks().addAll(theLinks);
 	}
 
+	@Override
+	public String getResourceType() {
+		return myResourceType;
+	}
+
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	@Override
+	public Collection<ResourceTag> getTags() {
+		if (myTags == null) {
+			myTags = new HashSet<>();
+		}
+		return myTags;
+	}
+
+	@Override
+	public long getVersion() {
+		return myVersion;
 	}
 
 	public void setVersion(long theVersion) {
 		myVersion = theVersion;
 	}
 
-	public ResourceHistoryTable toHistory(ResourceHistoryTable theResourceHistoryTable) {
-		ResourceHistoryTable retVal = theResourceHistoryTable != null ? theResourceHistoryTable : new ResourceHistoryTable();
+	public boolean isHasLinks() {
+		return myHasLinks;
+	}
+
+	public void setHasLinks(boolean theHasLinks) {
+		myHasLinks = theHasLinks;
+	}
+
+	public boolean isParamsCompositeStringUniquePresent() {
+		if (myParamsCompositeStringUniquePresent == null) {
+			return false;
+		}
+		return myParamsCompositeStringUniquePresent;
+	}
+
+	public void setParamsCompositeStringUniquePresent(boolean theParamsCompositeStringUniquePresent) {
+		myParamsCompositeStringUniquePresent = theParamsCompositeStringUniquePresent;
+	}
+
+	public boolean isParamsCoordsPopulated() {
+		return myParamsCoordsPopulated;
+	}
+
+	public void setParamsCoordsPopulated(boolean theParamsCoordsPopulated) {
+		myParamsCoordsPopulated = theParamsCoordsPopulated;
+	}
+
+	public boolean isParamsDatePopulated() {
+		return myParamsDatePopulated;
+	}
+
+	public void setParamsDatePopulated(boolean theParamsDatePopulated) {
+		myParamsDatePopulated = theParamsDatePopulated;
+	}
+
+	public boolean isParamsNumberPopulated() {
+		return myParamsNumberPopulated;
+	}
+
+	public void setParamsNumberPopulated(boolean theParamsNumberPopulated) {
+		myParamsNumberPopulated = theParamsNumberPopulated;
+	}
+
+	public boolean isParamsQuantityPopulated() {
+		return myParamsQuantityPopulated;
+	}
+
+	public void setParamsQuantityPopulated(boolean theParamsQuantityPopulated) {
+		myParamsQuantityPopulated = theParamsQuantityPopulated;
+	}
+
+	public boolean isParamsStringPopulated() {
+		return myParamsStringPopulated;
+	}
+
+	public void setParamsStringPopulated(boolean theParamsStringPopulated) {
+		myParamsStringPopulated = theParamsStringPopulated;
+	}
+
+	public boolean isParamsTokenPopulated() {
+		return myParamsTokenPopulated;
+	}
+
+	public void setParamsTokenPopulated(boolean theParamsTokenPopulated) {
+		myParamsTokenPopulated = theParamsTokenPopulated;
+	}
+
+	public boolean isParamsUriPopulated() {
+		return myParamsUriPopulated;
+	}
+
+	public void setParamsUriPopulated(boolean theParamsUriPopulated) {
+		myParamsUriPopulated = theParamsUriPopulated;
+	}
+
+	/**
+	 * Transient (not saved in DB) flag indicating that this resource was found to be unchanged by the current operation
+	 * and was not re-saved in the database
+	 */
+	public boolean isUnchangedInCurrentOperation() {
+		return myUnchangedInCurrentOperation;
+	}
+
+	/**
+	 * Transient (not saved in DB) flag indicating that this resource was found to be unchanged by the current operation
+	 * and was not re-saved in the database
+	 */
+	public void setUnchangedInCurrentOperation(boolean theUnchangedInCurrentOperation) {
+		myUnchangedInCurrentOperation = theUnchangedInCurrentOperation;
+	}
+
+	public void setContentTextParsedIntoWords(String theContentText) {
+		myContentText = theContentText;
+	}
+
+	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
+		myNarrativeText = theNarrativeText;
+	}
+
+	public ResourceHistoryTable toHistory() {
+		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
 		retVal.setVersion(myVersion);
 
-		retVal.setTitle(getTitle());
 		retVal.setPublished(getPublished());
 		retVal.setUpdated(getUpdated());
-		retVal.setEncoding(getEncoding());
+//		retVal.setEncoding(getEncoding());
 		retVal.setFhirVersion(getFhirVersion());
-		retVal.setResource(getResource());
+//		retVal.setResource(getResource());
 		retVal.setDeleted(getDeleted());
 		retVal.setForcedId(getForcedId());
 

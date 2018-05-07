@@ -1,12 +1,25 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.*;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +35,14 @@ import java.util.List;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.rest.method.RequestDetails;
-
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
 	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem);
 
 	LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
 
-	public class LookupCodeResult {
+	class LookupCodeResult {
+
 		private String myCodeDisplay;
 		private boolean myCodeIsAbstract;
 		private String myCodeSystemDisplayName;
@@ -42,61 +50,137 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> ext
 		private boolean myFound;
 		private String mySearchedForCode;
 		private String mySearchedForSystem;
+		private List<IContextValidationSupport.BaseConceptProperty> myProperties;
+
+		/**
+		 * Constructor
+		 */
+		public LookupCodeResult() {
+			super();
+		}
 
 		public String getCodeDisplay() {
 			return myCodeDisplay;
-		}
-
-		public String getCodeSystemDisplayName() {
-			return myCodeSystemDisplayName;
-		}
-
-		public String getCodeSystemVersion() {
-			return myCodeSystemVersion;
-		}
-
-		public String getSearchedForCode() {
-			return mySearchedForCode;
-		}
-
-		public String getSearchedForSystem() {
-			return mySearchedForSystem;
-		}
-
-		public boolean isCodeIsAbstract() {
-			return myCodeIsAbstract;
-		}
-
-		public boolean isFound() {
-			return myFound;
 		}
 
 		public void setCodeDisplay(String theCodeDisplay) {
 			myCodeDisplay = theCodeDisplay;
 		}
 
-		public void setCodeIsAbstract(boolean theCodeIsAbstract) {
-			myCodeIsAbstract = theCodeIsAbstract;
+		public String getCodeSystemDisplayName() {
+			return myCodeSystemDisplayName;
 		}
 
 		public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
 			myCodeSystemDisplayName = theCodeSystemDisplayName;
 		}
 
+		public String getCodeSystemVersion() {
+			return myCodeSystemVersion;
+		}
+
 		public void setCodeSystemVersion(String theCodeSystemVersion) {
 			myCodeSystemVersion = theCodeSystemVersion;
 		}
 
-		public void setFound(boolean theFound) {
-			myFound = theFound;
+		public String getSearchedForCode() {
+			return mySearchedForCode;
 		}
 
 		public void setSearchedForCode(String theSearchedForCode) {
 			mySearchedForCode = theSearchedForCode;
 		}
 
+		public String getSearchedForSystem() {
+			return mySearchedForSystem;
+		}
+
 		public void setSearchedForSystem(String theSearchedForSystem) {
 			mySearchedForSystem = theSearchedForSystem;
+		}
+
+		public boolean isCodeIsAbstract() {
+			return myCodeIsAbstract;
+		}
+
+		public void setCodeIsAbstract(boolean theCodeIsAbstract) {
+			myCodeIsAbstract = theCodeIsAbstract;
+		}
+
+		public boolean isFound() {
+			return myFound;
+		}
+
+		public void setFound(boolean theFound) {
+			myFound = theFound;
+		}
+
+		public void setProperties(List<IContextValidationSupport.BaseConceptProperty> theProperties) {
+			myProperties = theProperties;
+		}
+
+		public void throwNotFoundIfAppropriate() {
+			if (isFound() == false) {
+				throw new ResourceNotFoundException("Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
+			}
+		}
+
+		public Parameters toParameters(List<? extends IPrimitiveType<String>> theProperties) {
+			Parameters retVal = new Parameters();
+
+			retVal.addParameter().setName("name").setValue(new StringType(getCodeSystemDisplayName()));
+			if (isNotBlank(getCodeSystemVersion())) {
+				retVal.addParameter().setName("version").setValue(new StringType(getCodeSystemVersion()));
+			}
+			retVal.addParameter().setName("display").setValue(new StringType(getCodeDisplay()));
+			retVal.addParameter().setName("abstract").setValue(new BooleanType(isCodeIsAbstract()));
+
+			if (myProperties != null) {
+
+				Set<String> properties = Collections.emptySet();
+				if (theProperties != null) {
+					properties = theProperties
+						.stream()
+						.map(IPrimitiveType::getValueAsString)
+						.collect(Collectors.toSet());
+				}
+
+				for (IContextValidationSupport.BaseConceptProperty next : myProperties) {
+
+					if (!properties.isEmpty()) {
+						if (!properties.contains(next.getPropertyName())) {
+							continue;
+						}
+					}
+
+					Parameters.ParametersParameterComponent property = retVal.addParameter().setName("property");
+					property
+						.addPart()
+						.setName("code")
+						.setValue(new CodeType(next.getPropertyName()));
+
+					if (next instanceof IContextValidationSupport.StringConceptProperty) {
+						IContextValidationSupport.StringConceptProperty prop = (IContextValidationSupport.StringConceptProperty) next;
+						property
+							.addPart()
+							.setName("value")
+							.setValue(new StringType(prop.getValue()));
+					} else if (next instanceof IContextValidationSupport.CodingConceptProperty) {
+						IContextValidationSupport.CodingConceptProperty prop = (IContextValidationSupport.CodingConceptProperty) next;
+						property
+							.addPart()
+							.setName("value")
+							.setValue(new Coding()
+								.setSystem(prop.getCodeSystem())
+								.setCode(prop.getCode())
+								.setDisplay(prop.getDisplay()));
+					} else {
+						throw new IllegalStateException("Don't know how to handle " + next.getClass());
+					}
+				}
+			}
+
+			return retVal;
 		}
 	}
 

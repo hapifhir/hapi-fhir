@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,13 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import ca.uhn.fhir.model.api.Bundle;
+import java.lang.annotation.*;
 
 /**
  * RESTful method annotation to be used for the FHIR <a href="http://hl7.org/implement/standards/fhir/http.html#transaction">transaction</a> method.
  * 
  * <p>
- * This method should have a parameter of type {@link Bundle} annotated with the {@link TransactionParam} annotation.
+ * This method should have a parameter of type Bundle annotated with the {@link TransactionParam} annotation.
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)

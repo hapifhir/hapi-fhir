@@ -1,12 +1,25 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,70 +35,37 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
  * {@link SubscriptionStatusEnum#REQUESTED} state and prevents clients from changing the status.
  */
-public class SubscriptionsRequireManualActivationInterceptorDstu2 extends InterceptorAdapter {
-
-	public static final ResourceMetadataKeyEnum<Object> ALLOW_STATUS_CHANGE = new ResourceMetadataKeyEnum<Object>(FhirResourceDaoSubscriptionDstu2.class.getName() + "_ALLOW_STATUS_CHANGE") {
-		private static final long serialVersionUID = 1;
-
-		@CoverageIgnore
-		@Override
-		public Object get(IResource theResource) {
-			throw new UnsupportedOperationException();
-		}
-
-		@CoverageIgnore
-		@Override
-		public void put(IResource theResource, Object theObject) {
-			throw new UnsupportedOperationException();
-		}
-	};
+public class SubscriptionsRequireManualActivationInterceptorDstu2 extends ServerOperationInterceptorAdapter {
 
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu2")
 	private IFhirResourceDao<Subscription> myDao;
 
 	@Override
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest) {
-		switch (theOperation) {
-		case CREATE:
-		case UPDATE:
-			if (theProcessedRequest.getResourceType().equals("Subscription")) {
-				verifyStatusOk(theOperation, theProcessedRequest);
-			}
-			break;
-		default:
-			break;
+	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+		if (myDao.getContext().getResourceDefinition(theResource).getName().equals("Subscription")) {
+			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
+
+	@Override
+	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals("Subscription")) {
+			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
+		}
+	}
+
 
 	public void setDao(IFhirResourceDao<Subscription> theDao) {
 		myDao = theDao;
 	}
 
-	private void verifyStatusOk(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails) {
-		Subscription subscription = (Subscription) theRequestDetails.getResource();
+	private void verifyStatusOk(RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
+		Subscription subscription = (Subscription) theResource;
 		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
 
 		if (newStatus == SubscriptionStatusEnum.REQUESTED || newStatus == SubscriptionStatusEnum.OFF) {
@@ -94,27 +74,25 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Interc
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
-		IIdType requestId = theRequestDetails.getId();
-		if (requestId != null && requestId.hasIdPart()) {
-			Subscription existing;
+		if (theOldResourceOrNull != null) {
 			try {
-				existing = myDao.read(requestId, null);
+				Subscription existing = (Subscription) theOldResourceOrNull;
 				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
 				if (existingStatus != newStatus) {
-					verifyActiveStatus(subscription, newStatus, existingStatus);
+					verifyActiveStatus(theOperation, subscription, newStatus, existingStatus);
 				}
 			} catch (ResourceNotFoundException e) {
-				verifyActiveStatus(subscription, newStatus, null);
+				verifyActiveStatus(theOperation, subscription, newStatus, null);
 			}
 		} else {
-			verifyActiveStatus(subscription, newStatus, null);
+			verifyActiveStatus(theOperation, subscription, newStatus, null);
 		}
 	}
 
-	private void verifyActiveStatus(Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
+	private void verifyActiveStatus(RestOperationTypeEnum theOperation, Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
 		SubscriptionChannelTypeEnum channelType = theSubscription.getChannel().getTypeElement().getValueAsEnum();
 
 		if (channelType == null) {
@@ -127,6 +105,10 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Interc
 
 		if (theExistingStatus != null) {
 			throw new UnprocessableEntityException("Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+		}
+
+		if (theSubscription.getStatus() == null) {
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
 		}
 
 		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");

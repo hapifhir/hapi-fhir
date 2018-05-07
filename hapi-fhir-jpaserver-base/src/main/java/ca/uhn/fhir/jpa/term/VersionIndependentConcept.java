@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,16 @@ public class VersionIndependentConcept {
 	private String mySystem;
 	private String myCode;
 
+	/**
+	 * Constructor
+	 */
+	public VersionIndependentConcept() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
 	public VersionIndependentConcept(String theSystem, String theCode) {
 		setSystem(theSystem);
 		setCode(theCode);
@@ -34,16 +44,18 @@ public class VersionIndependentConcept {
 		return mySystem;
 	}
 
-	public void setSystem(String theSystem) {
+	public VersionIndependentConcept setSystem(String theSystem) {
 		mySystem = theSystem;
+		return this;
 	}
 
 	public String getCode() {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
+	public VersionIndependentConcept setCode(String theCode) {
 		myCode = theCode;
+		return this;
 	}
 
 }

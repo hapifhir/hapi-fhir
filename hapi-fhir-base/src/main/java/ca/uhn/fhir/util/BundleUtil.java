@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 /**
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+
+	/**
+	 * @return Returns <code>null</code> if the link isn't found or has no value
+	 */
+	public static String getLinkUrlOfType(FhirContext theContext, IBaseBundle theBundle, String theLinkRelation) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("link");
+		List<IBase> links = entryChild.getAccessor().getValues(theBundle);
+		for (IBase nextLink : links) {
+
+			boolean isRightRel = false;
+			BaseRuntimeElementCompositeDefinition relDef = (BaseRuntimeElementCompositeDefinition) theContext.getElementDefinition(nextLink.getClass());
+			BaseRuntimeChildDefinition relChild = relDef.getChildByName("relation");
+			List<IBase> relValues = relChild.getAccessor().getValues(nextLink);
+			for (IBase next : relValues) {
+				IPrimitiveType<?> nextValue = (IPrimitiveType<?>)next;
+				if (theLinkRelation.equals(nextValue.getValueAsString())) {
+					isRightRel = true;
+				}
+			}
+
+			if (!isRightRel) {
+				continue;
+			}
+
+			BaseRuntimeElementCompositeDefinition linkDef = (BaseRuntimeElementCompositeDefinition) theContext.getElementDefinition(nextLink.getClass());
+			BaseRuntimeChildDefinition urlChild = linkDef.getChildByName("url");
+			List<IBase> values = urlChild.getAccessor().getValues(nextLink);
+			for (IBase nextUrl : values) {
+				IPrimitiveType<?> nextValue = (IPrimitiveType<?>)nextUrl;
+				if (isNotBlank(nextValue.getValueAsString())) {
+					return nextValue.getValueAsString();
+				}
+			}
+
+		}
+
+		return null;
+	}
 
 	@SuppressWarnings("unchecked")
 	public static List<Pair<String, IBaseResource>> getBundleEntryUrlsAndResources(FhirContext theContext, IBaseBundle theBundle) {
@@ -56,7 +89,7 @@ public class BundleUtil {
 		
 		BaseRuntimeChildDefinition urlChild = requestDef.getChildByName("url");
 
-		List<Pair<String, IBaseResource>> retVal = new ArrayList<Pair<String,IBaseResource>>(entries.size());
+		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
 		for (IBase nextEntry : entries) {
 			
 			String url = null;
@@ -94,7 +127,7 @@ public class BundleUtil {
 	 * Extract all of the resources from a given bundle
 	 */
 	public static List<BundleEntryParts> toListOfEntries(FhirContext theContext, IBaseBundle theBundle) {
-		List<BundleEntryParts> retVal = new ArrayList<BundleEntryParts>();
+		List<BundleEntryParts> retVal = new ArrayList<>();
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
@@ -143,7 +176,15 @@ public class BundleUtil {
 	 * Extract all of the resources from a given bundle
 	 */
 	public static List<IBaseResource> toListOfResources(FhirContext theContext, IBaseBundle theBundle) {
-		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+		return toListOfResourcesOfType(theContext, theBundle, null);
+	}
+
+	/**
+	 * Extract all of the resources of a given type from a given bundle 
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends IBaseResource> List<T> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<T> theTypeToInclude) {
+		List<T> retVal = new ArrayList<>();
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
@@ -153,7 +194,10 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		for (IBase nextEntry : entries) {
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
-				retVal.add((IBaseResource) next);
+				if (theTypeToInclude != null && !theTypeToInclude.isAssignableFrom(next.getClass())) {
+					continue;
+				}
+				retVal.add((T) next);
 			}
 		}
 
@@ -165,7 +209,7 @@ public class BundleUtil {
 		private final RequestTypeEnum myRequestType;
 		private final IBaseResource myResource;
 		private final String myUrl;
-		public BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
+		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
 			super();
 			myRequestType = theRequestType;
 			myUrl = theUrl;

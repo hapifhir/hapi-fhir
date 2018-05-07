@@ -19,14 +19,12 @@ package ca.uhn.fhir.tinder;
  * #L%
  */
 
-import java.util.List;
-
-import org.apache.maven.plugins.annotations.Parameter;
-
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ProfileParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import org.apache.maven.plugins.annotations.Parameter;
+
+import java.util.List;
 
 /**
  * @author Bill.Denton
@@ -39,76 +37,78 @@ public class GeneratorContext {
 	private List<String> includeResources;
 	private List<String> excludeResources;
 	private List<ValueSetFileDefinition> valueSetFiles;
-	private List<ProfileFileDefinition> profileFiles;
 	private ResourceGeneratorUsingSpreadsheet resourceGenerator = null;
 	private ValueSetGenerator valueSetGenerator = null;
 	private DatatypeGeneratorUsingSpreadsheet datatypeGenerator = null;
-	private ProfileParser profileParser = null;
-	public String getVersion() {
-		return version;
-	}
-	public void setVersion(String version) {
-		this.version = version;
-	}
-	public String getPackageSuffix() {
-		return packageSuffix;
-	}
-	public void setPackageSuffix(String packageSuffix) {
-		this.packageSuffix = packageSuffix;
-	}
+
 	public String getBaseDir() {
 		return baseDir;
 	}
+
 	public void setBaseDir(String baseDir) {
 		this.baseDir = baseDir;
 	}
+
+	public DatatypeGeneratorUsingSpreadsheet getDatatypeGenerator() {
+		return datatypeGenerator;
+	}
+
+	public void setDatatypeGenerator(DatatypeGeneratorUsingSpreadsheet datatypeGenerator) {
+		this.datatypeGenerator = datatypeGenerator;
+	}
+
+	public List<String> getExcludeResources() {
+		return excludeResources;
+	}
+
+	public void setExcludeResources(List<String> excludeResources) {
+		this.excludeResources = excludeResources;
+	}
+
 	public List<String> getIncludeResources() {
 		return includeResources;
 	}
 	public void setIncludeResources(List<String> includeResources) {
 		this.includeResources = includeResources;
 	}
-	public List<String> getExcludeResources() {
-		return excludeResources;
+
+	public String getPackageSuffix() {
+		return packageSuffix;
 	}
-	public void setExcludeResources(List<String> excludeResources) {
-		this.excludeResources = excludeResources;
+
+	public void setPackageSuffix(String packageSuffix) {
+		this.packageSuffix = packageSuffix;
 	}
-	public List<ValueSetFileDefinition> getValueSetFiles() {
-		return valueSetFiles;
-	}
-	public void setValueSetFiles(List<ValueSetFileDefinition> valueSetFiles) {
-		this.valueSetFiles = valueSetFiles;
-	}
-	public List<ProfileFileDefinition> getProfileFiles() {
-		return profileFiles;
-	}
-	public void setProfileFiles(List<ProfileFileDefinition> profileFiles) {
-		this.profileFiles = profileFiles;
-	}
+
 	public ResourceGeneratorUsingSpreadsheet getResourceGenerator() {
 		return resourceGenerator;
 	}
+
 	public void setResourceGenerator(ResourceGeneratorUsingSpreadsheet resourceGenerator) {
 		this.resourceGenerator = resourceGenerator;
 	}
+
+	public List<ValueSetFileDefinition> getValueSetFiles() {
+		return valueSetFiles;
+	}
+
+	public void setValueSetFiles(List<ValueSetFileDefinition> valueSetFiles) {
+		this.valueSetFiles = valueSetFiles;
+	}
+
 	public ValueSetGenerator getValueSetGenerator() {
 		return valueSetGenerator;
 	}
 	public void setValueSetGenerator(ValueSetGenerator valueSetGenerator) {
 		this.valueSetGenerator = valueSetGenerator;
 	}
-	public DatatypeGeneratorUsingSpreadsheet getDatatypeGenerator() {
-		return datatypeGenerator;
+
+	public String getVersion() {
+		return version;
 	}
-	public void setDatatypeGenerator(DatatypeGeneratorUsingSpreadsheet datatypeGenerator) {
-		this.datatypeGenerator = datatypeGenerator;
-	}
-	public ProfileParser getProfileParser() {
-		return profileParser;
-	}
-	public void setProfileParser(ProfileParser profileParser) {
-		this.profileParser = profileParser;
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	public static class ProfileFileDefinition {

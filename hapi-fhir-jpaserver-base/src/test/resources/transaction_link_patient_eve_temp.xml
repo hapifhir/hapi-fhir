@@ -126,7 +126,7 @@
                     <other>
                         <reference value="Patient/555-44-4444"/>
                     </other>
-                    <type value="replace"/>
+                    <type value="replaces"/>
                 </link>
                 <active value="true"/>
             </Patient>

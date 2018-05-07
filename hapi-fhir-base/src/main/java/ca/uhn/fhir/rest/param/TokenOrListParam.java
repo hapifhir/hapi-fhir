@@ -11,7 +11,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,14 +69,12 @@ public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenPar
 
 	/**
 	 * Add a new token to this list
-	 * 
-	 * @param theSystem
+	 *  @param theSystem
 	 *            The system to use for the one token to pre-populate in this list
-	 * @param theValue
-	 *            The value to use for the one token to pre-populate in this list
 	 */
-	public void add(String theSystem, String theValue) {
+	public TokenOrListParam add(String theSystem, String theValue) {
 		add(new TokenParam(theSystem, theValue));
+		return this;
 	}
 
 	public List<BaseCodingDt> getListAsCodings() {

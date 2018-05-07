@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,6 +45,8 @@ public class ExDiagnosisrelatedgroupEnumFactory implements EnumFactory<ExDiagnos
       return ExDiagnosisrelatedgroup._101;
     if ("300".equals(codeString))
       return ExDiagnosisrelatedgroup._300;
+    if ("400".equals(codeString))
+      return ExDiagnosisrelatedgroup._400;
     throw new IllegalArgumentException("Unknown ExDiagnosisrelatedgroup code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class ExDiagnosisrelatedgroupEnumFactory implements EnumFactory<ExDiagnos
       return "101";
     if (code == ExDiagnosisrelatedgroup._300)
       return "300";
+    if (code == ExDiagnosisrelatedgroup._400)
+      return "400";
     return "?";
   }
 

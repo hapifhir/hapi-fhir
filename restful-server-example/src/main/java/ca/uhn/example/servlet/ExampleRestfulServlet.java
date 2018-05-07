@@ -1,8 +1,6 @@
 package ca.uhn.example.servlet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.web.cors.CorsConfiguration;
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,6 +28,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -46,13 +46,17 @@ import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 	private volatile Conformance myCachedValue;
 	private DaoConfig myDaoConfig;
 	private String myImplementationDescription;
+	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;
+	private ResourceCountCache myResourceCountsCache;
 
 	/**
 	 * Constructor
@@ -61,6 +65,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	public JpaConformanceProviderDstu2(){
 		super();
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
 
 	/**
@@ -72,13 +77,18 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
 
 	@Override
 	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		Conformance retVal = myCachedValue;
 
-		Map<String, Long> counts = mySystemDao.getResourceCounts();
+		Map<String, Long> counts = null;
+		if (myIncludeResourceCounts) {
+			counts = mySystemDao.getResourceCountsFromCache();
+		}
+		counts = defaultIfNull(counts, Collections.emptyMap());
 
 		FhirContext ctx = myRestfulServer.getFhirContext();
 
@@ -119,6 +129,10 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		return retVal;
 	}
 
+	public boolean isIncludeResourceCounts() {
+		return myIncludeResourceCounts;
+	}
+
 	public void setDaoConfig(DaoConfig myDaoConfig) {
 		this.myDaoConfig = myDaoConfig;
 	}
@@ -126,6 +140,10 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
+	}
+
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

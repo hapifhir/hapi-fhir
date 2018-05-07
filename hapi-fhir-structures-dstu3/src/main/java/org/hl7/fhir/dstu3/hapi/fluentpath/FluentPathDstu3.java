@@ -1,17 +1,16 @@
 package org.hl7.fhir.dstu3.hapi.fluentpath;
 
-import java.util.List;
-
-import org.hl7.fhir.dstu3.hapi.validation.HapiWorkerContext;
-import org.hl7.fhir.dstu3.hapi.validation.IValidationSupport;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
+import ca.uhn.fhir.fluentpath.IFluentPath;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import java.util.List;
 
 public class FluentPathDstu3 implements IFluentPath {
 

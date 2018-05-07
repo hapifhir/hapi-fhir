@@ -69,4 +69,7 @@ public class OidType extends UriType {
 		return new OidType(getValue());
 	}
 
+	public String fhirType() {
+		return "oid";		
+	}
 }

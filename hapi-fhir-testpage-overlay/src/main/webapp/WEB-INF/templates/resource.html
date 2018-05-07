@@ -7,9 +7,10 @@
 	</head>
 
 	<body>
-		<form action="" method="get" id="outerForm">
-		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/> 
-
+		<form action="#" method="get" id="outerForm">
+		<input type="hidden" id="serverId" name="serverId" th:value="${serverId}"/>
+		<input th:if="${_csrf} != null" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+  
 		<div th:replace="tmpl-navbar-top :: top" ></div>
 		
 		<div class="container-fluid">
@@ -63,7 +64,7 @@
 							</li>
 							<!-- CRUD Tab -->
 							<li th:class="(${!haveSearchParams} and ${queries.empty}) ? 'active'">
-								<a href="#tab-otheractions" role="tab" data-toggle="tab">CRUD Operations</a>
+								<a href="#tab-otheractions" role="tab" data-toggle="tab" name="tabCrudOperationsLink">CRUD Operations</a>
 							</li>
 							<!-- Tags Tab -->
 							<li>
@@ -342,9 +343,8 @@
 								            $(function () {
 								                $('#resource-history-datetime').datetimepicker({
 								                	sideBySide: true,
-								                	use24hours: true,
-								                	showToday: true,
-								                	keepInvalid: true
+								                	keepInvalid: true,
+								                	format: 'YYYY-MM-DDTHH:mm:ssZ'
 								                });
 								            });
 								            $('#resource-history-btn').click(
@@ -430,8 +430,7 @@
 								                    Contents
 								                    <span class="loadingStar">*</span>
 								                    </div>
-								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1">
-								                    </textarea>
+								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
 								                </div>
 								            </div>
 								        </div>											
@@ -492,9 +491,7 @@
 								                    Contents
 								                    <span class="loadingStar">*</span>
 								                    </div>
-								                    <textarea class="form-control" id="resource-update-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1">
-								                    	<th:block th:if="${updateResource} != null" th:text="${updateResource}"/>
-								                    </textarea>
+								                    <textarea class="form-control" id="resource-update-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"><th:block th:if="${updateResource} != null" th:text="${updateResource}"/></textarea>
 								                </div>
 								            </div>
 								        </div>											
@@ -580,7 +577,8 @@
 								<div class="container-fluid">
 
 								<!-- Get Tags -->
-
+								<!-- 
+								
 									<div class="row-fluid">
 										Show all of the tags currently in use on the server for this resource type. If an ID is specified,
 										returns only tags posted to the given version. If an ID and a version are specified, 
@@ -626,6 +624,7 @@
 											});
 										</script>
 									</div>
+								-->
 							
 								</div>							
 							</div>

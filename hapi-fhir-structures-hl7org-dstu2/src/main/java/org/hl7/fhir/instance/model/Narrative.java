@@ -29,15 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A human-readable formatted text, including images.
  */
@@ -65,7 +64,7 @@ public class Narrative extends BaseNarrative implements INarrative {
          * added to help the parsers
          */
         NULL;
-        public static NarrativeStatus fromCode(String codeString) throws Exception {
+        public static NarrativeStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("generated".equals(codeString))
@@ -76,7 +75,7 @@ public class Narrative extends BaseNarrative implements INarrative {
           return ADDITIONAL;
         if ("empty".equals(codeString))
           return EMPTY;
-        throw new Exception("Unknown NarrativeStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown NarrativeStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -130,6 +129,22 @@ public class Narrative extends BaseNarrative implements INarrative {
         if ("empty".equals(codeString))
           return NarrativeStatus.EMPTY;
         throw new IllegalArgumentException("Unknown NarrativeStatus code '"+codeString+"'");
+        }
+        public Enumeration<NarrativeStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("generated".equals(codeString))
+          return new Enumeration<NarrativeStatus>(this, NarrativeStatus.GENERATED);
+        if ("extensions".equals(codeString))
+          return new Enumeration<NarrativeStatus>(this, NarrativeStatus.EXTENSIONS);
+        if ("additional".equals(codeString))
+          return new Enumeration<NarrativeStatus>(this, NarrativeStatus.ADDITIONAL);
+        if ("empty".equals(codeString))
+          return new Enumeration<NarrativeStatus>(this, NarrativeStatus.EMPTY);
+        throw new FHIRException("Unknown NarrativeStatus code '"+codeString+"'");
         }
     public String toCode(NarrativeStatus code) {
       if (code == NarrativeStatus.GENERATED)
@@ -250,6 +265,28 @@ public class Narrative extends BaseNarrative implements INarrative {
         childrenList.add(new Property("status", "code", "The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.", 0, java.lang.Integer.MAX_VALUE, status));
       }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("status"))
+          this.status = new NarrativeStatusEnumFactory().fromType(value); // Enumeration<NarrativeStatus>
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Narrative.status");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Narrative";
+
+  }
+
       public Narrative copy() {
         Narrative dst = new Narrative();
         copyValues(dst);
@@ -285,6 +322,17 @@ public class Narrative extends BaseNarrative implements INarrative {
       public boolean isEmpty() {
         return super.isEmpty() && (status == null || status.isEmpty()) && (div == null || div.isEmpty())
           ;
+      }
+
+      @Override
+      public INarrative setStatusAsString(String theString) {
+        getStatusElement().setValueAsString(theString);
+        return this;
+      }
+
+      @Override
+      public String getStatusAsString() {
+        return getStatusElement().getValueAsString();
       }
 
 

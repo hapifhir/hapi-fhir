@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.client.api;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
-import ca.uhn.fhir.model.base.resource.BaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+
 import ca.uhn.fhir.rest.annotation.Metadata;
 
 /**
@@ -36,6 +37,6 @@ public interface IBasicClient extends IRestfulClient {
 	 * for more information.
 	 */
 	@Metadata
-	BaseConformance getServerConformanceStatement();
+	IBaseConformance getServerConformanceStatement();
 
 }

@@ -1,0 +1,2435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bundle xmlns="http://hl7.org/fhir">
+   <identifier>
+      <system value="urn:ietf:rfc:3986"/>
+      <value value="urn:uuid:db734647-fc99-424c-a864-7e3cda82e703"/>
+   </identifier>
+   <type value="transaction"/>
+   <entry>
+      <fullUrl value="urn:uuid:50bdc9ff-bade-45b1-a6dc-99ab03e1b30d"/>
+      <resource>
+         <Composition>
+            <meta>
+               <profile value="http://hl7.org/fhir/ccda/StructureDefinition/CCDA-on-FHIR-US-Realm-Header"/>
+               <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.1.1:2015-08-01-->
+               <profile value="http://hl7.org/fhir/ccda/StructureDefinition/CCDA-on-FHIR-Care-Plan"/>
+               <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.1.15:2015-08-01-->
+               <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.37.1.1:2017-08-01-->
+            </meta>
+            <language value="en-US"/>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Document Id</span>
+                           </td>
+                           <td class="td_header_role_value"> db734647-fc99-424c-a864-7e3cda82e703</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Document Created:</span>
+                           </td>
+                           <td class="td_header_role_value">December 1, 2016, 11:20, PST </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Care provision</span>
+                           </td>
+                           <td class="td_header_role_value">Review of Medications�from�November 1, 2016  to December 1, 2016 </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Performer </span>
+                           </td>
+                           <td class="td_header_role_value">Claude Pharmacist, CPh</td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Author</span>
+                           </td>
+                           <td class="td_header_role_value">Registered Pharmacist, RPh, The Pharmacy Alliance Health Group</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">1004 Pharmacy Drive <br/>Portland,�OR�99123,�US<br/>Tel:  +1(555)555-1004<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Encounter Id</span>
+                           </td>
+                           <td class="td_header_role_value">9937012 2.16.840.1.113883.19</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Encounter Type</span>
+                           </td>
+                           <td class="td_header_role_value">Inpatient</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Encounter Date</span>
+                           </td>
+                           <td class="td_header_role_value">�From�December 1, 2016, 09:20   to December 1, 2016, 10:20  </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Encounter Location</span>
+                           </td>
+                           <td class="td_header_role_value">id: NPI-Example 2.16.840.1.113883.4.6</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Responsible party</span>
+                           </td>
+                           <td class="td_header_role_value">Michael Coletta, M.D. of Mass Doctors</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">2100 North Ave<br/>Burlington,�MA�02368,�US<br/>Tel:  +1(555)555-1003<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Assigned entity</span>
+                           </td>
+                           <td class="td_header_role_value">Review of Care Plan<br/>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Assigned entity {$code/@code='SELF'?}</span>
+                           </td>
+                           <td class="td_header_role_value">Review of Care Plan<br/>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Emergency contact</span>
+                           </td>
+                           <td class="td_header_role_value">Mrs. Martha Jones<br/>
+                              <br/>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">17 Daws Rd.<br/>Ann Arbor,�MI�97857,�US<br/>Tel:  (999)555-1212<br/>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Care giver</span>
+                           </td>
+                           <td class="td_header_role_value">Mrs. Martha Jones<br/>
+                           </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">17 Daws Rd.<br/>Ann Arbor,�MI�97857,�US<br/>Tel:  (999)555-1212<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Entered by</span>
+                           </td>
+                           <td class="td_header_role_value">Ellen Enter</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">1007 Pharmacy Drive<br/>Portland,�OR�99123,�US<br/>Tel:  +1(555)555-1050<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Signed </span>
+                           </td>
+                           <td class="td_header_role_value">Eve Everywoman at December 1, 2016 </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value"> Primary Home:<br/>2222 Home Street<br/>Beaverton,�OR�97867,�US<br/>Tel:  +1(555)555-2003<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Informant</span>
+                           </td>
+                           <td class="td_header_role_value">Harold Pharma, CPh</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">1007 Pharmacy Drive<br/>Portland,�OR�99123,�US<br/>Tel:  +1(555)555-1003<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Information recipient:</span>
+                           </td>
+                           <td class="td_header_role_value">Pharmacist Coordinator, CPh</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">100 Better Health Rd.<br/>Ann Arbor,�MI�97857,�US<br/>Telecom information not available<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Legal authenticator</span>
+                           </td>
+                           <td class="td_header_role_value">Pharmacist Registered, RPh of Greater Area Pharmacy signed at December 1, 2016 </td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value">1004 Pharmacy Drive <br/>Portland,�OR�99123,�US<br/>Tel:  +1(555)555-1004<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+                  <table class="header_table">
+                     <tbody>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Document maintained by</span>
+                           </td>
+                           <td class="td_header_role_value">Greater Area Pharmacy HIE</td>
+                        </tr>
+                        <tr>
+                           <td class="td_header_role_name">
+                              <span class="td_label">Contact info</span>
+                           </td>
+                           <td class="td_header_role_value"> Work Place:<br/>1009 Pharmacy Drive <br/>Portland,�OR�99123,�US<br/>Tel:  +1(555)555-1009<br/>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:004bb033-b948-4f4c-b5bf-a8dbd7d8dd40"/>
+            </identifier>
+            <status value="preliminary"/>
+            <type>
+               <coding>
+                  <system value="http://loinc.org"/>
+                  <code value="52521-2"/>
+                  <display value="Overall Plan of Care/Advance Care Directives"/>
+               </coding>
+            </type>
+            <subject>
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <encounter>
+               <reference value="urn:uuid:e46d009a-817a-417f-88ea-da6dd88c0593"/>
+            </encounter>
+            <date value="2016-12-01T11:20:00-08:00"/>
+            <author>
+               <reference value="urn:uuid:ec36309c-edb2-47c1-bc39-67f61f38e2a5"/>
+            </author>
+            <title value="Pharmacist Care Plan"/>
+            <confidentiality value="N"/>
+            <attester>
+               <mode value="legal"/>
+               <time value="2016-12-01"/>
+               <party>
+                  <reference value="urn:uuid:61a60cde-63c4-4a4f-899a-fc1c9fcf8a2a"/>
+               </party>
+            </attester>
+            <custodian>
+               <reference value="urn:uuid:18d04c4e-78cf-4c04-9361-6fe85601bf6d"/>
+            </custodian>
+            <event>
+               <extension url="http://hl7.org/fhir/ccda/StructureDefinition/CCDA-on-FHIR-Performer">
+                  <valueReference>
+                     <reference value="urn:uuid:5b9cd493-fc58-46f6-9b23-b646e4d05203"/>
+                  </valueReference>
+               </extension>
+               <period>
+                  <start value="2016-11-01"/>
+                  <end value="2016-12-01"/>
+               </period>
+            </event>
+            <section>
+               <title value="Health Concerns Section"/>
+               <code>
+                  <coding>
+                     <system value="http://loinc.org"/>
+                     <code value="75310-3"/>
+                     <display value="Health Concerns Document"/>
+                  </coding>
+               </code>
+               <text>
+                  <status value="additional"/>
+                  <div xmlns="http://www.w3.org/1999/xhtml">
+                     <table>
+                        <thead>
+                           <tr>
+                              <th>Health Concern</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>active</td>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Problem Type</th>
+                                                <th>Problem</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Condition</td>
+                                                <td>Constipation</td>
+                                                <td>AUG 19, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="60%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Intolerance Type</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>
+                                                   <span class="Italics Bold">No known </span>Allergy to Substance</td>
+                                                <td>AUG 20, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="60%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Cognitive Function Observation</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Difficulty processing information accurately</td>
+                                                <td>AUG 1, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>ADL Type</th>
+                                                <th>Ability</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Bathing</td>
+                                                <td>Independent</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Functional Assessment</th>
+                                                <th>Result of Evaluation</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Functional status</td>
+                                                <td>Independent walking</td>
+                                                <td>MAR 11, 2016</td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <col width="30%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Device Supplied</th>
+                                                                  <th>Quantity Supplied</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>cane, device (physical object)</td>
+                                                                  <td>2</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="60%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Nutritional Status</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>well nourished</td>
+                                                <td>MAY 12, 2016</td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <col width="60%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Nutrition assessment</th>
+                                                                  <th>Date(s)</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>low sodium diet (finding)</td>
+                                                                  <td>MAY 12, 2016</td>
+                                                               </tr>
+                                                               <tr>
+                                                                  <td>excessive dietary carbohydrate intake (finding)</td>
+                                                                  <td>MAY 12, 2016</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Reaction Type</th>
+                                                <th>Severity</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Nausea</td>
+                                                <td>Mild</td>
+                                                <td>FEB 26, 2016 08:05 to FEB 28, 2016 12:05</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Social History Observation Type</th>
+                                                <th>Value</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Alcohol Intake</td>
+                                                <td>12 drinks per day</td>
+                                                <td>FEB 15, 2016</td>
+                                             </tr>
+                                             <tr>
+                                                <td>History of tobacco use</td>
+                                                <td>Current every day smoker</td>
+                                                <td>FEB 14, 2016</td>
+                                             </tr>
+                                             <tr>
+                                                <td>Personal belief</td>
+                                                <td>Does not accept blood transfusions, or donates, or stores blood for transfusion.</td>
+                                                <td>MAR 12, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Vital Sign</th>
+                                                <th>Value</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Patient Body Weight - Measured</td>
+                                                <td>88 kg</td>
+                                                <td>SEP 1, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Caregiver Characteristic</th>
+                                                <th>Caregiver</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Caregiver has difficulty providing physical care</td>
+                                                <td>Mother</td>
+                                                <td>MAR 12, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Functional Assessment</th>
+                                                <th>Summed score of component values</th>
+                                                <th>Effective Date</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Brief Interview for Mental Status</td>
+                                                <td>7</td>
+                                                <td>FEB 14, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Sensory Status Type</th>
+                                                <th>Value</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Hearing</td>
+                                                <td>Impaired</td>
+                                                <td>MAR 3, 2015 </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="60%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Pregnancy Status</th>
+                                                <th>Date</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>pregnant</td>
+                                                <td>SEP 10, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <thead>
+                                             <tr>
+                                                <th>Wound Type</th>
+                                                <th>Location</th>
+                                                <th>Width</th>
+                                                <th>Length</th>
+                                                <th>Characteristic</th>
+                                                <th>Number of Pressure Ulcers/Stage</th>
+                                                <th>Highest Pressure Ulcer Stage</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Pressure ulcer stage 3</td>
+                                                <td>Anterior aspect of knee</td>
+                                                <td>1 inch</td>
+                                                <td>2 inches</td>
+                                                <td>Offensive wound odor</td>
+                                                <td>3 / Pressure ulcer stage 3</td>
+                                                <td>Necrotic eschar</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Encounter Diagnosis Type</th>
+                                                <th>Encounter Diagnosis</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Problem</td>
+                                                <td>Migraine</td>
+                                                <td>AUG 19, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Family History Subject</th>
+                                                <th>Administrative Gender</th>
+                                                <th>Birth Date</th>
+                                                <th>Deceased</th>
+                                                <th>Deceased Date</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Father</td>
+                                                <td>Male</td>
+                                                <td>1910</td>
+                                                <td>true</td>
+                                                <td>1967</td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <col width="10%"/>
+                                                            <col width="10%"/>
+                                                            <col width="10%"/>
+                                                            <col width="10%"/>
+                                                            <col width="10%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Problem Type</th>
+                                                                  <th>Problem</th>
+                                                                  <th>Date(s)</th>
+                                                                  <th>Age at Onset</th>
+                                                                  <th>Cause of Death</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Condition</td>
+                                                                  <td>Myocardial infarction</td>
+                                                                  <td>1967</td>
+                                                                  <td>57 years</td>
+                                                                  <td>Yes</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="20%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <col width="10%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Substance or Device Allergy-Intolerance Type</th>
+                                                <th>Substance/Device</th>
+                                                <th>Date(s)</th>
+                                                <th>Reaction to substance</th>
+                                                <th>Severity of reaction</th>
+                                                <th>Reaction Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Food Allergy</td>
+                                                <td>Peanut</td>
+                                                <td>JAN 9, 2016</td>
+                                                <td>Hives</td>
+                                                <td>Mild</td>
+                                                <td>JAN 9, 2016 08:05 to JAN 9, 2016 12:05</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <table>
+                        <thead>
+                           <tr>
+                              <th>Risk Concern</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>active</td>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Social History Observation Type</th>
+                                                <th>Value</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Characteristics of residence</td>
+                                                <td>Motel</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Problem Type</th>
+                                                <th>Problem</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Condition</td>
+                                                <td>Opiod abuse (disorder)</td>
+                                                <td>DEC 1, 2016</td>
+                                             </tr>
+                                             <tr>
+                                                <td>
+                                                   <span class="Italics Bold">No known </span>Problem</td>
+                                                <td/>
+                                                <td>DEC 1, 2016 10:45</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="60%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Intolerance Type</th>
+                                                <th>Date(s)</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>
+                                                   <span class="Italics Bold">No known </span>Allergy to Substance</td>
+                                                <td>AUG 20, 2016</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </text>
+               <entry>
+                  <reference value="urn:uuid:320e25c5-b583-4c11-951a-5efc532556ec"/>
+               </entry>
+               <entry>
+                  <reference value="urn:uuid:a53aa517-60b3-4272-a443-c9d8920eb59e"/>
+               </entry>
+               <entry>
+                  <reference value="urn:uuid:8ccfd7bd-409a-4515-9540-e2b090a0dcf3"/>
+               </entry>
+            </section>
+            <section>
+               <title value="Goals Section"/>
+               <code>
+                  <coding>
+                     <system value="http://loinc.org"/>
+                     <code value="61146-7"/>
+                     <display value="Goals"/>
+                  </coding>
+               </code>
+               <text>
+                  <status value="generated"/>
+                  <div xmlns="http://www.w3.org/1999/xhtml">
+                     <table>
+                        <col width="30%"/>
+                        <thead>
+                           <tr>
+                              <th>Goal</th>
+                              <th>Date</th>
+                              <th>Author</th>
+                              <th>Reference to</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Prevention of constipation</td>
+                              <td>DEC 1, 2016</td>
+                              <td>
+                                 <ul>
+                                    <li>
+                                       <span class="Italics">Pharmacist</span>: Registered Pharmacist, The Pharmacy Alliance Health Group</li>
+                                 </ul>
+                              </td>
+                              <td>Problem of "Constipation" in the Health Concerns Section</td>
+                           </tr>
+                           <tr>
+                              <td>Prevention of opioid abuse</td>
+                              <td>DEC 1, 2016</td>
+                              <td>
+                                 <ul>
+                                    <li>
+                                       <span class="Italics">Pharmacist</span>: Registered Pharmacist, The Pharmacy Alliance Health Group</li>
+                                 </ul>
+                              </td>
+                              <td>Risk for "Opioid Abuse" in the Health Concerns Section</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </text>
+               <entry>
+                  <reference value="urn:uuid:e6b1a60b-be79-4cf5-b64b-8541315dfadf"/>
+               </entry>
+               <entry>
+                  <reference value="urn:uuid:eba4ea86-9963-4a72-8a08-61c549e67c88"/>
+               </entry>
+            </section>
+            <section>
+               <title value="Interventions Section"/>
+               <code>
+                  <coding>
+                     <system value="http://loinc.org"/>
+                     <code value="62387-6"/>
+                     <display value="Interventions Provided"/>
+                  </coding>
+               </code>
+               <text>
+                  <status value="generated"/>
+                  <div xmlns="http://www.w3.org/1999/xhtml">
+                     <table>
+                        <thead>
+                           <tr>
+                              <th>Intervention</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Procedure/intervention</td>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <col width="20%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Medication(Prescription)</th>
+                                                <th>Dose</th>
+                                                <th>Frequency</th>
+                                                <th>Duration</th>
+                                                <th>Repeat Number</th>
+                                                <th>Route</th>
+                                                <th>Rate</th>
+                                                <th>Author</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>oxyCODONE Hydrochloride 10 MG Oral Tablet</td>
+                                                <td>2</td>
+                                                <td>6 h</td>
+                                                <td>NOV 25, 2016 to NOV 28, 2016</td>
+                                                <td>0</td>
+                                                <td>ORAL</td>
+                                                <td>24</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">General Practice</span>: John Middle Doe, MD</li>
+                                                      <li>
+                                                         <span class="Italics">Date: </span>NOV 25, 2016</li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <col width="30%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Reason for action</th>
+                                                                  <th>Value</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Complaint</td>
+                                                                  <td>Chronic Low Back Pain</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                         <table>
+                                                            <col width="20%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Medication Supplied</th>
+                                                                  <th>Status</th>
+                                                                  <th>Other timing</th>
+                                                                  <th>Repeat Number</th>
+                                                                  <th>Quantity</th>
+                                                                  <th>Performer</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Oxycodone Hydrochloride 10 MG Oral Tablet</td>
+                                                                  <td>completed</td>
+                                                                  <td>NOV 28, 2016</td>
+                                                                  <td>1</td>
+                                                                  <td>24</td>
+                                                                  <td>
+                                                                     <ul>
+                                                                        <li>
+                                                                           <span class="Italics">The Pharmacy Alliance Health Group</span>: </li>
+                                                                     </ul>
+                                                                  </td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <table>
+                        <col width="30%"/>
+                        <thead>
+                           <tr>
+                              <th>Intervention</th>
+                              <th>Date(s)</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Procedure/intervention</td>
+                              <td/>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <col width="20%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Planned Medication (Prescription)</th>
+                                                <th>Dose</th>
+                                                <th>Frequency</th>
+                                                <th>Duration</th>
+                                                <th>Repeat Number</th>
+                                                <th>Route</th>
+                                                <th>Rate</th>
+                                                <th>Author</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Oxycodone Hydrochloride 10 MG Oral Tablet</td>
+                                                <td>2</td>
+                                                <td>6 h</td>
+                                                <td>NOV 25, 2016 to NOV 28, 2016</td>
+                                                <td>0</td>
+                                                <td>ORAL</td>
+                                                <td>24</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Nurse Practitioner</span>: Mary Middle Jane, NP</li>
+                                                      <li>
+                                                         <span class="Italics">Date: </span>NOV 25, 2016</li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <col width="30%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Reason for action</th>
+                                                                  <th>Value</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Complaint</td>
+                                                                  <td>Chronic Low Back Pain</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                         <table>
+                                                            <col width="20%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Medication Supplied</th>
+                                                                  <th>Status</th>
+                                                                  <th>Description</th>
+                                                                  <th>Other timing</th>
+                                                                  <th>Quantity</th>
+                                                                  <th>Performer</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Oxycodone Hydrochloride 10 MG Oral Tablet</td>
+                                                                  <td>aborted</td>
+                                                                  <td>Refused to dispense - drug denied.</td>
+                                                                  <td>NOV 25, 2016</td>
+                                                                  <td>0</td>
+                                                                  <td>
+                                                                     <ul>
+                                                                        <li>
+                                                                           <span class="Italics">Competitor Pharmacy</span>: </li>
+                                                                     </ul>
+                                                                  </td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <table>
+                        <thead>
+                           <tr>
+                              <th>Planned Intervention</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Intervention</td>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <thead>
+                                             <tr>
+                                                <th>Reference to</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Goal of "Prevention of opioid abuse" in the Goals Section</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Patient Referral</th>
+                                                <th>Date(s)</th>
+                                                <th>Author</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Referral to general practitioner</td>
+                                                <td>DEC 1, 2016</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Pharmacist</span>: Registered Pharmacist, The Pharmacy Alliance Health Group</li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <col width="30%"/>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Reason for action</th>
+                                                                  <th>Value</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Problem</td>
+                                                                  <td>Opioid abuse (disorder) (suspected)</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="30%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Planned Encounter</th>
+                                                <th>Date(s)</th>
+                                                <th>Performer</th>
+                                                <th>Location</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Office outpatient visit 15 minutes</td>
+                                                <td>DEC 15, 2016 13:00</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Clinical Pharmacist</span>: Claude Pharma Pharmacist</li>
+                                                   </ul>
+                                                </td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Urgent Care Center</span>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                             <tr>
+                                                <td>Office outpatient visit 15 minutes</td>
+                                                <td>DEC 25, 2016 13:00</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics"> Clinical Pharmacist</span>: Claude Pharma Pharmacist</li>
+                                                   </ul>
+                                                </td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Urgent Care Center</span>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <col width="20%"/>
+                                          <thead>
+                                             <tr>
+                                                <th>Handoff communication</th>
+                                                <th>Date(s)</th>
+                                                <th>Participant</th>
+                                                <th>Author</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>handoff communication (procedure)</td>
+                                                <td>DEC 1, 2016</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Registered Nurse</span>: Nightingale Nancy</li>
+                                                   </ul>
+                                                </td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Registered nurse</span>: Nurse Florence</li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </text>
+               <entry>
+                  <reference value="urn:uuid:bc2adf40-9760-4652-890b-c749471544b0"/>
+               </entry>
+               <!--Unmapped entry reference: act urn:hl7ii:2.16.840.1.113883.10.20.22.4.146:2015-08-01 urn:hl7ii:2.16.840.1.113883.10.20.37.3.12:2017-08-01-->
+            </section>
+            <section>
+               <title value="Health Status Evaluations/Outcomes Section"/>
+               <code>
+                  <coding>
+                     <system value="http://loinc.org"/>
+                     <code value="11383-7"/>
+                     <display value="Patient Problem Outcome"/>
+                  </coding>
+               </code>
+               <text>
+                  <status value="additional"/>
+                  <div xmlns="http://www.w3.org/1999/xhtml">
+                     <table>
+                        <col width="30%"/>
+                        <thead>
+                           <tr>
+                              <th>Outcome Type</th>
+                              <th>Outcome Value</th>
+                              <th>Author</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Nutrition and dietetics team consult</td>
+                              <td>Normal Bowel Habits</td>
+                              <td>
+                                 <ul>
+                                    <li>
+                                       <span class="Italics">Pharmacist</span>: Registered Pharmacist, The Pharmacy Alliance Health Group</li>
+                                    <li>
+                                       <span class="Italics">Date: </span>JAN 1, 2016</li>
+                                 </ul>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <thead>
+                                             <tr>
+                                                <th>Reference to</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Goal of "Prevention of constipation" in the Goals Section</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                       <table>
+                                          <thead>
+                                             <tr>
+                                                <th>Progress Toward Goal</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Goal achieved</td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </text>
+               <entry>
+                  <reference value="urn:uuid:ff03c97a-ebf4-49dc-a2c8-22cdeaf5887d"/>
+               </entry>
+            </section>
+            <section>
+               <title value="INSURANCE PROVIDERS"/>
+               <code>
+                  <coding>
+                     <system value="http://loinc.org"/>
+                     <code value="48768-6"/>
+                     <display value="Payer"/>
+                  </coding>
+               </code>
+               <text>
+                  <status value="generated"/>
+                  <div xmlns="http://www.w3.org/1999/xhtml">
+                     <table>
+                        <thead>
+                           <tr>
+                              <th>Coverage</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                              <td>Payment sources</td>
+                           </tr>
+                           <tr>
+                              <td colspan="20">
+                                 <ul>
+                                    <li>
+                                       <table>
+                                          <thead>
+                                             <tr>
+                                                <th>Policy</th>
+                                                <th>Preference Order</th>
+                                                <th>Covered Party</th>
+                                                <th>Policy Holder</th>
+                                                <th>Performer</th>
+                                             </tr>
+                                          </thead>
+                                          <tbody>
+                                             <tr>
+                                                <td>Medicaid</td>
+                                                <td>1</td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Self</span>: Eve Middle Betterhalf</li>
+                                                   </ul>
+                                                </td>
+                                                <td>
+                                                   <ul>
+                                                      <li/>
+                                                   </ul>
+                                                </td>
+                                                <td>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Payor</span>: </li>
+                                                   </ul>
+                                                   <ul>
+                                                      <li>
+                                                         <span class="Italics">Guarantor</span>: Boris Betterhalf</li>
+                                                      <li>
+                                                         <span class="Italics">Date: </span>Unknown</li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                             <tr>
+                                                <td colspan="20">
+                                                   <ul>
+                                                      <li>
+                                                         <table>
+                                                            <thead>
+                                                               <tr>
+                                                                  <th>Authorization For</th>
+                                                               </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td>Nutritionist education, guidance, and counseling</td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </li>
+                                                   </ul>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </li>
+                                 </ul>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </text>
+               <!--Found Coverage Activity-->
+               <!--Found Policy Activity-->
+               <entry>
+                  <reference value="urn:uuid:b91f92de-af9a-4871-bac2-851356b8e320"/>
+               </entry>
+            </section>
+         </Composition>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Composition"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+      <resource>
+         <Patient>
+            <meta>
+               <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"/>
+            </meta>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <h1>Betterhalf3, Eve Middle</h1>
+                  <p>Alternate name: Everywoman,
+                                        Eve</p>
+                  <!--TODO: finish Patient.text (add contact info, etc.)-->
+               </div>
+            </text>
+            <extension url="http://hl7.org/fhir/us/core/StructureDefinition/us-core-race">
+               <extension url="ombCategory">
+                  <valueCoding>
+                     <system value="http://hl7.org/fhir/v3/Race"/>
+                     <code value="2106-3"/>
+                     <display value="White"/>
+                  </valueCoding>
+               </extension>
+               <extension url="detailed">
+                  <valueCoding>
+                     <system value="http://hl7.org/fhir/v3/Race"/>
+                     <code value="2076-8"/>
+                     <display value="Hawaiian or Other Pacific Islander"/>
+                  </valueCoding>
+               </extension>
+            </extension>
+            <extension url="http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity">
+               <extension url="ombCategory">
+                  <valueCoding>
+                     <system value="http://hl7.org/fhir/v3/Ethnicity"/>
+                     <code value="2186-5"/>
+                     <display value="Not Hispanic or Latino"/>
+                  </valueCoding>
+               </extension>
+            </extension>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.4.1"/>
+               <value value="444222222"/>
+            </identifier>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.19"/>
+               <value value="example-ccnc-id"/>
+            </identifier>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.19"/>
+               <value value="example-vendor-id"/>
+            </identifier>
+            <name>
+               <use value="usual"/>
+               <text value="Betterhalf3, Sr., Eve Middle (usual name)"/>
+               <family value="Betterhalf3"/>
+               <given value="Eve"/>
+               <given value="Middle"/>
+               <suffix value="Sr."/>
+            </name>
+            <name>
+               <use value="maiden"/>
+               <text value="Everywoman, Eve (maiden name)"/>
+               <family value="Everywoman"/>
+               <given value="Eve"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-2003"/>
+               <use value="home"/>
+            </telecom>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-2006"/>
+               <use value="home"/>
+            </telecom>
+            <gender value="female"/>
+            <birthDate value="1975-05-01"/>
+            <address>
+               <line value="2222 Home Street 3333 Old Home Street"/>
+               <city value="Beaverton Beaverton"/>
+               <state value="OR OR"/>
+               <postalCode value="97867 97869"/>
+               <country value="US US"/>
+            </address>
+         </Patient>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Patient"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:e46d009a-817a-417f-88ea-da6dd88c0593"/>
+      <resource>
+         <Encounter>
+            <status value="finished"/>
+            <type>
+               <coding>
+                  <system value="http://hl7.org/fhir/v3/ActCode"/>
+                  <code value="IMP"/>
+                  <display value="Inpatient"/>
+               </coding>
+               <coding>
+                  <system value="urn:oid:2.16.840.1.113883.999999"/>
+                  <code value="fake_code"/>
+                  <display value="fake display name"/>
+               </coding>
+            </type>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <period>
+               <start value="2016-12-01T09:20:00-04:00"/>
+               <end value="2016-12-01T10:20:00-04:00"/>
+            </period>
+         </Encounter>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Encounter"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:ec36309c-edb2-47c1-bc39-67f61f38e2a5"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Pharmacist, Registered</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:ec399842-7c0d-4cfc-ada3-f11a799d0460"/>
+            </identifier>
+            <name>
+               <family value="Pharmacist"/>
+               <given value="Registered"/>
+               <suffix value="RPh"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Pharmacy Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:bb8054b1-61aa-4964-9d0b-70e64870dff7"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Amanda, Assigned</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1003</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.19.5"/>
+               <value value="KP00017"/>
+            </identifier>
+            <name>
+               <family value="Amanda"/>
+               <given value="Assigned"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1003"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1003 Health Care Drive"/>
+               <city value="Ann Arbor"/>
+               <state value="MI"/>
+               <postalCode value="02368"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:1122a28b-5e9d-421b-89c5-ef0f7ceacedd"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Pharmacist, Registered</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:5c9ad54d-aa68-4f07-963e-c51920c952c9"/>
+            </identifier>
+            <name>
+               <family value="Pharmacist"/>
+               <given value="Registered"/>
+               <suffix value="RPh"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Pharmacy Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:fe096f70-b7c3-4679-b9cb-4030cbc1087b"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Pharmacist, Registered</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:5c9ad54d-aa68-4f07-963e-c51920c952c9"/>
+            </identifier>
+            <name>
+               <family value="Pharmacist"/>
+               <given value="Registered"/>
+               <suffix value="RPh"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Pharmacy Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:2604e064-259b-4501-ae6e-c46f9cb20091"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Doe, John Middle</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004 fax:+1(555)555-5050 mailto:doctor@provider.com</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.4.6"/>
+               <value value="219BX"/>
+            </identifier>
+            <name>
+               <family value="Doe"/>
+               <given value="John"/>
+               <given value="Middle"/>
+               <suffix value="MD"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <telecom>
+               <system value="fax"/>
+               <value value="+1(555)555-5050"/>
+               <use value="work"/>
+            </telecom>
+            <telecom>
+               <system value="email"/>
+               <value value="doctor@provider.com"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Clinical Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:af0bc8f4-2d68-4eb8-8816-7f24dec4c3a7"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Jane, Mary Middle</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004 fax:+1(555)555-5050 mailto:pharmacist@pharmacy.com</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.4.6"/>
+               <value value="219BX"/>
+            </identifier>
+            <name>
+               <family value="Jane"/>
+               <given value="Mary"/>
+               <given value="Middle"/>
+               <suffix value="NP"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <telecom>
+               <system value="fax"/>
+               <value value="+1(555)555-5050"/>
+               <use value="work"/>
+            </telecom>
+            <telecom>
+               <system value="email"/>
+               <value value="pharmacist@pharmacy.com"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Clinical Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:682830d6-b182-4b9f-a66e-7f1811769b78"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Pharmacist, Registered</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:ec399842-7c0d-4cfc-ada3-f11a799d0460"/>
+            </identifier>
+            <name>
+               <family value="Pharmacist"/>
+               <given value="Registered"/>
+               <suffix value="RPh"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Pharmacy Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:19df9511-501f-44d0-9921-87aad87da4c6"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Florence, Nurse</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: </p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:d839038b-7171-4165-a760-467925b43857"/>
+            </identifier>
+            <name>
+               <family value="Florence"/>
+               <given value="Nurse"/>
+               <suffix value="RN"/>
+            </name>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:2cdff84e-0a07-4958-a523-99152d67999e"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: </p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:ec399842-7c0d-4cfc-ada3-f11a799d0460"/>
+            </identifier>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:18d04c4e-78cf-4c04-9361-6fe85601bf6d"/>
+      <resource>
+         <Organization>
+            <name value="Greater Area Pharmacy HIE"/>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1009"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1009 Pharmacy Drive "/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Organization>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Organization"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:61a60cde-63c4-4a4f-899a-fc1c9fcf8a2a"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Registered, Pharmacist</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555-1004</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:20cf14fb-b65c-4c8c-a54d-b0cca834c18d"/>
+            </identifier>
+            <name>
+               <family value="Registered"/>
+               <given value="Pharmacist"/>
+               <suffix value="RPh"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555-1004"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Pharmacy Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:5b9cd493-fc58-46f6-9b23-b646e4d05203"/>
+      <resource>
+         <Practitioner>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <p>Name: Pharmacist, Claude Pharma</p>
+                  <p>---TODO: ID info---</p>
+                  <p>Telephone: tel:+1(555)555 -1004</p>
+               </div>
+            </text>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.4.6"/>
+               <value value="5555555555"/>
+            </identifier>
+            <name>
+               <family value="Pharmacist"/>
+               <given value="Claude"/>
+               <given value="Pharma"/>
+               <suffix value="CPh"/>
+            </name>
+            <telecom>
+               <system value="phone"/>
+               <value value="+1(555)555 -1004"/>
+               <use value="work"/>
+            </telecom>
+            <address>
+               <line value="1004 Pharmaceutical Drive"/>
+               <city value="Portland"/>
+               <state value="OR"/>
+               <postalCode value="99123"/>
+               <country value="US"/>
+            </address>
+         </Practitioner>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Practitioner"/>
+      </request>
+   </entry>
+   <!--Removed concern wrapper-->
+   <entry>
+      <fullUrl value="urn:uuid:320e25c5-b583-4c11-951a-5efc532556ec"/>
+      <resource>
+         <Condition>
+            <meta>
+               <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"/>
+               <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.4:2015-08-01-->
+            </meta>
+            <clinicalStatus value="active"/>
+            <verificationStatus value="confirmed"/>
+            <category>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="55607006"/>
+                  <display value="Problem"/>
+               </coding>
+               <coding>
+                  <system value="http://loinc.org"/>
+                  <code value="75326-9"/>
+                  <display value="Problem"/>
+               </coding>
+            </category>
+            <code>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="14760008"/>
+                  <display value="Constipation"/>
+               </coding>
+            </code>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <onsetDateTime value="2016-08-19"/>
+            <asserter><!--Pulling author from document-->
+               <reference value="urn:uuid:ec36309c-edb2-47c1-bc39-67f61f38e2a5"/>
+            </asserter>
+         </Condition>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Condition"/>
+      </request>
+   </entry>
+   <!--Removed concern wrapper-->
+   <entry>
+      <fullUrl value="urn:uuid:a53aa517-60b3-4272-a443-c9d8920eb59e"/>
+      <resource>
+         <AllergyIntolerance>
+            <meta>
+               <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"/>
+               <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.7:2014-06-09-->
+            </meta>
+            <clinicalStatus value="active"/>
+            <verificationStatus value="confirmed"/>
+            <code><!--Original negated code: 419199007-->
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="716186003"/>
+                  <display value="No known allergy"/>
+               </coding>
+            </code>
+            <patient>
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </patient>
+            <onsetDateTime value="2016-08-20"/>
+         </AllergyIntolerance>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="AllergyIntolerance"/>
+      </request>
+   </entry>
+   <!--Removed concern wrapper-->
+   <entry>
+      <fullUrl value="urn:uuid:8ccfd7bd-409a-4515-9540-e2b090a0dcf3"/>
+      <resource>
+         <Condition>
+            <meta><!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.114:2015-08-01-->
+               <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"/>
+               <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.4:2015-08-01-->
+            </meta>
+            <clinicalStatus value="active"/>
+            <verificationStatus value="confirmed"/>
+            <category>
+               <coding>
+                  <system value="http://hl7.org/fhir/v3/ActCode"/>
+                  <code value="ASSERTION"/>
+               </coding>
+               <coding>
+                  <system value="http://loinc.org"/>
+                  <code value="75321-0"/>
+                  <display value="Clinical Finding"/>
+               </coding>
+            </category>
+            <code>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="425144005"/>
+                  <display value="pressure ulcer stage 3"/>
+               </coding>
+            </code>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <onsetDateTime value="2016-02-14"/>
+            <asserter>
+               <reference value="urn:uuid:bb8054b1-61aa-4964-9d0b-70e64870dff7"/>
+            </asserter>
+         </Condition>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Condition"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:e6b1a60b-be79-4cf5-b64b-8541315dfadf"/>
+      <resource>
+         <Goal>
+            <status value="in-progress"/>
+            <description>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="713115004"/>
+                  <display value="Prevention of constipation"/>
+               </coding>
+            </description>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <expressedBy>
+               <reference value="urn:uuid:1122a28b-5e9d-421b-89c5-ef0f7ceacedd"/>
+            </expressedBy>
+            <addresses>
+               <reference value="urn:uuid:320e25c5-b583-4c11-951a-5efc532556ec"/>
+            </addresses>
+            <!--Found linked outcome observation-->
+            <outcomeReference>
+               <reference value="urn:uuid:ff03c97a-ebf4-49dc-a2c8-22cdeaf5887d"/>
+            </outcomeReference>
+         </Goal>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Goal"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:eba4ea86-9963-4a72-8a08-61c549e67c88"/>
+      <resource>
+         <Goal>
+            <status value="in-progress"/>
+            <description>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="426928008"/>
+                  <display value="Prevention of opioid abuse"/>
+               </coding>
+            </description>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <statusDate value="2016-12-01"/>
+            <expressedBy>
+               <reference value="urn:uuid:fe096f70-b7c3-4679-b9cb-4030cbc1087b"/>
+            </expressedBy>
+         </Goal>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Goal"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:bc2adf40-9760-4652-890b-c749471544b0"/>
+      <resource>
+         <List>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:1040f76d-d877-4f0a-8564-c0b508c57085"/>
+            </identifier>
+            <status value="current"/>
+            <mode value="snapshot"/>
+            <code>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="362956003"/>
+                  <display value="Procedure/intervention"/>
+               </coding>
+            </code>
+            <entry>
+               <item>
+                  <reference value="urn:uuid:4376031c-b85c-49ec-9e22-ba624dfb4297"/>
+               </item>
+            </entry>
+            <entry>
+               <item>
+                  <reference value="urn:uuid:ce030106-6953-4d1a-9444-c703be1b56ff"/>
+               </item>
+            </entry>
+         </List>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="List"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:4376031c-b85c-49ec-9e22-ba624dfb4297"/>
+      <resource>
+         <MedicationRequest>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.19"/>
+               <value value="example-rx-number-id"/>
+            </identifier>
+            <status value="active"/>
+            <intent value="order"/>
+            <medicationCodeableConcept>
+               <coding>
+                  <system value="http://www.nlm.nih.gov/research/umls/rxnorm"/>
+                  <code value="1049683"/>
+                  <display value="oxyCODONE Hydrochloride 10 MG Oral Tablet"/>
+               </coding>
+               <coding>
+                  <system value="http://hl7.org/fhir/sid/ndc"/>
+                  <code value="35356083930"/>
+                  <display value="oxyCODONE Hydrochloride 10 MG Oral Tablet"/>
+               </coding>
+            </medicationCodeableConcept>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <authoredOn value="2016-11-25"/>
+            <requester>
+               <agent>
+                  <reference value="urn:uuid:2604e064-259b-4501-ae6e-c46f9cb20091"/>
+               </agent>
+            </requester>
+            <dosageInstruction>
+               <timing>
+                  <repeat>
+                     <boundsPeriod>
+                        <start value="2016-11-25"/>
+                        <end value="2016-11-28"/>
+                     </boundsPeriod>
+                     <period value="6"/>
+                     <periodUnit value="h"/>
+                  </repeat>
+               </timing>
+               <route>
+                  <coding>
+                     <system value="urn:oid:2.16.840.1.113883.3.26.1.1"/>
+                     <code value="C38288"/>
+                     <display value="ORAL"/>
+                  </coding>
+               </route>
+            </dosageInstruction>
+            <dispenseRequest>
+               <numberOfRepeatsAllowed value="3"/>
+            </dispenseRequest>
+         </MedicationRequest>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="MedicationRequest"/>
+      </request>
+   </entry>
+   <entry>
+      <fullUrl value="urn:uuid:ce030106-6953-4d1a-9444-c703be1b56ff"/>
+      <resource>
+         <MedicationRequest>
+            <identifier>
+               <system value="urn:oid:2.16.840.1.113883.19"/>
+               <value value="example-rx-number-id"/>
+            </identifier>
+            <status value="active"/>
+            <intent value="order"/>
+            <medicationCodeableConcept>
+               <coding>
+                  <system value="http://www.nlm.nih.gov/research/umls/rxnorm"/>
+                  <code value="1049683"/>
+                  <display value="oxyCODONE Hydrochloride 10 MG Oral Tablet"/>
+               </coding>
+               <coding>
+                  <system value="http://hl7.org/fhir/sid/ndc"/>
+                  <code value="35356083930"/>
+                  <display value="oxyCODONE Hydrochloride 10 MG Oral Tablet"/>
+               </coding>
+            </medicationCodeableConcept>
+            <subject><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <authoredOn value="2016-11-25"/>
+            <requester>
+               <agent>
+                  <reference value="urn:uuid:af0bc8f4-2d68-4eb8-8816-7f24dec4c3a7"/>
+               </agent>
+            </requester>
+            <dosageInstruction>
+               <timing>
+                  <repeat>
+                     <boundsPeriod>
+                        <start value="2016-11-25"/>
+                        <end value="2016-11-28"/>
+                     </boundsPeriod>
+                     <period value="6"/>
+                     <periodUnit value="h"/>
+                  </repeat>
+               </timing>
+               <route>
+                  <coding>
+                     <system value="urn:oid:2.16.840.1.113883.3.26.1.1"/>
+                     <code value="C38288"/>
+                     <display value="ORAL"/>
+                  </coding>
+               </route>
+            </dosageInstruction>
+            <dispenseRequest>
+               <numberOfRepeatsAllowed value="3"/>
+            </dispenseRequest>
+         </MedicationRequest>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="MedicationRequest"/>
+      </request>
+   </entry>
+   <!--No template match for 2.16.840.1.113883.10.20.22.4.146: 2015-08-01-->
+   <!--No template match for 2.16.840.1.113883.10.20.37.3.12: 2017-08-01-->
+   <entry>
+      <fullUrl value="urn:uuid:ff03c97a-ebf4-49dc-a2c8-22cdeaf5887d"/>
+      <resource>
+         <Observation>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:5c9f77b1-257a-4f9e-bde1-9ee715e1e755"/>
+            </identifier>
+            <status value="final"/>
+            <code>
+               <coding>
+                  <system value="http://loinc.org"/>
+                  <code value="84292-2"/>
+                  <display value="Nutrition and dietetics team consult"/>
+               </coding>
+            </code>
+            <subject>
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </subject>
+            <performer>
+               <reference value="urn:uuid:2cdff84e-0a07-4958-a523-99152d67999e"/>
+            </performer>
+            <valueCodeableConcept>
+               <coding>
+                  <system value="http://snomed.info/sct"/>
+                  <code value="55019002"/>
+                  <display value="Normal bowel habits"/>
+               </coding>
+            </valueCodeableConcept>
+         </Observation>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Observation"/>
+      </request>
+   </entry>
+   <!--Found Coverage Activity-->
+   <!--Found Policy Activity-->
+   <entry>
+      <fullUrl value="urn:uuid:b91f92de-af9a-4871-bac2-851356b8e320"/>
+      <resource>
+         <Coverage>
+            <identifier>
+               <system value="urn:ietf:rfc:3986"/>
+               <value value="urn:uuid:3e676a50-7aac-11db-9fe1-0800200c9a66"/>
+            </identifier>
+            <type>
+               <coding>
+                  <system value="urn:oid:2.16.840.1.113883.3.88.12.3221.5.2"/>
+                  <code value="MC"/>
+                  <display value="Medicaid"/>
+               </coding>
+               <coding>
+                  <system value="urn:oid:2.16.840.1.113883.3.221.5"/>
+                  <code value="212"/>
+                  <display value="Medicaid PPO"/>
+               </coding>
+            </type>
+            <policyHolder><!--Pulling subject from document-->
+               <reference value="urn:uuid:addbc0f2-10f9-40b3-91c3-41b4c8ba090e"/>
+            </policyHolder>
+         </Coverage>
+      </resource>
+      <request>
+         <method value="POST"/>
+         <url value="Coverage"/>
+      </request>
+   </entry>
+</Bundle>

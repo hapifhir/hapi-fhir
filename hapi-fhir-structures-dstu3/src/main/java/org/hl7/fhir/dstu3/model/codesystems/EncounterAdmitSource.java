@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,43 +37,43 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EncounterAdmitSource {
 
         /**
-         * null
+         * The Patient has been transferred from another hospital for this encounter.
          */
         HOSPTRANS, 
         /**
-         * null
+         * The patient has been transferred from the emergency department within the hospital. This is typically used in the transition to an inpatient encounter
          */
         EMD, 
         /**
-         * null
+         * The patient has been transferred from an outpatient department within the hospital.
          */
         OUTP, 
         /**
-         * null
+         * The patient is a newborn and the encounter will track the baby related activities (as opposed to the Mothers encounter - that may be associated using the newborn encounters partof property)
          */
         BORN, 
         /**
-         * null
+         * The patient has been admitted due to a referred from a General Practitioner.
          */
         GP, 
         /**
-         * null
+         * The patient has been admitted due to a referred from a Specialist (as opposed to a General Practitioner).
          */
         MP, 
         /**
-         * null
+         * The patient has been transferred from a nursing home.
          */
         NURSING, 
         /**
-         * null
+         * The patient has been transferred from a psychiatric facility.
          */
         PSYCH, 
         /**
-         * null
+         * The patient has been transferred from a rehabilitiation facility or clinic.
          */
         REHAB, 
         /**
-         * null
+         * The patient has been admitted from a source otherwise not specified here.
          */
         OTHER, 
         /**
@@ -125,16 +125,16 @@ public enum EncounterAdmitSource {
         }
         public String getDefinition() {
           switch (this) {
-            case HOSPTRANS: return "";
-            case EMD: return "";
-            case OUTP: return "";
-            case BORN: return "";
-            case GP: return "";
-            case MP: return "";
-            case NURSING: return "";
-            case PSYCH: return "";
-            case REHAB: return "";
-            case OTHER: return "";
+            case HOSPTRANS: return "The Patient has been transferred from another hospital for this encounter.";
+            case EMD: return "The patient has been transferred from the emergency department within the hospital. This is typically used in the transition to an inpatient encounter";
+            case OUTP: return "The patient has been transferred from an outpatient department within the hospital.";
+            case BORN: return "The patient is a newborn and the encounter will track the baby related activities (as opposed to the Mothers encounter - that may be associated using the newborn encounters partof property)";
+            case GP: return "The patient has been admitted due to a referred from a General Practitioner.";
+            case MP: return "The patient has been admitted due to a referred from a Specialist (as opposed to a General Practitioner).";
+            case NURSING: return "The patient has been transferred from a nursing home.";
+            case PSYCH: return "The patient has been transferred from a psychiatric facility.";
+            case REHAB: return "The patient has been transferred from a rehabilitiation facility or clinic.";
+            case OTHER: return "The patient has been admitted from a source otherwise not specified here.";
             default: return "?";
           }
         }

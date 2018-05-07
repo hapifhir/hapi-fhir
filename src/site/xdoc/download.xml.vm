@@ -5,83 +5,336 @@
 		<title>Download</title>
 	</properties>
 
+	<head>
+	</head>
+
 	<body>
 
 		<section name="FHIR Versions">
-
+			<p>
+				The following table shows the various versions of the HAPI FHIR library, and
+				the versions of the FHIR standard that they support. Note that support for
+				stable releases of FHIR are shown in 
+				<span style="background: #CEC; padding: 3px;">GREEN</span> 
+				and support for draft pre-release versions of FHIR are shown in 
+				<span style="background: #EEB; padding: 3px;">YELLOW</span>.
+			</p>
+			<p>
+				Note also that after the release of the FHIR DSTU2 specification, the FHIR
+				standard itself stopped using the DSTUx naming scheme, in favour or naming
+				new releases STUx or simply Rx. Because HAPI FHIR already had draft support
+				for what was then called DSTU3 at this time, we did not update our naming
+				conventions until R4 in order to avoid breaking existing users' code.
+				From the perspective of a user of HAPI FHIR, consider the terms
+				DSTU3 / STU3 / R3 to be interchangeable.
+			</p>
 			<table>
 				<thead>
 					<tr>
-						<td><b>HAPI Structure Library</b></td>
 						<td><b>HAPI Version</b></td>
-						<td><b>FHIR Specification Version</b></td>
+						<td><b>Min JDK</b></td>
+						<td><b>DSTU1</b></td>
+						<td><b>DSTU2</b></td>
+						<td><b>DSTU2.1</b></td>
+						<td><b>DSTU3</b></td>
+						<td><b>R4</b></td>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td rowspan="1">hapi-fhir-structures-dstu</td>
-						<td>HAPI FHIR 1.1 - 2.1</td>
-						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
-					</tr>
-					<tr>
-						<td rowspan="3">hapi-fhir-structures-dstu2</td>
 						<td>HAPI FHIR 1.1</td>
-						<td><a href="http://www.hl7.org/fhir/2015May/index.html">DSTU2 0.5.0</a></td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #EEB;">0.5.0-5843</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #EEB;">0.5.0-5843</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
-						<td>HAPI FHIR 1.3 - 2.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
+						<td>HAPI FHIR 1.3</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
-						<td rowspan="3">hapi-fhir-structures-hl7org-dstu2</td>
-						<td>HAPI FHIR 1.1</td>
-						<td><a href="http://build.fhir.org/">DSTU2 0.5.0 Snapshot</a> (SVN 5843)</td>
-					</tr>
-					<tr>
-						<td>HAPI FHIR 1.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.0</a></td>
-					</tr>
-					<tr>
-						<td>HAPI FHIR 1.3 - 2.2</td>
-						<td><a href="http://hl7.org/fhir/2015Sep/index.html">DSTU2 1.0.2</a></td>
-					</tr>
-					<tr>
-						<td>hapi-fhir-structures-dstu2.1</td>
-						<td>HAPI FHIR 2.2</td>
-						<td><a href="http://build.fhir.org/">DSTU3 1.4.0 Snapshot</a> (May 2016 / Baltimore)</td>
-					</tr>
-					<tr>
-						<td rowspan="6">hapi-fhir-structures-dstu3</td>
 						<td>HAPI FHIR 1.4</td>
-						<td><a href="http://build.fhir.org/">STU3 1.3.0 Snapshot</a> (SVN 7602)</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">1.3.0-7602</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.5</td>
-						<td><a href="http://build.fhir.org/">STU3 1.4.0 Snapshot</a> (SVN 8138)</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">1.4.0-8138</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.6</td>
-						<td><a href="http://build.fhir.org/">STU3 1.4.0 Snapshot</a> (SVN 8636)</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">1.4.0-8636</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.0</td>
-						<td><a href="http://build.fhir.org/">STU3 1.6.0</a> (SVN 9663)</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">1.6.0-9663</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.1</td>
-						<td><a href="http://build.fhir.org/">STU3 1.7.0</a> (SVN 10129)</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #EEB;">1.7.0-10129</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.2</td>
-						<td><a href="http://build.fhir.org/">STU3 1.8.0</a> (SVN 10528)</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #EEB;">1.8.0-10528</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 2.3</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #EEB;">1.9.0-11501</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 2.4</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 2.5</td>
+						<td>JDK6+</td>
+						<td style="background: #CEC;">0.0.82</td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 3.0.0</td>
+						<td>JDK7+</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.1.0-12370</td>
+						</tr>
+					<tr>
+						<td>HAPI FHIR 3.1.0</td>
+						<td>JDK7+</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.1.0-12370</td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 3.2.0</td>
+						<td>JDK7+</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.2.0-12917</td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 3.3.0</td>
+						<td>JDK7+</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.2.0-13271</td>
 					</tr>
 				</tbody>
 			</table>
 
+		</section>
+		
+ 		<section name="HAPI FHIR Modules">
+			<p>
+				The following table shows the modules that make up the HAPI
+				FHIR library.
+			</p>
+			<table class="">
+				<tbody>
+					<tr><td colspan="2" style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;">Core Libraries</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-base</td>
+						<td>
+							This is the core HAPI FHIR library and is always required in order to use
+							the framework. It contains the context, parsers, and other support classes.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-utilities</td>
+						<td>
+							This is a support library containing various utility methods for working with
+							FHIR. It is always required in order to use the framework.
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Structures</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu</td>
+						<td>
+							This module contains FHIR DSTU1 model classes. It was retired in HAPI FHIR 3.0.0.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu2</td>
+						<td>
+							This module contains FHIR DSTU2 model classes.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-hl7org-dstu2</td>
+						<td>
+							This module contains alternate FHIR DSTU2 model classes. The HAPI FHIR and FHIR "Java Reference Implementation"
+							libraries were merged in 2015, and at the time there were two parallel sets of DSTU2 model 
+							classes. This set more closely resembles the model classes for DSTU3+ where the other set
+							more closely resembles the DSTU1 model classes. The two DSTU2 model JARs are functionally
+							identital, but the various utility methods on the classes are somewhat different.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-dstu3</td>
+						<td>
+							This module contains FHIR DSTU3 model classes.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-structures-r4</td>
+						<td>
+							This module contains FHIR R4 model classes.
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Client Framework</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client</td>
+						<td>
+							This module contains the core FHIR client framework, including an 
+							HTTP implementation based on 
+							<a href="https://hc.apache.org/">Apache HttpClient</a>. It is required in order
+							to use client functionality in HAPI.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-client-okhttp</td>
+						<td>
+							This module contains an alternate HTTP implementation based on
+							<a href="http://square.github.io/okhttp/">OKHTTP</a>.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-android</td>
+						<td>
+							This module contains the Android HAPI FHIR framework, which is a FHIR
+							client framework which has been tailed specifically to run on Android.
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Validation</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation</td>
+						<td>
+							This module contains the FHIR Profile Validator, which is used to 
+							validate resource instances against FHIR Profiles (StructureDefinitions,
+							ValueSets, CodeSystems, etc.).
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-dstu2</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR DSTU2
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-dstu2.1</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR DSTU2.1
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-dstu3</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR DSTU3
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation-resources-r4</td>
+						<td>
+							This module contains the StructureDefinitions, ValueSets, CodeSystems, Schemas, 
+							and Schematrons for FHIR R4
+						</td>
+					</tr>
+					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Server</td></tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-server</td>
+						<td>
+							This module contains the HAPI FHIR Server framework, which can be used to 
+							develop FHIR compliant servers against your own data storage layer.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-jpaserver-base</td>
+						<td>
+							This module contains the HAPI FHIR "JPA Server", which is a complete 
+							FHIR server solution including a database and implementations of many 
+							advanced FHIR server features.
+						</td>
+					</tr>
+					<tr>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-testpage-overlay</td>
+						<td>
+							This module contains the web based "testpage overlay", which is the 
+							UI that powers our 
+							<a href="http://fhirtest.uhn.ca">Public Demo Server</a>
+							and can also be added to your applications.
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</section>
 
 		<section name="Downloading HAPI FHIR">
@@ -121,29 +374,6 @@
 				The structures JAR contains classes with the resource and datatype definitions for a given
 				version of FHIR.
 			</p>
-
-			<subsection name="DSTU1 Resources - HAPI Structures">
-				<p>
-					HAPI supports multiple versions of the FHIR specification. Code which
-					needs to interact with or implement the DSTU1 specification (which is
-					now gradually beginning to be replaced by newer specifications) can do
-					so using <code>hapi-fhir-structures-dstu-[version].jar</code>.
-				</p>
-				<p>
-					If you use Maven, you can include these JARs with the following dependency tags
-					to enable DSTU1 support:
-				</p>
-				<source><![CDATA[<dependency>
-   <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-base</artifactId>
-   <version>${project.version}</version>
-</dependency>
-<dependency>
-   <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-structures-dstu</artifactId>
-   <version>${project.version}</version>
-</dependency>]]></source>
-			</subsection>
 
 			<subsection name="DSTU2 Resources - HAPI Structures">
 

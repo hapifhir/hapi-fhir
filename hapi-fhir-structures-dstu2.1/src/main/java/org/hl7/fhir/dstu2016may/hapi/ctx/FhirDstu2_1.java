@@ -10,7 +10,7 @@ package org.hl7.fhir.dstu2016may.hapi.ctx;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,31 +26,16 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2016may.hapi.rest.server.Dstu2_1BundleFactory;
-import org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider;
-import org.hl7.fhir.dstu2016may.hapi.rest.server.ServerProfileProvider;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.Constants;
-import org.hl7.fhir.dstu2016may.model.IdType;
-import org.hl7.fhir.dstu2016may.model.Reference;
-import org.hl7.fhir.dstu2016may.model.Resource;
-import org.hl7.fhir.dstu2016may.model.StructureDefinition;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.instance.model.api.*;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 public class FhirDstu2_1 implements IFhirVersion {
 
@@ -59,16 +44,6 @@ public class FhirDstu2_1 implements IFhirVersion {
 	@Override
 	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
 		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
-	}
-
-	@Override
-	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerConformanceProvider(theServer);
-	}
-
-	@Override
-	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
 	}
 
 	@Override
@@ -113,10 +88,10 @@ public class FhirDstu2_1 implements IFhirVersion {
 	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
 		return ((Resource) theResource).getMeta().getLastUpdatedElement();
 	}
-	
+
 	@Override
 	public String getPathToSchemaDefinitions() {
-		return "/org/hl7/fhir/dstu2016may/schema";
+		return "/org/hl7/fhir/dstu2016may/model/schema";
 	}
 
 	@Override
@@ -142,6 +117,11 @@ public class FhirDstu2_1 implements IFhirVersion {
 	@Override
 	public IIdType newIdType() {
 		return new IdType();
+	}
+
+	@Override
+	public Object getServerVersion() {
+		return ReflectionUtil.newInstanceOfFhirServerType("org.hl7.fhir.dstu2016may.hapi.ctx.FhirServerDstu2_1");
 	}
 
 }

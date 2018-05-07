@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,21 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
 
+import javax.persistence.*;
+
 //@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_COORDS", indexes = { 
 	@Index(name = "IDX_SP_COORDS", columnList = "RES_TYPE,SP_NAME,SP_LATITUDE,SP_LONGITUDE"), 
+	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID") 
 })
 //@formatter:on
@@ -98,6 +92,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return myId;
 	}
 
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return null;
+	}
+
 	public double getLatitude() {
 		return myLatitude;
 	}
@@ -128,7 +127,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("resourceId", getResourcePid());
 		b.append("lat", getLatitude());
 		b.append("lon", getLongitude());
 		return b.build();

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -117,8 +117,10 @@ public class OperationDefinition extends MetadataResource {
         throw new IllegalArgumentException("Unknown OperationKind code '"+codeString+"'");
         }
         public Enumeration<OperationKind> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<OperationKind>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -207,8 +209,10 @@ public class OperationDefinition extends MetadataResource {
         throw new IllegalArgumentException("Unknown OperationParameterUse code '"+codeString+"'");
         }
         public Enumeration<OperationParameterUse> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<OperationParameterUse>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -811,83 +815,106 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
-          this.use = new OperationParameterUseEnumFactory().fromType(value); // Enumeration<OperationParameterUse>
-          break;
+          value = new OperationParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<OperationParameterUse>
+          return value;
         case 108114: // min
           this.min = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case -710454014: // searchType
-          this.searchType = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
-          break;
+          value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
+          this.searchType = (Enumeration) value; // Enumeration<SearchParamType>
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
+          return value;
         case -108220795: // binding
           this.binding = (OperationDefinitionParameterBindingComponent) value; // OperationDefinitionParameterBindingComponent
-          break;
+          return value;
         case 3433459: // part
           this.getPart().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToCode(value); // CodeType
-        else if (name.equals("use"))
-          this.use = new OperationParameterUseEnumFactory().fromType(value); // Enumeration<OperationParameterUse>
-        else if (name.equals("min"))
+        } else if (name.equals("use")) {
+          value = new OperationParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<OperationParameterUse>
+        } else if (name.equals("min")) {
           this.min = castToInteger(value); // IntegerType
-        else if (name.equals("max"))
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("searchType"))
-          this.searchType = new SearchParamTypeEnumFactory().fromType(value); // Enumeration<SearchParamType>
-        else if (name.equals("profile"))
+        } else if (name.equals("searchType")) {
+          value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
+          this.searchType = (Enumeration) value; // Enumeration<SearchParamType>
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else if (name.equals("binding"))
+        } else if (name.equals("binding")) {
           this.binding = (OperationDefinitionParameterBindingComponent) value; // OperationDefinitionParameterBindingComponent
-        else if (name.equals("part"))
+        } else if (name.equals("part")) {
           this.getPart().add((OperationDefinitionParameterComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<OperationParameterUse>
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -710454014: throw new FHIRException("Cannot make property searchType as it is not a complex type"); // Enumeration<SearchParamType>
-        case -309425751:  return getProfile(); // Reference
-        case -108220795:  return getBinding(); // OperationDefinitionParameterBindingComponent
-        case 3433459:  return addPart(); // OperationDefinitionParameterComponent
+        case 3373707:  return getNameElement();
+        case 116103:  return getUseElement();
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
+        case 1587405498:  return getDocumentationElement();
+        case 3575610:  return getTypeElement();
+        case -710454014:  return getSearchTypeElement();
+        case -309425751:  return getProfile(); 
+        case -108220795:  return getBinding(); 
+        case 3433459:  return addPart(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"code"};
+        case 108114: /*min*/ return new String[] {"integer"};
+        case 107876: /*max*/ return new String[] {"string"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -710454014: /*searchType*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case -108220795: /*binding*/ return new String[] {};
+        case 3433459: /*part*/ return new String[] {"@OperationDefinition.parameter"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1129,35 +1156,49 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 1791316033: // strength
-          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
-          break;
+          value = new BindingStrengthEnumFactory().fromType(castToCode(value));
+          this.strength = (Enumeration) value; // Enumeration<BindingStrength>
+          return value;
         case -1410174671: // valueSet
           this.valueSet = castToType(value); // Type
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("strength"))
-          this.strength = new BindingStrengthEnumFactory().fromType(value); // Enumeration<BindingStrength>
-        else if (name.equals("valueSet[x]"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("strength")) {
+          value = new BindingStrengthEnumFactory().fromType(castToCode(value));
+          this.strength = (Enumeration) value; // Enumeration<BindingStrength>
+        } else if (name.equals("valueSet[x]")) {
           this.valueSet = castToType(value); // Type
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1791316033: throw new FHIRException("Cannot make property strength as it is not a complex type"); // Enumeration<BindingStrength>
-        case -1438410321:  return getValueSet(); // Type
+        case 1791316033:  return getStrengthElement();
+        case -1438410321:  return getValueSet(); 
+        case -1410174671:  return getValueSet(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1791316033: /*strength*/ return new String[] {"code"};
+        case -1410174671: /*valueSet*/ return new String[] {"uri", "Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1370,35 +1411,46 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -379607596: // parameterName
           this.getParameterName().add(castToString(value)); // StringType
-          break;
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("parameterName"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("parameterName")) {
           this.getParameterName().add(castToString(value));
-        else if (name.equals("comment"))
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -379607596: throw new FHIRException("Cannot make property parameterName as it is not a complex type"); // StringType
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
+        case -379607596:  return addParameterNameElement();
+        case 950398559:  return getCommentElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -379607596: /*parameterName*/ return new String[] {"string"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1469,23 +1521,23 @@ public class OperationDefinition extends MetadataResource {
     protected Enumeration<OperationKind> kind;
 
     /**
-     * Explains why this operation definition is needed and why it has been designed as it has.
+     * Explaination of why this operation definition is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this operation definition is defined", formalDefinition="Explains why this operation definition is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this operation definition is defined", formalDefinition="Explaination of why this operation definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
      * Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.
      */
-    @Child(name = "idempotent", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "idempotent", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Whether content is unchanged by the operation", formalDefinition="Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST." )
     protected BooleanType idempotent;
 
     /**
      * The name used to invoke the operation.
      */
-    @Child(name = "code", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "code", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name used to invoke the operation", formalDefinition="The name used to invoke the operation." )
     protected CodeType code;
 
@@ -1499,7 +1551,7 @@ public class OperationDefinition extends MetadataResource {
     /**
      * Indicates that this operation definition is a constraining profile on the base.
      */
-    @Child(name = "base", type = {OperationDefinition.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "base", type = {OperationDefinition.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Marks this as a profile of the base", formalDefinition="Indicates that this operation definition is a constraining profile on the base." )
     protected Reference base;
 
@@ -1511,7 +1563,7 @@ public class OperationDefinition extends MetadataResource {
     /**
      * The types on which this operation can be executed.
      */
-    @Child(name = "resource", type = {CodeType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "resource", type = {CodeType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Types this operation applies to", formalDefinition="The types on which this operation can be executed." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> resource;
@@ -1519,21 +1571,21 @@ public class OperationDefinition extends MetadataResource {
     /**
      * Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).
      */
-    @Child(name = "system", type = {BooleanType.class}, order=7, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "system", type = {BooleanType.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Invoke at the system level?", formalDefinition="Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context)." )
     protected BooleanType system;
 
     /**
      * Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).
      */
-    @Child(name = "type", type = {BooleanType.class}, order=8, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "type", type = {BooleanType.class}, order=8, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Invole at the type level?", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context)." )
     protected BooleanType type;
 
     /**
      * Indicates whether this operation can be invoked on a particular instance of one of the given types.
      */
-    @Child(name = "instance", type = {BooleanType.class}, order=9, min=1, max=1, modifier=false, summary=false)
+    @Child(name = "instance", type = {BooleanType.class}, order=9, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Invoke on an instance?", formalDefinition="Indicates whether this operation can be invoked on a particular instance of one of the given types." )
     protected BooleanType instance;
 
@@ -1545,10 +1597,10 @@ public class OperationDefinition extends MetadataResource {
     protected List<OperationDefinitionParameterComponent> parameter;
 
     /**
-     * Defines an appropriate combination of parameters to use when invoking this operation.
+     * Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.
      */
     @Child(name = "overload", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="For generating overloaded methods in code", formalDefinition="Defines an appropriate combination of parameters to use when invoking this operation." )
+    @Description(shortDefinition="Define overloaded variants for when  generating code", formalDefinition="Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation." )
     protected List<OperationDefinitionOverloadComponent> overload;
 
     private static final long serialVersionUID = 1292377899L;
@@ -1575,7 +1627,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1595,7 +1647,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public OperationDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1603,14 +1655,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public OperationDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1624,7 +1676,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -1644,7 +1696,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public OperationDefinition setVersionElement(StringType value) { 
       this.version = value;
@@ -1652,14 +1704,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public OperationDefinition setVersion(String value) { 
       if (Utilities.noString(value))
@@ -1808,7 +1860,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1828,7 +1880,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public OperationDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1836,14 +1888,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public OperationDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1853,7 +1905,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1873,7 +1925,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public OperationDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1881,14 +1933,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
+     * @return The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
+     * @param value The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
      */
     public OperationDefinition setDate(Date value) { 
       if (value == null)
@@ -2004,7 +2056,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the operation definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the operation definition from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -2024,7 +2076,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the operation definition from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the operation definition from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public OperationDefinition setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -2032,14 +2084,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the operation definition from the consumer's perspective.
+     * @return A free text natural language description of the operation definition from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the operation definition from the consumer's perspective.
+     * @param value A free text natural language description of the operation definition from a consumer's perspective.
      */
     public OperationDefinition setDescription(String value) { 
       if (value == null)
@@ -2053,7 +2105,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate operation definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -2106,7 +2158,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the operation definition is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the operation definition is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -2159,7 +2211,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -2179,7 +2231,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public OperationDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -2187,14 +2239,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return Explains why this operation definition is needed and why it has been designed as it has.
+     * @return Explaination of why this operation definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this operation definition is needed and why it has been designed as it has.
+     * @param value Explaination of why this operation definition is needed and why it has been designed as it has.
      */
     public OperationDefinition setPurpose(String value) { 
       if (value == null)
@@ -2640,7 +2692,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #overload} (Defines an appropriate combination of parameters to use when invoking this operation.)
+     * @return {@link #overload} (Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.)
      */
     public List<OperationDefinitionOverloadComponent> getOverload() { 
       if (this.overload == null)
@@ -2694,19 +2746,19 @@ public class OperationDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this operation definition is (or will be) published. The URL SHOULD include the major version of the operation definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of this operation definition. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("kind", "code", "Whether this is an operation or a named query.", 0, java.lang.Integer.MAX_VALUE, kind));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the operation definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the operation definition from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the operation definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this operation definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the operation definition from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate operation definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the operation definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this operation definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("idempotent", "boolean", "Operations that are idempotent (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.", 0, java.lang.Integer.MAX_VALUE, idempotent));
         childrenList.add(new Property("code", "code", "The name used to invoke the operation.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("comment", "string", "Additional information about how to use this operation or named query.", 0, java.lang.Integer.MAX_VALUE, comment));
@@ -2716,7 +2768,7 @@ public class OperationDefinition extends MetadataResource {
         childrenList.add(new Property("type", "boolean", "Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("instance", "boolean", "Indicates whether this operation can be invoked on a particular instance of one of the given types.", 0, java.lang.Integer.MAX_VALUE, instance));
         childrenList.add(new Property("parameter", "", "The parameters for the operation/query.", 0, java.lang.Integer.MAX_VALUE, parameter));
-        childrenList.add(new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation.", 0, java.lang.Integer.MAX_VALUE, overload));
+        childrenList.add(new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.", 0, java.lang.Integer.MAX_VALUE, overload));
       }
 
       @Override
@@ -2751,161 +2803,197 @@ public class OperationDefinition extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case 3292052: // kind
-          this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
-          break;
+          value = new OperationKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<OperationKind>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
-          break;
+          return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1680468793: // idempotent
           this.idempotent = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
         case 950398559: // comment
           this.comment = castToString(value); // StringType
-          break;
+          return value;
         case 3016401: // base
           this.base = castToReference(value); // Reference
-          break;
+          return value;
         case -341064690: // resource
           this.getResource().add(castToCode(value)); // CodeType
-          break;
+          return value;
         case -887328209: // system
           this.system = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 555127957: // instance
           this.instance = castToBoolean(value); // BooleanType
-          break;
+          return value;
         case 1954460585: // parameter
           this.getParameter().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
-          break;
+          return value;
         case 529823674: // overload
           this.getOverload().add((OperationDefinitionOverloadComponent) value); // OperationDefinitionOverloadComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("kind"))
-          this.kind = new OperationKindEnumFactory().fromType(value); // Enumeration<OperationKind>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("kind")) {
+          value = new OperationKindEnumFactory().fromType(castToCode(value));
+          this.kind = (Enumeration) value; // Enumeration<OperationKind>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("publisher"))
+        } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
+        } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
-        else if (name.equals("description"))
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("idempotent"))
+        } else if (name.equals("idempotent")) {
           this.idempotent = castToBoolean(value); // BooleanType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("comment"))
+        } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        else if (name.equals("base"))
+        } else if (name.equals("base")) {
           this.base = castToReference(value); // Reference
-        else if (name.equals("resource"))
+        } else if (name.equals("resource")) {
           this.getResource().add(castToCode(value));
-        else if (name.equals("system"))
+        } else if (name.equals("system")) {
           this.system = castToBoolean(value); // BooleanType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToBoolean(value); // BooleanType
-        else if (name.equals("instance"))
+        } else if (name.equals("instance")) {
           this.instance = castToBoolean(value); // BooleanType
-        else if (name.equals("parameter"))
+        } else if (name.equals("parameter")) {
           this.getParameter().add((OperationDefinitionParameterComponent) value);
-        else if (name.equals("overload"))
+        } else if (name.equals("overload")) {
           this.getOverload().add((OperationDefinitionOverloadComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case 3292052: throw new FHIRException("Cannot make property kind as it is not a complex type"); // Enumeration<OperationKind>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1680468793: throw new FHIRException("Cannot make property idempotent as it is not a complex type"); // BooleanType
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case 950398559: throw new FHIRException("Cannot make property comment as it is not a complex type"); // StringType
-        case 3016401:  return getBase(); // Reference
-        case -341064690: throw new FHIRException("Cannot make property resource as it is not a complex type"); // CodeType
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // BooleanType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // BooleanType
-        case 555127957: throw new FHIRException("Cannot make property instance as it is not a complex type"); // BooleanType
-        case 1954460585:  return addParameter(); // OperationDefinitionParameterComponent
-        case 529823674:  return addOverload(); // OperationDefinitionOverloadComponent
+        case 116079:  return getUrlElement();
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case -892481550:  return getStatusElement();
+        case 3292052:  return getKindElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
+        case 1680468793:  return getIdempotentElement();
+        case 3059181:  return getCodeElement();
+        case 950398559:  return getCommentElement();
+        case 3016401:  return getBase(); 
+        case -341064690:  return addResourceElement();
+        case -887328209:  return getSystemElement();
+        case 3575610:  return getTypeElement();
+        case 555127957:  return getInstanceElement();
+        case 1954460585:  return addParameter(); 
+        case 529823674:  return addOverload(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case 3292052: /*kind*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1680468793: /*idempotent*/ return new String[] {"boolean"};
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        case 3016401: /*base*/ return new String[] {"Reference"};
+        case -341064690: /*resource*/ return new String[] {"code"};
+        case -887328209: /*system*/ return new String[] {"boolean"};
+        case 3575610: /*type*/ return new String[] {"boolean"};
+        case 555127957: /*instance*/ return new String[] {"boolean"};
+        case 1954460585: /*parameter*/ return new String[] {};
+        case 529823674: /*overload*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -3169,17 +3257,17 @@ public class OperationDefinition extends MetadataResource {
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for operation definition</b><br>
+   * Description: <b>Intended jurisdiction for the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="OperationDefinition.jurisdiction", description="Intended jurisdiction for operation definition", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="OperationDefinition.jurisdiction", description="Intended jurisdiction for the operation definition", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for operation definition</b><br>
+   * Description: <b>Intended jurisdiction for the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.jurisdiction</b><br>
    * </p>
@@ -3189,17 +3277,17 @@ public class OperationDefinition extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the operation definition</b><br>
+   * Description: <b>The description of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="OperationDefinition.description", description="Text search against the description of the operation definition", type="string" )
+  @SearchParamDefinition(name="description", path="OperationDefinition.description", description="The description of the operation definition", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the operation definition</b><br>
+   * Description: <b>The description of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.description</b><br>
    * </p>
@@ -3229,48 +3317,22 @@ public class OperationDefinition extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the operation definition</b><br>
+   * Description: <b>The business version of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="The version identifier of the operation definition", type="token" )
+  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="The business version of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the operation definition</b><br>
+   * Description: <b>The business version of the operation definition</b><br>
    * Type: <b>token</b><br>
    * Path: <b>OperationDefinition.version</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam VERSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VERSION);
-
- /**
-   * Search parameter: <b>paramprofile</b>
-   * <p>
-   * Description: <b>Profile on the type</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>OperationDefinition.parameter.profile</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="paramprofile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference", target={StructureDefinition.class } )
-  public static final String SP_PARAMPROFILE = "paramprofile";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>paramprofile</b>
-   * <p>
-   * Description: <b>Profile on the type</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>OperationDefinition.parameter.profile</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARAMPROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARAMPROFILE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>OperationDefinition:paramprofile</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARAMPROFILE = new ca.uhn.fhir.model.api.Include("OperationDefinition:paramprofile").toLocked();
 
  /**
    * Search parameter: <b>url</b>
@@ -3315,17 +3377,17 @@ public class OperationDefinition extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the operation definition</b><br>
+   * Description: <b>Computationally friendly name of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Name of the operation definition", type="string" )
+  @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Computationally friendly name of the operation definition", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the operation definition</b><br>
+   * Description: <b>Computationally friendly name of the operation definition</b><br>
    * Type: <b>string</b><br>
    * Path: <b>OperationDefinition.name</b><br>
    * </p>
@@ -3351,6 +3413,32 @@ public class OperationDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>param-profile</b>
+   * <p>
+   * Description: <b>Profile on the type</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>OperationDefinition.parameter.profile</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="param-profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference", target={StructureDefinition.class } )
+  public static final String SP_PARAM_PROFILE = "param-profile";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>param-profile</b>
+   * <p>
+   * Description: <b>Profile on the type</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>OperationDefinition.parameter.profile</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARAM_PROFILE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARAM_PROFILE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>OperationDefinition:param-profile</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARAM_PROFILE = new ca.uhn.fhir.model.api.Include("OperationDefinition:param-profile").toLocked();
 
  /**
    * Search parameter: <b>status</b>

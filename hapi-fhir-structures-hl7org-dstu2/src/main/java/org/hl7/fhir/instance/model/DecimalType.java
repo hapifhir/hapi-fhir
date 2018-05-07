@@ -31,9 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.instance.model;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
+import java.math.*;
 
 import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
 
@@ -156,4 +154,7 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 		return new DecimalType(getValue());
 	}
 
+	public String fhirType() {
+		return "decimal";		
+	}
 }

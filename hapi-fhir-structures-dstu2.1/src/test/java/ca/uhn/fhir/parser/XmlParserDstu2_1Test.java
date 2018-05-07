@@ -1,110 +1,5 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.text.Annotation;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
-import org.hl7.fhir.dstu2016may.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu2016may.model.AllergyIntolerance;
-import org.hl7.fhir.dstu2016may.model.Appointment;
-import org.hl7.fhir.dstu2016may.model.AuditEvent;
-import org.hl7.fhir.dstu2016may.model.Binary;
-import org.hl7.fhir.dstu2016may.model.Bundle;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleType;
-import org.hl7.fhir.dstu2016may.model.CodeType;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.Composition;
-import org.hl7.fhir.dstu2016may.model.ConceptMap;
-import org.hl7.fhir.dstu2016may.model.Condition;
-import org.hl7.fhir.dstu2016may.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.dstu2016may.model.DateTimeType;
-import org.hl7.fhir.dstu2016may.model.DateType;
-import org.hl7.fhir.dstu2016may.model.DiagnosticReport;
-import org.hl7.fhir.dstu2016may.model.DiagnosticReport.DiagnosticReportStatus;
-import org.hl7.fhir.dstu2016may.model.DocumentManifest;
-import org.hl7.fhir.dstu2016may.model.Duration;
-import org.hl7.fhir.dstu2016may.model.ElementDefinition;
-import org.hl7.fhir.dstu2016may.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.dstu2016may.model.Encounter;
-import org.hl7.fhir.dstu2016may.model.EnumFactory;
-import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu2016may.model.Enumerations.DocumentReferenceStatus;
-import org.hl7.fhir.dstu2016may.model.Extension;
-import org.hl7.fhir.dstu2016may.model.GuidanceResponse;
-import org.hl7.fhir.dstu2016may.model.HumanName;
-import org.hl7.fhir.dstu2016may.model.HumanName.NameUse;
-import org.hl7.fhir.dstu2016may.model.IdType;
-import org.hl7.fhir.dstu2016may.model.Identifier;
-import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu2016may.model.InstantType;
-import org.hl7.fhir.dstu2016may.model.Location;
-import org.hl7.fhir.dstu2016may.model.Medication;
-import org.hl7.fhir.dstu2016may.model.MedicationOrder;
-import org.hl7.fhir.dstu2016may.model.MedicationStatement;
-import org.hl7.fhir.dstu2016may.model.Observation;
-import org.hl7.fhir.dstu2016may.model.Observation.ObservationRelationshipType;
-import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu2016may.model.Organization;
-import org.hl7.fhir.dstu2016may.model.Patient;
-import org.hl7.fhir.dstu2016may.model.Practitioner;
-import org.hl7.fhir.dstu2016may.model.PrimitiveType;
-import org.hl7.fhir.dstu2016may.model.ProcedureRequest;
-import org.hl7.fhir.dstu2016may.model.Quantity;
-import org.hl7.fhir.dstu2016may.model.Reference;
-import org.hl7.fhir.dstu2016may.model.Resource;
-import org.hl7.fhir.dstu2016may.model.SampledData;
-import org.hl7.fhir.dstu2016may.model.SimpleQuantity;
-import org.hl7.fhir.dstu2016may.model.StringType;
-import org.hl7.fhir.dstu2016may.model.UriType;
-import org.hl7.fhir.dstu2016may.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import com.google.common.collect.Sets;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -112,10 +7,46 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.FooMessageHeaderWithExplicitField.FooMessageSourceComponent;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithCustomCompositeExtension.FooParentExtension;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.TestUtil;
-import net.sf.saxon.style.DataElement;
+import com.google.common.collect.Sets;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
+import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleType;
+import org.hl7.fhir.dstu2016may.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu2016may.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu2016may.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.dstu2016may.model.HumanName.NameUse;
+import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2016may.model.Observation.ObservationRelationshipType;
+import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.*;
+import org.mockito.ArgumentCaptor;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.ComparisonControllers;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class XmlParserDstu2_1Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
@@ -127,6 +58,47 @@ public class XmlParserDstu2_1Test {
 			ourCtx = FhirContext.forDstu2_1();
 		}
 		ourCtx.setNarrativeGenerator(null);
+	}
+	
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
+		try {
+			String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+			ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+			Bundle bundle = (Bundle) ourCtx.newXmlParser().parseResource(tmp);
+			assertEquals(1, bundle.getEntry().size());
+			{
+				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+				IIdType o1Id = o1.getIdElement();
+				assertFalse(o1Id.hasBaseUrl());
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
+				assertFalse(o1Id.hasVersionIdPart());
+			}
+		} finally {
+			// ensure we cleanup ourCtx so other tests continue to work
+			ourCtx = null;
+		}
+	}
+	
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
+		try {
+			String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+			Bundle bundle = (Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
+			assertEquals(1, bundle.getEntry().size());
+			{
+				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+				IIdType o1Id = o1.getIdElement();
+				assertFalse(o1Id.hasBaseUrl());
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
+				assertFalse(o1Id.hasVersionIdPart());
+			}
+		} finally {
+			// ensure we cleanup ourCtx so other tests continue to work
+			ourCtx = null;
+		}
 	}
 
 	/**
@@ -1830,8 +1802,7 @@ public class XmlParserDstu2_1Test {
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
-		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(content, reencoded);
 
 	}
 
@@ -1868,9 +1839,7 @@ public class XmlParserDstu2_1Test {
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
 
-		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
-		assertTrue(d.toString(), d.identical());
-
+		compareXml(content, reencoded);
 	}
 
 	@Test
@@ -2526,8 +2495,7 @@ public class XmlParserDstu2_1Test {
 		String reEncoded = p.encodeResourceToString(b);
 		ourLog.info(reEncoded);
 
-		Diff d = new Diff(new StringReader(bundle), new StringReader(reEncoded));
-		assertTrue(d.toString(), d.identical());
+		compareXml(bundle, reEncoded);
 
 	}
 
@@ -2695,16 +2663,42 @@ public class XmlParserDstu2_1Test {
 
 	}
 
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
+
+		IParser parser = ourCtx.newXmlParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<Extension> extlst = fhirPat.getExtensionsByUrl("x1");
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	@BeforeClass
-	public static void beforeClass() {
-		XMLUnit.setIgnoreAttributeOrder(true);
-		XMLUnit.setIgnoreComments(true);
-		XMLUnit.setIgnoreWhitespace(true);
+	public static void compareXml(String content, String reEncoded) {
+		Diff d = DiffBuilder.compare(Input.fromString(content))
+				.withTest(Input.fromString(reEncoded))
+				.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+				.checkForSimilar()
+				.ignoreWhitespace()
+				.ignoreComments()
+				.withComparisonController(ComparisonControllers.Default)
+				.build();
+
+		assertTrue(d.toString(), !d.hasDifferences());
 	}
 
 	public static void main(String[] args) {

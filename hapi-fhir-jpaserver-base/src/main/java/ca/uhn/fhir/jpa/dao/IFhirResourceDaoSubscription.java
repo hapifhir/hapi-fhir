@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +23,8 @@ import java.util.List;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	int pollForNewUndeliveredResources();
-
-	List<IBaseResource> getUndeliveredResourcesAndPurge(Long theSubscriptionPid);
-
 	Long getSubscriptionTablePidForSubscriptionResource(IIdType theId);
-
-	void purgeInactiveSubscriptions();
-
-	void pollForNewUndeliveredResourcesScheduler();
 
 }

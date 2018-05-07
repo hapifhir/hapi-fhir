@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,17 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
-	private Map<String, ArrayList<String>> myHeaders = new HashMap<String, ArrayList<String>>();
+	private Map<String, ArrayList<String>> myHeaders = new HashMap<>();
+
+	public void addHeader(String theName, String theValue) {
+		String lowerCase = theName.toLowerCase();
+		ArrayList<String> list = myHeaders.get(lowerCase);
+		if (list == null) {
+			list = new ArrayList<>();
+			myHeaders.put(lowerCase, list);
+		}
+		list.add(theValue);
+	}
 	
 	@Override
 	public String getHeader(String theName) {
@@ -49,14 +59,9 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 		return list;
 	}
 
-	public void addHeader(String theName, String theValue) {
-		String lowerCase = theName.toLowerCase();
-		ArrayList<String> list = myHeaders.get(lowerCase);
-		if (list == null) {
-			list = new ArrayList<String>();
-			myHeaders.put(lowerCase, list);
-		}
-		list.add(theValue);
+	@Override
+	public boolean isSubRequest() {
+		return true;
 	}
 
 }

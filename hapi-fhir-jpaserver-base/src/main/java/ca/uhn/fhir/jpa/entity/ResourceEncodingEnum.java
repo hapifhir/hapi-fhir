@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,22 @@ import ca.uhn.fhir.parser.IParser;
 
 public enum ResourceEncodingEnum {
 
+	/*
+	 * NB: Constants in this enum must be 5 chars long or less!!!
+	 *
+	 * See ResourceHistoryTable RES_ENCODING column
+	 */
+
 	/** Json */
 	JSON,
 	
 	/** Json Compressed */
-	JSONC;
+	JSONC,
+
+	/**
+	 * Resource was deleted - No contents expected
+	 */
+	DEL;
 
 	public IParser newParser(FhirContext theContext) {
 		return theContext.newJsonParser();

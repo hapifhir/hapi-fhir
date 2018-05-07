@@ -1,5 +1,9 @@
 # Use docker-based build environment (instead of openvz)
-sudo: false
+#sudo: false
+#dist: trusty
+
+# Use VM based build environment
+sudo: required
 
 language: java
 jdk:
@@ -20,4 +24,6 @@ before_script:
 
 script:
 #  - mvn -e -B clean install && cd hapi-fhir-ra && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean test jacoco:report coveralls:report
-  - mvn -Dci=true -e -B -P ALLMODULES,NOPARALLEL,ERRORPRONE clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
+#  - mvn -Dci=true -e -B -P ALLMODULES,NOPARALLEL,ERRORPRONE clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
+  - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,ERRORPRONE_JDK8,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
+

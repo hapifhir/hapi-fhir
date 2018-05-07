@@ -11,6 +11,7 @@ curl -H "Authorization: Bearer " "http://fhirtest.uhn.ca/baseDstu3/\$mark-all-re
 # Delete all errored resources
 update hfj_res_ver set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_history_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_res_ver where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource where sp_index_status = 2);
@@ -24,6 +25,114 @@ delete from hfj_spidx_token where res_id in (select res_id from hfj_resource whe
 delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_res_tag where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_search_result where resource_pid in (select res_id from hfj_resource where sp_index_status = 2);
+delete from hfj_res_param_present where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 delete from hfj_resource where res_id in (select res_id from hfj_resource where sp_index_status = 2);
 
+
+# Delete resource by id
+delete from hfj_res_link where src_resource_id = 16940 or target_resource_id = 16940;
+delete from hfj_spidx_date where res_id = 16940;
+delete from hfj_spidx_string where res_id = 16940;
+delete from hfj_spidx_token where res_id = 16940;
+delete from hfj_spidx_uri where res_id = 16940;
+delete from hfj_spidx_quantity where res_id = 16940;
+delete from hfj_search_result where resource_pid = 16940;
+delete from hfj_res_ver where res_id = 16940;
+delete from hfj_res_param_present where res_id = 16940;
+update hfj_resource set forced_id_pid = null where res_id = 16940;
+delete from hfj_forced_id where resource_pid = 16940;
+delete from hfj_resource where res_id = 16940;
+
+
+# Drop all tables
+drop table hfj_history_tag cascade constraints;
+drop table hfj_res_ver cascade constraints;
+drop table hfj_forced_id cascade constraints;
+drop table hfj_res_link cascade constraints;
+drop table hfj_res_link cascade constraints;
+drop table hfj_spidx_coords cascade constraints;
+drop table hfj_spidx_date cascade constraints;
+drop table hfj_spidx_number cascade constraints;
+drop table hfj_spidx_quantity cascade constraints;
+drop table hfj_spidx_string cascade constraints;
+drop table hfj_spidx_token cascade constraints;
+drop table hfj_spidx_uri cascade constraints;
+drop table hfj_res_tag cascade constraints;
+drop table hfj_search_result cascade constraints;
+drop table hfj_res_param_present cascade constraints;
+drop table hfj_resource cascade constraints;
+drop table hfj_idx_cmp_string_uniq cascade constraints;
+drop table hfj_search cascade constraints;
+drop table hfj_search_include cascade constraints;
+drop table hfj_search_parm cascade constraints;
+drop table hfj_subscription cascade constraints;
+drop table hfj_subscription_flag_res cascade constraints;
+drop table hfj_tag_def cascade constraints;
+drop table trm_codesystem cascade constraints;
+drop table trm_codesystem_var cascade constraints;
+drop table trm_concept cascade constraints;
+drop table trm_concept_pc_link cascade constraints;
+drop table trm_concept_property cascade constraints;
+
+# Delete all resources
+update hfj_res_ver set forced_id_pid = null where res_id in (select res_id from hfj_resource);
+update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource);
+delete from hfj_history_tag where res_id in (select res_id from hfj_resource);
+delete from hfj_res_ver where res_id in (select res_id from hfj_resource);
+delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource);
+delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource);
+delete from hfj_res_link where target_resource_id in (select res_id from hfj_resource);
+delete from hfj_spidx_coords where res_id in (select res_id from hfj_resource);
+delete from hfj_spidx_date where res_id in (select res_id from hfj_resource);
+delete from hfj_spidx_number where res_id in (select res_id from hfj_resource);
+delete from hfj_spidx_quantity where res_id in (select res_id from hfj_resource);
+delete from hfj_spidx_string where res_id in (select res_id from hfj_resource);
+delete from hfj_spidx_token where res_id in (select res_id from hfj_resource);
+delete from hfj_spidx_uri where res_id in (select res_id from hfj_resource);
+delete from hfj_res_tag where res_id in (select res_id from hfj_resource);
+delete from hfj_search_result where resource_pid in (select res_id from hfj_resource);
+delete from hfj_res_param_present where res_id in (select res_id from hfj_resource);
+delete from hfj_idx_cmp_string_uniq where res_id in (select res_id from hfj_resource);
+delete from hfj_subscription_stats where res_id in (select res_id from hfj_resource);
+delete from hfj_resource where res_id in (select res_id from hfj_resource);
+
+# Correct Version issues
+update hfj_resource
+set res_ver = res_ver + 1
+where res_id in (
+   select distinct res.res_id from hfj_resource res
+	inner join hfj_res_ver rv on (rv.res_id = res.res_id)
+	where ((res.res_ver + 1) = (rv.res_ver))
+)
+
+
+drop table hfj_history_tag cascade constraints;
+drop table hfj_forced_id cascade constraints;
+drop table hfj_res_link cascade constraints;
+drop table hfj_spidx_coords cascade constraints;
+drop table hfj_spidx_date cascade constraints;
+drop table hfj_spidx_number cascade constraints;
+drop table hfj_spidx_quantity cascade constraints;
+drop table hfj_spidx_string cascade constraints;
+drop table hfj_spidx_token cascade constraints;
+drop table hfj_spidx_uri cascade constraints;
+drop table hfj_res_tag cascade constraints;
+drop table hfj_search_result cascade constraints;
+drop table hfj_search_include cascade constraints;
+drop table hfj_search cascade constraints;
+drop table hfj_res_param_present cascade constraints;
+drop table hfj_idx_cmp_string_uniq cascade constraints;
+drop table hfj_subscription_stats cascade constraints;
+drop table trm_concept_property cascade constraints;
+drop table trm_concept_pc_link cascade constraints;
+drop table trm_concept cascade constraints;
+drop table trm_codesystem_ver cascade constraints;
+drop table trm_codesystem cascade constraints;
+DROP TABLE hfj_resource CASCADE CONSTRAINTS;
+DROP TABLE hfj_res_ver CASCADE CONSTRAINTS;
+drop table cdr_audit_evt_target_module cascade constraints;
+drop table cdr_audit_evt_target_res cascade constraints;
+drop table cdr_audit_evt_target_user cascade constraints;
+drop table cdr_xact_log_step cascade constraints;
+drop table cdr_xact_log cascade constraints;
 

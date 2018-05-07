@@ -3,13 +3,15 @@ package ca.uhn.fhir.model.api;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +35,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * upgrading servers.
  * </p>
  */
-public class Include {
+public class Include implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final boolean myImmutable;
 	private boolean myRecurse;
 	private String myValue;
@@ -189,8 +193,14 @@ public class Include {
 		return myRecurse;
 	}
 
-	public void setRecurse(boolean theRecurse) {
+	/**
+	 * Should this include recurse
+	 *
+	 * @return  Returns a reference to <code>this</code> for easy method chaining
+	 */
+	public Include setRecurse(boolean theRecurse) {
 		myRecurse = theRecurse;
+		return this;
 	}
 
 	public void setValue(String theValue) {

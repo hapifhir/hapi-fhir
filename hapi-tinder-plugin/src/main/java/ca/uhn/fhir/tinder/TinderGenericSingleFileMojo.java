@@ -1,16 +1,13 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.List;
-
+import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
+import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
+import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
+import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.TargetType;
 import org.apache.commons.lang.WordUtils;
-import org.apache.http.ParseException;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,14 +21,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
-import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
-import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
-import ca.uhn.fhir.tinder.GeneratorContext.ProfileFileDefinition;
-import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
-import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.TargetType;
+import java.io.*;
+import java.util.List;
 
 /**
  * Generate a single file based on resource or composite type metadata.
@@ -245,9 +236,6 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 	@Parameter(required = false)
 	private List<ValueSetFileDefinition> valueSetFiles;
 
-	@Parameter(required = false)
-	private List<ProfileFileDefinition> profileFiles;
-
 	@Component
 	private MavenProject myProject;
 
@@ -260,8 +248,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 		context.setIncludeResources(includeResources);
 		context.setExcludeResources(excludeResources);
 		context.setValueSetFiles(valueSetFiles);
-		context.setProfileFiles(profileFiles);
-		
+
 		Generator generator = new Generator();
 		try {
 			generator.prepare(context);
@@ -404,7 +391,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 		}
 	}
 
-	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {
+	public static void main(String[] args) throws IOException, MojoFailureException, MojoExecutionException {
 
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		// HttpClientBuilder builder = HttpClientBuilder.create();
@@ -433,12 +420,13 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 
 	class Generator extends AbstractGenerator {
 		@Override
-		protected void logInfo(String message) {
-			ourLog.info(message);
-		}
-		@Override
 		protected void logDebug(String message) {
 			ourLog.debug(message);
+		}
+
+		@Override
+		protected void logInfo(String message) {
+			ourLog.info(message);
 		}
 	}
 }

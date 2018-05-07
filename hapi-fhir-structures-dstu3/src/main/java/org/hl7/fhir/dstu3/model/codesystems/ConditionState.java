@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum ConditionState {
          */
         ACTIVE, 
         /**
-         * The condition inactive but not resolved.
+         * The condition is inactive, but not resolved.
          */
         INACTIVE, 
         /**
@@ -77,7 +77,7 @@ public enum ConditionState {
         public String getDefinition() {
           switch (this) {
             case ACTIVE: return "The condition is active.";
-            case INACTIVE: return "The condition inactive but not resolved.";
+            case INACTIVE: return "The condition is inactive, but not resolved.";
             case RESOLVED: return "The condition is resolved.";
             default: return "?";
           }

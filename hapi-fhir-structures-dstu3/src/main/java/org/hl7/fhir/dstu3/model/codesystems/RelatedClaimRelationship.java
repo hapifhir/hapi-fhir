@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum RelatedClaimRelationship {
          */
         PRIOR, 
         /**
-         * A claim for a different suite of services which is related the the suite claimed here.
+         * A claim for a different suite of services which is related the suite claimed here.
          */
         ASSOCIATED, 
         /**
@@ -70,7 +70,7 @@ public enum RelatedClaimRelationship {
         public String getDefinition() {
           switch (this) {
             case PRIOR: return "A prior claim instance for the same intended suite of services.";
-            case ASSOCIATED: return "A claim for a different suite of services which is related the the suite claimed here.";
+            case ASSOCIATED: return "A claim for a different suite of services which is related the suite claimed here.";
             default: return "?";
           }
         }

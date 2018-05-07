@@ -8,31 +8,18 @@
     {
       "resourceType" : "Practitioner",
       "id" : "a1",
-      "name" : {
+      "name" : [{
         "family" : [
           "Dopplemeyer"
         ],
         "given" : [
           "Sherry"
         ]
-      },
+      }],
       "telecom" : [
         {
           "system" : "email",
           "value" : "john.doe@healthcare.example.org"
-        }
-      ],
-      "organization" : {
-        "display" : "Cleveland Clinic"
-      },
-      "role" : [
-        {
-          "text" : "Primary Surgon"
-        }
-      ],
-      "specialty" : [
-        {
-          "text" : "Orthopedic"
         }
       ]
     }

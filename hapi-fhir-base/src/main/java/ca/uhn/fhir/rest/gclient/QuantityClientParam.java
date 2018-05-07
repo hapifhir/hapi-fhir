@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.gclient;
  */
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
@@ -122,26 +121,6 @@ public class QuantityClientParam extends BaseClientParam  implements IParam {
 			@Override
 			public IAndUnits number(String theNumber) {
 				return new AndUnits(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theNumber);
-			}
-		};
-	}
-
-	/**
-	 * @deprecated Use {@link #withPrefix(ParamPrefixEnum)} instead, as {@link QuantityCompararatorEnum} has been deprecated
-	 */
-	@Deprecated
-	public IMatches<IAndUnits> withComparator(QuantityCompararatorEnum theComparator) {
-		final String cmpString = theComparator != null ? theComparator.getCode() : "";
-		final ParamPrefixEnum prefix = ParamPrefixEnum.forDstu1Value(cmpString);
-		return new NumberClientParam.IMatches<IAndUnits>() {
-			@Override
-			public IAndUnits number(long theNumber) {
-				return new AndUnits(prefix, Long.toString(theNumber));
-			}
-
-			@Override
-			public IAndUnits number(String theNumber) {
-				return new AndUnits(prefix, theNumber);
 			}
 		};
 	}

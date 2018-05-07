@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
-	@Query("DELETE FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
+	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	@Modifying
-	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	List<TermConcept> findByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
 	@Modifying

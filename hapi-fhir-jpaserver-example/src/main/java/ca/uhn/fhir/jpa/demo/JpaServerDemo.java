@@ -1,38 +1,31 @@
+
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class JpaServerDemo extends RestfulServer {
@@ -50,13 +43,10 @@ public class JpaServerDemo extends RestfulServer {
 		 * We want to support FHIR DSTU2 format. This means that the server
 		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
 		 *
-		 * If you want to use DSTU1 instead, change the following line, and 
-		 * change the 2 occurrences of dstu2 in web.xml to dstu1
+		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
-		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2;
-		FhirContext context = new FhirContext(fhirVersion);
-		
-		setFhirContext(context);
+		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
+		setFhirContext(new FhirContext(fhirVersion));
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
@@ -67,9 +57,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * contains bean definitions for a resource provider for each resource type
 		 */
 		String resourceProviderBeanName;
-		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			resourceProviderBeanName = "myResourceProvidersDstu1";
-		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			resourceProviderBeanName = "myResourceProvidersDstu2";
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			resourceProviderBeanName = "myResourceProvidersDstu3";
@@ -84,9 +72,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * transaction, and global history.
 		 */
 		Object systemProvider;
-		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
-		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
+		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
@@ -100,19 +86,14 @@ public class JpaServerDemo extends RestfulServer {
 		 * this server. The JPA version adds resource counts to the exported statement, so it
 		 * is a nice addition.
 		 */
-		if (fhirVersion == FhirVersionEnum.DSTU1) {
-			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
-			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
-			confProvider.setImplementationDescription("Example Server");
-			setServerConformanceProvider(confProvider);
-		} else if (fhirVersion == FhirVersionEnum.DSTU2) {
-			IFhirSystemDao<Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
+		if (fhirVersion == FhirVersionEnum.DSTU2) {
+			IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
 					myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
+			IFhirSystemDao<Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
 			myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
@@ -146,23 +127,6 @@ public class JpaServerDemo extends RestfulServer {
 		 * but makes the server much more scalable.
 		 */
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
-
-		/*
-		 * Enable CORS
-		 */
-		CorsConfiguration config = new CorsConfiguration();
-		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-		config.addAllowedHeader("Origin");
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("Access-Control-Request-Method");
-		config.addAllowedHeader("Access-Control-Request-Headers");
-		config.addAllowedOrigin("*");
-		config.addExposedHeader("Location");
-		config.addExposedHeader("Content-Location");
-		config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
-		registerInterceptor(corsInterceptor);
 
 		/*
 		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)

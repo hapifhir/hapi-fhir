@@ -8,7 +8,7 @@ import java.util.Map;
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 import okhttp3.Call;
 import okhttp3.Call.Factory;
 import okhttp3.Request;
@@ -65,9 +66,10 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public IHttpResponse execute() throws IOException {
-        myRequestBuilder.method(getHttpVerbName(), myRequestBody);
-        Call call = myClient.newCall(myRequestBuilder.build());
-        return new OkHttpRestfulResponse(call.execute());
+		 StopWatch responseStopWatch = new StopWatch();
+		 myRequestBuilder.method(getHttpVerbName(), myRequestBody);
+		 Call call = myClient.newCall(myRequestBuilder.build());
+		 return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
     }
 
     @Override

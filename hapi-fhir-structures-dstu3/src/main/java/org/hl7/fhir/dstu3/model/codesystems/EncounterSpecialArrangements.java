@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EncounterSpecialArrangements {
 
         /**
-         * null
+         * The patient requires a wheelchair to be made available for the encounter.
          */
         WHEEL, 
         /**
-         * null
+         * An additional bed made available for a person accompanying the patient, for example a parent accompanying a child.
          */
-        STRET, 
+        ADDBED, 
         /**
-         * null
+         * The patient is not fluent in the local language and requires an interpreter to be available. Refer to the Patient.Language property for the type of interpreter required.
          */
         INT, 
         /**
-         * null
+         * A person who accompanies a patient to provide assistive services necessary for the patient's care during the encounter.
          */
         ATT, 
         /**
-         * null
+         * The patient has a guide-dog and the location used for the encounter should be able to support the presence of the service animal.
          */
         DOG, 
         /**
@@ -65,8 +65,8 @@ public enum EncounterSpecialArrangements {
                 return null;
         if ("wheel".equals(codeString))
           return WHEEL;
-        if ("stret".equals(codeString))
-          return STRET;
+        if ("add-bed".equals(codeString))
+          return ADDBED;
         if ("int".equals(codeString))
           return INT;
         if ("att".equals(codeString))
@@ -78,7 +78,7 @@ public enum EncounterSpecialArrangements {
         public String toCode() {
           switch (this) {
             case WHEEL: return "wheel";
-            case STRET: return "stret";
+            case ADDBED: return "add-bed";
             case INT: return "int";
             case ATT: return "att";
             case DOG: return "dog";
@@ -90,18 +90,18 @@ public enum EncounterSpecialArrangements {
         }
         public String getDefinition() {
           switch (this) {
-            case WHEEL: return "";
-            case STRET: return "";
-            case INT: return "";
-            case ATT: return "";
-            case DOG: return "";
+            case WHEEL: return "The patient requires a wheelchair to be made available for the encounter.";
+            case ADDBED: return "An additional bed made available for a person accompanying the patient, for example a parent accompanying a child.";
+            case INT: return "The patient is not fluent in the local language and requires an interpreter to be available. Refer to the Patient.Language property for the type of interpreter required.";
+            case ATT: return "A person who accompanies a patient to provide assistive services necessary for the patient's care during the encounter.";
+            case DOG: return "The patient has a guide-dog and the location used for the encounter should be able to support the presence of the service animal.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case WHEEL: return "Wheelchair";
-            case STRET: return "Stretcher";
+            case ADDBED: return "Additional bedding";
             case INT: return "Interpreter";
             case ATT: return "Attendant";
             case DOG: return "Guide dog";

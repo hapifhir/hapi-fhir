@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -45,6 +45,8 @@ public class ConsentDataMeaningEnumFactory implements EnumFactory<ConsentDataMea
       return ConsentDataMeaning.RELATED;
     if ("dependents".equals(codeString))
       return ConsentDataMeaning.DEPENDENTS;
+    if ("authoredby".equals(codeString))
+      return ConsentDataMeaning.AUTHOREDBY;
     throw new IllegalArgumentException("Unknown ConsentDataMeaning code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class ConsentDataMeaningEnumFactory implements EnumFactory<ConsentDataMea
       return "related";
     if (code == ConsentDataMeaning.DEPENDENTS)
       return "dependents";
+    if (code == ConsentDataMeaning.AUTHOREDBY)
+      return "authoredby";
     return "?";
   }
 

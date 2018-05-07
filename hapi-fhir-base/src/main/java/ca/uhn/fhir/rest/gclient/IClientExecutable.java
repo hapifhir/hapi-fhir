@@ -1,16 +1,17 @@
 package ca.uhn.fhir.rest.gclient;
 
-import java.util.List;
-
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import java.util.List;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +28,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
  */
 
 
-public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
+public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 
 	/**
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
@@ -39,19 +40,28 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);
 
 	/**
+	 * Sets the <code>Cache-Control</code> header value, which advises the server (or any cache in front of it)
+	 * how to behave in terms of cached requests
+	 */
+	T cacheControl(CacheControlDirective theCacheControlDirective);
+
+	/**
 	 * Request that the server return subsetted resources, containing only the elements specified in the given parameters. 
 	 * For example: <code>subsetElements("name", "identifier")</code> requests that the server only return
 	 * the "name" and "identifier" fields in the returned resource, and omit any others.  
 	 */
 	T elementsSubset(String... theElements);
 
+	T encoded(EncodingEnum theEncoding);
+
 	T encodedJson();
 
 	T encodedXml();
 
+	/**
+	 * Actually execute the client operation
+	 */
 	Y execute();
-
-	T prettyPrint();
 
 	/**
 	 * Explicitly specify a custom structure type to attempt to use when parsing the response. This
@@ -73,6 +83,8 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	 * </p>
 	 */
 	T preferResponseTypes(List<Class<? extends IBaseResource>> theTypes);
+
+	T prettyPrint();
 
 	/**
 	 * Request that the server modify the response using the <code>_summary</code> param 

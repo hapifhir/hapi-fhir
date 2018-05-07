@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.util.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class IncomingRequestAddressStrategyTest {
@@ -93,7 +93,7 @@ public class IncomingRequestAddressStrategyTest {
 
 	@Test
 	public void testUnderJettyWithContextPathServletRoot() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/*";
@@ -119,7 +119,7 @@ public class IncomingRequestAddressStrategyTest {
 
 	@Test
 	public void testUnderJettyWithContextPathServletRootContextOnly() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/";
@@ -147,7 +147,7 @@ public class IncomingRequestAddressStrategyTest {
 	
 	@Test
 	public void testUnderJettyWithContextPathServletRoot2() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/foo/bar/*"; // not /* but still this should work
@@ -173,7 +173,7 @@ public class IncomingRequestAddressStrategyTest {
 
 	@Test
 	public void testUnderJettyWithContextPathServletPath() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/ctx";
 		String servletPath = "/servlet/*";
@@ -195,7 +195,7 @@ public class IncomingRequestAddressStrategyTest {
 
 	@Test
 	public void testUnderJettyWithContextRootServletRoot() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 
 		String contextPath = "/";
 		String servletPath = "/*";

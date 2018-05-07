@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -100,11 +100,11 @@ public enum GoalCategory {
         }
         public String getDisplay() {
           switch (this) {
-            case DIETARY: return "dietary";
-            case SAFETY: return "safety";
-            case BEHAVIORAL: return "behavioral";
-            case NURSING: return "nursing";
-            case PHYSIOTHERAPY: return "physiotherapy";
+            case DIETARY: return "Dietary";
+            case SAFETY: return "Safety";
+            case BEHAVIORAL: return "Behavioral";
+            case NURSING: return "Nursing";
+            case PHYSIOTHERAPY: return "Physiotherapy";
             default: return "?";
           }
     }

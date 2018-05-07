@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,24 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.search.annotations.Field;
 
+import javax.persistence.*;
+
 //@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_URI", indexes = { 
-	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"), 
-	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"), 
-	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID") 
+@Table(name = "HFJ_SPIDX_URI", indexes = {
+	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"),
+	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"),
+	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
+	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 })
 //@formatter:on
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
@@ -53,16 +48,14 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	public static final int MAX_LENGTH = 255;
 
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@SequenceGenerator(name="SEQ_SPIDX_URI", sequenceName="SEQ_SPIDX_URI")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="SEQ_SPIDX_URI")
-	@Column(name = "SP_ID")
-	private Long myId;
-
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
 	@Field()
 	public String myUri;
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	public ResourceIndexedSearchParamUri() {
 	}
@@ -100,6 +93,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return myUri;
 	}
 
+	public void setUri(String theUri) {
+		myUri = StringUtils.defaultIfBlank(theUri, null);
+	}
+
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
@@ -109,17 +106,19 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return b.toHashCode();
 	}
 
-	public void setUri(String theUri) {
-		myUri = StringUtils.defaultIfBlank(theUri, null);
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return new UriParam(getUri());
 	}
 
 	@Override
 	public String toString() {
-		ToStringBuilder builder = new ToStringBuilder(this);
-		builder.append("id", getId());
-		builder.append("paramName", getParamName());
-		builder.append("uri", myUri);
-		return builder.toString();
+		ToStringBuilder b = new ToStringBuilder(this);
+		b.append("id", getId());
+		b.append("resourceId", getResourcePid());
+		b.append("paramName", getParamName());
+		b.append("uri", myUri);
+		return b.toString();
 	}
 
 }

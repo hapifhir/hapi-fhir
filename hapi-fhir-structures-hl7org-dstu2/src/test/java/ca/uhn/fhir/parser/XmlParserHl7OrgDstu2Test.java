@@ -1,55 +1,26 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.instance.model.Binary;
-import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Composition;
-import org.hl7.fhir.instance.model.Condition;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.DecimalType;
-import org.hl7.fhir.instance.model.DiagnosticReport;
-import org.hl7.fhir.instance.model.DocumentManifest;
-import org.hl7.fhir.instance.model.EnumFactory;
 import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.instance.model.Extension;
-import org.hl7.fhir.instance.model.HumanName;
-import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.MedicationStatement;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.api.*;
+import org.junit.*;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -60,23 +31,28 @@ import org.hl7.fhir.instance.model.SimpleQuantity;
 import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredExtension;
-import ca.uhn.fhir.rest.server.AddProfileTagEnum;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
@@ -97,6 +73,52 @@ public class XmlParserHl7OrgDstu2Test {
   private String fixDivNodeTextJson(String htmlNoNs) {
     return htmlNoNs.replace("<div>", "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
   }
+  
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlEnabled() {
+		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+		Bundle bundle = (Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		assertEquals(1, bundle.getEntry().size());
+		{
+			Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+			IIdType o1Id = o1.getIdElement();
+			assertEquals("http://lalaland.org", o1Id.getBaseUrl());
+			assertEquals("patient", o1Id.getResourceType());
+			assertEquals("pat1", o1Id.getIdPart());
+			assertFalse(o1Id.hasVersionIdPart());
+		}
+	}
+  
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
+		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+		ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+		Bundle bundle = (Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		assertEquals(1, bundle.getEntry().size());
+		{
+			Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+			IIdType o1Id = o1.getIdElement();
+			assertFalse(o1Id.hasBaseUrl());
+			assertEquals("Patient", o1Id.getResourceType());
+			assertEquals("patxuzos", o1Id.getIdPart());
+			assertFalse(o1Id.hasVersionIdPart());
+		}
+	}
+
+	@Test
+	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
+		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
+		Bundle bundle = (Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
+		assertEquals(1, bundle.getEntry().size());
+		{
+			Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
+			IIdType o1Id = o1.getIdElement();
+			assertFalse(o1Id.hasBaseUrl());
+			assertEquals("Patient", o1Id.getResourceType());
+			assertEquals("patxuzos", o1Id.getIdPart());
+			assertFalse(o1Id.hasVersionIdPart());
+		}
+	}
 
   @Test
   public void testComposition() {
@@ -1341,12 +1363,10 @@ public class XmlParserHl7OrgDstu2Test {
 
     ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-
     ourLog.info("Expected: {}", msg);
     ourLog.info("Actual:   {}", encoded);
 
-    assertTrue(d.toString(), d.identical());
+    compareXml(msg, encoded);
 
   }
 
@@ -1385,8 +1405,7 @@ public class XmlParserHl7OrgDstu2Test {
     String encoded = p.setPrettyPrint(true).encodeResourceToString(resource);
     ourLog.info(encoded);
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-    assertTrue(d.toString(), d.identical());
+    compareXml(msg, encoded);
   }
 
   @Test
@@ -1426,8 +1445,7 @@ public class XmlParserHl7OrgDstu2Test {
     String encoded = p.encodeResourceToString(resource);
     ourLog.info(encoded);
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
-    assertTrue(d.toString(), d.identical());
+    compareXml(msg, encoded);
   }
 
   @Test
@@ -1668,9 +1686,7 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info("Expected: {}", msg);
     ourLog.info("Actual:   {}", encoded1);
 
-    Diff d = new Diff(new StringReader(msg), new StringReader(encoded1));
-    assertTrue(d.toString(), d.identical());
-
+    compareXml(msg, encoded1);
   }
 
   @Test
@@ -1698,9 +1714,7 @@ public class XmlParserHl7OrgDstu2Test {
     String expected = (jsonString);
     String actual = (encoded.trim());
 
-    Diff d = new Diff(new StringReader(expected), new StringReader(actual));
-    assertTrue(d.toString(), d.identical());
-
+    compareXml(expected, actual);
   }
 
   @Test
@@ -1731,9 +1745,7 @@ public class XmlParserHl7OrgDstu2Test {
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-    // The encoded escapes quote marks using XML escaping instead of JSON
-    // escaping, which is probably nicer anyhow...
-    String exp = fixDivNodeTextJson(expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;"));
+    String exp = fixDivNodeTextJson(expected.toString());
     String act = fixDivNodeTextJson(actual.toString());
 
     ourLog.info("Expected: {}", exp);
@@ -1742,11 +1754,28 @@ public class XmlParserHl7OrgDstu2Test {
 
   }
 
+	@Test
+	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
+		String refVal = "http://my.org/FooBar";
+
+		Patient fhirPat = new Patient();
+		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
+
+		IParser parser = ourCtx.newXmlParser();
+
+		String output = parser.encodeResourceToString(fhirPat);
+		System.out.println("output: " + output);
+
+		// Deserialize then check that valueReference value is still correct
+		fhirPat = parser.parseResource(Patient.class, output);
+
+		List<Extension> extlst = fhirPat.getExtension();
+		Assert.assertEquals(1, extlst.size());
+		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
+	}
+
   @BeforeClass
   public static void beforeClass() {
-    XMLUnit.setIgnoreAttributeOrder(true);
-    XMLUnit.setIgnoreComments(true);
-    XMLUnit.setIgnoreWhitespace(true);
     ourCtx = FhirContext.forDstu2Hl7Org();
   }
 
@@ -1772,5 +1801,18 @@ public class XmlParserHl7OrgDstu2Test {
       this.testConditions = ref;
     }
   }
+
+  public static void compareXml(String content, String reEncoded) {
+    Diff d = DiffBuilder.compare(Input.fromString(content))
+          .withTest(Input.fromString(reEncoded))
+          .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+          .checkForSimilar()
+          .ignoreWhitespace()
+          .ignoreComments()
+          .withComparisonController(ComparisonControllers.Default)
+          .build();
+
+    assertTrue(d.toString(), !d.hasDifferences());
+ }
 
 }

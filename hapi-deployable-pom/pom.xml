@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>2.3-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -31,13 +31,29 @@
 						</goals>
 						<configuration>
 							<signature>
-								<groupId>org.codehaus.mojo.signature
-								</groupId>
-								<artifactId>java16</artifactId>
-								<version>1.1</version>
+								<groupId>org.codehaus.mojo.signature</groupId>
+								<artifactId>java18</artifactId>
+								<version>1.0</version>
 							</signature>
 						</configuration>
 					</execution>
+					<!-- 
+					<execution>
+						<id>check-android-api</id>
+						<phase>test</phase>
+						<inherited>true</inherited>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<signature>
+								<groupId>net.sf.androidscents.signature</groupId>
+								<artifactId>android-api-level-21</artifactId>
+								<version>5.0.1_r2</version>
+  							</signature>
+						</configuration>
+					</execution>
+					-->
 				</executions>
 				<dependencies>
 					<dependency>
@@ -46,6 +62,86 @@
 						<version>5.0.4</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<inherited>true</inherited>
+					</execution>
+				</executions>
+				<configuration>
+					<printEqualFiles>false</printEqualFiles>
+					<failBuildInCaseOfDifferentContentConflict>true</failBuildInCaseOfDifferentContentConflict>
+					<failBuildInCaseOfEqualContentConflict>true</failBuildInCaseOfEqualContentConflict>
+					<failBuildInCaseOfConflict>true</failBuildInCaseOfConflict>
+					<checkCompileClasspath>true</checkCompileClasspath>
+					<checkRuntimeClasspath>false</checkRuntimeClasspath>
+					<checkTestClasspath>false</checkTestClasspath>
+					<skip>false</skip>
+					<quiet>false</quiet>
+					<preferLocal>true</preferLocal>
+					<useResultFile>true</useResultFile>
+					<resultFileMinClasspathCount>2</resultFileMinClasspathCount>
+					<resultFile>${project.build.directory}/duplicate-finder-result.xml</resultFile>
+					<ignoredDependencies>
+						<dependency>
+							<groupId>javax.el</groupId>
+							<artifactId>javax.el-api</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>javax.mail</groupId>
+							<artifactId>javax.mail-api</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>com.phloc</groupId>
+							<artifactId>phloc-commons</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>commons-logging</groupId>
+							<artifactId>commons-logging</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.jscience</groupId>
+							<artifactId>jscience</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-jcl</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-jcl</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>com.google.code.findbugs</groupId>
+							<artifactId>annotations</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.derby</groupId>
+							<artifactId>derbyclient</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.derby</groupId>
+							<artifactId>derbynet</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.derby</groupId>
+							<artifactId>derbyclient</artifactId>
+						</dependency>
+					</ignoredDependencies>
+					<ignoredResourcePatterns>
+						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
+						<ignoredResource>javac.bat</ignoredResource>
+						<ignoredResource>about.html</ignoredResource>
+					</ignoredResourcePatterns>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

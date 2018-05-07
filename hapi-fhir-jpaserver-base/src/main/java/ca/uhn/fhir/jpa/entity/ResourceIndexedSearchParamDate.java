@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,55 +20,47 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.param.DateParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
+import org.hl7.fhir.r4.model.DateTimeType;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
+import javax.persistence.*;
+import java.util.Date;
 
-//@formatter:off
 @Embeddable
 @Entity
-@Table(name = "HFJ_SPIDX_DATE", indexes= {
+@Table(name = "HFJ_SPIDX_DATE", indexes = {
 	@Index(name = "IDX_SP_DATE", columnList = "RES_TYPE,SP_NAME,SP_VALUE_LOW,SP_VALUE_HIGH"),
-	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID") 
+	@Index(name = "IDX_SP_DATE_UPDATED", columnList = "SP_UPDATED"),
+	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID")
 })
-//@formatter:on
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_DATE", sequenceName = "SEQ_SPIDX_DATE")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
-	@Column(name = "SP_ID")
-	private Long myId;
+	@Transient
+	private transient String myOriginalValue;
 
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	@Field
 	public Date myValueHigh;
-
 	@Column(name = "SP_VALUE_LOW", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	@Field
 	public Date myValueLow;
+	@Id
+	@SequenceGenerator(name = "SEQ_SPIDX_DATE", sequenceName = "SEQ_SPIDX_DATE")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
+	@Column(name = "SP_ID")
+	private Long myId;
 
 	/**
 	 * Constructor
@@ -79,10 +71,11 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh) {
+	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh, String theOriginalValue) {
 		setParamName(theName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
+		myOriginalValue = theOriginalValue;
 	}
 
 	@Override
@@ -99,10 +92,18 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getParamName(), obj.getParamName());
+
 		b.append(getResource(), obj.getResource());
-		b.append(getValueHigh(), obj.getValueHigh());
-		b.append(getValueLow(), obj.getValueLow());
+		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
+		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
 		return b.isEquals();
+	}
+
+	protected Long getTimeFromDate(Date date) {
+		if (date != null) {
+			return date.getTime();
+		}
+		return null;
 	}
 
 	@Override
@@ -114,8 +115,16 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return myValueHigh;
 	}
 
+	public void setValueHigh(Date theValueHigh) {
+		myValueHigh = theValueHigh;
+	}
+
 	public Date getValueLow() {
 		return myValueLow;
+	}
+
+	public void setValueLow(Date theValueLow) {
+		myValueLow = theValueLow;
 	}
 
 	@Override
@@ -123,17 +132,18 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getParamName());
 		b.append(getResource());
-		b.append(getValueHigh());
-		b.append(getValueLow());
+		b.append(getTimeFromDate(getValueHigh()));
+		b.append(getTimeFromDate(getValueLow()));
 		return b.toHashCode();
 	}
 
-	public void setValueHigh(Date theValueHigh) {
-		myValueHigh = theValueHigh;
-	}
-
-	public void setValueLow(Date theValueLow) {
-		myValueLow = theValueLow;
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		DateTimeType value = new DateTimeType(myOriginalValue);
+		if (value.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+			value.setTimeZoneZulu(true);
+		}
+		return new DateParam(value.getValueAsString());
 	}
 
 	@Override

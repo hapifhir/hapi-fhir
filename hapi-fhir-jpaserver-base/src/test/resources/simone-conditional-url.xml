@@ -20,15 +20,14 @@
 					<reference value="Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1" />
 					<display value="Kennedy, Ann(*24.05.1928)" />
 				</patient>
-				<substance>
-					<coding>
-						<code value="1605" />
-						<display value="L" />
-					</coding>
-					<text value="acetaminophen" />
-				</substance>
-				<category value="medication" />
 				<reaction>
+					<substance>
+						<coding>
+							<code value="1605" />
+							<display value="L" />
+						</coding>
+						<text value="acetaminophen" />
+					</substance>
 					<manifestation>
 						<text value="Muscle Pain" />
 					</manifestation>
@@ -72,15 +71,14 @@
 					<reference value="Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1" />
 					<display value="Kennedy, Ann(*24.05.1928)" />
 				</patient>
-				<substance>
-					<coding>
-						<code value="2221" />
-						<display value="L" />
-					</coding>
-					<text value="Peanuts" />
-				</substance>
-				<category value="environment" />
 				<reaction>
+					<substance>
+						<coding>
+							<code value="2221" />
+							<display value="L" />
+						</coding>
+						<text value="Peanuts" />
+					</substance>
 					<manifestation>
 						<text value="Anaphylactic Shock" />
 					</manifestation>

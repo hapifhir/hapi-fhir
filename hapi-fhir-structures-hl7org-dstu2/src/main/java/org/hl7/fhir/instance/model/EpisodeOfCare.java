@@ -29,17 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
@@ -75,7 +72,7 @@ public class EpisodeOfCare extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static EpisodeOfCareStatus fromCode(String codeString) throws Exception {
+        public static EpisodeOfCareStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("planned".equals(codeString))
@@ -90,7 +87,7 @@ public class EpisodeOfCare extends DomainResource {
           return FINISHED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown EpisodeOfCareStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -156,6 +153,26 @@ public class EpisodeOfCare extends DomainResource {
         if ("cancelled".equals(codeString))
           return EpisodeOfCareStatus.CANCELLED;
         throw new IllegalArgumentException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
+        }
+        public Enumeration<EpisodeOfCareStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("planned".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.PLANNED);
+        if ("waitlist".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.WAITLIST);
+        if ("active".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.ACTIVE);
+        if ("onhold".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.ONHOLD);
+        if ("finished".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.FINISHED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<EpisodeOfCareStatus>(this, EpisodeOfCareStatus.CANCELLED);
+        throw new FHIRException("Unknown EpisodeOfCareStatus code '"+codeString+"'");
         }
     public String toCode(EpisodeOfCareStatus code) {
       if (code == EpisodeOfCareStatus.PLANNED)
@@ -283,6 +300,29 @@ public class EpisodeOfCare extends DomainResource {
           childrenList.add(new Property("period", "Period", "The period during this EpisodeOfCare that the specific status applied.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("status"))
+          this.status = new EpisodeOfCareStatusEnumFactory().fromType(value); // Enumeration<EpisodeOfCareStatus>
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EpisodeOfCare.status");
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public EpisodeOfCareStatusHistoryComponent copy() {
         EpisodeOfCareStatusHistoryComponent dst = new EpisodeOfCareStatusHistoryComponent();
         copyValues(dst);
@@ -315,6 +355,11 @@ public class EpisodeOfCare extends DomainResource {
         return super.isEmpty() && (status == null || status.isEmpty()) && (period == null || period.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "EpisodeOfCare.statusHistory";
+
+  }
 
   }
 
@@ -465,6 +510,35 @@ public class EpisodeOfCare extends DomainResource {
           childrenList.add(new Property("member", "Reference(Practitioner|Organization)", "The practitioner (or Organization) within the team.", 0, java.lang.Integer.MAX_VALUE, member));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("role"))
+          this.getRole().add(castToCodeableConcept(value));
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("member"))
+          this.member = castToReference(value); // Reference
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("role")) {
+          return addRole();
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("member")) {
+          this.member = new Reference();
+          return this.member;
+        }
+        else
+          return super.addChild(name);
+      }
+
       public EpisodeOfCareCareTeamComponent copy() {
         EpisodeOfCareCareTeamComponent dst = new EpisodeOfCareCareTeamComponent();
         copyValues(dst);
@@ -503,6 +577,11 @@ public class EpisodeOfCare extends DomainResource {
         return super.isEmpty() && (role == null || role.isEmpty()) && (period == null || period.isEmpty())
            && (member == null || member.isEmpty());
       }
+
+  public String fhirType() {
+    return "EpisodeOfCare.careTeam";
+
+  }
 
   }
 
@@ -1123,6 +1202,82 @@ public class EpisodeOfCare extends DomainResource {
         childrenList.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, java.lang.Integer.MAX_VALUE, careManager));
         childrenList.add(new Property("careTeam", "", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, careTeam));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("status"))
+          this.status = new EpisodeOfCareStatusEnumFactory().fromType(value); // Enumeration<EpisodeOfCareStatus>
+        else if (name.equals("statusHistory"))
+          this.getStatusHistory().add((EpisodeOfCareStatusHistoryComponent) value);
+        else if (name.equals("type"))
+          this.getType().add(castToCodeableConcept(value));
+        else if (name.equals("condition"))
+          this.getCondition().add(castToReference(value));
+        else if (name.equals("patient"))
+          this.patient = castToReference(value); // Reference
+        else if (name.equals("managingOrganization"))
+          this.managingOrganization = castToReference(value); // Reference
+        else if (name.equals("period"))
+          this.period = castToPeriod(value); // Period
+        else if (name.equals("referralRequest"))
+          this.getReferralRequest().add(castToReference(value));
+        else if (name.equals("careManager"))
+          this.careManager = castToReference(value); // Reference
+        else if (name.equals("careTeam"))
+          this.getCareTeam().add((EpisodeOfCareCareTeamComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type EpisodeOfCare.status");
+        }
+        else if (name.equals("statusHistory")) {
+          return addStatusHistory();
+        }
+        else if (name.equals("type")) {
+          return addType();
+        }
+        else if (name.equals("condition")) {
+          return addCondition();
+        }
+        else if (name.equals("patient")) {
+          this.patient = new Reference();
+          return this.patient;
+        }
+        else if (name.equals("managingOrganization")) {
+          this.managingOrganization = new Reference();
+          return this.managingOrganization;
+        }
+        else if (name.equals("period")) {
+          this.period = new Period();
+          return this.period;
+        }
+        else if (name.equals("referralRequest")) {
+          return addReferralRequest();
+        }
+        else if (name.equals("careManager")) {
+          this.careManager = new Reference();
+          return this.careManager;
+        }
+        else if (name.equals("careTeam")) {
+          return addCareTeam();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "EpisodeOfCare";
+
+  }
 
       public EpisodeOfCare copy() {
         EpisodeOfCare dst = new EpisodeOfCare();

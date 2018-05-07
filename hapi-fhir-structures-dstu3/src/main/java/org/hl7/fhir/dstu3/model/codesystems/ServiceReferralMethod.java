@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum ServiceReferralMethod {
          */
         ELEC, 
         /**
-         * Referrals may be accepted via a secure email. To send please enrypt with the services public key.
+         * Referrals may be accepted via a secure email. To send please encrypt with the services public key.
          */
         SEMAIL, 
         /**
@@ -93,7 +93,7 @@ public enum ServiceReferralMethod {
             case FAX: return "Referrals may be accepted by fax.";
             case PHONE: return "Referrals may be accepted over the phone from a practitioner.";
             case ELEC: return "Referrals may be accepted via a secure messaging system. To determine the types of secure messaging systems supported, refer to the identifiers collection. Callers will need to understand the specific identifier system used to know that they are able to transmit messages.";
-            case SEMAIL: return "Referrals may be accepted via a secure email. To send please enrypt with the services public key.";
+            case SEMAIL: return "Referrals may be accepted via a secure email. To send please encrypt with the services public key.";
             case MAIL: return "Referrals may be accepted via regular postage (or hand delivered).";
             default: return "?";
           }

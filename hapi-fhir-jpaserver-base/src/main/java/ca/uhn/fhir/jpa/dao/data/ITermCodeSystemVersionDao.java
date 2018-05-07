@@ -1,12 +1,19 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +29,16 @@ import java.util.List;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemVersion, Long> {
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-
-public interface ITermCodeSystemVersionDao  extends JpaRepository<TermCodeSystemVersion, Long> {
+	@Modifying
+	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myCodeSystem = :cs")
+	void deleteForCodeSystem(@Param("cs") TermCodeSystem theCodeSystem);
 
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResource.myId = :resource_id")
 	List<TermCodeSystemVersion> findByCodeSystemResource(@Param("resource_id") Long theCodeSystemResourcePid);
-	
-	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myResource.myId = :resource_id AND cs.myResourceVersionId = :version_id")
-	TermCodeSystemVersion findByCodeSystemResourceAndVersion(@Param("resource_id") Long theCodeSystemResourcePid, @Param("version_id") Long theCodeSystemVersionPid);
+
+	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemHavingThisVersionAsCurrentVersionIfAny.myResource.myId = :resource_id")
+	TermCodeSystemVersion findCurrentVersionForCodeSystemResourcePid(@Param("resource_id") Long theCodeSystemResourcePid);
 
 }

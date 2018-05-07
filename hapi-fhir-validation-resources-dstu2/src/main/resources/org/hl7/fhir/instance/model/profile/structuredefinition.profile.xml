@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="StructureDefinition"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="2"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for StructureDefinition Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -56,9 +56,6 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="*.element.first.label.empty() and *.element.first.code.empty() and *.element.first.requirements.empty()"/>
-    </extension>
     <key value="sdf-9"/>
     <requirements value="Because these 3 fields seem to be have overlapping meaning with the ones in the root of StructureDefinition"/>
     <severity value="error"/>
@@ -66,18 +63,12 @@
     <xpath value="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.tail.all(path.startsWith(snapshot.element.first.path+&quot;.&quot;)) and differential.element.tail.all(path.startsWith(differential.element.first.path+&quot;.&quot;))"/>
-    </extension>
     <key value="sdf-8"/>
     <severity value="error"/>
     <human value="In any snapshot or differential, all the elements except the first have to have a path that starts with the path of the first + &quot;.&quot;"/>
     <xpath value="string-join(for $elementName in f:*[self::f:snapshot or self::f:differential]/f:element[position()>1]/f:path/@value return if (starts-with($elementName, concat($elementName/ancestor::f:element/parent::f:*/f:element[1]/f:path/@value, '.'))) then '' else $elementName,'')=''"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.base.empty() xor base"/>
-    </extension>
     <key value="sdf-12"/>
     <requirements value="Ensure that element.base appears with base or not"/>
     <severity value="error"/>
@@ -85,9 +76,6 @@
     <xpath value="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constrainedType.empty() or snapshot.element.first.path = constrainedType"/>
-    </extension>
     <key value="sdf-11"/>
     <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
     <severity value="error"/>
@@ -95,9 +83,6 @@
     <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.base.empty() xor base"/>
-    </extension>
     <key value="sdf-13"/>
     <requirements value="Ensure that element.base appears if there's a constrained type on the structure definition"/>
     <severity value="error"/>
@@ -105,18 +90,12 @@
     <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="containedType or snapshot.element.distinct(path)"/>
-    </extension>
     <key value="sdf-1"/>
     <severity value="error"/>
     <human value="Element paths must be unique unless the structure is a constraint"/>
     <xpath value="exists(f:constrainedType) or (count(f:snapshot/f:element) = count(distinct-values(f:snapshot/f:element/f:path/@value)))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="base or abstract = 'true' or constrainedType"/>
-    </extension>
     <key value="sdf-10"/>
     <requirements value="Ensure that there's a base unless the type is abstract and there's no constrainedType"/>
     <severity value="error"/>
@@ -124,36 +103,24 @@
     <xpath value="(f:abstract/@value=true()) or not(exists(f:constrainedType)) or exists(f:base)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constrainedType or url = 'http://hl7.org/fhir/StuctureDefinition/'+id"/>
-    </extension>
     <key value="sdf-7"/>
     <severity value="error"/>
     <human value="If the structure describes a base Resource or Type, the URL has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the id"/>
     <xpath value="exists(f:constrainedType) or f:url/@value=concat('http://hl7.org/fhir/StructureDefinition/', f:id/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot or differential"/>
-    </extension>
     <key value="sdf-6"/>
     <severity value="error"/>
     <human value="A structure must have either a differential, or a snapshot (or both)"/>
     <xpath value="exists(f:snapshot) or exists(f:differential)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constrainedType != 'Extension' or (context and contextType)"/>
-    </extension>
     <key value="sdf-5"/>
     <severity value="error"/>
     <human value="If the structure defines an extension then the structure must have context information"/>
     <xpath value="not(f:constrainedType/@value = 'extension') or (exists(f:context) and exists(f:contextType))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="base or abstract = 'true'"/>
-    </extension>
     <key value="sdf-4"/>
     <severity value="error"/>
     <human value="A structure must have a base unless abstract = true"/>
@@ -654,9 +621,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="name or uri"/>
-    </extension>
     <key value="sdf-2"/>
     <severity value="error"/>
     <human value="Must have at a name or a uri (or both)"/>
@@ -866,9 +830,6 @@
    </type>
    <condition value="sdf-6"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.all(definition and min and max)"/>
-    </extension>
     <key value="sdf-3"/>
     <severity value="error"/>
     <human value="Each element definition in a snapshot must have a formal definition and cardinalities"/>
@@ -1031,9 +992,6 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="*.element.first.label.empty() and *.element.first.code.empty() and *.element.first.requirements.empty()"/>
-    </extension>
     <key value="sdf-9"/>
     <requirements value="Because these 3 fields seem to be have overlapping meaning with the ones in the root of StructureDefinition"/>
     <severity value="error"/>
@@ -1041,18 +999,12 @@
     <xpath value="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.tail.all(path.startsWith(snapshot.element.first.path+&quot;.&quot;)) and differential.element.tail.all(path.startsWith(differential.element.first.path+&quot;.&quot;))"/>
-    </extension>
     <key value="sdf-8"/>
     <severity value="error"/>
     <human value="In any snapshot or differential, all the elements except the first have to have a path that starts with the path of the first + &quot;.&quot;"/>
     <xpath value="string-join(for $elementName in f:*[self::f:snapshot or self::f:differential]/f:element[position()>1]/f:path/@value return if (starts-with($elementName, concat($elementName/ancestor::f:element/parent::f:*/f:element[1]/f:path/@value, '.'))) then '' else $elementName,'')=''"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.base.empty() xor base"/>
-    </extension>
     <key value="sdf-12"/>
     <requirements value="Ensure that element.base appears with base or not"/>
     <severity value="error"/>
@@ -1060,9 +1012,6 @@
     <xpath value="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constrainedType.empty() or snapshot.element.first.path = constrainedType"/>
-    </extension>
     <key value="sdf-11"/>
     <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
     <severity value="error"/>
@@ -1070,9 +1019,6 @@
     <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.base.empty() xor base"/>
-    </extension>
     <key value="sdf-13"/>
     <requirements value="Ensure that element.base appears if there's a constrained type on the structure definition"/>
     <severity value="error"/>
@@ -1080,18 +1026,12 @@
     <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="containedType or snapshot.element.distinct(path)"/>
-    </extension>
     <key value="sdf-1"/>
     <severity value="error"/>
     <human value="Element paths must be unique unless the structure is a constraint"/>
     <xpath value="exists(f:constrainedType) or (count(f:snapshot/f:element) = count(distinct-values(f:snapshot/f:element/f:path/@value)))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="base or abstract = 'true' or constrainedType"/>
-    </extension>
     <key value="sdf-10"/>
     <requirements value="Ensure that there's a base unless the type is abstract and there's no constrainedType"/>
     <severity value="error"/>
@@ -1099,36 +1039,24 @@
     <xpath value="(f:abstract/@value=true()) or not(exists(f:constrainedType)) or exists(f:base)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constrainedType or url = 'http://hl7.org/fhir/StuctureDefinition/'+id"/>
-    </extension>
     <key value="sdf-7"/>
     <severity value="error"/>
     <human value="If the structure describes a base Resource or Type, the URL has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the id"/>
     <xpath value="exists(f:constrainedType) or f:url/@value=concat('http://hl7.org/fhir/StructureDefinition/', f:id/@value)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot or differential"/>
-    </extension>
     <key value="sdf-6"/>
     <severity value="error"/>
     <human value="A structure must have either a differential, or a snapshot (or both)"/>
     <xpath value="exists(f:snapshot) or exists(f:differential)"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="constrainedType != 'Extension' or (context and contextType)"/>
-    </extension>
     <key value="sdf-5"/>
     <severity value="error"/>
     <human value="If the structure defines an extension then the structure must have context information"/>
     <xpath value="not(f:constrainedType/@value = 'extension') or (exists(f:context) and exists(f:contextType))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="base or abstract = 'true'"/>
-    </extension>
     <key value="sdf-4"/>
     <severity value="error"/>
     <human value="A structure must have a base unless abstract = true"/>
@@ -1453,9 +1381,6 @@
     <code value="BackboneElement"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="name or uri"/>
-    </extension>
     <key value="sdf-2"/>
     <severity value="error"/>
     <human value="Must have at a name or a uri (or both)"/>
@@ -1614,9 +1539,6 @@
    </type>
    <condition value="sdf-6"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="snapshot.element.all(definition and min and max)"/>
-    </extension>
     <key value="sdf-3"/>
     <severity value="error"/>
     <human value="Each element definition in a snapshot must have a formal definition and cardinalities"/>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,75 +37,73 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ItemType {
 
         /**
-         * An item with no direct answer but which has descendant items that are questions
+         * An item with no direct answer but should have at least one child item.
          */
         GROUP, 
         /**
-         * Text for display that will not capture an answer or have descendants
+         * Text for display that will not capture an answer or have child items.
          */
         DISPLAY, 
         /**
-         * An item that defines a specific answer to be captured (and may have descendant items)
+         * An item that defines a specific answer to be captured, and may have child items.
+(the answer provided in the QuestionnaireResponse should be of the defined datatype)
          */
         QUESTION, 
         /**
-         * Question with a yes/no answer
+         * Question with a yes/no answer (valueBoolean)
          */
         BOOLEAN, 
         /**
-         * Question with is a real number answer
+         * Question with is a real number answer (valueDecimal)
          */
         DECIMAL, 
         /**
-         * Question with an integer answer
+         * Question with an integer answer (valueInteger)
          */
         INTEGER, 
         /**
-         * Question with adate answer
+         * Question with a date answer (valueDate)
          */
         DATE, 
         /**
-         * Question with a date and time answer
+         * Question with a date and time answer (valueDateTime)
          */
         DATETIME, 
         /**
-         * Question with a system timestamp answer
-         */
-        INSTANT, 
-        /**
-         * Question with a time (hour/minute/second) answer independent of date.
+         * Question with a time (hour:minute:second) answer independent of date. (valueTime)
          */
         TIME, 
         /**
-         * Question with a short (few words to short sentence) free-text entry answer
+         * Question with a short (few words to short sentence) free-text entry answer (valueString)
          */
         STRING, 
         /**
-         * Question with a long (potentially multi-paragraph) free-text entry (still captured as a string) answer
+         * Question with a long (potentially multi-paragraph) free-text entry answer (valueString)
          */
         TEXT, 
         /**
-         * Question with a url (website, FTP site, etc.) answer
+         * Question with a URL (website, FTP site, etc.) answer (valueUri)
          */
         URL, 
         /**
-         * Question with a Coding drawn from a list of options as an answer
+         * Question with a Coding drawn from a list of options (specified in either the option property, or via the valueset referenced in the options property) as an answer (valueCoding)
          */
         CHOICE, 
         /**
-         * Answer is a Coding drawn from a list of options or a free-text entry captured as Coding.display
+         * Answer is a Coding drawn from a list of options (as with the choice type) or a free-text entry in a string (valueCoding or valueString)
          */
         OPENCHOICE, 
         /**
-         * Question with binary content such as a image, PDF, etc. as an answer
+         * Question with binary content such as a image, PDF, etc. as an answer (valueAttachment)
          */
         ATTACHMENT, 
         /**
-         * Question with a reference to another resource (practitioner, organization, etc.) as an answer
+         * Question with a reference to another resource (practitioner, organization, etc.) as an answer (valueReference)
          */
         REFERENCE, 
         /**
-         * Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer.
+         * Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity)
+There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit whould be captured (or the a unit that has a ucum conversion from the provided unit)
          */
         QUANTITY, 
         /**
@@ -131,8 +129,6 @@ public enum ItemType {
           return DATE;
         if ("dateTime".equals(codeString))
           return DATETIME;
-        if ("instant".equals(codeString))
-          return INSTANT;
         if ("time".equals(codeString))
           return TIME;
         if ("string".equals(codeString))
@@ -163,7 +159,6 @@ public enum ItemType {
             case INTEGER: return "integer";
             case DATE: return "date";
             case DATETIME: return "dateTime";
-            case INSTANT: return "instant";
             case TIME: return "time";
             case STRING: return "string";
             case TEXT: return "text";
@@ -181,24 +176,23 @@ public enum ItemType {
         }
         public String getDefinition() {
           switch (this) {
-            case GROUP: return "An item with no direct answer but which has descendant items that are questions";
-            case DISPLAY: return "Text for display that will not capture an answer or have descendants";
-            case QUESTION: return "An item that defines a specific answer to be captured (and may have descendant items)";
-            case BOOLEAN: return "Question with a yes/no answer";
-            case DECIMAL: return "Question with is a real number answer";
-            case INTEGER: return "Question with an integer answer";
-            case DATE: return "Question with adate answer";
-            case DATETIME: return "Question with a date and time answer";
-            case INSTANT: return "Question with a system timestamp answer";
-            case TIME: return "Question with a time (hour/minute/second) answer independent of date.";
-            case STRING: return "Question with a short (few words to short sentence) free-text entry answer";
-            case TEXT: return "Question with a long (potentially multi-paragraph) free-text entry (still captured as a string) answer";
-            case URL: return "Question with a url (website, FTP site, etc.) answer";
-            case CHOICE: return "Question with a Coding drawn from a list of options as an answer";
-            case OPENCHOICE: return "Answer is a Coding drawn from a list of options or a free-text entry captured as Coding.display";
-            case ATTACHMENT: return "Question with binary content such as a image, PDF, etc. as an answer";
-            case REFERENCE: return "Question with a reference to another resource (practitioner, organization, etc.) as an answer";
-            case QUANTITY: return "Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer.";
+            case GROUP: return "An item with no direct answer but should have at least one child item.";
+            case DISPLAY: return "Text for display that will not capture an answer or have child items.";
+            case QUESTION: return "An item that defines a specific answer to be captured, and may have child items.\n(the answer provided in the QuestionnaireResponse should be of the defined datatype)";
+            case BOOLEAN: return "Question with a yes/no answer (valueBoolean)";
+            case DECIMAL: return "Question with is a real number answer (valueDecimal)";
+            case INTEGER: return "Question with an integer answer (valueInteger)";
+            case DATE: return "Question with a date answer (valueDate)";
+            case DATETIME: return "Question with a date and time answer (valueDateTime)";
+            case TIME: return "Question with a time (hour:minute:second) answer independent of date. (valueTime)";
+            case STRING: return "Question with a short (few words to short sentence) free-text entry answer (valueString)";
+            case TEXT: return "Question with a long (potentially multi-paragraph) free-text entry answer (valueString)";
+            case URL: return "Question with a URL (website, FTP site, etc.) answer (valueUri)";
+            case CHOICE: return "Question with a Coding drawn from a list of options (specified in either the option property, or via the valueset referenced in the options property) as an answer (valueCoding)";
+            case OPENCHOICE: return "Answer is a Coding drawn from a list of options (as with the choice type) or a free-text entry in a string (valueCoding or valueString)";
+            case ATTACHMENT: return "Question with binary content such as a image, PDF, etc. as an answer (valueAttachment)";
+            case REFERENCE: return "Question with a reference to another resource (practitioner, organization, etc.) as an answer (valueReference)";
+            case QUANTITY: return "Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity)\nThere is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit whould be captured (or the a unit that has a ucum conversion from the provided unit)";
             default: return "?";
           }
         }
@@ -212,7 +206,6 @@ public enum ItemType {
             case INTEGER: return "Integer";
             case DATE: return "Date";
             case DATETIME: return "Date Time";
-            case INSTANT: return "Instant";
             case TIME: return "Time";
             case STRING: return "String";
             case TEXT: return "Text";

@@ -1,0 +1,53 @@
+{
+	"resourceType": "MedicationRequest",
+	"id": "196356",
+	"meta": {
+		"versionId": "2",
+		"lastUpdated": "2017-08-04T15:26:29.333-04:00",
+		"profile": [
+		]
+	},
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n            <p>Viagra 100 mg Tablets</p>\n            <p>\n                <b>Creation Date: 2017-08-04</b>\n            </p>\n        </div>"
+	},
+	"status": "active",
+	"intent": "order",
+	"category": {
+		"coding": [
+			{
+				"system": "http://hl7.org/fhir/medication-request-category",
+				"code": "community"
+			}
+		]
+	},
+	"medicationCodeableConcept": {
+		"coding": [
+			{
+				"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+				"code": "316663",
+				"display": "Viagra"
+			}
+		]
+	},
+	"subject": {
+		"reference": "Patient/195975",
+		"display": "Mary Ann Mallady"
+	},
+	"authoredOn": "2017-08-03",
+	"requester": {
+		"agent": {
+			"reference": "Practitioner/196336"
+		}
+	},
+	"reasonCode": [
+		{
+			"coding": [
+				{
+					"system": "http://snomed.info/sct",
+					"code": "14760008"
+				}
+			]
+		}
+	]
+}

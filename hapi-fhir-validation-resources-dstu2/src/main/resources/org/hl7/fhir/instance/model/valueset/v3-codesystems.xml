@@ -1,7 +1,7 @@
 <Bundle xmlns="http://hl7.org/fhir">
  <id value="v3-valuesets"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
  </meta>
  <type value="collection"/>
  <entry>
@@ -10,7 +10,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementCondition"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -73,7 +73,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementDetailCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-AcknowledgementDetailCode"/>
@@ -274,7 +274,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementDetailType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -349,7 +349,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AcknowledgementType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -421,7 +421,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClass"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -1274,7 +1274,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActCode"/>
@@ -7919,7 +7919,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActExposureLevelCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActExposureLevelCode"/>
@@ -7976,7 +7976,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceElementModifier"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -8036,7 +8036,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActMood"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -8261,7 +8261,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPriority"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActPriority"/>
@@ -8384,7 +8384,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActReason"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActReason"/>
@@ -10068,7 +10068,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipCheckpoint"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -10134,7 +10134,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipJoin"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -10194,7 +10194,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipSplit"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -10254,7 +10254,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipSubset"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -10374,7 +10374,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActRelationshipType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -11333,7 +11333,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSite"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActSite"/>
@@ -11690,7 +11690,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -11786,7 +11786,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActUncertainty"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -11834,7 +11834,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActUSPrivacyLaw"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ActUSPrivacyLaw"/>
@@ -11909,7 +11909,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AddressPartType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -12125,7 +12125,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AddressUse"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -12275,7 +12275,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AdministrativeGender"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -12329,7 +12329,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-AmericanIndianAlaskaNativeLanguages"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-AmericanIndianAlaskaNativeLanguages"/>
@@ -13892,7 +13892,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Calendar"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -13934,7 +13934,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CalendarCycle"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-CalendarCycle"/>
@@ -14105,7 +14105,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CalendarType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14147,7 +14147,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Charset"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14243,7 +14243,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CodingRationale"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14336,7 +14336,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CommunicationFunctionType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14390,7 +14390,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-CompressionAlgorithm"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14462,7 +14462,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Confidentiality"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Confidentiality"/>
@@ -14654,7 +14654,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContainerCap"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ContainerCap"/>
@@ -14729,7 +14729,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContainerSeparator"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14777,7 +14777,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContentProcessingMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14825,7 +14825,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ContextControl"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -14921,7 +14921,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DataOperation"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-DataOperation"/>
@@ -15074,7 +15074,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DeviceAlertLevel"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15134,7 +15134,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentCompletion"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15224,7 +15224,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-DocumentStorage"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-DocumentStorage"/>
@@ -15281,7 +15281,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EducationLevel"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15371,7 +15371,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EmployeeJobClass"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15419,7 +15419,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EncounterAdmissionSource"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15473,7 +15473,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EncounterSpecialCourtesy"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15539,7 +15539,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityClass"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -15737,7 +15737,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityCode"/>
@@ -16649,7 +16649,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityDeterminer"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -16718,7 +16718,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityHandling"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -16862,7 +16862,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartQualifier"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17114,7 +17114,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartQualifierR2"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17312,7 +17312,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17378,7 +17378,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNamePartTypeR2"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17438,7 +17438,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNameUse"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17564,7 +17564,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityNameUseR2"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17708,7 +17708,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityRisk"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-EntityRisk"/>
@@ -17807,7 +17807,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EntityStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17876,7 +17876,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-EquipmentAlertLevel"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -17936,7 +17936,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Ethnicity"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Ethnicity"/>
@@ -18227,7 +18227,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ExposureMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ExposureMode"/>
@@ -18290,7 +18290,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GenderStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -18338,7 +18338,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GTSAbbreviation"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-GTSAbbreviation"/>
@@ -18569,7 +18569,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-hl7Realm"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -18881,7 +18881,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HL7UpdateMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19037,7 +19037,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-hl7V3Conformance"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-hl7V3Conformance"/>
@@ -19106,7 +19106,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-HtmlLinkType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19232,7 +19232,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-IdentifierReliability"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19286,7 +19286,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-IdentifierScope"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19346,7 +19346,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-IntegrityCheckAlgorithm"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19394,7 +19394,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LanguageAbilityMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19466,7 +19466,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LanguageAbilityProficiency"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19526,7 +19526,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LivingArrangement"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-LivingArrangement"/>
@@ -19631,7 +19631,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LocalMarkupIgnore"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19679,7 +19679,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-LocalRemoteControlState"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19727,7 +19727,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ManagedParticipationStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19799,7 +19799,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MapRelationship"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -19853,7 +19853,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MaritalStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-MaritalStatus"/>
@@ -19946,7 +19946,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MessageWaitingPriority"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-MessageWaitingPriority"/>
@@ -19997,7 +19997,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ModifyIndicator"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -20045,7 +20045,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-NullFlavor"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -20180,7 +20180,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationInterpretation"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -20546,7 +20546,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationMethod"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -22409,7 +22409,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationValue"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ObservationValue"/>
@@ -23849,7 +23849,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-orderableDrugForm"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-orderableDrugForm"/>
@@ -24863,7 +24863,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationFunction"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -25193,7 +25193,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ParticipationMode"/>
@@ -25316,7 +25316,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationSignature"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -25370,7 +25370,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ParticipationType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -25775,7 +25775,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PatientImportance"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -25865,7 +25865,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PaymentTerms"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -25925,7 +25925,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonDisabilityType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-PersonDisabilityType"/>
@@ -26018,7 +26018,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProbabilityDistributionType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -26108,7 +26108,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProcessingID"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -26162,7 +26162,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProcessingMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -26222,7 +26222,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryParameterValue"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryParameterValue"/>
@@ -26351,7 +26351,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryPriority"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -26399,7 +26399,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryRequestLimit"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-QueryRequestLimit"/>
@@ -26444,7 +26444,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryResponse"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -26504,7 +26504,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-QueryStatusCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -26570,7 +26570,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Race"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-Race"/>
@@ -32129,7 +32129,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RelationalOperator"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -32213,7 +32213,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RelationshipConjunction"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -32267,7 +32267,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ReligiousAffiliation"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-ReligiousAffiliation"/>
@@ -32792,7 +32792,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ResponseLevel"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -32870,7 +32870,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ResponseModality"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -32924,7 +32924,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ResponseMode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -32978,7 +32978,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleClass"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -33710,7 +33710,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RoleCode"/>
@@ -36241,7 +36241,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleLinkStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -36313,7 +36313,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleLinkType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -36397,7 +36397,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RoleStatus"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -36475,7 +36475,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RouteOfAdministration"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-RouteOfAdministration"/>
@@ -39481,7 +39481,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Sequencing"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -39535,7 +39535,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SetOperator"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -39607,7 +39607,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SpecimenType"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SpecimenType"/>
@@ -40384,7 +40384,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-substanceAdminSubstitution"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-substanceAdminSubstitution"/>
@@ -40477,7 +40477,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstitutionCondition"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-SubstitutionCondition"/>
@@ -40540,7 +40540,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableCellHorizontalAlign"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -40606,7 +40606,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableCellScope"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -40666,7 +40666,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableCellVerticalAlign"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -40726,7 +40726,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableFrame"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -40816,7 +40816,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TableRules"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -40882,7 +40882,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TargetAwareness"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -40954,7 +40954,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TelecommunicationCapabilities"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -41020,7 +41020,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TimingEvent"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -41164,7 +41164,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TransmissionRelationshipTypeCode"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -41206,7 +41206,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-TribalEntityUS"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <url value="http://hl7.org/fhir/ValueSet/v3-TribalEntityUS"/>
@@ -44647,7 +44647,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VaccineManufacturer"/>
     <meta>
-     <lastUpdated value="2015-07-31T00:00:00.000-04:00"/>
+     <lastUpdated value="2015-07-31T00:00:00.000+10:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -44923,7 +44923,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActPharmacySupplyType"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -44967,7 +44967,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObservationType"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45008,7 +45008,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActIncidentCode"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45052,7 +45052,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActSubstanceAdminSubstitutionCode"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45096,7 +45096,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SeverityObservation"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45140,7 +45140,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-xBasicConfidentialityKind"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45182,7 +45182,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ServiceDeliveryLocationRoleType"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45226,7 +45226,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-MilitaryRoleType"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45264,7 +45264,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActClassInvestigation"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45302,7 +45302,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SubstanceAdminSubstitutionReason"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45346,7 +45346,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActInvoiceGroupCode"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45390,7 +45390,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PersonalRelationshipRoleType"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45434,7 +45434,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-FamilyMember"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45472,7 +45472,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-VerificationMethod"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45510,7 +45510,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActCoverageTypeCode"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45548,7 +45548,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ActConsentType"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45586,7 +45586,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-InformationSensitivityPolicy"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45624,7 +45624,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityPolicy"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45662,7 +45662,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ObligationPolicy"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45700,7 +45700,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-RefrainPolicy"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45738,7 +45738,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-PurposeOfUse"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45776,7 +45776,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-GeneralPurposeOfUse"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45836,7 +45836,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityControlObservationValue"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45871,7 +45871,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-Compartment"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45909,7 +45909,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-SecurityIntegrityObservationValue"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -45953,7 +45953,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-AS"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -46004,7 +46004,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState-DC"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">
@@ -46052,7 +46052,7 @@
    <ValueSet xmlns="http://hl7.org/fhir">
     <id value="v3-ProvenanceEventCurrentState"/>
     <meta>
-     <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+     <lastUpdated value="2015-10-24T07:41:03.495+11:00"/>
      <profile value="http://hl7.org/fhir/StructureDefinition/valueset-shareable-definition"/>
     </meta>
     <extension url="http://hl7.org/fhir/StructureDefinition/valueset-oid">

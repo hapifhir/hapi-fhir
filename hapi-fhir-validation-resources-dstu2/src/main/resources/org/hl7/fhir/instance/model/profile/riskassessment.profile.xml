@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="RiskAssessment"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="0"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/dss/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for RiskAssessment Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -484,18 +484,12 @@
     <code value="CodeableConcept"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="(low.empty() or ((low.code = &quot;%&quot;) and (low.system = %ucum))) and (high.empty() or ((high.code = &quot;%&quot;) and (high.system = %ucum)))"/>
-    </extension>
     <key value="ras-1"/>
     <severity value="error"/>
     <human value="low and high must be percentages, if present"/>
     <xpath value="(not(f:low) or f:low[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org']) and (not(f:high) or f:high[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org'])"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="value &lt;= 100"/>
-    </extension>
     <key value="ras-2"/>
     <severity value="error"/>
     <human value="Must be &lt;= 100"/>
@@ -844,18 +838,12 @@
     <code value="CodeableConcept"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="(low.empty() or ((low.code = &quot;%&quot;) and (low.system = %ucum))) and (high.empty() or ((high.code = &quot;%&quot;) and (high.system = %ucum)))"/>
-    </extension>
     <key value="ras-1"/>
     <severity value="error"/>
     <human value="low and high must be percentages, if present"/>
     <xpath value="(not(f:low) or f:low[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org']) and (not(f:high) or f:high[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org'])"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="value &lt;= 100"/>
-    </extension>
     <key value="ras-2"/>
     <severity value="error"/>
     <human value="Must be &lt;= 100"/>

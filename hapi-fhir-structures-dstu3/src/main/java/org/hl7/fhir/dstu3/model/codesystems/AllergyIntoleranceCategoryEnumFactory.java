@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -43,10 +43,10 @@ public class AllergyIntoleranceCategoryEnumFactory implements EnumFactory<Allerg
       return AllergyIntoleranceCategory.FOOD;
     if ("medication".equals(codeString))
       return AllergyIntoleranceCategory.MEDICATION;
-    if ("biologic".equals(codeString))
-      return AllergyIntoleranceCategory.BIOLOGIC;
     if ("environment".equals(codeString))
       return AllergyIntoleranceCategory.ENVIRONMENT;
+    if ("biologic".equals(codeString))
+      return AllergyIntoleranceCategory.BIOLOGIC;
     throw new IllegalArgumentException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
   }
 
@@ -55,10 +55,10 @@ public class AllergyIntoleranceCategoryEnumFactory implements EnumFactory<Allerg
       return "food";
     if (code == AllergyIntoleranceCategory.MEDICATION)
       return "medication";
-    if (code == AllergyIntoleranceCategory.BIOLOGIC)
-      return "biologic";
     if (code == AllergyIntoleranceCategory.ENVIRONMENT)
       return "environment";
+    if (code == AllergyIntoleranceCategory.BIOLOGIC)
+      return "biologic";
     return "?";
   }
 

@@ -21,7 +21,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.hapi.rest.server.ServerConformanceProvider;
+import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -39,7 +39,6 @@ import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
-@SuppressWarnings("deprecation")
 public class MetadataConformanceDstu3Test {
 
 	private static CloseableHttpClient ourClient;
@@ -61,7 +60,7 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
-			assertThat(output, containsString("<Conformance"));
+         assertThat(output, containsString("<CapabilityStatement"));
 			assertThat(output, stringContainsInOrder("<meta>", "SUBSETTED", "</meta>"));
 			assertThat(output, not(stringContainsInOrder("searchParam")));
 		} finally {
@@ -75,7 +74,7 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
-			assertThat(output, containsString("<Conformance"));
+         assertThat(output, containsString("<CapabilityStatement"));
 			assertThat(output, not(stringContainsInOrder("<meta>", "SUBSETTED", "</meta>")));
 			assertThat(output, stringContainsInOrder("searchParam"));
 		} finally {
@@ -93,7 +92,7 @@ public class MetadataConformanceDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
-			assertThat(output, containsString("<Conformance"));
+			assertThat(output, containsString("<CapabilityStatement"));
 			assertThat(output, stringContainsInOrder("<meta>", "SUBSETTED", "</meta>"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -109,7 +108,7 @@ public class MetadataConformanceDstu3Test {
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(output, containsString("<Conformance"));
+         assertThat(output, containsString("<CapabilityStatement"));
 			assertEquals("HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3)", status.getFirstHeader("X-Powered-By").getValue());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -154,7 +153,7 @@ public class MetadataConformanceDstu3Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setServerConformanceProvider(new ServerConformanceProvider(ourServlet));
+		ourServlet.setServerConformanceProvider(new ServerCapabilityStatementProvider(ourServlet));
 		ourServlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

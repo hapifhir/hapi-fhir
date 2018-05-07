@@ -1,22 +1,31 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+import java.util.Collections;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +41,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-
+@Transactional(value = TxType.REQUIRED)
 public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu3.class);
@@ -68,18 +68,34 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	public JpaValidationSupportDstu3() {
 		super();
 	}
-	
-	
+
+
 	@Override
+	@Transactional(value = TxType.SUPPORTS)
 	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;
 	}
 
 	@Override
+	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
+		return null;
+	}
+
+	@Override
+	@Transactional(value = TxType.SUPPORTS)
+	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
+		return Collections.emptyList();
+	}
+
+	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		IdType id = new IdType(theUri);
@@ -92,19 +108,40 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 		IBundleProvider search;
 		if ("ValueSet".equals(resourceName)) {
 			if (localReference) {
-				search = myValueSetDao.search(IAnyResource.SP_RES_ID, new StringParam(theUri));
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
+				search = myValueSetDao.search(params);
+				if (search.size() == 0) {
+					params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
+					params.add(ValueSet.SP_URL, new UriParam(theUri));
+					search = myValueSetDao.search(params);
+				}
 			} else {
-				search = myValueSetDao.search(ValueSet.SP_URL, new UriParam(theUri));
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add(ValueSet.SP_URL, new UriParam(theUri));
+				search = myValueSetDao.search(params);
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 				return null;
 			}
-			search = myStructureDefinitionDao.search(StructureDefinition.SP_URL, new UriParam(theUri));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+			search = myStructureDefinitionDao.search(params);
 		} else if ("Questionnaire".equals(resourceName)) {
-			search = myQuestionnaireDao.search(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+			search = myQuestionnaireDao.search(params);
 		} else if ("CodeSystem".equals(resourceName)) {
-			search = myCodeSystemDao.search(CodeSystem.SP_URL, new UriParam(theUri));
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(CodeSystem.SP_URL, new UriParam(theUri));
+			search = myCodeSystemDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -121,25 +158,20 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	}
 
 	@Override
+	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
+		return fetchResource(theCtx, StructureDefinition.class, theUrl);
+	}
+
+	@Override
+	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
 	}
 
 	@Override
+	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		return null;
-	}
-
-
-	@Override
-	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
-		return fetchResource(theCtx, StructureDefinition.class, theUrl);
-	}
-
-
-	@Override
-	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return Collections.emptyList();
 	}
 
 }

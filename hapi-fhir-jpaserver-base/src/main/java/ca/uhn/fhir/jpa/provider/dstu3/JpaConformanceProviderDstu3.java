@@ -1,12 +1,10 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,35 +19,33 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider {
 
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
 	private String myImplementationDescription;
+	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-
+	
 	/**
 	 * Constructor
 	 */
@@ -57,8 +53,9 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	public JpaConformanceProviderDstu3(){
 		super();
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
-
+	
 	/**
 	 * Constructor
 	 */
@@ -68,15 +65,18 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
+		setIncludeResourceCounts(true);
 	}
-	
+
 	@Override
 	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
 		CapabilityStatement retVal = myCachedValue;
 
-		Map<String, Long> counts = mySystemDao.getResourceCounts();
-
-		FhirContext ctx = myRestfulServer.getFhirContext();
+		Map<String, Long> counts = null;
+		if (myIncludeResourceCounts) {
+			counts = mySystemDao.getResourceCountsFromCache();
+		}
+		counts = defaultIfNull(counts, Collections.emptyMap());
 
 		retVal = super.getServerConformance(theRequest);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {
@@ -148,6 +148,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		return retVal;
 	}
 
+	public boolean isIncludeResourceCounts() {
+		return myIncludeResourceCounts;
+	}
+	
 	/**
 	 * Subclasses may override
 	 */
@@ -162,6 +166,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
+	}
+
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

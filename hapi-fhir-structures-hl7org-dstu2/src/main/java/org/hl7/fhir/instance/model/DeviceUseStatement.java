@@ -29,15 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import org.hl7.fhir.exceptions.FHIRException;
+
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.
  */
@@ -145,26 +142,26 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
-    public CodeableConcept getBodySiteCodeableConcept() throws Exception { 
+    public CodeableConcept getBodySiteCodeableConcept() throws FHIRException { 
       if (!(this.bodySite instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
       return (CodeableConcept) this.bodySite;
     }
 
-    public boolean hasBodySiteCodeableConcept() throws Exception { 
+    public boolean hasBodySiteCodeableConcept() { 
       return this.bodySite instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
-    public Reference getBodySiteReference() throws Exception { 
+    public Reference getBodySiteReference() throws FHIRException { 
       if (!(this.bodySite instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
       return (Reference) this.bodySite;
     }
 
-    public boolean hasBodySiteReference() throws Exception { 
+    public boolean hasBodySiteReference() { 
       return this.bodySite instanceof Reference;
     }
 
@@ -485,39 +482,39 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @return {@link #timing} (How often the device was used.)
      */
-    public Timing getTimingTiming() throws Exception { 
+    public Timing getTimingTiming() throws FHIRException { 
       if (!(this.timing instanceof Timing))
-        throw new Exception("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Timing) this.timing;
     }
 
-    public boolean hasTimingTiming() throws Exception { 
+    public boolean hasTimingTiming() { 
       return this.timing instanceof Timing;
     }
 
     /**
      * @return {@link #timing} (How often the device was used.)
      */
-    public Period getTimingPeriod() throws Exception { 
+    public Period getTimingPeriod() throws FHIRException { 
       if (!(this.timing instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Period) this.timing;
     }
 
-    public boolean hasTimingPeriod() throws Exception { 
+    public boolean hasTimingPeriod() { 
       return this.timing instanceof Period;
     }
 
     /**
      * @return {@link #timing} (How often the device was used.)
      */
-    public DateTimeType getTimingDateTimeType() throws Exception { 
+    public DateTimeType getTimingDateTimeType() throws FHIRException { 
       if (!(this.timing instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
+        throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateTimeType) this.timing;
     }
 
-    public boolean hasTimingDateTimeType() throws Exception { 
+    public boolean hasTimingDateTimeType() { 
       return this.timing instanceof DateTimeType;
     }
 
@@ -545,6 +542,85 @@ public class DeviceUseStatement extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient)", "The patient who used the device.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, java.lang.Integer.MAX_VALUE, timing));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("bodySite[x]"))
+          this.bodySite = (Type) value; // Type
+        else if (name.equals("whenUsed"))
+          this.whenUsed = castToPeriod(value); // Period
+        else if (name.equals("device"))
+          this.device = castToReference(value); // Reference
+        else if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("indication"))
+          this.getIndication().add(castToCodeableConcept(value));
+        else if (name.equals("notes"))
+          this.getNotes().add(castToString(value));
+        else if (name.equals("recordedOn"))
+          this.recordedOn = castToDateTime(value); // DateTimeType
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("timing[x]"))
+          this.timing = (Type) value; // Type
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("bodySiteCodeableConcept")) {
+          this.bodySite = new CodeableConcept();
+          return this.bodySite;
+        }
+        else if (name.equals("bodySiteReference")) {
+          this.bodySite = new Reference();
+          return this.bodySite;
+        }
+        else if (name.equals("whenUsed")) {
+          this.whenUsed = new Period();
+          return this.whenUsed;
+        }
+        else if (name.equals("device")) {
+          this.device = new Reference();
+          return this.device;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("indication")) {
+          return addIndication();
+        }
+        else if (name.equals("notes")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceUseStatement.notes");
+        }
+        else if (name.equals("recordedOn")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceUseStatement.recordedOn");
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("timingTiming")) {
+          this.timing = new Timing();
+          return this.timing;
+        }
+        else if (name.equals("timingPeriod")) {
+          this.timing = new Period();
+          return this.timing;
+        }
+        else if (name.equals("timingDateTime")) {
+          this.timing = new DateTimeType();
+          return this.timing;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "DeviceUseStatement";
+
+  }
 
       public DeviceUseStatement copy() {
         DeviceUseStatement dst = new DeviceUseStatement();

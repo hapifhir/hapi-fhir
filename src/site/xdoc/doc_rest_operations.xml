@@ -11,16 +11,16 @@
 
 			<a name="operations" />
 			<p>
-				This page shows the operations which can be implemented on 
+				This page shows the operations which can be implemented on
 				HAPI
 				<a href="./doc_rest_server.html">RESTful Servers</a>, as well as
 				<a href="./doc_rest_client_annotation.html">Annotation Clients</a>.
 				Most of the examples shown here show how to implement a server
 				method, but to perform an equivalent call on an annotation
 				client you simply put a method with the same signature in your
-				client interface. 
+				client interface.
 			</p>
-			
+
 			<a name="instance_read" />
 		</section>
 
@@ -80,7 +80,7 @@
 				operation retrieves a specific version of a resource with a given ID.
 				To support vread, simply add "version=true" to your @Read annotation. This
 				means that the read method will support both "Read" and "VRead". The IdDt
-				may or may not have the version populated depending on the client request. 
+				may or may not have the version populated depending on the client request.
 			</p>
 
 			<macro name="snippet">
@@ -93,7 +93,7 @@
 				<br />
 				<code>http://fhir.example.com/Patient/111/_history/2</code>
 			</p>
-			
+
 			<a name="instance_update" />
 		</section>
 
@@ -156,14 +156,14 @@
 				<param name="id" value="updateClient" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<h4>Conditional Updates</h4>
 			<p>
 				If you wish to suport conditional updates, you can add a parameter
-				tagged with a 
+				tagged with a
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ConditionalOperationParam.html">@ConditionalOperationParam</a>
 				annotation. If the request URL contains search parameters instead of a
-				resource ID, then this parameter will be populated. 
+				resource ID, then this parameter will be populated.
 			</p>
 
 			<macro name="snippet">
@@ -185,7 +185,7 @@
 				for any reason, you may also add parameters which have been annotated
 				with the <code>@ResourceParam</code> of type
 				<code>String</code> (to access the raw resource body) and/or
-				<code>EncodingEnum</code> (to determine which encoding was used) 
+				<code>EncodingEnum</code> (to determine which encoding was used)
 			</p>
 			<p>
 				The following example shows how to use these additonal data elements.
@@ -213,35 +213,35 @@
 				server method should add the updated resource to the MethodOutcome object
 				being returned, as shown in the example below.
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="updatePrefer" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<h4>Contention Aware Updating</h4>
 
 			<p>
 				As of FHIR DSTU2, FHIR uses the <code>ETag</code> header to
 				provide "conention aware updating". Under this scheme, a client
 				may create a request that contains an ETag specifying the version,
-				and the server will fail if the given version is not the latest 
+				and the server will fail if the given version is not the latest
 				version.
 			</p>
 			<p>
 				Such a request is shown below. In the following example, the update will
 				only be applied if resource "Patient/123" is currently at version "3".
-				Otherwise, 
+				Otherwise,
 			</p>
 			<pre><![CDATA[PUT [serverBase]/Patient/123
 If-Match: W/"3"]]></pre>
-			
+
 			<p>
 				If a client performs a contention aware update, the ETag version will be
-				placed in the version part of the IdDt/IdType that is passed into the 
+				placed in the version part of the IdDt/IdType that is passed into the
 				method. For example:
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="updateEtag" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
@@ -305,14 +305,14 @@ If-Match: W/"3"]]></pre>
 			</p>
 
 			<h4>Conditional Deletes</h4>
-			
+
 			<p>
 				The FHIR specification also allows "conditional deletes". A conditional
 				delete uses a search style URL instead of a read style URL, and
 				deletes a single resource if it matches the given search parameters.
-				The following example shows how to 
+				The following example shows how to
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="deleteConditional" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
@@ -382,7 +382,7 @@ If-Match: W/"3"]]></pre>
 			</macro>
 
 			<h4>Conditional Creates</h4>
-			
+
 			<p>
 				The FHIR specification also allows "conditional creates". A conditional
 				create has an additional header called <code>If-None-Exist</code>
@@ -398,7 +398,7 @@ If-Match: W/"3"]]></pre>
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ConditionalOperationParam.html">@ConditionalOperationParam</a>
 				is detected, it will be populated with the value of this header.
 			</p>
-			
+
 			<macro name="snippet">
 				<param name="id" value="createConditional" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
@@ -409,21 +409,21 @@ If-Match: W/"3"]]></pre>
 				<br />
 				<code>http://fhir.example.com/Patient<br/>If-None-Exist: Patient?identifier=system%7C0001</code>
 			</p>
-			
+
 			<h4>Prefer Header / Returning the resource body</h4>
 			<p>
 				If you wish to allow your server to honour the <code>Prefer</code>
-				header, the same mechanism shown above for 
+				header, the same mechanism shown above for
 				<a href="#prefer">Prefer Header for Updates</a> should be used.
 			</p>
 
 			<h4>Accessing The Raw Resource Payload</h4>
 			<p>
 				The create operation also supports access to the raw payload,
-				using the same semantics as raw payload access 
+				using the same semantics as raw payload access
 				<a href="#raw_update_access">for the update operation</a>.
 			</p>
-			
+
 			<a name="type_search" />
 		</section>
 
@@ -482,9 +482,9 @@ If-Match: W/"3"]]></pre>
 					individual HAPI resource
 					classes.
 				</p>
-				
+
 				<p>
-					Parameters which take a string as their format should use the 
+					Parameters which take a string as their format should use the
 					<code><a href="./apidocs/ca/uhn/fhir/rest/param/StringParam.html">StringParam</a></code>
 					type. They may also use normal java <code>String</code>, although it is
 					not possible to use the <code>:exact</code> qualifier in that case.
@@ -671,21 +671,21 @@ If-Match: W/"3"]]></pre>
 					for patients.
 				</p>
 				<p>
-					Reference parameters use the 
-					<a href="./apidocs/ca/uhn/fhir/rest/param/ReferenceParam.html">ReferenceParam</a> 
+					Reference parameters use the
+					<a href="./apidocs/ca/uhn/fhir/rest/param/ReferenceParam.html">ReferenceParam</a>
 					type. Reference parameters are, in their most basic form, just a pointer to another
 					resource. For example, you might want to query for DiagnosticReport resources where the
 					subject (the Patient resource that the report is about) is Patient/123. The following
-					example shows a simple resource reference parameter in use. 
+					example shows a simple resource reference parameter in use.
 				</p>
 				<macro name="snippet">
 					<param name="id" value="referenceSimple" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
-				
+
+
 				<h4>Chained Resource References</h4>
-				
+
 				<p>
 					References may also support a "chained" value. This is a search parameter name
 					on the target resource. For example, you might want to search for DiagnosticReport
@@ -697,20 +697,20 @@ If-Match: W/"3"]]></pre>
 					where the <b>subject</b> (Patient) of the report has the <b>family</b> (name) of
 					'SMITH'</i>".
 				</p>
-				
+
 				<p>
 					There are two ways of dealing with chained parameters in your methods: static chains and
 					dynamic chains. Both are equally valid, although dyamic chains might lead to somewhat
 					more compact and readable code.
 				</p>
-				
+
 				<a name="dynamic_chains"/>
 				<h4>Dynamic Chains</h4>
-				
+
 				<p>
 					Chained values must be explicitly declared through the use
 					of a whitelist (or blacklist). The following example shows how to declare a
-					report with an allowable chained parameter: 
+					report with an allowable chained parameter:
 				</p>
 				<macro name="snippet">
 					<param name="id" value="referenceWithChain" />
@@ -720,7 +720,7 @@ If-Match: W/"3"]]></pre>
 				<p>
 					You may also specify the whitelist value of
 					<code>""</code> to allow an empty chain (e.g. ther resource ID)
-					and this can be combined with other values, as shown below: 
+					and this can be combined with other values, as shown below:
 				</p>
 
 				<macro name="snippet">
@@ -738,7 +738,7 @@ If-Match: W/"3"]]></pre>
 					<param name="id" value="referenceWithDynamicChain" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<h4>Static Chains</h4>
 
 				<p>
@@ -766,11 +766,11 @@ If-Match: W/"3"]]></pre>
 				<p>
 					In the following example, Observation.name-value-date is shown. This parameter
 					is a composite of a string and a date. Note that the composite parameter types
-					(StringParam and DateParam) must be specified in both the annotation's 
+					(StringParam and DateParam) must be specified in both the annotation's
 					<code>compositeTypes</code> field, as well as the generic types for the
 					<code>CompositeParam</code> method parameter itself.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="searchComposite" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
@@ -810,23 +810,23 @@ If-Match: W/"3"]]></pre>
 
 				<p>
 					If you wish to create a server that can accept any combination of a large number
-					of parameters, (this is how the various reference servers behave, as well as the 
-					<a href="http://fhirtest.uhn.ca">public HAPI server</a>) 
+					of parameters, (this is how the various reference servers behave, as well as the
+					<a href="http://fhirtest.uhn.ca">public HAPI server</a>)
 					the easiest way to accomplish this is to simply create one method
 					with all allowable parameters, each annotated as @OptionalParam.
 				</p>
 
 				<p>
-					On the other hand, if you have specific combinations of parameters you wish to 
+					On the other hand, if you have specific combinations of parameters you wish to
 					support (a common scenario if you are building FHIR on top of existing data sources
 					and only have certain indexes you can use) you could create multiple search methods,
 					each with specific required and optional parameters matching the database indexes.
 				</p>
-				
+
 				<p>
 					The following example shows a method with two parameters.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="searchOptionalParam" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
@@ -881,7 +881,7 @@ If-Match: W/"3"]]></pre>
 				<p>
 					It is worth noting that according to the FHIR specification, you can have an
 					AND relationship combining multiple OR relationships, but not vice-versa. In
-					other words, it's possible to support a search like 
+					other words, it's possible to support a search like
 					<code>("name" = ("joe" or "john")) AND ("age" = (11 or 12))</code> but not
 					a search like
 					<code>("language" = ("en" AND "fr") OR ("address" = ("Canada" AND "Quebec"))</code>
@@ -892,7 +892,7 @@ If-Match: W/"3"]]></pre>
 				<p>
 					To accept a composite parameter, use a parameter type which implements the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterOr.html">IQueryParameterOr</a>
-					interface. 
+					interface.
 				</p>
 				<p>
 					Each parameter type (StringParam, TokenParam, etc.) has a corresponding parameter
@@ -924,7 +924,7 @@ If-Match: W/"3"]]></pre>
 					interface (which in turn encapsulates the corresponding IQueryParameterOr types).
 				</p>
 				<p>
-					An example follows which shows a search for Patients by address, where multiple string 
+					An example follows which shows a search for Patients by address, where multiple string
 					lists may be supplied by the client. For example, the client might request that the
 					address match <code>("Montreal" OR "Sherbrooke") AND ("Quebec" OR "QC")</code> using
 					the following query:
@@ -932,11 +932,11 @@ If-Match: W/"3"]]></pre>
 					<code>http://fhir.example.com/Patient?address=Montreal,Sherbrooke&amp;address=Quebec,QC</code>
 				</p>
 				<p>
-					The following code shows how to receive this parameter using a 
+					The following code shows how to receive this parameter using a
 					<a href="./apidocs/ca/uhn/fhir/rest/param/StringAndListParam.html">StringAndListParameter</a>,
 					which can handle an AND list of multiple OR lists of strings.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="searchMultipleAnd" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
@@ -948,13 +948,13 @@ If-Match: W/"3"]]></pre>
 					to use AND search parameters to specify a search criteria of
 					<code>(A=1 OR A=2) AND (B=1 OR B=2)</code>
 					but it is not possible to specify
-					<code>(A=1 AND B=1) OR (A=2 AND B=2)</code> (aside from 
-					in very specific cases where a composite parameter has been 
-					specifically defined). 
+					<code>(A=1 AND B=1) OR (A=2 AND B=2)</code> (aside from
+					in very specific cases where a composite parameter has been
+					specifically defined).
 				</p>
-				
+
 				<h4>AND Relationship Query Parameters for Dates</h4>
-				
+
 				<p>
 					Dates are a bit of a special case, since it is a common scenario to want to match
 					a date range (which is really just an AND query on two qualified date parameters).
@@ -1006,7 +1006,7 @@ If-Match: W/"3"]]></pre>
 
 				<p>
 					To add support for reverse includes (via the <code>_revinclude</code> parameter),
-					use the same format as with the <code>_include</code> parameter (shown above) 
+					use the same format as with the <code>_include</code> parameter (shown above)
 					but add <code>reverse=true</code> to the <code>@IncludeParam</code>
 					annotation, as shown below.
 				</p>
@@ -1017,7 +1017,7 @@ If-Match: W/"3"]]></pre>
 				</macro>
 
 			</subsection>
-			
+
 			<subsection name="Named Queries (_query)">
 
 				<p>
@@ -1055,15 +1055,15 @@ If-Match: W/"3"]]></pre>
 				</p>
 
 				<p>
-					According to the specification, sorting is requested by the client using a 
+					According to the specification, sorting is requested by the client using a
 					search param as the sort key. For example, when searching Patient resources,
 					a sort key of "given" requests the "given" search param as the sort key. That
-					param maps to the values in the field "Patient.name.given". 
+					param maps to the values in the field "Patient.name.given".
 				</p>
 
 				<p>
 					Sort specifications can be passed into handler methods by adding a parameter
-					of type 
+					of type
 					SortSpec,
 					which has been annotated with the
 					@Sort
@@ -1087,9 +1087,9 @@ If-Match: W/"3"]]></pre>
 
 				<p>
 					It is also possible to annotate search methods and/or parameters with
-					the 
+					the
 					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
-					annotation. This annotation allows you to add a description of the method 
+					annotation. This annotation allows you to add a description of the method
 					and the individual parameters. These descriptions will be placed in the
 					server's conformance statement, which can be helpful to anyone who is developing
 					software against your server.
@@ -1101,7 +1101,7 @@ If-Match: W/"3"]]></pre>
 				</macro>
 
 			</subsection>
-			
+
 			<a name="type_validate" />
 		</section>
 
@@ -1124,7 +1124,7 @@ If-Match: W/"3"]]></pre>
 				In FHIR DSTU1 the validate operation used a URL resembling <code>http://example.com/Patient/_validate</code>
 				with a resource in the HTTP POST body. In FHIR DSTU2, validate has been changed to use the
 				<a href="#extended_operations">extended operation</a> mechanism. It now uses a URL
-				resembling <code>http://example.com/Patient/$validate</code> and takes a 
+				resembling <code>http://example.com/Patient/$validate</code> and takes a
 				Parameters resource as input in the method body.<br/><br/>
 				The mechanism described below may be used for both DSTU1 and DSTU2+ servers, and HAPI
 				will automatically use the correct form depending on what FHIR version the
@@ -1180,13 +1180,13 @@ If-Match: W/"3"]]></pre>
 
 			<p>
 				In the example above, only the <code>@ResourceParam</code> parameter is technically required, but
-				in DSTU2 you are encouraged to also add the following parameters: 
+				in DSTU2 you are encouraged to also add the following parameters:
 			</p>
 			<ul>
 				<li><b>@Validate.Mode ValidationModeEnum mode</b> - This is the validation mode (see the FHIR specification for information on this)</li>
 				<li><b>@Validate.Profile String profile</b> - This is the profile to validate against (see the FHIR specification for more information on this)</li>
 			</ul>
-			
+
 			<p>
 				Example URL to invoke this method (this would be invoked using an HTTP POST,
 				with a Parameters resource in the POST body):
@@ -1260,7 +1260,7 @@ If-Match: W/"3"]]></pre>
 		<section name="System Level - Transaction">
 
 			<p>
-				The 
+				The
 				<a href="http://hl7.org/implement/standards/fhir/http.html#transaction">transaction</a>
 				action is among the most challenging parts of the FHIR specification to implement. It allows the
 				user to submit a bundle containing a number of resources to be created/updated/deleted as a single
@@ -1276,35 +1276,35 @@ If-Match: W/"3"]]></pre>
 				<param name="id" value="transaction" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<p>
 				Transaction methods require one parameter annotated with @TransactionParam, and that
 				parameter may be of type List&lt;IResource&gt; or Bundle.
 			</p>
-			
+
 			<p>
-				In terms of actually implementing the method, unfortunately there is only so much help 
-				HAPI will give you. One might expect HAPI to automatically delegate the individual 
-				operations in the transaction to other methods on the server but at this point it 
-				does not do that. There is a lot that transaction needs to handle 
-				(making everything atomic, replacing placeholder IDs across multiple resources 
-				which may even be circular, handling operations in the right order) and 
+				In terms of actually implementing the method, unfortunately there is only so much help
+				HAPI will give you. One might expect HAPI to automatically delegate the individual
+				operations in the transaction to other methods on the server but at this point it
+				does not do that. There is a lot that transaction needs to handle
+				(making everything atomic, replacing placeholder IDs across multiple resources
+				which may even be circular, handling operations in the right order) and
 				so far we have not found a way for the framework to do this in a generic way.
 			</p>
 			<p>
 				What it comes down to is the fact that transaction is a tricky thing to implement.
 				For what it's worth, you could look at our JPA module's "transaction" method in
-				<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/dstu3/FhirSystemDaoDstu3.java">our source repository</a> 
+				<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/dao/dstu3/FhirSystemDaoDstu3.java">our source repository</a>
 				to see how we implemented transaction in the JPA server.
 			</p>
-			
+
 			<p>
 				Example URL to invoke this method:
 				<br />
 				<code>POST http://fhir.example.com/</code><br/>
 				<i>(note that the content of this POST will be a bundle)</i>
 			</p>
-			
+
 
 			<a name="system_search" />
 		</section>
@@ -1414,13 +1414,13 @@ If-Match: W/"3"]]></pre>
 			<u>
 				<li>
 					The <code>@Since</code> method argument implements the <code>_since</code>
-					parameter and should be of type <code>DateTimeDt</code> or <code>DateTimeType</code> 
+					parameter and should be of type <code>DateTimeDt</code> or <code>DateTimeType</code>
 				</li>
 				<li>
 					The <code>@At</code> method argument implements the <code>_at</code>
-					parameter and may be of type 
+					parameter and may be of type
 					<code>DateRangeParam</code>,
-					<code>DateTimeDt</code> or <code>DateTimeType</code> 
+					<code>DateTimeDt</code> or <code>DateTimeType</code>
 				</li>
 			</u>
 
@@ -1440,6 +1440,30 @@ If-Match: W/"3"]]></pre>
 
 			<a name="exceptions" />
 		</section>
+
+
+		<section name="Instance Level - Patch">
+
+			<p>
+				HAPI FHIR includes basic support for the
+				<a href="http://hl7.org/implement/standards/fhir/http.html#patch">
+					<b>patch</b>
+				</a>
+				operation. This support allows you to perform patches, but does not
+				include logic to actually implement resource patching in the server
+				framework (note that the JPA server does include a patch implementation).
+			</p>
+			<p>
+				The following snippet shows how to define a patch method on a server:
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="patch" />
+				<param name="file" value="examples/src/main/java/example/PatchExamples.java" />
+			</macro>
+
+		</section>
+
 
 		<!-- ****************************************************************** -->
 		<!-- ****************************************************************** -->
@@ -1496,16 +1520,16 @@ If-Match: W/"3"]]></pre>
 				<a href="http://hl7.org/implement/standards/fhir/extras.html#tags">here</a>
 				before attempting to implement tagging in your own applications.
 			</p>
-		
+
 			<subsection name="Accessing Tags in a Read / VRead / Search Method">
-			
+
 				<p>
-					Tags are stored within a resource object, in the 
+					Tags are stored within a resource object, in the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IResource.html#getResourceMetadata()">IResource.html#getResourceMetadata()</a>
-					map, under the key 
+					map, under the key
 					<a href="./apidocs/ca/uhn/fhir/model/api/ResourceMetadataKeyEnum.html#TAG_LIST">TAG_LIST</a>.
 				</p>
-				
+
 				<p>
 					In a server implementation, you may populate your tags into the
 					returned resource(s) and HAPI will automatically place these tags into
@@ -1514,39 +1538,39 @@ If-Match: W/"3"]]></pre>
 					example shows how to supply tags in a read method, but the same approach applies
 					to vread and search operations as well.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="readTags" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
 					In a client operation, you simply call the read/vread/search method as you
 					normally would (as described above), and if any tags have been returned
 					by the server, these may be accessed from the resource metadata.
 				</p>
-				
+
 				<macro name="snippet">
 					<param name="id" value="clientReadTags" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 			</subsection>
 
 			<subsection name="Setting Tags in a Create/Update Method">
-				
+
 				<p>
 					Within a <a href="#type_create">Type Create</a>
 					or <a href="#instance_update">Instance Update</a> method, it is
 					possible for the client to specify a set of tags to be stored
-					along with the saved resource instance. 
+					along with the saved resource instance.
 				</p>
 				<p>
 					Note that FHIR specifies that in an update method, any tags supplied
 					by the client are copied to the newly saved version, as well as any
 					tags the existing version had.
 				</p>
-				
+
 				<p>
 					To work with tags in a create/update method, the pattern used in the
 					read examples above is simply revered. In a server, the resource which
@@ -1557,16 +1581,16 @@ If-Match: W/"3"]]></pre>
 					<param name="id" value="createTags" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 			</subsection>
 
 			<subsection name="More tag methods">
-				
+
 				<p>
 					FHIR also provides a number of operations to interact directly
 					with tags. These methods may be used to retrieve lists of tags
 					that are available on the server, or to add or remove tags from
-					resources without interacting directly with those resources.			
+					resources without interacting directly with those resources.
 				</p>
 
 				<p>
@@ -1577,14 +1601,14 @@ If-Match: W/"3"]]></pre>
 					<param name="id" value="tagMethodProvider" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
-				
+
 				<p>
 					On a client, the methods are defined in the exact same way, except that
 					there is no method body in the client interface.
 				</p>
-				
+
 			</subsection>
-			
+
 		</section>
 
 		<!-- ****************************************************************** -->
@@ -1592,18 +1616,18 @@ If-Match: W/"3"]]></pre>
 		<!-- ****************************************************************** -->
 
 		<section name="_summary and _elements">
-			
+
 			The <code>_summary</code> and <code>_elements</code> parameters are
 			automatically handled by the server, so no coding is required to make this
 			work. If you wish to add parameters to manually handle these fields however,
 			the following example shows how to access these.
-			
+
 			<macro name="snippet">
 				<param name="id" value="summaryAndElements" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
-			
+
+
 			<a name="compartments" />
 		</section>
 
@@ -1619,7 +1643,7 @@ If-Match: W/"3"]]></pre>
 			</p>
 			<p>
 				To define a search by compartment, you simply need to add the <code>compartmentName</code> attribute
-				to the <code>@Search</code> annotation, and add an <code>@IdParam</code> parameter. 
+				to the <code>@Search</code> annotation, and add an <code>@IdParam</code> parameter.
 			</p>
 			<p>
 				The following example shows a search method in a resource provider which returns
@@ -1630,40 +1654,40 @@ If-Match: W/"3"]]></pre>
 				<param name="id" value="searchCompartment" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
-			
+
 			<p>
 				Example URL to invoke this method:
 				<br />
 				<code>http://fhir.example.com/Patient/123/Condition</code>
 			</p>
-			
+
 			<a name="extended_operations"/>
 		</section>
 
 		<section name="Extended Operations">
-		
+
 			<p>
 				FHIR extended operations are a special type of RPC-style invocation you
 				can perform against a FHIR server, type, or resource instance. These invocations
-				take a 
+				take a
 				<a href="./apidocs-dstu2/ca/uhn/fhir/model/dstu2/resource/Parameters.html">Parameters</a>
 				resource as input, and return either another Parameters resource or a different resource type.
 			</p>
 
 			<p>
-				To define an operation, a method should be placed in a 
-				<a href="./doc_rest_server.html#resource_providers">Resource Provider</a> 
+				To define an operation, a method should be placed in a
+				<a href="./doc_rest_server.html#resource_providers">Resource Provider</a>
 				class if the operation works against a resource type (e.g. <code>Patient</code>)
-				or a resource instance (e.g. <code>Patient/123</code>), or on a 
-				Plain Provider 
+				or a resource instance (e.g. <code>Patient/123</code>), or on a
+				Plain Provider
 				if the operation works against the server (i.e. it is global and not resource specific).
 			</p>
 
 			<subsection name="Type-Specific Operations">
-			
+
 				<p>
-					To implement a type-specific operation, 
-					the method should be annotated with the 
+					To implement a type-specific operation,
+					the method should be annotated with the
 					<code>@Operation</code> tag, and should have an
 					<code>@OperationParam</code> tag for each named parameter that
 					the input Parameters resource may be populated with. The following
@@ -1675,17 +1699,17 @@ If-Match: W/"3"]]></pre>
 					<param name="file"
 						value="examples/src/main/java/example/ServerOperations.java" />
 				</macro>
-				
+
 				<p>
 					Example URL to invoke this operation (HTTP request body is Parameters resource):
 					<br />
 					<code>POST http://fhir.example.com/Patient/$everything</code>
 				</p>
-				
+
 			</subsection>
-			
+
 			<subsection name="Instance-Specific Operations">
-			
+
 				<p>
 					To create an instance-specific operation (an operation which takes the
 					ID of a specific resource instance as a part of its request URL),
@@ -1698,25 +1722,25 @@ If-Match: W/"3"]]></pre>
 					<param name="file"
 						value="examples/src/main/java/example/ServerOperations.java" />
 				</macro>
-				
+
 				<p>
 					Example URL to invoke this operation (HTTP request body is Parameters resource):
 					<br />
 					<code>http://fhir.example.com/Patient/123/$everything</code>
 				</p>
-				
+
 			</subsection>
 
 			<subsection name="Using Search Parameter Types">
-			
+
 				<p>
-					FHIR allows operation parameters to be of a 
+					FHIR allows operation parameters to be of a
 					<a href="http://hl7.org/fhir/search.html#ptypes">Search parameter type</a>
 					(e.g. token) instead of a FHIR datatype (e.g. Coding).
 				</p>
 				<p>
-					To use a search parameter type, any of the search parameter 
-					types listed in 
+					To use a search parameter type, any of the search parameter
+					types listed in
 					<a href="./doc_rest_operations.html#Type_Level_-_Search">Search</a>
 					may be used. For example, the following is a simple operation method declaration
 					using search parameters:
@@ -1726,7 +1750,7 @@ If-Match: W/"3"]]></pre>
 					<param name="file"
 						value="examples/src/main/java/example/ServerOperations.java" />
 				</macro>
-				
+
 				<p>
 					Example URL to invoke this operation (HTTP request body is Parameters resource):
 					<br />
@@ -1738,10 +1762,10 @@ If-Match: W/"3"]]></pre>
 					if you want to be able to accept multiple values. For example,
 					a <code>List&lt;TokenParam&gt;</code> could be used if you want
 					to allow multiple repetitions of a given token parameter (this is
-					analogous to the "AND" semantics in a search). 
+					analogous to the "AND" semantics in a search).
 					A <code>TokenOrListParam</code> could be used if you want to allow
 					multiple values within a single repetition, separated by comma (this
-					is analogous to "OR" semantics in a search). 
+					is analogous to "OR" semantics in a search).
 				</p>
 				<p>For example:</p>
 				<macro name="snippet">
@@ -1749,14 +1773,14 @@ If-Match: W/"3"]]></pre>
 					<param name="file"
 						value="examples/src/main/java/example/ServerOperations.java" />
 				</macro>
-				
+
 			</subsection>
 
 			<subsection name="Server Operations">
 
 				<p>
 					Server operations do not operate on a specific resource type or
-					instance, but rather operate globally on the server itself. The following 
+					instance, but rather operate globally on the server itself. The following
 					example show how to implement the
 					<code>$closure</code> operation. Note that the <code>concept</code> parameter
 					in the example has a cardinality of <code>0..*</code> according to the
@@ -1768,30 +1792,30 @@ If-Match: W/"3"]]></pre>
 					<param name="file"
 						value="examples/src/main/java/example/ServerOperations.java" />
 				</macro>
-				
+
 				<p>
 					Example URL to invoke this operation (HTTP request body is Parameters resource):
 					<br />
 					<code>http://fhir.example.com/$closure</code>
 				</p>
-				
+
 			</subsection>
 
 			<subsection name="Returning Multiple OUT Parameters">
-				
+
 				<p>
 					In all of the Extended Operation examples above, the return
 					type specified for the operation is a single Resource instance. This is
-					a common pattern in FHIR defined operations. However, it is also 
+					a common pattern in FHIR defined operations. However, it is also
 					possible for an extended operation to be defined with multiple
 					and/or repeating OUT parameters. In this case, you can return
-					a <code>Parameters</code> resource directly.  
+					a <code>Parameters</code> resource directly.
 				</p>
-			
+
 			</subsection>
 
 			<subsection name="Idempotent Operations / Handling HTTP Get">
-				
+
 				<p>
 					The FHIR specification notes that if an operation is
 					<a href="http://en.wikipedia.org/wiki/Idempotence">idempotent</a>
@@ -1801,7 +1825,7 @@ If-Match: W/"3"]]></pre>
 				</p>
 				<p>
 					If you are implementing an operation which is idempotent,
-					you should mark your operation with 
+					you should mark your operation with
 					<code>idempotent=true</code>,
 					as shown in some of the examples above. The default value
 					for this flag is <code>false</code>, meaning that operations
@@ -1814,7 +1838,7 @@ If-Match: W/"3"]]></pre>
 					server will respond with an <code>HTTP 405 Method Not Supported</code>.
 				</p>
 			</subsection>
-			
+
 		</section>
 
 	</body>

@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="Immunization"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="1"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/pher/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Immunization Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -59,18 +59,12 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="wasNotGiven.where(value = 'false').empty() or explanation.reasonNotGIven.empty()"/>
-    </extension>
     <key value="imm-2"/>
     <severity value="error"/>
     <human value="If immunization was administered (wasNotGiven=false) then explanation.reasonNotGiven SHALL be absent."/>
     <xpath value="not(f:wasNotGiven/@value=false() and exists(f:explanation/f:reasonNotGiven))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="wasNotGiven.where(value = 'true').empty() or (reaction.empty() and explanation.reason.empty())"/>
-    </extension>
     <key value="imm-1"/>
     <severity value="error"/>
     <human value="If immunization was not administred (wasNotGiven=true) then there SHALL be no reaction nor explanation.reason present"/>
@@ -1093,18 +1087,12 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="wasNotGiven.where(value = 'false').empty() or explanation.reasonNotGIven.empty()"/>
-    </extension>
     <key value="imm-2"/>
     <severity value="error"/>
     <human value="If immunization was administered (wasNotGiven=false) then explanation.reasonNotGiven SHALL be absent."/>
     <xpath value="not(f:wasNotGiven/@value=false() and exists(f:explanation/f:reasonNotGiven))"/>
    </constraint>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="wasNotGiven.where(value = 'true').empty() or (reaction.empty() and explanation.reason.empty())"/>
-    </extension>
     <key value="imm-1"/>
     <severity value="error"/>
     <human value="If immunization was not administred (wasNotGiven=true) then there SHALL be no reaction nor explanation.reason present"/>

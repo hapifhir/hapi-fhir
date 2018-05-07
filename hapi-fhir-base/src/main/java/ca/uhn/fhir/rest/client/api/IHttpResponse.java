@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
+import ca.uhn.fhir.util.StopWatch;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -32,52 +34,10 @@ import java.util.Map;
 public interface IHttpResponse {
 
 	/**
-	 * Get the status code associated with the response.
-	 * 
-	 * @return the response status code.
+	 * @deprecated This method was deprecated in HAPI FHIR 2.2 because its name has a typo. Use {@link #bufferEntity()} instead.
 	 */
-	public int getStatus();
-
-	/**
-	 * @return the native response, depending on the client library used
-	 */
-	Object getResponse();
-
-	/**
-	 * Extracts {@code Content-Type} value from the response exactly as
-	 * specified by the {@code Content-Type} header. Returns {@code null}
-	 * if not specified.
-	 */
-	public String getMimeType();
-
-	/**
-	 * Get map of the response headers and corresponding string values.
-	 * 
-	 * @return response headers as a map header keys and they values.
-	 */
-	public Map<String, List<String>> getAllHeaders();
-
-	/**
-	 * Get the response status information reason phrase associated with the response.
-	 * 
-	 * @return the reason phrase.
-	 */
-	public String getStatusInfo();
-
-	/**
-	 * Returna reader for the response entity
-	 */
-	public Reader createReader() throws IOException;
-
-	/**
-	 * Read the message entity input stream as an InputStream.
-	 */
-	public InputStream readEntity() throws IOException;
-
-	/**
-	 * Close the response
-	 */
-	public void close();
+	@Deprecated
+	void bufferEntitity() throws IOException;
 
 	/**
 	 * Buffer the message entity data.
@@ -99,15 +59,70 @@ public interface IHttpResponse {
 	 * <p>
 	 * Buffering the message entity data allows for multiple invocations of
 	 * {@code readEntity(...)} methods on the response instance.
-	 * 
+	 *
 	 * @since 2.2
 	 */
 	void bufferEntity() throws IOException;
 
 	/**
-	 * @deprecated This method was deprecated in HAPI FHIR 2.2 because its name has a typo. Use {@link #bufferEntity()} instead.
+	 * Close the response
 	 */
-	@Deprecated
-	void bufferEntitity() throws IOException;
+	void close();
 
+	/**
+	 * Returna reader for the response entity
+	 */
+	Reader createReader() throws IOException;
+
+	/**
+	 * Get map of the response headers and corresponding string values.
+	 *
+	 * @return response headers as a map header keys and they values.
+	 */
+	Map<String, List<String>> getAllHeaders();
+
+	/**
+	 * Return all headers in the response with the given type
+	 */
+	List<String> getHeaders(String theName);
+
+	/**
+	 * Extracts {@code Content-Type} value from the response exactly as
+	 * specified by the {@code Content-Type} header. Returns {@code null}
+	 * if not specified.
+	 */
+	String getMimeType();
+
+	/**
+	 * @return Returns a StopWatch that was started right before
+	 * the client request was started. The time returned by this
+	 * client includes any time that was spent within the HTTP
+	 * library (possibly including waiting for a connection, and
+	 * any network activity)
+	 */
+	StopWatch getRequestStopWatch();
+
+	/**
+	 * @return the native response, depending on the client library used
+	 */
+	Object getResponse();
+
+	/**
+	 * Get the status code associated with the response.
+	 *
+	 * @return the response status code.
+	 */
+	int getStatus();
+
+	/**
+	 * Get the response status information reason phrase associated with the response.
+	 *
+	 * @return the reason phrase.
+	 */
+	String getStatusInfo();
+
+	/**
+	 * Read the message entity input stream as an InputStream.
+	 */
+	InputStream readEntity() throws IOException;
 }

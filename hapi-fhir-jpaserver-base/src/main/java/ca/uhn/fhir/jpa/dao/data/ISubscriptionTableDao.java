@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,20 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.Date;
-
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-
 public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long> {
 
+	@Modifying
+	@Query("DELETE FROM SubscriptionTable t WHERE t.mySubscriptionResource = :subscription ")
+	void deleteAllForSubscription(@Param("subscription") ResourceTable theSubscription);
+
 	@Query("SELECT t FROM SubscriptionTable t WHERE t.myResId = :pid")
-   public SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);
+	SubscriptionTable findOneByResourcePid(@Param("pid") Long theId);
 
-	@Modifying
-	@Query("DELETE FROM SubscriptionTable t WHERE t.myId = :id ")
-	public void deleteAllForSubscription(@Param("id") Long theSubscriptionId);
-
-	@Modifying
-	@Query("UPDATE SubscriptionTable t SET t.myLastClientPoll = :last_client_poll")
-	public int updateLastClientPoll(@Param("last_client_poll") Date theLastClientPoll);
-
-	@Query("SELECT t FROM SubscriptionTable t WHERE t.myLastClientPoll < :cutoff OR (t.myLastClientPoll IS NULL AND t.myCreated < :cutoff)")
-	public Collection<SubscriptionTable> findInactiveBeforeCutoff(@Param("cutoff") Date theCutoff);
-
-	@Query("SELECT t.myId FROM SubscriptionTable t WHERE t.myStatus = :status AND t.myNextCheck <= :next_check")
-	public Collection<Long> findSubscriptionsWhichNeedToBeChecked(@Param("status") String theStatus, @Param("next_check") Date theNextCheck);
 }

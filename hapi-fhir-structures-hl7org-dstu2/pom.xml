@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>2.3-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR Structures - HL7.org DSTU2</name>
 
@@ -22,9 +22,35 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!--
+		Test dependencies on other optional parts of HAPI 
+		-->
+      <dependency>
+         <groupId>org.codehaus.woodstox</groupId>
+         <artifactId>woodstox-core-asl</artifactId>
+         <scope>test</scope>
+      </dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+			<version>${project.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<version>${project.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- 
@@ -35,11 +61,8 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
-			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
-
-		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon</artifactId> 
-			<version>8.7</version> </dependency> -->
 
 		<dependency>
 			<groupId>xpp3</groupId>
@@ -49,13 +72,12 @@
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
-			<version>9.6.0-4</version>
 		</dependency>
 
 		<!-- Testing -->
 		<dependency>
-			<groupId>xmlunit</groupId>
-			<artifactId>xmlunit</artifactId>
+			<groupId>org.xmlunit</groupId>
+			<artifactId>xmlunit-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -208,10 +230,14 @@
 					<classFolders>
 						<classFolder>${basedir}/target/classes</classFolder>
 						<classFolder>${basedir}../hapi-fhir-base/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
+						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
 					</classFolders>
 					<sourceFolders>
 						<sourceFolder>${basedir}/src/main/java</sourceFolder>
 						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
+						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
 					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
@@ -228,7 +254,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -244,6 +270,22 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<fork>true</fork>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+						<Import-Package>
+							javax.servlet*;resolution:=optional,
+							*
+						</Import-Package>
+					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>

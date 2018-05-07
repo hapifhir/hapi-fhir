@@ -1,0 +1,29 @@
+{
+	"resourceType": "Patient",
+	"extension": [
+		{
+			"url": "http://fmcna.com/myDoctor",
+			"valueReference": {
+				"reference": "Practitioner/A"
+			}
+		}
+	],
+	"identifier": [{
+		"type": {
+			"coding": [{
+				"system": "http://hl7.org/fhir/v2/0203",
+				"code": "MR"
+			}]
+		},
+		"system": "http://hl7.org/fhir/v2/0203",
+		"value": "5000077430"
+	}],
+	"name": [{
+		"use": "official",
+		"family": "Ravi",
+		"given": [
+			"Kuchi"
+		]
+	}]
+}
+

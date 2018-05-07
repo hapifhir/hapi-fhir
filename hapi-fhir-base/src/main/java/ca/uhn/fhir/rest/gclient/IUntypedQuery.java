@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,13 @@ package ca.uhn.fhir.rest.gclient;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Bundle;
+public interface IUntypedQuery<T> {
 
-public interface IUntypedQuery {
+	IQuery<T> forAllResources();
 
-	IQuery<Bundle> forAllResources();
+	IQuery<T> forResource(String theResourceName);
 
-	IQuery<Bundle> forResource(String theResourceName);
-
-	IQuery<Bundle> forResource(Class<? extends IBaseResource> theClass);
+	IQuery<T> forResource(Class<? extends IBaseResource> theClass);
 
 	/**
 	 * Perform a search directly by URL. It is usually better to construct the URL using the {@link #forAllResources()}, {@link #forResource(Class)} etc, but sometimes it is useful to simply search by
@@ -40,6 +38,6 @@ public interface IUntypedQuery {
 	 *           The URL to search for. Note that this URL may be complete (e.g. "http://example.com/base/Patient?name=foo") in which case the client's base URL will be ignored. Or it can be relative
 	 *           (e.g. "Patient?name=foo") in which case the client's base URL will be used.
 	 */
-	IQuery<Bundle> byUrl(String theSearchUrl);
+	IQuery<T> byUrl(String theSearchUrl);
 
 }

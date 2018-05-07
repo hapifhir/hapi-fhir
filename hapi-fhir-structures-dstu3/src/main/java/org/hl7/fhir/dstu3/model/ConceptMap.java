@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -47,15 +47,124 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.
  */
 @ResourceDef(name="ConceptMap", profile="http://hl7.org/fhir/Profile/ConceptMap")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "publisher", "contact", "date", "description", "useContext", "jurisdiction", "purpose", "copyright", "source[x]", "target[x]", "group"})
+//@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "source[x]", "target[x]", "group"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "source", "target", "group"})
 public class ConceptMap extends MetadataResource {
+
+    public enum ConceptMapGroupUnmappedMode {
+        /**
+         * Use the code as provided in the $translate request
+         */
+        PROVIDED, 
+        /**
+         * Use the code explicitly provided in the group.unmapped
+         */
+        FIXED, 
+        /**
+         * Use the map identified by the canonical URL in URL
+         */
+        OTHERMAP, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static ConceptMapGroupUnmappedMode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("provided".equals(codeString))
+          return PROVIDED;
+        if ("fixed".equals(codeString))
+          return FIXED;
+        if ("other-map".equals(codeString))
+          return OTHERMAP;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown ConceptMapGroupUnmappedMode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case PROVIDED: return "provided";
+            case FIXED: return "fixed";
+            case OTHERMAP: return "other-map";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case PROVIDED: return "http://hl7.org/fhir/conceptmap-unmapped-mode";
+            case FIXED: return "http://hl7.org/fhir/conceptmap-unmapped-mode";
+            case OTHERMAP: return "http://hl7.org/fhir/conceptmap-unmapped-mode";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case PROVIDED: return "Use the code as provided in the $translate request";
+            case FIXED: return "Use the code explicitly provided in the group.unmapped";
+            case OTHERMAP: return "Use the map identified by the canonical URL in URL";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case PROVIDED: return "Provided Code";
+            case FIXED: return "Fixed Code";
+            case OTHERMAP: return "Other Map";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class ConceptMapGroupUnmappedModeEnumFactory implements EnumFactory<ConceptMapGroupUnmappedMode> {
+    public ConceptMapGroupUnmappedMode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("provided".equals(codeString))
+          return ConceptMapGroupUnmappedMode.PROVIDED;
+        if ("fixed".equals(codeString))
+          return ConceptMapGroupUnmappedMode.FIXED;
+        if ("other-map".equals(codeString))
+          return ConceptMapGroupUnmappedMode.OTHERMAP;
+        throw new IllegalArgumentException("Unknown ConceptMapGroupUnmappedMode code '"+codeString+"'");
+        }
+        public Enumeration<ConceptMapGroupUnmappedMode> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<ConceptMapGroupUnmappedMode>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("provided".equals(codeString))
+          return new Enumeration<ConceptMapGroupUnmappedMode>(this, ConceptMapGroupUnmappedMode.PROVIDED);
+        if ("fixed".equals(codeString))
+          return new Enumeration<ConceptMapGroupUnmappedMode>(this, ConceptMapGroupUnmappedMode.FIXED);
+        if ("other-map".equals(codeString))
+          return new Enumeration<ConceptMapGroupUnmappedMode>(this, ConceptMapGroupUnmappedMode.OTHERMAP);
+        throw new FHIRException("Unknown ConceptMapGroupUnmappedMode code '"+codeString+"'");
+        }
+    public String toCode(ConceptMapGroupUnmappedMode code) {
+      if (code == ConceptMapGroupUnmappedMode.PROVIDED)
+        return "provided";
+      if (code == ConceptMapGroupUnmappedMode.FIXED)
+        return "fixed";
+      if (code == ConceptMapGroupUnmappedMode.OTHERMAP)
+        return "other-map";
+      return "?";
+      }
+    public String toSystem(ConceptMapGroupUnmappedMode code) {
+      return code.getSystem();
+      }
+    }
 
     @Block()
     public static class ConceptMapGroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).
          */
-        @Child(name = "source", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "source", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code System (if value set crosses code systems)", formalDefinition="An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system)." )
         protected UriType source;
 
@@ -87,21 +196,20 @@ public class ConceptMap extends MetadataResource {
         @Description(shortDefinition="Mappings for a concept from the source set", formalDefinition="Mappings for an individual concept in the source to one or more concepts in the target." )
         protected List<SourceElementComponent> element;
 
-        private static final long serialVersionUID = 924052416L;
+        /**
+         * What to do when there is no match in the mappings in the group.
+         */
+        @Child(name = "unmapped", type = {}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="When no match in the mappings", formalDefinition="What to do when there is no match in the mappings in the group." )
+        protected ConceptMapGroupUnmappedComponent unmapped;
+
+        private static final long serialVersionUID = 1606357508L;
 
     /**
      * Constructor
      */
       public ConceptMapGroupComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ConceptMapGroupComponent(UriType source) {
-        super();
-        this.source = source;
       }
 
         /**
@@ -143,9 +251,13 @@ public class ConceptMap extends MetadataResource {
          * @param value An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).
          */
         public ConceptMapGroupComponent setSource(String value) { 
+          if (Utilities.noString(value))
+            this.source = null;
+          else {
             if (this.source == null)
               this.source = new UriType();
             this.source.setValue(value);
+          }
           return this;
         }
 
@@ -349,6 +461,30 @@ public class ConceptMap extends MetadataResource {
           return getElement().get(0);
         }
 
+        /**
+         * @return {@link #unmapped} (What to do when there is no match in the mappings in the group.)
+         */
+        public ConceptMapGroupUnmappedComponent getUnmapped() { 
+          if (this.unmapped == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptMapGroupComponent.unmapped");
+            else if (Configuration.doAutoCreate())
+              this.unmapped = new ConceptMapGroupUnmappedComponent(); // cc
+          return this.unmapped;
+        }
+
+        public boolean hasUnmapped() { 
+          return this.unmapped != null && !this.unmapped.isEmpty();
+        }
+
+        /**
+         * @param value {@link #unmapped} (What to do when there is no match in the mappings in the group.)
+         */
+        public ConceptMapGroupComponent setUnmapped(ConceptMapGroupUnmappedComponent value) { 
+          this.unmapped = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("source", "uri", "An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).", 0, java.lang.Integer.MAX_VALUE, source));
@@ -356,6 +492,7 @@ public class ConceptMap extends MetadataResource {
           childrenList.add(new Property("target", "uri", "An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).", 0, java.lang.Integer.MAX_VALUE, target));
           childrenList.add(new Property("targetVersion", "string", "The specific version of the code system, as determined by the code system authority.", 0, java.lang.Integer.MAX_VALUE, targetVersion));
           childrenList.add(new Property("element", "", "Mappings for an individual concept in the source to one or more concepts in the target.", 0, java.lang.Integer.MAX_VALUE, element));
+          childrenList.add(new Property("unmapped", "", "What to do when there is no match in the mappings in the group.", 0, java.lang.Integer.MAX_VALUE, unmapped));
         }
 
       @Override
@@ -366,59 +503,81 @@ public class ConceptMap extends MetadataResource {
         case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // UriType
         case -1639412217: /*targetVersion*/ return this.targetVersion == null ? new Base[0] : new Base[] {this.targetVersion}; // StringType
         case -1662836996: /*element*/ return this.element == null ? new Base[0] : this.element.toArray(new Base[this.element.size()]); // SourceElementComponent
+        case -194857460: /*unmapped*/ return this.unmapped == null ? new Base[0] : new Base[] {this.unmapped}; // ConceptMapGroupUnmappedComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -896505829: // source
           this.source = castToUri(value); // UriType
-          break;
+          return value;
         case 446171197: // sourceVersion
           this.sourceVersion = castToString(value); // StringType
-          break;
+          return value;
         case -880905839: // target
           this.target = castToUri(value); // UriType
-          break;
+          return value;
         case -1639412217: // targetVersion
           this.targetVersion = castToString(value); // StringType
-          break;
+          return value;
         case -1662836996: // element
           this.getElement().add((SourceElementComponent) value); // SourceElementComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        case -194857460: // unmapped
+          this.unmapped = (ConceptMapGroupUnmappedComponent) value; // ConceptMapGroupUnmappedComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("source"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("source")) {
           this.source = castToUri(value); // UriType
-        else if (name.equals("sourceVersion"))
+        } else if (name.equals("sourceVersion")) {
           this.sourceVersion = castToString(value); // StringType
-        else if (name.equals("target"))
+        } else if (name.equals("target")) {
           this.target = castToUri(value); // UriType
-        else if (name.equals("targetVersion"))
+        } else if (name.equals("targetVersion")) {
           this.targetVersion = castToString(value); // StringType
-        else if (name.equals("element"))
+        } else if (name.equals("element")) {
           this.getElement().add((SourceElementComponent) value);
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("unmapped")) {
+          this.unmapped = (ConceptMapGroupUnmappedComponent) value; // ConceptMapGroupUnmappedComponent
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -896505829: throw new FHIRException("Cannot make property source as it is not a complex type"); // UriType
-        case 446171197: throw new FHIRException("Cannot make property sourceVersion as it is not a complex type"); // StringType
-        case -880905839: throw new FHIRException("Cannot make property target as it is not a complex type"); // UriType
-        case -1639412217: throw new FHIRException("Cannot make property targetVersion as it is not a complex type"); // StringType
-        case -1662836996:  return addElement(); // SourceElementComponent
+        case -896505829:  return getSourceElement();
+        case 446171197:  return getSourceVersionElement();
+        case -880905839:  return getTargetElement();
+        case -1639412217:  return getTargetVersionElement();
+        case -1662836996:  return addElement(); 
+        case -194857460:  return getUnmapped(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -896505829: /*source*/ return new String[] {"uri"};
+        case 446171197: /*sourceVersion*/ return new String[] {"string"};
+        case -880905839: /*target*/ return new String[] {"uri"};
+        case -1639412217: /*targetVersion*/ return new String[] {"string"};
+        case -1662836996: /*element*/ return new String[] {};
+        case -194857460: /*unmapped*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -440,6 +599,10 @@ public class ConceptMap extends MetadataResource {
         else if (name.equals("element")) {
           return addElement();
         }
+        else if (name.equals("unmapped")) {
+          this.unmapped = new ConceptMapGroupUnmappedComponent();
+          return this.unmapped;
+        }
         else
           return super.addChild(name);
       }
@@ -456,6 +619,7 @@ public class ConceptMap extends MetadataResource {
           for (SourceElementComponent i : element)
             dst.element.add(i.copy());
         };
+        dst.unmapped = unmapped == null ? null : unmapped.copy();
         return dst;
       }
 
@@ -468,7 +632,7 @@ public class ConceptMap extends MetadataResource {
         ConceptMapGroupComponent o = (ConceptMapGroupComponent) other;
         return compareDeep(source, o.source, true) && compareDeep(sourceVersion, o.sourceVersion, true)
            && compareDeep(target, o.target, true) && compareDeep(targetVersion, o.targetVersion, true) && compareDeep(element, o.element, true)
-          ;
+           && compareDeep(unmapped, o.unmapped, true);
       }
 
       @Override
@@ -484,7 +648,7 @@ public class ConceptMap extends MetadataResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(source, sourceVersion, target
-          , targetVersion, element);
+          , targetVersion, element, unmapped);
       }
 
   public String fhirType() {
@@ -504,13 +668,20 @@ public class ConceptMap extends MetadataResource {
         protected CodeType code;
 
         /**
+         * The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Display for the code", formalDefinition="The display for the code. The display is only provided to help editors when editing the concept map." )
+        protected StringType display;
+
+        /**
          * A concept from the target value set that this concept maps to.
          */
-        @Child(name = "target", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "target", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Concept in target system for element", formalDefinition="A concept from the target value set that this concept maps to." )
         protected List<TargetElementComponent> target;
 
-        private static final long serialVersionUID = 410931019L;
+        private static final long serialVersionUID = -1115258852L;
 
     /**
      * Constructor
@@ -564,6 +735,55 @@ public class ConceptMap extends MetadataResource {
             if (this.code == null)
               this.code = new CodeType();
             this.code.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public StringType getDisplayElement() { 
+          if (this.display == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SourceElementComponent.display");
+            else if (Configuration.doAutoCreate())
+              this.display = new StringType(); // bb
+          return this.display;
+        }
+
+        public boolean hasDisplayElement() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        public boolean hasDisplay() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        /**
+         * @param value {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public SourceElementComponent setDisplayElement(StringType value) { 
+          this.display = value;
+          return this;
+        }
+
+        /**
+         * @return The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public String getDisplay() { 
+          return this.display == null ? null : this.display.getValue();
+        }
+
+        /**
+         * @param value The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public SourceElementComponent setDisplay(String value) { 
+          if (Utilities.noString(value))
+            this.display = null;
+          else {
+            if (this.display == null)
+              this.display = new StringType();
+            this.display.setValue(value);
           }
           return this;
         }
@@ -624,6 +844,7 @@ public class ConceptMap extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Identity (code or path) or the element/item being mapped.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("display", "string", "The display for the code. The display is only provided to help editors when editing the concept map.", 0, java.lang.Integer.MAX_VALUE, display));
           childrenList.add(new Property("target", "", "A concept from the target value set that this concept maps to.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
@@ -631,6 +852,7 @@ public class ConceptMap extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
         case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // TargetElementComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -638,35 +860,53 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          return value;
         case -880905839: // target
           this.getTarget().add((TargetElementComponent) value); // TargetElementComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("target"))
+        } else if (name.equals("display")) {
+          this.display = castToString(value); // StringType
+        } else if (name.equals("target")) {
           this.getTarget().add((TargetElementComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case -880905839:  return addTarget(); // TargetElementComponent
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
+        case -880905839:  return addTarget(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case -880905839: /*target*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -675,6 +915,9 @@ public class ConceptMap extends MetadataResource {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("code")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
+        }
+        else if (name.equals("display")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.display");
         }
         else if (name.equals("target")) {
           return addTarget();
@@ -687,6 +930,7 @@ public class ConceptMap extends MetadataResource {
         SourceElementComponent dst = new SourceElementComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
+        dst.display = display == null ? null : display.copy();
         if (target != null) {
           dst.target = new ArrayList<TargetElementComponent>();
           for (TargetElementComponent i : target)
@@ -702,7 +946,8 @@ public class ConceptMap extends MetadataResource {
         if (!(other instanceof SourceElementComponent))
           return false;
         SourceElementComponent o = (SourceElementComponent) other;
-        return compareDeep(code, o.code, true) && compareDeep(target, o.target, true);
+        return compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(target, o.target, true)
+          ;
       }
 
       @Override
@@ -712,11 +957,11 @@ public class ConceptMap extends MetadataResource {
         if (!(other instanceof SourceElementComponent))
           return false;
         SourceElementComponent o = (SourceElementComponent) other;
-        return compareValues(code, o.code, true);
+        return compareValues(code, o.code, true) && compareValues(display, o.display, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, target);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, display, target);
       }
 
   public String fhirType() {
@@ -736,9 +981,16 @@ public class ConceptMap extends MetadataResource {
         protected CodeType code;
 
         /**
+         * The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Display for the code", formalDefinition="The display for the code. The display is only provided to help editors when editing the concept map." )
+        protected StringType display;
+
+        /**
          * The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).
          */
-        @Child(name = "equivalence", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=false)
+        @Child(name = "equivalence", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=false)
         @Description(shortDefinition="relatedto | equivalent | equal | wider | subsumes | narrower | specializes | inexact | unmatched | disjoint", formalDefinition="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/concept-map-equivalence")
         protected Enumeration<ConceptMapEquivalence> equivalence;
@@ -746,25 +998,25 @@ public class ConceptMap extends MetadataResource {
         /**
          * A description of status/issues in mapping that conveys additional information not represented in  the structured data.
          */
-        @Child(name = "comments", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "comment", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of status/issues in mapping", formalDefinition="A description of status/issues in mapping that conveys additional information not represented in  the structured data." )
-        protected StringType comments;
+        protected StringType comment;
 
         /**
          * A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value.
          */
-        @Child(name = "dependsOn", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "dependsOn", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Other elements required for this mapping (from context)", formalDefinition="A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value." )
         protected List<OtherElementComponent> dependsOn;
 
         /**
          * A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.
          */
-        @Child(name = "product", type = {OtherElementComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "product", type = {OtherElementComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Other concepts that this mapping also produces", formalDefinition="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on." )
         protected List<OtherElementComponent> product;
 
-        private static final long serialVersionUID = 770469317L;
+        private static final long serialVersionUID = -2008997477L;
 
     /**
      * Constructor
@@ -823,6 +1075,55 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
+         * @return {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public StringType getDisplayElement() { 
+          if (this.display == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TargetElementComponent.display");
+            else if (Configuration.doAutoCreate())
+              this.display = new StringType(); // bb
+          return this.display;
+        }
+
+        public boolean hasDisplayElement() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        public boolean hasDisplay() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        /**
+         * @param value {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public TargetElementComponent setDisplayElement(StringType value) { 
+          this.display = value;
+          return this;
+        }
+
+        /**
+         * @return The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public String getDisplay() { 
+          return this.display == null ? null : this.display.getValue();
+        }
+
+        /**
+         * @param value The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public TargetElementComponent setDisplay(String value) { 
+          if (Utilities.noString(value))
+            this.display = null;
+          else {
+            if (this.display == null)
+              this.display = new StringType();
+            this.display.setValue(value);
+          }
+          return this;
+        }
+
+        /**
          * @return {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
          */
         public Enumeration<ConceptMapEquivalence> getEquivalenceElement() { 
@@ -872,50 +1173,50 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @return {@link #comments} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+         * @return {@link #comment} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
          */
-        public StringType getCommentsElement() { 
-          if (this.comments == null)
+        public StringType getCommentElement() { 
+          if (this.comment == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TargetElementComponent.comments");
+              throw new Error("Attempt to auto-create TargetElementComponent.comment");
             else if (Configuration.doAutoCreate())
-              this.comments = new StringType(); // bb
-          return this.comments;
+              this.comment = new StringType(); // bb
+          return this.comment;
         }
 
-        public boolean hasCommentsElement() { 
-          return this.comments != null && !this.comments.isEmpty();
+        public boolean hasCommentElement() { 
+          return this.comment != null && !this.comment.isEmpty();
         }
 
-        public boolean hasComments() { 
-          return this.comments != null && !this.comments.isEmpty();
+        public boolean hasComment() { 
+          return this.comment != null && !this.comment.isEmpty();
         }
 
         /**
-         * @param value {@link #comments} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+         * @param value {@link #comment} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
          */
-        public TargetElementComponent setCommentsElement(StringType value) { 
-          this.comments = value;
+        public TargetElementComponent setCommentElement(StringType value) { 
+          this.comment = value;
           return this;
         }
 
         /**
          * @return A description of status/issues in mapping that conveys additional information not represented in  the structured data.
          */
-        public String getComments() { 
-          return this.comments == null ? null : this.comments.getValue();
+        public String getComment() { 
+          return this.comment == null ? null : this.comment.getValue();
         }
 
         /**
          * @param value A description of status/issues in mapping that conveys additional information not represented in  the structured data.
          */
-        public TargetElementComponent setComments(String value) { 
+        public TargetElementComponent setComment(String value) { 
           if (Utilities.noString(value))
-            this.comments = null;
+            this.comment = null;
           else {
-            if (this.comments == null)
-              this.comments = new StringType();
-            this.comments.setValue(value);
+            if (this.comment == null)
+              this.comment = new StringType();
+            this.comment.setValue(value);
           }
           return this;
         }
@@ -1029,8 +1330,9 @@ public class ConceptMap extends MetadataResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Identity (code or path) or the element/item that the map refers to.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("display", "string", "The display for the code. The display is only provided to help editors when editing the concept map.", 0, java.lang.Integer.MAX_VALUE, display));
           childrenList.add(new Property("equivalence", "code", "The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).", 0, java.lang.Integer.MAX_VALUE, equivalence));
-          childrenList.add(new Property("comments", "string", "A description of status/issues in mapping that conveys additional information not represented in  the structured data.", 0, java.lang.Integer.MAX_VALUE, comments));
+          childrenList.add(new Property("comment", "string", "A description of status/issues in mapping that conveys additional information not represented in  the structured data.", 0, java.lang.Integer.MAX_VALUE, comment));
           childrenList.add(new Property("dependsOn", "", "A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value.", 0, java.lang.Integer.MAX_VALUE, dependsOn));
           childrenList.add(new Property("product", "@ConceptMap.group.element.target.dependsOn", "A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.", 0, java.lang.Integer.MAX_VALUE, product));
         }
@@ -1039,8 +1341,9 @@ public class ConceptMap extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
         case -15828692: /*equivalence*/ return this.equivalence == null ? new Base[0] : new Base[] {this.equivalence}; // Enumeration<ConceptMapEquivalence>
-        case -602415628: /*comments*/ return this.comments == null ? new Base[0] : new Base[] {this.comments}; // StringType
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         case -1109214266: /*dependsOn*/ return this.dependsOn == null ? new Base[0] : this.dependsOn.toArray(new Base[this.dependsOn.size()]); // OtherElementComponent
         case -309474065: /*product*/ return this.product == null ? new Base[0] : this.product.toArray(new Base[this.product.size()]); // OtherElementComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1049,53 +1352,76 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
           this.code = castToCode(value); // CodeType
-          break;
+          return value;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          return value;
         case -15828692: // equivalence
-          this.equivalence = new ConceptMapEquivalenceEnumFactory().fromType(value); // Enumeration<ConceptMapEquivalence>
-          break;
-        case -602415628: // comments
-          this.comments = castToString(value); // StringType
-          break;
+          value = new ConceptMapEquivalenceEnumFactory().fromType(castToCode(value));
+          this.equivalence = (Enumeration) value; // Enumeration<ConceptMapEquivalence>
+          return value;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          return value;
         case -1109214266: // dependsOn
           this.getDependsOn().add((OtherElementComponent) value); // OtherElementComponent
-          break;
+          return value;
         case -309474065: // product
           this.getProduct().add((OtherElementComponent) value); // OtherElementComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
           this.code = castToCode(value); // CodeType
-        else if (name.equals("equivalence"))
-          this.equivalence = new ConceptMapEquivalenceEnumFactory().fromType(value); // Enumeration<ConceptMapEquivalence>
-        else if (name.equals("comments"))
-          this.comments = castToString(value); // StringType
-        else if (name.equals("dependsOn"))
+        } else if (name.equals("display")) {
+          this.display = castToString(value); // StringType
+        } else if (name.equals("equivalence")) {
+          value = new ConceptMapEquivalenceEnumFactory().fromType(castToCode(value));
+          this.equivalence = (Enumeration) value; // Enumeration<ConceptMapEquivalence>
+        } else if (name.equals("comment")) {
+          this.comment = castToString(value); // StringType
+        } else if (name.equals("dependsOn")) {
           this.getDependsOn().add((OtherElementComponent) value);
-        else if (name.equals("product"))
+        } else if (name.equals("product")) {
           this.getProduct().add((OtherElementComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // CodeType
-        case -15828692: throw new FHIRException("Cannot make property equivalence as it is not a complex type"); // Enumeration<ConceptMapEquivalence>
-        case -602415628: throw new FHIRException("Cannot make property comments as it is not a complex type"); // StringType
-        case -1109214266:  return addDependsOn(); // OtherElementComponent
-        case -309474065:  return addProduct(); // OtherElementComponent
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
+        case -15828692:  return getEquivalenceElement();
+        case 950398559:  return getCommentElement();
+        case -1109214266:  return addDependsOn(); 
+        case -309474065:  return addProduct(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case -15828692: /*equivalence*/ return new String[] {"code"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        case -1109214266: /*dependsOn*/ return new String[] {};
+        case -309474065: /*product*/ return new String[] {"@ConceptMap.group.element.target.dependsOn"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1105,11 +1431,14 @@ public class ConceptMap extends MetadataResource {
         if (name.equals("code")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
         }
+        else if (name.equals("display")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.display");
+        }
         else if (name.equals("equivalence")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.equivalence");
         }
-        else if (name.equals("comments")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.comments");
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.comment");
         }
         else if (name.equals("dependsOn")) {
           return addDependsOn();
@@ -1125,8 +1454,9 @@ public class ConceptMap extends MetadataResource {
         TargetElementComponent dst = new TargetElementComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
+        dst.display = display == null ? null : display.copy();
         dst.equivalence = equivalence == null ? null : equivalence.copy();
-        dst.comments = comments == null ? null : comments.copy();
+        dst.comment = comment == null ? null : comment.copy();
         if (dependsOn != null) {
           dst.dependsOn = new ArrayList<OtherElementComponent>();
           for (OtherElementComponent i : dependsOn)
@@ -1147,8 +1477,9 @@ public class ConceptMap extends MetadataResource {
         if (!(other instanceof TargetElementComponent))
           return false;
         TargetElementComponent o = (TargetElementComponent) other;
-        return compareDeep(code, o.code, true) && compareDeep(equivalence, o.equivalence, true) && compareDeep(comments, o.comments, true)
-           && compareDeep(dependsOn, o.dependsOn, true) && compareDeep(product, o.product, true);
+        return compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(equivalence, o.equivalence, true)
+           && compareDeep(comment, o.comment, true) && compareDeep(dependsOn, o.dependsOn, true) && compareDeep(product, o.product, true)
+          ;
       }
 
       @Override
@@ -1158,13 +1489,13 @@ public class ConceptMap extends MetadataResource {
         if (!(other instanceof TargetElementComponent))
           return false;
         TargetElementComponent o = (TargetElementComponent) other;
-        return compareValues(code, o.code, true) && compareValues(equivalence, o.equivalence, true) && compareValues(comments, o.comments, true)
-          ;
+        return compareValues(code, o.code, true) && compareValues(display, o.display, true) && compareValues(equivalence, o.equivalence, true)
+           && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, equivalence, comments
-          , dependsOn, product);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, display, equivalence
+          , comment, dependsOn, product);
       }
 
   public String fhirType() {
@@ -1177,10 +1508,10 @@ public class ConceptMap extends MetadataResource {
     @Block()
     public static class OtherElementComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property.
+         * A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property.
          */
         @Child(name = "property", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Reference to property mapping depends on", formalDefinition="A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property." )
+        @Description(shortDefinition="Reference to property mapping depends on", formalDefinition="A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property." )
         protected UriType property;
 
         /**
@@ -1197,7 +1528,14 @@ public class ConceptMap extends MetadataResource {
         @Description(shortDefinition="Value of the referenced element", formalDefinition="Identity (code or path) or the element/item/ValueSet that the map depends on / refers to." )
         protected StringType code;
 
-        private static final long serialVersionUID = 1055992750L;
+        /**
+         * The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        @Child(name = "display", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Display for the code", formalDefinition="The display for the code. The display is only provided to help editors when editing the concept map." )
+        protected StringType display;
+
+        private static final long serialVersionUID = 678887659L;
 
     /**
      * Constructor
@@ -1216,7 +1554,7 @@ public class ConceptMap extends MetadataResource {
       }
 
         /**
-         * @return {@link #property} (A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property.). This is the underlying object with id, value and extensions. The accessor "getProperty" gives direct access to the value
+         * @return {@link #property} (A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property.). This is the underlying object with id, value and extensions. The accessor "getProperty" gives direct access to the value
          */
         public UriType getPropertyElement() { 
           if (this.property == null)
@@ -1236,7 +1574,7 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @param value {@link #property} (A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property.). This is the underlying object with id, value and extensions. The accessor "getProperty" gives direct access to the value
+         * @param value {@link #property} (A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property.). This is the underlying object with id, value and extensions. The accessor "getProperty" gives direct access to the value
          */
         public OtherElementComponent setPropertyElement(UriType value) { 
           this.property = value;
@@ -1244,14 +1582,14 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @return A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property.
+         * @return A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property.
          */
         public String getProperty() { 
           return this.property == null ? null : this.property.getValue();
         }
 
         /**
-         * @param value A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property.
+         * @param value A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property.
          */
         public OtherElementComponent setProperty(String value) { 
             if (this.property == null)
@@ -1354,11 +1692,61 @@ public class ConceptMap extends MetadataResource {
           return this;
         }
 
+        /**
+         * @return {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public StringType getDisplayElement() { 
+          if (this.display == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create OtherElementComponent.display");
+            else if (Configuration.doAutoCreate())
+              this.display = new StringType(); // bb
+          return this.display;
+        }
+
+        public boolean hasDisplayElement() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        public boolean hasDisplay() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        /**
+         * @param value {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public OtherElementComponent setDisplayElement(StringType value) { 
+          this.display = value;
+          return this;
+        }
+
+        /**
+         * @return The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public String getDisplay() { 
+          return this.display == null ? null : this.display.getValue();
+        }
+
+        /**
+         * @param value The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public OtherElementComponent setDisplay(String value) { 
+          if (Utilities.noString(value))
+            this.display = null;
+          else {
+            if (this.display == null)
+              this.display = new StringType();
+            this.display.setValue(value);
+          }
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("property", "uri", "A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labelled to correspond with a code system property.", 0, java.lang.Integer.MAX_VALUE, property));
+          childrenList.add(new Property("property", "uri", "A reference to an element that holds a coded value that corresponds to a code system property. The idea is that the information model carries an element somwhere that is labeled to correspond with a code system property.", 0, java.lang.Integer.MAX_VALUE, property));
           childrenList.add(new Property("system", "uri", "An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).", 0, java.lang.Integer.MAX_VALUE, system));
           childrenList.add(new Property("code", "string", "Identity (code or path) or the element/item/ValueSet that the map depends on / refers to.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("display", "string", "The display for the code. The display is only provided to help editors when editing the concept map.", 0, java.lang.Integer.MAX_VALUE, display));
         }
 
       @Override
@@ -1367,47 +1755,67 @@ public class ConceptMap extends MetadataResource {
         case -993141291: /*property*/ return this.property == null ? new Base[0] : new Base[] {this.property}; // UriType
         case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // StringType
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
 
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -993141291: // property
           this.property = castToUri(value); // UriType
-          break;
+          return value;
         case -887328209: // system
           this.system = castToUri(value); // UriType
-          break;
+          return value;
         case 3059181: // code
           this.code = castToString(value); // StringType
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("property"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("property")) {
           this.property = castToUri(value); // UriType
-        else if (name.equals("system"))
+        } else if (name.equals("system")) {
           this.system = castToUri(value); // UriType
-        else if (name.equals("code"))
+        } else if (name.equals("code")) {
           this.code = castToString(value); // StringType
-        else
-          super.setProperty(name, value);
+        } else if (name.equals("display")) {
+          this.display = castToString(value); // StringType
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -993141291: throw new FHIRException("Cannot make property property as it is not a complex type"); // UriType
-        case -887328209: throw new FHIRException("Cannot make property system as it is not a complex type"); // UriType
-        case 3059181: throw new FHIRException("Cannot make property code as it is not a complex type"); // StringType
+        case -993141291:  return getPropertyElement();
+        case -887328209:  return getSystemElement();
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -993141291: /*property*/ return new String[] {"uri"};
+        case -887328209: /*system*/ return new String[] {"uri"};
+        case 3059181: /*code*/ return new String[] {"string"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -1423,6 +1831,9 @@ public class ConceptMap extends MetadataResource {
         else if (name.equals("code")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
         }
+        else if (name.equals("display")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.display");
+        }
         else
           return super.addChild(name);
       }
@@ -1433,6 +1844,7 @@ public class ConceptMap extends MetadataResource {
         dst.property = property == null ? null : property.copy();
         dst.system = system == null ? null : system.copy();
         dst.code = code == null ? null : code.copy();
+        dst.display = display == null ? null : display.copy();
         return dst;
       }
 
@@ -1444,7 +1856,7 @@ public class ConceptMap extends MetadataResource {
           return false;
         OtherElementComponent o = (OtherElementComponent) other;
         return compareDeep(property, o.property, true) && compareDeep(system, o.system, true) && compareDeep(code, o.code, true)
-          ;
+           && compareDeep(display, o.display, true);
       }
 
       @Override
@@ -1455,15 +1867,399 @@ public class ConceptMap extends MetadataResource {
           return false;
         OtherElementComponent o = (OtherElementComponent) other;
         return compareValues(property, o.property, true) && compareValues(system, o.system, true) && compareValues(code, o.code, true)
-          ;
+           && compareValues(display, o.display, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(property, system, code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(property, system, code, display
+          );
       }
 
   public String fhirType() {
     return "ConceptMap.group.element.target.dependsOn";
+
+  }
+
+  }
+
+    @Block()
+    public static class ConceptMapGroupUnmappedComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).
+         */
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="provided | fixed | other-map", formalDefinition="Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/conceptmap-unmapped-mode")
+        protected Enumeration<ConceptMapGroupUnmappedMode> mode;
+
+        /**
+         * The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.
+         */
+        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Fixed code when mode = fixed", formalDefinition="The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code." )
+        protected CodeType code;
+
+        /**
+         * The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        @Child(name = "display", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Display for the code", formalDefinition="The display for the code. The display is only provided to help editors when editing the concept map." )
+        protected StringType display;
+
+        /**
+         * The canonical URL of the map to use if this map contains no mapping.
+         */
+        @Child(name = "url", type = {UriType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Canonical URL for other concept map", formalDefinition="The canonical URL of the map to use if this map contains no mapping." )
+        protected UriType url;
+
+        private static final long serialVersionUID = -482446774L;
+
+    /**
+     * Constructor
+     */
+      public ConceptMapGroupUnmappedComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ConceptMapGroupUnmappedComponent(Enumeration<ConceptMapGroupUnmappedMode> mode) {
+        super();
+        this.mode = mode;
+      }
+
+        /**
+         * @return {@link #mode} (Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         */
+        public Enumeration<ConceptMapGroupUnmappedMode> getModeElement() { 
+          if (this.mode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptMapGroupUnmappedComponent.mode");
+            else if (Configuration.doAutoCreate())
+              this.mode = new Enumeration<ConceptMapGroupUnmappedMode>(new ConceptMapGroupUnmappedModeEnumFactory()); // bb
+          return this.mode;
+        }
+
+        public boolean hasModeElement() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        public boolean hasMode() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #mode} (Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         */
+        public ConceptMapGroupUnmappedComponent setModeElement(Enumeration<ConceptMapGroupUnmappedMode> value) { 
+          this.mode = value;
+          return this;
+        }
+
+        /**
+         * @return Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).
+         */
+        public ConceptMapGroupUnmappedMode getMode() { 
+          return this.mode == null ? null : this.mode.getValue();
+        }
+
+        /**
+         * @param value Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).
+         */
+        public ConceptMapGroupUnmappedComponent setMode(ConceptMapGroupUnmappedMode value) { 
+            if (this.mode == null)
+              this.mode = new Enumeration<ConceptMapGroupUnmappedMode>(new ConceptMapGroupUnmappedModeEnumFactory());
+            this.mode.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #code} (The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         */
+        public CodeType getCodeElement() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptMapGroupUnmappedComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeType(); // bb
+          return this.code;
+        }
+
+        public boolean hasCodeElement() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         */
+        public ConceptMapGroupUnmappedComponent setCodeElement(CodeType value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.
+         */
+        public String getCode() { 
+          return this.code == null ? null : this.code.getValue();
+        }
+
+        /**
+         * @param value The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.
+         */
+        public ConceptMapGroupUnmappedComponent setCode(String value) { 
+          if (Utilities.noString(value))
+            this.code = null;
+          else {
+            if (this.code == null)
+              this.code = new CodeType();
+            this.code.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public StringType getDisplayElement() { 
+          if (this.display == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptMapGroupUnmappedComponent.display");
+            else if (Configuration.doAutoCreate())
+              this.display = new StringType(); // bb
+          return this.display;
+        }
+
+        public boolean hasDisplayElement() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        public boolean hasDisplay() { 
+          return this.display != null && !this.display.isEmpty();
+        }
+
+        /**
+         * @param value {@link #display} (The display for the code. The display is only provided to help editors when editing the concept map.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         */
+        public ConceptMapGroupUnmappedComponent setDisplayElement(StringType value) { 
+          this.display = value;
+          return this;
+        }
+
+        /**
+         * @return The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public String getDisplay() { 
+          return this.display == null ? null : this.display.getValue();
+        }
+
+        /**
+         * @param value The display for the code. The display is only provided to help editors when editing the concept map.
+         */
+        public ConceptMapGroupUnmappedComponent setDisplay(String value) { 
+          if (Utilities.noString(value))
+            this.display = null;
+          else {
+            if (this.display == null)
+              this.display = new StringType();
+            this.display.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #url} (The canonical URL of the map to use if this map contains no mapping.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public UriType getUrlElement() { 
+          if (this.url == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConceptMapGroupUnmappedComponent.url");
+            else if (Configuration.doAutoCreate())
+              this.url = new UriType(); // bb
+          return this.url;
+        }
+
+        public boolean hasUrlElement() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        public boolean hasUrl() { 
+          return this.url != null && !this.url.isEmpty();
+        }
+
+        /**
+         * @param value {@link #url} (The canonical URL of the map to use if this map contains no mapping.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         */
+        public ConceptMapGroupUnmappedComponent setUrlElement(UriType value) { 
+          this.url = value;
+          return this;
+        }
+
+        /**
+         * @return The canonical URL of the map to use if this map contains no mapping.
+         */
+        public String getUrl() { 
+          return this.url == null ? null : this.url.getValue();
+        }
+
+        /**
+         * @param value The canonical URL of the map to use if this map contains no mapping.
+         */
+        public ConceptMapGroupUnmappedComponent setUrl(String value) { 
+          if (Utilities.noString(value))
+            this.url = null;
+          else {
+            if (this.url == null)
+              this.url = new UriType();
+            this.url.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("mode", "code", "Defines which action to take if there is no match in the group. One of 3 actions is possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).", 0, java.lang.Integer.MAX_VALUE, mode));
+          childrenList.add(new Property("code", "code", "The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("display", "string", "The display for the code. The display is only provided to help editors when editing the concept map.", 0, java.lang.Integer.MAX_VALUE, display));
+          childrenList.add(new Property("url", "uri", "The canonical URL of the map to use if this map contains no mapping.", 0, java.lang.Integer.MAX_VALUE, url));
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<ConceptMapGroupUnmappedMode>
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
+        case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
+        case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3357091: // mode
+          value = new ConceptMapGroupUnmappedModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<ConceptMapGroupUnmappedMode>
+          return value;
+        case 3059181: // code
+          this.code = castToCode(value); // CodeType
+          return value;
+        case 1671764162: // display
+          this.display = castToString(value); // StringType
+          return value;
+        case 116079: // url
+          this.url = castToUri(value); // UriType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("mode")) {
+          value = new ConceptMapGroupUnmappedModeEnumFactory().fromType(castToCode(value));
+          this.mode = (Enumeration) value; // Enumeration<ConceptMapGroupUnmappedMode>
+        } else if (name.equals("code")) {
+          this.code = castToCode(value); // CodeType
+        } else if (name.equals("display")) {
+          this.display = castToString(value); // StringType
+        } else if (name.equals("url")) {
+          this.url = castToUri(value); // UriType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3357091:  return getModeElement();
+        case 3059181:  return getCodeElement();
+        case 1671764162:  return getDisplayElement();
+        case 116079:  return getUrlElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3357091: /*mode*/ return new String[] {"code"};
+        case 3059181: /*code*/ return new String[] {"code"};
+        case 1671764162: /*display*/ return new String[] {"string"};
+        case 116079: /*url*/ return new String[] {"uri"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("mode")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.mode");
+        }
+        else if (name.equals("code")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.code");
+        }
+        else if (name.equals("display")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.display");
+        }
+        else if (name.equals("url")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.url");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ConceptMapGroupUnmappedComponent copy() {
+        ConceptMapGroupUnmappedComponent dst = new ConceptMapGroupUnmappedComponent();
+        copyValues(dst);
+        dst.mode = mode == null ? null : mode.copy();
+        dst.code = code == null ? null : code.copy();
+        dst.display = display == null ? null : display.copy();
+        dst.url = url == null ? null : url.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof ConceptMapGroupUnmappedComponent))
+          return false;
+        ConceptMapGroupUnmappedComponent o = (ConceptMapGroupUnmappedComponent) other;
+        return compareDeep(mode, o.mode, true) && compareDeep(code, o.code, true) && compareDeep(display, o.display, true)
+           && compareDeep(url, o.url, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof ConceptMapGroupUnmappedComponent))
+          return false;
+        ConceptMapGroupUnmappedComponent o = (ConceptMapGroupUnmappedComponent) other;
+        return compareValues(mode, o.mode, true) && compareValues(code, o.code, true) && compareValues(display, o.display, true)
+           && compareValues(url, o.url, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(mode, code, display, url
+          );
+      }
+
+  public String fhirType() {
+    return "ConceptMap.group.unmapped";
 
   }
 
@@ -1477,10 +2273,10 @@ public class ConceptMap extends MetadataResource {
     protected Identifier identifier;
 
     /**
-     * Explains why this concept map is needed and why it has been designed as it has.
+     * Explaination of why this concept map is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this concept map is defined", formalDefinition="Explains why this concept map is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this concept map is defined", formalDefinition="Explaination of why this concept map is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -1529,7 +2325,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1549,7 +2345,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ConceptMap setUrlElement(UriType value) { 
       this.url = value;
@@ -1557,14 +2353,14 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).
+     * @return An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).
+     * @param value An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).
      */
     public ConceptMap setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1602,7 +2398,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -1622,7 +2418,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public ConceptMap setVersionElement(StringType value) { 
       this.version = value;
@@ -1630,14 +2426,14 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @return The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.
+     * @param value The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.
      */
     public ConceptMap setVersion(String value) { 
       if (Utilities.noString(value))
@@ -1794,7 +2590,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A flag to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A boolean value to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1814,7 +2610,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A flag to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A boolean value to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public ConceptMap setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1822,19 +2618,68 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return A flag to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A boolean value to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A flag to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A boolean value to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public ConceptMap setExperimental(boolean value) { 
         if (this.experimental == null)
           this.experimental = new BooleanType();
         this.experimental.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date  (and optionally time) when the concept map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ConceptMap.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date  (and optionally time) when the concept map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public ConceptMap setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date  (and optionally time) when the concept map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date  (and optionally time) when the concept map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.
+     */
+    public ConceptMap setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
       return this;
     }
 
@@ -1941,56 +2786,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public DateTimeType getDateElement() { 
-      if (this.date == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ConceptMap.date");
-        else if (Configuration.doAutoCreate())
-          this.date = new DateTimeType(); // bb
-      return this.date;
-    }
-
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
-    }
-
-    /**
-     * @param value {@link #date} (The date  (and optionally time) when the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-     */
-    public ConceptMap setDateElement(DateTimeType value) { 
-      this.date = value;
-      return this;
-    }
-
-    /**
-     * @return The date  (and optionally time) when the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.
-     */
-    public Date getDate() { 
-      return this.date == null ? null : this.date.getValue();
-    }
-
-    /**
-     * @param value The date  (and optionally time) when the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.
-     */
-    public ConceptMap setDate(Date value) { 
-      if (value == null)
-        this.date = null;
-      else {
-        if (this.date == null)
-          this.date = new DateTimeType();
-        this.date.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (A free text natural language description of the concept map from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the concept map from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -2010,7 +2806,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the concept map from the consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the concept map from a consumer's perspective.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public ConceptMap setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -2018,14 +2814,14 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the concept map from the consumer's perspective.
+     * @return A free text natural language description of the concept map from a consumer's perspective.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the concept map from the consumer's perspective.
+     * @param value A free text natural language description of the concept map from a consumer's perspective.
      */
     public ConceptMap setDescription(String value) { 
       if (value == null)
@@ -2039,7 +2835,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate concept map instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -2092,7 +2888,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #jurisdiction} (A jurisdiction in which the concept map is intended to be used.)
+     * @return {@link #jurisdiction} (A legal or geographic region in which the concept map is intended to be used.)
      */
     public List<CodeableConcept> getJurisdiction() { 
       if (this.jurisdiction == null)
@@ -2145,7 +2941,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explains why this concept map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explaination of why this concept map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -2165,7 +2961,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explains why this concept map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explaination of why this concept map is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public ConceptMap setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -2173,14 +2969,14 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return Explains why this concept map is needed and why it has been designed as it has.
+     * @return Explaination of why this concept map is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explains why this concept map is needed and why it has been designed as it has.
+     * @param value Explaination of why this concept map is needed and why it has been designed as it has.
      */
     public ConceptMap setPurpose(String value) { 
       if (value == null)
@@ -2387,20 +3183,20 @@ public class ConceptMap extends MetadataResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published. The URL SHOULD include the major version of the concept map. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the concept map author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A natural language name identifying the concept map. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the concept map.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The status of this concept map. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A flag to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this concept map is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the concept map was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the concept map.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. In addition, it should change when the substantive content of the concept map changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the concept map from the consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A jurisdiction in which the concept map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explains why this concept map is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        childrenList.add(new Property("description", "markdown", "A free text natural language description of the concept map from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate concept map instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the concept map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        childrenList.add(new Property("purpose", "markdown", "Explaination of why this concept map is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
         childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the concept map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the concept map.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("source[x]", "uri|Reference(ValueSet)", "The source value set that specifies the concepts that are being mapped.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("target[x]", "uri|Reference(ValueSet)", "The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.", 0, java.lang.Integer.MAX_VALUE, target));
@@ -2417,9 +3213,9 @@ public class ConceptMap extends MetadataResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
@@ -2434,131 +3230,162 @@ public class ConceptMap extends MetadataResource {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 116079: // url
           this.url = castToUri(value); // UriType
-          break;
+          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
-          break;
+          return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
-          break;
+          return value;
         case 3373707: // name
           this.name = castToString(value); // StringType
-          break;
+          return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
-          break;
+          return value;
         case -892481550: // status
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-          break;
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+          return value;
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
-          break;
-        case 1447404028: // publisher
-          this.publisher = castToString(value); // StringType
-          break;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          break;
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
-          break;
+          return value;
+        case 1447404028: // publisher
+          this.publisher = castToString(value); // StringType
+          return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          break;
+          return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          break;
+          return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case 1522889671: // copyright
           this.copyright = castToMarkdown(value); // MarkdownType
-          break;
+          return value;
         case -896505829: // source
           this.source = castToType(value); // Type
-          break;
+          return value;
         case -880905839: // target
           this.target = castToType(value); // Type
-          break;
+          return value;
         case 98629247: // group
           this.getGroup().add((ConceptMapGroupComponent) value); // ConceptMapGroupComponent
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("url"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("url")) {
           this.url = castToUri(value); // UriType
-        else if (name.equals("identifier"))
+        } else if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
-        else if (name.equals("version"))
+        } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
-        else if (name.equals("name"))
+        } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
-        else if (name.equals("title"))
+        } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
-        else if (name.equals("status"))
-          this.status = new PublicationStatusEnumFactory().fromType(value); // Enumeration<PublicationStatus>
-        else if (name.equals("experimental"))
+        } else if (name.equals("status")) {
+          value = new PublicationStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<PublicationStatus>
+        } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
-        else if (name.equals("publisher"))
-          this.publisher = castToString(value); // StringType
-        else if (name.equals("contact"))
-          this.getContact().add(castToContactDetail(value));
-        else if (name.equals("date"))
+        } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
-        else if (name.equals("description"))
+        } else if (name.equals("publisher")) {
+          this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
+        } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        else if (name.equals("useContext"))
+        } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
-        else if (name.equals("jurisdiction"))
+        } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        else if (name.equals("purpose"))
+        } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
-        else if (name.equals("copyright"))
+        } else if (name.equals("copyright")) {
           this.copyright = castToMarkdown(value); // MarkdownType
-        else if (name.equals("source[x]"))
+        } else if (name.equals("source[x]")) {
           this.source = castToType(value); // Type
-        else if (name.equals("target[x]"))
+        } else if (name.equals("target[x]")) {
           this.target = castToType(value); // Type
-        else if (name.equals("group"))
+        } else if (name.equals("group")) {
           this.getGroup().add((ConceptMapGroupComponent) value);
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 116079: throw new FHIRException("Cannot make property url as it is not a complex type"); // UriType
-        case -1618432855:  return getIdentifier(); // Identifier
-        case 351608024: throw new FHIRException("Cannot make property version as it is not a complex type"); // StringType
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // StringType
-        case 110371416: throw new FHIRException("Cannot make property title as it is not a complex type"); // StringType
-        case -892481550: throw new FHIRException("Cannot make property status as it is not a complex type"); // Enumeration<PublicationStatus>
-        case -404562712: throw new FHIRException("Cannot make property experimental as it is not a complex type"); // BooleanType
-        case 1447404028: throw new FHIRException("Cannot make property publisher as it is not a complex type"); // StringType
-        case 951526432:  return addContact(); // ContactDetail
-        case 3076014: throw new FHIRException("Cannot make property date as it is not a complex type"); // DateTimeType
-        case -1724546052: throw new FHIRException("Cannot make property description as it is not a complex type"); // MarkdownType
-        case -669707736:  return addUseContext(); // UsageContext
-        case -507075711:  return addJurisdiction(); // CodeableConcept
-        case -220463842: throw new FHIRException("Cannot make property purpose as it is not a complex type"); // MarkdownType
-        case 1522889671: throw new FHIRException("Cannot make property copyright as it is not a complex type"); // MarkdownType
-        case -1698413947:  return getSource(); // Type
-        case -815579825:  return getTarget(); // Type
-        case 98629247:  return addGroup(); // ConceptMapGroupComponent
+        case 116079:  return getUrlElement();
+        case -1618432855:  return getIdentifier(); 
+        case 351608024:  return getVersionElement();
+        case 3373707:  return getNameElement();
+        case 110371416:  return getTitleElement();
+        case -892481550:  return getStatusElement();
+        case -404562712:  return getExperimentalElement();
+        case 3076014:  return getDateElement();
+        case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
+        case 1522889671:  return getCopyrightElement();
+        case -1698413947:  return getSource(); 
+        case -896505829:  return getSource(); 
+        case -815579825:  return getTarget(); 
+        case -880905839:  return getTarget(); 
+        case 98629247:  return addGroup(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 116079: /*url*/ return new String[] {"uri"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 351608024: /*version*/ return new String[] {"string"};
+        case 3373707: /*name*/ return new String[] {"string"};
+        case 110371416: /*title*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case 3076014: /*date*/ return new String[] {"dateTime"};
+        case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
+        case -896505829: /*source*/ return new String[] {"uri", "Reference"};
+        case -880905839: /*target*/ return new String[] {"uri", "Reference"};
+        case 98629247: /*group*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }
@@ -2587,14 +3414,14 @@ public class ConceptMap extends MetadataResource {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.experimental");
         }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.date");
+        }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.publisher");
         }
         else if (name.equals("contact")) {
           return addContact();
-        }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.date");
         }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ConceptMap.description");
@@ -2649,13 +3476,13 @@ public class ConceptMap extends MetadataResource {
         dst.title = title == null ? null : title.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
-        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
@@ -2738,17 +3565,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the concept map</b><br>
+   * Description: <b>External identifier for the concept map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ConceptMap.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="External identifiers for the concept map", type="token" )
+  @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="External identifier for the concept map", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>External identifiers for the concept map</b><br>
+   * Description: <b>External identifier for the concept map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ConceptMap.identifier</b><br>
    * </p>
@@ -2774,6 +3601,26 @@ public class ConceptMap extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam PRODUCT = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_PRODUCT);
+
+ /**
+   * Search parameter: <b>other</b>
+   * <p>
+   * Description: <b>Canonical URL for other concept map</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ConceptMap.group.unmapped.url</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="other", path="ConceptMap.group.unmapped.url", description="Canonical URL for other concept map", type="uri" )
+  public static final String SP_OTHER = "other";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>other</b>
+   * <p>
+   * Description: <b>Canonical URL for other concept map</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ConceptMap.group.unmapped.url</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam OTHER = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_OTHER);
 
  /**
    * Search parameter: <b>target-system</b>
@@ -2818,17 +3665,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for concept map</b><br>
+   * Description: <b>Intended jurisdiction for the concept map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ConceptMap.jurisdiction</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="jurisdiction", path="ConceptMap.jurisdiction", description="Intended jurisdiction for concept map", type="token" )
+  @SearchParamDefinition(name="jurisdiction", path="ConceptMap.jurisdiction", description="Intended jurisdiction for the concept map", type="token" )
   public static final String SP_JURISDICTION = "jurisdiction";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>jurisdiction</b>
    * <p>
-   * Description: <b>Intended jurisdiction for concept map</b><br>
+   * Description: <b>Intended jurisdiction for the concept map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ConceptMap.jurisdiction</b><br>
    * </p>
@@ -2838,17 +3685,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the concept map</b><br>
+   * Description: <b>The description of the concept map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ConceptMap.description</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search against the description of the concept map", type="string" )
+  @SearchParamDefinition(name="description", path="ConceptMap.description", description="The description of the concept map", type="string" )
   public static final String SP_DESCRIPTION = "description";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>description</b>
    * <p>
-   * Description: <b>Text search against the description of the concept map</b><br>
+   * Description: <b>The description of the concept map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ConceptMap.description</b><br>
    * </p>
@@ -2884,17 +3731,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the concept map</b><br>
+   * Description: <b>The human-friendly name of the concept map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ConceptMap.title</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="title", path="ConceptMap.title", description="Text search against the title of the concept map", type="string" )
+  @SearchParamDefinition(name="title", path="ConceptMap.title", description="The human-friendly name of the concept map", type="string" )
   public static final String SP_TITLE = "title";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>title</b>
    * <p>
-   * Description: <b>Text search against the title of the concept map</b><br>
+   * Description: <b>The human-friendly name of the concept map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ConceptMap.title</b><br>
    * </p>
@@ -2904,17 +3751,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the concept map</b><br>
+   * Description: <b>The business version of the concept map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ConceptMap.version</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token" )
+  @SearchParamDefinition(name="version", path="ConceptMap.version", description="The business version of the concept map", type="token" )
   public static final String SP_VERSION = "version";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>version</b>
    * <p>
-   * Description: <b>The version identifier of the concept map</b><br>
+   * Description: <b>The business version of the concept map</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ConceptMap.version</b><br>
    * </p>
@@ -3016,17 +3863,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>name</b>
    * <p>
-   * Description: <b>Name of the concept map</b><br>
+   * Description: <b>Computationally friendly name of the concept map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ConceptMap.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
+  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Computationally friendly name of the concept map", type="string" )
   public static final String SP_NAME = "name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>name</b>
    * <p>
-   * Description: <b>Name of the concept map</b><br>
+   * Description: <b>Computationally friendly name of the concept map</b><br>
    * Type: <b>string</b><br>
    * Path: <b>ConceptMap.name</b><br>
    * </p>

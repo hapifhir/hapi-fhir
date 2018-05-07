@@ -1,46 +1,32 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.dstu3.model.*;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.*;
 
 public class ReadDstu3Test {
 	private static CloseableHttpClient ourClient;
@@ -49,7 +35,6 @@ public class ReadDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-
 
 	@Test
 	public void testRead() throws Exception {
@@ -66,20 +51,61 @@ public class ReadDstu3Test {
 		assertEquals("http://localhost:" + ourPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_LOCATION).getValue());
 		assertEquals(null, status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 
-		//@formatter:off
 		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"2\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
-			"</Patient>"));
-		//@formatter:on
+				"<Patient xmlns=\"http://hl7.org/fhir\">",
+				" <id value=\"2\"/>",
+				" <meta>",
+				"  <profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+				" </meta>",
+				" <modifierExtension url=\"http://example.com/ext/date\">",
+				"  <valueDate value=\"2011-01-01\"/>",
+				" </modifierExtension>",
+				"</Patient>"));
 	}
 
+	@Test
+	public void testIfModifiedSince() throws Exception {
+
+		CloseableHttpResponse status;
+		HttpGet httpGet;
+
+		// Fixture was last modified at 2012-01-01T12:12:12Z
+		// thus it hasn't changed after the later time of 2012-01-01T13:00:00Z
+		// so we expect a 304 (Not Modified)
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
+		status = ourClient.execute(httpGet);
+		try {
+			assertEquals(304, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+
+		// Fixture was last modified at 2012-01-01T12:12:12Z
+		// thus it hasn't changed after the same time of 2012-01-01T12:12:12Z
+		// so we expect a 304 (Not Modified)
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
+		status = ourClient.execute(httpGet);
+		try {
+			assertEquals(304, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+
+		// Fixture was last modified at 2012-01-01T12:12:12Z
+		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
+		// so we expect a 200
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
+		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
+		status = ourClient.execute(httpGet);
+		try {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -117,9 +143,10 @@ public class ReadDstu3Test {
 			return Patient.class;
 		}
 
-		@Read(version=true)
+		@Read(version = true)
 		public MyPatientWithExtensions read(@IdParam IdType theIdParam) {
 			MyPatientWithExtensions p0 = new MyPatientWithExtensions();
+			p0.getMeta().getLastUpdatedElement().setValueAsString("2012-01-01T12:12:12Z");
 			p0.setId(theIdParam);
 			if (theIdParam.hasVersionIdPart() == false) {
 				p0.setIdElement(p0.getIdElement().withVersion("2"));
@@ -127,7 +154,6 @@ public class ReadDstu3Test {
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
 		}
-
 
 	}
 

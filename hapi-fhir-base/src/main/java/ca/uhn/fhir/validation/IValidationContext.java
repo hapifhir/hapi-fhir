@@ -1,10 +1,12 @@
 package ca.uhn.fhir.validation;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +23,7 @@ package ca.uhn.fhir.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public interface IValidationContext<T> {
 
@@ -35,6 +37,8 @@ public interface IValidationContext<T> {
 
 	void addValidationMessage(SingleValidationMessage theMessage);
 
+	List<SingleValidationMessage> getMessages();
+	
 	ValidationResult toResult();
 
 }

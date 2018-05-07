@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -115,8 +115,10 @@ public class ParameterDefinition extends Type implements ICompositeType {
         throw new IllegalArgumentException("Unknown ParameterUse code '"+codeString+"'");
         }
         public Enumeration<ParameterUse> fromType(Base code) throws FHIRException {
-          if (code == null || code.isEmpty())
+          if (code == null)
             return null;
+          if (code.isEmpty())
+            return new Enumeration<ParameterUse>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
@@ -139,17 +141,17 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * The name of the parameter.
+     * The name of the parameter used to allow access to the value of the parameter in evaluation contexts.
      */
     @Child(name = "name", type = {CodeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Parameter name", formalDefinition="The name of the parameter." )
+    @Description(shortDefinition="Name used to access the parameter value", formalDefinition="The name of the parameter used to allow access to the value of the parameter in evaluation contexts." )
     protected CodeType name;
 
     /**
      * Whether the parameter is input or output for the module.
      */
     @Child(name = "use", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="input | output", formalDefinition="Whether the parameter is input or output for the module." )
+    @Description(shortDefinition="in | out", formalDefinition="Whether the parameter is input or output for the module." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-parameter-use")
     protected Enumeration<ParameterUse> use;
 
@@ -178,7 +180,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * The type of the parameter.
      */
     @Child(name = "type", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Type for the parameter", formalDefinition="The type of the parameter." )
+    @Description(shortDefinition="What type of value", formalDefinition="The type of the parameter." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/all-types")
     protected CodeType type;
 
@@ -186,7 +188,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
      * If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.
      */
     @Child(name = "profile", type = {StructureDefinition.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The profile of the parameter, any", formalDefinition="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to." )
+    @Description(shortDefinition="What profile the value is expected to be", formalDefinition="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to." )
     protected Reference profile;
 
     /**
@@ -213,7 +215,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #name} (The name of the parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (The name of the parameter used to allow access to the value of the parameter in evaluation contexts.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public CodeType getNameElement() { 
       if (this.name == null)
@@ -233,7 +235,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #name} (The name of the parameter.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (The name of the parameter used to allow access to the value of the parameter in evaluation contexts.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public ParameterDefinition setNameElement(CodeType value) { 
       this.name = value;
@@ -241,14 +243,14 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return The name of the parameter.
+     * @return The name of the parameter used to allow access to the value of the parameter in evaluation contexts.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value The name of the parameter.
+     * @param value The name of the parameter used to allow access to the value of the parameter in evaluation contexts.
      */
     public ParameterDefinition setName(String value) { 
       if (Utilities.noString(value))
@@ -540,7 +542,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("name", "code", "The name of the parameter.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("name", "code", "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("use", "code", "Whether the parameter is input or output for the module.", 0, java.lang.Integer.MAX_VALUE, use));
         childrenList.add(new Property("min", "integer", "The minimum number of times this parameter SHALL appear in the request or response.", 0, java.lang.Integer.MAX_VALUE, min));
         childrenList.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, java.lang.Integer.MAX_VALUE, max));
@@ -565,65 +567,83 @@ public class ParameterDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public void setProperty(int hash, String name, Base value) throws FHIRException {
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3373707: // name
           this.name = castToCode(value); // CodeType
-          break;
+          return value;
         case 116103: // use
-          this.use = new ParameterUseEnumFactory().fromType(value); // Enumeration<ParameterUse>
-          break;
+          value = new ParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<ParameterUse>
+          return value;
         case 108114: // min
           this.min = castToInteger(value); // IntegerType
-          break;
+          return value;
         case 107876: // max
           this.max = castToString(value); // StringType
-          break;
+          return value;
         case 1587405498: // documentation
           this.documentation = castToString(value); // StringType
-          break;
+          return value;
         case 3575610: // type
           this.type = castToCode(value); // CodeType
-          break;
+          return value;
         case -309425751: // profile
           this.profile = castToReference(value); // Reference
-          break;
-        default: super.setProperty(hash, name, value);
+          return value;
+        default: return super.setProperty(hash, name, value);
         }
 
       }
 
       @Override
-      public void setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name"))
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("name")) {
           this.name = castToCode(value); // CodeType
-        else if (name.equals("use"))
-          this.use = new ParameterUseEnumFactory().fromType(value); // Enumeration<ParameterUse>
-        else if (name.equals("min"))
+        } else if (name.equals("use")) {
+          value = new ParameterUseEnumFactory().fromType(castToCode(value));
+          this.use = (Enumeration) value; // Enumeration<ParameterUse>
+        } else if (name.equals("min")) {
           this.min = castToInteger(value); // IntegerType
-        else if (name.equals("max"))
+        } else if (name.equals("max")) {
           this.max = castToString(value); // StringType
-        else if (name.equals("documentation"))
+        } else if (name.equals("documentation")) {
           this.documentation = castToString(value); // StringType
-        else if (name.equals("type"))
+        } else if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
-        else if (name.equals("profile"))
+        } else if (name.equals("profile")) {
           this.profile = castToReference(value); // Reference
-        else
-          super.setProperty(name, value);
+        } else
+          return super.setProperty(name, value);
+        return value;
       }
 
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3373707: throw new FHIRException("Cannot make property name as it is not a complex type"); // CodeType
-        case 116103: throw new FHIRException("Cannot make property use as it is not a complex type"); // Enumeration<ParameterUse>
-        case 108114: throw new FHIRException("Cannot make property min as it is not a complex type"); // IntegerType
-        case 107876: throw new FHIRException("Cannot make property max as it is not a complex type"); // StringType
-        case 1587405498: throw new FHIRException("Cannot make property documentation as it is not a complex type"); // StringType
-        case 3575610: throw new FHIRException("Cannot make property type as it is not a complex type"); // CodeType
-        case -309425751:  return getProfile(); // Reference
+        case 3373707:  return getNameElement();
+        case 116103:  return getUseElement();
+        case 108114:  return getMinElement();
+        case 107876:  return getMaxElement();
+        case 1587405498:  return getDocumentationElement();
+        case 3575610:  return getTypeElement();
+        case -309425751:  return getProfile(); 
         default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3373707: /*name*/ return new String[] {"code"};
+        case 116103: /*use*/ return new String[] {"code"};
+        case 108114: /*min*/ return new String[] {"integer"};
+        case 107876: /*max*/ return new String[] {"string"};
+        case 1587405498: /*documentation*/ return new String[] {"string"};
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -309425751: /*profile*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
         }
 
       }

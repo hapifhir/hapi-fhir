@@ -36,6 +36,16 @@ public class CommonConfig {
 	}
 	
 	/**
+	 * This is a joke
+	 *
+	 * https://chat.fhir.org/#narrow/stream/implementers/topic/Unsupported.20search.20parameters
+	 */
+	@Bean
+	public IServerInterceptor holyFooCowInterceptor() {
+		return new HolyFooCowInterceptor();
+	}
+	
+	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
 	 */
 	@Bean
@@ -46,15 +56,9 @@ public class CommonConfig {
 		retVal.setLogExceptions(false);
 		return retVal;
 	}
-	
-	/**
-	 * This is a joke
-	 * 
-	 * https://chat.fhir.org/#narrow/stream/implementers/topic/Unsupported.20search.20parameters
-	 */
-	@Bean
-	public IServerInterceptor holyFooCowInterceptor() {
-		return new HolyFooCowInterceptor();
+
+	public static boolean isLocalTestMode(){
+		return "true".equalsIgnoreCase(System.getProperty("testmode.local"));
 	}
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,17 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.util.CoverageIgnore;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import ca.uhn.fhir.util.CoverageIgnore;
-
 //@formatter:off
-@Table(name="TRM_CODESYSTEM_VER", uniqueConstraints= {
-	@UniqueConstraint(name="IDX_CSV_RESOURCEPID_AND_VER", columnNames= {"RES_ID", "RES_VERSION_ID"})
-})
+@Table(name = "TRM_CODESYSTEM_VER"
+	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
+)
 @Entity()
 //@formatter:on
 public class TermCodeSystemVersion implements Serializable {
@@ -54,42 +41,32 @@ public class TermCodeSystemVersion implements Serializable {
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
-	@GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_CODESYSTEMVER_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
 	private Long myId;
 
 	@OneToOne()
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey=@ForeignKey(name="FK_CODESYSVER_RES_ID"))
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "RES_VERSION_ID", nullable = false, updatable = false)
-	private Long myResourceVersionId;
+	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false)
+	private String myCodeSystemVersionId;
+	/**
+	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
+	 * issued. It should be made non-nullable at some point.
+	 */
+	@ManyToOne
+	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
+	private TermCodeSystem myCodeSystem;
+	@SuppressWarnings("unused")
+	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
+	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
 	/**
 	 * Constructor
 	 */
 	public TermCodeSystemVersion() {
 		super();
-	}
-
-	public Collection<TermConcept> getConcepts() {
-		if (myConcepts == null) {
-			myConcepts = new ArrayList<TermConcept>();
-		}
-		return myConcepts;
-	}
-
-	public Long getPid() {
-		return myId;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((myResource.getId() == null) ? 0 : myResource.getId().hashCode());
-		result = prime * result + ((myResourceVersionId == null) ? 0 : myResourceVersionId.hashCode());
-		return result;
 	}
 
 	@CoverageIgnore
@@ -110,31 +87,59 @@ public class TermCodeSystemVersion implements Serializable {
 		} else if (!myResource.getId().equals(other.myResource.getId())) {
 			return false;
 		}
-		
-		if (myResourceVersionId == null) {
-			if (other.myResourceVersionId != null) {
+
+		if (myCodeSystemVersionId == null) {
+			if (other.myCodeSystemVersionId != null) {
 				return false;
 			}
-		} else if (!myResourceVersionId.equals(other.myResourceVersionId)) {
+		} else if (!myCodeSystemVersionId.equals(other.myCodeSystemVersionId)) {
 			return false;
 		}
 		return true;
+	}
+
+	public TermCodeSystem getCodeSystem() {
+		return myCodeSystem;
+	}
+
+	public void setCodeSystem(TermCodeSystem theCodeSystem) {
+		myCodeSystem = theCodeSystem;
+	}
+
+	public String getCodeSystemVersionId() {
+		return myCodeSystemVersionId;
+	}
+
+	public void setCodeSystemVersionId(String theCodeSystemVersionId) {
+		myCodeSystemVersionId = theCodeSystemVersionId;
+	}
+
+	public Collection<TermConcept> getConcepts() {
+		if (myConcepts == null) {
+			myConcepts = new ArrayList<>();
+		}
+		return myConcepts;
+	}
+
+	public Long getPid() {
+		return myId;
 	}
 
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public Long getResourceVersionId() {
-		return myResourceVersionId;
-	}
-
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
 
-	public void setResourceVersionId(Long theResourceVersionId) {
-		myResourceVersionId = theResourceVersionId;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myResource.getId() == null) ? 0 : myResource.getId().hashCode());
+		result = prime * result + ((myCodeSystemVersionId == null) ? 0 : myCodeSystemVersionId.hashCode());
+		return result;
 	}
 
 }

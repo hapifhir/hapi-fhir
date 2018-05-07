@@ -29,16 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centres, etc.
  */
@@ -58,14 +56,14 @@ public class Account extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AccountStatus fromCode(String codeString) throws Exception {
+        public static AccountStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
           return ACTIVE;
         if ("inactive".equals(codeString))
           return INACTIVE;
-        throw new Exception("Unknown AccountStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -107,6 +105,18 @@ public class Account extends DomainResource {
         if ("inactive".equals(codeString))
           return AccountStatus.INACTIVE;
         throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
+        }
+        public Enumeration<AccountStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("active".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.ACTIVE);
+        if ("inactive".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.INACTIVE);
+        throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
     public String toCode(AccountStatus code) {
       if (code == AccountStatus.ACTIVE)
@@ -617,6 +627,85 @@ public class Account extends DomainResource {
         childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
         childrenList.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, java.lang.Integer.MAX_VALUE, description));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("name"))
+          this.name = castToString(value); // StringType
+        else if (name.equals("type"))
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("status"))
+          this.status = new AccountStatusEnumFactory().fromType(value); // Enumeration<AccountStatus>
+        else if (name.equals("activePeriod"))
+          this.activePeriod = castToPeriod(value); // Period
+        else if (name.equals("currency"))
+          this.currency = castToCoding(value); // Coding
+        else if (name.equals("balance"))
+          this.balance = castToMoney(value); // Money
+        else if (name.equals("coveragePeriod"))
+          this.coveragePeriod = castToPeriod(value); // Period
+        else if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("owner"))
+          this.owner = castToReference(value); // Reference
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("name")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.name");
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.status");
+        }
+        else if (name.equals("activePeriod")) {
+          this.activePeriod = new Period();
+          return this.activePeriod;
+        }
+        else if (name.equals("currency")) {
+          this.currency = new Coding();
+          return this.currency;
+        }
+        else if (name.equals("balance")) {
+          this.balance = new Money();
+          return this.balance;
+        }
+        else if (name.equals("coveragePeriod")) {
+          this.coveragePeriod = new Period();
+          return this.coveragePeriod;
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("owner")) {
+          this.owner = new Reference();
+          return this.owner;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Account.description");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Account";
+
+  }
 
       public Account copy() {
         Account dst = new Account();

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
@@ -31,18 +28,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.IdType;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.param.ResourceParameter;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.util.UrlUtil;
 
 /**
@@ -56,15 +51,15 @@ public class JaxRsRequest extends RequestDetails {
 	 * An implementation of the builder pattern for the JaxRsRequest
 	 */
 	public static class Builder {
-		private String myResource;
-		private AbstractJaxRsProvider myServer;
-		private RequestTypeEnum myRequestType;
-		private RestOperationTypeEnum myRestOperation;
-		private String myId;
-		private String myVersion;
 		private String myCompartment;
+		private String myId;
+		private RequestTypeEnum myRequestType;
 		private String myRequestUrl;
-        private final String myResourceName;		
+		private String myResource;
+		private final String myResourceName;
+		private RestOperationTypeEnum myRestOperation;
+		private AbstractJaxRsProvider myServer;
+        private String myVersion;		
 
 		/**
 		 * Utility Constructor
@@ -83,46 +78,6 @@ public class JaxRsRequest extends RequestDetails {
 		}
 
 		/**
-		 * Set the resource
-		 * @param resource the body contents of an http method 
-		 * @return the builder
-		 */
-		public Builder resource(String resource) {
-			this.myResource = resource;
-			return this;
-		}
-
-		/**
-		 * Set the id
-		 * @param id the resource id
-		 * @return the builder
-		 */
-		public Builder id(String id) {
-			this.myId = id;
-			return this;
-		}
-
-		/**
-		 * Set the id version
-		 * @param version the version of the resource
-		 * @return the builder
-		 */
-		public Builder version(String version) {
-			this.myVersion = version;
-			return this;
-		}
-
-		/**
-		 * Set the compartment
-		 * @param compartment the compartment
-		 * @return the builder
-		 */
-		public Builder compartment(String compartment) {
-			this.myCompartment = compartment;
-			return this;
-		}
-
-		/**
 		 * Create the jax-rs request
 		 * @return the jax-rs request
 		 */
@@ -137,28 +92,68 @@ public class JaxRsRequest extends RequestDetails {
          FhirVersionEnum fhirContextVersion = myServer.getFhirContext().getVersion().getVersion();
 
          if (StringUtils.isNotBlank(myVersion)) {
-             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
-                 result.setId(
-                         new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
-             } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                 result.setId(
-                         new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
-             }
+             switch (fhirContextVersion) {
+                 case R4:
+                     result.setId(new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU3:
+                     result.setId(new org.hl7.fhir.dstu3.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU2_1:
+                     result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU2_HL7ORG:
+                     result.setId(new org.hl7.fhir.instance.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 case DSTU2:
+                     result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+                     break;
+                 default:
+                     throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+            }
          } else if (StringUtils.isNotBlank(myId)) {
-             if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
-                 result.setId(new IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
-             } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                 result.setId(new IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
-             }
+             switch (fhirContextVersion) {
+                 case R4:
+                     result.setId(new org.hl7.fhir.r4.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU3:
+                     result.setId(new org.hl7.fhir.dstu3.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU2_1:
+                     result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU2_HL7ORG:
+                     result.setId(new org.hl7.fhir.instance.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 case DSTU2:
+                     result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+                     break;
+                 default:
+                     throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+              }
          }
 
          if (myRestOperation == RestOperationTypeEnum.UPDATE) {
              String contentLocation = result.getHeader(Constants.HEADER_CONTENT_LOCATION);
              if (contentLocation != null) {
-                 if (FhirVersionEnum.DSTU3.equals(fhirContextVersion) || FhirVersionEnum.DSTU2_HL7ORG.equals(fhirContextVersion)) {
-                     result.setId(new IdType(contentLocation));
-                 } else if (FhirVersionEnum.DSTU2.equals(fhirContextVersion)) {
-                     result.setId(new IdDt(contentLocation));
+                 switch (fhirContextVersion) {
+                     case R4:
+                         result.setId(new org.hl7.fhir.r4.model.IdType(contentLocation));
+                         break;
+                     case DSTU3:
+                         result.setId(new org.hl7.fhir.dstu3.model.IdType(contentLocation));
+                         break;
+                     case DSTU2_1:
+                         result.setId(new org.hl7.fhir.dstu2016may.model.IdType(contentLocation));
+                         break;
+                     case DSTU2_HL7ORG:
+                         result.setId(new org.hl7.fhir.instance.model.IdType(contentLocation));
+                         break;
+                    case DSTU2:
+                         result.setId(new ca.uhn.fhir.model.primitive.IdDt(contentLocation));
+                         break;
+                    default:
+                         throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
                  }
              }
          }
@@ -169,10 +164,50 @@ public class JaxRsRequest extends RequestDetails {
 			
 			return result;
 		}
+
+		/**
+		 * Set the compartment
+		 * @param compartment the compartment
+		 * @return the builder
+		 */
+		public Builder compartment(String compartment) {
+			this.myCompartment = compartment;
+			return this;
+		}
+
+		/**
+		 * Set the id
+		 * @param id the resource id
+		 * @return the builder
+		 */
+		public Builder id(String id) {
+			this.myId = id;
+			return this;
+		}
+
+		/**
+		 * Set the resource
+		 * @param resource the body contents of an http method 
+		 * @return the builder
+		 */
+		public Builder resource(String resource) {
+			this.myResource = resource;
+			return this;
+		}
+
+		/**
+		 * Set the id version
+		 * @param version the version of the resource
+		 * @return the builder
+		 */
+		public Builder version(String version) {
+			this.myVersion = version;
+			return this;
+		}
 	}
 
-	private String myResourceString;
 	private HttpHeaders myHeaders;
+	private String myResourceString;
 	private AbstractJaxRsProvider myServer;
 
 	/**
@@ -194,16 +229,28 @@ public class JaxRsRequest extends RequestDetails {
 	}
 
 	@Override
-	public AbstractJaxRsProvider getServer() {
-		return myServer;
+	protected byte[] getByteStreamRequestContents() {
+		return StringUtils.defaultString(myResourceString, "")
+				.getBytes(ResourceParameter.determineRequestCharset(this));
 	}
 
-	/**
-	 * Set the server
-	 * @param theServer the server to set
-	 */
-	public void setServer(AbstractJaxRsProvider theServer) {
-		this.myServer = theServer;
+	@Override
+	public Charset getCharset() {
+		String charset = null;
+		
+		if(myHeaders.getMediaType() != null && myHeaders.getMediaType().getParameters() != null) {
+			charset = myHeaders.getMediaType().getParameters().get(MediaType.CHARSET_PARAMETER);
+		}
+		if(charset != null) {
+			return Charset.forName(charset);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myServer.getFhirContext();
 	}
 
 	@Override
@@ -219,14 +266,15 @@ public class JaxRsRequest extends RequestDetails {
 	}
 
 	@Override
-	public String getServerBaseForRequest() {
-		return getServer().getServerAddressStrategy().determineServerBase(null, null);
+	public InputStream getInputStream() {
+		// not yet implemented
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected byte[] getByteStreamRequestContents() {
-		return StringUtils.defaultString(myResourceString, "")
-				.getBytes(ResourceParameter.determineRequestCharset(this));
+	public Reader getReader() throws IOException {
+		// not yet implemented
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -238,28 +286,20 @@ public class JaxRsRequest extends RequestDetails {
 	}
 
 	@Override
-	public Reader getReader() throws IOException {
-		// not yet implemented
-		throw new UnsupportedOperationException();
+	public AbstractJaxRsProvider getServer() {
+		return myServer;
 	}
 
 	@Override
-	public InputStream getInputStream() {
-		// not yet implemented
-		throw new UnsupportedOperationException();
+	public String getServerBaseForRequest() {
+		return getServer().getServerAddressStrategy().determineServerBase(null, null);
 	}
 
-	@Override
-	public Charset getCharset() {
-		String charset = null;
-		
-		if(myHeaders.getMediaType() != null && myHeaders.getMediaType().getParameters() != null) {
-			charset = myHeaders.getMediaType().getParameters().get(MediaType.CHARSET_PARAMETER);
-		}
-		if(charset != null) {
-			return Charset.forName(charset);
-		} else {
-			return null;
-		}
+	/**
+	 * Set the server
+	 * @param theServer the server to set
+	 */
+	public void setServer(AbstractJaxRsProvider theServer) {
+		this.myServer = theServer;
 	}
 }

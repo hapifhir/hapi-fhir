@@ -4,13 +4,13 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,16 +25,16 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IMetaGetUnsourced<T extends IBaseMetaType> {
 
-	IClientExecutable<IClientExecutable<?,?>, T> fromServer();
-	
-	IClientExecutable<IClientExecutable<?,?>, T> fromType(String theResourceName);
+	IClientExecutable<IClientExecutable<?, T>, T> fromServer();
+
+	IClientExecutable<IClientExecutable<?, T>, T> fromType(String theResourceName);
 
 	/**
-	 * Get the meta from a resource instance by ID. 
+	 * Get the meta from a resource instance by ID.
 	 * 
-	 * @param theId The ID. Must contain both a resource type and an ID part
+	 * @param theId
+	 *           The ID. Must contain both a resource type and an ID part
 	 */
-	IClientExecutable<IClientExecutable<?,?>, T> fromResource(IIdType theId);
-
+	IClientExecutable<IClientExecutable<?, T>, T> fromResource(IIdType theId);
 
 }

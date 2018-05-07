@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 
 public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQueryParameterType {
 
+	private static final long serialVersionUID = 1L;
 	private BigDecimal myQuantity;
 
 	/**
@@ -39,6 +40,16 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	 */
 	public NumberParam() {
 		super();
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theValue
+	 *            A value, e.g. "10"
+	 */
+	public NumberParam(int theValue) {
+		setValue(new BigDecimal(theValue));
 	}
 
 	/**
@@ -60,7 +71,7 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		StringBuilder b = new StringBuilder();
 		if (getPrefix() != null) {
-			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValueForContext(theContext)));
+			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
 		}
 		b.append(ParameterUtil.escapeWithDefault(myQuantity.toPlainString()));
 		return b.toString();
@@ -79,21 +90,21 @@ public class NumberParam extends BaseParamWithPrefix<NumberParam> implements IQu
 	}
 	
 	
+	public BigDecimal getValue() {
+		return myQuantity;
+	}
+
+	public NumberParam setValue(BigDecimal theValue) {
+		myQuantity = theValue;
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE);
 		b.append("prefix", getPrefix());
 		b.append("value", myQuantity);
 		return b.build();
-	}
-
-	public BigDecimal getValue() {
-		return myQuantity;
-	}
-	
-	public NumberParam setValue(BigDecimal theValue) {
-		myQuantity = theValue;
-		return this;
 	}
 
 }

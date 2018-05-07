@@ -1,39 +1,42 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.dstu2.resource.Device;
-import ca.uhn.fhir.model.dstu2.resource.Media;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.TestUtil;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchFtTest.class);
+
+	@Before
+	public void beforeDisableResultReuse() {
+		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -150,13 +153,18 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchAndReindex() {
-		Patient patient;
 		SearchParameterMap map;
 
-		patient = new Patient();
-		patient.getText().setDiv("<div>DIVAAA</div>");
-		patient.addName().addGiven("NAMEAAA");
-		IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType pId1= newTxTemplate().execute(new TransactionCallback<IIdType>() {
+			@Override
+			public IIdType doInTransaction(TransactionStatus theStatus) {
+				// TODO Auto-generated method stub
+				Patient patient = new Patient();
+				patient.getText().setDiv("<div>DIVAAA</div>");
+				patient.addName().addGiven("NAMEAAA");
+				return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
@@ -169,12 +177,21 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		/*
 		 * Reindex
 		 */
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				Patient patient = new Patient();
+				patient.setId(pId1);
+				patient.getText().setDiv("<div>DIVBBB</div>");
+				patient.addName().addGiven("NAMEBBB");
+				myPatientDao.update(patient, mySrd);
+			}
+		});
 
-		patient = new Patient();
-		patient.setId(pId1);
-		patient.getText().setDiv("<div>DIVBBB</div>");
-		patient.addName().addGiven("NAMEBBB");
-		myPatientDao.update(patient, mySrd);
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("NAMEAAA"));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
@@ -379,13 +396,14 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testSearchDontReindexForUpdateWithIndexDisabled() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(true);
 		Patient patient;
 		SearchParameterMap map;
 
 		patient = new Patient();
 		patient.getText().setDiv("<div>DIVAAA</div>");
 		patient.addName().addGiven("NAMEAAA");
-		IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		final IIdType pId1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));

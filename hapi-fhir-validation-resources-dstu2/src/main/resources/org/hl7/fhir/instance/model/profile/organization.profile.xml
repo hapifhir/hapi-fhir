@@ -1,7 +1,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
  <id value="Organization"/>
  <meta>
-  <lastUpdated value="2015-11-11T10:54:01.813-05:00"/>
+  <lastUpdated value="2017-07-27T08:19:05.564-04:00"/>
  </meta>
  <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm">
   <valueInteger value="1"/>
@@ -22,7 +22,7 @@
    <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
   </telecom>
  </contact>
- <date value="2015-11-11T10:54:01-05:00"/>
+ <date value="2017-07-27T08:19:05-04:00"/>
  <description value="Base StructureDefinition for Organization Resource"/>
  <fhirVersion value="1.0.2"/>
  <mapping>
@@ -59,9 +59,6 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="identifier or name"/>
-    </extension>
     <key value="org-1"/>
     <severity value="error"/>
     <human value="The organization SHALL at least have a name or an id, and possibly more than one"/>
@@ -343,9 +340,6 @@
    </type>
    <condition value="org-3"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="telecom.where(use = 'home').empty()"/>
-    </extension>
     <key value="org-3"/>
     <severity value="error"/>
     <human value="The telecom of an organization can never be of use 'home'"/>
@@ -377,9 +371,6 @@
    </type>
    <condition value="org-2"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="address.where(use = 'home').empty()"/>
-    </extension>
     <key value="org-2"/>
     <severity value="error"/>
     <human value="An address of an organization can never be of use 'home'"/>
@@ -581,9 +572,6 @@
     <code value="DomainResource"/>
    </type>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="identifier or name"/>
-    </extension>
     <key value="org-1"/>
     <severity value="error"/>
     <human value="The organization SHALL at least have a name or an id, and possibly more than one"/>
@@ -740,9 +728,6 @@
    </type>
    <condition value="org-3"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="telecom.where(use = 'home').empty()"/>
-    </extension>
     <key value="org-3"/>
     <severity value="error"/>
     <human value="The telecom of an organization can never be of use 'home'"/>
@@ -774,9 +759,6 @@
    </type>
    <condition value="org-2"/>
    <constraint>
-    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-expression">
-     <valueString value="address.where(use = 'home').empty()"/>
-    </extension>
     <key value="org-2"/>
     <severity value="error"/>
     <human value="An address of an organization can never be of use 'home'"/>

@@ -8,12 +8,13 @@ import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptPropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.PropertyComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.PropertyType;
+import org.hl7.fhir.dstu3.utils.ToolingExtensions;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
 public class CodeSystemUtilities {
 
@@ -87,9 +88,9 @@ public class CodeSystemUtilities {
     if (!cs.hasMeta())
       cs.setMeta(new Meta());
     for (UriType t : cs.getMeta().getProfile()) 
-      if (t.getValue().equals("http://hl7.org/fhir/StructureDefinition/codesystem-shareable-definition"))
+      if (t.getValue().equals("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"))
         return cs;
-    cs.getMeta().getProfile().add(new UriType("http://hl7.org/fhir/StructureDefinition/codesystem-shareable-definition"));
+    cs.getMeta().getProfile().add(new UriType("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"));
     return cs;
   }
 
@@ -139,6 +140,23 @@ public class CodeSystemUtilities {
         return s;
     }
     return null;
+  }
+
+  public static void markStatus(CodeSystem cs, String wg, String status, String fmm) {
+  }
+
+  private static int ssval(String status) {
+    if ("Draft".equals("status")) 
+      return 1;
+    if ("Informative".equals("status")) 
+      return 2;
+    if ("External".equals("status")) 
+      return 3;
+    if ("Trial Use".equals("status")) 
+      return 3;
+    if ("Normative".equals("status")) 
+      return 4;
+    return -1;
   }
 
 }

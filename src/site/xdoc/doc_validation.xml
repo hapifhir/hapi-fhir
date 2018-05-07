@@ -192,11 +192,10 @@
 		<section name="Resource Validation (Profile/StructureDefinition)">
 
 			<p>
-				As of HAPI FHIR 1.2, HAPI supports validation against StructureDefinition
+				HAPI also supports validation against StructureDefinition
 				resources. This functionality uses the HL7 "InstanceValidator", which is able
-				to
-				check a resource for conformance to a given profile
-				(StructureDefinitions and ValueSets),
+				to check a resource for conformance to FHIR profiles
+				(StructureDefinitions, ValueSets, and CodeSystems),
 				including validating fields, extensions, and codes for conformance to their given ValueSets.
 			</p>
 			<p>
@@ -206,9 +205,9 @@
 			</p>
 
 			<p class="doc_info_bubble">
-				This style of validation is still experimental, and should be used with caution.
-				It is very powerful, but is still under active development and may continue to 
-				change over time.				
+				The instance validator is experimental in the DSTU2 mode, but has become very stable
+				and full-featured in DSTU3 mode. Use with caution when validating DSTU2 resources using
+				instance validator.
 			</p>
 
 			<subsection name="Preparation">
@@ -243,7 +242,7 @@
 
 				<p>
 					To execute the validator, you simply create an instance of
-					<a href="./apidocs-hl7org-dstu2/ca/uhn/fhir/validation/FhirInstanceValidator.html">FhirInstanceValidator</a>
+					<a href="./apidocs-dstu3/org/hl7/fhir/dstu3/hapi/validation/FhirInstanceValidator.html">FhirInstanceValidator</a>
 					and register it to new validator, as shown in the example below.
 				</p>
 				

@@ -1,12 +1,40 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.entity.ForcedId;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.*;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,39 +49,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.persistence.Query;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.entity.ForcedId;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.ReindexFailureException;
-import ca.uhn.fhir.jpa.util.StopWatch;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
@@ -66,51 +61,55 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
-
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	@Qualifier("myResourceCountsCache")
+	public ResourceCountCache myResourceCountsCache;
 
-	@Transactional(propagation = Propagation.REQUIRED)
-	@Override
-	public void deleteAllTagsOnServer(RequestDetails theRequestDetails) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
-
-		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
-	}
 
 	private int doPerformReindexingPass(final Integer theCount) {
+		/*
+		 * If any search parameters have been recently added or changed,
+		 * this makes sure that the cache has been reloaded to reflect
+		 * them.
+		 */
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		int retVal = doPerformReindexingPassForResources(theCount, txTemplate);
-		return retVal;
+		return doPerformReindexingPassForResources(theCount, txTemplate);
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	private int doPerformReindexingPassForResources(final Integer theCount, TransactionTemplate txTemplate) {
 		return txTemplate.execute(new TransactionCallback<Integer>() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public Integer doInTransaction(TransactionStatus theStatus) {
-				TypedQuery<ResourceTable> q = myEntityManager.createQuery("SELECT t FROM " + ResourceTable.class.getSimpleName() + " t WHERE t.myIndexStatus IS null", ResourceTable.class);
+			public Integer doInTransaction(@Nonnull TransactionStatus theStatus) {
 
 				int maxResult = 500;
 				if (theCount != null) {
 					maxResult = Math.min(theCount, 2000);
 				}
+				maxResult = Math.max(maxResult, 10);
 
+				TypedQuery<Long> q = myEntityManager.createQuery("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL", Long.class);
+
+				ourLog.debug("Beginning indexing query with maximum {}", maxResult);
 				q.setMaxResults(maxResult);
-				List<ResourceTable> resources = q.getResultList();
-				if (resources.isEmpty()) {
-					return 0;
-				}
-
-				ourLog.info("Indexing {} resources", resources.size());
+				Collection<Long> resources = q.getResultList();
 
 				int count = 0;
 				long start = System.currentTimeMillis();
 
-				for (ResourceTable resourceTable : resources) {
+				for (Long nextId : resources) {
+					ResourceTable resourceTable = myResourceTableDao.findOne(nextId);
+
 					try {
 						/*
 						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
@@ -126,59 +125,58 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 						final IBaseResource resource = toResource(resourceTable, false);
 
-						@SuppressWarnings("rawtypes")
-						final IFhirResourceDao dao = getDao(resource.getClass());
+						@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDao(resource.getClass());
 
 						dao.reindex(resource, resourceTable);
 					} catch (Exception e) {
-						ourLog.error("Failed to index resource {}: {}", new Object[] { resourceTable.getIdDt(), e.toString(), e });
+						ourLog.error("Failed to index resource {}: {}", new Object[]{resourceTable.getIdDt(), e.toString(), e});
 						throw new ReindexFailureException(resourceTable.getId());
 					}
 					count++;
+
+					if (count >= maxResult) {
+						break;
+					}
 				}
 
 				long delay = System.currentTimeMillis() - start;
-				long avg = (delay / resources.size());
-				ourLog.info("Indexed {} / {} resources in {}ms - Avg {}ms / resource", new Object[] { count, resources.size(), delay, avg });
+				long avg;
+				if (count > 0) {
+					avg = (delay / count);
+					ourLog.info("Indexed {} resources in {}ms - Avg {}ms / resource", new Object[]{count, delay, avg});
+				} else {
+					ourLog.debug("Indexed 0 resources in {}ms", delay);
+				}
 
-				return resources.size();
+				return count;
 			}
 		});
 	}
 
 	@Override
-	public TagList getAllTags(RequestDetails theRequestDetails) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
-
-		StopWatch w = new StopWatch();
-		TagList retVal = super.getTags(null, null);
-		ourLog.info("Processed getAllTags in {}ms", w.getMillisAndRestart());
-		return retVal;
+	@Transactional(propagation = Propagation.REQUIRED)
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
+		return doExpunge(null, null, null, theExpungeOptions);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	@Override
 	public Map<String, Long> getResourceCounts() {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-		Root<?> from = cq.from(ResourceTable.class);
-		cq.multiselect(from.get("myResourceType").as(String.class), builder.count(from.get("myResourceType")).as(Long.class));
-		cq.groupBy(from.get("myResourceType"));
+		Map<String, Long> retVal = new HashMap<>();
 
-		TypedQuery<Tuple> q = myEntityManager.createQuery(cq);
-
-		Map<String, Long> retVal = new HashMap<String, Long>();
-		for (Tuple next : q.getResultList()) {
-			String resourceName = next.get(0, String.class);
-			Long count = next.get(1, Long.class);
-			retVal.put(resourceName, count);
+		List<Map<?,?>> counts = myResourceTableDao.getResourceCounts();
+		for (Map<?, ?> next : counts) {
+			retVal.put(next.get("type").toString(), Long.parseLong(next.get("count").toString()));
 		}
+
 		return retVal;
 	}
 
-	protected boolean hasValue(InstantDt theInstantDt) {
-		return theInstantDt != null && theInstantDt.isEmpty() == false;
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	@Nullable
+	@Override
+	public Map<String, Long> getResourceCountsFromCache() {
+		return myResourceCountsCache.get();
 	}
 
 	@Override
@@ -188,27 +186,23 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 			notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
 		}
-		
+
 		StopWatch w = new StopWatch();
 		IBundleProvider retVal = super.history(null, null, theSince, theUntil);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
 	}
 
-	protected ResourceTable loadFirstEntityFromCandidateMatches(Set<Long> candidateMatches) {
-		return myEntityManager.find(ResourceTable.class, candidateMatches.iterator().next());
-	}
-
 	@Transactional()
 	@Override
 	public int markAllResourcesForReindexing() {
-		
+
 		ourLog.info("Marking all resources as needing reindexing");
 		int retVal = myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " t SET t.myIndexStatus = null").executeUpdate();
-		
+
 		ourLog.info("Marking all concepts as needing reindexing");
 		retVal += myTermConceptDao.markAllForReindexing();
-		
+
 		ourLog.info("Done marking reindexing");
 		return retVal;
 	}
@@ -218,13 +212,13 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				ourLog.info("Marking resource with PID {} as indexing_failed", new Object[] { theId });
+			public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
+				ourLog.info("Marking resource with PID {} as indexing_failed", new Object[]{theId});
 				Query q = myEntityManager.createQuery("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id");
 				q.setParameter("status", INDEX_STATUS_INDEXING_FAILED);
 				q.setParameter("id", theId);
 				q.executeUpdate();
-				
+
 				q = myEntityManager.createQuery("DELETE FROM ResourceTag t WHERE t.myResourceId = :id");
 				q.setParameter("id", theId);
 				q.executeUpdate();
@@ -269,7 +263,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 			}
 		});
 	}
-	
+
 	@Override
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public Integer performReindexingPass(final Integer theCount) {
@@ -286,21 +280,5 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 			myReindexLock.unlock();
 		}
 	}
-
-	public void setTxManager(PlatformTransactionManager theTxManager) {
-		myTxManager = theTxManager;
-	}
-
-	protected ResourceTable tryToLoadEntity(IdDt nextId) {
-		ResourceTable entity;
-		try {
-			Long pid = translateForcedIdToPid(nextId.getResourceType(), nextId.getIdPart());
-			entity = myEntityManager.find(ResourceTable.class, pid);
-		} catch (ResourceNotFoundException e) {
-			entity = null;
-		}
-		return entity;
-	}
-
 
 }

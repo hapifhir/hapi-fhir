@@ -29,19 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
@@ -65,7 +60,7 @@ public class Questionnaire extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static QuestionnaireStatus fromCode(String codeString) throws Exception {
+        public static QuestionnaireStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -74,7 +69,7 @@ public class Questionnaire extends DomainResource {
           return PUBLISHED;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new Exception("Unknown QuestionnaireStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown QuestionnaireStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -122,6 +117,20 @@ public class Questionnaire extends DomainResource {
         if ("retired".equals(codeString))
           return QuestionnaireStatus.RETIRED;
         throw new IllegalArgumentException("Unknown QuestionnaireStatus code '"+codeString+"'");
+        }
+        public Enumeration<QuestionnaireStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("draft".equals(codeString))
+          return new Enumeration<QuestionnaireStatus>(this, QuestionnaireStatus.DRAFT);
+        if ("published".equals(codeString))
+          return new Enumeration<QuestionnaireStatus>(this, QuestionnaireStatus.PUBLISHED);
+        if ("retired".equals(codeString))
+          return new Enumeration<QuestionnaireStatus>(this, QuestionnaireStatus.RETIRED);
+        throw new FHIRException("Unknown QuestionnaireStatus code '"+codeString+"'");
         }
     public String toCode(QuestionnaireStatus code) {
       if (code == QuestionnaireStatus.DRAFT)
@@ -199,7 +208,7 @@ public class Questionnaire extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AnswerFormat fromCode(String codeString) throws Exception {
+        public static AnswerFormat fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("boolean".equals(codeString))
@@ -232,7 +241,7 @@ public class Questionnaire extends DomainResource {
           return REFERENCE;
         if ("quantity".equals(codeString))
           return QUANTITY;
-        throw new Exception("Unknown AnswerFormat code '"+codeString+"'");
+        throw new FHIRException("Unknown AnswerFormat code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -352,6 +361,44 @@ public class Questionnaire extends DomainResource {
         if ("quantity".equals(codeString))
           return AnswerFormat.QUANTITY;
         throw new IllegalArgumentException("Unknown AnswerFormat code '"+codeString+"'");
+        }
+        public Enumeration<AnswerFormat> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("boolean".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.BOOLEAN);
+        if ("decimal".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.DECIMAL);
+        if ("integer".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.INTEGER);
+        if ("date".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.DATE);
+        if ("dateTime".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.DATETIME);
+        if ("instant".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.INSTANT);
+        if ("time".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.TIME);
+        if ("string".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.STRING);
+        if ("text".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.TEXT);
+        if ("url".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.URL);
+        if ("choice".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.CHOICE);
+        if ("open-choice".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.OPENCHOICE);
+        if ("attachment".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.ATTACHMENT);
+        if ("reference".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.REFERENCE);
+        if ("quantity".equals(codeString))
+          return new Enumeration<AnswerFormat>(this, AnswerFormat.QUANTITY);
+        throw new FHIRException("Unknown AnswerFormat code '"+codeString+"'");
         }
     public String toCode(AnswerFormat code) {
       if (code == AnswerFormat.BOOLEAN)
@@ -824,6 +871,58 @@ public class Questionnaire extends DomainResource {
           childrenList.add(new Property("question", "", "Set of questions within this group. The order of questions within the group is relevant.", 0, java.lang.Integer.MAX_VALUE, question));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("linkId"))
+          this.linkId = castToString(value); // StringType
+        else if (name.equals("title"))
+          this.title = castToString(value); // StringType
+        else if (name.equals("concept"))
+          this.getConcept().add(castToCoding(value));
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("required"))
+          this.required = castToBoolean(value); // BooleanType
+        else if (name.equals("repeats"))
+          this.repeats = castToBoolean(value); // BooleanType
+        else if (name.equals("group"))
+          this.getGroup().add((GroupComponent) value);
+        else if (name.equals("question"))
+          this.getQuestion().add((QuestionComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("linkId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.linkId");
+        }
+        else if (name.equals("title")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.title");
+        }
+        else if (name.equals("concept")) {
+          return addConcept();
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.text");
+        }
+        else if (name.equals("required")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.required");
+        }
+        else if (name.equals("repeats")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.repeats");
+        }
+        else if (name.equals("group")) {
+          return addGroup();
+        }
+        else if (name.equals("question")) {
+          return addQuestion();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public GroupComponent copy() {
         GroupComponent dst = new GroupComponent();
         copyValues(dst);
@@ -879,6 +978,11 @@ public class Questionnaire extends DomainResource {
            && (repeats == null || repeats.isEmpty()) && (group == null || group.isEmpty()) && (question == null || question.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "Questionnaire.group";
+
+  }
 
   }
 
@@ -1375,6 +1479,64 @@ public class Questionnaire extends DomainResource {
           childrenList.add(new Property("group", "@Questionnaire.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("linkId"))
+          this.linkId = castToString(value); // StringType
+        else if (name.equals("concept"))
+          this.getConcept().add(castToCoding(value));
+        else if (name.equals("text"))
+          this.text = castToString(value); // StringType
+        else if (name.equals("type"))
+          this.type = new AnswerFormatEnumFactory().fromType(value); // Enumeration<AnswerFormat>
+        else if (name.equals("required"))
+          this.required = castToBoolean(value); // BooleanType
+        else if (name.equals("repeats"))
+          this.repeats = castToBoolean(value); // BooleanType
+        else if (name.equals("options"))
+          this.options = castToReference(value); // Reference
+        else if (name.equals("option"))
+          this.getOption().add(castToCoding(value));
+        else if (name.equals("group"))
+          this.getGroup().add((GroupComponent) value);
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("linkId")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.linkId");
+        }
+        else if (name.equals("concept")) {
+          return addConcept();
+        }
+        else if (name.equals("text")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.text");
+        }
+        else if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.type");
+        }
+        else if (name.equals("required")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.required");
+        }
+        else if (name.equals("repeats")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.repeats");
+        }
+        else if (name.equals("options")) {
+          this.options = new Reference();
+          return this.options;
+        }
+        else if (name.equals("option")) {
+          return addOption();
+        }
+        else if (name.equals("group")) {
+          return addGroup();
+        }
+        else
+          return super.addChild(name);
+      }
+
       public QuestionComponent copy() {
         QuestionComponent dst = new QuestionComponent();
         copyValues(dst);
@@ -1432,6 +1594,11 @@ public class Questionnaire extends DomainResource {
            && (repeats == null || repeats.isEmpty()) && (options == null || options.isEmpty()) && (option == null || option.isEmpty())
            && (group == null || group.isEmpty());
       }
+
+  public String fhirType() {
+    return "Questionnaire.group.question";
+
+  }
 
   }
 
@@ -1870,6 +2037,64 @@ public class Questionnaire extends DomainResource {
         childrenList.add(new Property("subjectType", "code", "Identifies the types of subjects that can be the subject of the questionnaire.", 0, java.lang.Integer.MAX_VALUE, subjectType));
         childrenList.add(new Property("group", "", "A collection of related questions (or further groupings of questions).", 0, java.lang.Integer.MAX_VALUE, group));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("version"))
+          this.version = castToString(value); // StringType
+        else if (name.equals("status"))
+          this.status = new QuestionnaireStatusEnumFactory().fromType(value); // Enumeration<QuestionnaireStatus>
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("publisher"))
+          this.publisher = castToString(value); // StringType
+        else if (name.equals("telecom"))
+          this.getTelecom().add(castToContactPoint(value));
+        else if (name.equals("subjectType"))
+          this.getSubjectType().add(castToCode(value));
+        else if (name.equals("group"))
+          this.group = (GroupComponent) value; // GroupComponent
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("version")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.version");
+        }
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.status");
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.date");
+        }
+        else if (name.equals("publisher")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.publisher");
+        }
+        else if (name.equals("telecom")) {
+          return addTelecom();
+        }
+        else if (name.equals("subjectType")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Questionnaire.subjectType");
+        }
+        else if (name.equals("group")) {
+          this.group = new GroupComponent();
+          return this.group;
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "Questionnaire";
+
+  }
 
       public Questionnaire copy() {
         Questionnaire dst = new Questionnaire();

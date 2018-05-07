@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Thu, Feb 9, 2017 08:03-0500 for FHIR v1.9.0
 
 
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,8 +39,12 @@ public class ProcedureStatusEnumFactory implements EnumFactory<ProcedureStatus> 
   public ProcedureStatus fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
+    if ("preparation".equals(codeString))
+      return ProcedureStatus.PREPARATION;
     if ("in-progress".equals(codeString))
       return ProcedureStatus.INPROGRESS;
+    if ("suspended".equals(codeString))
+      return ProcedureStatus.SUSPENDED;
     if ("aborted".equals(codeString))
       return ProcedureStatus.ABORTED;
     if ("completed".equals(codeString))
@@ -53,8 +57,12 @@ public class ProcedureStatusEnumFactory implements EnumFactory<ProcedureStatus> 
   }
 
   public String toCode(ProcedureStatus code) {
+    if (code == ProcedureStatus.PREPARATION)
+      return "preparation";
     if (code == ProcedureStatus.INPROGRESS)
       return "in-progress";
+    if (code == ProcedureStatus.SUSPENDED)
+      return "suspended";
     if (code == ProcedureStatus.ABORTED)
       return "aborted";
     if (code == ProcedureStatus.COMPLETED)

@@ -1,11 +1,29 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import static org.apache.commons.lang3.StringUtils.*;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +38,10 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.math.BigDecimal;
-import java.util.UUID;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.util.UrlUtil;
 
 /**
  * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs, Resource References, etc. to represent a specific instance of a resource.
- * 
+ * <p>
  * <p>
  * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
  * limit of 36 characters.
@@ -88,7 +86,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Create a new ID using a string. This String may contain a simple ID (e.g. "1234") or it may contain a complete URL (http://example.com/fhir/Patient/1234).
-	 * 
+	 * <p>
 	 * <p>
 	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
 	 * limit of 36 characters.
@@ -104,11 +102,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theResourceType
-	 *           The resource type (e.g. "Patient")
-	 * @param theIdPart
-	 *           The ID (e.g. "123")
+	 *
+	 * @param theResourceType The resource type (e.g. "Patient")
+	 * @param theIdPart       The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, BigDecimal theIdPart) {
 		this(theResourceType, toPlainStringWithNpeThrowIfNeeded(theIdPart));
@@ -116,11 +112,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theResourceType
-	 *           The resource type (e.g. "Patient")
-	 * @param theIdPart
-	 *           The ID (e.g. "123")
+	 *
+	 * @param theResourceType The resource type (e.g. "Patient")
+	 * @param theIdPart       The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, Long theIdPart) {
 		this(theResourceType, toPlainStringWithNpeThrowIfNeeded(theIdPart));
@@ -129,10 +123,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	/**
 	 * Constructor
 	 *
-	 * @param theResourceType
-	 *           The resource type (e.g. "Patient")
-	 * @param theId
-	 *           The ID (e.g. "123")
+	 * @param theResourceType The resource type (e.g. "Patient")
+	 * @param theId           The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, String theId) {
 		this(theResourceType, theId, null);
@@ -140,13 +132,10 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theResourceType
-	 *           The resource type (e.g. "Patient")
-	 * @param theId
-	 *           The ID (e.g. "123")
-	 * @param theVersionId
-	 *           The version ID ("e.g. "456")
+	 *
+	 * @param theResourceType The resource type (e.g. "Patient")
+	 * @param theId           The ID (e.g. "123")
+	 * @param theVersionId    The version ID ("e.g. "456")
 	 */
 	public IdDt(String theResourceType, String theId, String theVersionId) {
 		this(null, theResourceType, theId, theVersionId);
@@ -154,15 +143,11 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theBaseUrl
-	 *           The server base URL (e.g. "http://example.com/fhir")
-	 * @param theResourceType
-	 *           The resource type (e.g. "Patient")
-	 * @param theId
-	 *           The ID (e.g. "123")
-	 * @param theVersionId
-	 *           The version ID ("e.g. "456")
+	 *
+	 * @param theBaseUrl      The server base URL (e.g. "http://example.com/fhir")
+	 * @param theResourceType The resource type (e.g. "Patient")
+	 * @param theId           The ID (e.g. "123")
+	 * @param theVersionId    The version ID ("e.g. "456")
 	 */
 	public IdDt(String theBaseUrl, String theResourceType, String theId, String theVersionId) {
 		myBaseUrl = theBaseUrl;
@@ -248,9 +233,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Returns the unqualified portion of this ID as a big decimal, or <code>null</code> if the value is null
-	 * 
-	 * @throws NumberFormatException
-	 *            If the value is not a valid BigDecimal
+	 *
+	 * @throws NumberFormatException If the value is not a valid BigDecimal
 	 */
 	public BigDecimal getIdPartAsBigDecimal() {
 		String val = getIdPart();
@@ -262,9 +246,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Returns the unqualified portion of this ID as a {@link Long}, or <code>null</code> if the value is null
-	 * 
-	 * @throws NumberFormatException
-	 *            If the value is not a valid Long
+	 *
+	 * @throws NumberFormatException If the value is not a valid Long
 	 */
 	@Override
 	public Long getIdPartAsLong() {
@@ -282,7 +265,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
-	 * 
+	 *
 	 * @see #getIdPart()
 	 */
 	@Override
@@ -305,11 +288,16 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 				b.append(myResourceType);
 			}
 
-			if (b.length() > 0) {
+			if (b.length() > 0 && isNotBlank(myUnqualifiedId)) {
 				b.append('/');
 			}
 
-			b.append(myUnqualifiedId);
+			if (isNotBlank(myUnqualifiedId)) {
+				b.append(myUnqualifiedId);
+			} else if (isNotBlank(myUnqualifiedVersionId)) {
+				b.append('/');
+			}
+
 			if (isNotBlank(myUnqualifiedVersionId)) {
 				b.append('/');
 				b.append(Constants.PARAM_HISTORY);
@@ -322,9 +310,109 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		return super.getValue();
 	}
 
+	/**
+	 * Set the value
+	 * <p>
+	 * <p>
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
+	 * </p>
+	 * <p>
+	 * regex: [a-z0-9\-\.]{1,36}
+	 * </p>
+	 */
+	@Override
+	public IdDt setValue(String theValue) throws DataFormatException {
+		// TODO: add validation
+		super.setValue(theValue);
+		myHaveComponentParts = false;
+
+		if (StringUtils.isBlank(theValue)) {
+			myBaseUrl = null;
+			super.setValue(null);
+			myUnqualifiedId = null;
+			myUnqualifiedVersionId = null;
+			myResourceType = null;
+		} else if (theValue.charAt(0) == '#' && theValue.length() > 1) {
+			super.setValue(theValue);
+			myBaseUrl = null;
+			myUnqualifiedId = theValue;
+			myUnqualifiedVersionId = null;
+			myResourceType = null;
+			myHaveComponentParts = true;
+		} else if (theValue.startsWith("urn:")) {
+			myBaseUrl = null;
+			myUnqualifiedId = theValue;
+			myUnqualifiedVersionId = null;
+			myResourceType = null;
+			myHaveComponentParts = true;
+		} else {
+			int vidIndex = theValue.indexOf("/_history/");
+			int idIndex;
+			if (vidIndex != -1) {
+				myUnqualifiedVersionId = theValue.substring(vidIndex + "/_history/".length());
+				idIndex = theValue.lastIndexOf('/', vidIndex - 1);
+				myUnqualifiedId = theValue.substring(idIndex + 1, vidIndex);
+			} else {
+				idIndex = theValue.lastIndexOf('/');
+				myUnqualifiedId = theValue.substring(idIndex + 1);
+				myUnqualifiedVersionId = null;
+			}
+
+			myBaseUrl = null;
+			if (idIndex <= 0) {
+				myResourceType = null;
+			} else {
+				int typeIndex = theValue.lastIndexOf('/', idIndex - 1);
+				if (typeIndex == -1) {
+					myResourceType = theValue.substring(0, idIndex);
+				} else {
+					if (typeIndex > 0 && '/' == theValue.charAt(typeIndex - 1)) {
+						typeIndex = theValue.indexOf('/', typeIndex + 1);
+					}
+					if (typeIndex >= idIndex) {
+						// e.g. http://example.org/foo
+						// 'foo' was the id but we're making that the resource type. Nullify the id part because we don't have an id.
+						// Also set null value to the super.setValue() and enable myHaveComponentParts so it forces getValue() to properly
+						// recreate the url
+						myResourceType = myUnqualifiedId;
+						myUnqualifiedId = null;
+						super.setValue(null);
+						myHaveComponentParts = true;
+					} else {
+						myResourceType = theValue.substring(typeIndex + 1, idIndex);
+					}
+
+					if (typeIndex > 4) {
+						myBaseUrl = theValue.substring(0, typeIndex);
+					}
+
+				}
+			}
+
+		}
+		return this;
+	}
+
 	@Override
 	public String getValueAsString() {
 		return getValue();
+	}
+
+	/**
+	 * Set the value
+	 * <p>
+	 * <p>
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
+	 * </p>
+	 * <p>
+	 * regex: [a-z0-9\-\.]{1,36}
+	 * </p>
+	 */
+	@Override
+	public void setValueAsString(String theValue) throws DataFormatException {
+		setValue(theValue);
 	}
 
 	@Override
@@ -342,19 +430,12 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Returns true if this ID has a base url
-	 * 
+	 *
 	 * @see #getBaseUrl()
 	 */
 	@Override
 	public boolean hasBaseUrl() {
 		return isNotBlank(myBaseUrl);
-	}
-
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getValueAsString());
-		return b.toHashCode();
 	}
 
 	@Override
@@ -372,6 +453,13 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		return isNotBlank(getVersionIdPart());
 	}
 
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getValueAsString());
+		return b.toHashCode();
+	}
+
 	/**
 	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or "https://"
 	 */
@@ -385,7 +473,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	@Override
 	public boolean isEmpty() {
-		return isBlank(getValue());
+		return super.isBaseEmpty() && isBlank(getValue());
 	}
 
 	@Override
@@ -441,6 +529,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
+	 *
 	 * @deprecated
 	 */
 	@Deprecated //override deprecated method
@@ -468,92 +557,6 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		myHaveComponentParts = true;
 
 		return this;
-	}
-
-	/**
-	 * Set the value
-	 * 
-	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
-	 * limit of 36 characters.
-	 * </p>
-	 * <p>
-	 * regex: [a-z0-9\-\.]{1,36}
-	 * </p>
-	 */
-	@Override
-	public IdDt setValue(String theValue) throws DataFormatException {
-		// TODO: add validation
-		super.setValue(theValue);
-		myHaveComponentParts = false;
-
-		if (StringUtils.isBlank(theValue)) {
-			myBaseUrl = null;
-			super.setValue(null);
-			myUnqualifiedId = null;
-			myUnqualifiedVersionId = null;
-			myResourceType = null;
-		} else if (theValue.charAt(0) == '#' && theValue.length() > 1) {
-			super.setValue(theValue);
-			myBaseUrl = null;
-			myUnqualifiedId = theValue;
-			myUnqualifiedVersionId = null;
-			myResourceType = null;
-			myHaveComponentParts = true;
-		} else if (theValue.startsWith("urn:")) {
-			myBaseUrl = null;
-			myUnqualifiedId = theValue;
-			myUnqualifiedVersionId = null;
-			myResourceType = null;
-			myHaveComponentParts = true;
-		} else {
-			int vidIndex = theValue.indexOf("/_history/");
-			int idIndex;
-			if (vidIndex != -1) {
-				myUnqualifiedVersionId = theValue.substring(vidIndex + "/_history/".length());
-				idIndex = theValue.lastIndexOf('/', vidIndex - 1);
-				myUnqualifiedId = theValue.substring(idIndex + 1, vidIndex);
-			} else {
-				idIndex = theValue.lastIndexOf('/');
-				myUnqualifiedId = theValue.substring(idIndex + 1);
-				myUnqualifiedVersionId = null;
-			}
-
-			myBaseUrl = null;
-			if (idIndex <= 0) {
-				myResourceType = null;
-			} else {
-				int typeIndex = theValue.lastIndexOf('/', idIndex - 1);
-				if (typeIndex == -1) {
-					myResourceType = theValue.substring(0, idIndex);
-				} else {
-					myResourceType = theValue.substring(typeIndex + 1, idIndex);
-
-					if (typeIndex > 4) {
-						myBaseUrl = theValue.substring(0, typeIndex);
-					}
-
-				}
-			}
-
-		}
-		return this;
-	}
-
-	/**
-	 * Set the value
-	 * 
-	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
-	 * limit of 36 characters.
-	 * </p>
-	 * <p>
-	 * regex: [a-z0-9\-\.]{1,36}
-	 * </p>
-	 */
-	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
-		setValue(theValue);
 	}
 
 	@Override
@@ -600,11 +603,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	/**
 	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be used if the ID does not already contain those respective parts). Essentially,
 	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.
-	 * 
-	 * @param theServerBase
-	 *           The server base (e.g. "http://example.com/fhir")
-	 * @param theResourceType
-	 *           The resource name (e.g. "Patient")
+	 *
+	 * @param theServerBase   The server base (e.g. "http://example.com/fhir")
+	 * @param theResourceType The resource name (e.g. "Patient")
 	 * @return A fully qualified URL for this ID (e.g. "http://example.com/fhir/Patient/1")
 	 */
 	@Override
@@ -617,14 +618,15 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	/**
 	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID noted by theVersion.
-	 * 
-	 * @param theVersion
-	 *           The actual version string, e.g. "1"
+	 *
+	 * @param theVersion The actual version string, e.g. "1". If theVersion is blank or null, returns the same as {@link #toVersionless()}}
 	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 */
 	@Override
 	public IdDt withVersion(String theVersion) {
-		Validate.notBlank(theVersion, "Version may not be null or empty");
+		if (isBlank(theVersion)) {
+			return toVersionless();
+		}
 
 		if (isLocal() || isUrn()) {
 			return new IdDt(getValueAsString());

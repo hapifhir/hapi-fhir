@@ -159,6 +159,7 @@ public abstract class BackboneElement extends Element implements IBaseBackboneEl
       public abstract BackboneElement copy();
 
       public void copyValues(BackboneElement dst) {
+        super.copyValues(dst);
         if (modifierExtension != null) {
           dst.modifierExtension = new ArrayList<Extension>();
           for (Extension i : modifierExtension)

@@ -1,16 +1,15 @@
 package example;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import org.hl7.fhir.dstu3.model.Bundle;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.IRestfulClientFactory;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.client.interceptor.*;
+import org.hl7.fhir.r4.model.Patient;
 
 public class ClientExamples {
 
@@ -34,6 +33,46 @@ public class ClientExamples {
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
       // END SNIPPET: proxy
    }
+
+   @SuppressWarnings("unused")
+   public void processMessage() {
+      // START SNIPPET: processMessage
+      FhirContext ctx = FhirContext.forDstu3();
+
+      // Create the client
+      IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      
+      Bundle bundle = new Bundle();
+      // ..populate the bundle..
+      
+      Bundle response = client
+            .operation()
+            .processMessage() // New operation for sending messages
+            .setMessageBundle(bundle)
+            .asynchronous(Bundle.class)
+            .execute();
+      // END SNIPPET: processMessage
+   }
+
+	@SuppressWarnings("unused")
+	public void cacheControl() {
+		FhirContext ctx = FhirContext.forDstu3();
+
+		// Create the client
+		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+
+		Bundle bundle = new Bundle();
+		// ..populate the bundle..
+
+		// START SNIPPET: cacheControl
+		Bundle response = client
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.cacheControl(new CacheControlDirective().setNoCache(true)) // <-- add a directive
+			.execute();
+		// END SNIPPET: cacheControl
+	}
 
    @SuppressWarnings("unused")
    public void createOkHttp() {
@@ -74,14 +113,16 @@ public class ClientExamples {
       // Create an HTTP basic auth interceptor
       String username = "foobar";
       String password = "boobear";
-      BasicAuthInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
+      IClientInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
 
-      // Register the interceptor with your client (either style)
+		// If you're usinf an annotation client, use this style to
+		// register it
       IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
-      annotationClient.registerInterceptor(authInterceptor);
+		annotationClient.registerInterceptor(authInterceptor);
 
+		// If you're using a generic client, use this instead
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-      annotationClient.registerInterceptor(authInterceptor);
+      genericClient.registerInterceptor(authInterceptor);
       // END SNIPPET: security
    }
 

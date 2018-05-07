@@ -4,12 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 @SuppressWarnings({ })
 public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
@@ -32,7 +30,7 @@ public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("blue", read.getEyeColour().getValue());
 		
 		IBundleProvider found = myObservationDao.search(new SearchParameterMap());
-		assertEquals(1, found.size());
+		assertEquals(1, found.size().intValue());
 		CustomObservationDstu3 search = (CustomObservationDstu3) found.getResources(0, 1).get(0);
 		assertEquals("blue", search.getEyeColour().getValue());
 		

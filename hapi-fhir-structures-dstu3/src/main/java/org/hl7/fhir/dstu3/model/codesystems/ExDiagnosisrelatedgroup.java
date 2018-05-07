@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,6 +49,10 @@ public enum ExDiagnosisrelatedgroup {
          */
         _300, 
         /**
+         * Head trauma - concussion.
+         */
+        _400, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -61,6 +65,8 @@ public enum ExDiagnosisrelatedgroup {
           return _101;
         if ("300".equals(codeString))
           return _300;
+        if ("400".equals(codeString))
+          return _400;
         throw new FHIRException("Unknown ExDiagnosisrelatedgroup code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum ExDiagnosisrelatedgroup {
             case _100: return "100";
             case _101: return "101";
             case _300: return "300";
+            case _400: return "400";
             default: return "?";
           }
         }
@@ -79,6 +86,7 @@ public enum ExDiagnosisrelatedgroup {
             case _100: return "Normal Vaginal Delivery.";
             case _101: return "Appendectomy without rupture or other complications.";
             case _300: return "Emergency department treatment of a tooth abcess.";
+            case _400: return "Head trauma - concussion.";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum ExDiagnosisrelatedgroup {
             case _100: return "Normal Vaginal Delivery";
             case _101: return "Appendectomy - uncomplicated";
             case _300: return "Tooth abcess";
+            case _400: return "Head trauma - concussion";
             default: return "?";
           }
     }

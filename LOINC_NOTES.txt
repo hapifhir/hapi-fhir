@@ -1,0 +1,64 @@
+Database migration:
+  update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
+  drop constraint IDX_CSV_RESOURCEPID_AND_VER from table TRM_CODESYSTEM_VER
+
+TODO:
+  In answer lists, figure out what to do with externally defined lists
+
+Comments for Loinc:
+
+Overall
+- ValueSet and ConceptMap resources have a spot for copyright and
+  contact information. Are there official values for these?
+
+Answer Lists
+- Per the notes, there is no way in FHIR currently to map answer lists to
+  codes based on context. For this reason, I am ignoring any entries in
+  LoincAnswerListLink_Beta_1.csv where the "ApplicableContext" context is
+  not empty. Is this correct?
+
+Parts
+- Only parts with a status of "ACTIVE" are being imported, any others are
+  ignored.
+- The PartTypeName (e.g. "ADJUSTMENT") is ignored as there is no corresponding
+  property in loinc.xml
+- PartDisplayName is not mapped
+- Part links are not currently processed (it's not clear to me how to model
+  these in FHIR, as CodeSystem.hierarchyMeaning has to be only one of 'is-a'
+  or 'part-of' and presumably the 'is-a' relationship is more important.
+
+Part Mappings
+- I have made LOINC the source and SCT the target for the mappings in the
+  ConceptMap resource. Does this seem like the appropriate orientation?
+- A canonical URI should be defined for the LOINC->SCT mapping ConceptMap
+  resource. I have hardcoded "http://loinc.org/loinc-to-snomed" for now, but
+  we should discuss what is appropriate.
+
+RSNA Playbook
+- A canonical URI should be defined for the "all RSNA playbook codes" ValueSet.
+  I have hardcoded "http://loinc.org/rsna-codes" for now but we should discuss
+  what is appropriate.
+- A name for the "RSNA Playbook" ValueSet is needed.
+- Just to confirm, the "all RSNA playbook codes" ValueSet should contain the
+  loinc codes (e.g. "17787-3") and not the part codes (e.g. "LP199995-4")?
+- A codesystem URI for radlex RID and RPID codes is needed (currently
+  "http://rid" and "http://rpid" are used as placeholders since I'm assuming
+  these exist somewhere.
+- For mappings from loinc part codes to RadLex RIDs, are the codes considered
+  equivalent (or would they be wider/narrower). They look equivalent to me.
+
+Document Ontology
+- Per the SOW, "A value set containing terms in the LOINC Document Ontology
+  will be created". Just to confirm, entries in this ValueSet are therefore
+  LOINC terms (such as "11488-4 / Consultation Note") as opposed to part
+  codes?
+- Need to define a URI for the document ontology ValueSet. Currently I am
+  using "http://loinc.org/document-ontology-codes"
+
+Top 2000
+- Need to define a URI for both ValueSets. Currently I am using
+  "http://loinc.org/top-2000-lab-results-us" and
+  "http://loinc.org/top-2000-lab-results-si"
+
+Universal Order Set
+- Need to define a URI for this ValueSet - Currenty using "http://loinc.org/fhir/loinc-universal-order-set"

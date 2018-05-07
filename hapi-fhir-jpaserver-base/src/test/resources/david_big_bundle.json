@@ -60,7 +60,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -74,7 +74,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -119,7 +119,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -133,7 +133,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -275,7 +275,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -289,7 +289,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -334,7 +334,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -348,7 +348,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -391,7 +391,7 @@
 				},
 				"evidence": [
 					{
-						"code": {
+						"code": [{
 							"coding": [
 								{
 									"system": "http://snomed.info/ct",
@@ -400,7 +400,7 @@
 								}
 							],
 							"text": "Painful joint"
-						}
+						}]
 					}
 				]
 			},
@@ -419,7 +419,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -433,7 +433,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -476,7 +476,7 @@
 				},
 				"evidence": [
 					{
-						"code": {
+						"code": [{
 							"coding": [
 								{
 									"system": "http://snomed.info/ct",
@@ -485,7 +485,7 @@
 								}
 							],
 							"text": "Painful joint"
-						}
+						}]
 					}
 				]
 			},
@@ -504,7 +504,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -518,7 +518,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -563,7 +563,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -577,7 +577,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -622,7 +622,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -636,7 +636,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -681,7 +681,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -695,7 +695,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -726,7 +726,7 @@
 				},
 				"evidence": [
 					{
-						"code": {
+						"code": [{
 							"coding": [
 								{
 									"system": "http://snomed.info/ct",
@@ -735,7 +735,7 @@
 								}
 							],
 							"text": "Chest Pain"
-						}
+						}]
 					}
 				]
 			},
@@ -754,7 +754,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -768,7 +768,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -813,7 +813,7 @@
 				},
 				"clinicalStatus": "active",
 				"verificationStatus": "confirmed",
-				"category": {
+				"category": [{
 					"coding": [
 						{
 							"system": "http://hl7.org/fhir/condition-category",
@@ -827,7 +827,7 @@
 						}
 					],
 					"text": "Diagnosis"
-				},
+				}],
 				"severity": {
 					"coding": [
 						{
@@ -876,7 +876,7 @@
 						"text": "OutPatient"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -914,7 +914,7 @@
 						"text": "OutPatient"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -932,12 +932,16 @@
 						"text": "sore throat"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161450"
+						"condition": {
+							"reference": "Condition/A161450"
+						}
 					},
 					{
-						"reference": "Condition/A161448"
+						"condition": {
+							"reference": "Condition/A161448"
+						}
 					}
 				]
 			},
@@ -960,7 +964,7 @@
 						"text": "GP"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -978,9 +982,11 @@
 						"text": "headache"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
+						"condition": {
 						"reference": "Condition/A161452"
+						}
 					}
 				]
 			},
@@ -1003,7 +1009,7 @@
 						"text": "OutPatient"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1021,9 +1027,11 @@
 						"text": "sore throat"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161455"
+						"condition": {
+							"reference": "Condition/A161455"
+						}
 					}
 				]
 			},
@@ -1046,7 +1054,7 @@
 						"text": "GP"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1064,9 +1072,11 @@
 						"text": "sore throat"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161455"
+						"condition": {
+							"reference": "Condition/A161455"
+						}
 					}
 				]
 			},
@@ -1089,7 +1099,7 @@
 						"text": "GP"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1107,12 +1117,16 @@
 						"text": "sore throat"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161448"
+						"condition": {
+							"reference": "Condition/A161448"
+						}
 					},
 					{
-						"reference": "Condition/A161450"
+						"condition": {
+							"reference": "Condition/A161450"
+						}
 					}
 				]
 			},
@@ -1135,7 +1149,7 @@
 						"text": "OutPatient"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1173,7 +1187,7 @@
 						"text": "OutPatient"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1191,12 +1205,16 @@
 						"text": "headache"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161453"
+						"condition": {
+							"reference": "Condition/A161453"
+						}
 					},
 					{
+						"condition": {
 						"reference": "Condition/A161445"
+						}
 					}
 				]
 			},
@@ -1293,7 +1311,7 @@
 						"text": "OutPatient"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1311,12 +1329,16 @@
 						"text": "sore throat"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161450"
+						"condition": {
+							"reference": "Condition/A161450"
+						}
 					},
 					{
+						"condition": {
 						"reference": "Condition/A161451"
+						}
 					}
 				]
 			},
@@ -1339,7 +1361,7 @@
 						"text": "GP"
 					}
 				],
-				"patient": {
+				"subject": {
 					"reference": "Patient/A161443"
 				},
 				"participant": [
@@ -1357,9 +1379,11 @@
 						"text": "sore throat"
 					}
 				],
-				"indication": [
+				"diagnosis": [
 					{
-						"reference": "Condition/A161455"
+						"condition": {
+							"reference": "Condition/A161455"
+						}
 					}
 				]
 			},
@@ -1376,7 +1400,7 @@
 					"versionId": "1",
 					"lastUpdated": "2016-10-06T13:10:47.440-04:00"
 				},
-				"status": "active-confirmed",
+				"clinicalStatus": "active",
 				"type": "allergy",
 				"criticality": "low",
 				"code": {
@@ -1392,10 +1416,9 @@
 				"patient": {
 					"reference": "Patient/A161443"
 				},
-				"reporter": {
+				"asserter": {
 					"reference": "Patient/A161443"
 				},
-				"onset": "2012-08-23",
 				"reaction": [
 					{
 						"substance": {
@@ -1408,7 +1431,6 @@
 							],
 							"text": "codeine"
 						},
-						"certainty": "confirmed",
 						"manifestation": [
 							{
 								"coding": [
@@ -1421,7 +1443,6 @@
 								"text": "nausea"
 							}
 						],
-						"onset": "2012-08-23",
 						"severity": "mild",
 						"exposureRoute": {
 							"coding": [
@@ -1445,7 +1466,6 @@
 							],
 							"text": "codeine"
 						},
-						"certainty": "confirmed",
 						"manifestation": [
 							{
 								"coding": [
@@ -1458,7 +1478,6 @@
 								"text": "nausea"
 							}
 						],
-						"onset": "2012-08-30",
 						"severity": "mild",
 						"exposureRoute": {
 							"coding": [
@@ -1486,7 +1505,7 @@
 					"versionId": "1",
 					"lastUpdated": "2016-10-06T13:10:47.440-04:00"
 				},
-				"status": "active-confirmed",
+				"clinicalStatus": "active",
 				"type": "allergy",
 				"criticality": "low",
 				"code": {
@@ -1502,7 +1521,7 @@
 				"patient": {
 					"reference": "Patient/A161443"
 				},
-				"reporter": {
+				"asserter": {
 					"reference": "Patient/A161443"
 				},
 				"reaction": [
@@ -1517,7 +1536,6 @@
 							],
 							"text": "latex"
 						},
-						"certainty": "confirmed",
 						"manifestation": [
 							{
 								"coding": [
@@ -1661,7 +1679,7 @@
 					"versionId": "1",
 					"lastUpdated": "2016-10-06T13:10:47.440-04:00"
 				},
-				"status": "active-confirmed",
+				"clinicalStatus": "active",
 				"type": "allergy",
 				"criticality": "low",
 				"code": {
@@ -1677,10 +1695,9 @@
 				"patient": {
 					"reference": "Patient/A161443"
 				},
-				"reporter": {
+				"asserter": {
 					"reference": "Patient/A161443"
 				},
-				"onset": "2010-07-01",
 				"reaction": [
 					{
 						"substance": {
@@ -1693,7 +1710,6 @@
 							],
 							"text": "lisinopril"
 						},
-						"certainty": "confirmed",
 						"manifestation": [
 							{
 								"coding": [
@@ -1706,7 +1722,6 @@
 								"text": "Cough"
 							}
 						],
-						"onset": "2010-07-01",
 						"severity": "mild",
 						"exposureRoute": {
 							"coding": [
@@ -1770,7 +1785,7 @@
 					"versionId": "1",
 					"lastUpdated": "2016-10-06T13:10:47.440-04:00"
 				},
-				"status": "active-confirmed",
+				"clinicalStatus": "active",
 				"type": "allergy",
 				"criticality": "low",
 				"code": {
@@ -1786,7 +1801,7 @@
 				"patient": {
 					"reference": "Patient/A161443"
 				},
-				"reporter": {
+				"asserter": {
 					"reference": "Patient/A161443"
 				},
 				"reaction": [
@@ -1801,7 +1816,6 @@
 							],
 							"text": "levofloxacin"
 						},
-						"certainty": "likely",
 						"manifestation": [
 							{
 								"coding": [
@@ -1814,7 +1828,6 @@
 								"text": "rash"
 							}
 						],
-						"onset": "2014-10-16",
 						"severity": "moderate",
 						"exposureRoute": {
 							"coding": [
@@ -1842,7 +1855,7 @@
 					"versionId": "1",
 					"lastUpdated": "2016-10-06T13:10:47.440-04:00"
 				},
-				"status": "active-confirmed",
+				"clinicalStatus": "active",
 				"type": "allergy",
 				"criticality": "low",
 				"code": {
@@ -1858,7 +1871,7 @@
 				"patient": {
 					"reference": "Patient/A161443"
 				},
-				"reporter": {
+				"asserter": {
 					"reference": "Patient/A161443"
 				},
 				"reaction": [
@@ -1873,7 +1886,6 @@
 							],
 							"text": "sulphonamide"
 						},
-						"certainty": "likely",
 						"manifestation": [
 							{
 								"coding": [
@@ -1886,7 +1898,6 @@
 								"text": "Stevens-Johnson Syndrome"
 							}
 						],
-						"onset": "2009-09-12",
 						"severity": "moderate",
 						"exposureRoute": {
 							"coding": [
@@ -1910,7 +1921,6 @@
 							],
 							"text": "sulphonamide"
 						},
-						"certainty": "likely",
 						"manifestation": [
 							{
 								"coding": [
@@ -1923,7 +1933,6 @@
 								"text": "Stevens-Johnson Syndrome"
 							}
 						],
-						"onset": "2010-12-10",
 						"severity": "moderate",
 						"exposureRoute": {
 							"coding": [
@@ -1951,7 +1960,7 @@
 					"versionId": "1",
 					"lastUpdated": "2016-10-06T13:10:47.440-04:00"
 				},
-				"status": "active-confirmed",
+				"clinicalStatus": "active",
 				"type": "allergy",
 				"criticality": "low",
 				"code": {
@@ -1967,7 +1976,7 @@
 				"patient": {
 					"reference": "Patient/A161443"
 				},
-				"reporter": {
+				"asserter": {
 					"reference": "Patient/A161443"
 				},
 				"reaction": [
@@ -1982,7 +1991,6 @@
 							],
 							"text": "peanuts"
 						},
-						"certainty": "likely",
 						"manifestation": [
 							{
 								"coding": [

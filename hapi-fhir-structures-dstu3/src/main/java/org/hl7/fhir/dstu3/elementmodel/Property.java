@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.elementmodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
@@ -203,7 +204,7 @@ public class Property {
     ElementDefinition ed = definition;
     StructureDefinition sd = structure;
     List<ElementDefinition> children = ProfileUtilities.getChildMap(sd, ed);
-    if (children.isEmpty()) {
+    if (children.isEmpty()  || isElementWithOnlyExtension(ed, children)) {
       // ok, find the right definitions
       String t = null;
       if (ed.getType().size() == 1)
@@ -240,9 +241,15 @@ public class Property {
         }
       }
       if (!"xhtml".equals(t)) {
-        sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+t);
+        final String url;
+        if (StringUtils.isNotBlank(ed.getType().get(0).getProfile())) {
+         url = ed.getType().get(0).getProfile();
+        } else {
+          url = "http://hl7.org/fhir/StructureDefinition/" + t;
+        }
+        sd = context.fetchResource(StructureDefinition.class, url);
         if (sd == null)
-          throw new DefinitionException("Unable to find class '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
+          throw new DefinitionException("Unable to find type '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
         children = ProfileUtilities.getChildMap(sd, sd.getSnapshot().getElement().get(0));
       }
     }
@@ -326,9 +333,32 @@ public class Property {
     return null;
   }
 
+  public Property getChildSimpleName(String elementName, String name) throws DefinitionException {
+    List<Property> children = getChildProperties(elementName, null);
+    for (Property p : children) {
+      if (p.getName().equals(name) || p.getName().equals(name+"[x]")) {
+        return p;
+      }
+    }
+    return null;
+  }
+
   public IWorkerContext getContext() {
     return context;
   }
 
+  private boolean isElementWithOnlyExtension(final ElementDefinition ed, final List<ElementDefinition> children) {
+    boolean result = false;
+    if (!ed.getType().isEmpty()) {
+      result = true;
+      for (final ElementDefinition ele : children) {
+        if (!ele.getPath().contains("extension")) {
+          result = false;
+          break;
+        }
+      }
+    }
+    return result;
+  }
 
 }

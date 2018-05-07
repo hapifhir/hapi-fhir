@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,43 +37,43 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EncounterDischargeDisposition {
 
         /**
-         * null
+         * The patient was dicharged and has indicated that they are going to return home afterwards.
          */
         HOME, 
         /**
-         * null
+         * The patient was transferred to another healthcare facility.
          */
         OTHERHCF, 
         /**
-         * null
+         * The patient has been discharged into palliative care.
          */
         HOSP, 
         /**
-         * null
+         * The patient has been discharged into long-term care where is likely to be monitored through an ongoing episode-of-care.
          */
         LONG, 
         /**
-         * null
+         * The patient self discharged against medical advice.
          */
         AADVICE, 
         /**
-         * null
+         * The patient has deceased during this encounter.
          */
         EXP, 
         /**
-         * null
+         * The patient has been transferred to a psychiatric facility.
          */
         PSY, 
         /**
-         * null
+         * The patient was discharged and is to receive post acute care rehabilitation services.
          */
         REHAB, 
         /**
-         * null
+         * The patient has been discharged to a skilled nursing facility for the patient to receive additional care.
          */
         SNF, 
         /**
-         * null
+         * The discharge disposition has not otherwise defined.
          */
         OTH, 
         /**
@@ -125,16 +125,16 @@ public enum EncounterDischargeDisposition {
         }
         public String getDefinition() {
           switch (this) {
-            case HOME: return "";
-            case OTHERHCF: return "";
-            case HOSP: return "";
-            case LONG: return "";
-            case AADVICE: return "";
-            case EXP: return "";
-            case PSY: return "";
-            case REHAB: return "";
-            case SNF: return "";
-            case OTH: return "";
+            case HOME: return "The patient was dicharged and has indicated that they are going to return home afterwards.";
+            case OTHERHCF: return "The patient was transferred to another healthcare facility.";
+            case HOSP: return "The patient has been discharged into palliative care.";
+            case LONG: return "The patient has been discharged into long-term care where is likely to be monitored through an ongoing episode-of-care.";
+            case AADVICE: return "The patient self discharged against medical advice.";
+            case EXP: return "The patient has deceased during this encounter.";
+            case PSY: return "The patient has been transferred to a psychiatric facility.";
+            case REHAB: return "The patient was discharged and is to receive post acute care rehabilitation services.";
+            case SNF: return "The patient has been discharged to a skilled nursing facility for the patient to receive additional care.";
+            case OTH: return "The discharge disposition has not otherwise defined.";
             default: return "?";
           }
         }

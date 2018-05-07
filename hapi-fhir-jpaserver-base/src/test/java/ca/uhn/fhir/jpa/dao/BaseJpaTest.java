@@ -1,19 +1,23 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.LoggingRule;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -21,64 +25,62 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.Mockito;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.ForcedId;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.entity.ResourceLink;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.SearchInclude;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.entity.SubscriptionFlaggedResource;
-import ca.uhn.fhir.jpa.entity.SubscriptionTable;
-import ca.uhn.fhir.jpa.entity.TagDefinition;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
-import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.rest.method.IRequestOperationCallback;
-import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TestUtil;
+import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 	protected ServletRequestDetails mySrd;
+	protected ArrayList<IServerInterceptor> myServerInterceptorList;
+	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
+
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
+
+	@After
+	public final void afterPerformCleanup() {
+		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+	}
 
 	@Before
 	public void beforeCreateSrd() {
 		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
-		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
-		when(mySrd.getServer().getInterceptors()).thenReturn(new ArrayList<IServerInterceptor>());
-		when(mySrd.getUserData()).thenReturn(new HashMap<Object, Object>());
+		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
+		myServerInterceptorList = new ArrayList<>();
+		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
+		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 	}
 
-	@SuppressWarnings({ "rawtypes" })
-	protected List toList(IBundleProvider theSearch) {
-		return theSearch.getResources(0, theSearch.size());
+	protected abstract FhirContext getContext();
+
+	/**
+	 * Sleep until at least 1 ms has elapsed
+	 */
+	public void sleepUntilTimeChanges() throws InterruptedException {
+		StopWatch sw = new StopWatch();
+		while (sw.getMillis() == 0) {
+			Thread.sleep(10);
+		}
 	}
 
 	protected org.hl7.fhir.dstu3.model.Bundle toBundle(IBundleProvider theSearch) {
@@ -89,8 +91,42 @@ public abstract class BaseJpaTest {
 		return bundle;
 	}
 
-	protected abstract FhirContext getContext();
-	
+	protected org.hl7.fhir.r4.model.Bundle toBundleR4(IBundleProvider theSearch) {
+		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+			bundle.addEntry().setResource((org.hl7.fhir.r4.model.Resource) next);
+		}
+		return bundle;
+	}
+
+	@SuppressWarnings({"rawtypes"})
+	protected List toList(IBundleProvider theSearch) {
+		return theSearch.getResources(0, theSearch.size());
+	}
+
+	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
+		List<String> retVal = new ArrayList<String>();
+
+		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		int size = res.size();
+		ourLog.info("Found {} results", size);
+		for (IBaseResource next : res) {
+			retVal.add(next.getIdElement().toUnqualified().getValue());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
+		List<String> retVal = new ArrayList<String>();
+		int size = theFound.size();
+		ourLog.info("Found {} results", size);
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualified().getValue());
+		}
+		return retVal;
+	}
+
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<String>();
 
@@ -103,14 +139,18 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<String>();
-
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
-		int size = res.size();
+		Integer size = theFound.size();
 		ourLog.info("Found {} results", size);
-		for (IBaseResource next : res) {
-			retVal.add(next.getIdElement().toUnqualified().getValue());
+
+		if (size == null) {
+			size = 99999;
+		}
+
+		List<IBaseResource> resources = theFound.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}
@@ -126,12 +166,26 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
-		int size = theFound.size();
+		List<IIdType> retVal = new ArrayList<>();
+		Integer size = theFound.size();
+		StopWatch sw = new StopWatch();
+		while (size == null) {
+			int timeout = 20000;
+			if (sw.getMillis() > timeout) {
+				fail("Waited over "+timeout+"ms for search");
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException theE) {
+				//ignore
+			}
+			size = theFound.size();
+		}
+
 		ourLog.info("Found {} results", size);
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -139,7 +193,7 @@ public abstract class BaseJpaTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
-			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -154,24 +208,12 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
-		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
-		for (IBaseResource next : resources) {
-			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
-		}
-		return retVal;
-	}
-
-	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
-		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
-		for (IBaseResource next : resources) {
-			retVal.add(next.getIdElement().toUnqualified().getValue());
+	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.r4.model.Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
+		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
+			// }
 		}
 		return retVal;
 	}
@@ -190,7 +232,7 @@ public abstract class BaseJpaTest {
 	}
 
 	@AfterClass
-	public static void afterClassShutdownDerby() throws SQLException {
+	public static void afterClassShutdownDerby() {
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		// try {
 		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
@@ -208,72 +250,20 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager) {
-		TransactionTemplate txTemplate = new TransactionTemplate(theTxManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				entityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + SubscriptionFlaggedResource.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SearchResult.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
-				for (TermCodeSystem next : entityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
-					next.setCurrentVersion(null);
-					entityManager.merge(next);
-				}
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + Search.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
-		});
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?,?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
+		theSearchCoordinatorSvc.cancelAllActiveSearches();
+
+		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
+		theDaoConfig.setExpungeEnabled(true);
+		theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+		theDaoConfig.setExpungeEnabled(expungeEnabled);
+
+		theSearchParamPresenceSvc.flushCachesForUnitTest();
+		theSearchParamRegistry.forceRefresh();
 	}
 
 	public static Set<String> toCodes(Set<TermConcept> theConcepts) {
-		HashSet<String> retVal = new HashSet<String>();
+		HashSet<String> retVal = new HashSet<>();
 		for (TermConcept next : theConcepts) {
 			retVal.add(next.getCode());
 		}
@@ -286,6 +276,38 @@ public abstract class BaseJpaTest {
 			retVal.add(next.getCode());
 		}
 		return retVal;
+	}
+
+	public static void waitForSize(int theTarget, List<?> theList) {
+		StopWatch sw = new StopWatch();
+		while (theList.size() != theTarget && sw.getMillis() <= 15000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 15000) {
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + theList.toString());
+		}
+	}
+
+	public static void waitForSize(int theTarget, Callable<Number> theCallable) throws Exception {
+		waitForSize(theTarget, 10000, theCallable);
+	}
+
+	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable) throws Exception {
+		StopWatch sw = new StopWatch();
+		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= theTimeout) {
+			fail("Size " + theCallable.call() + " is != target " + theTarget);
+		}
 	}
 
 }

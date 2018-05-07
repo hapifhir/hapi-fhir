@@ -114,7 +114,7 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
         if (r instanceof OperationOutcome) {
           OperationOutcome oo = (OperationOutcome) r;
           expansions.put(ToolingExtensions.getExtension(oo,VS_ID_EXT).getValue().toString(),
-            new ValueSetExpansionOutcome(new XhtmlComposer().setXmlOnly(true).composePlainText(oo.getText().getDiv()), TerminologyServiceErrorClass.UNKNOWN));
+            new ValueSetExpansionOutcome(new XhtmlComposer(XhtmlComposer.XML).composePlainText(oo.getText().getDiv()), TerminologyServiceErrorClass.UNKNOWN));
         } else {
           ValueSet vs = (ValueSet) r; 
           expansions.put(vs.getUrl(), new ValueSetExpansionOutcome(vs));

@@ -13,7 +13,7 @@ public class TurtleParser extends ParserBase {
 	}
 
 	@Override
-	public Element parse(InputStream theStream) throws Exception {
+	public Element parse(InputStream theStream) {
 		throw new UnsupportedOperationException();
 	}
 

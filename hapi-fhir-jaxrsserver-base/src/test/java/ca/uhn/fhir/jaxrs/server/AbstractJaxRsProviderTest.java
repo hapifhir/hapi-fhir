@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,21 +16,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsResponse;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @SuppressWarnings("javadoc")
@@ -48,8 +42,16 @@ public class AbstractJaxRsProviderTest {
     }
 
     @Test
-    public void testWithStackTrace() {
-        assertFalse(provider.withStackTrace());
+    public void testHandleExceptionDataFormatException() throws IOException, URISyntaxException {
+        final DataFormatException theException = new DataFormatException();
+		 UriInfo uriInfo = mock(UriInfo.class);
+		 when(uriInfo.getRequestUri()).thenReturn(new URI("http://example.com"));
+		 when(uriInfo.getBaseUri()).thenReturn(new URI("http://example.com"));
+		 when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<String, String>());
+		 provider.setUriInfo(uriInfo);
+        final Response result = provider.handleException(theRequest, theException);
+        assertNotNull(result);
+        assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, result.getStatus());
     }
 
     @Test
@@ -59,14 +61,6 @@ public class AbstractJaxRsProviderTest {
         final Response result = provider.handleException(theRequest, theException);
         assertNotNull(result);
         assertEquals(base.getStatusCode(), result.getStatus());
-    }
-
-    @Test
-    public void testHandleExceptionDataFormatException() throws IOException {
-        final DataFormatException theException = new DataFormatException();
-        final Response result = provider.handleException(theRequest, theException);
-        assertNotNull(result);
-        assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, result.getStatus());
     }
 
     @Test
@@ -82,5 +76,10 @@ public class AbstractJaxRsProviderTest {
         final Response result = provider.handleException(theRequest, theException);
         assertNotNull(result);
         assertEquals(Constants.STATUS_HTTP_500_INTERNAL_ERROR, result.getStatus());
+    }
+
+    @Test
+    public void testWithStackTrace() {
+        assertFalse(provider.withStackTrace());
     }
 }

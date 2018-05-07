@@ -32,7 +32,7 @@
 			<subsection name="Read / VRead">
 
 				<p>
-					To notify the server that it should return an <code>HTTP 301 Not Modified</code>
+					To notify the server that it should return an <code>HTTP 304 Not Modified</code>
 					if the content has not changed, add an <code>ifVersionMatches(foo).[operation]</code>
 					invocation.
 				</p>

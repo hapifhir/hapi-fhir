@@ -31,19 +31,14 @@ import java.math.BigDecimal;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
  */
@@ -138,39 +133,39 @@ public class RiskAssessment extends DomainResource {
         /**
          * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
          */
-        public DecimalType getProbabilityDecimalType() throws Exception { 
+        public DecimalType getProbabilityDecimalType() throws FHIRException { 
           if (!(this.probability instanceof DecimalType))
-            throw new Exception("Type mismatch: the type DecimalType was expected, but "+this.probability.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (DecimalType) this.probability;
         }
 
-        public boolean hasProbabilityDecimalType() throws Exception { 
+        public boolean hasProbabilityDecimalType() { 
           return this.probability instanceof DecimalType;
         }
 
         /**
          * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
          */
-        public Range getProbabilityRange() throws Exception { 
+        public Range getProbabilityRange() throws FHIRException { 
           if (!(this.probability instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.probability.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (Range) this.probability;
         }
 
-        public boolean hasProbabilityRange() throws Exception { 
+        public boolean hasProbabilityRange() { 
           return this.probability instanceof Range;
         }
 
         /**
          * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
          */
-        public CodeableConcept getProbabilityCodeableConcept() throws Exception { 
+        public CodeableConcept getProbabilityCodeableConcept() throws FHIRException { 
           if (!(this.probability instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.probability.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (CodeableConcept) this.probability;
         }
 
-        public boolean hasProbabilityCodeableConcept() throws Exception { 
+        public boolean hasProbabilityCodeableConcept() { 
           return this.probability instanceof CodeableConcept;
         }
 
@@ -245,26 +240,26 @@ public class RiskAssessment extends DomainResource {
         /**
          * @return {@link #when} (Indicates the period of time or age range of the subject to which the specified probability applies.)
          */
-        public Period getWhenPeriod() throws Exception { 
+        public Period getWhenPeriod() throws FHIRException { 
           if (!(this.when instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.when.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Period) this.when;
         }
 
-        public boolean hasWhenPeriod() throws Exception { 
+        public boolean hasWhenPeriod() { 
           return this.when instanceof Period;
         }
 
         /**
          * @return {@link #when} (Indicates the period of time or age range of the subject to which the specified probability applies.)
          */
-        public Range getWhenRange() throws Exception { 
+        public Range getWhenRange() throws FHIRException { 
           if (!(this.when instanceof Range))
-            throw new Exception("Type mismatch: the type Range was expected, but "+this.when.getClass().getName()+" was encountered");
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Range) this.when;
         }
 
-        public boolean hasWhenRange() throws Exception { 
+        public boolean hasWhenRange() { 
           return this.when instanceof Range;
         }
 
@@ -338,6 +333,58 @@ public class RiskAssessment extends DomainResource {
           childrenList.add(new Property("rationale", "string", "Additional information explaining the basis for the prediction.", 0, java.lang.Integer.MAX_VALUE, rationale));
         }
 
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("outcome"))
+          this.outcome = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("probability[x]"))
+          this.probability = (Type) value; // Type
+        else if (name.equals("relativeRisk"))
+          this.relativeRisk = castToDecimal(value); // DecimalType
+        else if (name.equals("when[x]"))
+          this.when = (Type) value; // Type
+        else if (name.equals("rationale"))
+          this.rationale = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("outcome")) {
+          this.outcome = new CodeableConcept();
+          return this.outcome;
+        }
+        else if (name.equals("probabilityDecimal")) {
+          this.probability = new DecimalType();
+          return this.probability;
+        }
+        else if (name.equals("probabilityRange")) {
+          this.probability = new Range();
+          return this.probability;
+        }
+        else if (name.equals("probabilityCodeableConcept")) {
+          this.probability = new CodeableConcept();
+          return this.probability;
+        }
+        else if (name.equals("relativeRisk")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.relativeRisk");
+        }
+        else if (name.equals("whenPeriod")) {
+          this.when = new Period();
+          return this.when;
+        }
+        else if (name.equals("whenRange")) {
+          this.when = new Range();
+          return this.when;
+        }
+        else if (name.equals("rationale")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.rationale");
+        }
+        else
+          return super.addChild(name);
+      }
+
       public RiskAssessmentPredictionComponent copy() {
         RiskAssessmentPredictionComponent dst = new RiskAssessmentPredictionComponent();
         copyValues(dst);
@@ -376,6 +423,11 @@ public class RiskAssessment extends DomainResource {
            && (relativeRisk == null || relativeRisk.isEmpty()) && (when == null || when.isEmpty()) && (rationale == null || rationale.isEmpty())
           ;
       }
+
+  public String fhirType() {
+    return "RiskAssessment.prediction";
+
+  }
 
   }
 
@@ -897,6 +949,79 @@ public class RiskAssessment extends DomainResource {
         childrenList.add(new Property("prediction", "", "Describes the expected outcome for the subject.", 0, java.lang.Integer.MAX_VALUE, prediction));
         childrenList.add(new Property("mitigation", "string", "A description of the steps that might be taken to reduce the identified risk(s).", 0, java.lang.Integer.MAX_VALUE, mitigation));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("subject"))
+          this.subject = castToReference(value); // Reference
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("condition"))
+          this.condition = castToReference(value); // Reference
+        else if (name.equals("encounter"))
+          this.encounter = castToReference(value); // Reference
+        else if (name.equals("performer"))
+          this.performer = castToReference(value); // Reference
+        else if (name.equals("identifier"))
+          this.identifier = castToIdentifier(value); // Identifier
+        else if (name.equals("method"))
+          this.method = castToCodeableConcept(value); // CodeableConcept
+        else if (name.equals("basis"))
+          this.getBasis().add(castToReference(value));
+        else if (name.equals("prediction"))
+          this.getPrediction().add((RiskAssessmentPredictionComponent) value);
+        else if (name.equals("mitigation"))
+          this.mitigation = castToString(value); // StringType
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.date");
+        }
+        else if (name.equals("condition")) {
+          this.condition = new Reference();
+          return this.condition;
+        }
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
+        }
+        else if (name.equals("performer")) {
+          this.performer = new Reference();
+          return this.performer;
+        }
+        else if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("method")) {
+          this.method = new CodeableConcept();
+          return this.method;
+        }
+        else if (name.equals("basis")) {
+          return addBasis();
+        }
+        else if (name.equals("prediction")) {
+          return addPrediction();
+        }
+        else if (name.equals("mitigation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.mitigation");
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "RiskAssessment";
+
+  }
 
       public RiskAssessment copy() {
         RiskAssessment dst = new RiskAssessment();

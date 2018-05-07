@@ -7,23 +7,20 @@ import java.io.IOException;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class ExampleServerIT {
 
-	private static IGenericClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleServerIT.class);
-
+	private static IGenericClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -31,14 +28,15 @@ public class ExampleServerIT {
 
 	@Test
 	public void testCreateAndRead() throws IOException {
+		ourLog.info("Base URL is: http://localhost:" + ourPort + "/baseDstu3");
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		IIdType id = ourClient.create().resource(pt).execute().getId();
 
 		Patient pt2 = ourClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(methodName, pt2.getName().get(0).getFamily().get(0).getValue());
+		assertEquals(methodName, pt2.getName().get(0).getFamily());
 	}
 
 	@AfterClass
@@ -58,7 +56,9 @@ public class ExampleServerIT {
 
 		ourLog.info("Project base path is: {}", path);
 
-		ourPort = RandomServerPortProvider.findFreePort();
+		if (ourPort == 0) {
+			ourPort = RandomServerPortProvider.findFreePort();
+		}
 		ourServer = new Server(ourPort);
 
 		WebAppContext webAppContext = new WebAppContext();
@@ -72,10 +72,16 @@ public class ExampleServerIT {
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourServerBase = "http://localhost:" + ourPort + "/baseDstu2";
+		ourServerBase = "http://localhost:" + ourPort + "/baseDstu3";
 		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}
+
+	public static void main(String[] theArgs) throws Exception {
+		ourPort = 8080;
+		beforeClass();
+	}
+
 
 }

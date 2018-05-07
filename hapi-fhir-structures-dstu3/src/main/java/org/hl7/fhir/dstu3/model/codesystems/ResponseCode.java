@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum ResponseCode {
          */
         TRANSIENTERROR, 
         /**
-         * The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe the issue.
+         * The message was rejected because of a problem with the content. There is no point in re-sending without change. The response narrative SHALL describe the issue.
          */
         FATALERROR, 
         /**
@@ -78,7 +78,7 @@ public enum ResponseCode {
           switch (this) {
             case OK: return "The message was accepted and processed without error.";
             case TRANSIENTERROR: return "Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required.";
-            case FATALERROR: return "The message was rejected because of some content in it. There is no point in re-sending without change. The response narrative SHALL describe the issue.";
+            case FATALERROR: return "The message was rejected because of a problem with the content. There is no point in re-sending without change. The response narrative SHALL describe the issue.";
             default: return "?";
           }
         }

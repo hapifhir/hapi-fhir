@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -48,7 +49,9 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private List<RuntimeSearchParam> mySearchParams;
 	private final FhirVersionEnum myStructureVersion;
 	private volatile RuntimeResourceDefinition myBaseDefinition;
-	
+
+
+
 	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super(theResourceName, theClass, theStandardType, theContext, theClassToElementDefinitions);
 		myContext = theContext;
@@ -67,6 +70,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		}
 
 	}
+
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
 		myNameToSearchParam.put(theParam.getName(), theParam);
@@ -127,9 +131,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		if (!UrlUtil.isValid(profile)) {
 			String resourceName = "/StructureDefinition/";
-			if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				resourceName = "/Profile/";
-			}
 			String profileWithUrl = theServerBase + resourceName + profile;
 			if (UrlUtil.isValid(profileWithUrl)) {
 				return profileWithUrl;

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model.codesystems;
   
 */
 
-// Generated on Tue, Dec 6, 2016 09:42-0500 for FHIR v1.8.0
+// Generated on Sat, Mar 25, 2017 21:03-0400 for FHIR v3.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,7 +69,7 @@ public enum MapTransform {
          */
         REFERENCE, 
         /**
-         * Perform a date operation. Parameters to be documented
+         * Perform a date operation. *Parameters to be documented*
          */
         DATEOP, 
         /**
@@ -77,7 +77,7 @@ public enum MapTransform {
          */
         UUID, 
         /**
-         * Return the appropriate string to put in a Reference that refers to the resource provided as a parameter
+         * Return the appropriate string to put in a reference that refers to the resource provided as a parameter
          */
         POINTER, 
         /**
@@ -93,7 +93,7 @@ public enum MapTransform {
          */
         C, 
         /**
-         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text =s the natural represenation e.g. [comparator]value[space]unit
+         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit
          */
         QTY, 
         /**
@@ -182,13 +182,13 @@ public enum MapTransform {
             case APPEND: return "append(source...) - source is element or string";
             case TRANSLATE: return "translate(source, uri_of_map) - use the translate operation";
             case REFERENCE: return "reference(source : object) - return a string that references the provided tree properly";
-            case DATEOP: return "Perform a date operation. Parameters to be documented";
+            case DATEOP: return "Perform a date operation. *Parameters to be documented*";
             case UUID: return "Generate a random UUID (in lowercase). No Parameters";
-            case POINTER: return "Return the appropriate string to put in a Reference that refers to the resource provided as a parameter";
+            case POINTER: return "Return the appropriate string to put in a reference that refers to the resource provided as a parameter";
             case EVALUATE: return "Execute the supplied fluentpath expression and use the value returned by that";
             case CC: return "Create a CodeableConcept. Parameters = (text) or (system. Code[, display])";
             case C: return "Create a Coding. Parameters = (system. Code[, display])";
-            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text =s the natural represenation e.g. [comparator]value[space]unit";
+            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit";
             case ID: return "Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set";
             case CP: return "Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value";
             default: return "?";

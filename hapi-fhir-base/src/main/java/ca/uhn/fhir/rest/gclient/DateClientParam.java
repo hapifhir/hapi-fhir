@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class DateClientParam  extends BaseClientParam implements IParam {
 					b.append(',');
 				}
 				if (myPrefix != null && myPrefix != ParamPrefixEnum.EQUAL) {
-					b.append(myPrefix.getValueForContext(theContext));
+					b.append(myPrefix.getValue());
 				}
 				b.append(myValue);
 			}

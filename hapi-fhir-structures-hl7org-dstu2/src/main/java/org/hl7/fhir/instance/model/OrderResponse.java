@@ -29,17 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Nov 11, 2015 10:54-0500 for FHIR v1.0.2
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+// Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
+import java.util.*;
 
-import org.hl7.fhir.instance.utilities.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.api.annotation.*;
 /**
  * A response to an order.
  */
@@ -87,7 +83,7 @@ public class OrderResponse extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static OrderStatus fromCode(String codeString) throws Exception {
+        public static OrderStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("pending".equals(codeString))
@@ -108,7 +104,7 @@ public class OrderResponse extends DomainResource {
           return ABORTED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new Exception("Unknown OrderStatus code '"+codeString+"'");
+        throw new FHIRException("Unknown OrderStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -192,6 +188,32 @@ public class OrderResponse extends DomainResource {
         if ("completed".equals(codeString))
           return OrderStatus.COMPLETED;
         throw new IllegalArgumentException("Unknown OrderStatus code '"+codeString+"'");
+        }
+        public Enumeration<OrderStatus> fromType(Base code) throws FHIRException {
+          if (code == null || code.isEmpty())
+            return null;
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("pending".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.PENDING);
+        if ("review".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.REVIEW);
+        if ("rejected".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.REJECTED);
+        if ("error".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.ERROR);
+        if ("accepted".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.ACCEPTED);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.CANCELLED);
+        if ("replaced".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.REPLACED);
+        if ("aborted".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.ABORTED);
+        if ("completed".equals(codeString))
+          return new Enumeration<OrderStatus>(this, OrderStatus.COMPLETED);
+        throw new FHIRException("Unknown OrderStatus code '"+codeString+"'");
         }
     public String toCode(OrderStatus code) {
       if (code == OrderStatus.PENDING)
@@ -623,6 +645,60 @@ public class OrderResponse extends DomainResource {
         childrenList.add(new Property("description", "string", "Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("fulfillment", "Reference(Any)", "Links to resources that provide details of the outcome of performing the order; e.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
       }
+
+      @Override
+      public void setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier"))
+          this.getIdentifier().add(castToIdentifier(value));
+        else if (name.equals("request"))
+          this.request = castToReference(value); // Reference
+        else if (name.equals("date"))
+          this.date = castToDateTime(value); // DateTimeType
+        else if (name.equals("who"))
+          this.who = castToReference(value); // Reference
+        else if (name.equals("orderStatus"))
+          this.orderStatus = new OrderStatusEnumFactory().fromType(value); // Enumeration<OrderStatus>
+        else if (name.equals("description"))
+          this.description = castToString(value); // StringType
+        else if (name.equals("fulfillment"))
+          this.getFulfillment().add(castToReference(value));
+        else
+          super.setProperty(name, value);
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("request")) {
+          this.request = new Reference();
+          return this.request;
+        }
+        else if (name.equals("date")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OrderResponse.date");
+        }
+        else if (name.equals("who")) {
+          this.who = new Reference();
+          return this.who;
+        }
+        else if (name.equals("orderStatus")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OrderResponse.orderStatus");
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type OrderResponse.description");
+        }
+        else if (name.equals("fulfillment")) {
+          return addFulfillment();
+        }
+        else
+          return super.addChild(name);
+      }
+
+  public String fhirType() {
+    return "OrderResponse";
+
+  }
 
       public OrderResponse copy() {
         OrderResponse dst = new OrderResponse();
