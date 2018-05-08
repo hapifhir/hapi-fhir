@@ -75,7 +75,7 @@ public class ImportCsvToConceptMapCommandTest {
 	}
 
 	@Test
-	public void testConditionalUpdate() {
+	public void testConditionalUpdateResultsInCreate() {
 		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
 		String conceptMapUrl = conceptMap.getUrl();
 
@@ -87,12 +87,53 @@ public class ImportCsvToConceptMapCommandTest {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-//		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-//		MethodOutcome methodOutcome = ourClient
-//			.update()
-//			.resource(conceptMap)
-//			.conditionalByUrl("ConceptMap?url=" + conceptMapUrl)
-//			.execute();
+		if (methodOutcome.getCreated()) {
+			ourLog.info("DIEDERIK Created new ConceptMap: {}", methodOutcome.getId().getValue());
+		} else {
+			ourLog.info("DIEDERIK Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
+		}
+	}
+
+	@Test
+	public void testConditionalUpdateResultsInUpdate() {
+		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
+		ourClient.create().resource(conceptMap).execute();
+		String conceptMapUrl = conceptMap.getUrl();
+
+		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
+		MethodOutcome methodOutcome = ourClient
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMapUrl))
+			.execute();
+
+		if (methodOutcome.getCreated()) {
+			ourLog.info("DIEDERIK Created new ConceptMap: {}", methodOutcome.getId().getValue());
+		} else {
+			ourLog.info("DIEDERIK Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
+		}
+	}
+
+	@Test
+	public void testNonConditionalUpdate() {
+		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
+		ourClient.create().resource(conceptMap).execute();
+
+		Bundle response = ourClient
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ConceptMap resultConceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
+
+		MethodOutcome methodOutcome = ourClient
+			.update()
+			.resource(resultConceptMap)
+			.withId(resultConceptMap.getIdElement())
+			.execute();
 
 		if (methodOutcome.getCreated()) {
 			ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
