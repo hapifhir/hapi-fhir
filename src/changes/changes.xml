@@ -78,6 +78,10 @@
 				applies to the operation by name whether it is at the
 				server, type, or instance level.
 			</action>
+			<action type="add" issue="709">
+				The <![CDATA[<code>ConceptMap</code>]] operation <![CDATA[<code>$translate</code>]]> has been
+				implemented.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
@@ -476,10 +480,6 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 				<a href="http://hapifhir.io/doc_rest_server.html">Server Documentation</a>
 				]]>
 				for more information.
-			</action>
-			<action type="add">
-				The <![CDATA[<code>ConceptMap</code>]] operation <![CDATA[<code>$translate</code>]]> has been
-				implemented.
 			</action>
 		</release>
 		<release version="3.1.0" date="2017-11-23">
