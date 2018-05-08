@@ -41,8 +41,8 @@ import java.io.IOException;
 import java.util.Collection;
 
 public class IgPackUploader extends BaseCommand {
-	// Don't use qualified names for loggers in HAPI CLI.
-	private static final Logger ourLog = LoggerFactory.getLogger(IgPackUploader.class.getSimpleName());
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
+	private static final Logger ourLog = LoggerFactory.getLogger(IgPackUploader.class);
 
 	@Override
 	public String getCommandDescription() {

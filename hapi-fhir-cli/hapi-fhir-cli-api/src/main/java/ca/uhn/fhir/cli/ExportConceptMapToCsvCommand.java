@@ -43,7 +43,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
-	// FIXME: Don't use qualified names for loggers in HAPI CLI.
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
 
 	@Override

@@ -180,7 +180,7 @@ public class AbstractHashMapResourceProvider<T extends IBaseResource> implements
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);
 
 		Long versionIdPart;
-		boolean created;
+		Boolean created;
 		if (versionToResource.isEmpty()) {
 			versionIdPart = 1L;
 			created = true;

@@ -57,7 +57,7 @@ import java.util.zip.GZIPInputStream;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
-	// FIXME: Don't use qualified names for loggers in HAPI CLI.
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
 
 	protected static final String BASE_URL_PARAM = "t";

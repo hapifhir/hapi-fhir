@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class AbstractImportExportCsvConceptMapCommand extends BaseCommand {
-	// FIXME: Don't use qualified names for loggers in HAPI CLI.
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractImportExportCsvConceptMapCommand.class);
 
 	protected static final String CONCEPTMAP_URL_PARAM = "u";

@@ -49,7 +49,7 @@ import java.util.concurrent.ExecutionException;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConceptMapCommand {
-	// FIXME: Don't use qualified names for loggers in HAPI CLI.
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommand.class);
 
 	protected static final String SOURCE_VALUE_SET_PARAM = "i";
@@ -129,7 +129,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 				.where(org.hl7.fhir.dstu3.model.ConceptMap.URL.matches().value(conceptMapUrl))
 				.execute();
 
-			if (methodOutcome.getCreated()) {
+			if (Boolean.TRUE.equals(methodOutcome.getCreated())) {
 				ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
 			} else {
 				ourLog.info("Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
@@ -145,7 +145,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 				.where(ConceptMap.URL.matches().value(conceptMapUrl))
 				.execute();
 
-			if (methodOutcome.getCreated()) {
+			if (Boolean.TRUE.equals(methodOutcome.getCreated())) {
 				ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
 			} else {
 				ourLog.info("Updated existing ConceptMap: {}", methodOutcome.getId().getValue());

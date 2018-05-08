@@ -37,8 +37,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class WebsocketSubscribeCommand extends BaseCommand {
 	private static final org.slf4j.Logger LOG_RECV = org.slf4j.LoggerFactory.getLogger("websocket.RECV");
 	private static final org.slf4j.Logger LOG_SEND = org.slf4j.LoggerFactory.getLogger("websocket.SEND");
-	// Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketSubscribeCommand.class.getSimpleName());
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketSubscribeCommand.class);
 
 	private boolean myQuit;
 

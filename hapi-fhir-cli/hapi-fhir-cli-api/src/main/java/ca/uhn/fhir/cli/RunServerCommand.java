@@ -49,8 +49,8 @@ public class RunServerCommand extends BaseCommand {
 	private static final int DEFAULT_PORT = 8080;
 	private static final String OPTION_P = "p";
 
-	// Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RunServerCommand.class.getSimpleName());
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RunServerCommand.class);
 	public static final String RUN_SERVER_COMMAND = "run-server";
 	private int myPort;
 

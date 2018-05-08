@@ -17,13 +17,14 @@ import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class ImportCsvToConceptMapCommandTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandTest.class);
@@ -42,8 +43,18 @@ public class ImportCsvToConceptMapCommandTest {
 	private static int ourPort;
 	private static Server ourServer;
 
+	private static RestfulServer restfulServer;
+
+	private static HashMapResourceProviderConceptMapR4 hashMapResourceProviderConceptMapR4;
+
 	static {
 		System.setProperty("test", "true");
+	}
+
+	@After
+	public void afterClearResourceProvider() {
+		HashMapResourceProviderConceptMapR4 resourceProvider = (HashMapResourceProviderConceptMapR4) restfulServer.getResourceProviders().iterator().next();
+		resourceProvider.clear();
 	}
 
 	@AfterClass
@@ -59,7 +70,7 @@ public class ImportCsvToConceptMapCommandTest {
 
 		ServletHandler servletHandler = new ServletHandler();
 
-		RestfulServer restfulServer = new RestfulServer(ourCtx);
+		restfulServer = new RestfulServer(ourCtx);
 		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
 		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapR4(ourCtx));
 
@@ -87,11 +98,8 @@ public class ImportCsvToConceptMapCommandTest {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-		if (methodOutcome.getCreated()) {
-			ourLog.info("DIEDERIK Created new ConceptMap: {}", methodOutcome.getId().getValue());
-		} else {
-			ourLog.info("DIEDERIK Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
-		}
+		// Do not simplify to assertEquals(...)
+		assertTrue(Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@Test
@@ -108,11 +116,8 @@ public class ImportCsvToConceptMapCommandTest {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-		if (methodOutcome.getCreated()) {
-			ourLog.info("DIEDERIK Created new ConceptMap: {}", methodOutcome.getId().getValue());
-		} else {
-			ourLog.info("DIEDERIK Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
-		}
+		// Do not simplify to assertEquals(...)
+		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@Test
@@ -135,11 +140,10 @@ public class ImportCsvToConceptMapCommandTest {
 			.withId(resultConceptMap.getIdElement())
 			.execute();
 
-		if (methodOutcome.getCreated()) {
-			ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
-		} else {
-			ourLog.info("Updated existing ConceptMap: {}", methodOutcome.getId().getValue());
-		}
+		assertNull(methodOutcome.getCreated());
+
+		// Do not simplify to assertEquals(...)
+		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@Test
@@ -167,6 +171,8 @@ public class ImportCsvToConceptMapCommandTest {
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/1", conceptMap.getId());
 
 		assertEquals(CM_URL, conceptMap.getUrl());
 		assertEquals(VS_URL_1, conceptMap.getSourceUriType().getValueAsString());
@@ -341,5 +347,25 @@ public class ImportCsvToConceptMapCommandTest {
 		assertEquals("Display 3d", target.getDisplay());
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
+
+		App.main(new String[] {"import-csv-to-conceptmap",
+			"-v", "r4",
+			"-t", ourBase,
+			"-u", CM_URL,
+			"-i", VS_URL_1,
+			"-o", VS_URL_2,
+			"-f", file,
+			"-l"});
+
+		response = ourClient
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
+
+		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/2", conceptMap.getId());
 	}
 }

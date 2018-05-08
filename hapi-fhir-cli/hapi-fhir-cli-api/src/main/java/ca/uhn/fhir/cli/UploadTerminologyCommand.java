@@ -36,8 +36,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class UploadTerminologyCommand extends BaseCommand {
-	// Don't use qualified names for loggers in HAPI CLI.
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class.getSimpleName());
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
 	private static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "upload-external-code-system";
 
 	@Override
