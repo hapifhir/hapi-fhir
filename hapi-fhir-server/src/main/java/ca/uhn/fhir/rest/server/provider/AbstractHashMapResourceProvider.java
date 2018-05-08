@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cli;
+package ca.uhn.fhir.rest.server.provider;
 
 /*-
  * #%L
@@ -40,7 +40,7 @@ import java.util.*;
  * with the {@link Update} and {@link ResourceParam} annotations removed from method
  * {@link ca.uhn.fhir.rest.server.provider.HashMapResourceProvider#update(IBaseResource)}.
  * Non-generic subclasses of this abstract class may implement their own annotated methods (e.g. a conditional
- * update method specifically for {@link org.hl7.fhir.r4.model.ConceptMap} resources).
+ * update method specifically for ConceptMap resources).
  * <p>
  * This class currently supports the following FHIR operations:
  * </p>
