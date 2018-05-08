@@ -49,6 +49,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  * <ul>
  * <li>Search for R4 ConceptMap resources by ConceptMap.url</li>
+ * <li>Conditional update for R4 ConceptMap resources by ConceptMap.url</li>
  * </ul>
  */
 public class HashMapResourceProviderConceptMapR4 extends AbstractHashMapResourceProvider<ConceptMap> {
