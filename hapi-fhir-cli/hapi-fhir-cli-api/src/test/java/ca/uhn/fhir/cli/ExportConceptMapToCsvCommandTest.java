@@ -83,7 +83,8 @@ public class ExportConceptMapToCsvCommandTest {
 			"-v", "r4",
 			"-t", ourBase,
 			"-u", CM_URL,
-			"-f", FILE});
+			"-f", FILE,
+			"-l"});
 
 		String expected = "SOURCE_CODE_SYSTEM,SOURCE_CODE_SYSTEM_VERSION,TARGET_CODE_SYSTEM,TARGET_CODE_SYSTEM_VERSION,SOURCE_CODE,SOURCE_DISPLAY,TARGET_CODE,TARGET_DISPLAY,EQUIVALENCE,COMMENT\n" +
 			"http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1a,Display 1a,Code 2a,Display 2a,equal,2a This is a comment.\n" +

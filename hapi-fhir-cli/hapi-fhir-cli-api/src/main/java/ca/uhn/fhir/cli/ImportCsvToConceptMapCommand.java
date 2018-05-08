@@ -90,6 +90,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		// </editor-fold>
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
 		addBasicAuthOption(options);
+		addVerboseLoggingOption(options);
 
 		return options;
 	}

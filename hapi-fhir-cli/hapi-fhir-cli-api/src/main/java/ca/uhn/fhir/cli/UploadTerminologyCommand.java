@@ -59,6 +59,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addBasicAuthOption(options);
+		addVerboseLoggingOption(options);
 
 		return options;
 	}
@@ -91,7 +92,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 			throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());
 		}
 
-		if (theCommandLine.hasOption('v')) {
+		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 

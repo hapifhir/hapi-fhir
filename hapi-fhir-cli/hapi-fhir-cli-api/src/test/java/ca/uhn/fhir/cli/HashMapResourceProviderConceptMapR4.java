@@ -22,14 +22,23 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import com.google.common.base.Charsets;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.IdType;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This is a subclass to implement FHIR operations specific to R4 ConceptMap
@@ -57,12 +66,14 @@ public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider
 	}
 
 	@Search
-	public List<ConceptMap> search(@RequiredParam(name=ConceptMap.SP_URL) String theConceptMapUrl) {
+	public List<ConceptMap> searchByUrl(
+		@RequiredParam(name=ConceptMap.SP_URL) String theConceptMapUrl) {
+
 		List<ConceptMap> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, ConceptMap> next : myIdToVersionToResourceMap.values()) {
 			if (!next.isEmpty()) {
-				ConceptMap conceptMap = (ConceptMap) next.lastEntry().getValue();
+				ConceptMap conceptMap = next.lastEntry().getValue();
 				if (theConceptMapUrl.equals(conceptMap.getUrl()))
 				retVal.add(conceptMap);
 				break;
@@ -70,5 +81,45 @@ public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider
 		}
 
 		return retVal;
+	}
+
+	@Update
+	public MethodOutcome updateConceptMapConditional(
+		@ResourceParam ConceptMap theConceptMap,
+		@IdParam IdType theId,
+		@ConditionalUrlParam String theConditional) {
+
+		MethodOutcome methodOutcome = new MethodOutcome();
+
+		if (theConceptMap != null) {
+
+			String url = null;
+
+			try {
+				List<NameValuePair> params = URLEncodedUtils.parse(new URI(theConditional), Charsets.UTF_8);
+				for (NameValuePair param : params) {
+					if (param.getName().equalsIgnoreCase("url")) {
+						url = param.getValue();
+					}
+				}
+			} catch (URISyntaxException urise) {
+				throw new InvalidRequestException(urise);
+			}
+
+			if (isNotBlank(url)) {
+				List<ConceptMap> conceptMaps = searchByUrl(url);
+
+				if (!conceptMaps.isEmpty()) {
+					methodOutcome = update(conceptMaps.get(0));
+				} else {
+					methodOutcome = create(theConceptMap);
+				}
+			}
+
+		} else {
+			methodOutcome = update((ConceptMap) read(theId));
+		}
+
+		return methodOutcome;
 	}
 }

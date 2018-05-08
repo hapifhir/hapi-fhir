@@ -22,7 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -76,7 +75,7 @@ public class ImportCsvToConceptMapCommandTest {
 	}
 
 	@Test
-	public void testTest() {
+	public void testConditionalUpdate() {
 		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
 		String conceptMapUrl = conceptMap.getUrl();
 
@@ -88,6 +87,13 @@ public class ImportCsvToConceptMapCommandTest {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
+//		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
+//		MethodOutcome methodOutcome = ourClient
+//			.update()
+//			.resource(conceptMap)
+//			.conditionalByUrl("ConceptMap?url=" + conceptMapUrl)
+//			.execute();
+
 		if (methodOutcome.getCreated()) {
 			ourLog.info("Created new ConceptMap: {}", methodOutcome.getId().getValue());
 		} else {
@@ -96,7 +102,7 @@ public class ImportCsvToConceptMapCommandTest {
 	}
 
 	@Test
-	public void testImportCsvToConceptMapCommand() throws IOException, FHIRException {
+	public void testImportCsvToConceptMapCommand() throws FHIRException {
 		ClassLoader classLoader = getClass().getClassLoader();
 		File fileToImport = new File(classLoader.getResource(FILENAME).getFile());
 		ImportCsvToConceptMapCommandTest.file = fileToImport.getAbsolutePath();
@@ -107,7 +113,8 @@ public class ImportCsvToConceptMapCommandTest {
 			"-u", CM_URL,
 			"-i", VS_URL_1,
 			"-o", VS_URL_2,
-			"-f", file});
+			"-f", file,
+			"-l"});
 
 		Bundle response = ourClient
 			.search()

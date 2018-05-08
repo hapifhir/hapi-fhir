@@ -75,6 +75,10 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String FHIR_VERSION_PARAM_LONGOPT = "fhir-version";
 	protected static final String FHIR_VERSION_PARAM_NAME = "version";
 	protected static final String FHIR_VERSION_PARAM_DESC = "The FHIR version being used. Valid values: ";
+	protected static final String VERBOSE_LOGGING_PARAM = "l";
+	protected static final String VERBOSE_LOGGING_PARAM_LONGOPT = "logging";
+	protected static final String VERBOSE_LOGGING_PARAM_DESC = "If specified, verbose logging will be used.";
+
 
 	protected FhirContext myFhirCtx;
 
@@ -98,6 +102,10 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			.sorted()
 			.collect(Collectors.joining(", "));
 		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
+	}
+
+	protected void addVerboseLoggingOption(Options theOptions) {
+		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
 	}
 
 	private void addOption(Options theOptions, boolean theRequired, String theOpt, String theLong, boolean theHasArgument, String theArgumentName, String theDescription) {

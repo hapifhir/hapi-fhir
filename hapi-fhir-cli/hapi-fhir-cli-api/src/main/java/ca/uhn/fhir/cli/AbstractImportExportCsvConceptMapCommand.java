@@ -80,7 +80,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseComma
 			throw new ParseException("This command does not support FHIR version " + fhirVersion + ".");
 		}
 
-		if (theCommandLine.hasOption(FHIR_VERSION_PARAM)) {
+		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
