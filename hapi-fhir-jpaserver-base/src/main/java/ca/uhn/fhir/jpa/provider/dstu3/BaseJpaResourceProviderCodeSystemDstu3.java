@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -36,7 +37,7 @@ import java.util.List;
 public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderDstu3<CodeSystem> {
 
 	@SuppressWarnings("unchecked")
-	@Operation(name = "$lookup", idempotent = true, returnParameters= {
+	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 		@OperationParam(name="name", type=StringType.class, min=1),
 		@OperationParam(name="version", type=StringType.class, min=0),
 		@OperationParam(name="display", type=StringType.class, min=1),

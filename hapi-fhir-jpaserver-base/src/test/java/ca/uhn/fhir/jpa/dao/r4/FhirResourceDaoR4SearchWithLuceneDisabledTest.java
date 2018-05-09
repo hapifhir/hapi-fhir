@@ -93,7 +93,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before

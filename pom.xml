@@ -2,12 +2,6 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>9</version>
-	</parent>
-
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
@@ -29,6 +23,10 @@
 	</issueManagement>
 
 	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
 		<site>
 			<id>git.server</id>
 			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
@@ -417,6 +415,14 @@
 			<name>John Poth</name>
 			<organization>Red Hat</organization>
 		</developer>
+		<developer>
+			<id>t4deon</id>
+			<name>Andreas Keil</name>
+		</developer>
+		<developer>
+			<id>dgileadi</id>
+			<name>David Gileadi</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -438,6 +444,7 @@
 
 		<!-- Dependency Versions -->
 		<apache_karaf_version>4.1.4</apache_karaf_version>
+		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.10</commons_codec_version>
 		<commons_io_version>2.5</commons_io_version>
 		<commons_lang3_version>3.6</commons_lang3_version>
@@ -525,6 +532,11 @@
 				<version>2.9.2</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.ben-manes.caffeine</groupId>
+				<artifactId>caffeine</artifactId>
+				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
 				<version>1.5.6</version>
@@ -588,6 +600,11 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>${commons_codec_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -1119,6 +1136,17 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.6.8</version>
+					<extensions>true</extensions>
+					<configuration>
+						<serverId>ossrh</serverId>
+						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>com.gemnasium</groupId>
 					<artifactId>gemnasium-maven-plugin</artifactId>
 					<version>0.2.0</version>
@@ -1284,7 +1312,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.14</version>
+					<version>1.16</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>

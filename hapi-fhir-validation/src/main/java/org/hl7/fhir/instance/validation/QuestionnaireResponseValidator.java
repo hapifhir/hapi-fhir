@@ -245,7 +245,7 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 				}
 			}
 			for (org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent nextAnswerGroup : answerGroups) {
-				int index = theAnswerGroups.indexOf(answerGroups.get(1));
+				int index = theAnswerGroups.indexOf(nextAnswerGroup);
 				thePathStack.add("group(" + index + ")");
 				validateGroup(theErrors, nextQuestionGroup, nextAnswerGroup, thePathStack, theAnswers, theValidateRequired);
 				thePathStack.removeLast();

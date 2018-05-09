@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -40,6 +42,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -47,6 +50,9 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
+	@Autowired
+	@Qualifier("myResourceCountsCache")
+	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegsitry;
 	@Autowired
@@ -189,7 +195,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -40,8 +41,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
 
-	//@formatter:off
-	@Operation(name = "$expand", idempotent = true)
+
+	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true)
 	public ValueSet expand(
 			HttpServletRequest theServletRequest,
 			@IdParam(optional=true) IdDt theId,
@@ -49,8 +50,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 			@OperationParam(name="identifier", min=0, max=1) UriDt theIdentifier,
 			@OperationParam(name = "filter", min=0, max=1) StringDt theFilter,
 			RequestDetails theRequestDetails) {
-		//@formatter:on
-		
+
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theIdentifier != null && isNotBlank(theIdentifier.getValue());
 		boolean haveValueSet = theValueSet != null && theValueSet.isEmpty() == false;
@@ -99,8 +99,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		return theFilter != null ? theFilter.getValue() : null;
 	}
 
-	//@formatter:off
-	@Operation(name = "$lookup", idempotent = true, returnParameters= {
+	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 		@OperationParam(name="name", type=StringDt.class, min=1),
 		@OperationParam(name="version", type=StringDt.class, min=0),
 		@OperationParam(name="display", type=StringDt.class, min=1),
@@ -113,8 +112,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 			@OperationParam(name="coding", min=0, max=1) CodingDt theCoding,
 			RequestDetails theRequestDetails 
 			) {
-		//@formatter:on
-		
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt>) getDao();
@@ -136,8 +134,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	}
 	
 	
-	//@formatter:off
-	@Operation(name = "$validate-code", idempotent = true, returnParameters= {
+	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters= {
 		@OperationParam(name="result", type=BooleanDt.class, min=1),
 		@OperationParam(name="message", type=StringDt.class),
 		@OperationParam(name="display", type=StringDt.class)
@@ -153,8 +150,7 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 			@OperationParam(name="codeableConcept", min=0, max=1) CodeableConceptDt theCodeableConcept, 
 			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
-		
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>) getDao();

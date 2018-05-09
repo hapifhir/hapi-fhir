@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -1561,7 +1562,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testExtensionUrlWithHl7Url() throws IOException {
 		String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/" + JpaConstants.OPERATION_VALIDATE);
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 
 		CloseableHttpResponse resp = ourHttpClient.execute(post);
@@ -1689,6 +1690,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
 		myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		myResourceCountsCache.clear();
+		myResourceCountsCache.update();
 
 		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
 		CloseableHttpResponse response = ourHttpClient.execute(get);

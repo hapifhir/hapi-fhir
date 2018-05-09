@@ -18,6 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
@@ -90,6 +91,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((Reference) respParam.getParameter().get(1).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9]+"));
 
 		/*
 		 * Try uploading a second time

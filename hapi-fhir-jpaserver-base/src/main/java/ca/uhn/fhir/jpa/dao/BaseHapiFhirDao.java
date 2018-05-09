@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -79,9 +80,12 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -221,6 +225,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
+
+		if (!getConfig().isExpungeEnabled()) {
+			throw new MethodNotAllowedException("$expunge is not enabled on this server");
+		}
+
 		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
 
 		if (theResourceName == null && theResourceId == null && theVersion == null) {
@@ -291,75 +300,68 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return toExpungeOutcome(theExpungeOptions, remainingCount);
 	}
 
+	private void doExpungeEverythingQuery(String theQuery) {
+		StopWatch sw = new StopWatch();
+		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
+		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
+	}
+
 	private void doExpungeEverything() {
 
-		ourLog.info("** BEGINNING GLOBAL OPERATION_NAME_EXPUNGE **");
+		ourLog.info("** BEGINNING GLOBAL $expunge **");
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				myEntityManager.createQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null");
+			doExpungeEverythingQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null");
+			doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null");
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + SearchParam.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + SearchResult.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + SearchParam.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ForcedId.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + SearchResult.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d");
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
-				for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
-					next.setCurrentVersion(null);
-					myEntityManager.merge(next);
-				}
-				return null;
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConcept.class.getSimpleName() + " d");
+			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
+				next.setCurrentVersion(null);
+				myEntityManager.merge(next);
 			}
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d");
+			return null;
 		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				myEntityManager.createQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
-				myEntityManager.createQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d");
+			return null;
 		});
+
+		ourLog.info("** COMPLETED GLOBAL $expunge **");
 	}
 
 	private void expungeCurrentVersionOfResource(Long theResourceId) {
@@ -717,14 +719,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return mySearchParamExtractor.extractSearchParamUri(theEntity, theResource);
 	}
 
-	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<TagDefinition> allDefs) {
+	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				TagDefinition tag = getTagOrNull(TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
-				if (tag != null) {
+				TagDefinition def = getTagOrNull(TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
+				if (def != null) {
+					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
-					theEntity.addTag(tag);
 					theEntity.setHasTags(true);
 				}
 			}
@@ -733,10 +735,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(theResource);
 		if (securityLabels != null) {
 			for (BaseCodingDt next : securityLabels) {
-				TagDefinition tag = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
-				if (tag != null) {
+				TagDefinition def = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
+				if (def != null) {
+					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
-					theEntity.addTag(tag);
 					theEntity.setHasTags(true);
 				}
 			}
@@ -745,24 +747,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
 			for (IIdType next : profiles) {
-				TagDefinition tag = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
-				if (tag != null) {
+				TagDefinition def = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				if (def != null) {
+					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
-					theEntity.addTag(tag);
 					theEntity.setHasTags(true);
 				}
 			}
 		}
 	}
 
-	private void extractTagsRi(IAnyResource theResource, ResourceTable theEntity, Set<TagDefinition> allDefs) {
+	private void extractTagsRi(IAnyResource theResource, ResourceTable theEntity, Set<ResourceTag> theAllTags) {
 		List<? extends IBaseCoding> tagList = theResource.getMeta().getTag();
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
-				TagDefinition tag = getTagOrNull(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
-				if (tag != null) {
-					allDefs.add(tag);
-					theEntity.addTag(tag);
+				TagDefinition def = getTagOrNull(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
+				if (def != null) {
+					ResourceTag tag = theEntity.addTag(def);
+					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
 			}
@@ -771,10 +773,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition tag = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
-				if (tag != null) {
-					allDefs.add(tag);
-					theEntity.addTag(tag);
+				TagDefinition def = getTagOrNull(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
+				if (def != null) {
+					ResourceTag tag = theEntity.addTag(def);
+					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
 			}
@@ -783,10 +785,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		List<? extends IPrimitiveType<String>> profiles = theResource.getMeta().getProfile();
 		if (profiles != null) {
 			for (IPrimitiveType<String> next : profiles) {
-				TagDefinition tag = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
-				if (tag != null) {
-					allDefs.add(tag);
-					theEntity.addTag(tag);
+				TagDefinition def = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				if (def != null) {
+					ResourceTag tag = theEntity.addTag(def);
+					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
 			}
@@ -876,10 +878,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
 	}
 
-	private Set<TagDefinition> getAllTagDefinitions(ResourceTable theEntity) {
-		HashSet<TagDefinition> retVal = Sets.newHashSet();
-		for (ResourceTag next : theEntity.getTags()) {
-			retVal.add(next.getTag());
+	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
+		HashSet<ResourceTag> retVal = Sets.newHashSet();
+		if (theEntity.isHasTags()) {
+			for (ResourceTag next : theEntity.getTags()) {
+				retVal.add(next);
+			}
 		}
 		return retVal;
 	}
@@ -1173,7 +1177,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	/**
 	 * Returns true if the resource has changed (either the contents or the tags)
 	 */
-	protected EncodedResource populateResourceIntoEntity(IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHash) {
+	protected EncodedResource populateResourceIntoEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean theUpdateHash) {
 		if (theEntity.getResourceType() == null) {
 			theEntity.setResourceType(toResourceName(theResource));
 		}
@@ -1222,11 +1226,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				theEntity.setHashSha256(hashSha256);
 			}
 
-			Set<TagDefinition> allDefs = new HashSet<>();
-
-			theEntity.setHasTags(false);
-
-			Set<TagDefinition> allTagsOld = getAllTagDefinitions(theEntity);
+			Set<ResourceTag> allDefs = new HashSet<>();
+			Set<ResourceTag> allTagsOld = getAllTagDefinitions(theEntity);
 
 			if (theResource instanceof IResource) {
 				extractTagsHapi((IResource) theResource, theEntity, allDefs);
@@ -1238,32 +1239,33 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			if (def.isStandardType() == false) {
 				String profile = def.getResourceProfile("");
 				if (isNotBlank(profile)) {
-					TagDefinition tag = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
-					if (tag != null) {
+					TagDefinition profileDef = getTagOrNull(TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+					if (def != null) {
+						ResourceTag tag = theEntity.addTag(profileDef);
 						allDefs.add(tag);
-						theEntity.addTag(tag);
 						theEntity.setHasTags(true);
 					}
 				}
 			}
 
-			ArrayList<ResourceTag> existingTags = new ArrayList<>();
-			if (theEntity.isHasTags()) {
-				existingTags.addAll(theEntity.getTags());
-			}
-			for (ResourceTag next : existingTags) {
-				TagDefinition nextDef = next.getTag();
-				if (!allDefs.contains(nextDef)) {
-					if (shouldDroppedTagBeRemovedOnUpdate(theEntity, next)) {
+			// Don't keep duplicate tags
+			Set<TagDefinition> allDefsPresent = new HashSet<>();
+			theEntity.getTags().removeIf(theResourceTag -> !allDefsPresent.add(theResourceTag.getTag()));
+
+			// Remove any tags that have been removed
+			for (ResourceTag next : allTagsOld) {
+				if (!allDefs.contains(next)) {
+					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, next)) {
 						theEntity.getTags().remove(next);
 					}
 				}
 			}
 
-			Set<TagDefinition> allTagsNew = getAllTagDefinitions(theEntity);
+			Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
 			if (!allTagsOld.equals(allTagsNew)) {
 				changed = true;
 			}
+			theEntity.setHasTags(!allTagsNew.isEmpty());
 
 		} else {
 			theEntity.setHashSha256(null);
@@ -1486,17 +1488,47 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * The default implementation removes any profile declarations, but leaves tags and security labels in place. Subclasses may choose to override and change this behaviour.
 	 * </p>
 	 * <p>
-	 * See <a href="http://hl7.org/fhir/2015Sep/resource.html#1.11.3.7">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
+	 * See <a href="http://hl7.org/fhir/resource.html#tag-updates">Updates to Tags, Profiles, and Security Labels</a> for a description of the logic that the default behaviour folows.
 	 * </p>
 	 *
-	 * @param theEntity The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
-	 * @param theTag    The tag
+	 * @param theTag The tag
 	 * @return Returns <code>true</code> if the tag should be removed
 	 */
-	protected boolean shouldDroppedTagBeRemovedOnUpdate(ResourceTable theEntity, ResourceTag theTag) {
-		if (theTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
+	protected boolean shouldDroppedTagBeRemovedOnUpdate(RequestDetails theRequest, ResourceTag theTag) {
+
+		Set<TagTypeEnum> metaSnapshotModeTokens = null;
+
+		if (theRequest != null) {
+			List<String> metaSnapshotMode = theRequest.getHeaders(JpaConstants.HEADER_META_SNAPSHOT_MODE);
+			if (metaSnapshotMode != null && !metaSnapshotMode.isEmpty()) {
+				metaSnapshotModeTokens = new HashSet<>();
+				for (String nextHeaderValue : metaSnapshotMode) {
+					StringTokenizer tok = new StringTokenizer(nextHeaderValue, ",");
+					while (tok.hasMoreTokens()) {
+						switch (trim(tok.nextToken())) {
+							case "TAG":
+								metaSnapshotModeTokens.add(TagTypeEnum.TAG);
+								break;
+							case "PROFILE":
+								metaSnapshotModeTokens.add(TagTypeEnum.PROFILE);
+								break;
+							case "SECURITY_LABEL":
+								metaSnapshotModeTokens.add(TagTypeEnum.SECURITY_LABEL);
+								break;
+						}
+					}
+				}
+			}
+		}
+
+		if (metaSnapshotModeTokens == null) {
+			metaSnapshotModeTokens = Collections.singleton(TagTypeEnum.PROFILE);
+		}
+
+		if (metaSnapshotModeTokens.contains(theTag.getTag().getTagType())) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -1514,7 +1546,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, boolean theForHistoryOperation) {
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity,
+																 boolean theForHistoryOperation) {
 
 		ResourceHistoryTable history;
 		if (theEntity instanceof ResourceHistoryTable) {
@@ -1639,7 +1672,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(final IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+	protected ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
+		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ourLog.debug("Starting entity update");
 
@@ -1732,7 +1766,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			theEntity.setNarrativeTextParsedIntoWords(null);
 			theEntity.setContentTextParsedIntoWords(null);
 			theEntity.setHashSha256(null);
-			changed = populateResourceIntoEntity(theResource, theEntity, true);
+			changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
 		} else {
 
@@ -1844,7 +1878,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 				 */
 				compositeStringUniques = extractCompositeStringUniques(theEntity, stringParams, tokenParams, numberParams, quantityParams, dateParams, uriParams, links);
 
-				changed = populateResourceIntoEntity(theResource, theEntity, true);
+				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
 				theEntity.setUpdated(theUpdateTime);
 				if (theResource instanceof IResource) {
@@ -1874,7 +1908,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 			} else {
 
-				changed = populateResourceIntoEntity(theResource, theEntity, false);
+				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, false);
 
 				theEntity.setUpdated(theUpdateTime);
 				// theEntity.setLanguage(theResource.getLanguage().getValue());
@@ -2062,11 +2096,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return theEntity;
 	}
 
-	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
-		return updateEntity(theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
+	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable
+		entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
+		return updateEntity(theRequest, theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
-	public ResourceTable updateInternal(T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource) {
+	public ResourceTable updateInternal(RequestDetails theRequest, T theResource, boolean thePerformIndexing,
+													boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType
+														theResourceId, IBaseResource theOldResource) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = null;
 		if (theRequestDetails != null) {
@@ -2085,7 +2122,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
+		ResourceTable savedEntity = updateEntity(theRequest, theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
@@ -2271,14 +2308,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	 * @param theResourceType E.g. <code>Patient
 	 * @param thePartsChoices E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
 	 */
-	public static Set<String> extractCompositeStringUniquesValueChains(String theResourceType, List<List<String>> thePartsChoices) {
+	public static Set<String> extractCompositeStringUniquesValueChains(String
+																								 theResourceType, List<List<String>> thePartsChoices) {
 
 		for (List<String> next : thePartsChoices) {
-			for (Iterator<String> iter = next.iterator(); iter.hasNext(); ) {
-				if (isBlank(iter.next())) {
-					iter.remove();
-				}
-			}
+			next.removeIf(StringUtils::isBlank);
 			if (next.isEmpty()) {
 				return Collections.emptySet();
 			}
@@ -2288,19 +2322,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return Collections.emptySet();
 		}
 
-		Collections.sort(thePartsChoices, new Comparator<List<String>>() {
-			@Override
-			public int compare(List<String> o1, List<String> o2) {
-				String str1 = null;
-				String str2 = null;
-				if (o1.size() > 0) {
-					str1 = o1.get(0);
-				}
-				if (o2.size() > 0) {
-					str2 = o2.get(0);
-				}
-				return StringUtils.compare(str1, str2);
+		thePartsChoices.sort((o1, o2) -> {
+			String str1 = null;
+			String str2 = null;
+			if (o1.size() > 0) {
+				str1 = o1.get(0);
 			}
+			if (o2.size() > 0) {
+				str2 = o2.get(0);
+			}
+			return compare(str1, str2);
 		});
 
 		List<String> values = new ArrayList<>();
@@ -2309,7 +2340,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return queryStringsToPopulate;
 	}
 
-	private static void extractCompositeStringUniquesValueChains(String theResourceType, List<List<String>> thePartsChoices, List<String> theValues, Set<String> theQueryStringsToPopulate) {
+	private static void extractCompositeStringUniquesValueChains(String
+																						 theResourceType, List<List<String>> thePartsChoices, List<String> theValues, Set<String> theQueryStringsToPopulate) {
 		if (thePartsChoices.size() > 0) {
 			List<String> nextList = thePartsChoices.get(0);
 			Collections.sort(nextList);
@@ -2446,14 +2478,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	}
 
 	private static List<BaseCodingDt> toBaseCodingList(List<IBaseCoding> theSecurityLabels) {
-		ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>(theSecurityLabels.size());
+		ArrayList<BaseCodingDt> retVal = new ArrayList<>(theSecurityLabels.size());
 		for (IBaseCoding next : theSecurityLabels) {
 			retVal.add((BaseCodingDt) next);
 		}
 		return retVal;
 	}
 
-	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao theForcedIdDao) {
+	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao
+		theForcedIdDao) {
 		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
 	}
 
@@ -2482,7 +2515,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		}
 	}
 
-	public static SearchParameterMap translateMatchUrl(IDao theCallingDao, FhirContext theContext, String theMatchUrl, RuntimeResourceDefinition resourceDef) {
+	public static SearchParameterMap translateMatchUrl(IDao theCallingDao, FhirContext theContext, String
+		theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
 

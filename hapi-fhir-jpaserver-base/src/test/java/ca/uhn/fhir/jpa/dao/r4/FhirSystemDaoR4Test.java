@@ -37,6 +37,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
@@ -168,6 +169,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		fail();
 		return null;
 	}
+
+	@Test
+	public void testResourceCounts() {
+		Patient p = new Patient();
+		p.setActive(true);
+		myPatientDao.create(p);
+
+		Observation o = new Observation();
+		o.setStatus(ObservationStatus.AMENDED);
+		myObservationDao.create(o);
+
+		Map<String, Long> counts = mySystemDao.getResourceCounts();
+		assertEquals(new Long(1L), counts.get("Patient"));
+		assertEquals(new Long(1L), counts.get("Observation"));
+		assertEquals(null, counts.get("Organization"));
+
+	}
+
 
 	@Test
 	public void testBatchCreateWithBadRead() {

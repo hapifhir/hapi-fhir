@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.LoggingRule;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -26,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.Mockito;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -39,6 +42,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +62,9 @@ public abstract class BaseJpaTest {
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
+
 	@After
 	public final void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
@@ -70,6 +77,7 @@ public abstract class BaseJpaTest {
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 	}
 
 	protected abstract FhirContext getContext();
@@ -251,11 +259,13 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(IFhirSystemDao<?,?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
-
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?,?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 
+		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
+		theDaoConfig.setExpungeEnabled(true);
 		theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+		theDaoConfig.setExpungeEnabled(expungeEnabled);
 
 		theSearchParamPresenceSvc.flushCachesForUnitTest();
 		theSearchParamRegistry.forceRefresh();

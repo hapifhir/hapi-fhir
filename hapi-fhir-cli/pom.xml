@@ -16,6 +16,7 @@
 	
 	<modules>
 		<module>hapi-fhir-cli-jpaserver</module>
+		<module>hapi-fhir-cli-api</module>
 		<module>hapi-fhir-cli-app</module>
 	</modules>
 	

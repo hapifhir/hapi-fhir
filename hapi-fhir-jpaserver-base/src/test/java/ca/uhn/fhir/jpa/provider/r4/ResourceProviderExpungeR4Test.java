@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +25,11 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	private IIdType myOneVersionObservationId;
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
+
+	@After
+	public void afterDisableExpunge() {
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+	}
 
 	private void assertExpunged(IIdType theId) {
 		try {
@@ -95,6 +103,11 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Before
+	public void beforeEnableExpunge() {
+		myDaoConfig.setExpungeEnabled(true);
+	}
+
 	private IFhirResourceDao<?> getDao(IIdType theId) {
 		IFhirResourceDao<?> dao;
 		switch (theId.getResourceType()) {
@@ -139,6 +152,46 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertStillThere(myTwoVersionPatientId.withVersion("2"));
+		assertGone(myDeletedPatientId);
+
+		// No observations deleted
+		assertStillThere(myOneVersionObservationId);
+		assertStillThere(myTwoVersionObservationId.withVersion("1"));
+		assertStillThere(myTwoVersionObservationId.withVersion("2"));
+		assertGone(myDeletedObservationId);
+
+	}
+
+	@Test
+	public void testExpungeDisabled() {
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+
+		Parameters input = new Parameters();
+		input.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT)
+			.setValue(new IntegerType(1000));
+		input.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
+			.setValue(new BooleanType(true));
+		input.addParameter()
+			.setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
+			.setValue(new BooleanType(true));
+
+		try {
+			myClient
+				.operation()
+				.onInstance(myTwoVersionPatientId)
+				.named("expunge")
+				.withParameters(input)
+				.execute();
+			fail();
+		} catch (MethodNotAllowedException e){
+			assertEquals("HTTP 405 Method Not Allowed: $expunge is not enabled on this server", e.getMessage());
+		}
+		// Only deleted and prior patients
+		assertStillThere(myOneVersionPatientId);
+		assertStillThere(myTwoVersionPatientId.withVersion("1"));
 		assertStillThere(myTwoVersionPatientId.withVersion("2"));
 		assertGone(myDeletedPatientId);
 

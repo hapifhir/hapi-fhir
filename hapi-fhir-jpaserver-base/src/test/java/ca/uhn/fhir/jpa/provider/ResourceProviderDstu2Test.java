@@ -1318,6 +1318,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.addName().addFamily(methodName);
 		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
+		myResourceCountsCache.clear();
+		myResourceCountsCache.update();
+
 		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {

@@ -24,6 +24,7 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -319,9 +320,9 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		int conceptCount = code2concept.size();
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
-		storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps);
 
-		return new UploadStatistics(conceptCount);
+		return new UploadStatistics(conceptCount, target);
 	}
 
 	private UploadStatistics processSnomedCtFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
@@ -367,9 +368,9 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		cs.setUrl(SCT_URI);
 		cs.setName("SNOMED CT");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 
-		return new UploadStatistics(code2concept.size());
+		return new UploadStatistics(code2concept.size(), target);
 	}
 
 	@VisibleForTesting
@@ -382,19 +383,22 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		myTermSvc = theTermSvc;
 	}
 
-	private void storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.isTrue(theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT);
 
 		List<ValueSet> valueSets = ObjectUtils.defaultIfNull(theValueSets, Collections.emptyList());
 		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.emptyList());
 
+		IIdType retVal;
 		myTermSvc.setProcessDeferred(false);
 		if (myTermSvcDstu3 != null) {
-			myTermSvcDstu3.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
+			retVal = myTermSvcDstu3.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
 		} else {
-			myTermSvcR4.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
+			retVal = myTermSvcR4.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
 		}
 		myTermSvc.setProcessDeferred(true);
+
+		return retVal;
 	}
 
 

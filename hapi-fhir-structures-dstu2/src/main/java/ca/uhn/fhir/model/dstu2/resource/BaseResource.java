@@ -257,7 +257,11 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			
 			@Override
 			public IBaseMetaType setLastUpdated(Date theHeaderDateValue) {
-				ResourceMetadataKeyEnum.UPDATED.put(BaseResource.this, new InstantDt(theHeaderDateValue));
+				if (theHeaderDateValue == null) {
+					getResourceMetadata().remove(ResourceMetadataKeyEnum.UPDATED);
+				} else {
+					ResourceMetadataKeyEnum.UPDATED.put(BaseResource.this, new InstantDt(theHeaderDateValue));
+				}
 				return this;
 			}
 			

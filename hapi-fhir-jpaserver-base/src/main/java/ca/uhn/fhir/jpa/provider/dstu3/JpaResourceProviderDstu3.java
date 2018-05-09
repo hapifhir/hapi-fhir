@@ -31,20 +31,18 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_DELETE;
 
-	public static final String OPERATION_NAME_META = "$meta";
-	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
-	public static final String OPERATION_NAME_META_ADD = "$meta-add";
+public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
 	public JpaResourceProviderDstu3() {
 		// nothing
@@ -82,14 +80,14 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
-	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = org.hl7.fhir.r4.model.IntegerType.class)
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
 		@IdParam IIdType theIdParam,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions
 	) {
 		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		try {
@@ -99,13 +97,13 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
-	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = org.hl7.fhir.r4.model.IntegerType.class)
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) org.hl7.fhir.r4.model.IntegerType theLimit,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) org.hl7.fhir.r4.model.BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) org.hl7.fhir.r4.model.BooleanType theExpungeOldVersions
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions
 	) {
 		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		try {
@@ -115,11 +113,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters meta(RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theRequestDetails);
@@ -127,11 +123,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters meta(@IdParam IdType theId, RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theId, theRequestDetails);
@@ -139,11 +133,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META_ADD, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META_ADD, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters metaAdd(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
@@ -154,11 +146,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META_DELETE, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META_DELETE, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters metaDelete(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
