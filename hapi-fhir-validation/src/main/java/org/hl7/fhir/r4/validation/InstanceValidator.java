@@ -3353,8 +3353,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
               ei.element.setUserData("elementSupported", "N");
         }
 
-        if (ei.definition.getType().size() == 1 && !ei.definition.getType().get(0).getCode().equals("*") && !ei.definition.getType().get(0).getCode().equals("Element")
-            && !ei.definition.getType().get(0).getCode().equals("BackboneElement")) {
+        if (ei.definition.getType().size() == 1 && !"*".equals(ei.definition.getType().get(0).getCode()) && !"Element".equals(ei.definition.getType().get(0).getCode())
+            && !"BackboneElement".equals(ei.definition.getType().get(0).getCode())) {
           type = ei.definition.getType().get(0).getCode();
           // Excluding reference is a kludge to get around versioning issues
           if (ei.definition.getType().get(0).hasProfile() && !type.equals("Reference"))
