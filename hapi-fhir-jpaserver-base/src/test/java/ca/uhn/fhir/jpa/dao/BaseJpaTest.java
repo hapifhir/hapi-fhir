@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.LoggingRule;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -27,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.Mockito;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -50,6 +52,9 @@ public abstract class BaseJpaTest {
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
+
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
 
 	@After
 	public final void afterPerformCleanup() {

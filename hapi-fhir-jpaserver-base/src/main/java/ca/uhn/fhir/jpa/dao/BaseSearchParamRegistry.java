@@ -259,6 +259,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 					List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
 					for (IBaseResource nextResource : allSearchParams) {
 						SP nextSp = (SP) nextResource;
+						if (nextSp == null) {
+							continue;
+						}
+
 						RuntimeSearchParam runtimeSp = toRuntimeSp(nextSp);
 						if (runtimeSp == null) {
 							continue;
@@ -287,7 +291,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 							}
 
 							if (!activeSearchParams.containsKey(nextEntry.getKey())) {
-								activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
+								activeSearchParams.put(nextEntry.getKey(), new HashMap<>());
 							}
 							if (activeSearchParams.containsKey(nextEntry.getKey())) {
 								ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);

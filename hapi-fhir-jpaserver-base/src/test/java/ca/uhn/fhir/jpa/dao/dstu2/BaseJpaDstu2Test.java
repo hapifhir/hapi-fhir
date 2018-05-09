@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -51,7 +52,7 @@ import static org.mockito.Mockito.mock;
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myResourceCountsCache")
-	protected SingleItemLoadingCache<Map<String, Long>> myResourceCountsCache;
+	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegsitry;
 	@Autowired

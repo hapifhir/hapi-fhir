@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -97,8 +98,8 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(name = "myResourceCountsCache")
-	public SingleItemLoadingCache<Map<String, Long>> resourceCountsCache() {
-		SingleItemLoadingCache<Map<String, Long>> retVal = new SingleItemLoadingCache<>(() -> systemDaoR4().getResourceCounts());
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
 		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}

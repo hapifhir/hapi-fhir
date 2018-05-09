@@ -57,6 +57,9 @@ public class FhirAutoConfigurationTest {
     public void withFhirVersion() throws Exception {
         load("hapi.fhir.version:DSTU3");
         assertThat(this.context.getBean(FhirContext.class).getVersion()).isEqualTo(FhirVersionEnum.DSTU3.getVersionImplementation());
+
+		 load("hapi.fhir.version:R4");
+		 assertThat(this.context.getBean(FhirContext.class).getVersion()).isEqualTo(FhirVersionEnum.R4.getVersionImplementation());
     }
 
     @Test

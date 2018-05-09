@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -83,8 +84,8 @@ public class BaseDstu3Config extends BaseConfig {
 
 
 	@Bean(name = "myResourceCountsCache")
-	public SingleItemLoadingCache<Map<String, Long>> resourceCountsCache() {
-		SingleItemLoadingCache<Map<String, Long>> retVal = new SingleItemLoadingCache<>(() -> systemDaoDstu3().getResourceCounts());
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
 		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}

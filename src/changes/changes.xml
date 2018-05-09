@@ -116,6 +116,10 @@
 				happened upon every validation however, instead of only happening once which adversely
 				affected performance. A cache has been added.
 			</action>
+			<action type="add" issue="903">
+				Fix a bug in the DSTU2 QuestionnaireResponseValidator which prevented validation
+				on groups with only one question. Thanks David Gileadi for the pull request!
+			</action>
 			<action type="add" issue="927">
 				HAPI-FHIR_CLI now includes two new commands: one for importing and populating a
 				<![CDATA[<code>ConceptMap</code>]]> resource from a CSV; and one for exporting a
