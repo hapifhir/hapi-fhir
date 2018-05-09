@@ -23,6 +23,9 @@ package ca.uhn.fhir.rest.server.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -32,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class is a simple implementation of the resource provider
@@ -56,6 +60,11 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final String myResourceName;
 	private Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new HashMap<>();
 	private long myNextId;
+	private AtomicLong myDeleteCount = new AtomicLong(0);
+	private AtomicLong mySearchCount = new AtomicLong(0);
+	private AtomicLong myUpdateCount = new AtomicLong(0);
+	private AtomicLong myCreateCount = new AtomicLong(0);
+	private AtomicLong myReadCount = new AtomicLong(0);
 
 	/**
 	 * Constructor
@@ -79,6 +88,17 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		myIdToVersionToResourceMap.clear();
 	}
 
+	/**
+	 * Clear the counts used by {@link #getCountRead()} and other count methods
+	 */
+	public void clearCounts() {
+		myReadCount.set(0L);
+		myUpdateCount.set(0L);
+		myCreateCount.set(0L);
+		myDeleteCount.set(0L);
+		mySearchCount.set(0L);
+	}
+
 	@Create
 	public MethodOutcome create(@ResourceParam T theResource) {
 		long idPart = myNextId++;
@@ -86,6 +106,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		Long versionIdPart = 1L;
 
 		IIdType id = store(theResource, idPartAsString, versionIdPart);
+
+		myCreateCount.incrementAndGet();
 
 		return new MethodOutcome()
 			.setCreated(true)
@@ -99,11 +121,54 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			throw new ResourceNotFoundException(theId);
 		}
 
+
 		long nextVersion = versions.lastEntry().getKey() + 1L;
 		IIdType id = store(null, theId.getIdPart(), nextVersion);
 
+		myDeleteCount.incrementAndGet();
+
 		return new MethodOutcome()
 			.setId(id);
+	}
+
+	/**
+	 * This method returns a simple operation count. This is mostly
+	 * useful for testing purposes.
+	 */
+	public long getCountCreate() {
+		return myCreateCount.get();
+	}
+
+	/**
+	 * This method returns a simple operation count. This is mostly
+	 * useful for testing purposes.
+	 */
+	public long getCountDelete() {
+		return myDeleteCount.get();
+	}
+
+	/**
+	 * This method returns a simple operation count. This is mostly
+	 * useful for testing purposes.
+	 */
+	public long getCountRead() {
+		return myReadCount.get();
+	}
+
+	/**
+	 * This method returns a simple operation count. This is mostly
+	 * useful for testing purposes.
+	 */
+	public long getCountSearch() {
+		return mySearchCount.get();
+	}
+
+	/**
+	 * This method returns a simple operation count. This is mostly
+	 * useful for testing purposes.
+	 */
+	public long getCountUpdate() {
+		return myUpdateCount.get();
 	}
 
 	@Override
@@ -113,7 +178,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 	private synchronized TreeMap<Long, T> getVersionToResource(String theIdPart) {
 		if (!myIdToVersionToResourceMap.containsKey(theIdPart)) {
-			myIdToVersionToResourceMap.put(theIdPart, new TreeMap<Long, T>());
+			myIdToVersionToResourceMap.put(theIdPart, new TreeMap<>());
 		}
 		return myIdToVersionToResourceMap.get(theIdPart);
 	}
@@ -125,6 +190,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			throw new ResourceNotFoundException(theId);
 		}
 
+		T retVal;
 		if (theId.hasVersionIdPart()) {
 			Long versionId = theId.getVersionIdPartAsLong();
 			if (!versions.containsKey(versionId)) {
@@ -134,23 +200,52 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				if (resource == null) {
 					throw new ResourceGoneException(theId);
 				}
-				return resource;
+				retVal = resource;
 			}
 
 		} else {
-			return versions.lastEntry().getValue();
+			retVal = versions.lastEntry().getValue();
 		}
+
+		myReadCount.incrementAndGet();
+
+		return retVal;
 	}
 
 	@Search
-	public List<IBaseResource> search() {
+	public List<IBaseResource> search(
+		@OptionalParam(name = "_id") TokenAndListParam theIds) {
+
 		List<IBaseResource> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
 			if (next.isEmpty() == false) {
-				retVal.add(next.lastEntry().getValue());
+				T nextResource = next.lastEntry().getValue();
+
+				boolean matches = true;
+				if (theIds != null && theIds.getValuesAsQueryTokens().size() > 0) {
+					for (TokenOrListParam nextIdAnd : theIds.getValuesAsQueryTokens()) {
+						matches = false;
+						for (TokenParam nextOr : nextIdAnd.getValuesAsQueryTokens()) {
+							if (nextOr.getValue().equals(nextResource.getIdElement().getIdPart())) {
+								matches = true;
+							}
+						}
+						if (!matches) {
+							break;
+						}
+					}
+				}
+
+				if (!matches) {
+					continue;
+				}
+
+				retVal.add(nextResource);
 			}
 		}
+
+		mySearchCount.incrementAndGet();
 
 		return retVal;
 	}
@@ -187,6 +282,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		IIdType id = store(theResource, idPartAsString, versionIdPart);
+
+		myUpdateCount.incrementAndGet();
 
 		return new MethodOutcome()
 			.setCreated(created)

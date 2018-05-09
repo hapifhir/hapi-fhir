@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.IdType;
+import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * #%L
@@ -60,6 +63,11 @@ public class JpaValidationSupportDstu2 implements IJpaValidationSupportDstu2 {
 	@Autowired
 	@Qualifier("myFhirContextDstu2")
 	private FhirContext myDstu2Ctx;
+
+	@Override
+	public List<StructureDefinition> allStructures() {
+		return new ArrayList<>();
+	}
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
