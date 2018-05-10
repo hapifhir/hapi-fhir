@@ -127,6 +127,11 @@
 				Fix a bug in the DSTU2 QuestionnaireResponseValidator which prevented validation
 				on groups with only one question. Thanks David Gileadi for the pull request!
 			</action>
+			<action type="add">
+				Operation methods on a plain server may now use parameters
+				of type String (i.e. plain Java strings), and any FHIR primitive
+				datatype will be automatically coerced into a String.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
