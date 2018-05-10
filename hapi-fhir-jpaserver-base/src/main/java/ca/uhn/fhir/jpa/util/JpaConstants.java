@@ -160,4 +160,8 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_META_ADD = "$meta-add";
 
+	/**
+	 * Operation name for the $translate operation
+	 */
+	public static final String OPERATION_TRANSLATE = "$translate";
 }
