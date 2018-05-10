@@ -25,6 +25,9 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.TranslationMatch;
+import ca.uhn.fhir.jpa.term.TranslationRequest;
+import ca.uhn.fhir.jpa.term.TranslationResult;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
@@ -53,17 +56,26 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	private TranslationResult buildTranslationResult(List<TermConceptMapGroupElementTarget> theTargets) {
 		TranslationResult retVal = new TranslationResult();
 
+		String msg;
 		if (theTargets.isEmpty()) {
 
 			retVal.setResult(new BooleanType(false));
 
-			retVal.setMessage(new StringType("No matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapR4.class,
+				"noMatchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 		} else {
 
 			retVal.setResult(new BooleanType(true));
 
-			retVal.setMessage(new StringType("Matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapR4.class,
+				"matchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 			TranslationMatch translationMatch;
 			Set<TermConceptMapGroupElementTarget> targetsToReturn = new HashSet<>();
@@ -79,7 +91,6 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 							.setSystem(target.getSystem())
 							.setVersion(target.getSystemVersion())
 							.setDisplay(target.getDisplay())
-							.setUserSelected(false)
 					);
 
 					translationMatch.setSource(new UriType(target.getConceptMapUrl()));
@@ -95,17 +106,26 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 	private TranslationResult buildReverseTranslationResult(List<TermConceptMapGroupElement> theElements) {
 		TranslationResult retVal = new TranslationResult();
 
+		String msg;
 		if (theElements.isEmpty()) {
 
 			retVal.setResult(new BooleanType(false));
 
-			retVal.setMessage(new StringType("No matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapR4.class,
+				"noMatchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 		} else {
 
 			retVal.setResult(new BooleanType(true));
 
-			retVal.setMessage(new StringType("Matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapR4.class,
+				"matchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 			TranslationMatch translationMatch;
 			Set<TermConceptMapGroupElement> elementsToReturn = new HashSet<>();
@@ -119,7 +139,6 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 							.setSystem(element.getSystem())
 							.setVersion(element.getSystemVersion())
 							.setDisplay(element.getDisplay())
-							.setUserSelected(false)
 					);
 
 					translationMatch.setSource(new UriType(element.getConceptMapUrl()));

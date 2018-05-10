@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.dao.r4.TranslationMatch;
-import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
-import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
+import ca.uhn.fhir.jpa.term.TranslationMatch;
+import ca.uhn.fhir.jpa.term.TranslationRequest;
+import ca.uhn.fhir.jpa.term.TranslationResult;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
@@ -32,9 +32,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -60,17 +60,26 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 	private TranslationResult buildTranslationResult(List<TermConceptMapGroupElementTarget> theTargets) {
 		TranslationResult retVal = new TranslationResult();
 
+		String msg;
 		if (theTargets.isEmpty()) {
 
 			retVal.setResult(new BooleanType(false));
 
-			retVal.setMessage(new StringType("No matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapDstu3.class,
+				"noMatchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 		} else {
 
 			retVal.setResult(new BooleanType(true));
 
-			retVal.setMessage(new StringType("Matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapDstu3.class,
+				"matchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 			TranslationMatch translationMatch;
 			Set<TermConceptMapGroupElementTarget> targetsToReturn = new HashSet<>();
@@ -86,7 +95,6 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 							.setSystem(target.getSystem())
 							.setVersion(target.getSystemVersion())
 							.setDisplay(target.getDisplay())
-							.setUserSelected(false)
 					);
 
 					translationMatch.setSource(new UriType(target.getConceptMapUrl()));
@@ -102,17 +110,26 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 	private TranslationResult buildReverseTranslationResult(List<TermConceptMapGroupElement> theElements) {
 		TranslationResult retVal = new TranslationResult();
 
+		String msg;
 		if (theElements.isEmpty()) {
 
 			retVal.setResult(new BooleanType(false));
 
-			retVal.setMessage(new StringType("No matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapDstu3.class,
+				"noMatchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 		} else {
 
 			retVal.setResult(new BooleanType(true));
 
-			retVal.setMessage(new StringType("Matches found!"));
+			msg = getContext().getLocalizer().getMessage(
+				FhirResourceDaoConceptMapDstu3.class,
+				"matchesFound");
+
+			retVal.setMessage(new StringType(msg));
 
 			TranslationMatch translationMatch;
 			Set<TermConceptMapGroupElement> elementsToReturn = new HashSet<>();
@@ -126,7 +143,6 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 							.setSystem(element.getSystem())
 							.setVersion(element.getSystemVersion())
 							.setDisplay(element.getDisplay())
-							.setUserSelected(false)
 					);
 
 					translationMatch.setSource(new UriType(element.getConceptMapUrl()));

@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
-import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
+import ca.uhn.fhir.jpa.term.TranslationRequest;
+import ca.uhn.fhir.jpa.term.TranslationResult;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

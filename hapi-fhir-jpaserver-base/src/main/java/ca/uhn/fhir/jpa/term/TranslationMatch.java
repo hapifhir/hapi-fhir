@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.term;
 
 /*
  * #%L

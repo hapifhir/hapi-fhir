@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.term;
 
 /*
  * #%L
@@ -20,30 +20,34 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.UriType;
 
-public class TranslationQuery {
-	private Coding myCoding;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TranslationRequest {
+	private CodeableConcept myCodeableConcept;
 	private Long myResourceId;
+	private BooleanType myReverse;
 	private UriType mySource;
 	private UriType myTarget;
 	private UriType myTargetSystem;
 
-	public TranslationQuery() {
+	public TranslationRequest() {
 		super();
 
-		myCoding = new Coding();
+		myCodeableConcept = new CodeableConcept();
 	}
 
-	public Coding getCoding() {
-		return myCoding;
+	public CodeableConcept getCodeableConcept() {
+		return myCodeableConcept;
 	}
 
-	public void setCoding(Coding theCoding) {
-		myCoding = theCoding;
+	public void setCodeableConcept(CodeableConcept theCodeableConcept) {
+		myCodeableConcept = theCodeableConcept;
 	}
 
 	public boolean hasResourceId() {
@@ -56,6 +60,30 @@ public class TranslationQuery {
 
 	public void setResourceId(Long theResourceId) {
 		myResourceId = theResourceId;
+	}
+
+	public boolean hasReverse() {
+		return myReverse != null;
+	}
+
+	public BooleanType getReverse() {
+		return myReverse;
+	}
+
+	public boolean getReverseAsBoolean() {
+		if (hasReverse()) {
+			return myReverse.booleanValue();
+		}
+
+		return false;
+	}
+
+	public void setReverse(BooleanType theReverse) {
+		myReverse = theReverse;
+	}
+
+	public void setReverse(boolean theReverse) {
+		myReverse = new BooleanType(theReverse);
 	}
 
 	public boolean hasSource() {
@@ -94,35 +122,34 @@ public class TranslationQuery {
 		myTargetSystem = theTargetSystem;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
+	public List<TranslationQuery> getTranslationQueries() {
+		List<TranslationQuery> retVal = new ArrayList<>();
 
-		if (!(o instanceof TranslationQuery)) return false;
+		TranslationQuery translationQuery;
+		for (Coding coding : getCodeableConcept().getCoding()) {
+			translationQuery = new TranslationQuery();
 
-		TranslationQuery that = (TranslationQuery) o;
+			translationQuery.setCoding(coding);
 
-		return new EqualsBuilder()
-			.append(getCoding().getCode(), that.getCoding().getCode())
-			.append(getCoding().getSystem(), that.getCoding().getSystem())
-			.append(getCoding().getVersion(), that.getCoding().getVersion())
-			.append(getResourceId(), that.getResourceId())
-			.append(getSource(), that.getSource())
-			.append(getTarget(), that.getTarget())
-			.append(getTargetSystem(), that.getTargetSystem())
-			.isEquals();
-	}
+			if (this.hasResourceId()) {
+				translationQuery.setResourceId(this.getResourceId());
+			}
 
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getCoding().getCode())
-			.append(getCoding().getSystem())
-			.append(getCoding().getVersion())
-			.append(getResourceId())
-			.append(getSource())
-			.append(getTarget())
-			.append(getTargetSystem())
-			.toHashCode();
+			if (this.hasSource()) {
+				translationQuery.setSource(this.getSource());
+			}
+
+			if (this.hasTarget()) {
+				translationQuery.setTarget(this.getTarget());
+			}
+
+			if (this.hasTargetSystem()) {
+				translationQuery.setTargetSystem(this.getTargetSystem());
+			}
+
+			retVal.add(translationQuery);
+		}
+
+		return retVal;
 	}
 }

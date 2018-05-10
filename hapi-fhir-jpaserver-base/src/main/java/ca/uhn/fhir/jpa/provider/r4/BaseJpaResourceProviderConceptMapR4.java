@@ -21,8 +21,9 @@ package ca.uhn.fhir.jpa.provider.r4;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
-import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
-import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
+import ca.uhn.fhir.jpa.term.TranslationRequest;
+import ca.uhn.fhir.jpa.term.TranslationResult;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -33,7 +34,7 @@ import org.hl7.fhir.r4.model.*;
 import javax.servlet.http.HttpServletRequest;
 
 public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<ConceptMap> {
-	@Operation(name = "$translate", idempotent = true, returnParameters = {
+	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1, max = 1),
 		@OperationParam(name = "message", type = StringType.class, min = 0, max = 1),
 	})

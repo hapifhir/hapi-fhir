@@ -25,8 +25,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.*;
-import ca.uhn.fhir.jpa.dao.r4.TranslationQuery;
-import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
@@ -130,6 +128,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
 
+
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
 
 	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
@@ -192,16 +191,18 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 	@PostConstruct
 	public void buildTranslationCaches() {
+		Long timeout = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes();
+
 		myTranslationCache =
 			Caffeine.newBuilder()
 				.maximumSize(10000)
-				.expireAfterWrite(1, TimeUnit.HOURS)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
 				.build();
 
 		myTranslationWithReverseCache =
 			Caffeine.newBuilder()
 				.maximumSize(10000)
-				.expireAfterWrite(1, TimeUnit.HOURS)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
 				.build();
 	}
 

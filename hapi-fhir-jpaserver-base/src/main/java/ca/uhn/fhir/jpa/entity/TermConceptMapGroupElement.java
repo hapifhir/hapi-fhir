@@ -28,7 +28,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@Column(name = "SOURCE_CODE", nullable = false, length = 50)
 	private String myCode;
 
-	@Column(name = "SOURCE_DISPLAY", length = 100)
+	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConceptMapGroupElement")

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.r4.TranslationMatch;
-import ca.uhn.fhir.jpa.dao.r4.TranslationRequest;
-import ca.uhn.fhir.jpa.dao.r4.TranslationResult;
+import ca.uhn.fhir.jpa.term.TranslationMatch;
+import ca.uhn.fhir.jpa.term.TranslationRequest;
+import ca.uhn.fhir.jpa.term.TranslationResult;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.instance.model.api.IIdType;
