@@ -178,7 +178,7 @@ public abstract class BaseJpaTest {
 			}
 
 			if (theProvider instanceof PersistedJpaBundleProvider) {
-				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theFound;
+				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theProvider;
 				provider.clearCachedDataForUnitTest();
 			}
 			size = theProvider.size();
