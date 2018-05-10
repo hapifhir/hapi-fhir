@@ -154,7 +154,7 @@ public class ResourceProviderInterceptorDstu2Test extends BaseResourceProviderDs
 		ArgumentCaptor<ActionRequestDetails> ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		ArgumentCaptor<RestOperationTypeEnum> opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
 		verify(myServerInterceptor, times(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
+		assertEquals("Had types: " + opTypeCaptor.getAllValues() + " and requests: " + ardCaptor.getAllValues()RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
 		assertEquals(null, ardCaptor.getAllValues().get(0).getResourceType());
 		assertNotNull(ardCaptor.getAllValues().get(0).getResource());
 		assertEquals(RestOperationTypeEnum.CREATE, opTypeCaptor.getAllValues().get(1));
@@ -175,10 +175,10 @@ public class ResourceProviderInterceptorDstu2Test extends BaseResourceProviderDs
 		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
 		verify(myDaoInterceptor, atLeast(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
+		assertEquals("Had types: " + opTypeCaptor.getAllValues() + " and requests: " + ardCaptor.getAllValues(), RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
 		assertEquals("Bundle", ardCaptor.getAllValues().get(0).getResourceType());
 		assertNotNull(ardCaptor.getAllValues().get(0).getResource());
-		assertEquals(RestOperationTypeEnum.CREATE, opTypeCaptor.getAllValues().get(1));
+		assertEquals("Had types: " + opTypeCaptor.getAllValues() + " and requests: " + ardCaptor.getAllValues(), RestOperationTypeEnum.CREATE, opTypeCaptor.getAllValues().get(1));
 		assertEquals("Patient", ardCaptor.getAllValues().get(1).getResourceType());
 		assertNotNull(ardCaptor.getAllValues().get(1).getResource());
 

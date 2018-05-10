@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,6 +61,18 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao) {
 		myUuid = theSearchUuid;
 		myDao = theDao;
+	}
+
+	/**
+	 * When HAPI FHIR server is running "for real", a new
+	 * instance of the bundle provider is created to serve
+	 * every HTTP request, so it's ok for us to keep
+	 * state in here and expect that it will go away. But
+	 * in unit tests we keep this object around for longer
+	 * sometimes.
+	 */
+	public void clearCachedDataForUnitTest() {
+		mySearchEntity = null;
 	}
 
 	protected List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {

@@ -1,15 +1,15 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.LoggingRule;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -17,9 +17,9 @@ import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -30,12 +30,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mockito;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -49,12 +44,11 @@ import static org.mockito.Mockito.when;
 public abstract class BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
-
-	@Rule
-	public LoggingRule myLoggingRule = new LoggingRule();
 
 	@After
 	public final void afterPerformCleanup() {
@@ -166,24 +160,29 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
+		PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theFound;
+
 		List<IIdType> retVal = new ArrayList<>();
-		Integer size = theFound.size();
+		Integer size = provider.size();
 		StopWatch sw = new StopWatch();
 		while (size == null) {
 			int timeout = 20000;
 			if (sw.getMillis() > timeout) {
-				fail("Waited over "+timeout+"ms for search");
+				String message = "Waited over " + timeout + "ms for search " + provider.getUuid();
+				ourLog.info(message);
+				fail(message);
 			}
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException theE) {
 				//ignore
 			}
-			size = theFound.size();
+			provider.clearCachedDataForUnitTest();
+			size = provider.size();
 		}
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
+		List<IBaseResource> resources = provider.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
@@ -250,7 +249,7 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?,?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
