@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
@@ -14,20 +15,22 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -48,7 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -91,7 +94,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu3")
-	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Autowired
 	@Qualifier("myConditionDaoDstu3")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -229,6 +232,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	@Autowired
+	protected ITermConceptMapDao myTermConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 
 	@After()
 	public void afterCleanupDao() {
@@ -315,4 +322,34 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		return uuid;
 	}
 
+	/**
+	 * Creates a single {@link org.hl7.fhir.dstu3.model.ConceptMap} entity that includes:
+	 * <br>
+	 * <ul>
+	 *     <li>
+	 *         One group with two elements, each identifying one target apiece.
+	 *     </li>
+	 *     <li>
+	 *         One group with one element, identifying two targets.
+	 *     </li>
+	 *     <li>
+	 * 	 	  One group with one element, identifying a target that also appears
+	 * 	 	  in the first element of the first group.
+	 * 	 </li>
+	 * </ul>
+	 * </br>
+	 * The first two groups identify the same source code system and different target code systems.
+	 * </br>
+	 * The first two groups also include an element with the same source code.
+	 * </br>
+	 *
+	 * @return A {@link org.hl7.fhir.dstu3.model.ConceptMap} entity for testing.
+	 */
+	public static ConceptMap createConceptMap() {
+		try {
+			return VersionConvertor_30_40.convertConceptMap(BaseJpaR4Test.createConceptMap());
+		} catch (FHIRException fe) {
+			throw new InternalErrorException(fe);
+		}
+	}
 }

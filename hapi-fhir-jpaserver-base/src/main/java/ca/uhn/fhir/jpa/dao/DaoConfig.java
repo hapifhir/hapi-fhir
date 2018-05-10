@@ -58,6 +58,16 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
+	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 *
+	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 */
+	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	/**
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowExternalReferences = false;
@@ -555,6 +565,22 @@ public class DaoConfig {
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public Long getTranslationCachesExpireAfterWriteInMinutes() {
+		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
+		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
 	}
 
 	/**

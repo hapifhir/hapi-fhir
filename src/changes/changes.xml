@@ -120,6 +120,10 @@
 				Fix a bug in the DSTU2 QuestionnaireResponseValidator which prevented validation
 				on groups with only one question. Thanks David Gileadi for the pull request!
 			</action>
+			<action type="add" issue="709">
+				The <![CDATA[<code>ConceptMap</code>]] operation <![CDATA[<code>$translate</code>]]> has been
+				implemented.
+			</action>
 			<action type="add" issue="927">
 				HAPI-FHIR_CLI now includes two new commands: one for importing and populating a
 				<![CDATA[<code>ConceptMap</code>]]> resource from a CSV; and one for exporting a
@@ -699,7 +703,7 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 				in FHIR resource (XML/JSON) format.
 			</action>
 			<action type="add">
-				The Binary resource endpoint now supports the `X-Security-Context` header when
+				The Binary resource endpoint now supports the <![CDATA[<code>X-Security-Context</code>]]> header when
 				reading or writing Binary contents using their native Content-Type (i.e exchanging
 				the raw binary with the server, as opposed to exchanging a FHIR resource).
 			</action>

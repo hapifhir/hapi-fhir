@@ -29,6 +29,10 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,13 +52,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
@@ -102,7 +105,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
-	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -240,6 +243,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	@Autowired
+	protected ITermConceptMapDao myTermConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 
 	@After()
 	public void afterCleanupDao() {
@@ -327,4 +334,141 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return uuid;
 	}
 
+	/**
+	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
+	 * <br>
+	 * <ul>
+	 *     <li>
+	 *         One group with two elements, each identifying one target apiece.
+	 *     </li>
+	 *     <li>
+	 *         One group with one element, identifying two targets.
+	 *     </li>
+	 *     <li>
+	 * 	 	  One group with one element, identifying a target that also appears
+	 * 	 	  in the first element of the first group.
+	 * 	 </li>
+	 * </ul>
+	 * </br>
+	 * The first two groups identify the same source code system and different target code systems.
+	 * </br>
+	 * The first two groups also include an element with the same source code.
+	 *
+	 * @return A {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
+	 */
+	public static ConceptMap createConceptMap() {
+		// <editor-fold desc="ConceptMap">
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl(CM_URL);
+
+		conceptMap.setSource(new UriType(VS_URL));
+		conceptMap.setTarget(new UriType(VS_URL_2));
+
+		// <editor-fold desc="ConceptMap.group(0)">
+		ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		// <editor-fold desc="ConceptMap.group(0).element(0))">
+		SourceElementComponent element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		// <editor-fold desc="ConceptMap.group(0).element(0).target(0)">
+		TargetElementComponent target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+		// End ConceptMap.group(0).element(0).target(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(0).element(0)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(0).element(1))">
+		element = group.addElement();
+		element.setCode("23456");
+		element.setDisplay("Source Code 23456");
+
+		// <editor-fold desc="ConceptMap.group(0).element(1).target(0)">
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		// End ConceptMap.group(0).element(1).target(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(0).element(1)
+		// </editor-fold>
+
+		// End ConceptMap.group(0)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(1)">
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setSourceVersion("Version 3");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 4");
+
+		// <editor-fold desc="ConceptMap.group(1).element(0))">
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		// <editor-fold desc="ConceptMap.group(1).element(0).target(0)">
+		target = element.addTarget();
+		target.setCode("56789");
+		target.setDisplay("Target Code 56789");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+		// End ConceptMap.group(1).element(0).target(0)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(1).element(0).target(1)">
+		target = element.addTarget();
+		target.setCode("67890");
+		target.setDisplay("Target Code 67890");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		// End ConceptMap.group(1).element(0).target(1)
+		// </editor-fold>
+
+		// End ConceptMap.group(1).element(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(1)
+		// </editor-fold>
+
+		// <editor-fold desc="ConceptMap.group(2)">
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 5");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		// <editor-fold desc="ConceptMap.group(2).element(0))">
+		element = group.addElement();
+		element.setCode("78901");
+		element.setDisplay("Source Code 78901");
+
+		// <editor-fold desc="ConceptMap.group(2).element(0).target(0)">
+		target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+		// End ConceptMap.group(2).element(0).target(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(2).element(0)
+		// </editor-fold>
+
+		// End ConceptMap.group(2)
+		// </editor-fold>
+
+		// End ConceptMap
+		// </editor-fold>
+
+		return conceptMap;
+	}
 }

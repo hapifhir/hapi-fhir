@@ -49,6 +49,15 @@ import static org.mockito.Mockito.when;
 public abstract class BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+
+	protected static final String CM_URL = "http://example.com/my_concept_map";
+	protected static final String CS_URL = "http://example.com/my_code_system";
+	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
+	protected static final String CS_URL_3 = "http://example.com/my_code_system3";
+	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
+	protected static final String VS_URL = "http://example.com/my_value_set";
+	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
+
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);

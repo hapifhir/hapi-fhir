@@ -79,13 +79,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -333,6 +328,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			doExpungeEverythingQuery("DELETE from " + SearchResult.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d");
+			return null;
+		});
+		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElementTarget.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElement.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroup.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptMap.class.getSimpleName() + " d");
 			return null;
 		});
 		txTemplate.execute(t -> {
