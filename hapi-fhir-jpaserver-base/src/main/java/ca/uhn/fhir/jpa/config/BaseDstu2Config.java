@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +75,7 @@ public class BaseDstu2Config extends BaseConfig {
 	@Lazy
 	public IValidatorModule instanceValidatorDstu2() {
 		FhirInstanceValidator retVal = new FhirInstanceValidator();
-		retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		retVal.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2()));
 		return retVal;
 	}

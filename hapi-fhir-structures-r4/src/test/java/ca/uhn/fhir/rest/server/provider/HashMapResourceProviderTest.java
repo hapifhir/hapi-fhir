@@ -21,7 +21,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
 
@@ -31,11 +34,14 @@ public class HashMapResourceProviderTest {
 	private static Server ourListenerServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
-
+	private static HashMapResourceProvider<Patient> myPatientResourceProvider;
+	private static HashMapResourceProvider<Observation> myObservationResourceProvider;
 
 	@Before
 	public void before() {
 		ourRestServer.clearData();
+		myPatientResourceProvider.clearCounts();
+		myObservationResourceProvider.clearCounts();
 	}
 
 	@Test
@@ -50,6 +56,8 @@ public class HashMapResourceProviderTest {
 		// Read
 		p = (Patient) ourClient.read().resource("Patient").withId(id).execute();
 		assertEquals(true, p.getActive());
+
+		assertEquals(1, myPatientResourceProvider.getCountRead());
 	}
 
 	@Test
@@ -76,7 +84,11 @@ public class HashMapResourceProviderTest {
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("1", id.getVersionIdPart());
 
+		assertEquals(0, myPatientResourceProvider.getCountDelete());
+
 		ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+
+		assertEquals(1, myPatientResourceProvider.getCountDelete());
 
 		// Read
 		ourClient.read().resource("Patient").withId(id.withVersion("1")).execute();
@@ -103,6 +115,56 @@ public class HashMapResourceProviderTest {
 		Bundle resp = ourClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
 		assertEquals(100, resp.getTotal());
 		assertEquals(100, resp.getEntry().size());
+
+		assertEquals(1, myPatientResourceProvider.getCountSearch());
+
+	}
+
+	@Test
+	public void testSearchById() {
+		// Create
+		for (int i = 0; i < 100; i++) {
+			Patient p = new Patient();
+			p.addName().setFamily("FAM" + i);
+			IIdType id = ourClient.create().resource(p).execute().getId();
+			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
+			assertEquals("1", id.getVersionIdPart());
+		}
+
+		// Search
+		Bundle resp = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.returnBundle(Bundle.class).execute();
+		assertEquals(2, resp.getTotal());
+		assertEquals(2, resp.getEntry().size());
+		List<String> respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(respIds, containsInAnyOrder("Patient/2", "Patient/3"));
+
+		// Search
+		resp = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.returnBundle(Bundle.class).execute();
+		assertEquals(2, resp.getTotal());
+		assertEquals(2, resp.getEntry().size());
+		respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(respIds, containsInAnyOrder("Patient/2", "Patient/3"));
+
+		resp = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.where(Patient.RES_ID.exactly().codes("4", "3"))
+			.returnBundle(Bundle.class).execute();
+		respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(respIds, containsInAnyOrder("Patient/3"));
+		assertEquals(1, resp.getTotal());
+		assertEquals(1, resp.getEntry().size());
+
 	}
 
 	@Test
@@ -121,6 +183,9 @@ public class HashMapResourceProviderTest {
 		id = ourClient.update().resource(p).execute().getId();
 		assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 		assertEquals("2", id.getVersionIdPart());
+
+		assertEquals(1, myPatientResourceProvider.getCountCreate());
+		assertEquals(1, myPatientResourceProvider.getCountUpdate());
 
 		// Read
 		p = (Patient) ourClient.read().resource("Patient").withId(id.withVersion("1")).execute();
@@ -147,6 +212,8 @@ public class HashMapResourceProviderTest {
 		ourRestServer = new MyRestfulServer();
 		String ourBase = "http://localhost:" + ourListenerPort + "/";
 		ourListenerServer = new Server(ourListenerPort);
+
+		ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
 		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -161,6 +228,7 @@ public class HashMapResourceProviderTest {
 	}
 
 	private static class MyRestfulServer extends RestfulServer {
+
 		MyRestfulServer() {
 			super(ourCtx);
 		}
@@ -177,8 +245,10 @@ public class HashMapResourceProviderTest {
 		protected void initialize() throws ServletException {
 			super.initialize();
 
-			registerProvider(new HashMapResourceProvider<>(ourCtx, Patient.class));
-			registerProvider(new HashMapResourceProvider<>(ourCtx, Observation.class));
+			myPatientResourceProvider = new HashMapResourceProvider<>(ourCtx, Patient.class);
+			myObservationResourceProvider = new HashMapResourceProvider<>(ourCtx, Observation.class);
+			registerProvider(myPatientResourceProvider);
+			registerProvider(myObservationResourceProvider);
 		}
 
 

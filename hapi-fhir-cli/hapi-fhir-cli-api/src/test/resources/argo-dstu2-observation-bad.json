@@ -1,0 +1,37 @@
+{
+  "resourceType": "Observation",
+  "id": "head-circumference",
+  "meta": {
+    "profile": [
+      "http://fhir.org/guides/argonaut/StructureDefinition/argo-vitalsigns"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: head-circumference</p><p><b>meta</b>: </p><p><b>status</b>: final</p><p><b>category</b>: Vital Signs <span style=\"background: LightGoldenRodYellow\">(Details : {http://hl7.org/fhir/observation-category code 'vital-signs' = 'Vital Signs', given as 'Vital Signs'})</span></p><p><b>code</b>: head_circumference <span style=\"background: LightGoldenRodYellow\">(Details : {LOINC code '8287-5' = 'Head Occipital-frontal circumference by Tape measure', given as 'head_circumference'})</span></p><p><b>subject</b>: <a href=\"Patient-peter-chalmers.html\">Generated Summary: id: peter-chalmers; Medical Record Number = 1032702; active; Peter James Chalmers (OFFICIAL); ph: (555)555-5555(WORK), person@example.org(WORK); gender: male; birthDate: 19/06/1964</a></p><p><b>encounter</b>: <a href=\"Encounter-691.html\">Generated Summary: id: 691; status: in-progress; class: inpatient</a></p><p><b>effective</b>: 12/08/2010</p><p><b>value</b>: 51.2 cm<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code cm = 'cm')</span></p></div>"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8287-5",
+        "display": "head_circumference"
+      }
+    ],
+    "text": "head_circumference"
+  },
+  "subject": {
+    "reference": "Patient/peter-chalmers"
+  },
+  "encounter": {
+    "reference": "Encounter/691"
+  },
+  "effectiveDateTime": "2010-08-12",
+  "valueQuantity": {
+    "value": 51.2,
+    "unit": "cm",
+    "system": "http://unitsofmeasure.org",
+    "code": "cm"
+  }
+}

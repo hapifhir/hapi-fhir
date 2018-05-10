@@ -1,5 +1,35 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
+import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.BaseAndListParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.binder.CollectionBinder;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -11,9 +41,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,43 +52,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
-import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.param.binder.CollectionBinder;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ReflectionUtil;
-
 public class OperationParameter implements IParameter {
 
+	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IQueryParameterType>[] COMPOSITE_TYPES = new Class[0];
-
-	static final String REQUEST_CONTENTS_USERDATA_KEY = OperationParam.class.getName() + "_PARSED_RESOURCE";
-
-	private boolean myAllowGet;
-
 	private final FhirContext myContext;
+	private final String myName;
+	private final String myOperationName;
+	private boolean myAllowGet;
 	private IOperationParamConverter myConverter;
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
 	private int myMax;
 	private int myMin;
-	private final String myName;
-	private final String myOperationName;
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
@@ -75,7 +82,7 @@ public class OperationParameter implements IParameter {
 		myContext = theCtx;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addValueToList(List<Object> matchingParamValues, Object values) {
 		if (values != null) {
 			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && matchingParamValues.size() > 0) {
@@ -145,10 +152,10 @@ public class OperationParameter implements IParameter {
 		boolean typeIsConcrete = !myParameterType.isInterface() && !Modifier.isAbstract(myParameterType.getModifiers());
 
 		//@formatter:off
-		boolean isSearchParam = 
-			IQueryParameterType.class.isAssignableFrom(myParameterType) || 
-			IQueryParameterOr.class.isAssignableFrom(myParameterType) ||
-			IQueryParameterAnd.class.isAssignableFrom(myParameterType); 
+		boolean isSearchParam =
+			IQueryParameterType.class.isAssignableFrom(myParameterType) ||
+				IQueryParameterOr.class.isAssignableFrom(myParameterType) ||
+				IQueryParameterAnd.class.isAssignableFrom(myParameterType);
 		//@formatter:off
 
 		/*
@@ -250,7 +257,7 @@ public class OperationParameter implements IParameter {
 					Object values = mySearchParameterBinding.parse(myContext, Collections.singletonList(next));
 					addValueToList(matchingParamValues, values);
 				}
-				
+
 			}
 
 		} else {
@@ -274,7 +281,7 @@ public class OperationParameter implements IParameter {
 							matchingParamValues.add(next);
 						}
 					} else if (ValidationModeEnum.class.equals(myParameterType)) {
-						
+
 						if (isNotBlank(paramValues[0])) {
 							ValidationModeEnum validationMode = ValidationModeEnum.forCode(paramValues[0]);
 							if (validationMode != null) {
@@ -283,7 +290,7 @@ public class OperationParameter implements IParameter {
 								throwInvalidMode(paramValues[0]);
 							}
 						}
-						
+
 					} else {
 						for (String nextValue : paramValues) {
 							FhirContext ctx = theRequest.getServer().getFhirContext();
@@ -356,6 +363,13 @@ public class OperationParameter implements IParameter {
 			if (myConverter != null) {
 				nextValue = myConverter.incomingServer(nextValue);
 			}
+			if (myParameterType.equals(String.class)) {
+				if (nextValue instanceof IPrimitiveType<?>) {
+					IPrimitiveType<?> source = (IPrimitiveType<?>) nextValue;
+					theMatchingParamValues.add(source.getValueAsString());
+					continue;
+				}
+			}
 			if (!myParameterType.isAssignableFrom(nextValue.getClass())) {
 				Class<? extends IBaseDatatype> sourceType = (Class<? extends IBaseDatatype>) nextValue.getClass();
 				Class<? extends IBaseDatatype> targetType = (Class<? extends IBaseDatatype>) myParameterType;
@@ -373,7 +387,7 @@ public class OperationParameter implements IParameter {
 				}
 				throwWrongParamType(nextValue);
 			}
-			
+
 			addValueToList(theMatchingParamValues, nextValue);
 		}
 	}

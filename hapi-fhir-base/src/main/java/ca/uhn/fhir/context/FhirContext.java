@@ -658,7 +658,7 @@ public class FhirContext {
 		nameToElementDefinition.putAll(myNameToElementDefinition);
 		for (Entry<String, BaseRuntimeElementDefinition<?>> next : scanner.getNameToElementDefinitions().entrySet()) {
 			if (!nameToElementDefinition.containsKey(next.getKey())) {
-				nameToElementDefinition.put(next.getKey(), next.getValue());
+				nameToElementDefinition.put(next.getKey().toLowerCase(), next.getValue());
 			}
 		}
 

@@ -2597,7 +2597,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(responseString, containsString("No issues detected"));
+			assertThat(responseString, not(containsString("Resource has no id")));
 			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);

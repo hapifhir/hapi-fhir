@@ -45,6 +45,13 @@
 				This work was sponsored by the Regenstrief Institute. Thanks
 				to Regenstrief for their support!
 			</action>
+			<action type="add">
+				The DSTU2 validator has been refactored to use the same codebase
+				as the DSTU3/R4 validator (which were harmonized in HAPI FHIR 3.3.0).
+				This means that we now have a single codebase for all validators, which
+				improves maintainability and brings a number of improvements
+				to the accuracy of DSTU2 resource validation.
+			</action>
 			<action type="fix">
 				When encoding a resource that had contained resources with user-supplied
 				local IDs (e.g. resource.setId("#1")) as well as contained resources
@@ -128,6 +135,15 @@
 				HAPI-FHIR_CLI now includes two new commands: one for importing and populating a
 				<![CDATA[<code>ConceptMap</code>]]> resource from a CSV; and one for exporting a
 				<![CDATA[<code>ConceptMap</code>]]> resource to a CSV.
+			</action>
+			<action type="add">
+				Operation methods on a plain server may now use parameters
+				of type String (i.e. plain Java strings), and any FHIR primitive
+				datatype will be automatically coerced into a String.
+			</action>
+			<action type="add">
+				The HAPI FHIR CLI now supports importing an IGPack file as an import
+				to the validation process.
 			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
