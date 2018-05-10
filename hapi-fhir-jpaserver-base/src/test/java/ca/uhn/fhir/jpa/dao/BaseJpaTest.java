@@ -159,16 +159,15 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
-		PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theFound;
+	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theProvider) {
 
 		List<IIdType> retVal = new ArrayList<>();
-		Integer size = provider.size();
+		Integer size = theProvider.size();
 		StopWatch sw = new StopWatch();
 		while (size == null) {
 			int timeout = 20000;
 			if (sw.getMillis() > timeout) {
-				String message = "Waited over " + timeout + "ms for search " + provider.getUuid();
+				String message = "Waited over " + timeout + "ms for search " + theProvider.getUuid();
 				ourLog.info(message);
 				fail(message);
 			}
@@ -177,12 +176,16 @@ public abstract class BaseJpaTest {
 			} catch (InterruptedException theE) {
 				//ignore
 			}
-			provider.clearCachedDataForUnitTest();
-			size = provider.size();
+
+			if (theProvider instanceof PersistedJpaBundleProvider) {
+				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theFound;
+				provider.clearCachedDataForUnitTest();
+			}
+			size = theProvider.size();
 		}
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = provider.getResources(0, size);
+		List<IBaseResource> resources = theProvider.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
