@@ -132,6 +132,10 @@
 				of type String (i.e. plain Java strings), and any FHIR primitive
 				datatype will be automatically coerced into a String.
 			</action>
+			<action type="add">
+				The HAPI FHIR CLI now supports importing an IGPack file as an import
+				to the validation process.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
