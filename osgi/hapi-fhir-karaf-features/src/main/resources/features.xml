@@ -106,18 +106,22 @@
 	<feature name='hapi-fhir-validation-dstu2' version='${project.version}' start-level='50'>
 		<feature version='${project.version}'>hapi-fhir-validation</feature>
 		<feature version='${project.version}'>hapi-fhir-dstu2</feature>
+		<feature version='${project.version}'>hapi-fhir-r4</feature>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-validation-resources-dstu2/${project.version}</bundle>
 	</feature>
 
 	<feature name='hapi-fhir-validation-hl7org-dstu2' version='${project.version}' start-level='50'>
 		<feature version='${project.version}'>hapi-fhir-validation</feature>
+		<feature version='${project.version}'>hapi-fhir-dstu2</feature>
 		<feature version='${project.version}'>hapi-fhir-hl7org-dstu2</feature>
+		<feature version='${project.version}'>hapi-fhir-r4</feature>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-validation-resources-dstu2/${project.version}</bundle>
 	</feature>
 
 	<feature name='hapi-fhir-validation-dstu2.1' version='${project.version}' start-level='50'>
 		<feature version='${project.version}'>hapi-fhir-validation</feature>
 		<feature version='${project.version}'>hapi-fhir-dstu2.1</feature>
+		<feature version='${project.version}'>hapi-fhir-r4</feature>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-validation-resources-dstu2.1/${project.version}</bundle>
 	</feature>
 
