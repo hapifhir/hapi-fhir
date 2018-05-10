@@ -35,6 +35,7 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 
 	private FhirContext myCtx = FhirContext.forDstu2Hl7Org();
 
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu2.class);
 
 	@Override

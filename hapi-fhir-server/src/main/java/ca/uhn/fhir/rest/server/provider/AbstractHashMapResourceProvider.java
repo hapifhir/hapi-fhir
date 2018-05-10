@@ -36,6 +36,11 @@ import java.util.*;
 /**
  * This class is a simple implementation of the resource provider
  * interface that uses a HashMap to store all resources in memory.
+ * It is essentially a copy of {@link ca.uhn.fhir.rest.server.provider.HashMapResourceProvider}
+ * with the {@link Update} and {@link ResourceParam} annotations removed from method
+ * {@link ca.uhn.fhir.rest.server.provider.HashMapResourceProvider#update(IBaseResource)}.
+ * Non-generic subclasses of this abstract class may implement their own annotated methods (e.g. a conditional
+ * update method specifically for ConceptMap resources).
  * <p>
  * This class currently supports the following FHIR operations:
  * </p>
@@ -49,8 +54,8 @@ import java.util.*;
  *
  * @param <T> The resource type to support
  */
-public class HashMapResourceProvider<T extends IBaseResource> implements IResourceProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProvider.class);
+public class AbstractHashMapResourceProvider<T extends IBaseResource> implements IResourceProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractHashMapResourceProvider.class);
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
@@ -64,7 +69,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * @param theResourceType The resource type to support
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public HashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType) {
+	public AbstractHashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType) {
 		myFhirContext = theFhirContext;
 		myResourceType = theResourceType;
 		myResourceName = myFhirContext.getResourceDefinition(theResourceType).getName();
@@ -170,14 +175,12 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return id;
 	}
 
-	@Update
-	public MethodOutcome update(@ResourceParam T theResource) {
-
+	public MethodOutcome update(T theResource) {
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);
 
 		Long versionIdPart;
-		boolean created;
+		Boolean created;
 		if (versionToResource.isEmpty()) {
 			versionIdPart = 1L;
 			created = true;
@@ -192,5 +195,4 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			.setCreated(created)
 			.setId(id);
 	}
-
 }

@@ -57,21 +57,42 @@ import java.util.zip.GZIPInputStream;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
-	public static final String BASE_URL_PARAM = "t";
-	public static final String BASIC_AUTH_OPTION = "b";
-	public static final String BASIC_AUTH_LONGOPT = "basic-auth";
-	public static final String BEARER_TOKEN_LONGOPT = "bearer-token";
-	public static final String FHIR_VERSION_OPTION = "v";
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
-	private FhirContext myFhirCtx;
+
+	protected static final String BASE_URL_PARAM = "t";
+	protected static final String BASE_URL_PARAM_LONGOPT = "target";
+	protected static final String BASE_URL_PARAM_NAME = "target";
+	protected static final String BASE_URL_PARAM_DESC = "Base URL for the target server (e.g. \"http://example.com/fhir\").";
+	protected static final String BASIC_AUTH_PARAM = "b";
+	protected static final String BASIC_AUTH_PARAM_LONGOPT = "basic-auth";
+	protected static final String BASIC_AUTH_PARAM_NAME = "basic-auth";
+	protected static final String BASIC_AUTH_PARAM_DESC = "If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header.";
+	protected static final String BEARER_TOKEN_PARAM_LONGOPT = "bearer-token";
+	protected static final String BEARER_TOKEN_PARAM_NAME = "bearer-token";
+	protected static final String BEARER_TOKEN_PARAM_DESC = "If specified, this parameter supplies a Bearer Token to supply with the request.";
+	protected static final String FHIR_VERSION_PARAM = "v";
+	protected static final String FHIR_VERSION_PARAM_LONGOPT = "fhir-version";
+	protected static final String FHIR_VERSION_PARAM_NAME = "version";
+	protected static final String FHIR_VERSION_PARAM_DESC = "The FHIR version being used. Valid values: ";
+	protected static final String VERBOSE_LOGGING_PARAM = "l";
+	protected static final String VERBOSE_LOGGING_PARAM_LONGOPT = "logging";
+	protected static final String VERBOSE_LOGGING_PARAM_DESC = "If specified, verbose logging will be used.";
+
+
+	protected FhirContext myFhirCtx;
 
 	public BaseCommand() {
 		super();
 	}
 
+	protected void addBaseUrlOption(Options theOptions) {
+		addRequiredOption(theOptions, BASE_URL_PARAM, BASE_URL_PARAM_LONGOPT, BASE_URL_PARAM_NAME, BASE_URL_PARAM_DESC);
+	}
+
 	protected void addBasicAuthOption(Options theOptions) {
-		addOptionalOption(theOptions, BASIC_AUTH_OPTION, BASIC_AUTH_LONGOPT, true, "If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header");
-		addOptionalOption(theOptions, null, BEARER_TOKEN_LONGOPT, true, "If specified, this parameter supplies a Bearer Token to supply with the request");
+		addOptionalOption(theOptions, BASIC_AUTH_PARAM, BASIC_AUTH_PARAM_LONGOPT, BASIC_AUTH_PARAM_NAME, BASIC_AUTH_PARAM_DESC);
+		addOptionalOption(theOptions, null, BEARER_TOKEN_PARAM_LONGOPT, BEARER_TOKEN_PARAM_NAME, BEARER_TOKEN_PARAM_DESC);
 	}
 
 	protected void addFhirVersionOption(Options theOptions) {
@@ -80,7 +101,11 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			.map(t -> t.name().toLowerCase())
 			.sorted()
 			.collect(Collectors.joining(", "));
-		addRequiredOption(theOptions, FHIR_VERSION_OPTION, "fhir-version", "version", "The FHIR version being used. Valid values: " + versions);
+		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
+	}
+
+	protected void addVerboseLoggingOption(Options theOptions) {
+		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
 	}
 
 	private void addOption(Options theOptions, boolean theRequired, String theOpt, String theLong, boolean theHasArgument, String theArgumentName, String theDescription) {
@@ -117,9 +142,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected void addRequiredOption(Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
-		boolean hasArgument = isNotBlank(theArgumentName);
-		boolean required = true;
-		addOption(theOptions, required, theOpt, theLong, hasArgument, theArgumentName, theDescription);
+		addOption(theOptions, true, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
 	}
 
 	@Override
@@ -182,7 +205,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	 * @return Returns the complete authorization header value using the "-b" option
 	 */
 	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine) {
-		return getAndParseOptionBasicAuthHeader(theCommandLine, BASIC_AUTH_OPTION);
+		return getAndParseOptionBasicAuthHeader(theCommandLine, BASIC_AUTH_PARAM);
 	}
 
 	/**
@@ -307,12 +330,17 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return inputFiles;
 	}
 
-	protected IGenericClient newClient(CommandLine theCommandLine) {
-		return newClient(theCommandLine, BASE_URL_PARAM, BASIC_AUTH_OPTION, BEARER_TOKEN_LONGOPT);
+	protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
+		return newClient(theCommandLine, BASE_URL_PARAM, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT);
 	}
 
-	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName, String theBearerTokenOptionName) {
+	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
 		String baseUrl = theCommandLine.getOptionValue(theBaseUrlParamName);
+		if (isBlank(baseUrl)) {
+			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified.");
+		} else if (!baseUrl.startsWith("http") && !baseUrl.startsWith("file")) {
+			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'.");
+		}
 
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(10 * 60 * 1000);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(baseUrl);
@@ -333,9 +361,9 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
-		String version = theCommandLine.getOptionValue(FHIR_VERSION_OPTION);
+		String version = theCommandLine.getOptionValue(FHIR_VERSION_PARAM);
 		if (isBlank(version)) {
-			throw new ParseException("Missing required option: -" + FHIR_VERSION_OPTION);
+			throw new ParseException("Missing required option: -" + FHIR_VERSION_PARAM);
 		}
 
 		try {
@@ -348,5 +376,4 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 
 	public abstract void run(CommandLine theCommandLine) throws ParseException, ExecutionException;
-
 }
