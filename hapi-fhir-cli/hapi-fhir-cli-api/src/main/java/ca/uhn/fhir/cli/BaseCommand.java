@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,10 +26,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import com.google.common.base.Charsets;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -57,9 +54,6 @@ import java.util.zip.GZIPInputStream;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
-	// TODO: Don't use qualified names for loggers in HAPI CLI.
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
-
 	protected static final String BASE_URL_PARAM = "t";
 	protected static final String BASE_URL_PARAM_LONGOPT = "target";
 	protected static final String BASE_URL_PARAM_NAME = "target";
@@ -78,8 +72,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String VERBOSE_LOGGING_PARAM = "l";
 	protected static final String VERBOSE_LOGGING_PARAM_LONGOPT = "logging";
 	protected static final String VERBOSE_LOGGING_PARAM_DESC = "If specified, verbose logging will be used.";
-
-
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
 	protected FhirContext myFhirCtx;
 
 	public BaseCommand() {
@@ -104,13 +98,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
 	}
 
-	protected void addVerboseLoggingOption(Options theOptions) {
-		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
-	}
-
-	private void addOption(Options theOptions, boolean theRequired, String theOpt, String theLong, boolean theHasArgument, String theArgumentName, String theDescription) {
-		Option option = new Option(theOpt, theLong, theHasArgument, theDescription);
-		option.setRequired(theRequired);
+	private void addOption(Options theOptions, OptionGroup theOptionGroup, boolean theRequired, String theOpt, String theLongOpt, boolean theHasArgument, String theArgumentName, String theDescription) {
+		Option option = createOption(theRequired, theOpt, theLongOpt, theHasArgument, theDescription);
 		if (theHasArgument && isNotBlank(theArgumentName)) {
 			option.setArgName(theArgumentName);
 		}
@@ -119,35 +108,59 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			if (theOptions.getOption(theOpt) != null) {
 				throw new IllegalStateException("Duplicate option: " + theOpt);
 			}
+			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t-> theOpt.equals(t.getOpt()))) {
+				throw new IllegalStateException("Duplicate option: " + theOpt);
+			}
 		}
-		if (isNotBlank(theLong)) {
-			if (theOptions.getOption(theLong) != null) {
-				throw new IllegalStateException("Duplicate option: " + theLong);
+		if (isNotBlank(theLongOpt)) {
+			if (theOptions.getOption(theLongOpt) != null) {
+				throw new IllegalStateException("Duplicate option: " + theLongOpt);
+			}
+			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t-> theLongOpt.equals(t.getLongOpt()))) {
+				throw new IllegalStateException("Duplicate option: " + theOpt);
 			}
 		}
 
-		theOptions.addOption(option);
+		if (theOptionGroup != null) {
+			theOptionGroup.addOption(option);
+		} else {
+			theOptions.addOption(option);
+		}
 	}
 
 	protected void addOptionalOption(Options theOptions, String theOpt, String theLong, boolean theTakesArgument, String theDescription) {
-		addOption(theOptions, false, theOpt, theLong, theTakesArgument, null, theDescription);
+		addOption(theOptions, null, false, theOpt, theLong, theTakesArgument, null, theDescription);
 	}
 
 	protected void addOptionalOption(Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
-		addOption(theOptions, false, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
+		addOption(theOptions, null, false, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
+	}
+
+	protected void addOptionalOption(Options theOptions, OptionGroup theOptionGroup, String theOpt, String theLong, String theArgumentName, String theDescription) {
+		addOption(theOptions, theOptionGroup, false, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
 	}
 
 	protected void addRequiredOption(Options theOptions, String theOpt, String theLong, boolean theTakesArgument, String theDescription) {
-		addOption(theOptions, true, theOpt, theLong, theTakesArgument, null, theDescription);
+		addOption(theOptions, null, true, theOpt, theLong, theTakesArgument, null, theDescription);
 	}
 
 	protected void addRequiredOption(Options theOptions, String theOpt, String theLong, String theArgumentName, String theDescription) {
-		addOption(theOptions, true, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
+		addOption(theOptions, null, true, theOpt, theLong, isNotBlank(theArgumentName), theArgumentName, theDescription);
+	}
+
+	protected void addVerboseLoggingOption(Options theOptions) {
+		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
 	}
 
 	@Override
 	public int compareTo(BaseCommand theO) {
 		return getCommandName().compareTo(theO.getCommandName());
+	}
+
+	private Option createOption(boolean theRequired, String theOpt, String theLong, boolean theHasArgument, String theDescription) {
+		Option option = new Option(theOpt, theLong, theHasArgument, theDescription);
+		option.setRequired(theRequired);
+		return option;
 	}
 
 	protected Reader createReader(File theInputFile) throws IOException {

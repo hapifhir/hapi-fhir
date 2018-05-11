@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.cds.example;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -59,18 +60,16 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
+		LocalContainerEntityManagerFactoryBean retVal = entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
 		retVal.setDataSource(dataSource());
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
+		extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

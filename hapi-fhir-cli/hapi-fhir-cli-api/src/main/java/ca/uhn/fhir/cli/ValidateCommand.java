@@ -68,18 +68,18 @@ public class ValidateCommand extends BaseCommand {
 		addFhirVersionOption(retVal);
 
 		OptionGroup source = new OptionGroup();
-		addOptionalOption(source, "n", "file", true, "filename", "The name of the file to validate");
-		addOptionalOption(source, "d", "data", true, "text", "The text to validate");
+		addOptionalOption(retVal, source, "n", "file", "filename", "The name of the file to validate");
+		addOptionalOption(retVal, source, "d", "data", "text", "The text to validate");
 		retVal.addOptionGroup(source);
 
 		retVal.addOption("p", "profile", false, "Validate using Profiles (StructureDefinition / ValueSet)");
 		retVal.addOption("r", "fetch-remote", false,
 			"Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
-		addOptionalOption(retVal, "l", "fetch-local", true, "filename", "Fetch a profile locally and use it if referenced"));
+		addOptionalOption(retVal, "l", "fetch-local", "filename", "Fetch a profile locally and use it if referenced");
 		addOptionalOption(retVal, null, "igpack", true, "If specified, provides the filename of an IGPack file to include in validation");
 		addOptionalOption(retVal, "x", "xsd", false, "Validate using Schemas");
 		addOptionalOption(retVal, "s", "sch", false, "Validate using Schematrons");
-		addOptionalOption(retVal, "e", "encoding", true, "encoding", "File encoding (default is UTF-8)");
+		addOptionalOption(retVal, "e", "encoding","encoding", "File encoding (default is UTF-8)");
 		return retVal;
 	}
 

@@ -53,6 +53,11 @@ public class BaseDstu2Config extends BaseConfig {
 		return fhirContextDstu2();
 	}
 
+	@Override
+	public FhirContext fhirContext() {
+		return fhirContextDstu2();
+	}
+
 	@Bean(name = "myFhirContextDstu2")
 	@Lazy
 	public FhirContext fhirContextDstu2() {
