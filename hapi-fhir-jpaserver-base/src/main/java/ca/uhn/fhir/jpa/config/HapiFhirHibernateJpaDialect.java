@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hibernate.HibernateException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
@@ -23,7 +24,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	protected DataAccessException convertHibernateAccessException(HibernateException theException) {
 		if (theException instanceof ConstraintViolationException) {
 			if (ResourceHistoryTable.IDX_RESVER_ID_VER.equals(((ConstraintViolationException) theException).getConstraintName())) {
-				throw new PreconditionFailedException(myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
+				throw new ResourceVersionConflictException(myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
 			}
 		}
 

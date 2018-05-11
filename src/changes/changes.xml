@@ -147,8 +147,8 @@
 			</action>
 			<action type="add">
 				When two threads attempt to update the same resource at the same time, previously
-				an unspecified error was thrown by the JPA server. An HTTP 412
-				(Precondition Failed) with an informative error message is now thrown.
+				an unspecified error was thrown by the JPA server. An HTTP 409
+				(Conflict) with an informative error message is now thrown.
 			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">

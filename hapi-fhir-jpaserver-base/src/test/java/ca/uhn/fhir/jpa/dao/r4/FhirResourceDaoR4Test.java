@@ -444,7 +444,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 					try {
 						try {
 							myPatientDao.update(updatePatient);
-						} catch (PreconditionFailedException e) {
+						} catch (ResourceVersionConflictException e) {
 							assertEquals("The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.", e.getMessage());
 						}
 					} catch (Exception e) {
