@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A summary of information based on the results of executing a TestScript.
  */
@@ -726,11 +727,22 @@ public class TestReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "The type of participant.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("uri", "uri", "The uri of the participant. An absolute URL is preferred.", 0, java.lang.Integer.MAX_VALUE, uri));
-          childrenList.add(new Property("display", "string", "The display name of the participant.", 0, java.lang.Integer.MAX_VALUE, display));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "The type of participant.", 0, 1, type));
+          children.add(new Property("uri", "uri", "The uri of the participant. An absolute URL is preferred.", 0, 1, uri));
+          children.add(new Property("display", "string", "The display name of the participant.", 0, 1, display));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "The type of participant.", 0, 1, type);
+          case 116076: /*uri*/  return new Property("uri", "uri", "The uri of the participant. An absolute URL is preferred.", 0, 1, uri);
+          case 1671764162: /*display*/  return new Property("display", "string", "The display name of the participant.", 0, 1, display);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -823,23 +835,23 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestReportParticipantComponent))
+        if (!(other_ instanceof TestReportParticipantComponent))
           return false;
-        TestReportParticipantComponent o = (TestReportParticipantComponent) other;
+        TestReportParticipantComponent o = (TestReportParticipantComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(uri, o.uri, true) && compareDeep(display, o.display, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestReportParticipantComponent))
+        if (!(other_ instanceof TestReportParticipantComponent))
           return false;
-        TestReportParticipantComponent o = (TestReportParticipantComponent) other;
+        TestReportParticipantComponent o = (TestReportParticipantComponent) other_;
         return compareValues(type, o.type, true) && compareValues(uri, o.uri, true) && compareValues(display, o.display, true)
           ;
       }
@@ -926,9 +938,18 @@ public class TestReport extends DomainResource {
           return getAction().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422950858: /*action*/  return new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -999,22 +1020,22 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestReportSetupComponent))
+        if (!(other_ instanceof TestReportSetupComponent))
           return false;
-        TestReportSetupComponent o = (TestReportSetupComponent) other;
+        TestReportSetupComponent o = (TestReportSetupComponent) other_;
         return compareDeep(action, o.action, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestReportSetupComponent))
+        if (!(other_ instanceof TestReportSetupComponent))
           return false;
-        TestReportSetupComponent o = (TestReportSetupComponent) other;
+        TestReportSetupComponent o = (TestReportSetupComponent) other_;
         return true;
       }
 
@@ -1073,7 +1094,7 @@ public class TestReport extends DomainResource {
         /**
          * @param value {@link #operation} (The operation performed.)
          */
-        public SetupActionComponent setOperation(SetupActionOperationComponent value) { 
+        public SetupActionComponent setOperation(SetupActionOperationComponent value)  { 
           this.operation = value;
           return this;
         }
@@ -1097,15 +1118,25 @@ public class TestReport extends DomainResource {
         /**
          * @param value {@link #assert_} (The results of the assertion performed on the previous operations.)
          */
-        public SetupActionComponent setAssert(SetupActionAssertComponent value) { 
+        public SetupActionComponent setAssert(SetupActionAssertComponent value)  { 
           this.assert_ = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "", "The operation performed.", 0, java.lang.Integer.MAX_VALUE, operation));
-          childrenList.add(new Property("assert", "", "The results of the assertion performed on the previous operations.", 0, java.lang.Integer.MAX_VALUE, assert_));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("operation", "", "The operation performed.", 0, 1, operation));
+          children.add(new Property("assert", "", "The results of the assertion performed on the previous operations.", 0, 1, assert_));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1662702951: /*operation*/  return new Property("operation", "", "The operation performed.", 0, 1, operation);
+          case -1408208058: /*assert*/  return new Property("assert", "", "The results of the assertion performed on the previous operations.", 0, 1, assert_);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1186,22 +1217,22 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionComponent))
+        if (!(other_ instanceof SetupActionComponent))
           return false;
-        SetupActionComponent o = (SetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other_;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionComponent))
+        if (!(other_ instanceof SetupActionComponent))
           return false;
-        SetupActionComponent o = (SetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other_;
         return true;
       }
 
@@ -1400,11 +1431,22 @@ public class TestReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("result", "code", "The result of this operation.", 0, java.lang.Integer.MAX_VALUE, result));
-          childrenList.add(new Property("message", "markdown", "An explanatory message associated with the result.", 0, java.lang.Integer.MAX_VALUE, message));
-          childrenList.add(new Property("detail", "uri", "A link to further details on the result.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("result", "code", "The result of this operation.", 0, 1, result));
+          children.add(new Property("message", "markdown", "An explanatory message associated with the result.", 0, 1, message));
+          children.add(new Property("detail", "uri", "A link to further details on the result.", 0, 1, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -934426595: /*result*/  return new Property("result", "code", "The result of this operation.", 0, 1, result);
+          case 954925063: /*message*/  return new Property("message", "markdown", "An explanatory message associated with the result.", 0, 1, message);
+          case -1335224239: /*detail*/  return new Property("detail", "uri", "A link to further details on the result.", 0, 1, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1497,23 +1539,23 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionOperationComponent))
+        if (!(other_ instanceof SetupActionOperationComponent))
           return false;
-        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareDeep(result, o.result, true) && compareDeep(message, o.message, true) && compareDeep(detail, o.detail, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionOperationComponent))
+        if (!(other_ instanceof SetupActionOperationComponent))
           return false;
-        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareValues(result, o.result, true) && compareValues(message, o.message, true) && compareValues(detail, o.detail, true)
           ;
       }
@@ -1714,11 +1756,22 @@ public class TestReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("result", "code", "The result of this assertion.", 0, java.lang.Integer.MAX_VALUE, result));
-          childrenList.add(new Property("message", "markdown", "An explanatory message associated with the result.", 0, java.lang.Integer.MAX_VALUE, message));
-          childrenList.add(new Property("detail", "string", "A link to further details on the result.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("result", "code", "The result of this assertion.", 0, 1, result));
+          children.add(new Property("message", "markdown", "An explanatory message associated with the result.", 0, 1, message));
+          children.add(new Property("detail", "string", "A link to further details on the result.", 0, 1, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -934426595: /*result*/  return new Property("result", "code", "The result of this assertion.", 0, 1, result);
+          case 954925063: /*message*/  return new Property("message", "markdown", "An explanatory message associated with the result.", 0, 1, message);
+          case -1335224239: /*detail*/  return new Property("detail", "string", "A link to further details on the result.", 0, 1, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1811,23 +1864,23 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionAssertComponent))
+        if (!(other_ instanceof SetupActionAssertComponent))
           return false;
-        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other_;
         return compareDeep(result, o.result, true) && compareDeep(message, o.message, true) && compareDeep(detail, o.detail, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionAssertComponent))
+        if (!(other_ instanceof SetupActionAssertComponent))
           return false;
-        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other_;
         return compareValues(result, o.result, true) && compareValues(message, o.message, true) && compareValues(detail, o.detail, true)
           ;
       }
@@ -2027,11 +2080,22 @@ public class TestReport extends DomainResource {
           return getAction().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, 1, name));
+          children.add(new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, 1, description));
+          children.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, 1, name);
+          case -1724546052: /*description*/  return new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, 1, description);
+          case -1422950858: /*action*/  return new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2126,23 +2190,23 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestReportTestComponent))
+        if (!(other_ instanceof TestReportTestComponent))
           return false;
-        TestReportTestComponent o = (TestReportTestComponent) other;
+        TestReportTestComponent o = (TestReportTestComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(description, o.description, true) && compareDeep(action, o.action, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestReportTestComponent))
+        if (!(other_ instanceof TestReportTestComponent))
           return false;
-        TestReportTestComponent o = (TestReportTestComponent) other;
+        TestReportTestComponent o = (TestReportTestComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
@@ -2202,7 +2266,7 @@ public class TestReport extends DomainResource {
         /**
          * @param value {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TestActionComponent setOperation(SetupActionOperationComponent value) { 
+        public TestActionComponent setOperation(SetupActionOperationComponent value)  { 
           this.operation = value;
           return this;
         }
@@ -2226,15 +2290,25 @@ public class TestReport extends DomainResource {
         /**
          * @param value {@link #assert_} (The results of the assertion performed on the previous operations.)
          */
-        public TestActionComponent setAssert(SetupActionAssertComponent value) { 
+        public TestActionComponent setAssert(SetupActionAssertComponent value)  { 
           this.assert_ = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "@TestReport.setup.action.operation", "An operation would involve a REST request to a server.", 0, java.lang.Integer.MAX_VALUE, operation));
-          childrenList.add(new Property("assert", "@TestReport.setup.action.assert", "The results of the assertion performed on the previous operations.", 0, java.lang.Integer.MAX_VALUE, assert_));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("operation", "@TestReport.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation));
+          children.add(new Property("assert", "@TestReport.setup.action.assert", "The results of the assertion performed on the previous operations.", 0, 1, assert_));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1662702951: /*operation*/  return new Property("operation", "@TestReport.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation);
+          case -1408208058: /*assert*/  return new Property("assert", "@TestReport.setup.action.assert", "The results of the assertion performed on the previous operations.", 0, 1, assert_);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2315,22 +2389,22 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestActionComponent))
+        if (!(other_ instanceof TestActionComponent))
           return false;
-        TestActionComponent o = (TestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other_;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestActionComponent))
+        if (!(other_ instanceof TestActionComponent))
           return false;
-        TestActionComponent o = (TestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other_;
         return true;
       }
 
@@ -2416,9 +2490,18 @@ public class TestReport extends DomainResource {
           return getAction().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422950858: /*action*/  return new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2489,22 +2572,22 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestReportTeardownComponent))
+        if (!(other_ instanceof TestReportTeardownComponent))
           return false;
-        TestReportTeardownComponent o = (TestReportTeardownComponent) other;
+        TestReportTeardownComponent o = (TestReportTeardownComponent) other_;
         return compareDeep(action, o.action, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestReportTeardownComponent))
+        if (!(other_ instanceof TestReportTeardownComponent))
           return false;
-        TestReportTeardownComponent o = (TestReportTeardownComponent) other;
+        TestReportTeardownComponent o = (TestReportTeardownComponent) other_;
         return true;
       }
 
@@ -2564,14 +2647,23 @@ public class TestReport extends DomainResource {
         /**
          * @param value {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TeardownActionComponent setOperation(SetupActionOperationComponent value) { 
+        public TeardownActionComponent setOperation(SetupActionOperationComponent value)  { 
           this.operation = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "@TestReport.setup.action.operation", "An operation would involve a REST request to a server.", 0, java.lang.Integer.MAX_VALUE, operation));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("operation", "@TestReport.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1662702951: /*operation*/  return new Property("operation", "@TestReport.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2639,22 +2731,22 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TeardownActionComponent))
+        if (!(other_ instanceof TeardownActionComponent))
           return false;
-        TeardownActionComponent o = (TeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other_;
         return compareDeep(operation, o.operation, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TeardownActionComponent))
+        if (!(other_ instanceof TeardownActionComponent))
           return false;
-        TeardownActionComponent o = (TeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other_;
         return true;
       }
 
@@ -2798,7 +2890,7 @@ public class TestReport extends DomainResource {
     /**
      * @param value {@link #identifier} (Identifier for the TestScript assigned for external purposes outside the context of FHIR.)
      */
-    public TestReport setIdentifier(Identifier value) { 
+    public TestReport setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -2916,7 +3008,7 @@ public class TestReport extends DomainResource {
     /**
      * @param value {@link #testScript} (Ideally this is an absolute URL that is used to identify the version-specific TestScript that was executed, matching the `TestScript.url`.)
      */
-    public TestReport setTestScript(Reference value) { 
+    public TestReport setTestScript(Reference value)  { 
       this.testScript = value;
       return this;
     }
@@ -3223,7 +3315,7 @@ public class TestReport extends DomainResource {
     /**
      * @param value {@link #setup} (The results of the series of required setup operations before the tests were executed.)
      */
-    public TestReport setSetup(TestReportSetupComponent value) { 
+    public TestReport setSetup(TestReportSetupComponent value)  { 
       this.setup = value;
       return this;
     }
@@ -3300,25 +3392,45 @@ public class TestReport extends DomainResource {
     /**
      * @param value {@link #teardown} (The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).)
      */
-    public TestReport setTeardown(TestReportTeardownComponent value) { 
+    public TestReport setTeardown(TestReportTeardownComponent value)  { 
       this.teardown = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier for the TestScript assigned for external purposes outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("name", "string", "A free text natural language name identifying the executed TestScript.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "The current state of this test report.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("testScript", "Reference(TestScript)", "Ideally this is an absolute URL that is used to identify the version-specific TestScript that was executed, matching the `TestScript.url`.", 0, java.lang.Integer.MAX_VALUE, testScript));
-        childrenList.add(new Property("result", "code", "The overall result from the execution of the TestScript.", 0, java.lang.Integer.MAX_VALUE, result));
-        childrenList.add(new Property("score", "decimal", "The final score (percentage of tests passed) resulting from the execution of the TestScript.", 0, java.lang.Integer.MAX_VALUE, score));
-        childrenList.add(new Property("tester", "string", "Name of the tester producing this report (Organization or individual).", 0, java.lang.Integer.MAX_VALUE, tester));
-        childrenList.add(new Property("issued", "dateTime", "When the TestScript was executed and this TestReport was generated.", 0, java.lang.Integer.MAX_VALUE, issued));
-        childrenList.add(new Property("participant", "", "A participant in the test execution, either the execution engine, a client, or a server.", 0, java.lang.Integer.MAX_VALUE, participant));
-        childrenList.add(new Property("setup", "", "The results of the series of required setup operations before the tests were executed.", 0, java.lang.Integer.MAX_VALUE, setup));
-        childrenList.add(new Property("test", "", "A test executed from the test script.", 0, java.lang.Integer.MAX_VALUE, test));
-        childrenList.add(new Property("teardown", "", "The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).", 0, java.lang.Integer.MAX_VALUE, teardown));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier for the TestScript assigned for external purposes outside the context of FHIR.", 0, 1, identifier));
+        children.add(new Property("name", "string", "A free text natural language name identifying the executed TestScript.", 0, 1, name));
+        children.add(new Property("status", "code", "The current state of this test report.", 0, 1, status));
+        children.add(new Property("testScript", "Reference(TestScript)", "Ideally this is an absolute URL that is used to identify the version-specific TestScript that was executed, matching the `TestScript.url`.", 0, 1, testScript));
+        children.add(new Property("result", "code", "The overall result from the execution of the TestScript.", 0, 1, result));
+        children.add(new Property("score", "decimal", "The final score (percentage of tests passed) resulting from the execution of the TestScript.", 0, 1, score));
+        children.add(new Property("tester", "string", "Name of the tester producing this report (Organization or individual).", 0, 1, tester));
+        children.add(new Property("issued", "dateTime", "When the TestScript was executed and this TestReport was generated.", 0, 1, issued));
+        children.add(new Property("participant", "", "A participant in the test execution, either the execution engine, a client, or a server.", 0, java.lang.Integer.MAX_VALUE, participant));
+        children.add(new Property("setup", "", "The results of the series of required setup operations before the tests were executed.", 0, 1, setup));
+        children.add(new Property("test", "", "A test executed from the test script.", 0, java.lang.Integer.MAX_VALUE, test));
+        children.add(new Property("teardown", "", "The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).", 0, 1, teardown));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for the TestScript assigned for external purposes outside the context of FHIR.", 0, 1, identifier);
+        case 3373707: /*name*/  return new Property("name", "string", "A free text natural language name identifying the executed TestScript.", 0, 1, name);
+        case -892481550: /*status*/  return new Property("status", "code", "The current state of this test report.", 0, 1, status);
+        case 1712049149: /*testScript*/  return new Property("testScript", "Reference(TestScript)", "Ideally this is an absolute URL that is used to identify the version-specific TestScript that was executed, matching the `TestScript.url`.", 0, 1, testScript);
+        case -934426595: /*result*/  return new Property("result", "code", "The overall result from the execution of the TestScript.", 0, 1, result);
+        case 109264530: /*score*/  return new Property("score", "decimal", "The final score (percentage of tests passed) resulting from the execution of the TestScript.", 0, 1, score);
+        case -877169473: /*tester*/  return new Property("tester", "string", "Name of the tester producing this report (Organization or individual).", 0, 1, tester);
+        case -1179159893: /*issued*/  return new Property("issued", "dateTime", "When the TestScript was executed and this TestReport was generated.", 0, 1, issued);
+        case 767422259: /*participant*/  return new Property("participant", "", "A participant in the test execution, either the execution engine, a client, or a server.", 0, java.lang.Integer.MAX_VALUE, participant);
+        case 109329021: /*setup*/  return new Property("setup", "", "The results of the series of required setup operations before the tests were executed.", 0, 1, setup);
+        case 3556498: /*test*/  return new Property("test", "", "A test executed from the test script.", 0, java.lang.Integer.MAX_VALUE, test);
+        case -1663474172: /*teardown*/  return new Property("teardown", "", "The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).", 0, 1, teardown);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3542,12 +3654,12 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestReport))
+        if (!(other_ instanceof TestReport))
           return false;
-        TestReport o = (TestReport) other;
+        TestReport o = (TestReport) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(status, o.status, true)
            && compareDeep(testScript, o.testScript, true) && compareDeep(result, o.result, true) && compareDeep(score, o.score, true)
            && compareDeep(tester, o.tester, true) && compareDeep(issued, o.issued, true) && compareDeep(participant, o.participant, true)
@@ -3556,12 +3668,12 @@ public class TestReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestReport))
+        if (!(other_ instanceof TestReport))
           return false;
-        TestReport o = (TestReport) other;
+        TestReport o = (TestReport) other_;
         return compareValues(name, o.name, true) && compareValues(status, o.status, true) && compareValues(result, o.result, true)
            && compareValues(score, o.score, true) && compareValues(tester, o.tester, true) && compareValues(issued, o.issued, true)
           ;

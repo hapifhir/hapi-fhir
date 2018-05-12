@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -50,11 +50,11 @@ public class QuestionnaireResponse extends DomainResource {
 
     public enum QuestionnaireResponseStatus {
         /**
-         * This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.
+         * This QuestionnaireResponse has been partially filled out with answers but changes or additions are still expected to be made to it.
          */
         INPROGRESS, 
         /**
-         * This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.
+         * This QuestionnaireResponse has been filled out with answers and the current content is regarded as definitive.
          */
         COMPLETED, 
         /**
@@ -66,7 +66,7 @@ public class QuestionnaireResponse extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.
+         * This QuestionnaireResponse has been partially filled out with answers but has been abandoned. It is unknown whether changes or additions are expected to be made to it.
          */
         STOPPED, 
         /**
@@ -113,11 +113,11 @@ public class QuestionnaireResponse extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.";
-            case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
+            case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers but changes or additions are still expected to be made to it.";
+            case COMPLETED: return "This QuestionnaireResponse has been filled out with answers and the current content is regarded as definitive.";
             case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
             case ENTEREDINERROR: return "This QuestionnaireResponse was entered in error and voided.";
-            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.";
+            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers but has been abandoned. It is unknown whether changes or additions are expected to be made to it.";
             default: return "?";
           }
         }
@@ -770,156 +770,180 @@ public class QuestionnaireResponse extends DomainResource {
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
         public boolean hasValueBooleanType() { 
-          return this.value instanceof BooleanType;
+          return this != null && this.value instanceof BooleanType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DecimalType getValueDecimalType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
         }
 
         public boolean hasValueDecimalType() { 
-          return this.value instanceof DecimalType;
+          return this != null && this.value instanceof DecimalType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
         }
 
         public boolean hasValueIntegerType() { 
-          return this.value instanceof IntegerType;
+          return this != null && this.value instanceof IntegerType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DateType getValueDateType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
         }
 
         public boolean hasValueDateType() { 
-          return this.value instanceof DateType;
+          return this != null && this.value instanceof DateType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
         public boolean hasValueDateTimeType() { 
-          return this.value instanceof DateTimeType;
+          return this != null && this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public TimeType getValueTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
         }
 
         public boolean hasValueTimeType() { 
-          return this.value instanceof TimeType;
+          return this != null && this.value instanceof TimeType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public StringType getValueStringType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
         public boolean hasValueStringType() { 
-          return this.value instanceof StringType;
+          return this != null && this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public UriType getValueUriType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof UriType))
             throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (UriType) this.value;
         }
 
         public boolean hasValueUriType() { 
-          return this.value instanceof UriType;
+          return this != null && this.value instanceof UriType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Attachment getValueAttachment() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
         public boolean hasValueAttachment() { 
-          return this.value instanceof Attachment;
+          return this != null && this.value instanceof Attachment;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Coding getValueCoding() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
         }
 
         public boolean hasValueCoding() { 
-          return this.value instanceof Coding;
+          return this != null && this.value instanceof Coding;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Reference getValueReference() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
         }
 
         public boolean hasValueReference() { 
-          return this.value instanceof Reference;
+          return this != null && this.value instanceof Reference;
         }
 
         public boolean hasValue() { 
@@ -930,6 +954,8 @@ public class QuestionnaireResponse extends DomainResource {
          * @param value {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public QuestionnaireResponseItemAnswerComponent setValue(Type value) { 
+          if (value != null && !(value instanceof BooleanType || value instanceof DecimalType || value instanceof IntegerType || value instanceof DateType || value instanceof DateTimeType || value instanceof TimeType || value instanceof StringType || value instanceof UriType || value instanceof Attachment || value instanceof Coding || value instanceof Quantity || value instanceof Reference))
+            throw new Error("Not the right type for QuestionnaireResponse.item.answer.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }

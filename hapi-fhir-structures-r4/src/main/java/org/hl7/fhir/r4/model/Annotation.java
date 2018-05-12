@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -96,26 +96,30 @@ public class Annotation extends Type implements ICompositeType {
      * @return {@link #author} (The individual responsible for making the annotation.)
      */
     public Reference getAuthorReference() throws FHIRException { 
+      if (this.author == null)
+        return null;
       if (!(this.author instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.author.getClass().getName()+" was encountered");
       return (Reference) this.author;
     }
 
     public boolean hasAuthorReference() { 
-      return this.author instanceof Reference;
+      return this != null && this.author instanceof Reference;
     }
 
     /**
      * @return {@link #author} (The individual responsible for making the annotation.)
      */
     public StringType getAuthorStringType() throws FHIRException { 
+      if (this.author == null)
+        return null;
       if (!(this.author instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.author.getClass().getName()+" was encountered");
       return (StringType) this.author;
     }
 
     public boolean hasAuthorStringType() { 
-      return this.author instanceof StringType;
+      return this != null && this.author instanceof StringType;
     }
 
     public boolean hasAuthor() { 
@@ -126,6 +130,8 @@ public class Annotation extends Type implements ICompositeType {
      * @param value {@link #author} (The individual responsible for making the annotation.)
      */
     public Annotation setAuthor(Type value) { 
+      if (value != null && !(value instanceof Reference || value instanceof StringType))
+        throw new Error("Not the right type for Annotation.author[x]: "+value.fhirType());
       this.author = value;
       return this;
     }

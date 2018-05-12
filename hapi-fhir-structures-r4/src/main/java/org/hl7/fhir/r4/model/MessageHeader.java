@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1438,26 +1438,30 @@ public class MessageHeader extends DomainResource {
      * @return {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
      */
     public Coding getEventCoding() throws FHIRException { 
+      if (this.event == null)
+        return null;
       if (!(this.event instanceof Coding))
         throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.event.getClass().getName()+" was encountered");
       return (Coding) this.event;
     }
 
     public boolean hasEventCoding() { 
-      return this.event instanceof Coding;
+      return this != null && this.event instanceof Coding;
     }
 
     /**
      * @return {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
      */
     public UriType getEventUriType() throws FHIRException { 
+      if (this.event == null)
+        return null;
       if (!(this.event instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.event.getClass().getName()+" was encountered");
       return (UriType) this.event;
     }
 
     public boolean hasEventUriType() { 
-      return this.event instanceof UriType;
+      return this != null && this.event instanceof UriType;
     }
 
     public boolean hasEvent() { 
@@ -1468,6 +1472,8 @@ public class MessageHeader extends DomainResource {
      * @param value {@link #event} (Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value "http://hl7.org/fhir/message-events".  Alternatively uri to the EventDefinition.)
      */
     public MessageHeader setEvent(Type value) { 
+      if (value != null && !(value instanceof Coding || value instanceof UriType))
+        throw new Error("Not the right type for MessageHeader.event[x]: "+value.fhirType());
       this.event = value;
       return this;
     }

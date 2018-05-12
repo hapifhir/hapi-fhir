@@ -65,6 +65,21 @@ public class ExtensionHelper {
   
   /**
    * @param name the identity of the extension of interest
+   * @return The extension, if on this element, else null. will check modifier extensions too, if appropriate
+   */
+  public static Extension getExtension(DomainResource resource, String name) {
+    
+    if (name == null || resource == null || !resource.hasExtension())
+      return null;
+    for (Extension e : resource.getExtension()) {
+      if (name.equals(e.getUrl()))
+        return e;
+    }
+    return null;
+  }
+  
+  /**
+   * @param name the identity of the extension of interest
    * @return The extension, if on this element, else null. will check modifier extensions too
    */
   public static Extension getExtension(BackboneElement element, String name) {

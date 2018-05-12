@@ -25,7 +25,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@JoinColumn(name = "CONCEPT_MAP_GROUP_PID", nullable = false, referencedColumnName = "PID", foreignKey=@ForeignKey(name="FK_TCMGELEMENT_GROUP"))
 	private TermConceptMapGroup myConceptMapGroup;
 
-	@Column(name = "SOURCE_CODE", nullable = false, length = 50)
+	@Column(name = "SOURCE_CODE", nullable = false, length = 100)
 	private String myCode;
 
 	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)

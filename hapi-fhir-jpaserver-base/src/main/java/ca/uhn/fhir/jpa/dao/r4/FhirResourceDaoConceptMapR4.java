@@ -158,9 +158,7 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 
 		ConceptMap conceptMap = (ConceptMap) theResource;
 
-		if (conceptMap != null && isNotBlank(conceptMap.getUrl())) {
-			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
-		}
+		myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
 
 		return retVal;
 	}

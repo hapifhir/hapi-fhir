@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -78,8 +78,6 @@ public class ResourceFactory extends Factory {
             return new GraphDefinition();
         if ("Parameters".equals(name))
             return new Parameters();
-        if ("ImplementationGuideOutput".equals(name))
-            return new ImplementationGuideOutput();
         if ("MeasureReport".equals(name))
             return new MeasureReport();
         if ("PractitionerRole".equals(name))
@@ -136,8 +134,6 @@ public class ResourceFactory extends Factory {
             return new SubstanceSpecification();
         if ("SearchParameter".equals(name))
             return new SearchParameter();
-        if ("ServiceDefinition".equals(name))
-            return new ServiceDefinition();
         if ("Communication".equals(name))
             return new Communication();
         if ("ActivityDefinition".equals(name))
@@ -148,8 +144,6 @@ public class ResourceFactory extends Factory {
             return new ImmunizationEvaluation();
         if ("DeviceUseStatement".equals(name))
             return new DeviceUseStatement();
-        if ("ImplementationGuideInput".equals(name))
-            return new ImplementationGuideInput();
         if ("RequestGroup".equals(name))
             return new RequestGroup();
         if ("DeviceRequest".equals(name))
@@ -292,6 +286,8 @@ public class ResourceFactory extends Factory {
             return new ProductPlan();
         if ("MedicinalProductIngredient".equals(name))
             return new MedicinalProductIngredient();
+        if ("MedicationKnowledge".equals(name))
+            return new MedicationKnowledge();
         if ("Patient".equals(name))
             return new Patient();
         if ("Coverage".equals(name))
@@ -525,8 +521,6 @@ public class ResourceFactory extends Factory {
         case -1768794370: return new ImmunizationEvaluation();
         case 1728372347: return new ImmunizationRecommendation();
         case 1410262602: return new ImplementationGuide();
-        case 30400416: return new ImplementationGuideInput();
-        case 1120766955: return new ImplementationGuideOutput();
         case -670115059: return new Invoice();
         case 1347880168: return new ItemInstance();
         case 1830861979: return new Library();
@@ -540,6 +534,7 @@ public class ResourceFactory extends Factory {
         case -302536977: return new Medication();
         case -342579923: return new MedicationAdministration();
         case -408244884: return new MedicationDispense();
+        case 1537687119: return new MedicationKnowledge();
         case 1627523232: return new MedicationRequest();
         case -2097348800: return new MedicationStatement();
         case -1349298375: return new MedicinalProduct();
@@ -596,7 +591,6 @@ public class ResourceFactory extends Factory {
         case -633276745: return new Schedule();
         case -912457023: return new SearchParameter();
         case 1414192097: return new Sequence();
-        case 194378184: return new ServiceDefinition();
         case -1944810950: return new ServiceRequest();
         case -1217415016: return new Signature();
         case -1097468803: return new SimpleQuantity();

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -410,7 +410,7 @@ public class Practitioner extends DomainResource {
      * An identifier that applies to this person in this role.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A identifier for the person as this agent", formalDefinition="An identifier that applies to this person in this role." )
+    @Description(shortDefinition="An identifier for the person as this agent", formalDefinition="An identifier that applies to this person in this role." )
     protected List<Identifier> identifier;
 
     /**
@@ -471,10 +471,10 @@ public class Practitioner extends DomainResource {
     protected List<PractitionerQualificationComponent> qualification;
 
     /**
-     * A language the practitioner is able to use in patient communication.
+     * A language the practitioner can use in patient communication.
      */
     @Child(name = "communication", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A language the practitioner is able to use in patient communication", formalDefinition="A language the practitioner is able to use in patient communication." )
+    @Description(shortDefinition="A language the practitioner can use in patient communication", formalDefinition="A language the practitioner can use in patient communication." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
     protected List<CodeableConcept> communication;
 
@@ -949,7 +949,7 @@ public class Practitioner extends DomainResource {
     }
 
     /**
-     * @return {@link #communication} (A language the practitioner is able to use in patient communication.)
+     * @return {@link #communication} (A language the practitioner can use in patient communication.)
      */
     public List<CodeableConcept> getCommunication() { 
       if (this.communication == null)
@@ -1012,7 +1012,7 @@ public class Practitioner extends DomainResource {
         children.add(new Property("birthDate", "date", "The date of birth for the practitioner.", 0, 1, birthDate));
         children.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
         children.add(new Property("qualification", "", "Qualifications obtained by training and certification.", 0, java.lang.Integer.MAX_VALUE, qualification));
-        children.add(new Property("communication", "CodeableConcept", "A language the practitioner is able to use in patient communication.", 0, java.lang.Integer.MAX_VALUE, communication));
+        children.add(new Property("communication", "CodeableConcept", "A language the practitioner can use in patient communication.", 0, java.lang.Integer.MAX_VALUE, communication));
       }
 
       @Override
@@ -1027,7 +1027,7 @@ public class Practitioner extends DomainResource {
         case -1210031859: /*birthDate*/  return new Property("birthDate", "date", "The date of birth for the practitioner.", 0, 1, birthDate);
         case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo);
         case -631333393: /*qualification*/  return new Property("qualification", "", "Qualifications obtained by training and certification.", 0, java.lang.Integer.MAX_VALUE, qualification);
-        case -1035284522: /*communication*/  return new Property("communication", "CodeableConcept", "A language the practitioner is able to use in patient communication.", 0, java.lang.Integer.MAX_VALUE, communication);
+        case -1035284522: /*communication*/  return new Property("communication", "CodeableConcept", "A language the practitioner can use in patient communication.", 0, java.lang.Integer.MAX_VALUE, communication);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

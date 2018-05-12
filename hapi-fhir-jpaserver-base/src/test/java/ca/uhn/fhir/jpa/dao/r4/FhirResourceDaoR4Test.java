@@ -3026,17 +3026,17 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		ImmunizationRecommendation e1 = new ImmunizationRecommendation();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
-		e1.addRecommendation().setDoseNumber(1);
+		e1.addRecommendation().setDoseNumber(new PositiveIntType(1));
 		IIdType id1 = myImmunizationRecommendationDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
 
 		ImmunizationRecommendation e3 = new ImmunizationRecommendation();
 		e3.addIdentifier().setSystem("foo").setValue(methodName);
-		e3.addRecommendation().setDoseNumber(3);
+		e3.addRecommendation().setDoseNumber(new PositiveIntType(3));
 		IIdType id3 = myImmunizationRecommendationDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
 
 		ImmunizationRecommendation e2 = new ImmunizationRecommendation();
 		e2.addIdentifier().setSystem("foo").setValue(methodName);
-		e2.addRecommendation().setDoseNumber(2);
+		e2.addRecommendation().setDoseNumber(new PositiveIntType(2));
 		IIdType id2 = myImmunizationRecommendationDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
@@ -3477,14 +3477,14 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testTagsWithCreateAndReadAndSearch");
 		patient.addName().setFamily("Tester").addGiven("Joe");
-		List<Coding> tagList = new ArrayList<Coding>();
+		List<Coding> tagList = new ArrayList<>();
 		tagList.add(new Coding().setSystem(null).setCode("Dog").setDisplay("Puppies"));
 		// Add this twice
 		tagList.add(new Coding().setSystem("http://foo").setCode("Cat").setDisplay("Kittens"));
 		tagList.add(new Coding().setSystem("http://foo").setCode("Cat").setDisplay("Kittens"));
 		patient.getMeta().getTag().addAll(tagList);
 
-		List<Coding> securityLabels = new ArrayList<Coding>();
+		List<Coding> securityLabels = new ArrayList<>();
 		securityLabels.add(new Coding().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1"));
 		securityLabels.add(new Coding().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
 		patient.getMeta().getSecurity().addAll(securityLabels);

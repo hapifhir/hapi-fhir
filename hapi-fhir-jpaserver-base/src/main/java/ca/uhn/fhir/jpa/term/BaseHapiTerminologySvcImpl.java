@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -918,10 +919,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.info("Storing TermConceptMap...");
+		ourLog.info("Storing TermConceptMap {}", theConceptMap.getIdElement().getValue());
 
-		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied.");
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConceptMap.getUrl(), "No URL supplied.");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
 
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
@@ -958,11 +959,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
-				String source = theConceptMap.getSourceUriType().getValueAsString();
+				String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 				if (isNotBlank(source)) {
 					termConceptMap.setSource(source);
 				}
-				String target = theConceptMap.getTargetUriType().getValueAsString();
+				String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
 				if (isNotBlank(target)) {
 					termConceptMap.setTarget(target);
 				}
@@ -974,6 +975,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
 				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+					if (isBlank(group.getSource())) {
+						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
+					}
+					if (isBlank(group.getTarget())) {
+						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
+					}
 					termConceptMapGroup = new TermConceptMapGroup();
 					termConceptMapGroup.setConceptMap(termConceptMap);
 					termConceptMapGroup.setSource(group.getSource());
@@ -1013,7 +1020,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				BaseHapiTerminologySvcImpl.class,
 				"cannotCreateDuplicateConceptMapUrl",
 				conceptMapUrl,
-				existingTermConceptMap.getResourcePid());
+				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 
 			throw new UnprocessableEntityException(msg);
 		}
@@ -1036,6 +1043,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest) {
 		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();
 
@@ -1116,6 +1124,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest) {
 		List<TermConceptMapGroupElement> retVal = new ArrayList<>();
 
@@ -1237,7 +1246,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	static void clearOurLastResultsFromTranslationCache() {
+	public static void clearOurLastResultsFromTranslationCache() {
 		ourLastResultsFromTranslationCache = false;
 	}
 
@@ -1245,7 +1254,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	static void clearOurLastResultsFromTranslationWithReverseCache() {
+	public static void clearOurLastResultsFromTranslationWithReverseCache() {
 		ourLastResultsFromTranslationWithReverseCache = false;
 	}
 
@@ -1253,15 +1262,25 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	void clearTranslationCache() {
+	public void clearTranslationCache() {
 		myTranslationCache.invalidateAll();
 	}
 
 	/**
 	 * This method is present only for unit tests, do not call from client code
 	 */
+	@VisibleForTesting
+	public void clearDeferred() {
+		myDeferredValueSets.clear();
+		myDeferredConceptMaps.clear();
+		myDeferredConcepts.clear();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
 	@VisibleForTesting()
-	void clearTranslationWithReverseCache() {
+	public void clearTranslationWithReverseCache() {
 		myTranslationWithReverseCache.invalidateAll();
 	}
 

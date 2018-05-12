@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The Measure resource provides the definition of a quality measure.
  */
@@ -123,7 +124,7 @@ public class Measure extends MetadataResource {
         /**
          * @param value {@link #identifier} (A unique identifier for the group. This identifier will used to report data for the group in the measure report.)
          */
-        public MeasureGroupComponent setIdentifier(Identifier value) { 
+        public MeasureGroupComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -332,13 +333,26 @@ public class Measure extends MetadataResource {
           return getStratifier().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "A unique identifier for the group. This identifier will used to report data for the group in the measure report.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("name", "string", "Optional name or short description of this group.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "The human readable description of this population group.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population));
-          childrenList.add(new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "A unique identifier for the group. This identifier will used to report data for the group in the measure report.", 0, 1, identifier));
+          children.add(new Property("name", "string", "Optional name or short description of this group.", 0, 1, name));
+          children.add(new Property("description", "string", "The human readable description of this population group.", 0, 1, description));
+          children.add(new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population));
+          children.add(new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier for the group. This identifier will used to report data for the group in the measure report.", 0, 1, identifier);
+          case 3373707: /*name*/  return new Property("name", "string", "Optional name or short description of this group.", 0, 1, name);
+          case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this population group.", 0, 1, description);
+          case -2023558323: /*population*/  return new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population);
+          case 90983669: /*stratifier*/  return new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -462,23 +476,23 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureGroupComponent))
+        if (!(other_ instanceof MeasureGroupComponent))
           return false;
-        MeasureGroupComponent o = (MeasureGroupComponent) other;
+        MeasureGroupComponent o = (MeasureGroupComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(description, o.description, true)
            && compareDeep(population, o.population, true) && compareDeep(stratifier, o.stratifier, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureGroupComponent))
+        if (!(other_ instanceof MeasureGroupComponent))
           return false;
-        MeasureGroupComponent o = (MeasureGroupComponent) other;
+        MeasureGroupComponent o = (MeasureGroupComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
@@ -568,7 +582,7 @@ public class Measure extends MetadataResource {
         /**
          * @param value {@link #identifier} (A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.)
          */
-        public MeasureGroupPopulationComponent setIdentifier(Identifier value) { 
+        public MeasureGroupPopulationComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -592,7 +606,7 @@ public class Measure extends MetadataResource {
         /**
          * @param value {@link #code} (The type of population criteria.)
          */
-        public MeasureGroupPopulationComponent setCode(CodeableConcept value) { 
+        public MeasureGroupPopulationComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -740,13 +754,26 @@ public class Measure extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("code", "CodeableConcept", "The type of population criteria.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("name", "string", "Optional name or short description of this population.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "The human readable description of this population criteria.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("criteria", "string", "The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.", 0, java.lang.Integer.MAX_VALUE, criteria));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.", 0, 1, identifier));
+          children.add(new Property("code", "CodeableConcept", "The type of population criteria.", 0, 1, code));
+          children.add(new Property("name", "string", "Optional name or short description of this population.", 0, 1, name));
+          children.add(new Property("description", "string", "The human readable description of this population criteria.", 0, 1, description));
+          children.add(new Property("criteria", "string", "The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.", 0, 1, criteria));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier for the population criteria. This identifier is used to report data against this criteria within the measure report.", 0, 1, identifier);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of population criteria.", 0, 1, code);
+          case 3373707: /*name*/  return new Property("name", "string", "Optional name or short description of this population.", 0, 1, name);
+          case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this population criteria.", 0, 1, description);
+          case 1952046943: /*criteria*/  return new Property("criteria", "string", "The name of a valid referenced CQL expression (may be namespaced) that defines this population criteria.", 0, 1, criteria);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -863,23 +890,23 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureGroupPopulationComponent))
+        if (!(other_ instanceof MeasureGroupPopulationComponent))
           return false;
-        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other;
+        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
            && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureGroupPopulationComponent))
+        if (!(other_ instanceof MeasureGroupPopulationComponent))
           return false;
-        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other;
+        MeasureGroupPopulationComponent o = (MeasureGroupPopulationComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true) && compareValues(criteria, o.criteria, true)
           ;
       }
@@ -947,7 +974,7 @@ public class Measure extends MetadataResource {
         /**
          * @param value {@link #identifier} (The identifier for the stratifier used to coordinate the reported data back to this stratifier.)
          */
-        public MeasureGroupStratifierComponent setIdentifier(Identifier value) { 
+        public MeasureGroupStratifierComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1050,11 +1077,22 @@ public class Measure extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "The identifier for the stratifier used to coordinate the reported data back to this stratifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("criteria", "string", "The criteria for the stratifier. This must be the name of an expression defined within a referenced library.", 0, java.lang.Integer.MAX_VALUE, criteria));
-          childrenList.add(new Property("path", "string", "The path to an element that defines the stratifier, specified as a valid FHIR resource path.", 0, java.lang.Integer.MAX_VALUE, path));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "The identifier for the stratifier used to coordinate the reported data back to this stratifier.", 0, 1, identifier));
+          children.add(new Property("criteria", "string", "The criteria for the stratifier. This must be the name of an expression defined within a referenced library.", 0, 1, criteria));
+          children.add(new Property("path", "string", "The path to an element that defines the stratifier, specified as a valid FHIR resource path.", 0, 1, path));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier for the stratifier used to coordinate the reported data back to this stratifier.", 0, 1, identifier);
+          case 1952046943: /*criteria*/  return new Property("criteria", "string", "The criteria for the stratifier. This must be the name of an expression defined within a referenced library.", 0, 1, criteria);
+          case 3433509: /*path*/  return new Property("path", "string", "The path to an element that defines the stratifier, specified as a valid FHIR resource path.", 0, 1, path);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1146,23 +1184,23 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureGroupStratifierComponent))
+        if (!(other_ instanceof MeasureGroupStratifierComponent))
           return false;
-        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other;
+        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(criteria, o.criteria, true) && compareDeep(path, o.path, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureGroupStratifierComponent))
+        if (!(other_ instanceof MeasureGroupStratifierComponent))
           return false;
-        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other;
+        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
         return compareValues(criteria, o.criteria, true) && compareValues(path, o.path, true);
       }
 
@@ -1237,7 +1275,7 @@ public class Measure extends MetadataResource {
         /**
          * @param value {@link #identifier} (An identifier for the supplemental data.)
          */
-        public MeasureSupplementalDataComponent setIdentifier(Identifier value) { 
+        public MeasureSupplementalDataComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1393,12 +1431,24 @@ public class Measure extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "An identifier for the supplemental data.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage));
-          childrenList.add(new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, java.lang.Integer.MAX_VALUE, criteria));
-          childrenList.add(new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, path));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "An identifier for the supplemental data.", 0, 1, identifier));
+          children.add(new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage));
+          children.add(new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, 1, criteria));
+          children.add(new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, 1, path));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "An identifier for the supplemental data.", 0, 1, identifier);
+          case 111574433: /*usage*/  return new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage);
+          case 1952046943: /*criteria*/  return new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, 1, criteria);
+          case 3433509: /*path*/  return new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, 1, path);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1506,23 +1556,23 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureSupplementalDataComponent))
+        if (!(other_ instanceof MeasureSupplementalDataComponent))
           return false;
-        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other;
+        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(usage, o.usage, true) && compareDeep(criteria, o.criteria, true)
            && compareDeep(path, o.path, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureSupplementalDataComponent))
+        if (!(other_ instanceof MeasureSupplementalDataComponent))
           return false;
-        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other;
+        MeasureSupplementalDataComponent o = (MeasureSupplementalDataComponent) other_;
         return compareValues(criteria, o.criteria, true) && compareValues(path, o.path, true);
       }
 
@@ -2440,7 +2490,7 @@ public class Measure extends MetadataResource {
     /**
      * @param value {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
      */
-    public Measure setEffectivePeriod(Period value) { 
+    public Measure setEffectivePeriod(Period value)  { 
       this.effectivePeriod = value;
       return this;
     }
@@ -2955,7 +3005,7 @@ public class Measure extends MetadataResource {
     /**
      * @param value {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
      */
-    public Measure setScoring(CodeableConcept value) { 
+    public Measure setScoring(CodeableConcept value)  { 
       this.scoring = value;
       return this;
     }
@@ -2979,7 +3029,7 @@ public class Measure extends MetadataResource {
     /**
      * @param value {@link #compositeScoring} (If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.)
      */
-    public Measure setCompositeScoring(CodeableConcept value) { 
+    public Measure setCompositeScoring(CodeableConcept value)  { 
       this.compositeScoring = value;
       return this;
     }
@@ -3338,7 +3388,7 @@ public class Measure extends MetadataResource {
       if (this.definition == null)
         return false;
       for (MarkdownType v : this.definition)
-        if (v.equals(value)) // markdown
+        if (v.getValue().equals(value)) // markdown
           return true;
       return false;
     }
@@ -3547,45 +3597,90 @@ public class Measure extends MetadataResource {
       return getSupplementalData().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("purpose", "markdown", "Explaination of why this measure is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
-        childrenList.add(new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, java.lang.Integer.MAX_VALUE, usage));
-        childrenList.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, java.lang.Integer.MAX_VALUE, approvalDate));
-        childrenList.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, java.lang.Integer.MAX_VALUE, lastReviewDate));
-        childrenList.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, java.lang.Integer.MAX_VALUE, effectivePeriod));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
-        childrenList.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
-        childrenList.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
-        childrenList.add(new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.", 0, java.lang.Integer.MAX_VALUE, disclaimer));
-        childrenList.add(new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, java.lang.Integer.MAX_VALUE, scoring));
-        childrenList.add(new Property("compositeScoring", "CodeableConcept", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, java.lang.Integer.MAX_VALUE, compositeScoring));
-        childrenList.add(new Property("type", "CodeableConcept", "Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, java.lang.Integer.MAX_VALUE, riskAdjustment));
-        childrenList.add(new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, java.lang.Integer.MAX_VALUE, rateAggregation));
-        childrenList.add(new Property("rationale", "markdown", "Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, java.lang.Integer.MAX_VALUE, rationale));
-        childrenList.add(new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, java.lang.Integer.MAX_VALUE, clinicalRecommendationStatement));
-        childrenList.add(new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).", 0, java.lang.Integer.MAX_VALUE, improvementNotation));
-        childrenList.add(new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, java.lang.Integer.MAX_VALUE, guidance));
-        childrenList.add(new Property("set", "string", "The measure set, e.g. Preventive Care and Screening.", 0, java.lang.Integer.MAX_VALUE, set));
-        childrenList.add(new Property("group", "", "A group of population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, group));
-        childrenList.add(new Property("supplementalData", "", "The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, supplementalData));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version));
+        children.add(new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
+        children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, 1, title));
+        children.add(new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, 1, status));
+        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, 1, publisher));
+        children.add(new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, 1, description));
+        children.add(new Property("purpose", "markdown", "Explaination of why this measure is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, 1, usage));
+        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
+        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate));
+        children.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
+        children.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, 1, copyright));
+        children.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
+        children.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
+        children.add(new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.", 0, 1, disclaimer));
+        children.add(new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, 1, scoring));
+        children.add(new Property("compositeScoring", "CodeableConcept", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, 1, compositeScoring));
+        children.add(new Property("type", "CodeableConcept", "Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, 1, riskAdjustment));
+        children.add(new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, 1, rateAggregation));
+        children.add(new Property("rationale", "markdown", "Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale));
+        children.add(new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, 1, clinicalRecommendationStatement));
+        children.add(new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).", 0, 1, improvementNotation));
+        children.add(new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition));
+        children.add(new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, 1, guidance));
+        children.add(new Property("set", "string", "The measure set, e.g. Preventive Care and Screening.", 0, 1, set));
+        children.add(new Property("group", "", "A group of population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, group));
+        children.add(new Property("supplementalData", "", "The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, supplementalData));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this measure is (or will be) published. The URL SHOULD include the major version of the measure. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version);
+        case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
+        case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, 1, title);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, 1, status);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, 1, publisher);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, 1, description);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this measure is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, 1, usage);
+        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
+        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate);
+        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
+        case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, 1, copyright);
+        case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
+        case 166208699: /*library*/  return new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library);
+        case 432371099: /*disclaimer*/  return new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.", 0, 1, disclaimer);
+        case 1924005583: /*scoring*/  return new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, 1, scoring);
+        case 569347656: /*compositeScoring*/  return new Property("compositeScoring", "CodeableConcept", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, 1, compositeScoring);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.", 0, java.lang.Integer.MAX_VALUE, type);
+        case 93273500: /*riskAdjustment*/  return new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, 1, riskAdjustment);
+        case 1254503906: /*rateAggregation*/  return new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, 1, rateAggregation);
+        case 345689335: /*rationale*/  return new Property("rationale", "markdown", "Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale);
+        case -18631389: /*clinicalRecommendationStatement*/  return new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, 1, clinicalRecommendationStatement);
+        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).", 0, 1, improvementNotation);
+        case -1014418093: /*definition*/  return new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition);
+        case -1314002088: /*guidance*/  return new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, 1, guidance);
+        case 113762: /*set*/  return new Property("set", "string", "The measure set, e.g. Preventive Care and Screening.", 0, 1, set);
+        case 98629247: /*group*/  return new Property("group", "", "A group of population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, group);
+        case 1447496814: /*supplementalData*/  return new Property("supplementalData", "", "The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, supplementalData);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -4146,12 +4241,12 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Measure))
+        if (!(other_ instanceof Measure))
           return false;
-        Measure o = (Measure) other;
+        Measure o = (Measure) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
            && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
            && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
@@ -4166,12 +4261,12 @@ public class Measure extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Measure))
+        if (!(other_ instanceof Measure))
           return false;
-        Measure o = (Measure) other;
+        Measure o = (Measure) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
            && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
            && compareValues(disclaimer, o.disclaimer, true) && compareValues(riskAdjustment, o.riskAdjustment, true)

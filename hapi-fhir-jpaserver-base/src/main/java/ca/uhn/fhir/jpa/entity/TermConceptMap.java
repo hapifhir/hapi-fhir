@@ -26,13 +26,13 @@ public class TermConceptMap implements Serializable {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Column(name = "SOURCE_URL", nullable = false, length = 200)
+	@Column(name = "SOURCE_URL", nullable = true, length = 200)
 	private String mySource;
 
-	@Column(name = "TARGET_URL", nullable = false, length = 200)
+	@Column(name = "TARGET_URL", nullable = true, length = 200)
 	private String myTarget;
 
-	@Column(name = "URL", length = 200)
+	@Column(name = "URL", length = 200, nullable = false)
 	private String myUrl;
 
 	@OneToMany(mappedBy = "myConceptMap")

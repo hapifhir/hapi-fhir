@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
@@ -366,7 +367,7 @@ public class Flag extends DomainResource {
     /**
      * @param value {@link #category} (Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.)
      */
-    public Flag setCategory(CodeableConcept value) { 
+    public Flag setCategory(CodeableConcept value)  { 
       this.category = value;
       return this;
     }
@@ -390,7 +391,7 @@ public class Flag extends DomainResource {
     /**
      * @param value {@link #code} (The coded value or textual component of the flag to display to the user.)
      */
-    public Flag setCode(CodeableConcept value) { 
+    public Flag setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -414,7 +415,7 @@ public class Flag extends DomainResource {
     /**
      * @param value {@link #subject} (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
      */
-    public Flag setSubject(Reference value) { 
+    public Flag setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -453,7 +454,7 @@ public class Flag extends DomainResource {
     /**
      * @param value {@link #period} (The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.)
      */
-    public Flag setPeriod(Period value) { 
+    public Flag setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -477,7 +478,7 @@ public class Flag extends DomainResource {
     /**
      * @param value {@link #encounter} (This alert is only relevant during the encounter.)
      */
-    public Flag setEncounter(Reference value) { 
+    public Flag setEncounter(Reference value)  { 
       this.encounter = value;
       return this;
     }
@@ -521,7 +522,7 @@ public class Flag extends DomainResource {
     /**
      * @param value {@link #author} (The person, organization or device that created the flag.)
      */
-    public Flag setAuthor(Reference value) { 
+    public Flag setAuthor(Reference value)  { 
       this.author = value;
       return this;
     }
@@ -541,16 +542,32 @@ public class Flag extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier assigned to the flag for external use (outside the FHIR environment).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Supports basic workflow.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, java.lang.Integer.MAX_VALUE, author));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier assigned to the flag for external use (outside the FHIR environment).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "Supports basic workflow.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, 1, category));
+        children.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, 1, code));
+        children.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.", 0, 1, subject));
+        children.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, 1, period));
+        children.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, 1, encounter));
+        children.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, 1, author));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned to the flag for external use (outside the FHIR environment).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "Supports basic workflow.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, 1, category);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, 1, code);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.", 0, 1, subject);
+        case -991726143: /*period*/  return new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, 1, period);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, 1, encounter);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, 1, author);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -722,24 +739,24 @@ public class Flag extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Flag))
+        if (!(other_ instanceof Flag))
           return false;
-        Flag o = (Flag) other;
+        Flag o = (Flag) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true) && compareDeep(period, o.period, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(author, o.author, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Flag))
+        if (!(other_ instanceof Flag))
           return false;
-        Flag o = (Flag) other;
+        Flag o = (Flag) other_;
         return compareValues(status, o.status, true);
       }
 

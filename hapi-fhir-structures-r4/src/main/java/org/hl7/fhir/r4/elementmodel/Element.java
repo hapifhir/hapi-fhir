@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.elementmodel.Element.ElementSortComparator;
 import org.hl7.fhir.r4.elementmodel.Element.ICodingImpl;
 import org.hl7.fhir.r4.model.Base;
@@ -659,7 +660,7 @@ public class Element extends Base {
     private List<ElementDefinition> children;
     public ElementSortComparator(Element e, Property property) {
       String tn = e.getType();
-      StructureDefinition sd = property.getContext().fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+tn);
+      StructureDefinition sd = property.getContext().fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(tn));
       if (sd != null && !sd.getAbstract())
         children = sd.getSnapshot().getElement();
       else

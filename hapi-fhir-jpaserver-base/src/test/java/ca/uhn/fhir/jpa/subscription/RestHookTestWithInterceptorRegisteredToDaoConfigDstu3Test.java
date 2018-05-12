@@ -51,6 +51,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		
 		myDaoConfig.getInterceptors().remove(ourRestHookSubscriptionInterceptor);
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
 	}
 
 	@Before
@@ -62,6 +63,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu3Test extends B
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {

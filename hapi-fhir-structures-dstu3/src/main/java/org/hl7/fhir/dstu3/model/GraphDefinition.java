@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A formal computable definition of a graph of resources - that is, a coherent set of resources that form a graph by following references. The Graph Definition resource defines a set and makes rules about the set.
  */
@@ -665,14 +666,28 @@ public class GraphDefinition extends MetadataResource {
           return getTarget().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("path", "string", "Path in the resource that contains the link.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("sliceName", "string", "Which slice (if profiled).", 0, java.lang.Integer.MAX_VALUE, sliceName));
-          childrenList.add(new Property("min", "integer", "Minimum occurrences for this link.", 0, java.lang.Integer.MAX_VALUE, min));
-          childrenList.add(new Property("max", "string", "Maximum occurrences for this link.", 0, java.lang.Integer.MAX_VALUE, max));
-          childrenList.add(new Property("description", "string", "Information about why this link is of interest in this graph definition.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("target", "", "Potential target for the link.", 0, java.lang.Integer.MAX_VALUE, target));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("path", "string", "Path in the resource that contains the link.", 0, 1, path));
+          children.add(new Property("sliceName", "string", "Which slice (if profiled).", 0, 1, sliceName));
+          children.add(new Property("min", "integer", "Minimum occurrences for this link.", 0, 1, min));
+          children.add(new Property("max", "string", "Maximum occurrences for this link.", 0, 1, max));
+          children.add(new Property("description", "string", "Information about why this link is of interest in this graph definition.", 0, 1, description));
+          children.add(new Property("target", "", "Potential target for the link.", 0, java.lang.Integer.MAX_VALUE, target));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3433509: /*path*/  return new Property("path", "string", "Path in the resource that contains the link.", 0, 1, path);
+          case -825289923: /*sliceName*/  return new Property("sliceName", "string", "Which slice (if profiled).", 0, 1, sliceName);
+          case 108114: /*min*/  return new Property("min", "integer", "Minimum occurrences for this link.", 0, 1, min);
+          case 107876: /*max*/  return new Property("max", "string", "Maximum occurrences for this link.", 0, 1, max);
+          case -1724546052: /*description*/  return new Property("description", "string", "Information about why this link is of interest in this graph definition.", 0, 1, description);
+          case -880905839: /*target*/  return new Property("target", "", "Potential target for the link.", 0, java.lang.Integer.MAX_VALUE, target);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -803,24 +818,24 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkComponent))
+        if (!(other_ instanceof GraphDefinitionLinkComponent))
           return false;
-        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other;
+        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other_;
         return compareDeep(path, o.path, true) && compareDeep(sliceName, o.sliceName, true) && compareDeep(min, o.min, true)
            && compareDeep(max, o.max, true) && compareDeep(description, o.description, true) && compareDeep(target, o.target, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkComponent))
+        if (!(other_ instanceof GraphDefinitionLinkComponent))
           return false;
-        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other;
+        GraphDefinitionLinkComponent o = (GraphDefinitionLinkComponent) other_;
         return compareValues(path, o.path, true) && compareValues(sliceName, o.sliceName, true) && compareValues(min, o.min, true)
            && compareValues(max, o.max, true) && compareValues(description, o.description, true);
       }
@@ -1085,12 +1100,24 @@ public class GraphDefinition extends MetadataResource {
           return getLink().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "Type of resource this link refers to.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("profile", "uri", "Profile for the target resource.", 0, java.lang.Integer.MAX_VALUE, profile));
-          childrenList.add(new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment));
-          childrenList.add(new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "Type of resource this link refers to.", 0, 1, type));
+          children.add(new Property("profile", "uri", "Profile for the target resource.", 0, 1, profile));
+          children.add(new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment));
+          children.add(new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "Type of resource this link refers to.", 0, 1, type);
+          case -309425751: /*profile*/  return new Property("profile", "uri", "Profile for the target resource.", 0, 1, profile);
+          case -397756334: /*compartment*/  return new Property("compartment", "", "Compartment Consistency Rules.", 0, java.lang.Integer.MAX_VALUE, compartment);
+          case 3321850: /*link*/  return new Property("link", "@GraphDefinition.link", "Additional links from target resource.", 0, java.lang.Integer.MAX_VALUE, link);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1201,23 +1228,23 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetComponent))
           return false;
-        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other;
+        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(profile, o.profile, true) && compareDeep(compartment, o.compartment, true)
            && compareDeep(link, o.link, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetComponent))
           return false;
-        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other;
+        GraphDefinitionLinkTargetComponent o = (GraphDefinitionLinkTargetComponent) other_;
         return compareValues(type, o.type, true) && compareValues(profile, o.profile, true);
       }
 
@@ -1471,12 +1498,24 @@ public class GraphDefinition extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "Identifies the compartment.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("rule", "code", "identical | matching | different | no-rule | custom.", 0, java.lang.Integer.MAX_VALUE, rule));
-          childrenList.add(new Property("expression", "string", "Custom rule, as a FHIRPath expression.", 0, java.lang.Integer.MAX_VALUE, expression));
-          childrenList.add(new Property("description", "string", "Documentation for FHIRPath expression.", 0, java.lang.Integer.MAX_VALUE, description));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "code", "Identifies the compartment.", 0, 1, code));
+          children.add(new Property("rule", "code", "identical | matching | different | no-rule | custom.", 0, 1, rule));
+          children.add(new Property("expression", "string", "Custom rule, as a FHIRPath expression.", 0, 1, expression));
+          children.add(new Property("description", "string", "Documentation for FHIRPath expression.", 0, 1, description));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "code", "Identifies the compartment.", 0, 1, code);
+          case 3512060: /*rule*/  return new Property("rule", "code", "identical | matching | different | no-rule | custom.", 0, 1, rule);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "Custom rule, as a FHIRPath expression.", 0, 1, expression);
+          case -1724546052: /*description*/  return new Property("description", "string", "Documentation for FHIRPath expression.", 0, 1, description);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1583,23 +1622,23 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetCompartmentComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetCompartmentComponent))
           return false;
-        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other;
+        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(rule, o.rule, true) && compareDeep(expression, o.expression, true)
            && compareDeep(description, o.description, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinitionLinkTargetCompartmentComponent))
+        if (!(other_ instanceof GraphDefinitionLinkTargetCompartmentComponent))
           return false;
-        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other;
+        GraphDefinitionLinkTargetCompartmentComponent o = (GraphDefinitionLinkTargetCompartmentComponent) other_;
         return compareValues(code, o.code, true) && compareValues(rule, o.rule, true) && compareValues(expression, o.expression, true)
            && compareValues(description, o.description, true);
       }
@@ -2399,23 +2438,46 @@ public class GraphDefinition extends MetadataResource {
       return getLink().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the graph definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the graph definition from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate graph definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explaination of why this graph definition is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
-        childrenList.add(new Property("start", "code", "The type of FHIR resource at which instances of this graph start.", 0, java.lang.Integer.MAX_VALUE, start));
-        childrenList.add(new Property("profile", "uri", "The profile that describes the use of the base resource.", 0, java.lang.Integer.MAX_VALUE, profile));
-        childrenList.add(new Property("link", "", "Links this graph makes rules about.", 0, java.lang.Integer.MAX_VALUE, link));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
+        children.add(new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
+        children.add(new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, 1, status));
+        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the individual or organization that published the graph definition.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("description", "markdown", "A free text natural language description of the graph definition from a consumer's perspective.", 0, 1, description));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate graph definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("purpose", "markdown", "Explaination of why this graph definition is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("start", "code", "The type of FHIR resource at which instances of this graph start.", 0, 1, start));
+        children.add(new Property("profile", "uri", "The profile that describes the use of the base resource.", 0, 1, profile));
+        children.add(new Property("link", "", "Links this graph makes rules about.", 0, java.lang.Integer.MAX_VALUE, link));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this graph definition is (or will be) published. The URL SHOULD include the major version of the graph definition. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
+        case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, 1, status);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this graph definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the graph definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the graph definition changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the graph definition.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the graph definition from a consumer's perspective.", 0, 1, description);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate graph definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the graph definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this graph definition is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 109757538: /*start*/  return new Property("start", "code", "The type of FHIR resource at which instances of this graph start.", 0, 1, start);
+        case -309425751: /*profile*/  return new Property("profile", "uri", "The profile that describes the use of the base resource.", 0, 1, profile);
+        case 3321850: /*link*/  return new Property("link", "", "Links this graph makes rules about.", 0, java.lang.Integer.MAX_VALUE, link);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2677,23 +2739,23 @@ public class GraphDefinition extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GraphDefinition))
+        if (!(other_ instanceof GraphDefinition))
           return false;
-        GraphDefinition o = (GraphDefinition) other;
+        GraphDefinition o = (GraphDefinition) other_;
         return compareDeep(purpose, o.purpose, true) && compareDeep(start, o.start, true) && compareDeep(profile, o.profile, true)
            && compareDeep(link, o.link, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GraphDefinition))
+        if (!(other_ instanceof GraphDefinition))
           return false;
-        GraphDefinition o = (GraphDefinition) other;
+        GraphDefinition o = (GraphDefinition) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(start, o.start, true) && compareValues(profile, o.profile, true)
           ;
       }

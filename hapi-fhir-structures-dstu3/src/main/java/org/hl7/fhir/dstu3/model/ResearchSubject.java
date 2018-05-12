@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
  */
@@ -314,7 +315,7 @@ public class ResearchSubject extends DomainResource {
     /**
      * @param value {@link #identifier} (Identifiers assigned to this research study by the sponsor or other systems.)
      */
-    public ResearchSubject setIdentifier(Identifier value) { 
+    public ResearchSubject setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -383,7 +384,7 @@ public class ResearchSubject extends DomainResource {
     /**
      * @param value {@link #period} (The dates the subject began and ended their participation in the study.)
      */
-    public ResearchSubject setPeriod(Period value) { 
+    public ResearchSubject setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -407,7 +408,7 @@ public class ResearchSubject extends DomainResource {
     /**
      * @param value {@link #study} (Reference to the study the subject is participating in.)
      */
-    public ResearchSubject setStudy(Reference value) { 
+    public ResearchSubject setStudy(Reference value)  { 
       this.study = value;
       return this;
     }
@@ -451,7 +452,7 @@ public class ResearchSubject extends DomainResource {
     /**
      * @param value {@link #individual} (The record of the person or animal who is involved in the study.)
      */
-    public ResearchSubject setIndividual(Reference value) { 
+    public ResearchSubject setIndividual(Reference value)  { 
       this.individual = value;
       return this;
     }
@@ -593,7 +594,7 @@ public class ResearchSubject extends DomainResource {
     /**
      * @param value {@link #consent} (A record of the patient's informed agreement to participate in the study.)
      */
-    public ResearchSubject setConsent(Reference value) { 
+    public ResearchSubject setConsent(Reference value)  { 
       this.consent = value;
       return this;
     }
@@ -618,16 +619,32 @@ public class ResearchSubject extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The current state of the subject.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("period", "Period", "The dates the subject began and ended their participation in the study.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("study", "Reference(ResearchStudy)", "Reference to the study the subject is participating in.", 0, java.lang.Integer.MAX_VALUE, study));
-        childrenList.add(new Property("individual", "Reference(Patient)", "The record of the person or animal who is involved in the study.", 0, java.lang.Integer.MAX_VALUE, individual));
-        childrenList.add(new Property("assignedArm", "string", "The name of the arm in the study the subject is expected to follow as part of this study.", 0, java.lang.Integer.MAX_VALUE, assignedArm));
-        childrenList.add(new Property("actualArm", "string", "The name of the arm in the study the subject actually followed as part of this study.", 0, java.lang.Integer.MAX_VALUE, actualArm));
-        childrenList.add(new Property("consent", "Reference(Consent)", "A record of the patient's informed agreement to participate in the study.", 0, java.lang.Integer.MAX_VALUE, consent));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, 1, identifier));
+        children.add(new Property("status", "code", "The current state of the subject.", 0, 1, status));
+        children.add(new Property("period", "Period", "The dates the subject began and ended their participation in the study.", 0, 1, period));
+        children.add(new Property("study", "Reference(ResearchStudy)", "Reference to the study the subject is participating in.", 0, 1, study));
+        children.add(new Property("individual", "Reference(Patient)", "The record of the person or animal who is involved in the study.", 0, 1, individual));
+        children.add(new Property("assignedArm", "string", "The name of the arm in the study the subject is expected to follow as part of this study.", 0, 1, assignedArm));
+        children.add(new Property("actualArm", "string", "The name of the arm in the study the subject actually followed as part of this study.", 0, 1, actualArm));
+        children.add(new Property("consent", "Reference(Consent)", "A record of the patient's informed agreement to participate in the study.", 0, 1, consent));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, 1, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The current state of the subject.", 0, 1, status);
+        case -991726143: /*period*/  return new Property("period", "Period", "The dates the subject began and ended their participation in the study.", 0, 1, period);
+        case 109776329: /*study*/  return new Property("study", "Reference(ResearchStudy)", "Reference to the study the subject is participating in.", 0, 1, study);
+        case -46292327: /*individual*/  return new Property("individual", "Reference(Patient)", "The record of the person or animal who is involved in the study.", 0, 1, individual);
+        case 1741912494: /*assignedArm*/  return new Property("assignedArm", "string", "The name of the arm in the study the subject is expected to follow as part of this study.", 0, 1, assignedArm);
+        case 528827886: /*actualArm*/  return new Property("actualArm", "string", "The name of the arm in the study the subject actually followed as part of this study.", 0, 1, actualArm);
+        case 951500826: /*consent*/  return new Property("consent", "Reference(Consent)", "A record of the patient's informed agreement to participate in the study.", 0, 1, consent);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -794,24 +811,24 @@ public class ResearchSubject extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ResearchSubject))
+        if (!(other_ instanceof ResearchSubject))
           return false;
-        ResearchSubject o = (ResearchSubject) other;
+        ResearchSubject o = (ResearchSubject) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
            && compareDeep(study, o.study, true) && compareDeep(individual, o.individual, true) && compareDeep(assignedArm, o.assignedArm, true)
            && compareDeep(actualArm, o.actualArm, true) && compareDeep(consent, o.consent, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ResearchSubject))
+        if (!(other_ instanceof ResearchSubject))
           return false;
-        ResearchSubject o = (ResearchSubject) other;
+        ResearchSubject o = (ResearchSubject) other_;
         return compareValues(status, o.status, true) && compareValues(assignedArm, o.assignedArm, true) && compareValues(actualArm, o.actualArm, true)
           ;
       }

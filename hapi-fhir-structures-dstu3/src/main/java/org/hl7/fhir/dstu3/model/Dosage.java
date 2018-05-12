@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Indicates how the medication is/was taken or should be taken by the patient.
  */
@@ -374,7 +375,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #timing} (When medication should be administered.)
      */
-    public Dosage setTiming(Timing value) { 
+    public Dosage setTiming(Timing value)  { 
       this.timing = value;
       return this;
     }
@@ -390,26 +391,30 @@ public class Dosage extends Type implements ICompositeType {
      * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).)
      */
     public BooleanType getAsNeededBooleanType() throws FHIRException { 
+      if (this.asNeeded == null)
+        return null;
       if (!(this.asNeeded instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (BooleanType) this.asNeeded;
     }
 
     public boolean hasAsNeededBooleanType() { 
-      return this.asNeeded instanceof BooleanType;
+      return this != null && this.asNeeded instanceof BooleanType;
     }
 
     /**
      * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).)
      */
     public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
+      if (this.asNeeded == null)
+        return null;
       if (!(this.asNeeded instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;
     }
 
     public boolean hasAsNeededCodeableConcept() { 
-      return this.asNeeded instanceof CodeableConcept;
+      return this != null && this.asNeeded instanceof CodeableConcept;
     }
 
     public boolean hasAsNeeded() { 
@@ -419,7 +424,9 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).)
      */
-    public Dosage setAsNeeded(Type value) { 
+    public Dosage setAsNeeded(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof BooleanType || value instanceof CodeableConcept))
+        throw new FHIRFormatError("Not the right type for Dosage.asNeeded[x]: "+value.fhirType());
       this.asNeeded = value;
       return this;
     }
@@ -443,7 +450,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #site} (Body site to administer to.)
      */
-    public Dosage setSite(CodeableConcept value) { 
+    public Dosage setSite(CodeableConcept value)  { 
       this.site = value;
       return this;
     }
@@ -467,7 +474,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #route} (How drug should enter body.)
      */
-    public Dosage setRoute(CodeableConcept value) { 
+    public Dosage setRoute(CodeableConcept value)  { 
       this.route = value;
       return this;
     }
@@ -491,7 +498,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #method} (Technique for administering medication.)
      */
-    public Dosage setMethod(CodeableConcept value) { 
+    public Dosage setMethod(CodeableConcept value)  { 
       this.method = value;
       return this;
     }
@@ -507,26 +514,30 @@ public class Dosage extends Type implements ICompositeType {
      * @return {@link #dose} (Amount of medication per dose.)
      */
     public Range getDoseRange() throws FHIRException { 
+      if (this.dose == null)
+        return null;
       if (!(this.dose instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.dose.getClass().getName()+" was encountered");
       return (Range) this.dose;
     }
 
     public boolean hasDoseRange() { 
-      return this.dose instanceof Range;
+      return this != null && this.dose instanceof Range;
     }
 
     /**
      * @return {@link #dose} (Amount of medication per dose.)
      */
     public SimpleQuantity getDoseSimpleQuantity() throws FHIRException { 
+      if (this.dose == null)
+        return null;
       if (!(this.dose instanceof SimpleQuantity))
         throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.dose.getClass().getName()+" was encountered");
       return (SimpleQuantity) this.dose;
     }
 
     public boolean hasDoseSimpleQuantity() { 
-      return this.dose instanceof SimpleQuantity;
+      return this != null && this.dose instanceof SimpleQuantity;
     }
 
     public boolean hasDose() { 
@@ -536,7 +547,9 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #dose} (Amount of medication per dose.)
      */
-    public Dosage setDose(Type value) { 
+    public Dosage setDose(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Range || value instanceof Quantity))
+        throw new FHIRFormatError("Not the right type for Dosage.dose[x]: "+value.fhirType());
       this.dose = value;
       return this;
     }
@@ -560,7 +573,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #maxDosePerPeriod} (Upper limit on medication per unit of time.)
      */
-    public Dosage setMaxDosePerPeriod(Ratio value) { 
+    public Dosage setMaxDosePerPeriod(Ratio value)  { 
       this.maxDosePerPeriod = value;
       return this;
     }
@@ -584,7 +597,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #maxDosePerAdministration} (Upper limit on medication per administration.)
      */
-    public Dosage setMaxDosePerAdministration(SimpleQuantity value) { 
+    public Dosage setMaxDosePerAdministration(SimpleQuantity value)  { 
       this.maxDosePerAdministration = value;
       return this;
     }
@@ -608,7 +621,7 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #maxDosePerLifetime} (Upper limit on medication per lifetime of the patient.)
      */
-    public Dosage setMaxDosePerLifetime(SimpleQuantity value) { 
+    public Dosage setMaxDosePerLifetime(SimpleQuantity value)  { 
       this.maxDosePerLifetime = value;
       return this;
     }
@@ -624,39 +637,45 @@ public class Dosage extends Type implements ICompositeType {
      * @return {@link #rate} (Amount of medication per unit of time.)
      */
     public Ratio getRateRatio() throws FHIRException { 
+      if (this.rate == null)
+        return null;
       if (!(this.rate instanceof Ratio))
         throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
       return (Ratio) this.rate;
     }
 
     public boolean hasRateRatio() { 
-      return this.rate instanceof Ratio;
+      return this != null && this.rate instanceof Ratio;
     }
 
     /**
      * @return {@link #rate} (Amount of medication per unit of time.)
      */
     public Range getRateRange() throws FHIRException { 
+      if (this.rate == null)
+        return null;
       if (!(this.rate instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
       return (Range) this.rate;
     }
 
     public boolean hasRateRange() { 
-      return this.rate instanceof Range;
+      return this != null && this.rate instanceof Range;
     }
 
     /**
      * @return {@link #rate} (Amount of medication per unit of time.)
      */
     public SimpleQuantity getRateSimpleQuantity() throws FHIRException { 
+      if (this.rate == null)
+        return null;
       if (!(this.rate instanceof SimpleQuantity))
         throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
       return (SimpleQuantity) this.rate;
     }
 
     public boolean hasRateSimpleQuantity() { 
-      return this.rate instanceof SimpleQuantity;
+      return this != null && this.rate instanceof SimpleQuantity;
     }
 
     public boolean hasRate() { 
@@ -666,27 +685,61 @@ public class Dosage extends Type implements ICompositeType {
     /**
      * @param value {@link #rate} (Amount of medication per unit of time.)
      */
-    public Dosage setRate(Type value) { 
+    public Dosage setRate(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Ratio || value instanceof Range || value instanceof Quantity))
+        throw new FHIRFormatError("Not the right type for Dosage.rate[x]: "+value.fhirType());
       this.rate = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("sequence", "integer", "Indicates the order in which the dosage instructions should be applied or interpreted.", 0, java.lang.Integer.MAX_VALUE, sequence));
-        childrenList.add(new Property("text", "string", "Free text dosage instructions e.g. SIG.", 0, java.lang.Integer.MAX_VALUE, text));
-        childrenList.add(new Property("additionalInstruction", "CodeableConcept", "Supplemental instruction - e.g. \"with meals\".", 0, java.lang.Integer.MAX_VALUE, additionalInstruction));
-        childrenList.add(new Property("patientInstruction", "string", "Instructions in terms that are understood by the patient or consumer.", 0, java.lang.Integer.MAX_VALUE, patientInstruction));
-        childrenList.add(new Property("timing", "Timing", "When medication should be administered.", 0, java.lang.Integer.MAX_VALUE, timing));
-        childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, java.lang.Integer.MAX_VALUE, asNeeded));
-        childrenList.add(new Property("site", "CodeableConcept", "Body site to administer to.", 0, java.lang.Integer.MAX_VALUE, site));
-        childrenList.add(new Property("route", "CodeableConcept", "How drug should enter body.", 0, java.lang.Integer.MAX_VALUE, route));
-        childrenList.add(new Property("method", "CodeableConcept", "Technique for administering medication.", 0, java.lang.Integer.MAX_VALUE, method));
-        childrenList.add(new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, java.lang.Integer.MAX_VALUE, dose));
-        childrenList.add(new Property("maxDosePerPeriod", "Ratio", "Upper limit on medication per unit of time.", 0, java.lang.Integer.MAX_VALUE, maxDosePerPeriod));
-        childrenList.add(new Property("maxDosePerAdministration", "SimpleQuantity", "Upper limit on medication per administration.", 0, java.lang.Integer.MAX_VALUE, maxDosePerAdministration));
-        childrenList.add(new Property("maxDosePerLifetime", "SimpleQuantity", "Upper limit on medication per lifetime of the patient.", 0, java.lang.Integer.MAX_VALUE, maxDosePerLifetime));
-        childrenList.add(new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, java.lang.Integer.MAX_VALUE, rate));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("sequence", "integer", "Indicates the order in which the dosage instructions should be applied or interpreted.", 0, 1, sequence));
+        children.add(new Property("text", "string", "Free text dosage instructions e.g. SIG.", 0, 1, text));
+        children.add(new Property("additionalInstruction", "CodeableConcept", "Supplemental instruction - e.g. \"with meals\".", 0, java.lang.Integer.MAX_VALUE, additionalInstruction));
+        children.add(new Property("patientInstruction", "string", "Instructions in terms that are understood by the patient or consumer.", 0, 1, patientInstruction));
+        children.add(new Property("timing", "Timing", "When medication should be administered.", 0, 1, timing));
+        children.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded));
+        children.add(new Property("site", "CodeableConcept", "Body site to administer to.", 0, 1, site));
+        children.add(new Property("route", "CodeableConcept", "How drug should enter body.", 0, 1, route));
+        children.add(new Property("method", "CodeableConcept", "Technique for administering medication.", 0, 1, method));
+        children.add(new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, 1, dose));
+        children.add(new Property("maxDosePerPeriod", "Ratio", "Upper limit on medication per unit of time.", 0, 1, maxDosePerPeriod));
+        children.add(new Property("maxDosePerAdministration", "SimpleQuantity", "Upper limit on medication per administration.", 0, 1, maxDosePerAdministration));
+        children.add(new Property("maxDosePerLifetime", "SimpleQuantity", "Upper limit on medication per lifetime of the patient.", 0, 1, maxDosePerLifetime));
+        children.add(new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, 1, rate));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 1349547969: /*sequence*/  return new Property("sequence", "integer", "Indicates the order in which the dosage instructions should be applied or interpreted.", 0, 1, sequence);
+        case 3556653: /*text*/  return new Property("text", "string", "Free text dosage instructions e.g. SIG.", 0, 1, text);
+        case 1623641575: /*additionalInstruction*/  return new Property("additionalInstruction", "CodeableConcept", "Supplemental instruction - e.g. \"with meals\".", 0, java.lang.Integer.MAX_VALUE, additionalInstruction);
+        case 737543241: /*patientInstruction*/  return new Property("patientInstruction", "string", "Instructions in terms that are understood by the patient or consumer.", 0, 1, patientInstruction);
+        case -873664438: /*timing*/  return new Property("timing", "Timing", "When medication should be administered.", 0, 1, timing);
+        case -544329575: /*asNeeded[x]*/  return new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded);
+        case -1432923513: /*asNeeded*/  return new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded);
+        case -591717471: /*asNeededBoolean*/  return new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded);
+        case 1556420122: /*asNeededCodeableConcept*/  return new Property("asNeeded[x]", "boolean|CodeableConcept", "Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).", 0, 1, asNeeded);
+        case 3530567: /*site*/  return new Property("site", "CodeableConcept", "Body site to administer to.", 0, 1, site);
+        case 108704329: /*route*/  return new Property("route", "CodeableConcept", "How drug should enter body.", 0, 1, route);
+        case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "Technique for administering medication.", 0, 1, method);
+        case 1843195715: /*dose[x]*/  return new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, 1, dose);
+        case 3089437: /*dose*/  return new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, 1, dose);
+        case 1775578912: /*doseRange*/  return new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, 1, dose);
+        case 1230053850: /*doseSimpleQuantity*/  return new Property("dose[x]", "Range|SimpleQuantity", "Amount of medication per dose.", 0, 1, dose);
+        case 1506263709: /*maxDosePerPeriod*/  return new Property("maxDosePerPeriod", "Ratio", "Upper limit on medication per unit of time.", 0, 1, maxDosePerPeriod);
+        case 2004889914: /*maxDosePerAdministration*/  return new Property("maxDosePerAdministration", "SimpleQuantity", "Upper limit on medication per administration.", 0, 1, maxDosePerAdministration);
+        case 642099621: /*maxDosePerLifetime*/  return new Property("maxDosePerLifetime", "SimpleQuantity", "Upper limit on medication per lifetime of the patient.", 0, 1, maxDosePerLifetime);
+        case 983460768: /*rate[x]*/  return new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, 1, rate);
+        case 3493088: /*rate*/  return new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, 1, rate);
+        case 204021515: /*rateRatio*/  return new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, 1, rate);
+        case 204015677: /*rateRange*/  return new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, 1, rate);
+        case -2121057955: /*rateSimpleQuantity*/  return new Property("rate[x]", "Ratio|Range|SimpleQuantity", "Amount of medication per unit of time.", 0, 1, rate);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -951,12 +1004,12 @@ public class Dosage extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Dosage))
+        if (!(other_ instanceof Dosage))
           return false;
-        Dosage o = (Dosage) other;
+        Dosage o = (Dosage) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(text, o.text, true) && compareDeep(additionalInstruction, o.additionalInstruction, true)
            && compareDeep(patientInstruction, o.patientInstruction, true) && compareDeep(timing, o.timing, true)
            && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(site, o.site, true) && compareDeep(route, o.route, true)
@@ -966,12 +1019,12 @@ public class Dosage extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Dosage))
+        if (!(other_ instanceof Dosage))
           return false;
-        Dosage o = (Dosage) other;
+        Dosage o = (Dosage) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(text, o.text, true) && compareValues(patientInstruction, o.patientInstruction, true)
           ;
       }

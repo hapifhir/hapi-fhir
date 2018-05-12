@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
  */
@@ -559,17 +560,29 @@ public class Subscription extends DomainResource {
           if (this.header == null)
             return false;
           for (StringType v : this.header)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "The type of channel to send notifications on.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
-          childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "The type of channel to send notifications on.", 0, 1, type));
+          children.add(new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, 1, endpoint));
+          children.add(new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, 1, payload));
+          children.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "The type of channel to send notifications on.", 0, 1, type);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "uri", "The uri that describes the actual end-point to send messages to.", 0, 1, endpoint);
+          case -786701938: /*payload*/  return new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, 1, payload);
+          case -1221270899: /*header*/  return new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -678,23 +691,23 @@ public class Subscription extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SubscriptionChannelComponent))
+        if (!(other_ instanceof SubscriptionChannelComponent))
           return false;
-        SubscriptionChannelComponent o = (SubscriptionChannelComponent) other;
+        SubscriptionChannelComponent o = (SubscriptionChannelComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(endpoint, o.endpoint, true) && compareDeep(payload, o.payload, true)
            && compareDeep(header, o.header, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SubscriptionChannelComponent))
+        if (!(other_ instanceof SubscriptionChannelComponent))
           return false;
-        SubscriptionChannelComponent o = (SubscriptionChannelComponent) other;
+        SubscriptionChannelComponent o = (SubscriptionChannelComponent) other_;
         return compareValues(type, o.type, true) && compareValues(endpoint, o.endpoint, true) && compareValues(payload, o.payload, true)
            && compareValues(header, o.header, true);
       }
@@ -1094,7 +1107,7 @@ public class Subscription extends DomainResource {
     /**
      * @param value {@link #channel} (Details where to send notifications when resources are received that meet the criteria.)
      */
-    public Subscription setChannel(SubscriptionChannelComponent value) { 
+    public Subscription setChannel(SubscriptionChannelComponent value)  { 
       this.channel = value;
       return this;
     }
@@ -1152,16 +1165,32 @@ public class Subscription extends DomainResource {
       return getTag().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("status", "code", "The status of the subscription, which marks the server state for managing the subscription.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("end", "instant", "The time for the server to turn the subscription off.", 0, java.lang.Integer.MAX_VALUE, end));
-        childrenList.add(new Property("reason", "string", "A description of why this subscription is defined.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, java.lang.Integer.MAX_VALUE, criteria));
-        childrenList.add(new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, java.lang.Integer.MAX_VALUE, error));
-        childrenList.add(new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, java.lang.Integer.MAX_VALUE, channel));
-        childrenList.add(new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("status", "code", "The status of the subscription, which marks the server state for managing the subscription.", 0, 1, status));
+        children.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("end", "instant", "The time for the server to turn the subscription off.", 0, 1, end));
+        children.add(new Property("reason", "string", "A description of why this subscription is defined.", 0, 1, reason));
+        children.add(new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, 1, criteria));
+        children.add(new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, 1, error));
+        children.add(new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, 1, channel));
+        children.add(new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the subscription, which marks the server state for managing the subscription.", 0, 1, status);
+        case 951526432: /*contact*/  return new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case 100571: /*end*/  return new Property("end", "instant", "The time for the server to turn the subscription off.", 0, 1, end);
+        case -934964668: /*reason*/  return new Property("reason", "string", "A description of why this subscription is defined.", 0, 1, reason);
+        case 1952046943: /*criteria*/  return new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, 1, criteria);
+        case 96784904: /*error*/  return new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, 1, error);
+        case 738950403: /*channel*/  return new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, 1, channel);
+        case 114586: /*tag*/  return new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1332,24 +1361,24 @@ public class Subscription extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Subscription))
+        if (!(other_ instanceof Subscription))
           return false;
-        Subscription o = (Subscription) other;
+        Subscription o = (Subscription) other_;
         return compareDeep(status, o.status, true) && compareDeep(contact, o.contact, true) && compareDeep(end, o.end, true)
            && compareDeep(reason, o.reason, true) && compareDeep(criteria, o.criteria, true) && compareDeep(error, o.error, true)
            && compareDeep(channel, o.channel, true) && compareDeep(tag, o.tag, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Subscription))
+        if (!(other_ instanceof Subscription))
           return false;
-        Subscription o = (Subscription) other;
+        Subscription o = (Subscription) other_;
         return compareValues(status, o.status, true) && compareValues(end, o.end, true) && compareValues(reason, o.reason, true)
            && compareValues(criteria, o.criteria, true) && compareValues(error, o.error, true);
       }

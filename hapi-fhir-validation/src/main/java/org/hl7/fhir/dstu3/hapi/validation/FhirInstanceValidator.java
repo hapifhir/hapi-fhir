@@ -15,6 +15,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -507,6 +508,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public String getVersion() {
 			return myWrap.getVersion();
+		}
+
+		@Override
+		public UcumService getUcumService() {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

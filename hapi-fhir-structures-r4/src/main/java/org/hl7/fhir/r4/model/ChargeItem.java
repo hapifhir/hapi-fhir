@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -658,13 +658,13 @@ public class ChargeItem extends DomainResource {
     protected List<Annotation> note;
 
     /**
-     * Further information supporting the this charge.
+     * Further information supporting this charge.
      */
     @Child(name = "supportingInformation", type = {Reference.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Further information supporting the this charge", formalDefinition="Further information supporting the this charge." )
+    @Description(shortDefinition="Further information supporting this charge", formalDefinition="Further information supporting this charge." )
     protected List<Reference> supportingInformation;
     /**
-     * The actual objects that are the target of the reference (Further information supporting the this charge.)
+     * The actual objects that are the target of the reference (Further information supporting this charge.)
      */
     protected List<Resource> supportingInformationTarget;
 
@@ -1035,39 +1035,45 @@ public class ChargeItem extends DomainResource {
      * @return {@link #occurrence} (Date/time(s) or duration when the charged service was applied.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (Date/time(s) or duration when the charged service was applied.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (Date/time(s) or duration when the charged service was applied.)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -1078,6 +1084,8 @@ public class ChargeItem extends DomainResource {
      * @param value {@link #occurrence} (Date/time(s) or duration when the charged service was applied.)
      */
     public ChargeItem setOccurrence(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new Error("Not the right type for ChargeItem.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1812,7 +1820,7 @@ public class ChargeItem extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInformation} (Further information supporting the this charge.)
+     * @return {@link #supportingInformation} (Further information supporting this charge.)
      */
     public List<Reference> getSupportingInformation() { 
       if (this.supportingInformation == null)
@@ -1899,7 +1907,7 @@ public class ChargeItem extends DomainResource {
         children.add(new Property("service", "Reference(DiagnosticReport|ImagingStudy|Immunization|MedicationAdministration|MedicationDispense|Observation|Procedure|SupplyDelivery)", "Indicated the rendered service that caused this charge.", 0, java.lang.Integer.MAX_VALUE, service));
         children.add(new Property("account", "Reference(Account)", "Account into which this ChargeItems belongs.", 0, java.lang.Integer.MAX_VALUE, account));
         children.add(new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
-        children.add(new Property("supportingInformation", "Reference(Any)", "Further information supporting the this charge.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
+        children.add(new Property("supportingInformation", "Reference(Any)", "Further information supporting this charge.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
       }
 
       @Override
@@ -1932,7 +1940,7 @@ public class ChargeItem extends DomainResource {
         case 1984153269: /*service*/  return new Property("service", "Reference(DiagnosticReport|ImagingStudy|Immunization|MedicationAdministration|MedicationDispense|Observation|Procedure|SupplyDelivery)", "Indicated the rendered service that caused this charge.", 0, java.lang.Integer.MAX_VALUE, service);
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "Account into which this ChargeItems belongs.", 0, java.lang.Integer.MAX_VALUE, account);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
-        case -1248768647: /*supportingInformation*/  return new Property("supportingInformation", "Reference(Any)", "Further information supporting the this charge.", 0, java.lang.Integer.MAX_VALUE, supportingInformation);
+        case -1248768647: /*supportingInformation*/  return new Property("supportingInformation", "Reference(Any)", "Further information supporting this charge.", 0, java.lang.Integer.MAX_VALUE, supportingInformation);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

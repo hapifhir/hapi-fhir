@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A homogeneous material with a definite composition.
  */
@@ -207,7 +208,7 @@ public class Substance extends DomainResource {
         /**
          * @param value {@link #identifier} (Identifier associated with the package/container (usually a label affixed directly).)
          */
-        public SubstanceInstanceComponent setIdentifier(Identifier value) { 
+        public SubstanceInstanceComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -280,16 +281,27 @@ public class Substance extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of the substance.)
          */
-        public SubstanceInstanceComponent setQuantity(SimpleQuantity value) { 
+        public SubstanceInstanceComponent setQuantity(SimpleQuantity value)  { 
           this.quantity = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "Identifier associated with the package/container (usually a label affixed directly).", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("expiry", "dateTime", "When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.", 0, java.lang.Integer.MAX_VALUE, expiry));
-          childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of the substance.", 0, java.lang.Integer.MAX_VALUE, quantity));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "Identifier associated with the package/container (usually a label affixed directly).", 0, 1, identifier));
+          children.add(new Property("expiry", "dateTime", "When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.", 0, 1, expiry));
+          children.add(new Property("quantity", "SimpleQuantity", "The amount of the substance.", 0, 1, quantity));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier associated with the package/container (usually a label affixed directly).", 0, 1, identifier);
+          case -1289159373: /*expiry*/  return new Property("expiry", "dateTime", "When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.", 0, 1, expiry);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The amount of the substance.", 0, 1, quantity);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -382,23 +394,23 @@ public class Substance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SubstanceInstanceComponent))
+        if (!(other_ instanceof SubstanceInstanceComponent))
           return false;
-        SubstanceInstanceComponent o = (SubstanceInstanceComponent) other;
+        SubstanceInstanceComponent o = (SubstanceInstanceComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(expiry, o.expiry, true) && compareDeep(quantity, o.quantity, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SubstanceInstanceComponent))
+        if (!(other_ instanceof SubstanceInstanceComponent))
           return false;
-        SubstanceInstanceComponent o = (SubstanceInstanceComponent) other;
+        SubstanceInstanceComponent o = (SubstanceInstanceComponent) other_;
         return compareValues(expiry, o.expiry, true);
       }
 
@@ -467,7 +479,7 @@ public class Substance extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of the ingredient in the substance - a concentration ratio.)
          */
-        public SubstanceIngredientComponent setQuantity(Ratio value) { 
+        public SubstanceIngredientComponent setQuantity(Ratio value)  { 
           this.quantity = value;
           return this;
         }
@@ -483,26 +495,30 @@ public class Substance extends DomainResource {
          * @return {@link #substance} (Another substance that is a component of this substance.)
          */
         public CodeableConcept getSubstanceCodeableConcept() throws FHIRException { 
+          if (this.substance == null)
+            return null;
           if (!(this.substance instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (CodeableConcept) this.substance;
         }
 
         public boolean hasSubstanceCodeableConcept() { 
-          return this.substance instanceof CodeableConcept;
+          return this != null && this.substance instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #substance} (Another substance that is a component of this substance.)
          */
         public Reference getSubstanceReference() throws FHIRException { 
+          if (this.substance == null)
+            return null;
           if (!(this.substance instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (Reference) this.substance;
         }
 
         public boolean hasSubstanceReference() { 
-          return this.substance instanceof Reference;
+          return this != null && this.substance instanceof Reference;
         }
 
         public boolean hasSubstance() { 
@@ -512,15 +528,30 @@ public class Substance extends DomainResource {
         /**
          * @param value {@link #substance} (Another substance that is a component of this substance.)
          */
-        public SubstanceIngredientComponent setSubstance(Type value) { 
+        public SubstanceIngredientComponent setSubstance(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Substance.ingredient.substance[x]: "+value.fhirType());
           this.substance = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("quantity", "Ratio", "The amount of the ingredient in the substance - a concentration ratio.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("substance[x]", "CodeableConcept|Reference(Substance)", "Another substance that is a component of this substance.", 0, java.lang.Integer.MAX_VALUE, substance));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("quantity", "Ratio", "The amount of the ingredient in the substance - a concentration ratio.", 0, 1, quantity));
+          children.add(new Property("substance[x]", "CodeableConcept|Reference(Substance)", "Another substance that is a component of this substance.", 0, 1, substance));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1285004149: /*quantity*/  return new Property("quantity", "Ratio", "The amount of the ingredient in the substance - a concentration ratio.", 0, 1, quantity);
+          case 2127194384: /*substance[x]*/  return new Property("substance[x]", "CodeableConcept|Reference(Substance)", "Another substance that is a component of this substance.", 0, 1, substance);
+          case 530040176: /*substance*/  return new Property("substance[x]", "CodeableConcept|Reference(Substance)", "Another substance that is a component of this substance.", 0, 1, substance);
+          case -1974119407: /*substanceCodeableConcept*/  return new Property("substance[x]", "CodeableConcept|Reference(Substance)", "Another substance that is a component of this substance.", 0, 1, substance);
+          case 516208571: /*substanceReference*/  return new Property("substance[x]", "CodeableConcept|Reference(Substance)", "Another substance that is a component of this substance.", 0, 1, substance);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -606,22 +637,22 @@ public class Substance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SubstanceIngredientComponent))
+        if (!(other_ instanceof SubstanceIngredientComponent))
           return false;
-        SubstanceIngredientComponent o = (SubstanceIngredientComponent) other;
+        SubstanceIngredientComponent o = (SubstanceIngredientComponent) other_;
         return compareDeep(quantity, o.quantity, true) && compareDeep(substance, o.substance, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SubstanceIngredientComponent))
+        if (!(other_ instanceof SubstanceIngredientComponent))
           return false;
-        SubstanceIngredientComponent o = (SubstanceIngredientComponent) other;
+        SubstanceIngredientComponent o = (SubstanceIngredientComponent) other_;
         return true;
       }
 
@@ -879,7 +910,7 @@ public class Substance extends DomainResource {
     /**
      * @param value {@link #code} (A code (or set of codes) that identify this substance.)
      */
-    public Substance setCode(CodeableConcept value) { 
+    public Substance setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -1039,15 +1070,30 @@ public class Substance extends DomainResource {
       return getIngredient().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier for the substance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "A code to indicate if the substance is actively used.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("code", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("description", "string", "A description of the substance - its appearance, handling requirements, and other usage notes.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance));
-        childrenList.add(new Property("ingredient", "", "A substance can be composed of other substances.", 0, java.lang.Integer.MAX_VALUE, ingredient));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Unique identifier for the substance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "A code to indicate if the substance is actively used.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("code", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, 1, code));
+        children.add(new Property("description", "string", "A description of the substance - its appearance, handling requirements, and other usage notes.", 0, 1, description));
+        children.add(new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance));
+        children.add(new Property("ingredient", "", "A substance can be composed of other substances.", 0, java.lang.Integer.MAX_VALUE, ingredient));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for the substance.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "A code to indicate if the substance is actively used.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the general type of substance.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, 1, code);
+        case -1724546052: /*description*/  return new Property("description", "string", "A description of the substance - its appearance, handling requirements, and other usage notes.", 0, 1, description);
+        case 555127957: /*instance*/  return new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance);
+        case -206409263: /*ingredient*/  return new Property("ingredient", "", "A substance can be composed of other substances.", 0, java.lang.Integer.MAX_VALUE, ingredient);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1214,24 +1260,24 @@ public class Substance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Substance))
+        if (!(other_ instanceof Substance))
           return false;
-        Substance o = (Substance) other;
+        Substance o = (Substance) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(instance, o.instance, true)
            && compareDeep(ingredient, o.ingredient, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Substance))
+        if (!(other_ instanceof Substance))
           return false;
-        Substance o = (Substance) other;
+        Substance o = (Substance) other_;
         return compareValues(status, o.status, true) && compareValues(description, o.description, true);
       }
 

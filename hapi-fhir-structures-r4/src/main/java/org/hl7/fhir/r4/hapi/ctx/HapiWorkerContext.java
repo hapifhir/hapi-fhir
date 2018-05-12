@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.Validate;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -299,6 +300,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public String getVersion() {
     return myCtx.getVersion().getVersion().getFhirVersionString();
+  }
+
+  @Override
+  public UcumService getUcumService() {
+    throw new UnsupportedOperationException();
   }
 
   @Override

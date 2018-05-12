@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The EligibilityRequest provides patient and insurance coverage information to an insurer for them to respond, in the form of an EligibilityResponse, with information regarding whether the stated coverage is valid and in-force and optionally to provide the insurance details of the policy.
  */
@@ -446,7 +447,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #priority} (Immediate (STAT), best effort (NORMAL), deferred (DEFER).)
      */
-    public EligibilityRequest setPriority(CodeableConcept value) { 
+    public EligibilityRequest setPriority(CodeableConcept value)  { 
       this.priority = value;
       return this;
     }
@@ -470,7 +471,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #patient} (Patient Resource.)
      */
-    public EligibilityRequest setPatient(Reference value) { 
+    public EligibilityRequest setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -506,26 +507,30 @@ public class EligibilityRequest extends DomainResource {
      * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
      */
     public DateType getServicedDateType() throws FHIRException { 
+      if (this.serviced == null)
+        return null;
       if (!(this.serviced instanceof DateType))
         throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.serviced.getClass().getName()+" was encountered");
       return (DateType) this.serviced;
     }
 
     public boolean hasServicedDateType() { 
-      return this.serviced instanceof DateType;
+      return this != null && this.serviced instanceof DateType;
     }
 
     /**
      * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
      */
     public Period getServicedPeriod() throws FHIRException { 
+      if (this.serviced == null)
+        return null;
       if (!(this.serviced instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.serviced.getClass().getName()+" was encountered");
       return (Period) this.serviced;
     }
 
     public boolean hasServicedPeriod() { 
-      return this.serviced instanceof Period;
+      return this != null && this.serviced instanceof Period;
     }
 
     public boolean hasServiced() { 
@@ -535,7 +540,9 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
      */
-    public EligibilityRequest setServiced(Type value) { 
+    public EligibilityRequest setServiced(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateType || value instanceof Period))
+        throw new FHIRFormatError("Not the right type for EligibilityRequest.serviced[x]: "+value.fhirType());
       this.serviced = value;
       return this;
     }
@@ -608,7 +615,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #enterer} (Person who created the invoice/claim/pre-determination or pre-authorization.)
      */
-    public EligibilityRequest setEnterer(Reference value) { 
+    public EligibilityRequest setEnterer(Reference value)  { 
       this.enterer = value;
       return this;
     }
@@ -652,7 +659,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #provider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public EligibilityRequest setProvider(Reference value) { 
+    public EligibilityRequest setProvider(Reference value)  { 
       this.provider = value;
       return this;
     }
@@ -696,7 +703,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #organization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public EligibilityRequest setOrganization(Reference value) { 
+    public EligibilityRequest setOrganization(Reference value)  { 
       this.organization = value;
       return this;
     }
@@ -740,7 +747,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #insurer} (The Insurer who is target  of the request.)
      */
-    public EligibilityRequest setInsurer(Reference value) { 
+    public EligibilityRequest setInsurer(Reference value)  { 
       this.insurer = value;
       return this;
     }
@@ -784,7 +791,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #facility} (Facility where the services were provided.)
      */
-    public EligibilityRequest setFacility(Reference value) { 
+    public EligibilityRequest setFacility(Reference value)  { 
       this.facility = value;
       return this;
     }
@@ -828,7 +835,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #coverage} (Financial instrument by which payment information for health care.)
      */
-    public EligibilityRequest setCoverage(Reference value) { 
+    public EligibilityRequest setCoverage(Reference value)  { 
       this.coverage = value;
       return this;
     }
@@ -921,7 +928,7 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #benefitCategory} (Dental, Vision, Medical, Pharmacy, Rehab etc.)
      */
-    public EligibilityRequest setBenefitCategory(CodeableConcept value) { 
+    public EligibilityRequest setBenefitCategory(CodeableConcept value)  { 
       this.benefitCategory = value;
       return this;
     }
@@ -945,28 +952,54 @@ public class EligibilityRequest extends DomainResource {
     /**
      * @param value {@link #benefitSubCategory} (Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.)
      */
-    public EligibilityRequest setBenefitSubCategory(CodeableConcept value) { 
+    public EligibilityRequest setBenefitSubCategory(CodeableConcept value)  { 
       this.benefitSubCategory = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("priority", "CodeableConcept", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, serviced));
-        childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, java.lang.Integer.MAX_VALUE, enterer));
-        childrenList.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
-        childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("insurer", "Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, insurer));
-        childrenList.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, java.lang.Integer.MAX_VALUE, facility));
-        childrenList.add(new Property("coverage", "Reference(Coverage)", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, coverage));
-        childrenList.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, java.lang.Integer.MAX_VALUE, businessArrangement));
-        childrenList.add(new Property("benefitCategory", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, java.lang.Integer.MAX_VALUE, benefitCategory));
-        childrenList.add(new Property("benefitSubCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, java.lang.Integer.MAX_VALUE, benefitSubCategory));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("priority", "CodeableConcept", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, 1, priority));
+        children.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient));
+        children.add(new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, 1, serviced));
+        children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
+        children.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, 1, enterer));
+        children.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider));
+        children.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, organization));
+        children.add(new Property("insurer", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, insurer));
+        children.add(new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, 1, facility));
+        children.add(new Property("coverage", "Reference(Coverage)", "Financial instrument by which payment information for health care.", 0, 1, coverage));
+        children.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement));
+        children.add(new Property("benefitCategory", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, 1, benefitCategory));
+        children.add(new Property("benefitSubCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, 1, benefitSubCategory));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, 1, priority);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient);
+        case -1927922223: /*serviced[x]*/  return new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, 1, serviced);
+        case 1379209295: /*serviced*/  return new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, 1, serviced);
+        case 363246749: /*servicedDate*/  return new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, 1, serviced);
+        case 1534966512: /*servicedPeriod*/  return new Property("serviced[x]", "date|Period", "The date or dates when the enclosed suite of services were performed or completed.", 0, 1, serviced);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
+        case -1591951995: /*enterer*/  return new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, 1, enterer);
+        case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider);
+        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, organization);
+        case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, insurer);
+        case 501116579: /*facility*/  return new Property("facility", "Reference(Location)", "Facility where the services were provided.", 0, 1, facility);
+        case -351767064: /*coverage*/  return new Property("coverage", "Reference(Coverage)", "Financial instrument by which payment information for health care.", 0, 1, coverage);
+        case 259920682: /*businessArrangement*/  return new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement);
+        case -1023390027: /*benefitCategory*/  return new Property("benefitCategory", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, 1, benefitCategory);
+        case 1987878471: /*benefitSubCategory*/  return new Property("benefitSubCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, 1, benefitSubCategory);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1232,12 +1265,12 @@ public class EligibilityRequest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EligibilityRequest))
+        if (!(other_ instanceof EligibilityRequest))
           return false;
-        EligibilityRequest o = (EligibilityRequest) other;
+        EligibilityRequest o = (EligibilityRequest) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(priority, o.priority, true)
            && compareDeep(patient, o.patient, true) && compareDeep(serviced, o.serviced, true) && compareDeep(created, o.created, true)
            && compareDeep(enterer, o.enterer, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
@@ -1247,12 +1280,12 @@ public class EligibilityRequest extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EligibilityRequest))
+        if (!(other_ instanceof EligibilityRequest))
           return false;
-        EligibilityRequest o = (EligibilityRequest) other;
+        EligibilityRequest o = (EligibilityRequest) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(businessArrangement, o.businessArrangement, true)
           ;
       }

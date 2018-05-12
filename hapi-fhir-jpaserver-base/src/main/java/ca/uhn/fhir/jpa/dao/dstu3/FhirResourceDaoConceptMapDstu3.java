@@ -162,13 +162,11 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 
 		ConceptMap conceptMap = (ConceptMap) theResource;
 
-		if (conceptMap != null && isNotBlank(conceptMap.getUrl())) {
-			// Convert from DSTU3 to R4
-			try {
-				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, VersionConvertor_30_40.convertConceptMap(conceptMap));
-			} catch (FHIRException fe) {
-				throw new InternalErrorException(fe);
-			}
+		// Convert from DSTU3 to R4
+		try {
+			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, VersionConvertor_30_40.convertConceptMap(conceptMap));
+		} catch (FHIRException fe) {
+			throw new InternalErrorException(fe);
 		}
 
 		return retVal;

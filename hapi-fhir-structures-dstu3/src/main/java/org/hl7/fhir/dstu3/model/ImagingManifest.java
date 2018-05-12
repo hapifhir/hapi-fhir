@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.
  */
@@ -169,7 +170,7 @@ public class ImagingManifest extends DomainResource {
         /**
          * @param value {@link #imagingStudy} (Reference to the Imaging Study in FHIR form.)
          */
-        public StudyComponent setImagingStudy(Reference value) { 
+        public StudyComponent setImagingStudy(Reference value)  { 
           this.imagingStudy = value;
           return this;
         }
@@ -322,12 +323,24 @@ public class ImagingManifest extends DomainResource {
           return getSeries().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("uid", "oid", "Study instance UID of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("imagingStudy", "Reference(ImagingStudy)", "Reference to the Imaging Study in FHIR form.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
-          childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("series", "", "Series identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, series));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("uid", "oid", "Study instance UID of the SOP instances in the selection.", 0, 1, uid));
+          children.add(new Property("imagingStudy", "Reference(ImagingStudy)", "Reference to the Imaging Study in FHIR form.", 0, 1, imagingStudy));
+          children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+          children.add(new Property("series", "", "Series identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, series));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 115792: /*uid*/  return new Property("uid", "oid", "Study instance UID of the SOP instances in the selection.", 0, 1, uid);
+          case -814900911: /*imagingStudy*/  return new Property("imagingStudy", "Reference(ImagingStudy)", "Reference to the Imaging Study in FHIR form.", 0, 1, imagingStudy);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+          case -905838985: /*series*/  return new Property("series", "", "Series identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, series);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -439,23 +452,23 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof StudyComponent))
+        if (!(other_ instanceof StudyComponent))
           return false;
-        StudyComponent o = (StudyComponent) other;
+        StudyComponent o = (StudyComponent) other_;
         return compareDeep(uid, o.uid, true) && compareDeep(imagingStudy, o.imagingStudy, true) && compareDeep(endpoint, o.endpoint, true)
            && compareDeep(series, o.series, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof StudyComponent))
+        if (!(other_ instanceof StudyComponent))
           return false;
-        StudyComponent o = (StudyComponent) other;
+        StudyComponent o = (StudyComponent) other_;
         return compareValues(uid, o.uid, true);
       }
 
@@ -689,11 +702,22 @@ public class ImagingManifest extends DomainResource {
           return getInstance().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("uid", "oid", "Series instance UID of the SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("instance", "", "Identity and locating information of the selected DICOM SOP instances.", 0, java.lang.Integer.MAX_VALUE, instance));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("uid", "oid", "Series instance UID of the SOP instances in the selection.", 0, 1, uid));
+          children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+          children.add(new Property("instance", "", "Identity and locating information of the selected DICOM SOP instances.", 0, java.lang.Integer.MAX_VALUE, instance));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 115792: /*uid*/  return new Property("uid", "oid", "Series instance UID of the SOP instances in the selection.", 0, 1, uid);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+          case 555127957: /*instance*/  return new Property("instance", "", "Identity and locating information of the selected DICOM SOP instances.", 0, java.lang.Integer.MAX_VALUE, instance);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -792,23 +816,23 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SeriesComponent))
+        if (!(other_ instanceof SeriesComponent))
           return false;
-        SeriesComponent o = (SeriesComponent) other;
+        SeriesComponent o = (SeriesComponent) other_;
         return compareDeep(uid, o.uid, true) && compareDeep(endpoint, o.endpoint, true) && compareDeep(instance, o.instance, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SeriesComponent))
+        if (!(other_ instanceof SeriesComponent))
           return false;
-        SeriesComponent o = (SeriesComponent) other;
+        SeriesComponent o = (SeriesComponent) other_;
         return compareValues(uid, o.uid, true);
       }
 
@@ -948,10 +972,20 @@ public class ImagingManifest extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sopClass", "oid", "SOP class UID of the selected instance.", 0, java.lang.Integer.MAX_VALUE, sopClass));
-          childrenList.add(new Property("uid", "oid", "SOP Instance UID of the selected instance.", 0, java.lang.Integer.MAX_VALUE, uid));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sopClass", "oid", "SOP class UID of the selected instance.", 0, 1, sopClass));
+          children.add(new Property("uid", "oid", "SOP Instance UID of the selected instance.", 0, 1, uid));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1560041540: /*sopClass*/  return new Property("sopClass", "oid", "SOP class UID of the selected instance.", 0, 1, sopClass);
+          case 115792: /*uid*/  return new Property("uid", "oid", "SOP Instance UID of the selected instance.", 0, 1, uid);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1030,22 +1064,22 @@ public class ImagingManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof InstanceComponent))
+        if (!(other_ instanceof InstanceComponent))
           return false;
-        InstanceComponent o = (InstanceComponent) other;
+        InstanceComponent o = (InstanceComponent) other_;
         return compareDeep(sopClass, o.sopClass, true) && compareDeep(uid, o.uid, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof InstanceComponent))
+        if (!(other_ instanceof InstanceComponent))
           return false;
-        InstanceComponent o = (InstanceComponent) other;
+        InstanceComponent o = (InstanceComponent) other_;
         return compareValues(sopClass, o.sopClass, true) && compareValues(uid, o.uid, true);
       }
 
@@ -1149,7 +1183,7 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
     /**
      * @param value {@link #identifier} (Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.)
      */
-    public ImagingManifest setIdentifier(Identifier value) { 
+    public ImagingManifest setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -1173,7 +1207,7 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
     /**
      * @param value {@link #patient} (A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.)
      */
-    public ImagingManifest setPatient(Reference value) { 
+    public ImagingManifest setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1266,7 +1300,7 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
     /**
      * @param value {@link #author} (Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.)
      */
-    public ImagingManifest setAuthor(Reference value) { 
+    public ImagingManifest setAuthor(Reference value)  { 
       this.author = value;
       return this;
     }
@@ -1392,14 +1426,28 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
       return getStudy().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, java.lang.Integer.MAX_VALUE, authoringTime));
-        childrenList.add(new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("description", "string", "Free text narrative description of the ImagingManifest.  \nThe value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("study", "", "Study identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, study));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.", 0, 1, identifier));
+        children.add(new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.", 0, 1, patient));
+        children.add(new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, 1, authoringTime));
+        children.add(new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, 1, author));
+        children.add(new Property("description", "string", "Free text narrative description of the ImagingManifest.  \nThe value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.", 0, 1, description));
+        children.add(new Property("study", "", "Study identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, study));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier of the DICOM Key Object Selection (KOS) that this resource represents.", 0, 1, identifier);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "A patient resource reference which is the patient subject of all DICOM SOP Instances in this ImagingManifest.", 0, 1, patient);
+        case -1724532252: /*authoringTime*/  return new Property("authoringTime", "dateTime", "Date and time when the selection of the referenced instances were made. It is (typically) different from the creation date of the selection resource, and from dates associated with the referenced instances (e.g. capture time of the referenced image).", 0, 1, authoringTime);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Device|Organization|Patient|RelatedPerson)", "Author of ImagingManifest. It can be a human author or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attach in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.", 0, 1, author);
+        case -1724546052: /*description*/  return new Property("description", "string", "Free text narrative description of the ImagingManifest.  \nThe value may be derived from the DICOM Standard Part 16, CID-7010 descriptions (e.g. Best in Set, Complete Study Content). Note that those values cover the wide range of uses of the DICOM Key Object Selection object, several of which are not supported by ImagingManifest. Specifically, there is no expected behavior associated with descriptions that suggest referenced images be removed or not used.", 0, 1, description);
+        case 109776329: /*study*/  return new Property("study", "", "Study identity and locating information of the DICOM SOP instances in the selection.", 0, java.lang.Integer.MAX_VALUE, study);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1542,24 +1590,24 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImagingManifest))
+        if (!(other_ instanceof ImagingManifest))
           return false;
-        ImagingManifest o = (ImagingManifest) other;
+        ImagingManifest o = (ImagingManifest) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(authoringTime, o.authoringTime, true)
            && compareDeep(author, o.author, true) && compareDeep(description, o.description, true) && compareDeep(study, o.study, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImagingManifest))
+        if (!(other_ instanceof ImagingManifest))
           return false;
-        ImagingManifest o = (ImagingManifest) other;
+        ImagingManifest o = (ImagingManifest) other_;
         return compareValues(authoringTime, o.authoringTime, true) && compareValues(description, o.description, true)
           ;
       }

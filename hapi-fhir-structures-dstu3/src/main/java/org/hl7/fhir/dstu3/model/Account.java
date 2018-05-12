@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A financial tool for tracking value accrued for a particular purpose.  In the healthcare field, used to track charges for a patient, cost centers, etc.
  */
@@ -221,7 +222,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
 
 A coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.)
          */
-        public CoverageComponent setCoverage(Reference value) { 
+        public CoverageComponent setCoverage(Reference value)  { 
           this.coverage = value;
           return this;
         }
@@ -295,10 +296,20 @@ A coverage may only be resposible for specific types of charges, and the sequenc
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, java.lang.Integer.MAX_VALUE, coverage));
-          childrenList.add(new Property("priority", "positiveInt", "The priority of the coverage in the context of this account.", 0, java.lang.Integer.MAX_VALUE, priority));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, 1, coverage));
+          children.add(new Property("priority", "positiveInt", "The priority of the coverage in the context of this account.", 0, 1, priority));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -351767064: /*coverage*/  return new Property("coverage", "Reference(Coverage)", "The party(s) that are responsible for payment (or part of) of charges applied to this account (including self-pay).\n\nA coverage may only be resposible for specific types of charges, and the sequence of the coverages in the account could be important when processing billing.", 0, 1, coverage);
+          case -1165461084: /*priority*/  return new Property("priority", "positiveInt", "The priority of the coverage in the context of this account.", 0, 1, priority);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -378,22 +389,22 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CoverageComponent))
+        if (!(other_ instanceof CoverageComponent))
           return false;
-        CoverageComponent o = (CoverageComponent) other;
+        CoverageComponent o = (CoverageComponent) other_;
         return compareDeep(coverage, o.coverage, true) && compareDeep(priority, o.priority, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CoverageComponent))
+        if (!(other_ instanceof CoverageComponent))
           return false;
-        CoverageComponent o = (CoverageComponent) other;
+        CoverageComponent o = (CoverageComponent) other_;
         return compareValues(priority, o.priority, true);
       }
 
@@ -472,7 +483,7 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         /**
          * @param value {@link #party} (The entity who is responsible.)
          */
-        public GuarantorComponent setParty(Reference value) { 
+        public GuarantorComponent setParty(Reference value)  { 
           this.party = value;
           return this;
         }
@@ -556,16 +567,27 @@ A coverage may only be resposible for specific types of charges, and the sequenc
         /**
          * @param value {@link #period} (The timeframe during which the guarantor accepts responsibility for the account.)
          */
-        public GuarantorComponent setPeriod(Period value) { 
+        public GuarantorComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("party", "Reference(Patient|RelatedPerson|Organization)", "The entity who is responsible.", 0, java.lang.Integer.MAX_VALUE, party));
-          childrenList.add(new Property("onHold", "boolean", "A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.", 0, java.lang.Integer.MAX_VALUE, onHold));
-          childrenList.add(new Property("period", "Period", "The timeframe during which the guarantor accepts responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("party", "Reference(Patient|RelatedPerson|Organization)", "The entity who is responsible.", 0, 1, party));
+          children.add(new Property("onHold", "boolean", "A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.", 0, 1, onHold));
+          children.add(new Property("period", "Period", "The timeframe during which the guarantor accepts responsibility for the account.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 106437350: /*party*/  return new Property("party", "Reference(Patient|RelatedPerson|Organization)", "The entity who is responsible.", 0, 1, party);
+          case -1013289154: /*onHold*/  return new Property("onHold", "boolean", "A guarantor may be placed on credit hold or otherwise have their role temporarily suspended.", 0, 1, onHold);
+          case -991726143: /*period*/  return new Property("period", "Period", "The timeframe during which the guarantor accepts responsibility for the account.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -658,23 +680,23 @@ A coverage may only be resposible for specific types of charges, and the sequenc
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GuarantorComponent))
+        if (!(other_ instanceof GuarantorComponent))
           return false;
-        GuarantorComponent o = (GuarantorComponent) other;
+        GuarantorComponent o = (GuarantorComponent) other_;
         return compareDeep(party, o.party, true) && compareDeep(onHold, o.onHold, true) && compareDeep(period, o.period, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GuarantorComponent))
+        if (!(other_ instanceof GuarantorComponent))
           return false;
-        GuarantorComponent o = (GuarantorComponent) other;
+        GuarantorComponent o = (GuarantorComponent) other_;
         return compareValues(onHold, o.onHold, true);
       }
 
@@ -916,7 +938,7 @@ This period may be different to the coveragePeriod which is the duration of time
     /**
      * @param value {@link #type} (Categorizes the account for reporting and searching purposes.)
      */
-    public Account setType(CodeableConcept value) { 
+    public Account setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -989,7 +1011,7 @@ This period may be different to the coveragePeriod which is the duration of time
     /**
      * @param value {@link #subject} (Identifies the patient, device, practitioner, location or other object the account is associated with.)
      */
-    public Account setSubject(Reference value) { 
+    public Account setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1028,7 +1050,7 @@ This period may be different to the coveragePeriod which is the duration of time
     /**
      * @param value {@link #period} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
      */
-    public Account setPeriod(Period value) { 
+    public Account setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -1054,7 +1076,7 @@ This period may be different to the coveragePeriod which is the duration of time
      * @param value {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
 This period may be different to the coveragePeriod which is the duration of time that services may occur.)
      */
-    public Account setActive(Period value) { 
+    public Account setActive(Period value)  { 
       this.active = value;
       return this;
     }
@@ -1078,7 +1100,7 @@ This period may be different to the coveragePeriod which is the duration of time
     /**
      * @param value {@link #balance} (Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.)
      */
-    public Account setBalance(Money value) { 
+    public Account setBalance(Money value)  { 
       this.balance = value;
       return this;
     }
@@ -1155,7 +1177,7 @@ This period may be different to the coveragePeriod which is the duration of time
     /**
      * @param value {@link #owner} (Indicates the organization, department, etc. with responsibility for the account.)
      */
-    public Account setOwner(Reference value) { 
+    public Account setOwner(Reference value)  { 
       this.owner = value;
       return this;
     }
@@ -1282,20 +1304,40 @@ This period may be different to the coveragePeriod which is the duration of time
       return getGuarantor().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Indicates whether the account is presently used/usable or not.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("period", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, java.lang.Integer.MAX_VALUE, balance));
-        childrenList.add(new Property("coverage", "", "The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.", 0, java.lang.Integer.MAX_VALUE, coverage));
-        childrenList.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, java.lang.Integer.MAX_VALUE, owner));
-        childrenList.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("guarantor", "", "Parties financially responsible for the account.", 0, java.lang.Integer.MAX_VALUE, guarantor));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "Indicates whether the account is presently used/usable or not.", 0, 1, status));
+        children.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, 1, type));
+        children.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, 1, name));
+        children.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, 1, subject));
+        children.add(new Property("period", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, 1, period));
+        children.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, 1, active));
+        children.add(new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, 1, balance));
+        children.add(new Property("coverage", "", "The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.", 0, java.lang.Integer.MAX_VALUE, coverage));
+        children.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, 1, owner));
+        children.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, 1, description));
+        children.add(new Property("guarantor", "", "Parties financially responsible for the account.", 0, java.lang.Integer.MAX_VALUE, guarantor));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier used to reference the account.  May or may not be intended for human use (e.g. credit card number).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates whether the account is presently used/usable or not.", 0, 1, status);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, 1, type);
+        case 3373707: /*name*/  return new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, 1, name);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, 1, subject);
+        case -991726143: /*period*/  return new Property("period", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, 1, period);
+        case -1422950650: /*active*/  return new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, 1, active);
+        case -339185956: /*balance*/  return new Property("balance", "Money", "Represents the sum of all credits less all debits associated with the account.  Might be positive, zero or negative.", 0, 1, balance);
+        case -351767064: /*coverage*/  return new Property("coverage", "", "The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.", 0, java.lang.Integer.MAX_VALUE, coverage);
+        case 106164915: /*owner*/  return new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, 1, owner);
+        case -1724546052: /*description*/  return new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, 1, description);
+        case -188629045: /*guarantor*/  return new Property("guarantor", "", "Parties financially responsible for the account.", 0, java.lang.Integer.MAX_VALUE, guarantor);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1523,12 +1565,12 @@ This period may be different to the coveragePeriod which is the duration of time
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Account))
+        if (!(other_ instanceof Account))
           return false;
-        Account o = (Account) other;
+        Account o = (Account) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(period, o.period, true)
            && compareDeep(active, o.active, true) && compareDeep(balance, o.balance, true) && compareDeep(coverage, o.coverage, true)
@@ -1537,12 +1579,12 @@ This period may be different to the coveragePeriod which is the duration of time
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Account))
+        if (!(other_ instanceof Account))
           return false;
-        Account o = (Account) other;
+        Account o = (Account) other_;
         return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
           ;
       }

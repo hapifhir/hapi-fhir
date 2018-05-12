@@ -12,9 +12,9 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -42,9 +42,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
@@ -52,7 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -242,11 +245,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
-	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
-	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
+	@Autowired
+	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 
 	@After()
 	public void afterCleanupDao() {
@@ -255,6 +258,16 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+	}
+
+	@After
+	public void afterClearTerminologyCaches() {
+		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		baseHapiTerminologySvc.clearTranslationCache();
+		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearDeferred();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 	}
 
 	@After()
@@ -318,6 +331,15 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return retVal;
 	}
 
+	public void runInTransaction(Runnable theRunnable) {
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				theRunnable.run();
+			}
+		});
+	}
+
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() throws Exception {
 		ourValueSetDao.purgeCaches();
@@ -325,29 +347,20 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
-		String linkNext = theBundle.getLink("next").getUrl();
-		linkNext = linkNext.substring(linkNext.indexOf('?'));
-		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
-		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		String uuid = uuidParams[ 0 ];
-		return uuid;
-	}
-
 	/**
 	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
 	 * <br>
 	 * <ul>
-	 *     <li>
-	 *         One group with two elements, each identifying one target apiece.
-	 *     </li>
-	 *     <li>
-	 *         One group with one element, identifying two targets.
-	 *     </li>
-	 *     <li>
-	 * 	 	  One group with one element, identifying a target that also appears
-	 * 	 	  in the first element of the first group.
-	 * 	 </li>
+	 * <li>
+	 * One group with two elements, each identifying one target apiece.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying two targets.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying a target that also appears
+	 * in the first element of the first group.
+	 * </li>
 	 * </ul>
 	 * </br>
 	 * The first two groups identify the same source code system and different target code systems.
@@ -357,118 +370,81 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	 * @return A {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
 	 */
 	public static ConceptMap createConceptMap() {
-		// <editor-fold desc="ConceptMap">
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
 
 		conceptMap.setSource(new UriType(VS_URL));
 		conceptMap.setTarget(new UriType(VS_URL_2));
 
-		// <editor-fold desc="ConceptMap.group(0)">
 		ConceptMapGroupComponent group = conceptMap.addGroup();
 		group.setSource(CS_URL);
 		group.setSourceVersion("Version 1");
 		group.setTarget(CS_URL_2);
 		group.setTargetVersion("Version 2");
 
-		// <editor-fold desc="ConceptMap.group(0).element(0))">
 		SourceElementComponent element = group.addElement();
 		element.setCode("12345");
 		element.setDisplay("Source Code 12345");
 
-		// <editor-fold desc="ConceptMap.group(0).element(0).target(0)">
 		TargetElementComponent target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
 		target.setEquivalence(ConceptMapEquivalence.EQUAL);
-		// End ConceptMap.group(0).element(0).target(0)
-		// </editor-fold>
 
-		// End ConceptMap.group(0).element(0)
-		// </editor-fold>
-
-		// <editor-fold desc="ConceptMap.group(0).element(1))">
 		element = group.addElement();
 		element.setCode("23456");
 		element.setDisplay("Source Code 23456");
 
-		// <editor-fold desc="ConceptMap.group(0).element(1).target(0)">
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
 		target.setEquivalence(ConceptMapEquivalence.WIDER);
-		// End ConceptMap.group(0).element(1).target(0)
-		// </editor-fold>
 
-		// End ConceptMap.group(0).element(1)
-		// </editor-fold>
-
-		// End ConceptMap.group(0)
-		// </editor-fold>
-
-		// <editor-fold desc="ConceptMap.group(1)">
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
 		group.setSourceVersion("Version 3");
 		group.setTarget(CS_URL_3);
 		group.setTargetVersion("Version 4");
 
-		// <editor-fold desc="ConceptMap.group(1).element(0))">
 		element = group.addElement();
 		element.setCode("12345");
 		element.setDisplay("Source Code 12345");
 
-		// <editor-fold desc="ConceptMap.group(1).element(0).target(0)">
 		target = element.addTarget();
 		target.setCode("56789");
 		target.setDisplay("Target Code 56789");
 		target.setEquivalence(ConceptMapEquivalence.EQUAL);
-		// End ConceptMap.group(1).element(0).target(0)
-		// </editor-fold>
 
-		// <editor-fold desc="ConceptMap.group(1).element(0).target(1)">
 		target = element.addTarget();
 		target.setCode("67890");
 		target.setDisplay("Target Code 67890");
 		target.setEquivalence(ConceptMapEquivalence.WIDER);
-		// End ConceptMap.group(1).element(0).target(1)
-		// </editor-fold>
 
-		// End ConceptMap.group(1).element(0)
-		// </editor-fold>
-
-		// End ConceptMap.group(1)
-		// </editor-fold>
-
-		// <editor-fold desc="ConceptMap.group(2)">
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL_4);
 		group.setSourceVersion("Version 5");
 		group.setTarget(CS_URL_2);
 		group.setTargetVersion("Version 2");
 
-		// <editor-fold desc="ConceptMap.group(2).element(0))">
 		element = group.addElement();
 		element.setCode("78901");
 		element.setDisplay("Source Code 78901");
 
-		// <editor-fold desc="ConceptMap.group(2).element(0).target(0)">
 		target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
 		target.setEquivalence(ConceptMapEquivalence.NARROWER);
-		// End ConceptMap.group(2).element(0).target(0)
-		// </editor-fold>
-
-		// End ConceptMap.group(2).element(0)
-		// </editor-fold>
-
-		// End ConceptMap.group(2)
-		// </editor-fold>
-
-		// End ConceptMap
-		// </editor-fold>
 
 		return conceptMap;
 	}
+
+	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
+		String linkNext = theBundle.getLink("next").getUrl();
+		linkNext = linkNext.substring(linkNext.indexOf('?'));
+		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
+		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
+		String uuid = uuidParams[0];
+		return uuid;
+	}
+
 }

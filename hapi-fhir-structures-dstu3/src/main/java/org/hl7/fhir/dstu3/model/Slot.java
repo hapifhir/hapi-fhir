@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
  */
@@ -367,7 +368,7 @@ public class Slot extends DomainResource {
     /**
      * @param value {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
      */
-    public Slot setServiceCategory(CodeableConcept value) { 
+    public Slot setServiceCategory(CodeableConcept value)  { 
       this.serviceCategory = value;
       return this;
     }
@@ -497,7 +498,7 @@ public class Slot extends DomainResource {
     /**
      * @param value {@link #appointmentType} (The style of appointment or patient that may be booked in the slot (not service type).)
      */
-    public Slot setAppointmentType(CodeableConcept value) { 
+    public Slot setAppointmentType(CodeableConcept value)  { 
       this.appointmentType = value;
       return this;
     }
@@ -521,7 +522,7 @@ public class Slot extends DomainResource {
     /**
      * @param value {@link #schedule} (The schedule resource that this slot defines an interval of status information.)
      */
-    public Slot setSchedule(Reference value) { 
+    public Slot setSchedule(Reference value)  { 
       this.schedule = value;
       return this;
     }
@@ -775,19 +776,38 @@ public class Slot extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
-        childrenList.add(new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType));
-        childrenList.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        childrenList.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, java.lang.Integer.MAX_VALUE, appointmentType));
-        childrenList.add(new Property("schedule", "Reference(Schedule)", "The schedule resource that this slot defines an interval of status information.", 0, java.lang.Integer.MAX_VALUE, schedule));
-        childrenList.add(new Property("status", "code", "busy | free | busy-unavailable | busy-tentative | entered-in-error.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("start", "instant", "Date/Time that the slot is to begin.", 0, java.lang.Integer.MAX_VALUE, start));
-        childrenList.add(new Property("end", "instant", "Date/Time that the slot is to conclude.", 0, java.lang.Integer.MAX_VALUE, end));
-        childrenList.add(new Property("overbooked", "boolean", "This slot has already been overbooked, appointments are unlikely to be accepted for this time.", 0, java.lang.Integer.MAX_VALUE, overbooked));
-        childrenList.add(new Property("comment", "string", "Comments on the slot to describe any extended information. Such as custom constraints on the slot.", 0, java.lang.Integer.MAX_VALUE, comment));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, 1, serviceCategory));
+        children.add(new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType));
+        children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
+        children.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, 1, appointmentType));
+        children.add(new Property("schedule", "Reference(Schedule)", "The schedule resource that this slot defines an interval of status information.", 0, 1, schedule));
+        children.add(new Property("status", "code", "busy | free | busy-unavailable | busy-tentative | entered-in-error.", 0, 1, status));
+        children.add(new Property("start", "instant", "Date/Time that the slot is to begin.", 0, 1, start));
+        children.add(new Property("end", "instant", "Date/Time that the slot is to conclude.", 0, 1, end));
+        children.add(new Property("overbooked", "boolean", "This slot has already been overbooked, appointments are unlikely to be accepted for this time.", 0, 1, overbooked));
+        children.add(new Property("comment", "string", "Comments on the slot to describe any extended information. Such as custom constraints on the slot.", 0, 1, comment));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, 1, serviceCategory);
+        case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType);
+        case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
+        case -1596426375: /*appointmentType*/  return new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, 1, appointmentType);
+        case -697920873: /*schedule*/  return new Property("schedule", "Reference(Schedule)", "The schedule resource that this slot defines an interval of status information.", 0, 1, schedule);
+        case -892481550: /*status*/  return new Property("status", "code", "busy | free | busy-unavailable | busy-tentative | entered-in-error.", 0, 1, status);
+        case 109757538: /*start*/  return new Property("start", "instant", "Date/Time that the slot is to begin.", 0, 1, start);
+        case 100571: /*end*/  return new Property("end", "instant", "Date/Time that the slot is to conclude.", 0, 1, end);
+        case 2068545308: /*overbooked*/  return new Property("overbooked", "boolean", "This slot has already been overbooked, appointments are unlikely to be accepted for this time.", 0, 1, overbooked);
+        case 950398559: /*comment*/  return new Property("comment", "string", "Comments on the slot to describe any extended information. Such as custom constraints on the slot.", 0, 1, comment);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1000,12 +1020,12 @@ public class Slot extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Slot))
+        if (!(other_ instanceof Slot))
           return false;
-        Slot o = (Slot) other;
+        Slot o = (Slot) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(serviceCategory, o.serviceCategory, true)
            && compareDeep(serviceType, o.serviceType, true) && compareDeep(specialty, o.specialty, true) && compareDeep(appointmentType, o.appointmentType, true)
            && compareDeep(schedule, o.schedule, true) && compareDeep(status, o.status, true) && compareDeep(start, o.start, true)
@@ -1014,12 +1034,12 @@ public class Slot extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Slot))
+        if (!(other_ instanceof Slot))
           return false;
-        Slot o = (Slot) other;
+        Slot o = (Slot) other_;
         return compareValues(status, o.status, true) && compareValues(start, o.start, true) && compareValues(end, o.end, true)
            && compareValues(overbooked, o.overbooked, true) && compareValues(comment, o.comment, true);
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
@@ -1009,15 +1010,25 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #profile} (The type of origin profile the test system supports.)
          */
-        public TestScriptOriginComponent setProfile(Coding value) { 
+        public TestScriptOriginComponent setProfile(Coding value)  { 
           this.profile = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("index", "integer", "Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.", 0, java.lang.Integer.MAX_VALUE, index));
-          childrenList.add(new Property("profile", "Coding", "The type of origin profile the test system supports.", 0, java.lang.Integer.MAX_VALUE, profile));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("index", "integer", "Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.", 0, 1, index));
+          children.add(new Property("profile", "Coding", "The type of origin profile the test system supports.", 0, 1, profile));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 100346066: /*index*/  return new Property("index", "integer", "Abstract name given to an origin server in this test script.  The name is provided as a number starting at 1.", 0, 1, index);
+          case -309425751: /*profile*/  return new Property("profile", "Coding", "The type of origin profile the test system supports.", 0, 1, profile);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1097,22 +1108,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptOriginComponent))
+        if (!(other_ instanceof TestScriptOriginComponent))
           return false;
-        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
+        TestScriptOriginComponent o = (TestScriptOriginComponent) other_;
         return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptOriginComponent))
+        if (!(other_ instanceof TestScriptOriginComponent))
           return false;
-        TestScriptOriginComponent o = (TestScriptOriginComponent) other;
+        TestScriptOriginComponent o = (TestScriptOriginComponent) other_;
         return compareValues(index, o.index, true);
       }
 
@@ -1226,15 +1237,25 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #profile} (The type of destination profile the test system supports.)
          */
-        public TestScriptDestinationComponent setProfile(Coding value) { 
+        public TestScriptDestinationComponent setProfile(Coding value)  { 
           this.profile = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("index", "integer", "Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.", 0, java.lang.Integer.MAX_VALUE, index));
-          childrenList.add(new Property("profile", "Coding", "The type of destination profile the test system supports.", 0, java.lang.Integer.MAX_VALUE, profile));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("index", "integer", "Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.", 0, 1, index));
+          children.add(new Property("profile", "Coding", "The type of destination profile the test system supports.", 0, 1, profile));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 100346066: /*index*/  return new Property("index", "integer", "Abstract name given to a destination server in this test script.  The name is provided as a number starting at 1.", 0, 1, index);
+          case -309425751: /*profile*/  return new Property("profile", "Coding", "The type of destination profile the test system supports.", 0, 1, profile);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1314,22 +1335,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptDestinationComponent))
+        if (!(other_ instanceof TestScriptDestinationComponent))
           return false;
-        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
+        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other_;
         return compareDeep(index, o.index, true) && compareDeep(profile, o.profile, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptDestinationComponent))
+        if (!(other_ instanceof TestScriptDestinationComponent))
           return false;
-        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other;
+        TestScriptDestinationComponent o = (TestScriptDestinationComponent) other_;
         return compareValues(index, o.index, true);
       }
 
@@ -1475,10 +1496,20 @@ public class TestScript extends MetadataResource {
           return getCapability().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("link", "", "A link to the FHIR specification that this test is covering.", 0, java.lang.Integer.MAX_VALUE, link));
-          childrenList.add(new Property("capability", "", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("link", "", "A link to the FHIR specification that this test is covering.", 0, java.lang.Integer.MAX_VALUE, link));
+          children.add(new Property("capability", "", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3321850: /*link*/  return new Property("link", "", "A link to the FHIR specification that this test is covering.", 0, java.lang.Integer.MAX_VALUE, link);
+          case -783669992: /*capability*/  return new Property("capability", "", "Capabilities that must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, capability);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1565,22 +1596,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataComponent))
+        if (!(other_ instanceof TestScriptMetadataComponent))
           return false;
-        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other;
+        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other_;
         return compareDeep(link, o.link, true) && compareDeep(capability, o.capability, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataComponent))
+        if (!(other_ instanceof TestScriptMetadataComponent))
           return false;
-        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other;
+        TestScriptMetadataComponent o = (TestScriptMetadataComponent) other_;
         return true;
       }
 
@@ -1722,10 +1753,20 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("url", "uri", "URL to a particular requirement or feature within the FHIR specification.", 0, java.lang.Integer.MAX_VALUE, url));
-          childrenList.add(new Property("description", "string", "Short description of the link.", 0, java.lang.Integer.MAX_VALUE, description));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("url", "uri", "URL to a particular requirement or feature within the FHIR specification.", 0, 1, url));
+          children.add(new Property("description", "string", "Short description of the link.", 0, 1, description));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 116079: /*url*/  return new Property("url", "uri", "URL to a particular requirement or feature within the FHIR specification.", 0, 1, url);
+          case -1724546052: /*description*/  return new Property("description", "string", "Short description of the link.", 0, 1, description);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1804,22 +1845,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataLinkComponent))
+        if (!(other_ instanceof TestScriptMetadataLinkComponent))
           return false;
-        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other;
+        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other_;
         return compareDeep(url, o.url, true) && compareDeep(description, o.description, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataLinkComponent))
+        if (!(other_ instanceof TestScriptMetadataLinkComponent))
           return false;
-        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other;
+        TestScriptMetadataLinkComponent o = (TestScriptMetadataLinkComponent) other_;
         return compareValues(url, o.url, true) && compareValues(description, o.description, true);
       }
 
@@ -2102,7 +2143,7 @@ public class TestScript extends MetadataResource {
           if (this.origin == null)
             return false;
           for (IntegerType v : this.origin)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -2208,7 +2249,7 @@ public class TestScript extends MetadataResource {
           if (this.link == null)
             return false;
           for (UriType v : this.link)
-            if (v.equals(value)) // uri
+            if (v.getValue().equals(value)) // uri
               return true;
           return false;
         }
@@ -2232,7 +2273,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #capabilities} (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.)
          */
-        public TestScriptMetadataCapabilityComponent setCapabilities(Reference value) { 
+        public TestScriptMetadataCapabilityComponent setCapabilities(Reference value)  { 
           this.capabilities = value;
           return this;
         }
@@ -2257,15 +2298,30 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("required", "boolean", "Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.", 0, java.lang.Integer.MAX_VALUE, required));
-          childrenList.add(new Property("validated", "boolean", "Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.", 0, java.lang.Integer.MAX_VALUE, validated));
-          childrenList.add(new Property("description", "string", "Description of the capabilities that this test script is requiring the server to support.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("origin", "integer", "Which origin server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, origin));
-          childrenList.add(new Property("destination", "integer", "Which server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, destination));
-          childrenList.add(new Property("link", "uri", "Links to the FHIR specification that describes this interaction and the resources involved in more detail.", 0, java.lang.Integer.MAX_VALUE, link));
-          childrenList.add(new Property("capabilities", "Reference(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, java.lang.Integer.MAX_VALUE, capabilities));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("required", "boolean", "Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.", 0, 1, required));
+          children.add(new Property("validated", "boolean", "Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.", 0, 1, validated));
+          children.add(new Property("description", "string", "Description of the capabilities that this test script is requiring the server to support.", 0, 1, description));
+          children.add(new Property("origin", "integer", "Which origin server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, origin));
+          children.add(new Property("destination", "integer", "Which server these requirements apply to.", 0, 1, destination));
+          children.add(new Property("link", "uri", "Links to the FHIR specification that describes this interaction and the resources involved in more detail.", 0, java.lang.Integer.MAX_VALUE, link));
+          children.add(new Property("capabilities", "Reference(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, 1, capabilities));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -393139297: /*required*/  return new Property("required", "boolean", "Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.", 0, 1, required);
+          case -1109784050: /*validated*/  return new Property("validated", "boolean", "Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.", 0, 1, validated);
+          case -1724546052: /*description*/  return new Property("description", "string", "Description of the capabilities that this test script is requiring the server to support.", 0, 1, description);
+          case -1008619738: /*origin*/  return new Property("origin", "integer", "Which origin server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, origin);
+          case -1429847026: /*destination*/  return new Property("destination", "integer", "Which server these requirements apply to.", 0, 1, destination);
+          case 3321850: /*link*/  return new Property("link", "uri", "Links to the FHIR specification that describes this interaction and the resources involved in more detail.", 0, java.lang.Integer.MAX_VALUE, link);
+          case -1487597642: /*capabilities*/  return new Property("capabilities", "Reference(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, 1, capabilities);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2413,24 +2469,24 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataCapabilityComponent))
+        if (!(other_ instanceof TestScriptMetadataCapabilityComponent))
           return false;
-        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other;
+        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other_;
         return compareDeep(required, o.required, true) && compareDeep(validated, o.validated, true) && compareDeep(description, o.description, true)
            && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(link, o.link, true)
            && compareDeep(capabilities, o.capabilities, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptMetadataCapabilityComponent))
+        if (!(other_ instanceof TestScriptMetadataCapabilityComponent))
           return false;
-        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other;
+        TestScriptMetadataCapabilityComponent o = (TestScriptMetadataCapabilityComponent) other_;
         return compareValues(required, o.required, true) && compareValues(validated, o.validated, true) && compareValues(description, o.description, true)
            && compareValues(origin, o.origin, true) && compareValues(destination, o.destination, true) && compareValues(link, o.link, true)
           ;
@@ -2594,7 +2650,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #resource} (Reference to the resource (containing the contents of the resource needed for operations).)
          */
-        public TestScriptFixtureComponent setResource(Reference value) { 
+        public TestScriptFixtureComponent setResource(Reference value)  { 
           this.resource = value;
           return this;
         }
@@ -2614,11 +2670,22 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("autocreate", "boolean", "Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.", 0, java.lang.Integer.MAX_VALUE, autocreate));
-          childrenList.add(new Property("autodelete", "boolean", "Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.", 0, java.lang.Integer.MAX_VALUE, autodelete));
-          childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the resource needed for operations).", 0, java.lang.Integer.MAX_VALUE, resource));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("autocreate", "boolean", "Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.", 0, 1, autocreate));
+          children.add(new Property("autodelete", "boolean", "Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.", 0, 1, autodelete));
+          children.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the resource needed for operations).", 0, 1, resource));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 73154411: /*autocreate*/  return new Property("autocreate", "boolean", "Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.", 0, 1, autocreate);
+          case 89990170: /*autodelete*/  return new Property("autodelete", "boolean", "Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.", 0, 1, autodelete);
+          case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the resource needed for operations).", 0, 1, resource);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2710,23 +2777,23 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptFixtureComponent))
+        if (!(other_ instanceof TestScriptFixtureComponent))
           return false;
-        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other;
+        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other_;
         return compareDeep(autocreate, o.autocreate, true) && compareDeep(autodelete, o.autodelete, true)
            && compareDeep(resource, o.resource, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptFixtureComponent))
+        if (!(other_ instanceof TestScriptFixtureComponent))
           return false;
-        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other;
+        TestScriptFixtureComponent o = (TestScriptFixtureComponent) other_;
         return compareValues(autocreate, o.autocreate, true) && compareValues(autodelete, o.autodelete, true)
           ;
       }
@@ -3206,16 +3273,32 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Descriptive name for this variable.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("defaultValue", "string", "A default, hard-coded, or user-defined value for this variable.", 0, java.lang.Integer.MAX_VALUE, defaultValue));
-          childrenList.add(new Property("description", "string", "A free text natural language description of the variable and its purpose.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("expression", "string", "The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, java.lang.Integer.MAX_VALUE, expression));
-          childrenList.add(new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, java.lang.Integer.MAX_VALUE, headerField));
-          childrenList.add(new Property("hint", "string", "Displayable text string with hint help information to the user when entering a default value.", 0, java.lang.Integer.MAX_VALUE, hint));
-          childrenList.add(new Property("path", "string", "XPath or JSONPath to evaluate against the fixture body.  When variables are defined, only one of either expression, headerField or path must be specified.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.", 0, java.lang.Integer.MAX_VALUE, sourceId));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Descriptive name for this variable.", 0, 1, name));
+          children.add(new Property("defaultValue", "string", "A default, hard-coded, or user-defined value for this variable.", 0, 1, defaultValue));
+          children.add(new Property("description", "string", "A free text natural language description of the variable and its purpose.", 0, 1, description));
+          children.add(new Property("expression", "string", "The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, expression));
+          children.add(new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, 1, headerField));
+          children.add(new Property("hint", "string", "Displayable text string with hint help information to the user when entering a default value.", 0, 1, hint));
+          children.add(new Property("path", "string", "XPath or JSONPath to evaluate against the fixture body.  When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, path));
+          children.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.", 0, 1, sourceId));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this variable.", 0, 1, name);
+          case -659125328: /*defaultValue*/  return new Property("defaultValue", "string", "A default, hard-coded, or user-defined value for this variable.", 0, 1, defaultValue);
+          case -1724546052: /*description*/  return new Property("description", "string", "A free text natural language description of the variable and its purpose.", 0, 1, description);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, expression);
+          case 1160732269: /*headerField*/  return new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, 1, headerField);
+          case 3202695: /*hint*/  return new Property("hint", "string", "Displayable text string with hint help information to the user when entering a default value.", 0, 1, hint);
+          case 3433509: /*path*/  return new Property("path", "string", "XPath or JSONPath to evaluate against the fixture body.  When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, path);
+          case 1746327190: /*sourceId*/  return new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against within this variable.", 0, 1, sourceId);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3366,12 +3449,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptVariableComponent))
+        if (!(other_ instanceof TestScriptVariableComponent))
           return false;
-        TestScriptVariableComponent o = (TestScriptVariableComponent) other;
+        TestScriptVariableComponent o = (TestScriptVariableComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(defaultValue, o.defaultValue, true) && compareDeep(description, o.description, true)
            && compareDeep(expression, o.expression, true) && compareDeep(headerField, o.headerField, true)
            && compareDeep(hint, o.hint, true) && compareDeep(path, o.path, true) && compareDeep(sourceId, o.sourceId, true)
@@ -3379,12 +3462,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptVariableComponent))
+        if (!(other_ instanceof TestScriptVariableComponent))
           return false;
-        TestScriptVariableComponent o = (TestScriptVariableComponent) other;
+        TestScriptVariableComponent o = (TestScriptVariableComponent) other_;
         return compareValues(name, o.name, true) && compareValues(defaultValue, o.defaultValue, true) && compareValues(description, o.description, true)
            && compareValues(expression, o.expression, true) && compareValues(headerField, o.headerField, true)
            && compareValues(hint, o.hint, true) && compareValues(path, o.path, true) && compareValues(sourceId, o.sourceId, true)
@@ -3460,7 +3543,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #resource} (Reference to the resource (containing the contents of the rule needed for assertions).)
          */
-        public TestScriptRuleComponent setResource(Reference value) { 
+        public TestScriptRuleComponent setResource(Reference value)  { 
           this.resource = value;
           return this;
         }
@@ -3533,10 +3616,20 @@ public class TestScript extends MetadataResource {
           return getParam().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the rule needed for assertions).", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the rule needed for assertions).", 0, 1, resource));
+          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the rule needed for assertions).", 0, 1, resource);
+          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3620,22 +3713,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptRuleComponent))
+        if (!(other_ instanceof TestScriptRuleComponent))
           return false;
-        TestScriptRuleComponent o = (TestScriptRuleComponent) other;
+        TestScriptRuleComponent o = (TestScriptRuleComponent) other_;
         return compareDeep(resource, o.resource, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptRuleComponent))
+        if (!(other_ instanceof TestScriptRuleComponent))
           return false;
-        TestScriptRuleComponent o = (TestScriptRuleComponent) other;
+        TestScriptRuleComponent o = (TestScriptRuleComponent) other_;
         return true;
       }
 
@@ -3777,10 +3870,20 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("value", "string", "The explicit or dynamic value for the parameter that will be passed on to the external rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name));
+          children.add(new Property("value", "string", "The explicit or dynamic value for the parameter that will be passed on to the external rule template.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name);
+          case 111972721: /*value*/  return new Property("value", "string", "The explicit or dynamic value for the parameter that will be passed on to the external rule template.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3859,22 +3962,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RuleParamComponent))
+        if (!(other_ instanceof RuleParamComponent))
           return false;
-        RuleParamComponent o = (RuleParamComponent) other;
+        RuleParamComponent o = (RuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RuleParamComponent))
+        if (!(other_ instanceof RuleParamComponent))
           return false;
-        RuleParamComponent o = (RuleParamComponent) other;
+        RuleParamComponent o = (RuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -3946,7 +4049,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #resource} (Reference to the resource (containing the contents of the ruleset needed for assertions).)
          */
-        public TestScriptRulesetComponent setResource(Reference value) { 
+        public TestScriptRulesetComponent setResource(Reference value)  { 
           this.resource = value;
           return this;
         }
@@ -4019,10 +4122,20 @@ public class TestScript extends MetadataResource {
           return getRule().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, 1, resource));
+          children.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, 1, resource);
+          case 3512060: /*rule*/  return new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -4106,22 +4219,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptRulesetComponent))
+        if (!(other_ instanceof TestScriptRulesetComponent))
           return false;
-        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other;
+        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other_;
         return compareDeep(resource, o.resource, true) && compareDeep(rule, o.rule, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptRulesetComponent))
+        if (!(other_ instanceof TestScriptRulesetComponent))
           return false;
-        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other;
+        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other_;
         return true;
       }
 
@@ -4267,10 +4380,20 @@ public class TestScript extends MetadataResource {
           return getParam().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, ruleId));
-          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId));
+          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -919875273: /*ruleId*/  return new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId);
+          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -4353,22 +4476,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RulesetRuleComponent))
+        if (!(other_ instanceof RulesetRuleComponent))
           return false;
-        RulesetRuleComponent o = (RulesetRuleComponent) other;
+        RulesetRuleComponent o = (RulesetRuleComponent) other_;
         return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RulesetRuleComponent))
+        if (!(other_ instanceof RulesetRuleComponent))
           return false;
-        RulesetRuleComponent o = (RulesetRuleComponent) other;
+        RulesetRuleComponent o = (RulesetRuleComponent) other_;
         return compareValues(ruleId, o.ruleId, true);
       }
 
@@ -4510,10 +4633,20 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name));
+          children.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name);
+          case 111972721: /*value*/  return new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -4592,22 +4725,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RulesetRuleParamComponent))
+        if (!(other_ instanceof RulesetRuleParamComponent))
           return false;
-        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other;
+        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RulesetRuleParamComponent))
+        if (!(other_ instanceof RulesetRuleParamComponent))
           return false;
-        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other;
+        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -4693,9 +4826,18 @@ public class TestScript extends MetadataResource {
           return getAction().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422950858: /*action*/  return new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -4766,22 +4908,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptSetupComponent))
+        if (!(other_ instanceof TestScriptSetupComponent))
           return false;
-        TestScriptSetupComponent o = (TestScriptSetupComponent) other;
+        TestScriptSetupComponent o = (TestScriptSetupComponent) other_;
         return compareDeep(action, o.action, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptSetupComponent))
+        if (!(other_ instanceof TestScriptSetupComponent))
           return false;
-        TestScriptSetupComponent o = (TestScriptSetupComponent) other;
+        TestScriptSetupComponent o = (TestScriptSetupComponent) other_;
         return true;
       }
 
@@ -4840,7 +4982,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #operation} (The operation to perform.)
          */
-        public SetupActionComponent setOperation(SetupActionOperationComponent value) { 
+        public SetupActionComponent setOperation(SetupActionOperationComponent value)  { 
           this.operation = value;
           return this;
         }
@@ -4864,15 +5006,25 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #assert_} (Evaluates the results of previous operations to determine if the server under test behaves appropriately.)
          */
-        public SetupActionComponent setAssert(SetupActionAssertComponent value) { 
+        public SetupActionComponent setAssert(SetupActionAssertComponent value)  { 
           this.assert_ = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "", "The operation to perform.", 0, java.lang.Integer.MAX_VALUE, operation));
-          childrenList.add(new Property("assert", "", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, java.lang.Integer.MAX_VALUE, assert_));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("operation", "", "The operation to perform.", 0, 1, operation));
+          children.add(new Property("assert", "", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, 1, assert_));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1662702951: /*operation*/  return new Property("operation", "", "The operation to perform.", 0, 1, operation);
+          case -1408208058: /*assert*/  return new Property("assert", "", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, 1, assert_);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -4953,22 +5105,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionComponent))
+        if (!(other_ instanceof SetupActionComponent))
           return false;
-        SetupActionComponent o = (SetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other_;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionComponent))
+        if (!(other_ instanceof SetupActionComponent))
           return false;
-        SetupActionComponent o = (SetupActionComponent) other;
+        SetupActionComponent o = (SetupActionComponent) other_;
         return true;
       }
 
@@ -5129,7 +5281,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #type} (Server interaction or operation type.)
          */
-        public SetupActionOperationComponent setType(Coding value) { 
+        public SetupActionOperationComponent setType(Coding value)  { 
           this.type = value;
           return this;
         }
@@ -5861,24 +6013,48 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "Server interaction or operation type.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, label));
-          childrenList.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, java.lang.Integer.MAX_VALUE, accept));
-          childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
-          childrenList.add(new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, java.lang.Integer.MAX_VALUE, destination));
-          childrenList.add(new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, java.lang.Integer.MAX_VALUE, encodeRequestUrl));
-          childrenList.add(new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, java.lang.Integer.MAX_VALUE, origin));
-          childrenList.add(new Property("params", "string", "Path plus parameters after [type].  Used to set parts of the request URL explicitly.", 0, java.lang.Integer.MAX_VALUE, params));
-          childrenList.add(new Property("requestHeader", "", "Header elements would be used to set HTTP headers.", 0, java.lang.Integer.MAX_VALUE, requestHeader));
-          childrenList.add(new Property("requestId", "id", "The fixture id (maybe new) to map to the request.", 0, java.lang.Integer.MAX_VALUE, requestId));
-          childrenList.add(new Property("responseId", "id", "The fixture id (maybe new) to map to the response.", 0, java.lang.Integer.MAX_VALUE, responseId));
-          childrenList.add(new Property("sourceId", "id", "The id of the fixture used as the body of a PUT or POST request.", 0, java.lang.Integer.MAX_VALUE, sourceId));
-          childrenList.add(new Property("targetId", "id", "Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.", 0, java.lang.Integer.MAX_VALUE, targetId));
-          childrenList.add(new Property("url", "string", "Complete request URL.", 0, java.lang.Integer.MAX_VALUE, url));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "Coding", "Server interaction or operation type.", 0, 1, type));
+          children.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource));
+          children.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, 1, label));
+          children.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description));
+          children.add(new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, 1, accept));
+          children.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType));
+          children.add(new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, 1, destination));
+          children.add(new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, 1, encodeRequestUrl));
+          children.add(new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, 1, origin));
+          children.add(new Property("params", "string", "Path plus parameters after [type].  Used to set parts of the request URL explicitly.", 0, 1, params));
+          children.add(new Property("requestHeader", "", "Header elements would be used to set HTTP headers.", 0, java.lang.Integer.MAX_VALUE, requestHeader));
+          children.add(new Property("requestId", "id", "The fixture id (maybe new) to map to the request.", 0, 1, requestId));
+          children.add(new Property("responseId", "id", "The fixture id (maybe new) to map to the response.", 0, 1, responseId));
+          children.add(new Property("sourceId", "id", "The id of the fixture used as the body of a PUT or POST request.", 0, 1, sourceId));
+          children.add(new Property("targetId", "id", "Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.", 0, 1, targetId));
+          children.add(new Property("url", "string", "Complete request URL.", 0, 1, url));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "Coding", "Server interaction or operation type.", 0, 1, type);
+          case -341064690: /*resource*/  return new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource);
+          case 102727412: /*label*/  return new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, 1, label);
+          case -1724546052: /*description*/  return new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description);
+          case -1423461112: /*accept*/  return new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, 1, accept);
+          case -389131437: /*contentType*/  return new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType);
+          case -1429847026: /*destination*/  return new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, 1, destination);
+          case -1760554218: /*encodeRequestUrl*/  return new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, 1, encodeRequestUrl);
+          case -1008619738: /*origin*/  return new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, 1, origin);
+          case -995427962: /*params*/  return new Property("params", "string", "Path plus parameters after [type].  Used to set parts of the request URL explicitly.", 0, 1, params);
+          case 1074158076: /*requestHeader*/  return new Property("requestHeader", "", "Header elements would be used to set HTTP headers.", 0, java.lang.Integer.MAX_VALUE, requestHeader);
+          case 693933066: /*requestId*/  return new Property("requestId", "id", "The fixture id (maybe new) to map to the request.", 0, 1, requestId);
+          case -633138884: /*responseId*/  return new Property("responseId", "id", "The fixture id (maybe new) to map to the response.", 0, 1, responseId);
+          case 1746327190: /*sourceId*/  return new Property("sourceId", "id", "The id of the fixture used as the body of a PUT or POST request.", 0, 1, sourceId);
+          case -441951604: /*targetId*/  return new Property("targetId", "id", "Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.", 0, 1, targetId);
+          case 116079: /*url*/  return new Property("url", "string", "Complete request URL.", 0, 1, url);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -6134,12 +6310,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionOperationComponent))
+        if (!(other_ instanceof SetupActionOperationComponent))
           return false;
-        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true) && compareDeep(label, o.label, true)
            && compareDeep(description, o.description, true) && compareDeep(accept, o.accept, true) && compareDeep(contentType, o.contentType, true)
            && compareDeep(destination, o.destination, true) && compareDeep(encodeRequestUrl, o.encodeRequestUrl, true)
@@ -6149,12 +6325,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionOperationComponent))
+        if (!(other_ instanceof SetupActionOperationComponent))
           return false;
-        SetupActionOperationComponent o = (SetupActionOperationComponent) other;
+        SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareValues(resource, o.resource, true) && compareValues(label, o.label, true) && compareValues(description, o.description, true)
            && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true) && compareValues(destination, o.destination, true)
            && compareValues(encodeRequestUrl, o.encodeRequestUrl, true) && compareValues(origin, o.origin, true)
@@ -6300,10 +6476,20 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("field", "string", "The HTTP header field e.g. \"Accept\".", 0, java.lang.Integer.MAX_VALUE, field));
-          childrenList.add(new Property("value", "string", "The value of the header e.g. \"application/fhir+xml\".", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("field", "string", "The HTTP header field e.g. \"Accept\".", 0, 1, field));
+          children.add(new Property("value", "string", "The value of the header e.g. \"application/fhir+xml\".", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 97427706: /*field*/  return new Property("field", "string", "The HTTP header field e.g. \"Accept\".", 0, 1, field);
+          case 111972721: /*value*/  return new Property("value", "string", "The value of the header e.g. \"application/fhir+xml\".", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -6382,22 +6568,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionOperationRequestHeaderComponent))
+        if (!(other_ instanceof SetupActionOperationRequestHeaderComponent))
           return false;
-        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other;
+        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other_;
         return compareDeep(field, o.field, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionOperationRequestHeaderComponent))
+        if (!(other_ instanceof SetupActionOperationRequestHeaderComponent))
           return false;
-        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other;
+        SetupActionOperationRequestHeaderComponent o = (SetupActionOperationRequestHeaderComponent) other_;
         return compareValues(field, o.field, true) && compareValues(value, o.value, true);
       }
 
@@ -7494,7 +7680,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #rule} (The TestScript.rule this assert will evaluate.)
          */
-        public SetupActionAssertComponent setRule(ActionAssertRuleComponent value) { 
+        public SetupActionAssertComponent setRule(ActionAssertRuleComponent value)  { 
           this.rule = value;
           return this;
         }
@@ -7518,7 +7704,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #ruleset} (The TestScript.ruleset this assert will evaluate.)
          */
-        public SetupActionAssertComponent setRuleset(ActionAssertRulesetComponent value) { 
+        public SetupActionAssertComponent setRuleset(ActionAssertRulesetComponent value)  { 
           this.ruleset = value;
           return this;
         }
@@ -7715,32 +7901,64 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, label));
-          childrenList.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("direction", "code", "The direction to use for the assertion.", 0, java.lang.Integer.MAX_VALUE, direction));
-          childrenList.add(new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, java.lang.Integer.MAX_VALUE, compareToSourceId));
-          childrenList.add(new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, java.lang.Integer.MAX_VALUE, compareToSourceExpression));
-          childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
-          childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
-          childrenList.add(new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, java.lang.Integer.MAX_VALUE, expression));
-          childrenList.add(new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
-          childrenList.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, java.lang.Integer.MAX_VALUE, minimumId));
-          childrenList.add(new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, java.lang.Integer.MAX_VALUE, navigationLinks));
-          childrenList.add(new Property("operator", "code", "The operator type defines the conditional behavior of the assert. If not defined, the default is equals.", 0, java.lang.Integer.MAX_VALUE, operator));
-          childrenList.add(new Property("path", "string", "The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("requestMethod", "code", "The request method or HTTP operation code to compare against that used by the client system under test.", 0, java.lang.Integer.MAX_VALUE, requestMethod));
-          childrenList.add(new Property("requestURL", "string", "The value to use in a comparison against the request URL path string.", 0, java.lang.Integer.MAX_VALUE, requestURL));
-          childrenList.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, java.lang.Integer.MAX_VALUE, response));
-          childrenList.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, java.lang.Integer.MAX_VALUE, responseCode));
-          childrenList.add(new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rule));
-          childrenList.add(new Property("ruleset", "", "The TestScript.ruleset this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, ruleset));
-          childrenList.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, java.lang.Integer.MAX_VALUE, sourceId));
-          childrenList.add(new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, java.lang.Integer.MAX_VALUE, validateProfileId));
-          childrenList.add(new Property("value", "string", "The value to compare to.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("warningOnly", "boolean", "Whether or not the test execution will produce a warning only on error for this assert.", 0, java.lang.Integer.MAX_VALUE, warningOnly));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, 1, label));
+          children.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description));
+          children.add(new Property("direction", "code", "The direction to use for the assertion.", 0, 1, direction));
+          children.add(new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, 1, compareToSourceId));
+          children.add(new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression));
+          children.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourcePath));
+          children.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType));
+          children.add(new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression));
+          children.add(new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, 1, headerField));
+          children.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, 1, minimumId));
+          children.add(new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, 1, navigationLinks));
+          children.add(new Property("operator", "code", "The operator type defines the conditional behavior of the assert. If not defined, the default is equals.", 0, 1, operator));
+          children.add(new Property("path", "string", "The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.", 0, 1, path));
+          children.add(new Property("requestMethod", "code", "The request method or HTTP operation code to compare against that used by the client system under test.", 0, 1, requestMethod));
+          children.add(new Property("requestURL", "string", "The value to use in a comparison against the request URL path string.", 0, 1, requestURL));
+          children.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource));
+          children.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, 1, response));
+          children.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, 1, responseCode));
+          children.add(new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, 1, rule));
+          children.add(new Property("ruleset", "", "The TestScript.ruleset this assert will evaluate.", 0, 1, ruleset));
+          children.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, 1, sourceId));
+          children.add(new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, 1, validateProfileId));
+          children.add(new Property("value", "string", "The value to compare to.", 0, 1, value));
+          children.add(new Property("warningOnly", "boolean", "Whether or not the test execution will produce a warning only on error for this assert.", 0, 1, warningOnly));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 102727412: /*label*/  return new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, 1, label);
+          case -1724546052: /*description*/  return new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description);
+          case -962590849: /*direction*/  return new Property("direction", "code", "The direction to use for the assertion.", 0, 1, direction);
+          case 2081856758: /*compareToSourceId*/  return new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, 1, compareToSourceId);
+          case -1415702669: /*compareToSourceExpression*/  return new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression);
+          case -790206144: /*compareToSourcePath*/  return new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourcePath);
+          case -389131437: /*contentType*/  return new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression);
+          case 1160732269: /*headerField*/  return new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, 1, headerField);
+          case 818925001: /*minimumId*/  return new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, 1, minimumId);
+          case 1001488901: /*navigationLinks*/  return new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, 1, navigationLinks);
+          case -500553564: /*operator*/  return new Property("operator", "code", "The operator type defines the conditional behavior of the assert. If not defined, the default is equals.", 0, 1, operator);
+          case 3433509: /*path*/  return new Property("path", "string", "The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.", 0, 1, path);
+          case 1217874000: /*requestMethod*/  return new Property("requestMethod", "code", "The request method or HTTP operation code to compare against that used by the client system under test.", 0, 1, requestMethod);
+          case 37099616: /*requestURL*/  return new Property("requestURL", "string", "The value to use in a comparison against the request URL path string.", 0, 1, requestURL);
+          case -341064690: /*resource*/  return new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource);
+          case -340323263: /*response*/  return new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, 1, response);
+          case 1438723534: /*responseCode*/  return new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, 1, responseCode);
+          case 3512060: /*rule*/  return new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, 1, rule);
+          case 1548678118: /*ruleset*/  return new Property("ruleset", "", "The TestScript.ruleset this assert will evaluate.", 0, 1, ruleset);
+          case 1746327190: /*sourceId*/  return new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, 1, sourceId);
+          case 1555541038: /*validateProfileId*/  return new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, 1, validateProfileId);
+          case 111972721: /*value*/  return new Property("value", "string", "The value to compare to.", 0, 1, value);
+          case -481159832: /*warningOnly*/  return new Property("warningOnly", "boolean", "Whether or not the test execution will produce a warning only on error for this assert.", 0, 1, warningOnly);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -8095,12 +8313,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SetupActionAssertComponent))
+        if (!(other_ instanceof SetupActionAssertComponent))
           return false;
-        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other_;
         return compareDeep(label, o.label, true) && compareDeep(description, o.description, true) && compareDeep(direction, o.direction, true)
            && compareDeep(compareToSourceId, o.compareToSourceId, true) && compareDeep(compareToSourceExpression, o.compareToSourceExpression, true)
            && compareDeep(compareToSourcePath, o.compareToSourcePath, true) && compareDeep(contentType, o.contentType, true)
@@ -8114,12 +8332,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SetupActionAssertComponent))
+        if (!(other_ instanceof SetupActionAssertComponent))
           return false;
-        SetupActionAssertComponent o = (SetupActionAssertComponent) other;
+        SetupActionAssertComponent o = (SetupActionAssertComponent) other_;
         return compareValues(label, o.label, true) && compareValues(description, o.description, true) && compareValues(direction, o.direction, true)
            && compareValues(compareToSourceId, o.compareToSourceId, true) && compareValues(compareToSourceExpression, o.compareToSourceExpression, true)
            && compareValues(compareToSourcePath, o.compareToSourcePath, true) && compareValues(contentType, o.contentType, true)
@@ -8277,10 +8495,20 @@ public class TestScript extends MetadataResource {
           return getParam().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("ruleId", "id", "The TestScript.rule id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, ruleId));
-          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("ruleId", "id", "The TestScript.rule id value this assert will evaluate.", 0, 1, ruleId));
+          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -919875273: /*ruleId*/  return new Property("ruleId", "id", "The TestScript.rule id value this assert will evaluate.", 0, 1, ruleId);
+          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -8363,22 +8591,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleComponent))
+        if (!(other_ instanceof ActionAssertRuleComponent))
           return false;
-        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other;
+        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other_;
         return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleComponent))
+        if (!(other_ instanceof ActionAssertRuleComponent))
           return false;
-        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other;
+        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other_;
         return compareValues(ruleId, o.ruleId, true);
       }
 
@@ -8517,10 +8745,20 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("value", "string", "The value for the parameter that will be passed on to the external rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name));
+          children.add(new Property("value", "string", "The value for the parameter that will be passed on to the external rule template.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name);
+          case 111972721: /*value*/  return new Property("value", "string", "The value for the parameter that will be passed on to the external rule template.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -8599,22 +8837,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRuleParamComponent))
           return false;
-        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other;
+        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRuleParamComponent))
           return false;
-        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other;
+        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -8760,10 +8998,20 @@ public class TestScript extends MetadataResource {
           return getRule().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("rulesetId", "id", "The TestScript.ruleset id value this assert will evaluate.", 0, java.lang.Integer.MAX_VALUE, rulesetId));
-          childrenList.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("rulesetId", "id", "The TestScript.ruleset id value this assert will evaluate.", 0, 1, rulesetId));
+          children.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -2073977951: /*rulesetId*/  return new Property("rulesetId", "id", "The TestScript.ruleset id value this assert will evaluate.", 0, 1, rulesetId);
+          case 3512060: /*rule*/  return new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -8846,22 +9094,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetComponent))
+        if (!(other_ instanceof ActionAssertRulesetComponent))
           return false;
-        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other;
+        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other_;
         return compareDeep(rulesetId, o.rulesetId, true) && compareDeep(rule, o.rule, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetComponent))
+        if (!(other_ instanceof ActionAssertRulesetComponent))
           return false;
-        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other;
+        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other_;
         return compareValues(rulesetId, o.rulesetId, true);
       }
 
@@ -9007,10 +9255,20 @@ public class TestScript extends MetadataResource {
           return getParam().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, ruleId));
-          childrenList.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId));
+          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -919875273: /*ruleId*/  return new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId);
+          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -9093,22 +9351,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleComponent))
           return false;
-        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other;
+        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other_;
         return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleComponent))
           return false;
-        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other;
+        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other_;
         return compareValues(ruleId, o.ruleId, true);
       }
 
@@ -9247,10 +9505,20 @@ public class TestScript extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name));
+          children.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name);
+          case 111972721: /*value*/  return new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -9329,22 +9597,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleParamComponent))
           return false;
-        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other;
+        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ActionAssertRulesetRuleParamComponent))
+        if (!(other_ instanceof ActionAssertRulesetRuleParamComponent))
           return false;
-        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other;
+        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other_;
         return compareValues(name, o.name, true) && compareValues(value, o.value, true);
       }
 
@@ -9542,11 +9810,22 @@ public class TestScript extends MetadataResource {
           return getAction().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, 1, name));
+          children.add(new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, 1, description));
+          children.add(new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "The name of this test used for tracking/logging purposes by test engines.", 0, 1, name);
+          case -1724546052: /*description*/  return new Property("description", "string", "A short description of the test used by test engines for tracking and reporting purposes.", 0, 1, description);
+          case -1422950858: /*action*/  return new Property("action", "", "Action would contain either an operation or an assertion.", 0, java.lang.Integer.MAX_VALUE, action);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -9641,23 +9920,23 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptTestComponent))
+        if (!(other_ instanceof TestScriptTestComponent))
           return false;
-        TestScriptTestComponent o = (TestScriptTestComponent) other;
+        TestScriptTestComponent o = (TestScriptTestComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(description, o.description, true) && compareDeep(action, o.action, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptTestComponent))
+        if (!(other_ instanceof TestScriptTestComponent))
           return false;
-        TestScriptTestComponent o = (TestScriptTestComponent) other;
+        TestScriptTestComponent o = (TestScriptTestComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
@@ -9717,7 +9996,7 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TestActionComponent setOperation(SetupActionOperationComponent value) { 
+        public TestActionComponent setOperation(SetupActionOperationComponent value)  { 
           this.operation = value;
           return this;
         }
@@ -9741,15 +10020,25 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #assert_} (Evaluates the results of previous operations to determine if the server under test behaves appropriately.)
          */
-        public TestActionComponent setAssert(SetupActionAssertComponent value) { 
+        public TestActionComponent setAssert(SetupActionAssertComponent value)  { 
           this.assert_ = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, java.lang.Integer.MAX_VALUE, operation));
-          childrenList.add(new Property("assert", "@TestScript.setup.action.assert", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, java.lang.Integer.MAX_VALUE, assert_));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation));
+          children.add(new Property("assert", "@TestScript.setup.action.assert", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, 1, assert_));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1662702951: /*operation*/  return new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation);
+          case -1408208058: /*assert*/  return new Property("assert", "@TestScript.setup.action.assert", "Evaluates the results of previous operations to determine if the server under test behaves appropriately.", 0, 1, assert_);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -9830,22 +10119,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestActionComponent))
+        if (!(other_ instanceof TestActionComponent))
           return false;
-        TestActionComponent o = (TestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other_;
         return compareDeep(operation, o.operation, true) && compareDeep(assert_, o.assert_, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestActionComponent))
+        if (!(other_ instanceof TestActionComponent))
           return false;
-        TestActionComponent o = (TestActionComponent) other;
+        TestActionComponent o = (TestActionComponent) other_;
         return true;
       }
 
@@ -9931,9 +10220,18 @@ public class TestScript extends MetadataResource {
           return getAction().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422950858: /*action*/  return new Property("action", "", "The teardown action will only contain an operation.", 0, java.lang.Integer.MAX_VALUE, action);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -10004,22 +10302,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScriptTeardownComponent))
+        if (!(other_ instanceof TestScriptTeardownComponent))
           return false;
-        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other;
+        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other_;
         return compareDeep(action, o.action, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScriptTeardownComponent))
+        if (!(other_ instanceof TestScriptTeardownComponent))
           return false;
-        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other;
+        TestScriptTeardownComponent o = (TestScriptTeardownComponent) other_;
         return true;
       }
 
@@ -10079,14 +10377,23 @@ public class TestScript extends MetadataResource {
         /**
          * @param value {@link #operation} (An operation would involve a REST request to a server.)
          */
-        public TeardownActionComponent setOperation(SetupActionOperationComponent value) { 
+        public TeardownActionComponent setOperation(SetupActionOperationComponent value)  { 
           this.operation = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, java.lang.Integer.MAX_VALUE, operation));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1662702951: /*operation*/  return new Property("operation", "@TestScript.setup.action.operation", "An operation would involve a REST request to a server.", 0, 1, operation);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -10154,22 +10461,22 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TeardownActionComponent))
+        if (!(other_ instanceof TeardownActionComponent))
           return false;
-        TeardownActionComponent o = (TeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other_;
         return compareDeep(operation, o.operation, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TeardownActionComponent))
+        if (!(other_ instanceof TeardownActionComponent))
           return false;
-        TeardownActionComponent o = (TeardownActionComponent) other;
+        TeardownActionComponent o = (TeardownActionComponent) other_;
         return true;
       }
 
@@ -10370,7 +10677,7 @@ public class TestScript extends MetadataResource {
     /**
      * @param value {@link #identifier} (A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
-    public TestScript setIdentifier(Identifier value) { 
+    public TestScript setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -11137,7 +11444,7 @@ public class TestScript extends MetadataResource {
     /**
      * @param value {@link #metadata} (The required capability must exist and are assumed to function correctly on the FHIR server being tested.)
      */
-    public TestScript setMetadata(TestScriptMetadataComponent value) { 
+    public TestScript setMetadata(TestScriptMetadataComponent value)  { 
       this.metadata = value;
       return this;
     }
@@ -11436,7 +11743,7 @@ public class TestScript extends MetadataResource {
     /**
      * @param value {@link #setup} (A series of required setup operations before tests are executed.)
      */
-    public TestScript setSetup(TestScriptSetupComponent value) { 
+    public TestScript setSetup(TestScriptSetupComponent value)  { 
       this.setup = value;
       return this;
     }
@@ -11513,39 +11820,73 @@ public class TestScript extends MetadataResource {
     /**
      * @param value {@link #teardown} (A series of operations required to clean up after the all the tests are executed (successfully or otherwise).)
      */
-    public TestScript setTeardown(TestScriptTeardownComponent value) { 
+    public TestScript setTeardown(TestScriptTeardownComponent value)  { 
       this.teardown = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the test script.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("status", "code", "The status of this test script. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the test script.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explaination of why this test script is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
-        childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin));
-        childrenList.add(new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination));
-        childrenList.add(new Property("metadata", "", "The required capability must exist and are assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
-        childrenList.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
-        childrenList.add(new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
-        childrenList.add(new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable));
-        childrenList.add(new Property("rule", "", "Assert rule to be used in one or more asserts within the test script.", 0, java.lang.Integer.MAX_VALUE, rule));
-        childrenList.add(new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset));
-        childrenList.add(new Property("setup", "", "A series of required setup operations before tests are executed.", 0, java.lang.Integer.MAX_VALUE, setup));
-        childrenList.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));
-        childrenList.add(new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, java.lang.Integer.MAX_VALUE, teardown));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
+        children.add(new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
+        children.add(new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
+        children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the test script.", 0, 1, title));
+        children.add(new Property("status", "code", "The status of this test script. Enables tracking the life-cycle of the content.", 0, 1, status));
+        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the individual or organization that published the test script.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, 1, description));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("purpose", "markdown", "Explaination of why this test script is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, 1, copyright));
+        children.add(new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin));
+        children.add(new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination));
+        children.add(new Property("metadata", "", "The required capability must exist and are assumed to function correctly on the FHIR server being tested.", 0, 1, metadata));
+        children.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
+        children.add(new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
+        children.add(new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable));
+        children.add(new Property("rule", "", "Assert rule to be used in one or more asserts within the test script.", 0, java.lang.Integer.MAX_VALUE, rule));
+        children.add(new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset));
+        children.add(new Property("setup", "", "A series of required setup operations before tests are executed.", 0, 1, setup));
+        children.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));
+        children.add(new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, 1, teardown));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this test script is (or will be) published. The URL SHOULD include the major version of the test script. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
+        case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
+        case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
+        case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the test script.", 0, 1, title);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of this test script. Enables tracking the life-cycle of the content.", 0, 1, status);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the test script.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, 1, description);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this test script is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, 1, copyright);
+        case -1008619738: /*origin*/  return new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin);
+        case -1429847026: /*destination*/  return new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination);
+        case -450004177: /*metadata*/  return new Property("metadata", "", "The required capability must exist and are assumed to function correctly on the FHIR server being tested.", 0, 1, metadata);
+        case -843449847: /*fixture*/  return new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture);
+        case -309425751: /*profile*/  return new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile);
+        case -1249586564: /*variable*/  return new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable);
+        case 3512060: /*rule*/  return new Property("rule", "", "Assert rule to be used in one or more asserts within the test script.", 0, java.lang.Integer.MAX_VALUE, rule);
+        case 1548678118: /*ruleset*/  return new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset);
+        case 109329021: /*setup*/  return new Property("setup", "", "A series of required setup operations before tests are executed.", 0, 1, setup);
+        case 3556498: /*test*/  return new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test);
+        case -1663474172: /*teardown*/  return new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, 1, teardown);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -11971,12 +12312,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TestScript))
+        if (!(other_ instanceof TestScript))
           return false;
-        TestScript o = (TestScript) other;
+        TestScript o = (TestScript) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(metadata, o.metadata, true)
            && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
@@ -11985,12 +12326,12 @@ public class TestScript extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TestScript))
+        if (!(other_ instanceof TestScript))
           return false;
-        TestScript o = (TestScript) other;
+        TestScript o = (TestScript) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true);
       }
 

@@ -3,15 +3,20 @@ package org.hl7.fhir.dstu3.elementmodel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.IParser.OutputStyle;
 import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Factory;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
@@ -19,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
+
 
 
 public class ObjectConverter  {
@@ -99,5 +105,41 @@ public class ObjectConverter  {
     
   }
 
+  public static CodeableConcept readAsCodeableConcept(Element element) {
+    CodeableConcept cc = new CodeableConcept();
+    List<Element> list = new ArrayList<Element>();
+    element.getNamedChildren("coding", list);
+    for (Element item : list)
+      cc.addCoding(readAsCoding(item));
+    cc.setText(element.getNamedChildValue("text"));
+    return cc;
+  }
+
+  public static Coding readAsCoding(Element item) {
+    Coding c = new Coding();
+    c.setSystem(item.getNamedChildValue("system"));
+    c.setVersion(item.getNamedChildValue("version"));
+    c.setCode(item.getNamedChildValue("code"));
+    c.setDisplay(item.getNamedChildValue("display"));
+    return c;
+  }
+
+  public static Identifier readAsIdentifier(Element item) {
+    Identifier r = new Identifier();
+    r.setSystem(item.getNamedChildValue("system"));
+    r.setValue(item.getNamedChildValue("value"));
+    return r;
+  }
+
+  public static Reference readAsReference(Element item) {
+    Reference r = new Reference();
+    r.setDisplay(item.getNamedChildValue("display"));
+    r.setReference(item.getNamedChildValue("reference"));
+    List<Element> identifier = item.getChildrenByName("identifier");
+    if (identifier.isEmpty() == false) {
+      r.setIdentifier(readAsIdentifier(identifier.get(0)));
+    }
+    return r;
+  }
 
 }

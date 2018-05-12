@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
  */
@@ -107,7 +108,7 @@ public class Organization extends DomainResource {
         /**
          * @param value {@link #purpose} (Indicates a purpose for which the contact can be reached.)
          */
-        public OrganizationContactComponent setPurpose(CodeableConcept value) { 
+        public OrganizationContactComponent setPurpose(CodeableConcept value)  { 
           this.purpose = value;
           return this;
         }
@@ -131,7 +132,7 @@ public class Organization extends DomainResource {
         /**
          * @param value {@link #name} (A name associated with the contact.)
          */
-        public OrganizationContactComponent setName(HumanName value) { 
+        public OrganizationContactComponent setName(HumanName value)  { 
           this.name = value;
           return this;
         }
@@ -208,17 +209,29 @@ public class Organization extends DomainResource {
         /**
          * @param value {@link #address} (Visiting or postal addresses for the contact.)
          */
-        public OrganizationContactComponent setAddress(Address value) { 
+        public OrganizationContactComponent setAddress(Address value)  { 
           this.address = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("purpose", "CodeableConcept", "Indicates a purpose for which the contact can be reached.", 0, java.lang.Integer.MAX_VALUE, purpose));
-          childrenList.add(new Property("name", "HumanName", "A name associated with the contact.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom));
-          childrenList.add(new Property("address", "Address", "Visiting or postal addresses for the contact.", 0, java.lang.Integer.MAX_VALUE, address));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("purpose", "CodeableConcept", "Indicates a purpose for which the contact can be reached.", 0, 1, purpose));
+          children.add(new Property("name", "HumanName", "A name associated with the contact.", 0, 1, name));
+          children.add(new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom));
+          children.add(new Property("address", "Address", "Visiting or postal addresses for the contact.", 0, 1, address));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -220463842: /*purpose*/  return new Property("purpose", "CodeableConcept", "Indicates a purpose for which the contact can be reached.", 0, 1, purpose);
+          case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the contact.", 0, 1, name);
+          case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom);
+          case -1147692044: /*address*/  return new Property("address", "Address", "Visiting or postal addresses for the contact.", 0, 1, address);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -328,23 +341,23 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof OrganizationContactComponent))
+        if (!(other_ instanceof OrganizationContactComponent))
           return false;
-        OrganizationContactComponent o = (OrganizationContactComponent) other;
+        OrganizationContactComponent o = (OrganizationContactComponent) other_;
         return compareDeep(purpose, o.purpose, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof OrganizationContactComponent))
+        if (!(other_ instanceof OrganizationContactComponent))
           return false;
-        OrganizationContactComponent o = (OrganizationContactComponent) other;
+        OrganizationContactComponent o = (OrganizationContactComponent) other_;
         return true;
       }
 
@@ -706,7 +719,7 @@ public class Organization extends DomainResource {
       if (this.alias == null)
         return false;
       for (StringType v : this.alias)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -836,7 +849,7 @@ public class Organization extends DomainResource {
     /**
      * @param value {@link #partOf} (The organization of which this organization forms a part.)
      */
-    public Organization setPartOf(Reference value) { 
+    public Organization setPartOf(Reference value)  { 
       this.partOf = value;
       return this;
     }
@@ -989,18 +1002,36 @@ public class Organization extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the organization across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("type", "CodeableConcept", "The kind(s) of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("name", "string", "A name associated with the organization.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
-        childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
-        childrenList.add(new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("contact", "", "Contact for the organization for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the organization.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the organization across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, 1, active));
+        children.add(new Property("type", "CodeableConcept", "The kind(s) of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("name", "string", "A name associated with the organization.", 0, 1, name));
+        children.add(new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        children.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
+        children.add(new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, 1, partOf));
+        children.add(new Property("contact", "", "Contact for the organization for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the organization.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the organization across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, 1, active);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind(s) of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type);
+        case 3373707: /*name*/  return new Property("name", "string", "A name associated with the organization.", 0, 1, name);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom);
+        case -1147692044: /*address*/  return new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, 1, partOf);
+        case 951526432: /*contact*/  return new Property("contact", "", "Contact for the organization for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the organization.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1213,12 +1244,12 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Organization))
+        if (!(other_ instanceof Organization))
           return false;
-        Organization o = (Organization) other;
+        Organization o = (Organization) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(type, o.type, true)
            && compareDeep(name, o.name, true) && compareDeep(alias, o.alias, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true) && compareDeep(partOf, o.partOf, true) && compareDeep(contact, o.contact, true)
@@ -1226,12 +1257,12 @@ public class Organization extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Organization))
+        if (!(other_ instanceof Organization))
           return false;
-        Organization o = (Organization) other;
+        Organization o = (Organization) other_;
         return compareValues(active, o.active, true) && compareValues(name, o.name, true) && compareValues(alias, o.alias, true)
           ;
       }

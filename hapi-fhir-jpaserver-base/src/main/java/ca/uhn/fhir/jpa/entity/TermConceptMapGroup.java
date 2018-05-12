@@ -24,13 +24,13 @@ public class TermConceptMapGroup implements Serializable {
 	@Column(name = "SOURCE_URL", nullable = false, length = 200)
 	private String mySource;
 
-	@Column(name = "SOURCE_VERSION", length = 50)
+	@Column(name = "SOURCE_VERSION", length = 100)
 	private String mySourceVersion;
 
 	@Column(name = "TARGET_URL", nullable = false, length = 200)
 	private String myTarget;
 
-	@Column(name = "TARGET_VERSION", length = 50)
+	@Column(name = "TARGET_VERSION", length = 100)
 	private String myTargetVersion;
 
 	@OneToMany(mappedBy = "myConceptMapGroup")

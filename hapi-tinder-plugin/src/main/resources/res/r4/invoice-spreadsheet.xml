@@ -941,7 +941,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Reason for cancellation of this Invoice</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s94"><Data ss:Type="String">In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><Data ss:Type="String">In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><Data ss:Type="String">Derived Profiles may chose to add invariants requiring this field to be populated if either priceOverride or factorOverride have been filled</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4015,7 +4015,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
     <Cell ss:StyleID="s154"><Data ss:Type="String">InvoiceStatus</Data></Cell>
-    <Cell ss:StyleID="s82"><Data ss:Type="String">Codes identifying the stage lifecycle stage of an Invoice</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Codes identifying the lifecycle stage of an Invoice</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s121"><Data ss:Type="String">#invoice-status</Data></Cell>

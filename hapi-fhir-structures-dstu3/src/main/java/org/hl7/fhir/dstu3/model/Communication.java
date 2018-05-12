@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
  */
@@ -257,39 +258,45 @@ public class Communication extends DomainResource {
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public StringType getContentStringType() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.content.getClass().getName()+" was encountered");
           return (StringType) this.content;
         }
 
         public boolean hasContentStringType() { 
-          return this.content instanceof StringType;
+          return this != null && this.content instanceof StringType;
         }
 
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Attachment getContentAttachment() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
         public boolean hasContentAttachment() { 
-          return this.content instanceof Attachment;
+          return this != null && this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Reference getContentReference() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
         public boolean hasContentReference() { 
-          return this.content instanceof Reference;
+          return this != null && this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -299,14 +306,29 @@ public class Communication extends DomainResource {
         /**
          * @param value {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
-        public CommunicationPayloadComponent setContent(Type value) { 
+        public CommunicationPayloadComponent setContent(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof StringType || value instanceof Attachment || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Communication.payload.content[x]: "+value.fhirType());
           this.content = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, java.lang.Integer.MAX_VALUE, content));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, 1, content));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 264548711: /*content[x]*/  return new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, 1, content);
+          case 951530617: /*content*/  return new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, 1, content);
+          case -326336022: /*contentString*/  return new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, 1, content);
+          case -702028164: /*contentAttachment*/  return new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, 1, content);
+          case 1193747154: /*contentReference*/  return new Property("content[x]", "string|Attachment|Reference(Any)", "A communicated content (or for multi-part communications, one portion of the communication).", 0, 1, content);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -383,22 +405,22 @@ public class Communication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CommunicationPayloadComponent))
+        if (!(other_ instanceof CommunicationPayloadComponent))
           return false;
-        CommunicationPayloadComponent o = (CommunicationPayloadComponent) other;
+        CommunicationPayloadComponent o = (CommunicationPayloadComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CommunicationPayloadComponent))
+        if (!(other_ instanceof CommunicationPayloadComponent))
           return false;
-        CommunicationPayloadComponent o = (CommunicationPayloadComponent) other;
+        CommunicationPayloadComponent o = (CommunicationPayloadComponent) other_;
         return true;
       }
 
@@ -971,7 +993,7 @@ public class Communication extends DomainResource {
     /**
      * @param value {@link #notDoneReason} (Describes why the communication event did not occur in coded and/or textual form.)
      */
-    public Communication setNotDoneReason(CodeableConcept value) { 
+    public Communication setNotDoneReason(CodeableConcept value)  { 
       this.notDoneReason = value;
       return this;
     }
@@ -1101,7 +1123,7 @@ public class Communication extends DomainResource {
     /**
      * @param value {@link #subject} (The patient or group that was the focus of this communication.)
      */
-    public Communication setSubject(Reference value) { 
+    public Communication setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1266,7 +1288,7 @@ public class Communication extends DomainResource {
     /**
      * @param value {@link #context} (The encounter within which the communication was sent.)
      */
-    public Communication setContext(Reference value) { 
+    public Communication setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1403,7 +1425,7 @@ public class Communication extends DomainResource {
     /**
      * @param value {@link #sender} (The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.)
      */
-    public Communication setSender(Reference value) { 
+    public Communication setSender(Reference value)  { 
       this.sender = value;
       return this;
     }
@@ -1645,28 +1667,56 @@ public class Communication extends DomainResource {
       return getNote().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("definition", "Reference(PlanDefinition|ActivityDefinition)", "A protocol, guideline, or other definition that was adhered to in whole or in part by this communication event.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("basedOn", "Reference(Any)", "An order, proposal or plan fulfilled in whole or in part by this Communication.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("partOf", "Reference(Any)", "Part of this action.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("status", "code", "The status of the transmission.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("notDone", "boolean", "If true, indicates that the described communication event did not actually occur.", 0, java.lang.Integer.MAX_VALUE, notDone));
-        childrenList.add(new Property("notDoneReason", "CodeableConcept", "Describes why the communication event did not occur in coded and/or textual form.", 0, java.lang.Integer.MAX_VALUE, notDoneReason));
-        childrenList.add(new Property("category", "CodeableConcept", "The type of message conveyed such as alert, notification, reminder, instruction, etc.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("medium", "CodeableConcept", "A channel that was used for this communication (e.g. email, fax).", 0, java.lang.Integer.MAX_VALUE, medium));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient or group that was the focus of this communication.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("recipient", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson|Group)", "The entity (e.g. person, organization, clinical information system, or device) which was the target of the communication. If receipts need to be tracked by individual, a separate resource instance will need to be created for each recipient.  Multiple recipient communications are intended where either a receipt(s) is not tracked (e.g. a mass mail-out) or is captured in aggregate (all emails confirmed received by a particular time).", 0, java.lang.Integer.MAX_VALUE, recipient));
-        childrenList.add(new Property("topic", "Reference(Any)", "The resources which were responsible for or related to producing this communication.", 0, java.lang.Integer.MAX_VALUE, topic));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter within which the communication was sent.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("sent", "dateTime", "The time when this communication was sent.", 0, java.lang.Integer.MAX_VALUE, sent));
-        childrenList.add(new Property("received", "dateTime", "The time when this communication arrived at the destination.", 0, java.lang.Integer.MAX_VALUE, received));
-        childrenList.add(new Property("sender", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.", 0, java.lang.Integer.MAX_VALUE, sender));
-        childrenList.add(new Property("reasonCode", "CodeableConcept", "The reason or justification for the communication.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        childrenList.add(new Property("reasonReference", "Reference(Condition|Observation)", "Indicates another resource whose existence justifies this communication.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
-        childrenList.add(new Property("payload", "", "Text, attachment(s), or resource(s) that was communicated to the recipient.", 0, java.lang.Integer.MAX_VALUE, payload));
-        childrenList.add(new Property("note", "Annotation", "Additional notes or commentary about the communication by the sender, receiver or other interested parties.", 0, java.lang.Integer.MAX_VALUE, note));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("definition", "Reference(PlanDefinition|ActivityDefinition)", "A protocol, guideline, or other definition that was adhered to in whole or in part by this communication event.", 0, java.lang.Integer.MAX_VALUE, definition));
+        children.add(new Property("basedOn", "Reference(Any)", "An order, proposal or plan fulfilled in whole or in part by this Communication.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("partOf", "Reference(Any)", "Part of this action.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("status", "code", "The status of the transmission.", 0, 1, status));
+        children.add(new Property("notDone", "boolean", "If true, indicates that the described communication event did not actually occur.", 0, 1, notDone));
+        children.add(new Property("notDoneReason", "CodeableConcept", "Describes why the communication event did not occur in coded and/or textual form.", 0, 1, notDoneReason));
+        children.add(new Property("category", "CodeableConcept", "The type of message conveyed such as alert, notification, reminder, instruction, etc.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("medium", "CodeableConcept", "A channel that was used for this communication (e.g. email, fax).", 0, java.lang.Integer.MAX_VALUE, medium));
+        children.add(new Property("subject", "Reference(Patient|Group)", "The patient or group that was the focus of this communication.", 0, 1, subject));
+        children.add(new Property("recipient", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson|Group)", "The entity (e.g. person, organization, clinical information system, or device) which was the target of the communication. If receipts need to be tracked by individual, a separate resource instance will need to be created for each recipient.  Multiple recipient communications are intended where either a receipt(s) is not tracked (e.g. a mass mail-out) or is captured in aggregate (all emails confirmed received by a particular time).", 0, java.lang.Integer.MAX_VALUE, recipient));
+        children.add(new Property("topic", "Reference(Any)", "The resources which were responsible for or related to producing this communication.", 0, java.lang.Integer.MAX_VALUE, topic));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter within which the communication was sent.", 0, 1, context));
+        children.add(new Property("sent", "dateTime", "The time when this communication was sent.", 0, 1, sent));
+        children.add(new Property("received", "dateTime", "The time when this communication arrived at the destination.", 0, 1, received));
+        children.add(new Property("sender", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.", 0, 1, sender));
+        children.add(new Property("reasonCode", "CodeableConcept", "The reason or justification for the communication.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation)", "Indicates another resource whose existence justifies this communication.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("payload", "", "Text, attachment(s), or resource(s) that was communicated to the recipient.", 0, java.lang.Integer.MAX_VALUE, payload));
+        children.add(new Property("note", "Annotation", "Additional notes or commentary about the communication by the sender, receiver or other interested parties.", 0, java.lang.Integer.MAX_VALUE, note));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1014418093: /*definition*/  return new Property("definition", "Reference(PlanDefinition|ActivityDefinition)", "A protocol, guideline, or other definition that was adhered to in whole or in part by this communication event.", 0, java.lang.Integer.MAX_VALUE, definition);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(Any)", "An order, proposal or plan fulfilled in whole or in part by this Communication.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Any)", "Part of this action.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the transmission.", 0, 1, status);
+        case 2128257269: /*notDone*/  return new Property("notDone", "boolean", "If true, indicates that the described communication event did not actually occur.", 0, 1, notDone);
+        case -1973169255: /*notDoneReason*/  return new Property("notDoneReason", "CodeableConcept", "Describes why the communication event did not occur in coded and/or textual form.", 0, 1, notDoneReason);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "The type of message conveyed such as alert, notification, reminder, instruction, etc.", 0, java.lang.Integer.MAX_VALUE, category);
+        case -1078030475: /*medium*/  return new Property("medium", "CodeableConcept", "A channel that was used for this communication (e.g. email, fax).", 0, java.lang.Integer.MAX_VALUE, medium);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient or group that was the focus of this communication.", 0, 1, subject);
+        case 820081177: /*recipient*/  return new Property("recipient", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson|Group)", "The entity (e.g. person, organization, clinical information system, or device) which was the target of the communication. If receipts need to be tracked by individual, a separate resource instance will need to be created for each recipient.  Multiple recipient communications are intended where either a receipt(s) is not tracked (e.g. a mass mail-out) or is captured in aggregate (all emails confirmed received by a particular time).", 0, java.lang.Integer.MAX_VALUE, recipient);
+        case 110546223: /*topic*/  return new Property("topic", "Reference(Any)", "The resources which were responsible for or related to producing this communication.", 0, java.lang.Integer.MAX_VALUE, topic);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter within which the communication was sent.", 0, 1, context);
+        case 3526552: /*sent*/  return new Property("sent", "dateTime", "The time when this communication was sent.", 0, 1, sent);
+        case -808719903: /*received*/  return new Property("received", "dateTime", "The time when this communication arrived at the destination.", 0, 1, received);
+        case -905962955: /*sender*/  return new Property("sender", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.", 0, 1, sender);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "The reason or justification for the communication.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation)", "Indicates another resource whose existence justifies this communication.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case -786701938: /*payload*/  return new Property("payload", "", "Text, attachment(s), or resource(s) that was communicated to the recipient.", 0, java.lang.Integer.MAX_VALUE, payload);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Additional notes or commentary about the communication by the sender, receiver or other interested parties.", 0, java.lang.Integer.MAX_VALUE, note);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2024,12 +2074,12 @@ public class Communication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Communication))
+        if (!(other_ instanceof Communication))
           return false;
-        Communication o = (Communication) other;
+        Communication o = (Communication) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true)
            && compareDeep(notDone, o.notDone, true) && compareDeep(notDoneReason, o.notDoneReason, true) && compareDeep(category, o.category, true)
@@ -2041,12 +2091,12 @@ public class Communication extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Communication))
+        if (!(other_ instanceof Communication))
           return false;
-        Communication o = (Communication) other;
+        Communication o = (Communication) other_;
         return compareValues(status, o.status, true) && compareValues(notDone, o.notDone, true) && compareValues(sent, o.sent, true)
            && compareValues(received, o.received, true);
       }

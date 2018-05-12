@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -42,16 +43,27 @@ public class TranslationRequest {
 		myCodeableConcept = new CodeableConcept();
 	}
 
+	/**
+	 * This is just a convenience method that creates a codeableconcept if one
+	 * doesn't already exist, and adds a coding to it
+	 */
+	public TranslationRequest addCode(String theSystem, String theCode) {
+		Validate.notBlank(theSystem, "theSystem must not be null");
+		Validate.notBlank(theCode, "theCode must not be null");
+		if (getCodeableConcept() == null) {
+			setCodeableConcept(new CodeableConcept());
+		}
+		getCodeableConcept().addCoding(new Coding().setSystem(theSystem).setCode(theCode));
+		return this;
+	}
+
 	public CodeableConcept getCodeableConcept() {
 		return myCodeableConcept;
 	}
 
-	public void setCodeableConcept(CodeableConcept theCodeableConcept) {
+	public TranslationRequest setCodeableConcept(CodeableConcept theCodeableConcept) {
 		myCodeableConcept = theCodeableConcept;
-	}
-
-	public boolean hasResourceId() {
-		return myResourceId != null;
+		return this;
 	}
 
 	public Long getResourceId() {
@@ -62,12 +74,12 @@ public class TranslationRequest {
 		myResourceId = theResourceId;
 	}
 
-	public boolean hasReverse() {
-		return myReverse != null;
-	}
-
 	public BooleanType getReverse() {
 		return myReverse;
+	}
+
+	public void setReverse(BooleanType theReverse) {
+		myReverse = theReverse;
 	}
 
 	public boolean getReverseAsBoolean() {
@@ -78,48 +90,31 @@ public class TranslationRequest {
 		return false;
 	}
 
-	public void setReverse(BooleanType theReverse) {
-		myReverse = theReverse;
-	}
-
-	public void setReverse(boolean theReverse) {
-		myReverse = new BooleanType(theReverse);
-	}
-
-	public boolean hasSource() {
-		return mySource != null && mySource.hasValue();
-	}
-
 	public UriType getSource() {
 		return mySource;
 	}
 
-	public void setSource(UriType theSource) {
+	public TranslationRequest setSource(UriType theSource) {
 		mySource = theSource;
-	}
-
-	public boolean hasTarget() {
-		return myTarget != null && myTarget.hasValue();
+		return this;
 	}
 
 	public UriType getTarget() {
 		return myTarget;
 	}
 
-	public void setTarget(UriType theTarget) {
+	public TranslationRequest setTarget(UriType theTarget) {
 		myTarget = theTarget;
-	}
-
-	public boolean hasTargetSystem() {
-		return myTargetSystem != null && myTargetSystem.hasValue();
+		return this;
 	}
 
 	public UriType getTargetSystem() {
 		return myTargetSystem;
 	}
 
-	public void setTargetSystem(UriType theTargetSystem) {
+	public TranslationRequest setTargetSystem(UriType theTargetSystem) {
 		myTargetSystem = theTargetSystem;
+		return this;
 	}
 
 	public List<TranslationQuery> getTranslationQueries() {
@@ -151,5 +146,29 @@ public class TranslationRequest {
 		}
 
 		return retVal;
+	}
+
+	public boolean hasResourceId() {
+		return myResourceId != null;
+	}
+
+	public boolean hasReverse() {
+		return myReverse != null;
+	}
+
+	public boolean hasSource() {
+		return mySource != null && mySource.hasValue();
+	}
+
+	public boolean hasTarget() {
+		return myTarget != null && myTarget.hasValue();
+	}
+
+	public boolean hasTargetSystem() {
+		return myTargetSystem != null && myTargetSystem.hasValue();
+	}
+
+	public void setReverse(boolean theReverse) {
+		myReverse = new BooleanType(theReverse);
 	}
 }

@@ -14,10 +14,10 @@
    <Path>/Users/ehaas/Documents/FHIR/working-build/source/request/\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
-  
-  
-  
-  
+
+
+
+
   <TabRatio>644</TabRatio>
   <ActiveSheet>1</ActiveSheet>
   <RefModeR1C1/>
@@ -1542,7 +1542,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Concepts that are used to identify an entity that is ingested for nutritional purposes</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The food type(s) (e.g. meats, all foods)  that the texture modification applies to.  This could be all foods types.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Coupled with the textureModifier; could be (All Foods)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Coupled with the `texture.modifier`; could be (All Foods)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">.participation[typeCode=PRD].role[classCode=MANU], manufacturedFoodKind; .code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">ODS-4</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3968,7 +3968,7 @@
    <SplitVertical>2</SplitVertical>
    <LeftColumnRightPane>6</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
@@ -4502,7 +4502,7 @@
    <SplitVertical>2</SplitVertical>
    <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
@@ -4542,7 +4542,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s123"><Data ss:Type="String">NutritionOrder.orderer</Data></Cell>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">The identify of the provider who placed the nutrition order</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">The identity of the provider who placed the nutrition order</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s122"><Data ss:Type="String">identifier</Data></Cell>
@@ -4753,7 +4753,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
@@ -5338,7 +5338,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:Print>    </x:Print>
@@ -5608,7 +5608,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
@@ -5876,7 +5876,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:Print>    </x:Print>
@@ -6302,7 +6302,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
@@ -6374,7 +6374,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s152"><Data ss:Type="String">NutrientModifier</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of nutrient that is being modified such as carbohydrate or sodium.</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of nutrients that are being modified such as carbohydrate or sodium.</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">valueset-nutrient-code</Data></Cell>
@@ -6404,7 +6404,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s152"><Data ss:Type="String">TextureModifiedFoodType</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of foods that are texture modified.</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Codes for types of foods that are texture-modified.</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">valueset-modified-foodtype</Data></Cell>
@@ -6509,7 +6509,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s87"><Data ss:Type="String">NutritionOrderStatus</Data></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">Codes identifying the stage lifecycle stage of the nutrition order</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Codes identifying the lifecycle stage of the nutrition order</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s153"><Data ss:Type="String">http://hl7.org/fhir/ValueSet/request-status</Data></Cell>
@@ -6752,7 +6752,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
@@ -7894,7 +7894,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-   
+
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:Print>    </x:Print>

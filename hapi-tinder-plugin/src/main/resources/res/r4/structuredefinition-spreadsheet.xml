@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Grahame Grieve</LastAuthor>
+  <LastAuthor>lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2018-03-01T07:07:36Z</LastSaved>
+  <LastSaved>2018-04-15T16:10:36Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <CustomDocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
@@ -93,7 +93,7 @@
   
   
   
-  <ActiveSheet>10</ActiveSheet>
+  <ActiveSheet>2</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
@@ -838,7 +838,7 @@
   </Style>
  </Styles>
  <Names>
-  <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R47C1"/>
+  <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R48C1"/>
  </Names>
  <Worksheet ss:Name="Instructions">
   <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="5" x:FullColumns="1" x:FullRows="1">
@@ -919,7 +919,7 @@
     <Cell ss:StyleID="s75"><Data ss:Type="String">RIM Mapping</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">E.g. RIMClass[classCode=foo,moodCode=bar].someAssociation[typeCode=code].attribute</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">v2 Mapping</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">E.g. SEG.1.2.3</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">11179 Mapping</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s75"><Data ss:Type="String">??? Mapping</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">Hierarchy</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Change column name to one from mappingSpaces.xml.  Add more if needed</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">UML</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Display Hint</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1078,7 +1078,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">&amp; Applications don't have to use this name, but can always fall back to it. The title also corresponds to the label for the root element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">&amp; Applications don't have to use this name but can always fall back to it. The title also corresponds to the label for the root element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1409,7 +1409,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">FHIR Version this StructureDefinition targets</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is $version$ for this version</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">A StructureDefinition does not need to specify the target it applies to,as StructureDefinitions will often be valid across multiple versions of FHIR. FHIR tooling can determine whether a StructureDefinition is consistent with a particular StructureDefinition if desired</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">A StructureDefinition does not need to specify the target it applies to as StructureDefinitions will often be valid across multiple versions of FHIR. FHIR tooling can determine whether a StructureDefinition is consistent with a particular StructureDefinition if desired</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1598,7 +1598,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Whether the structure is abstract</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Whether structure this definition describes is abstract or not  - that is, whether the structure is not intended to be instantiated. For Resources and Data types, abstract types will never be exchanged  between systems</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Abstract Resources cannot be instantiated - a concrete sub-type must be used. Abstract datatypes and extensions cannot be used in an instance. For logical models, the exact implication of "abstract" will rest with the author, depending how the logical model is used. Flagging a constraint structure as abstract conveys design intent but makes no difference to how the structure definition is handled. Note that inline declared elements that are given the type "Element" in the profile, but have children described, are anonymous concrete types that specialise Element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Abstract Resources cannot be instantiated - a concrete sub-type must be used. Abstract datatypes and extensions cannot be used in an instance. For logical models, the exact implication of "abstract" will rest with the author, depending how the logical model is used. Flagging a constraint structure as abstract conveys design intent but makes no difference to how the structure definition is handled. Note that inline declared elements that are given the type "Element" in the profile, but have children described, are anonymous concrete types that specialize Element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1703,9 +1703,9 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">FHIRPath invariants - when the extension can be used</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true. </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">All the rules must be true. When evaluating the invariant, the fluentpath focus is the element that holds the extension, and %extension refers to the extension itself</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The rules are only evaluated when the extension is present. When evaluating the invariant, the FHIRPath focus is the element that holds the extension, and %extension refers to the extension itself</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1720,7 +1720,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="Number">11</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">uri</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">FHIRDefinedTypeExt</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1730,7 +1730,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Type defined or constrained by this structure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. "string" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Note that in the case of constraints, the type could be determined by chasing through the baseDefinition references until a concrete structure (derivation = specialization) is reached, or by looking at the path of the first element in the snapshot - if present - but providing the type directly makes for simpler tooling and indexing. &#10;&#10;The type must match the elements defined in the differential and the snapshot. For all FHIR defined types, the path name of the element will start with the type name. For logical models, where the type is a URL, the type name SHOULD start with the tail of the type URL where required</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1764,7 +1764,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="Boolean">1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1786,7 +1786,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">specialization | constraint - How relates to base definition</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">How the type relates to the baseDefinition.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String"> If the definition is a specialization, then it adds new elements in the differential, and the snapshot includes the inherited elements.  If the definition is a constraint, then it can not define new elements, it can only make new rules about existing content (see [Profiling Resources](profiling.html#resources))</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String"> If the definition is a specialization, then it adds new elements in the differential, and the snapshot includes the inherited elements.  If the definition is a constraint, then it cannot define new elements, it can only make new rules about existing content (see [Profiling Resources](profiling.html#resources))</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1811,7 +1811,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Snapshot view of the structure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3944,9 +3944,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>26</TopRowBottomPane>
+   <TopRowBottomPane>32</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>5</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -3959,14 +3959,14 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Invariants!R1C1:R2C7"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="48" ss:StyleID="s102" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="49" ss:StyleID="s102" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:Index="2" ss:StyleID="s102" ss:Width="70.0"/>
    <Column ss:StyleID="s102" ss:Width="55.0"/>
    <Column ss:StyleID="s102" ss:Width="165.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s102" ss:Width="453.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s102" ss:Width="567.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s102" ss:Width="691.0"/>
-   <Row ss:AutoFitHeight="0" ss:Height="15" ss:StyleID="s70">
+   <Row ss:AutoFitHeight="0" ss:StyleID="s70">
     <Cell ss:StyleID="s103"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Unique Number</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Requirements</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Unique short label</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Severity</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Indicates impact of violating the invariant.  (Defaults to 'error')</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3999,7 +3999,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition.snapshot</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Each element definition in a snapshot must have a formal definition and cardinalities</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">element.all(definition and min and max)</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">element.all(definition.exists() and min.exists() and max.exists())</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">count(f:element) = count(f:element[exists(f:definition) and exists(f:min) and exists(f:max)])</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="43">
@@ -4043,8 +4043,8 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition.snapshot</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">In any snapshot, all the elements must be in the specified type, and must have a base definition</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">element.first().path = %resource.type and element.tail().all(path.startsWith(%resource.type&amp;'.')) and element.all(base.exists())</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">All snapshot elements must be in the StructureDefinition's specified type</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">element.first().path = %resource.type and element.tail().all(path.startsWith(%resource.type&amp;'.'))</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">f:element[1]/f:path/@value=parent::f:StructureDefinition/f:type/@value and count(f:element[position()!=1])=count(f:element[position()!=1][starts-with(f:path/@value, concat(ancestor::f:StructureDefinition/f:type/@value, '.'))])</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
@@ -4053,15 +4053,24 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition.differential</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">In any differential, all the elements must be in the specified type</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">element.first().path.startsWith(%resource.type) and element.tail().all(path.startsWith(%resource.type&amp;'.'))</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">element.first().path.startsWith(%resource.type) and (element.tail().not() or element.tail().all(path.startsWith(%resource.type&amp;'.')))</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">count(f:element)=count(f:element[f:path/@value=ancestor::f:StructureDefinition/f:type/@value or starts-with(f:path/@value, concat(ancestor::f:StructureDefinition/f:type/@value, '.'))])</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29">
+    <Cell ss:StyleID="s110"><Data ss:Type="String">8b</Data><NamedCell ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition.snapshot</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">All snapshot elements must have a base definition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">element.all(base.exists())</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">count(f:element) = count(f:element/f:base)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="130">
     <Cell ss:StyleID="s108"><Data ss:Type="Number">9</Data><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Because these 3 fields seem to be have overlapping meaning with the ones in the root of StructureDefinition</Data></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">In any snapshot or differential, no label, code or requirements on the an element without a "." in the path (e.g. the first element)</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">In any snapshot or differential, no label, code or requirements on an element without a "." in the path (e.g. the first element)</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">children().element.where(path.contains('.').not()).label.empty() and children().element.where(path.contains('.').not()).code.empty() and children().element.where(path.contains('.').not()).requirements.empty()</Data></Cell>
     <Cell ss:StyleID="s109"><Data ss:Type="String">not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))</Data></Cell>
    </Row>
@@ -4096,19 +4105,19 @@
     <Cell ss:StyleID="s110"><Data ss:Type="Number">15</Data><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">No Type on the root element (snapshot)</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition.snapshot</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">The first element in a snapshot has no type</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">element.first().type.empty()</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">not(f:element[1]/f:type)</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">The first element in a snapshot has no type unless model is a logical model.</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">kind!='logical'  implies snapshot.element.first().type.empty()</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">f:kind/@value='logical' or not(f:snapshot/f:element[1]/f:type)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="58">
     <Cell ss:StyleID="s110"><Data ss:Type="String">15a</Data><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">No Type on the root element (differential)</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition.differential</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">If the first element in a differential has no "." in the path, it has no type</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">element.first().path.contains('.').not() implies element.first().type.empty()</Data></Cell>
-    <Cell ss:StyleID="s109"><Data ss:Type="String">not(f:element[1][not(contains(f:path/@value, '.'))]/f:type)</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">StructureDefinition</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">If the first element in a differential has no "." in the path and it's not a logical model, it has no type</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">(kind!='logical'  and differential.element.first().path.contains('.').not()) implies differential.element.first().type.empty()</Data></Cell>
+    <Cell ss:StyleID="s109"><Data ss:Type="String">f:kind/@value='logical' or not(f:differential/f:element[1][not(contains(f:path/@value, '.'))]/f:type)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="43">
     <Cell ss:StyleID="s108"><Data ss:Type="Number">16</Data><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4380,7 +4389,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s109"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s112"/>
     <Cell ss:StyleID="s112"/>
@@ -4389,7 +4398,7 @@
     <Cell ss:StyleID="s112"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="15"/>
+   <Row ss:AutoFitHeight="0"/>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -4402,12 +4411,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>11</TopRowBottomPane>
+   <TopRowBottomPane>5</TopRowBottomPane>
    <SplitVertical>2</SplitVertical>
-   <LeftColumnRightPane>3</LeftColumnRightPane>
+   <LeftColumnRightPane>4</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -4449,7 +4459,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s116"><Data ss:Type="String">type</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">StructureDefinition.type</Data></Cell>
     <Cell ss:StyleID="s118"/>
@@ -4494,7 +4504,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s119"><Data ss:Type="String">StructureDefinition.context</Data></Cell>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">The system is the URL for the context-type: e.g. http://hl7.org/fhir/ValueSet/extension-context-type#element|CodeableConcept.text</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">The system is the URL for the context-type: e.g. http://hl7.org/fhir/extension-context-type#element|CodeableConcept.text</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s116"><Data ss:Type="String">base</Data></Cell>
@@ -7826,7 +7836,6 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

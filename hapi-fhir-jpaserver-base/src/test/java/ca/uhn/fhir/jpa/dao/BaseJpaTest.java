@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -236,6 +237,11 @@ public abstract class BaseJpaTest {
 			retVal.add(next.getValue());
 		}
 		return retVal.toArray(new String[retVal.size()]);
+	}
+
+	@Before
+	public void beforeRandomizeLocale() {
+		randomizeLocale();
 	}
 
 	@AfterClass

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.
  */
 @DatatypeDef(name="ProdCharacteristic")
-public class ProdCharacteristic extends Type implements ICompositeType {
+public class ProdCharacteristic extends BackboneElement implements ICompositeType {
 
     /**
      * Where applicable, the height can be specified using a numerical value and its unit of measurement The unit of measurement shall be specified in accordance with ISO 11240 and the resulting terminology The symbol and the symbol identifier shall be used.

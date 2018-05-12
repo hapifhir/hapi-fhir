@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 
@@ -289,7 +290,7 @@ public class QuestionnaireBuilder {
         else if (isInlineDataType(child.getType()))
           buildGroup(childGroup, profile, child, nparents, nResponse); // todo: get the right children for this one...
         else
-          buildQuestion(childGroup, profile, child, child.getPath(), nResponse);
+          buildQuestion(childGroup, profile, child, child.getPath(), nResponse, parents);
       }
     }
   }
@@ -342,7 +343,7 @@ public class QuestionnaireBuilder {
     }
   }
 
-  private void buildQuestion(QuestionnaireItemComponent group, StructureDefinition profile, ElementDefinition element, String path, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups) throws FHIRException {
+  private void buildQuestion(QuestionnaireItemComponent group, StructureDefinition profile, ElementDefinition element, String path, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups, List<ElementDefinition> parents) throws FHIRException {
       group.setLinkId(path);
 
       // in this context, we don't have any concepts to mark...
@@ -376,11 +377,11 @@ public class QuestionnaireBuilder {
 
             List<QuestionnaireResponse.QuestionnaireResponseItemComponent> selected = new ArrayList<QuestionnaireResponse.QuestionnaireResponseItemComponent>();
             selectTypes(profile, sub, t, answerGroups, selected);
-            processDataType(profile, sub, element, element.getPath()+"._"+t.getUserData("text"), t, selected);
+            processDataType(profile, sub, element, element.getPath()+"._"+t.getUserData("text"), t, selected, parents);
           }
       } else
         // now we have to build the question panel for each different data type
-        processDataType(profile, group, element, element.getPath(), element.getType().get(0), answerGroups);
+        processDataType(profile, group, element, element.getPath(), element.getType().get(0), answerGroups, parents);
 
   }
 
@@ -456,7 +457,7 @@ public class QuestionnaireBuilder {
     return vs;
   }
 
-  private void selectTypes(StructureDefinition profile, QuestionnaireItemComponent sub, TypeRefComponent t, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> source, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> dest) {
+  private void selectTypes(StructureDefinition profile, QuestionnaireItemComponent sub, TypeRefComponent t, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> source, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> dest) throws FHIRFormatError {
     List<QuestionnaireResponse.QuestionnaireResponseItemComponent> temp = new ArrayList<QuestionnaireResponse.QuestionnaireResponseItemComponent>();
 
     for (QuestionnaireResponse.QuestionnaireResponseItemComponent g : source)
@@ -687,12 +688,12 @@ public class QuestionnaireBuilder {
     return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
   }
 
-  private void processDataType(StructureDefinition profile, QuestionnaireItemComponent group, ElementDefinition element, String path, TypeRefComponent t, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups) throws FHIRException {
+  private void processDataType(StructureDefinition profile, QuestionnaireItemComponent group, ElementDefinition element, String path, TypeRefComponent t, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups, List<ElementDefinition> parents) throws FHIRException {
     if (t.getCode().equals("code"))
       addCodeQuestions(group, element, path, answerGroups);
-    else if (t.getCode().equals("string") || t.getCode().equals("id") || t.getCode().equals("oid") || t.getCode().equals("markdown"))
+    else if (Utilities.existsInList(t.getCode(), "string", "id", "oid", "uuid", "markdown"))
       addStringQuestions(group, element, path, answerGroups);
-    else if (t.getCode().equals("uri") || t.getCode().equals("url") || t.getCode().equals("canonical"))
+    else if (Utilities.existsInList(t.getCode(), "uri", "url", "canonical"))
       addUriQuestions(group, element, path, answerGroups);
     else if (t.getCode().equals("boolean"))
       addBooleanQuestions(group, element, path, answerGroups);
@@ -746,11 +747,15 @@ public class QuestionnaireBuilder {
       addSampledDataQuestions(group, element, path, answerGroups);
     else if (t.getCode().equals("Extension")) {
       if (t.hasProfile())
-        addExtensionQuestions(profile, group, element, path, t.getProfile().get(0).getValue(), answerGroups);
+        addExtensionQuestions(profile, group, element, path, t.getProfile().get(0).getValue(), answerGroups, parents);
     } else if (t.getCode().equals("SampledData"))
       addSampledDataQuestions(group, element, path, answerGroups);
-    else if (!t.getCode().equals("Narrative") && !t.getCode().equals("Resource") && !t.getCode().equals("Meta") && !t.getCode().equals("Signature"))
-      throw new NotImplementedException("Unhandled Data Type: "+t.getCode()+" on element "+element.getPath());
+    else if (!t.getCode().equals("Narrative") && !t.getCode().equals("Resource") && !t.getCode().equals("Meta") && !t.getCode().equals("Signature")) {
+      StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+t.getCode());
+      if (sd == null)
+        throw new NotImplementedException("Unhandled Data Type: "+t.getCode()+" on element "+element.getPath());
+      buildGroup(group, sd, sd.getSnapshot().getElementFirstRep(), parents, answerGroups);
+    }
   }
 
   private void addCodeQuestions(QuestionnaireItemComponent group, ElementDefinition element, String path, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups) throws FHIRException {
@@ -1008,14 +1013,14 @@ public class QuestionnaireBuilder {
     }
 
 
-    private void addExtensionQuestions(StructureDefinition profile, QuestionnaireItemComponent group, ElementDefinition element, String path, String url, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups) throws FHIRException { 
+    private void addExtensionQuestions(StructureDefinition profile, QuestionnaireItemComponent group, ElementDefinition element, String path, String url, List<QuestionnaireResponse.QuestionnaireResponseItemComponent> answerGroups, List<ElementDefinition> parents) throws FHIRException { 
       // if this a  profiled extension, then we add it
     	if (!Utilities.noString(url)) {
     		StructureDefinition ed =  context.fetchResource(StructureDefinition.class, url);
     		if (ed != null) {
           if (answerGroups.size() > 0)
             throw new NotImplementedException("Debug this");
-    			buildQuestion(group, profile, ed.getSnapshot().getElement().get(0), path+".extension["+url+"]", answerGroups);
+    			buildQuestion(group, profile, ed.getSnapshot().getElement().get(0), path+".extension["+url+"]", answerGroups, parents);
         }
       }
     }

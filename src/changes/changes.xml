@@ -17,6 +17,18 @@
 					</ul>
 				]]>
 			</action>
+			<action type="add">
+				R4 structures have been updated to the latest definitions
+				(SVN 13732)
+			</action>
+			<action type="fix" issue="846">
+				When calling a getter on a DSTU3/R4 structure for a choice type
+				(e.g. Observation#getValueString()), a NullPointerException
+				was thrown if there was no value in this field, and the NPE
+				had no useful error message. Now this method call will simply
+				return null.
+				method
+			</action>
 			<action type="fix">
 				When performing a FHIR resource update in the JPA server
 				where the update happens within a transaction, and the
