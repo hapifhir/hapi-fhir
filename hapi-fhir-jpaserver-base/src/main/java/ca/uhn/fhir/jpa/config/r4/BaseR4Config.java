@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
@@ -31,8 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import java.util.Map;
 
 /*
  * #%L
@@ -57,6 +54,11 @@ import java.util.Map;
 @Configuration
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfig {
+
+	@Override
+	public FhirContext fhirContext() {
+		return fhirContextR4();
+	}
 
 	@Bean
 	@Primary

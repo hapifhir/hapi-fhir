@@ -78,6 +78,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -98,6 +99,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("WeakerAccess")
+@Repository
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	public static final long INDEX_STATUS_INDEXED = 1L;
