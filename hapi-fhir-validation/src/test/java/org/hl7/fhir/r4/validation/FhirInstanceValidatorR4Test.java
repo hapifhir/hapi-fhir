@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.*;
 import org.junit.rules.TestRule;
@@ -210,6 +211,40 @@ public class FhirInstanceValidatorR4Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
 		assertEquals("primitive types must have a value or must have child extensions", all.get(0).getMessage());
+	}
+
+	/**
+	 * See #942
+	 */
+	@Test
+	public void testValidateDoesntEnforceBestPracticesByDefault() {
+		Observation input = new Observation();
+		input.setStatus(ObservationStatus.AMENDED);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+
+		FhirInstanceValidator instanceModule;
+		FhirValidator val;
+		ValidationResult result;
+		List<SingleValidationMessage> all;
+
+		// With BPs disabled
+		val = ourCtx.newValidator();
+		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		val.registerValidatorModule(instanceModule);
+		result = val.validateWithResult(input);
+		all = logResultsAndReturnAll(result);
+		assertTrue(result.isSuccessful());
+		assertThat(all, empty());
+
+		// With BPs enabled
+		val = ourCtx.newValidator();
+		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		instanceModule.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Error);
+		val.registerValidatorModule(instanceModule);
+		result = val.validateWithResult(input);
+		all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("All observations should have a subject", all.get(0).getMessage());
 	}
 
 
