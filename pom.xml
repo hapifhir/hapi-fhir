@@ -444,6 +444,7 @@
 
 		<!-- Dependency Versions -->
 		<apache_karaf_version>4.1.4</apache_karaf_version>
+		<aries_spifly_version>1.0.10</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.10</commons_codec_version>
 		<commons_io_version>2.5</commons_io_version>
@@ -464,11 +465,12 @@
 		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
+		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<ph_schematron_version>5.0.2</ph_schematron_version>
-		<ph_commons_version>9.0.2</ph_commons_version>
+		<ph_schematron_version>5.0.3-SNAPSHOT</ph_schematron_version>
+		<ph_commons_version>9.1.0-SNAPSHOT</ph_commons_version>
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<spring_version>5.0.3.RELEASE</spring_version>
