@@ -75,7 +75,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		return FhirServerConfigCommon.getEntityManagerFactory(env, dataSource());
+		return FhirServerConfigCommon.getEntityManagerFactory(env, dataSource(), fhirContextDstu2());
 	}
 
 

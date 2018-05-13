@@ -78,14 +78,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -103,6 +99,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("WeakerAccess")
+@Repository
 public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	public static final long INDEX_STATUS_INDEXED = 1L;
@@ -300,12 +297,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return toExpungeOutcome(theExpungeOptions, remainingCount);
 	}
 
-	private void doExpungeEverythingQuery(String theQuery) {
-		StopWatch sw = new StopWatch();
-		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
-	}
-
 	private void doExpungeEverything() {
 
 		ourLog.info("** BEGINNING GLOBAL $expunge **");
@@ -336,6 +327,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			return null;
 		});
 		txTemplate.execute(t -> {
+			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElementTarget.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElement.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroup.class.getSimpleName() + " d");
+			doExpungeEverythingQuery("DELETE from " + TermConceptMap.class.getSimpleName() + " d");
+			return null;
+		});
+		txTemplate.execute(t -> {
 			doExpungeEverythingQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + TermConcept.class.getSimpleName() + " d");
@@ -362,6 +360,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		});
 
 		ourLog.info("** COMPLETED GLOBAL $expunge **");
+	}
+
+	private void doExpungeEverythingQuery(String theQuery) {
+		StopWatch sw = new StopWatch();
+		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
+		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
 	}
 
 	private void expungeCurrentVersionOfResource(Long theResourceId) {
@@ -2077,7 +2081,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
 						ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 						if (existing != null) {
-							throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
+							String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+							throw new PreconditionFailedException(msg);
 						}
 					}
 					ourLog.debug("Persisting unique index: {}", next);

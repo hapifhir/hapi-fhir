@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.
  */
@@ -330,7 +331,7 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @param value {@link #appointment} (Appointment that this response is replying to.)
      */
-    public AppointmentResponse setAppointment(Reference value) { 
+    public AppointmentResponse setAppointment(Reference value)  { 
       this.appointment = value;
       return this;
     }
@@ -525,7 +526,7 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @param value {@link #actor} (A Person, Location/HealthcareService or Device that is participating in the appointment.)
      */
-    public AppointmentResponse setActor(Reference value) { 
+    public AppointmentResponse setActor(Reference value)  { 
       this.actor = value;
       return this;
     }
@@ -639,16 +640,32 @@ public class AppointmentResponse extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment response concern that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("appointment", "Reference(Appointment)", "Appointment that this response is replying to.", 0, java.lang.Integer.MAX_VALUE, appointment));
-        childrenList.add(new Property("start", "instant", "Date/Time that the appointment is to take place, or requested new start time.", 0, java.lang.Integer.MAX_VALUE, start));
-        childrenList.add(new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, java.lang.Integer.MAX_VALUE, end));
-        childrenList.add(new Property("participantType", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, participantType));
-        childrenList.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, java.lang.Integer.MAX_VALUE, actor));
-        childrenList.add(new Property("participantStatus", "code", "Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, java.lang.Integer.MAX_VALUE, participantStatus));
-        childrenList.add(new Property("comment", "string", "Additional comments about the appointment.", 0, java.lang.Integer.MAX_VALUE, comment));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment response concern that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("appointment", "Reference(Appointment)", "Appointment that this response is replying to.", 0, 1, appointment));
+        children.add(new Property("start", "instant", "Date/Time that the appointment is to take place, or requested new start time.", 0, 1, start));
+        children.add(new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, 1, end));
+        children.add(new Property("participantType", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, participantType));
+        children.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, 1, actor));
+        children.add(new Property("participantStatus", "code", "Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, 1, participantStatus));
+        children.add(new Property("comment", "string", "Additional comments about the appointment.", 0, 1, comment));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this appointment response concern that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "Appointment that this response is replying to.", 0, 1, appointment);
+        case 109757538: /*start*/  return new Property("start", "instant", "Date/Time that the appointment is to take place, or requested new start time.", 0, 1, start);
+        case 100571: /*end*/  return new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, 1, end);
+        case 841294093: /*participantType*/  return new Property("participantType", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, participantType);
+        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, 1, actor);
+        case 996096261: /*participantStatus*/  return new Property("participantStatus", "code", "Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, 1, participantStatus);
+        case 950398559: /*comment*/  return new Property("comment", "string", "Additional comments about the appointment.", 0, 1, comment);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -820,12 +837,12 @@ public class AppointmentResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AppointmentResponse))
+        if (!(other_ instanceof AppointmentResponse))
           return false;
-        AppointmentResponse o = (AppointmentResponse) other;
+        AppointmentResponse o = (AppointmentResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(appointment, o.appointment, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(participantType, o.participantType, true)
            && compareDeep(actor, o.actor, true) && compareDeep(participantStatus, o.participantStatus, true)
@@ -833,12 +850,12 @@ public class AppointmentResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AppointmentResponse))
+        if (!(other_ instanceof AppointmentResponse))
           return false;
-        AppointmentResponse o = (AppointmentResponse) other;
+        AppointmentResponse o = (AppointmentResponse) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(participantStatus, o.participantStatus, true)
            && compareValues(comment, o.comment, true);
       }

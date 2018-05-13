@@ -1102,7 +1102,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">The source of the data entry</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Need to know for audit/traceback requirements and possibly for authorization.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Usually only for the request, but can be used in a response</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Usually only for the request but can be used in a response</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">unique(./controlAct[classCode="CACT" and classCode="EVN" and isNormalAct()]/participation[typeCode="ENT" and isNormalParticipation]/role[classCode="ASSIGNED" and isNormalRole()]/player[isNormalEntity() and classCode=("DEV", "PSN") and determinerCode="INST"])</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">EVN-5 / ORC-10 / PRT-5:PRT-4='EP' / ROL where ROL.3 is EP or ORC.10</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1128,7 +1128,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">The source of the decision</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Need to know for audit/traceback requirements and possibly for authorization.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Usually only for the request, but can be used in a response</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Usually only for the request but can be used in a response</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">unique(./controlAct[classCode="CACT" and classCode="EVN" and isNormalAct()]/participation[isHighest(priorityCode) and typeCode="AUT" and isNormalParticipation]/role[classCode="ASSIGNED" and isNormalRole()]/player[isNormalEntity() and classCode=("DEV", "PSN") and determinerCode="INST"])</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">ORC-19 / PRT-5:PRT-4='AUT' / ROL where ROL.3 is IP or ORC.12</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1310,7 +1310,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Final responsibility for event </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Need to know for audit/traceback requirements and possibly for authorization.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Usually only for the request, but can be used in a response</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Usually only for the request but can be used in a response</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">unique(./controlAct[classCode="CACT" and classCode="EVN" and isNormalAct()]/participation[isHighest(priorityCode) and typeCode="RESP" and isNormalParticipation]/role[classCode="ASSIGNED" and isNormalRole()]/player[isNormalEntity() and classCode="PSN" and determinerCode="INST"] or ./controlAct[classCode="CACT" and classCode="EVN" and isNormalAct()]/participation[isHighest(priorityCode) and typeCode="RESP" and isNormalParticipation]/role[classCode="ASSIGNED" and isNormalRole()]/scoper[isNormalEntity() and classCode="ORG" and determinerCode="INST"])</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">ORC-12 /  PRT-5:PRT-4='OP' /  PRT-8:PRT-4='OP' / ROL where ROL.3 is RO or ORC.11</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>

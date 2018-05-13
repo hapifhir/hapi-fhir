@@ -1255,7 +1255,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">DeiviceComponentPropertyCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">DeviceComponentPropertyCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1307,7 +1307,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">DeiviceComponentPropertyValue</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">DeviceComponentPropertyValue</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -5835,7 +5835,7 @@
     <Cell ss:StyleID="s120"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">DeiviceComponentPropertyCode</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">DeviceComponentPropertyCode</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Codes for identifying device properties.   This is based upon IEEE/HCD specified codes</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">extensible</Data></Cell>
@@ -5850,7 +5850,7 @@
     <Cell ss:StyleID="s120"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">DeiviceComponentPropertyValue</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">DeviceComponentPropertyValue</Data></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Property value codes for device properties</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">unbound</Data></Cell>
     <Cell ss:StyleID="s119"/>
@@ -6871,8 +6871,8 @@
     <Cell ss:StyleID="s132"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s154"/>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">Transducer Diconnected</Data></Cell>
-    <Cell ss:StyleID="s154"><Data ss:Type="String">The device transducer is diconnected.</Data></Cell>
+    <Cell ss:StyleID="s154"><Data ss:Type="String">Transducer Disconnected</Data></Cell>
+    <Cell ss:StyleID="s154"><Data ss:Type="String">The device transducer is disconnected.</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s143"/>

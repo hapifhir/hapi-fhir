@@ -1508,7 +1508,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">Further information supporting the this charge</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Further information supporting this charge</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4069,7 +4069,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
     <Cell ss:StyleID="s154"><Data ss:Type="String">ChargeItemStatus</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">Codes identifying the stage lifecycle stage of a ChargeItem</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">Codes identifying the lifecycle stage of a ChargeItem</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">#chargeitem-status</Data></Cell>

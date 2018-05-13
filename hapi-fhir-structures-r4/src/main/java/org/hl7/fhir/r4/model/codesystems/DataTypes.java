@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -145,7 +145,7 @@ public enum DataTypes {
          */
         PRODCHARACTERISTIC, 
         /**
-         * The shelf-life and storage information for a medicinal product item or container can be described using the this class.
+         * The shelf-life and storage information for a medicinal product item or container can be described using this class.
          */
         PRODUCTSHELFLIFE, 
         /**
@@ -197,7 +197,7 @@ public enum DataTypes {
          */
         TRIGGERDEFINITION, 
         /**
-         * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
+         * Specifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
          */
         USAGECONTEXT, 
         /**
@@ -509,7 +509,7 @@ public enum DataTypes {
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
             case PRODCHARACTERISTIC: return "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.";
-            case PRODUCTSHELFLIFE: return "The shelf-life and storage information for a medicinal product item or container can be described using the this class.";
+            case PRODUCTSHELFLIFE: return "The shelf-life and storage information for a medicinal product item or container can be described using this class.";
             case QUANTITY: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case RANGE: return "A set of ordered Quantities defined by a low and high limit.";
             case RATIO: return "A relationship of two Quantity values - expressed as a numerator and a denominator.";
@@ -522,7 +522,7 @@ public enum DataTypes {
             case SUBSTANCEMOIETY: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
             case TRIGGERDEFINITION: return "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.";
-            case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
+            case USAGECONTEXT: return "Specifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
             case CANONICAL: return "A URI that is a reference to a canonical URI on a FHIR resource";

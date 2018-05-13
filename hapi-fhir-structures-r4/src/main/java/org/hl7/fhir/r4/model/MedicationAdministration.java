@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -54,7 +54,7 @@ public class MedicationAdministration extends DomainResource {
          */
         INPROGRESS, 
         /**
-         * The administration was terminated prior to any impact on the subject (though prepartory actions may have been taken)
+         * The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)
          */
         NOTDONE, 
         /**
@@ -130,7 +130,7 @@ public class MedicationAdministration extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The administration has started but has not yet completed.";
-            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though prepartory actions may have been taken)";
+            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
             case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case COMPLETED: return "All actions that are implied by the administration have occurred.";
             case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
@@ -658,26 +658,30 @@ public class MedicationAdministration extends DomainResource {
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
         public Ratio getRateRatio() throws FHIRException { 
+          if (this.rate == null)
+            return null;
           if (!(this.rate instanceof Ratio))
             throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
         }
 
         public boolean hasRateRatio() { 
-          return this.rate instanceof Ratio;
+          return this != null && this.rate instanceof Ratio;
         }
 
         /**
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
         public SimpleQuantity getRateSimpleQuantity() throws FHIRException { 
+          if (this.rate == null)
+            return null;
           if (!(this.rate instanceof SimpleQuantity))
             throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (SimpleQuantity) this.rate;
         }
 
         public boolean hasRateSimpleQuantity() { 
-          return this.rate instanceof SimpleQuantity;
+          return this != null && this.rate instanceof SimpleQuantity;
         }
 
         public boolean hasRate() { 
@@ -688,6 +692,8 @@ public class MedicationAdministration extends DomainResource {
          * @param value {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
         public MedicationAdministrationDosageComponent setRate(Type value) { 
+          if (value != null && !(value instanceof Ratio || value instanceof SimpleQuantity))
+            throw new Error("Not the right type for MedicationAdministration.dosage.rate[x]: "+value.fhirType());
           this.rate = value;
           return this;
         }
@@ -887,17 +893,17 @@ public class MedicationAdministration extends DomainResource {
   }
 
     /**
-     * External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.
+     * External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event. This identifier is particularly important when these records require updates.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="External identifier", formalDefinition="External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated." )
+    @Description(shortDefinition="External identifier", formalDefinition="External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event. This identifier is particularly important when these records require updates." )
     protected List<Identifier> identifier;
 
     /**
-     * A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.
+     * A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.
      */
     @Child(name = "instantiates", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Instantiates protocol or definition", formalDefinition="A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event." )
+    @Description(shortDefinition="Instantiates protocol or definition", formalDefinition="A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event." )
     protected List<UriType> instantiates;
 
     /**
@@ -913,10 +919,10 @@ public class MedicationAdministration extends DomainResource {
 
 
     /**
-     * Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
+     * Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="in-progress | not-done | on-hold | completed | entered-in-error | stopped | unknown", formalDefinition="Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way." )
+    @Description(shortDefinition="in-progress | not-done | on-hold | completed | entered-in-error | stopped | unknown", formalDefinition="Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-admin-status")
     protected Enumeration<MedicationAdministrationStatus> status;
 
@@ -949,14 +955,14 @@ public class MedicationAdministration extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.
+     * The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.
      */
     @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Encounter or Episode of Care administered as part of", formalDefinition="The visit, admission or other contact between patient and health care provider the medication administration was performed as part of." )
+    @Description(shortDefinition="Encounter or Episode of Care administered as part of", formalDefinition="The visit, admission, or other contact between patient and health care provider during which the medication administration was performed." )
     protected Reference context;
 
     /**
-     * The actual object that is the target of the reference (The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.)
+     * The actual object that is the target of the reference (The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.)
      */
     protected Resource contextTarget;
 
@@ -1006,7 +1012,7 @@ public class MedicationAdministration extends DomainResource {
      * Condition or observation that supports why the medication was administered.
      */
     @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Condition or Observation that supports why the medication was administered", formalDefinition="Condition or observation that supports why the medication was administered." )
+    @Description(shortDefinition="Condition or observation that supports why the medication was administered", formalDefinition="Condition or observation that supports why the medication was administered." )
     protected List<Reference> reasonReference;
     /**
      * The actual objects that are the target of the reference (Condition or observation that supports why the medication was administered.)
@@ -1085,7 +1091,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.)
+     * @return {@link #identifier} (External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event. This identifier is particularly important when these records require updates.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1138,7 +1144,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #instantiates} (A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.)
+     * @return {@link #instantiates} (A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.)
      */
     public List<UriType> getInstantiates() { 
       if (this.instantiates == null)
@@ -1164,7 +1170,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #instantiates} (A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.)
+     * @return {@link #instantiates} (A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.)
      */
     public UriType addInstantiatesElement() {//2 
       UriType t = new UriType();
@@ -1175,7 +1181,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #instantiates} (A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.)
+     * @param value {@link #instantiates} (A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.)
      */
     public MedicationAdministration addInstantiates(String value) { //1
       UriType t = new UriType();
@@ -1187,7 +1193,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #instantiates} (A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.)
+     * @param value {@link #instantiates} (A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.)
      */
     public boolean hasInstantiates(String value) { 
       if (this.instantiates == null)
@@ -1262,7 +1268,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<MedicationAdministrationStatus> getStatusElement() { 
       if (this.status == null)
@@ -1282,7 +1288,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public MedicationAdministration setStatusElement(Enumeration<MedicationAdministrationStatus> value) { 
       this.status = value;
@@ -1290,14 +1296,14 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
+     * @return Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
      */
     public MedicationAdministrationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
+     * @param value Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
      */
     public MedicationAdministration setStatus(MedicationAdministrationStatus value) { 
         if (this.status == null)
@@ -1341,26 +1347,30 @@ public class MedicationAdministration extends DomainResource {
      * @return {@link #medication} (Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
+      if (this.medication == null)
+        return null;
       if (!(this.medication instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (CodeableConcept) this.medication;
     }
 
     public boolean hasMedicationCodeableConcept() { 
-      return this.medication instanceof CodeableConcept;
+      return this != null && this.medication instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #medication} (Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public Reference getMedicationReference() throws FHIRException { 
+      if (this.medication == null)
+        return null;
       if (!(this.medication instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
     }
 
     public boolean hasMedicationReference() { 
-      return this.medication instanceof Reference;
+      return this != null && this.medication instanceof Reference;
     }
 
     public boolean hasMedication() { 
@@ -1371,6 +1381,8 @@ public class MedicationAdministration extends DomainResource {
      * @param value {@link #medication} (Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public MedicationAdministration setMedication(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for MedicationAdministration.medication[x]: "+value.fhirType());
       this.medication = value;
       return this;
     }
@@ -1415,7 +1427,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.)
+     * @return {@link #context} (The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.)
      */
     public Reference getContext() { 
       if (this.context == null)
@@ -1431,7 +1443,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #context} (The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.)
+     * @param value {@link #context} (The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.)
      */
     public MedicationAdministration setContext(Reference value) { 
       this.context = value;
@@ -1439,14 +1451,14 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.)
+     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.)
      */
     public Resource getContextTarget() { 
       return this.contextTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.)
+     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.)
      */
     public MedicationAdministration setContextTarget(Resource value) { 
       this.contextTarget = value;
@@ -1527,26 +1539,30 @@ public class MedicationAdministration extends DomainResource {
      * @return {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
     public boolean hasEffectiveDateTimeType() { 
-      return this.effective instanceof DateTimeType;
+      return this != null && this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public Period getEffectivePeriod() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
     public boolean hasEffectivePeriod() { 
-      return this.effective instanceof Period;
+      return this != null && this.effective instanceof Period;
     }
 
     public boolean hasEffective() { 
@@ -1557,6 +1573,8 @@ public class MedicationAdministration extends DomainResource {
      * @param value {@link #effective} (A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.)
      */
     public MedicationAdministration setEffective(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new Error("Not the right type for MedicationAdministration.effective[x]: "+value.fhirType());
       this.effective = value;
       return this;
     }
@@ -2056,14 +2074,14 @@ public class MedicationAdministration extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("instantiates", "uri", "A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, instantiates));
+        children.add(new Property("identifier", "Identifier", "External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event. This identifier is particularly important when these records require updates.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("instantiates", "uri", "A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, instantiates));
         children.add(new Property("partOf", "Reference(MedicationAdministration|Procedure)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        children.add(new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, 1, status));
+        children.add(new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, 1, status));
         children.add(new Property("category", "CodeableConcept", "Indicates the type of medication administration and where the medication is expected to be consumed or administered.", 0, 1, category));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "The person or animal or group receiving the medication.", 0, 1, subject));
-        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.", 0, 1, context));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.", 0, 1, context));
         children.add(new Property("supportingInformation", "Reference(Any)", "Additional information (for example, patient height and weight) that supports the administration of the medication.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         children.add(new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective));
         children.add(new Property("performer", "", "Indicates who or what performed the medication administration and how they were involved.", 0, java.lang.Integer.MAX_VALUE, performer));
@@ -2080,17 +2098,17 @@ public class MedicationAdministration extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "A protocol, guideline, orderset or other definition that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, instantiates);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External identifier - FHIR will generate its own internal identifiers (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event. This identifier is particularly important when these records require updates.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, instantiates);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(MedicationAdministration|Procedure)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
-        case -892481550: /*status*/  return new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, 1, status);
+        case -892481550: /*status*/  return new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, 1, status);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication administration and where the medication is expected to be consumed or administered.", 0, 1, category);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case -209845038: /*medicationCodeableConcept*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 2104315196: /*medicationReference*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The person or animal or group receiving the medication.", 0, 1, subject);
-        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The visit, admission or other contact between patient and health care provider the medication administration was performed as part of.", 0, 1, context);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.", 0, 1, context);
         case -1248768647: /*supportingInformation*/  return new Property("supportingInformation", "Reference(Any)", "Additional information (for example, patient height and weight) that supports the administration of the medication.", 0, java.lang.Integer.MAX_VALUE, supportingInformation);
         case 247104889: /*effective[x]*/  return new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective);
         case -1468651097: /*effective*/  return new Property("effective[x]", "dateTime|Period", "A specific date/time or interval of time during which the administration took place (or did not take place, when the 'notGiven' attribute is true). For many administrations, such as swallowing a tablet the use of dateTime is more appropriate.", 0, 1, effective);
@@ -2569,17 +2587,17 @@ public class MedicationAdministration extends DomainResource {
  /**
    * Search parameter: <b>performer</b>
    * <p>
-   * Description: <b>The identify of the individual who administered the medication</b><br>
+   * Description: <b>The identity of the individual who administered the medication</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationAdministration.performer.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="MedicationAdministration.performer.actor", description="The identify of the individual who administered the medication", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="performer", path="MedicationAdministration.performer.actor", description="The identity of the individual who administered the medication", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
    * <p>
-   * Description: <b>The identify of the individual who administered the medication</b><br>
+   * Description: <b>The identity of the individual who administered the medication</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationAdministration.performer.actor</b><br>
    * </p>
@@ -2595,17 +2613,17 @@ public class MedicationAdministration extends DomainResource {
  /**
    * Search parameter: <b>subject</b>
    * <p>
-   * Description: <b>The identify of the individual or group to list administrations for</b><br>
+   * Description: <b>The identity of the individual or group to list administrations for</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationAdministration.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="MedicationAdministration.subject", description="The identify of the individual or group to list administrations for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class } )
+  @SearchParamDefinition(name="subject", path="MedicationAdministration.subject", description="The identity of the individual or group to list administrations for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
    * <p>
-   * Description: <b>The identify of the individual or group to list administrations for</b><br>
+   * Description: <b>The identity of the individual or group to list administrations for</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationAdministration.subject</b><br>
    * </p>

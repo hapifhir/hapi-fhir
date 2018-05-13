@@ -7696,8 +7696,8 @@
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">amp</Data></Cell>
     <Cell><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:Index="5"><Data ss:Type="String">amplificaiton</Data></Cell>
-    <Cell><Data ss:Type="String">amplificaiton</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">amplification</Data></Cell>
+    <Cell><Data ss:Type="String">amplification</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">del</Data></Cell>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
@@ -337,7 +338,7 @@ public class DeviceComponent extends DomainResource {
         /**
          * @param value {@link #specType} (The specification type, such as, serial number, part number, hardware revision, software revision, etc.)
          */
-        public DeviceComponentProductionSpecificationComponent setSpecType(CodeableConcept value) { 
+        public DeviceComponentProductionSpecificationComponent setSpecType(CodeableConcept value)  { 
           this.specType = value;
           return this;
         }
@@ -361,7 +362,7 @@ public class DeviceComponent extends DomainResource {
         /**
          * @param value {@link #componentId} (The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.)
          */
-        public DeviceComponentProductionSpecificationComponent setComponentId(Identifier value) { 
+        public DeviceComponentProductionSpecificationComponent setComponentId(Identifier value)  { 
           this.componentId = value;
           return this;
         }
@@ -415,11 +416,22 @@ public class DeviceComponent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("specType", "CodeableConcept", "The specification type, such as, serial number, part number, hardware revision, software revision, etc.", 0, java.lang.Integer.MAX_VALUE, specType));
-          childrenList.add(new Property("componentId", "Identifier", "The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.", 0, java.lang.Integer.MAX_VALUE, componentId));
-          childrenList.add(new Property("productionSpec", "string", "The printable string defining the component.", 0, java.lang.Integer.MAX_VALUE, productionSpec));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("specType", "CodeableConcept", "The specification type, such as, serial number, part number, hardware revision, software revision, etc.", 0, 1, specType));
+          children.add(new Property("componentId", "Identifier", "The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.", 0, 1, componentId));
+          children.add(new Property("productionSpec", "string", "The printable string defining the component.", 0, 1, productionSpec));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -2133482091: /*specType*/  return new Property("specType", "CodeableConcept", "The specification type, such as, serial number, part number, hardware revision, software revision, etc.", 0, 1, specType);
+          case -985933064: /*componentId*/  return new Property("componentId", "Identifier", "The internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacturer can make use of.", 0, 1, componentId);
+          case 182147092: /*productionSpec*/  return new Property("productionSpec", "string", "The printable string defining the component.", 0, 1, productionSpec);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -512,23 +524,23 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceComponentProductionSpecificationComponent))
+        if (!(other_ instanceof DeviceComponentProductionSpecificationComponent))
           return false;
-        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other;
+        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other_;
         return compareDeep(specType, o.specType, true) && compareDeep(componentId, o.componentId, true)
            && compareDeep(productionSpec, o.productionSpec, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceComponentProductionSpecificationComponent))
+        if (!(other_ instanceof DeviceComponentProductionSpecificationComponent))
           return false;
-        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other;
+        DeviceComponentProductionSpecificationComponent o = (DeviceComponentProductionSpecificationComponent) other_;
         return compareValues(productionSpec, o.productionSpec, true);
       }
 
@@ -666,7 +678,7 @@ public class DeviceComponent extends DomainResource {
     /**
      * @param value {@link #identifier} (The locally assigned unique identification by the software. For example: handle ID.)
      */
-    public DeviceComponent setIdentifier(Identifier value) { 
+    public DeviceComponent setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -690,7 +702,7 @@ public class DeviceComponent extends DomainResource {
     /**
      * @param value {@link #type} (The component type as defined in the object-oriented or metric nomenclature partition.)
      */
-    public DeviceComponent setType(CodeableConcept value) { 
+    public DeviceComponent setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -763,7 +775,7 @@ public class DeviceComponent extends DomainResource {
     /**
      * @param value {@link #source} (The link to the source Device that contains administrative device information such as manufacture, serial number, etc.)
      */
-    public DeviceComponent setSource(Reference value) { 
+    public DeviceComponent setSource(Reference value)  { 
       this.source = value;
       return this;
     }
@@ -807,7 +819,7 @@ public class DeviceComponent extends DomainResource {
     /**
      * @param value {@link #parent} (The link to the parent resource. For example: Channel is linked to its VMD parent.)
      */
-    public DeviceComponent setParent(Reference value) { 
+    public DeviceComponent setParent(Reference value)  { 
       this.parent = value;
       return this;
     }
@@ -904,7 +916,7 @@ public class DeviceComponent extends DomainResource {
     /**
      * @param value {@link #parameterGroup} (The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.)
      */
-    public DeviceComponent setParameterGroup(CodeableConcept value) { 
+    public DeviceComponent setParameterGroup(CodeableConcept value)  { 
       this.parameterGroup = value;
       return this;
     }
@@ -1030,23 +1042,41 @@ public class DeviceComponent extends DomainResource {
     /**
      * @param value {@link #languageCode} (The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.)
      */
-    public DeviceComponent setLanguageCode(CodeableConcept value) { 
+    public DeviceComponent setLanguageCode(CodeableConcept value)  { 
       this.languageCode = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The locally assigned unique identification by the software. For example: handle ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "CodeableConcept", "The component type as defined in the object-oriented or metric nomenclature partition.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("lastSystemChange", "instant", "The timestamp for the most recent system change which includes device configuration or setting change.", 0, java.lang.Integer.MAX_VALUE, lastSystemChange));
-        childrenList.add(new Property("source", "Reference(Device)", "The link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("parent", "Reference(DeviceComponent)", "The link to the parent resource. For example: Channel is linked to its VMD parent.", 0, java.lang.Integer.MAX_VALUE, parent));
-        childrenList.add(new Property("operationalStatus", "CodeableConcept", "The current operational status of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
-        childrenList.add(new Property("parameterGroup", "CodeableConcept", "The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.", 0, java.lang.Integer.MAX_VALUE, parameterGroup));
-        childrenList.add(new Property("measurementPrinciple", "code", "The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, java.lang.Integer.MAX_VALUE, measurementPrinciple));
-        childrenList.add(new Property("productionSpecification", "", "The production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
-        childrenList.add(new Property("languageCode", "CodeableConcept", "The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, java.lang.Integer.MAX_VALUE, languageCode));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The locally assigned unique identification by the software. For example: handle ID.", 0, 1, identifier));
+        children.add(new Property("type", "CodeableConcept", "The component type as defined in the object-oriented or metric nomenclature partition.", 0, 1, type));
+        children.add(new Property("lastSystemChange", "instant", "The timestamp for the most recent system change which includes device configuration or setting change.", 0, 1, lastSystemChange));
+        children.add(new Property("source", "Reference(Device)", "The link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, 1, source));
+        children.add(new Property("parent", "Reference(DeviceComponent)", "The link to the parent resource. For example: Channel is linked to its VMD parent.", 0, 1, parent));
+        children.add(new Property("operationalStatus", "CodeableConcept", "The current operational status of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
+        children.add(new Property("parameterGroup", "CodeableConcept", "The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.", 0, 1, parameterGroup));
+        children.add(new Property("measurementPrinciple", "code", "The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, 1, measurementPrinciple));
+        children.add(new Property("productionSpecification", "", "The production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification));
+        children.add(new Property("languageCode", "CodeableConcept", "The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, 1, languageCode));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The locally assigned unique identification by the software. For example: handle ID.", 0, 1, identifier);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The component type as defined in the object-oriented or metric nomenclature partition.", 0, 1, type);
+        case -2072475531: /*lastSystemChange*/  return new Property("lastSystemChange", "instant", "The timestamp for the most recent system change which includes device configuration or setting change.", 0, 1, lastSystemChange);
+        case -896505829: /*source*/  return new Property("source", "Reference(Device)", "The link to the source Device that contains administrative device information such as manufacture, serial number, etc.", 0, 1, source);
+        case -995424086: /*parent*/  return new Property("parent", "Reference(DeviceComponent)", "The link to the parent resource. For example: Channel is linked to its VMD parent.", 0, 1, parent);
+        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "CodeableConcept", "The current operational status of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus);
+        case 1111110742: /*parameterGroup*/  return new Property("parameterGroup", "CodeableConcept", "The parameter group supported by the current device component that is based on some nomenclature, e.g. cardiovascular.", 0, 1, parameterGroup);
+        case 24324384: /*measurementPrinciple*/  return new Property("measurementPrinciple", "code", "The physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, 1, measurementPrinciple);
+        case -455527222: /*productionSpecification*/  return new Property("productionSpecification", "", "The production specification such as component revision, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, productionSpecification);
+        case -2092349083: /*languageCode*/  return new Property("languageCode", "CodeableConcept", "The language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.", 0, 1, languageCode);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1246,12 +1276,12 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceComponent))
+        if (!(other_ instanceof DeviceComponent))
           return false;
-        DeviceComponent o = (DeviceComponent) other;
+        DeviceComponent o = (DeviceComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(lastSystemChange, o.lastSystemChange, true)
            && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalStatus, o.operationalStatus, true)
            && compareDeep(parameterGroup, o.parameterGroup, true) && compareDeep(measurementPrinciple, o.measurementPrinciple, true)
@@ -1260,12 +1290,12 @@ public class DeviceComponent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceComponent))
+        if (!(other_ instanceof DeviceComponent))
           return false;
-        DeviceComponent o = (DeviceComponent) other;
+        DeviceComponent o = (DeviceComponent) other_;
         return compareValues(lastSystemChange, o.lastSystemChange, true) && compareValues(measurementPrinciple, o.measurementPrinciple, true)
           ;
       }

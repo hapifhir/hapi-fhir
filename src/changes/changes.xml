@@ -17,6 +17,18 @@
 					</ul>
 				]]>
 			</action>
+			<action type="add">
+				R4 structures have been updated to the latest definitions
+				(SVN 13732)
+			</action>
+			<action type="fix" issue="846">
+				When calling a getter on a DSTU3/R4 structure for a choice type
+				(e.g. Observation#getValueString()), a NullPointerException
+				was thrown if there was no value in this field, and the NPE
+				had no useful error message. Now this method call will simply
+				return null.
+				method
+			</action>
 			<action type="fix">
 				When performing a FHIR resource update in the JPA server
 				where the update happens within a transaction, and the
@@ -44,6 +56,13 @@
 				a number of LOINC ValueSets, and a number of LOINC ConceptMaps.
 				This work was sponsored by the Regenstrief Institute. Thanks
 				to Regenstrief for their support!
+			</action>
+			<action type="add">
+				The DSTU2 validator has been refactored to use the same codebase
+				as the DSTU3/R4 validator (which were harmonized in HAPI FHIR 3.3.0).
+				This means that we now have a single codebase for all validators, which
+				improves maintainability and brings a number of improvements
+				to the accuracy of DSTU2 resource validation.
 			</action>
 			<action type="fix">
 				When encoding a resource that had contained resources with user-supplied
@@ -119,6 +138,29 @@
 			<action type="add" issue="903">
 				Fix a bug in the DSTU2 QuestionnaireResponseValidator which prevented validation
 				on groups with only one question. Thanks David Gileadi for the pull request!
+			</action>
+			<action type="add" issue="709">
+				The <![CDATA[<code>ConceptMap</code>]] operation <![CDATA[<code>$translate</code>]]> has been
+				implemented.
+			</action>
+			<action type="add" issue="927">
+				HAPI-FHIR_CLI now includes two new commands: one for importing and populating a
+				<![CDATA[<code>ConceptMap</code>]]> resource from a CSV; and one for exporting a
+				<![CDATA[<code>ConceptMap</code>]]> resource to a CSV.
+			</action>
+			<action type="add">
+				Operation methods on a plain server may now use parameters
+				of type String (i.e. plain Java strings), and any FHIR primitive
+				datatype will be automatically coerced into a String.
+			</action>
+			<action type="add">
+				The HAPI FHIR CLI now supports importing an IGPack file as an import
+				to the validation process.
+			</action>
+			<action type="add">
+				When two threads attempt to update the same resource at the same time, previously
+				an unspecified error was thrown by the JPA server. An HTTP 409
+				(Conflict) with an informative error message is now thrown.
 			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
@@ -694,7 +736,7 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 				in FHIR resource (XML/JSON) format.
 			</action>
 			<action type="add">
-				The Binary resource endpoint now supports the `X-Security-Context` header when
+				The Binary resource endpoint now supports the <![CDATA[<code>X-Security-Context</code>]]> header when
 				reading or writing Binary contents using their native Content-Type (i.e exchanging
 				the raw binary with the server, as opposed to exchanging a FHIR resource).
 			</action>

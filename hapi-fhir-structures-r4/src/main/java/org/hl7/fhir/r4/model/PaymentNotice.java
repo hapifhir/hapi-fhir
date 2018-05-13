@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -240,36 +240,24 @@ public class PaymentNotice extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "provider", type = {Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "provider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference provider;
 
     /**
      * The actual object that is the target of the reference (The practitioner who is responsible for the services rendered to the patient.)
      */
-    protected Practitioner providerTarget;
-
-    /**
-     * The organization which is responsible for the services rendered to the patient.
-     */
-    @Child(name = "organization", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
-    protected Reference organization;
-
-    /**
-     * The actual object that is the target of the reference (The organization which is responsible for the services rendered to the patient.)
-     */
-    protected Organization organizationTarget;
+    protected Resource providerTarget;
 
     /**
      * The payment status, typically paid: payment sent, cleared: payment received.
      */
-    @Child(name = "paymentStatus", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "paymentStatus", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Whether payment has been sent or cleared", formalDefinition="The payment status, typically paid: payment sent, cleared: payment received." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payment-status")
     protected CodeableConcept paymentStatus;
 
-    private static final long serialVersionUID = 37278603L;
+    private static final long serialVersionUID = 952123554L;
 
   /**
    * Constructor
@@ -627,64 +615,15 @@ public class PaymentNotice extends DomainResource {
     /**
      * @return {@link #provider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public Practitioner getProviderTarget() { 
-      if (this.providerTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentNotice.provider");
-        else if (Configuration.doAutoCreate())
-          this.providerTarget = new Practitioner(); // aa
+    public Resource getProviderTarget() { 
       return this.providerTarget;
     }
 
     /**
      * @param value {@link #provider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public PaymentNotice setProviderTarget(Practitioner value) { 
+    public PaymentNotice setProviderTarget(Resource value) { 
       this.providerTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #organization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Reference getOrganization() { 
-      if (this.organization == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentNotice.organization");
-        else if (Configuration.doAutoCreate())
-          this.organization = new Reference(); // cc
-      return this.organization;
-    }
-
-    public boolean hasOrganization() { 
-      return this.organization != null && !this.organization.isEmpty();
-    }
-
-    /**
-     * @param value {@link #organization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public PaymentNotice setOrganization(Reference value) { 
-      this.organization = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Organization getOrganizationTarget() { 
-      if (this.organizationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentNotice.organization");
-        else if (Configuration.doAutoCreate())
-          this.organizationTarget = new Organization(); // aa
-      return this.organizationTarget;
-    }
-
-    /**
-     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
-     */
-    public PaymentNotice setOrganizationTarget(Organization value) { 
-      this.organizationTarget = value;
       return this;
     }
 
@@ -721,8 +660,7 @@ public class PaymentNotice extends DomainResource {
         children.add(new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, 1, statusDate));
         children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
         children.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target));
-        children.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider));
-        children.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, organization));
+        children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider));
         children.add(new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, 1, paymentStatus));
       }
 
@@ -736,8 +674,7 @@ public class PaymentNotice extends DomainResource {
         case 247524032: /*statusDate*/  return new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, 1, statusDate);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
         case -880905839: /*target*/  return new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target);
-        case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider);
-        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, organization);
+        case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider);
         case 1430704536: /*paymentStatus*/  return new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, 1, paymentStatus);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -755,7 +692,6 @@ public class PaymentNotice extends DomainResource {
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
         case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Reference
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case 1430704536: /*paymentStatus*/ return this.paymentStatus == null ? new Base[0] : new Base[] {this.paymentStatus}; // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -790,9 +726,6 @@ public class PaymentNotice extends DomainResource {
         case -987494927: // provider
           this.provider = castToReference(value); // Reference
           return value;
-        case 1178922291: // organization
-          this.organization = castToReference(value); // Reference
-          return value;
         case 1430704536: // paymentStatus
           this.paymentStatus = castToCodeableConcept(value); // CodeableConcept
           return value;
@@ -820,8 +753,6 @@ public class PaymentNotice extends DomainResource {
           this.target = castToReference(value); // Reference
         } else if (name.equals("provider")) {
           this.provider = castToReference(value); // Reference
-        } else if (name.equals("organization")) {
-          this.organization = castToReference(value); // Reference
         } else if (name.equals("paymentStatus")) {
           this.paymentStatus = castToCodeableConcept(value); // CodeableConcept
         } else
@@ -840,7 +771,6 @@ public class PaymentNotice extends DomainResource {
         case 1028554472:  return getCreatedElement();
         case -880905839:  return getTarget(); 
         case -987494927:  return getProvider(); 
-        case 1178922291:  return getOrganization(); 
         case 1430704536:  return getPaymentStatus(); 
         default: return super.makeProperty(hash, name);
         }
@@ -858,7 +788,6 @@ public class PaymentNotice extends DomainResource {
         case 1028554472: /*created*/ return new String[] {"dateTime"};
         case -880905839: /*target*/ return new String[] {"Reference"};
         case -987494927: /*provider*/ return new String[] {"Reference"};
-        case 1178922291: /*organization*/ return new String[] {"Reference"};
         case 1430704536: /*paymentStatus*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -895,10 +824,6 @@ public class PaymentNotice extends DomainResource {
           this.provider = new Reference();
           return this.provider;
         }
-        else if (name.equals("organization")) {
-          this.organization = new Reference();
-          return this.organization;
-        }
         else if (name.equals("paymentStatus")) {
           this.paymentStatus = new CodeableConcept();
           return this.paymentStatus;
@@ -927,7 +852,6 @@ public class PaymentNotice extends DomainResource {
         dst.created = created == null ? null : created.copy();
         dst.target = target == null ? null : target.copy();
         dst.provider = provider == null ? null : provider.copy();
-        dst.organization = organization == null ? null : organization.copy();
         dst.paymentStatus = paymentStatus == null ? null : paymentStatus.copy();
         return dst;
       }
@@ -945,8 +869,8 @@ public class PaymentNotice extends DomainResource {
         PaymentNotice o = (PaymentNotice) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
            && compareDeep(response, o.response, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(created, o.created, true)
-           && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
-           && compareDeep(paymentStatus, o.paymentStatus, true);
+           && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true) && compareDeep(paymentStatus, o.paymentStatus, true)
+          ;
       }
 
       @Override
@@ -962,8 +886,7 @@ public class PaymentNotice extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, request
-          , response, statusDate, created, target, provider, organization, paymentStatus
-          );
+          , response, statusDate, created, target, provider, paymentStatus);
       }
 
   @Override
@@ -1025,7 +948,7 @@ public class PaymentNotice extends DomainResource {
    * Path: <b>PaymentNotice.provider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provider", path="PaymentNotice.provider", description="The reference to the provider", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="provider", path="PaymentNotice.provider", description="The reference to the provider", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_PROVIDER = "provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provider</b>
@@ -1088,32 +1011,6 @@ public class PaymentNotice extends DomainResource {
    * the path value of "<b>PaymentNotice:response</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_RESPONSE = new ca.uhn.fhir.model.api.Include("PaymentNotice:response").toLocked();
-
- /**
-   * Search parameter: <b>organization</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.organization</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization", path="PaymentNotice.organization", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION = "organization";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentNotice.organization</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentNotice:organization</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("PaymentNotice:organization").toLocked();
 
  /**
    * Search parameter: <b>payment-status</b>

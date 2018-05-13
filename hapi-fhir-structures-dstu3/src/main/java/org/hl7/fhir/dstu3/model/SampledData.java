@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
  */
@@ -136,7 +137,7 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * @param value {@link #origin} (The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.)
      */
-    public SampledData setOrigin(SimpleQuantity value) { 
+    public SampledData setOrigin(SimpleQuantity value)  { 
       this.origin = value;
       return this;
     }
@@ -495,15 +496,30 @@ public class SampledData extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("origin", "SimpleQuantity", "The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.", 0, java.lang.Integer.MAX_VALUE, origin));
-        childrenList.add(new Property("period", "decimal", "The length of time between sampling times, measured in milliseconds.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("factor", "decimal", "A correction factor that is applied to the sampled data points before they are added to the origin.", 0, java.lang.Integer.MAX_VALUE, factor));
-        childrenList.add(new Property("lowerLimit", "decimal", "The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit).", 0, java.lang.Integer.MAX_VALUE, lowerLimit));
-        childrenList.add(new Property("upperLimit", "decimal", "The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit).", 0, java.lang.Integer.MAX_VALUE, upperLimit));
-        childrenList.add(new Property("dimensions", "positiveInt", "The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once.", 0, java.lang.Integer.MAX_VALUE, dimensions));
-        childrenList.add(new Property("data", "string", "A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value.", 0, java.lang.Integer.MAX_VALUE, data));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("origin", "SimpleQuantity", "The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.", 0, 1, origin));
+        children.add(new Property("period", "decimal", "The length of time between sampling times, measured in milliseconds.", 0, 1, period));
+        children.add(new Property("factor", "decimal", "A correction factor that is applied to the sampled data points before they are added to the origin.", 0, 1, factor));
+        children.add(new Property("lowerLimit", "decimal", "The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit).", 0, 1, lowerLimit));
+        children.add(new Property("upperLimit", "decimal", "The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit).", 0, 1, upperLimit));
+        children.add(new Property("dimensions", "positiveInt", "The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once.", 0, 1, dimensions));
+        children.add(new Property("data", "string", "A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value.", 0, 1, data));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1008619738: /*origin*/  return new Property("origin", "SimpleQuantity", "The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.", 0, 1, origin);
+        case -991726143: /*period*/  return new Property("period", "decimal", "The length of time between sampling times, measured in milliseconds.", 0, 1, period);
+        case -1282148017: /*factor*/  return new Property("factor", "decimal", "A correction factor that is applied to the sampled data points before they are added to the origin.", 0, 1, factor);
+        case 1209133370: /*lowerLimit*/  return new Property("lowerLimit", "decimal", "The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit).", 0, 1, lowerLimit);
+        case -1681713095: /*upperLimit*/  return new Property("upperLimit", "decimal", "The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit).", 0, 1, upperLimit);
+        case 414334925: /*dimensions*/  return new Property("dimensions", "positiveInt", "The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once.", 0, 1, dimensions);
+        case 3076010: /*data*/  return new Property("data", "string", "A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value.", 0, 1, data);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -652,24 +668,24 @@ public class SampledData extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SampledData))
+        if (!(other_ instanceof SampledData))
           return false;
-        SampledData o = (SampledData) other;
+        SampledData o = (SampledData) other_;
         return compareDeep(origin, o.origin, true) && compareDeep(period, o.period, true) && compareDeep(factor, o.factor, true)
            && compareDeep(lowerLimit, o.lowerLimit, true) && compareDeep(upperLimit, o.upperLimit, true) && compareDeep(dimensions, o.dimensions, true)
            && compareDeep(data, o.data, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SampledData))
+        if (!(other_ instanceof SampledData))
           return false;
-        SampledData o = (SampledData) other;
+        SampledData o = (SampledData) other_;
         return compareValues(period, o.period, true) && compareValues(factor, o.factor, true) && compareValues(lowerLimit, o.lowerLimit, true)
            && compareValues(upperLimit, o.upperLimit, true) && compareValues(dimensions, o.dimensions, true) && compareValues(data, o.data, true)
           ;

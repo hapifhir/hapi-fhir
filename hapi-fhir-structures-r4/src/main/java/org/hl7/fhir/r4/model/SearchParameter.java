@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
 @ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
-@ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "purpose", "code", "base", "type", "derivedFrom", "description", "expression", "xpath", "xpathUsage", "target", "multipleOr", "multipleAnd", "comparator", "modifier", "chain", "component"})
+@ChildOrder(names={"url", "version", "name", "derivedFrom", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "code", "base", "type", "expression", "xpath", "xpathUsage", "target", "multipleOr", "multipleAnd", "comparator", "modifier", "chain", "component"})
 public class SearchParameter extends MetadataResource {
 
     public enum XPathUsageType {
@@ -862,23 +862,30 @@ public class SearchParameter extends MetadataResource {
   }
 
     /**
-     * Explaination of why this search parameter is needed and why it has been designed as it has.
+     * Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
      */
-    @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this search parameter is defined", formalDefinition="Explaination of why this search parameter is needed and why it has been designed as it has." )
+    @Child(name = "derivedFrom", type = {CanonicalType.class}, order=0, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Original definition for the search parameter", formalDefinition="Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter." )
+    protected CanonicalType derivedFrom;
+
+    /**
+     * Explanation of why this search parameter is needed and why it has been designed as it has.
+     */
+    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this search parameter is defined", formalDefinition="Explanation of why this search parameter is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
      * The code used in the URL or the parameter name in a parameters resource for this search parameter.
      */
-    @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Code used in URL", formalDefinition="The code used in the URL or the parameter name in a parameters resource for this search parameter." )
     protected CodeType code;
 
     /**
      * The base resource type(s) that this search parameter can be used against.
      */
-    @Child(name = "base", type = {CodeType.class}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "base", type = {CodeType.class}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The resource type(s) this search parameter applies to", formalDefinition="The base resource type(s) that this search parameter can be used against." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/resource-types")
     protected List<CodeType> base;
@@ -886,17 +893,10 @@ public class SearchParameter extends MetadataResource {
     /**
      * The type of value a search parameter refers to, and how the content is interpreted.
      */
-    @Child(name = "type", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-param-type")
     protected Enumeration<SearchParamType> type;
-
-    /**
-     * Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
-     */
-    @Child(name = "derivedFrom", type = {CanonicalType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Original Definition for the search parameter", formalDefinition="Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter." )
-    protected CanonicalType derivedFrom;
 
     /**
      * A FHIRPath expression that returns a set of elements for the search parameter.
@@ -959,10 +959,10 @@ public class SearchParameter extends MetadataResource {
     protected List<Enumeration<SearchModifierCode>> modifier;
 
     /**
-     * Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.
+     * Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.
      */
     @Child(name = "chain", type = {StringType.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Chained names supported", formalDefinition="Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type." )
+    @Description(shortDefinition="Chained names supported", formalDefinition="Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type." )
     protected List<StringType> chain;
 
     /**
@@ -972,7 +972,7 @@ public class SearchParameter extends MetadataResource {
     @Description(shortDefinition="For Composite resources to define the parts", formalDefinition="Used to define the parts of a composite search parameter." )
     protected List<SearchParameterComponentComponent> component;
 
-    private static final long serialVersionUID = 1646142475L;
+    private static final long serialVersionUID = -533803519L;
 
   /**
    * Constructor
@@ -984,18 +984,18 @@ public class SearchParameter extends MetadataResource {
   /**
    * Constructor
    */
-    public SearchParameter(UriType url, StringType name, Enumeration<PublicationStatus> status, CodeType code, Enumeration<SearchParamType> type, MarkdownType description) {
+    public SearchParameter(UriType url, StringType name, Enumeration<PublicationStatus> status, MarkdownType description, CodeType code, Enumeration<SearchParamType> type) {
       super();
       this.url = url;
       this.name = name;
       this.status = status;
+      this.description = description;
       this.code = code;
       this.type = type;
-      this.description = description;
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1015,7 +1015,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public SearchParameter setUrlElement(UriType value) { 
       this.url = value;
@@ -1023,14 +1023,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.
+     * @return An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.
+     * @param value An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.
      */
     public SearchParameter setUrl(String value) { 
         if (this.url == null)
@@ -1134,6 +1134,55 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
+     * @return {@link #derivedFrom} (Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.). This is the underlying object with id, value and extensions. The accessor "getDerivedFrom" gives direct access to the value
+     */
+    public CanonicalType getDerivedFromElement() { 
+      if (this.derivedFrom == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.derivedFrom");
+        else if (Configuration.doAutoCreate())
+          this.derivedFrom = new CanonicalType(); // bb
+      return this.derivedFrom;
+    }
+
+    public boolean hasDerivedFromElement() { 
+      return this.derivedFrom != null && !this.derivedFrom.isEmpty();
+    }
+
+    public boolean hasDerivedFrom() { 
+      return this.derivedFrom != null && !this.derivedFrom.isEmpty();
+    }
+
+    /**
+     * @param value {@link #derivedFrom} (Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.). This is the underlying object with id, value and extensions. The accessor "getDerivedFrom" gives direct access to the value
+     */
+    public SearchParameter setDerivedFromElement(CanonicalType value) { 
+      this.derivedFrom = value;
+      return this;
+    }
+
+    /**
+     * @return Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
+     */
+    public String getDerivedFrom() { 
+      return this.derivedFrom == null ? null : this.derivedFrom.getValue();
+    }
+
+    /**
+     * @param value Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
+     */
+    public SearchParameter setDerivedFrom(String value) { 
+      if (Utilities.noString(value))
+        this.derivedFrom = null;
+      else {
+        if (this.derivedFrom == null)
+          this.derivedFrom = new CanonicalType();
+        this.derivedFrom.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #status} (The status of this search parameter. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<PublicationStatus> getStatusElement() { 
@@ -1179,7 +1228,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1199,7 +1248,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public SearchParameter setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1207,14 +1256,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public SearchParameter setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1224,7 +1273,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the search parameter was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1244,7 +1293,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the search parameter was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public SearchParameter setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1252,14 +1301,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the search parameter was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
+     * @return The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the search parameter was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
+     * @param value The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.
      */
     public SearchParameter setDate(Date value) { 
       if (value == null)
@@ -1273,7 +1322,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the search parameter.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the search parameter.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -1293,7 +1342,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the search parameter.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the search parameter.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public SearchParameter setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -1301,14 +1350,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the search parameter.
+     * @return The name of the organization or individual that published the search parameter.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the search parameter.
+     * @param value The name of the organization or individual that published the search parameter.
      */
     public SearchParameter setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -1372,6 +1421,51 @@ public class SearchParameter extends MetadataResource {
         addContact();
       }
       return getContact().get(0);
+    }
+
+    /**
+     * @return {@link #description} (A free text natural language description of the search parameter from a consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public MarkdownType getDescriptionElement() { 
+      if (this.description == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SearchParameter.description");
+        else if (Configuration.doAutoCreate())
+          this.description = new MarkdownType(); // bb
+      return this.description;
+    }
+
+    public boolean hasDescriptionElement() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    public boolean hasDescription() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    /**
+     * @param value {@link #description} (A free text natural language description of the search parameter from a consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public SearchParameter setDescriptionElement(MarkdownType value) { 
+      this.description = value;
+      return this;
+    }
+
+    /**
+     * @return A free text natural language description of the search parameter from a consumer's perspective. and how it used.
+     */
+    public String getDescription() { 
+      return this.description == null ? null : this.description.getValue();
+    }
+
+    /**
+     * @param value A free text natural language description of the search parameter from a consumer's perspective. and how it used.
+     */
+    public SearchParameter setDescription(String value) { 
+        if (this.description == null)
+          this.description = new MarkdownType();
+        this.description.setValue(value);
+      return this;
     }
 
     /**
@@ -1481,7 +1575,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this search parameter is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this search parameter is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -1501,7 +1595,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this search parameter is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this search parameter is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public SearchParameter setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -1509,14 +1603,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return Explaination of why this search parameter is needed and why it has been designed as it has.
+     * @return Explanation of why this search parameter is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this search parameter is needed and why it has been designed as it has.
+     * @param value Explanation of why this search parameter is needed and why it has been designed as it has.
      */
     public SearchParameter setPurpose(String value) { 
       if (value == null)
@@ -1677,100 +1771,6 @@ public class SearchParameter extends MetadataResource {
         if (this.type == null)
           this.type = new Enumeration<SearchParamType>(new SearchParamTypeEnumFactory());
         this.type.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #derivedFrom} (Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.). This is the underlying object with id, value and extensions. The accessor "getDerivedFrom" gives direct access to the value
-     */
-    public CanonicalType getDerivedFromElement() { 
-      if (this.derivedFrom == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SearchParameter.derivedFrom");
-        else if (Configuration.doAutoCreate())
-          this.derivedFrom = new CanonicalType(); // bb
-      return this.derivedFrom;
-    }
-
-    public boolean hasDerivedFromElement() { 
-      return this.derivedFrom != null && !this.derivedFrom.isEmpty();
-    }
-
-    public boolean hasDerivedFrom() { 
-      return this.derivedFrom != null && !this.derivedFrom.isEmpty();
-    }
-
-    /**
-     * @param value {@link #derivedFrom} (Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.). This is the underlying object with id, value and extensions. The accessor "getDerivedFrom" gives direct access to the value
-     */
-    public SearchParameter setDerivedFromElement(CanonicalType value) { 
-      this.derivedFrom = value;
-      return this;
-    }
-
-    /**
-     * @return Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
-     */
-    public String getDerivedFrom() { 
-      return this.derivedFrom == null ? null : this.derivedFrom.getValue();
-    }
-
-    /**
-     * @param value Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.
-     */
-    public SearchParameter setDerivedFrom(String value) { 
-      if (Utilities.noString(value))
-        this.derivedFrom = null;
-      else {
-        if (this.derivedFrom == null)
-          this.derivedFrom = new CanonicalType();
-        this.derivedFrom.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #description} (A free text natural language description of the search parameter from a consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public MarkdownType getDescriptionElement() { 
-      if (this.description == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SearchParameter.description");
-        else if (Configuration.doAutoCreate())
-          this.description = new MarkdownType(); // bb
-      return this.description;
-    }
-
-    public boolean hasDescriptionElement() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    public boolean hasDescription() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    /**
-     * @param value {@link #description} (A free text natural language description of the search parameter from a consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-     */
-    public SearchParameter setDescriptionElement(MarkdownType value) { 
-      this.description = value;
-      return this;
-    }
-
-    /**
-     * @return A free text natural language description of the search parameter from a consumer's perspective. and how it used.
-     */
-    public String getDescription() { 
-      return this.description == null ? null : this.description.getValue();
-    }
-
-    /**
-     * @param value A free text natural language description of the search parameter from a consumer's perspective. and how it used.
-     */
-    public SearchParameter setDescription(String value) { 
-        if (this.description == null)
-          this.description = new MarkdownType();
-        this.description.setValue(value);
       return this;
     }
 
@@ -2195,7 +2195,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     * @return {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
      */
     public List<StringType> getChain() { 
       if (this.chain == null)
@@ -2221,7 +2221,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     * @return {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
      */
     public StringType addChainElement() {//2 
       StringType t = new StringType();
@@ -2232,7 +2232,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     * @param value {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
      */
     public SearchParameter addChain(String value) { //1
       StringType t = new StringType();
@@ -2244,7 +2244,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
+     * @param value {@link #chain} (Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.)
      */
     public boolean hasChain(String value) { 
       if (this.chain == null)
@@ -2310,22 +2310,22 @@ public class SearchParameter extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
+        children.add(new Property("derivedFrom", "canonical(SearchParameter)", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, 1, derivedFrom));
         children.add(new Property("status", "code", "The status of this search parameter. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the search parameter.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the search parameter.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("description", "markdown", "A free text natural language description of the search parameter from a consumer's perspective. and how it used.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate search parameter instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the search parameter is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, 1, code));
         children.add(new Property("base", "code", "The base resource type(s) that this search parameter can be used against.", 0, java.lang.Integer.MAX_VALUE, base));
         children.add(new Property("type", "code", "The type of value a search parameter refers to, and how the content is interpreted.", 0, 1, type));
-        children.add(new Property("derivedFrom", "canonical(SearchParameter)", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, 1, derivedFrom));
-        children.add(new Property("description", "markdown", "A free text natural language description of the search parameter from a consumer's perspective. and how it used.", 0, 1, description));
         children.add(new Property("expression", "string", "A FHIRPath expression that returns a set of elements for the search parameter.", 0, 1, expression));
         children.add(new Property("xpath", "string", "An XPath expression that returns a set of elements for the search parameter.", 0, 1, xpath));
         children.add(new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, 1, xpathUsage));
@@ -2334,29 +2334,29 @@ public class SearchParameter extends MetadataResource {
         children.add(new Property("multipleAnd", "boolean", "Whether multiple parameters are allowed - e.g. more than one parameter with the same name. The search matches if all the parameters match.", 0, 1, multipleAnd));
         children.add(new Property("comparator", "code", "Comparators supported for the search parameter.", 0, java.lang.Integer.MAX_VALUE, comparator));
         children.add(new Property("modifier", "code", "A modifier supported for the search parameter.", 0, java.lang.Integer.MAX_VALUE, modifier));
-        children.add(new Property("chain", "string", "Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.", 0, java.lang.Integer.MAX_VALUE, chain));
+        children.add(new Property("chain", "string", "Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.", 0, java.lang.Integer.MAX_VALUE, chain));
         children.add(new Property("component", "", "Used to define the parts of a composite search parameter.", 0, java.lang.Integer.MAX_VALUE, component));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
+        case 1077922663: /*derivedFrom*/  return new Property("derivedFrom", "canonical(SearchParameter)", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, 1, derivedFrom);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this search parameter. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the search parameter.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this search parameter is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the search parameter.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the search parameter from a consumer's perspective. and how it used.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate search parameter instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the search parameter is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose);
         case 3059181: /*code*/  return new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, 1, code);
         case 3016401: /*base*/  return new Property("base", "code", "The base resource type(s) that this search parameter can be used against.", 0, java.lang.Integer.MAX_VALUE, base);
         case 3575610: /*type*/  return new Property("type", "code", "The type of value a search parameter refers to, and how the content is interpreted.", 0, 1, type);
-        case 1077922663: /*derivedFrom*/  return new Property("derivedFrom", "canonical(SearchParameter)", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. I.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, 1, derivedFrom);
-        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the search parameter from a consumer's perspective. and how it used.", 0, 1, description);
         case -1795452264: /*expression*/  return new Property("expression", "string", "A FHIRPath expression that returns a set of elements for the search parameter.", 0, 1, expression);
         case 114256029: /*xpath*/  return new Property("xpath", "string", "An XPath expression that returns a set of elements for the search parameter.", 0, 1, xpath);
         case 1801322244: /*xpathUsage*/  return new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, 1, xpathUsage);
@@ -2365,7 +2365,7 @@ public class SearchParameter extends MetadataResource {
         case 562422183: /*multipleAnd*/  return new Property("multipleAnd", "boolean", "Whether multiple parameters are allowed - e.g. more than one parameter with the same name. The search matches if all the parameters match.", 0, 1, multipleAnd);
         case -844673834: /*comparator*/  return new Property("comparator", "code", "Comparators supported for the search parameter.", 0, java.lang.Integer.MAX_VALUE, comparator);
         case -615513385: /*modifier*/  return new Property("modifier", "code", "A modifier supported for the search parameter.", 0, java.lang.Integer.MAX_VALUE, modifier);
-        case 94623425: /*chain*/  return new Property("chain", "string", "Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.", 0, java.lang.Integer.MAX_VALUE, chain);
+        case 94623425: /*chain*/  return new Property("chain", "string", "Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from SearchParameter.code for a parameter on the target resource type.", 0, java.lang.Integer.MAX_VALUE, chain);
         case -1399907075: /*component*/  return new Property("component", "", "Used to define the parts of a composite search parameter.", 0, java.lang.Integer.MAX_VALUE, component);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2378,19 +2378,19 @@ public class SearchParameter extends MetadataResource {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
+        case 1077922663: /*derivedFrom*/ return this.derivedFrom == null ? new Base[0] : new Base[] {this.derivedFrom}; // CanonicalType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
         case 3016401: /*base*/ return this.base == null ? new Base[0] : this.base.toArray(new Base[this.base.size()]); // CodeType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SearchParamType>
-        case 1077922663: /*derivedFrom*/ return this.derivedFrom == null ? new Base[0] : new Base[] {this.derivedFrom}; // CanonicalType
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
         case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
         case 114256029: /*xpath*/ return this.xpath == null ? new Base[0] : new Base[] {this.xpath}; // StringType
         case 1801322244: /*xpathUsage*/ return this.xpathUsage == null ? new Base[0] : new Base[] {this.xpathUsage}; // Enumeration<XPathUsageType>
@@ -2418,6 +2418,9 @@ public class SearchParameter extends MetadataResource {
         case 3373707: // name
           this.name = castToString(value); // StringType
           return value;
+        case 1077922663: // derivedFrom
+          this.derivedFrom = castToCanonical(value); // CanonicalType
+          return value;
         case -892481550: // status
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -2433,6 +2436,9 @@ public class SearchParameter extends MetadataResource {
           return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
+        case -1724546052: // description
+          this.description = castToMarkdown(value); // MarkdownType
           return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
@@ -2452,12 +2458,6 @@ public class SearchParameter extends MetadataResource {
         case 3575610: // type
           value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<SearchParamType>
-          return value;
-        case 1077922663: // derivedFrom
-          this.derivedFrom = castToCanonical(value); // CanonicalType
-          return value;
-        case -1724546052: // description
-          this.description = castToMarkdown(value); // MarkdownType
           return value;
         case -1795452264: // expression
           this.expression = castToString(value); // StringType
@@ -2505,6 +2505,8 @@ public class SearchParameter extends MetadataResource {
           this.version = castToString(value); // StringType
         } else if (name.equals("name")) {
           this.name = castToString(value); // StringType
+        } else if (name.equals("derivedFrom")) {
+          this.derivedFrom = castToCanonical(value); // CanonicalType
         } else if (name.equals("status")) {
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -2516,6 +2518,8 @@ public class SearchParameter extends MetadataResource {
           this.publisher = castToString(value); // StringType
         } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
+        } else if (name.equals("description")) {
+          this.description = castToMarkdown(value); // MarkdownType
         } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
         } else if (name.equals("jurisdiction")) {
@@ -2529,10 +2533,6 @@ public class SearchParameter extends MetadataResource {
         } else if (name.equals("type")) {
           value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<SearchParamType>
-        } else if (name.equals("derivedFrom")) {
-          this.derivedFrom = castToCanonical(value); // CanonicalType
-        } else if (name.equals("description")) {
-          this.description = castToMarkdown(value); // MarkdownType
         } else if (name.equals("expression")) {
           this.expression = castToString(value); // StringType
         } else if (name.equals("xpath")) {
@@ -2567,19 +2567,19 @@ public class SearchParameter extends MetadataResource {
         case 116079:  return getUrlElement();
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
+        case 1077922663:  return getDerivedFromElement();
         case -892481550:  return getStatusElement();
         case -404562712:  return getExperimentalElement();
         case 3076014:  return getDateElement();
         case 1447404028:  return getPublisherElement();
         case 951526432:  return addContact(); 
+        case -1724546052:  return getDescriptionElement();
         case -669707736:  return addUseContext(); 
         case -507075711:  return addJurisdiction(); 
         case -220463842:  return getPurposeElement();
         case 3059181:  return getCodeElement();
         case 3016401:  return addBaseElement();
         case 3575610:  return getTypeElement();
-        case 1077922663:  return getDerivedFromElement();
-        case -1724546052:  return getDescriptionElement();
         case -1795452264:  return getExpressionElement();
         case 114256029:  return getXpathElement();
         case 1801322244:  return getXpathUsageElement();
@@ -2601,19 +2601,19 @@ public class SearchParameter extends MetadataResource {
         case 116079: /*url*/ return new String[] {"uri"};
         case 351608024: /*version*/ return new String[] {"string"};
         case 3373707: /*name*/ return new String[] {"string"};
+        case 1077922663: /*derivedFrom*/ return new String[] {"canonical"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -404562712: /*experimental*/ return new String[] {"boolean"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case 1447404028: /*publisher*/ return new String[] {"string"};
         case 951526432: /*contact*/ return new String[] {"ContactDetail"};
+        case -1724546052: /*description*/ return new String[] {"markdown"};
         case -669707736: /*useContext*/ return new String[] {"UsageContext"};
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 3059181: /*code*/ return new String[] {"code"};
         case 3016401: /*base*/ return new String[] {"code"};
         case 3575610: /*type*/ return new String[] {"code"};
-        case 1077922663: /*derivedFrom*/ return new String[] {"canonical"};
-        case -1724546052: /*description*/ return new String[] {"markdown"};
         case -1795452264: /*expression*/ return new String[] {"string"};
         case 114256029: /*xpath*/ return new String[] {"string"};
         case 1801322244: /*xpathUsage*/ return new String[] {"code"};
@@ -2640,6 +2640,9 @@ public class SearchParameter extends MetadataResource {
         else if (name.equals("name")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.name");
         }
+        else if (name.equals("derivedFrom")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.derivedFrom");
+        }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.status");
         }
@@ -2654,6 +2657,9 @@ public class SearchParameter extends MetadataResource {
         }
         else if (name.equals("contact")) {
           return addContact();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.description");
         }
         else if (name.equals("useContext")) {
           return addUseContext();
@@ -2672,12 +2678,6 @@ public class SearchParameter extends MetadataResource {
         }
         else if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.type");
-        }
-        else if (name.equals("derivedFrom")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.derivedFrom");
-        }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.description");
         }
         else if (name.equals("expression")) {
           throw new FHIRException("Cannot call addChild on a primitive type SearchParameter.expression");
@@ -2724,6 +2724,7 @@ public class SearchParameter extends MetadataResource {
         dst.url = url == null ? null : url.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
+        dst.derivedFrom = derivedFrom == null ? null : derivedFrom.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.date = date == null ? null : date.copy();
@@ -2733,6 +2734,7 @@ public class SearchParameter extends MetadataResource {
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
         };
+        dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
@@ -2751,8 +2753,6 @@ public class SearchParameter extends MetadataResource {
             dst.base.add(i.copy());
         };
         dst.type = type == null ? null : type.copy();
-        dst.derivedFrom = derivedFrom == null ? null : derivedFrom.copy();
-        dst.description = description == null ? null : description.copy();
         dst.expression = expression == null ? null : expression.copy();
         dst.xpath = xpath == null ? null : xpath.copy();
         dst.xpathUsage = xpathUsage == null ? null : xpathUsage.copy();
@@ -2797,8 +2797,8 @@ public class SearchParameter extends MetadataResource {
         if (!(other_ instanceof SearchParameter))
           return false;
         SearchParameter o = (SearchParameter) other_;
-        return compareDeep(purpose, o.purpose, true) && compareDeep(code, o.code, true) && compareDeep(base, o.base, true)
-           && compareDeep(type, o.type, true) && compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(expression, o.expression, true)
+        return compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(purpose, o.purpose, true) && compareDeep(code, o.code, true)
+           && compareDeep(base, o.base, true) && compareDeep(type, o.type, true) && compareDeep(expression, o.expression, true)
            && compareDeep(xpath, o.xpath, true) && compareDeep(xpathUsage, o.xpathUsage, true) && compareDeep(target, o.target, true)
            && compareDeep(multipleOr, o.multipleOr, true) && compareDeep(multipleAnd, o.multipleAnd, true)
            && compareDeep(comparator, o.comparator, true) && compareDeep(modifier, o.modifier, true) && compareDeep(chain, o.chain, true)
@@ -2820,8 +2820,8 @@ public class SearchParameter extends MetadataResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(purpose, code, base, type
-          , derivedFrom, expression, xpath, xpathUsage, target, multipleOr, multipleAnd
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(derivedFrom, purpose, code
+          , base, type, expression, xpath, xpathUsage, target, multipleOr, multipleAnd
           , comparator, modifier, chain, component);
       }
 
@@ -2913,17 +2913,17 @@ public class SearchParameter extends MetadataResource {
  /**
    * Search parameter: <b>derived-from</b>
    * <p>
-   * Description: <b>Original Definition for the search parameter</b><br>
+   * Description: <b>Original definition for the search parameter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>SearchParameter.derivedFrom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="derived-from", path="SearchParameter.derivedFrom", description="Original Definition for the search parameter", type="reference", target={SearchParameter.class } )
+  @SearchParamDefinition(name="derived-from", path="SearchParameter.derivedFrom", description="Original definition for the search parameter", type="reference", target={SearchParameter.class } )
   public static final String SP_DERIVED_FROM = "derived-from";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>derived-from</b>
    * <p>
-   * Description: <b>Original Definition for the search parameter</b><br>
+   * Description: <b>Original definition for the search parameter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>SearchParameter.derivedFrom</b><br>
    * </p>

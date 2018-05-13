@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
@@ -870,7 +871,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         /**
          * @param value {@link #details} (Additional details about the error. This may be a text description of the error, or a system code that identifies the error.)
          */
-        public OperationOutcomeIssueComponent setDetails(CodeableConcept value) { 
+        public OperationOutcomeIssueComponent setDetails(CodeableConcept value)  { 
           this.details = value;
           return this;
         }
@@ -980,7 +981,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           if (this.location == null)
             return false;
           for (StringType v : this.location)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -1041,19 +1042,33 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           if (this.expression == null)
             return false;
           for (StringType v : this.expression)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, java.lang.Integer.MAX_VALUE, severity));
-          childrenList.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, java.lang.Integer.MAX_VALUE, details));
-          childrenList.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, java.lang.Integer.MAX_VALUE, diagnostics));
-          childrenList.add(new Property("location", "string", "For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("expression", "string", "A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, 1, severity));
+          children.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, 1, code));
+          children.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, 1, details));
+          children.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, 1, diagnostics));
+          children.add(new Property("location", "string", "For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
+          children.add(new Property("expression", "string", "A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1478300413: /*severity*/  return new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, 1, severity);
+          case 3059181: /*code*/  return new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, 1, code);
+          case 1557721666: /*details*/  return new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, 1, details);
+          case -740386388: /*diagnostics*/  return new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, 1, diagnostics);
+          case 1901043637: /*location*/  return new Property("location", "string", "For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "A simple FHIRPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1193,24 +1208,24 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof OperationOutcomeIssueComponent))
+        if (!(other_ instanceof OperationOutcomeIssueComponent))
           return false;
-        OperationOutcomeIssueComponent o = (OperationOutcomeIssueComponent) other;
+        OperationOutcomeIssueComponent o = (OperationOutcomeIssueComponent) other_;
         return compareDeep(severity, o.severity, true) && compareDeep(code, o.code, true) && compareDeep(details, o.details, true)
            && compareDeep(diagnostics, o.diagnostics, true) && compareDeep(location, o.location, true) && compareDeep(expression, o.expression, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof OperationOutcomeIssueComponent))
+        if (!(other_ instanceof OperationOutcomeIssueComponent))
           return false;
-        OperationOutcomeIssueComponent o = (OperationOutcomeIssueComponent) other;
+        OperationOutcomeIssueComponent o = (OperationOutcomeIssueComponent) other_;
         return compareValues(severity, o.severity, true) && compareValues(code, o.code, true) && compareValues(diagnostics, o.diagnostics, true)
            && compareValues(location, o.location, true) && compareValues(expression, o.expression, true);
       }
@@ -1296,9 +1311,18 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       return getIssue().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("issue", "", "An error, warning or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("issue", "", "An error, warning or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 100509913: /*issue*/  return new Property("issue", "", "An error, warning or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1378,22 +1402,22 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof OperationOutcome))
+        if (!(other_ instanceof OperationOutcome))
           return false;
-        OperationOutcome o = (OperationOutcome) other;
+        OperationOutcome o = (OperationOutcome) other_;
         return compareDeep(issue, o.issue, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof OperationOutcome))
+        if (!(other_ instanceof OperationOutcome))
           return false;
-        OperationOutcome o = (OperationOutcome) other;
+        OperationOutcome o = (OperationOutcome) other_;
         return true;
       }
 

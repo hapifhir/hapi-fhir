@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
  */
@@ -480,7 +481,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #role} (How the individual is involved in the resources content that is described in the consent.)
          */
-        public ConsentActorComponent setRole(CodeableConcept value) { 
+        public ConsentActorComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -504,7 +505,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #reference} (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
-        public ConsentActorComponent setReference(Reference value) { 
+        public ConsentActorComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -524,10 +525,20 @@ public class Consent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the consent.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, reference));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the consent.", 0, 1, role));
+          children.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the consent.", 0, 1, role);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -608,22 +619,22 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConsentActorComponent))
+        if (!(other_ instanceof ConsentActorComponent))
           return false;
-        ConsentActorComponent o = (ConsentActorComponent) other;
+        ConsentActorComponent o = (ConsentActorComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(reference, o.reference, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConsentActorComponent))
+        if (!(other_ instanceof ConsentActorComponent))
           return false;
-        ConsentActorComponent o = (ConsentActorComponent) other;
+        ConsentActorComponent o = (ConsentActorComponent) other_;
         return true;
       }
 
@@ -761,10 +772,20 @@ public class Consent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, java.lang.Integer.MAX_VALUE, authority));
-          childrenList.add(new Property("uri", "uri", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, uri));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, 1, authority));
+          children.add(new Property("uri", "uri", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, 1, uri));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1475610435: /*authority*/  return new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, 1, authority);
+          case 116076: /*uri*/  return new Property("uri", "uri", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, 1, uri);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -843,22 +864,22 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConsentPolicyComponent))
+        if (!(other_ instanceof ConsentPolicyComponent))
           return false;
-        ConsentPolicyComponent o = (ConsentPolicyComponent) other;
+        ConsentPolicyComponent o = (ConsentPolicyComponent) other_;
         return compareDeep(authority, o.authority, true) && compareDeep(uri, o.uri, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConsentPolicyComponent))
+        if (!(other_ instanceof ConsentPolicyComponent))
           return false;
-        ConsentPolicyComponent o = (ConsentPolicyComponent) other;
+        ConsentPolicyComponent o = (ConsentPolicyComponent) other_;
         return compareValues(authority, o.authority, true) && compareValues(uri, o.uri, true);
       }
 
@@ -977,7 +998,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #reference} (A reference to a specific resource that defines which resources are covered by this consent.)
          */
-        public ConsentDataComponent setReference(Reference value) { 
+        public ConsentDataComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -997,10 +1018,20 @@ public class Consent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("meaning", "code", "How the resource reference is interpreted when testing consent restrictions.", 0, java.lang.Integer.MAX_VALUE, meaning));
-          childrenList.add(new Property("reference", "Reference(Any)", "A reference to a specific resource that defines which resources are covered by this consent.", 0, java.lang.Integer.MAX_VALUE, reference));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("meaning", "code", "How the resource reference is interpreted when testing consent restrictions.", 0, 1, meaning));
+          children.add(new Property("reference", "Reference(Any)", "A reference to a specific resource that defines which resources are covered by this consent.", 0, 1, reference));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 938160637: /*meaning*/  return new Property("meaning", "code", "How the resource reference is interpreted when testing consent restrictions.", 0, 1, meaning);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Any)", "A reference to a specific resource that defines which resources are covered by this consent.", 0, 1, reference);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1082,22 +1113,22 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConsentDataComponent))
+        if (!(other_ instanceof ConsentDataComponent))
           return false;
-        ConsentDataComponent o = (ConsentDataComponent) other;
+        ConsentDataComponent o = (ConsentDataComponent) other_;
         return compareDeep(meaning, o.meaning, true) && compareDeep(reference, o.reference, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConsentDataComponent))
+        if (!(other_ instanceof ConsentDataComponent))
           return false;
-        ConsentDataComponent o = (ConsentDataComponent) other;
+        ConsentDataComponent o = (ConsentDataComponent) other_;
         return compareValues(meaning, o.meaning, true);
       }
 
@@ -1271,7 +1302,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #period} (The timeframe in this exception is valid.)
          */
-        public ExceptComponent setPeriod(Period value) { 
+        public ExceptComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
@@ -1613,7 +1644,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #dataPeriod} (Clinical or Operational Relevant period of time that bounds the data controlled by this exception.)
          */
-        public ExceptComponent setDataPeriod(Period value) { 
+        public ExceptComponent setDataPeriod(Period value)  { 
           this.dataPeriod = value;
           return this;
         }
@@ -1671,18 +1702,36 @@ public class Consent extends DomainResource {
           return getData().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "Action  to take - permit or deny - when the exception conditions are met.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("period", "Period", "The timeframe in this exception is valid.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("actor", "", "Who or what is controlled by this Exception. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("action", "CodeableConcept", "Actions controlled by this Exception.", 0, java.lang.Integer.MAX_VALUE, action));
-          childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this exception. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-          childrenList.add(new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception.", 0, java.lang.Integer.MAX_VALUE, purpose));
-          childrenList.add(new Property("class", "Coding", "The class of information covered by this exception. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to.", 0, java.lang.Integer.MAX_VALUE, class_));
-          childrenList.add(new Property("code", "Coding", "If this code is found in an instance, then the exception applies.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("dataPeriod", "Period", "Clinical or Operational Relevant period of time that bounds the data controlled by this exception.", 0, java.lang.Integer.MAX_VALUE, dataPeriod));
-          childrenList.add(new Property("data", "", "The resources controlled by this exception, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "Action  to take - permit or deny - when the exception conditions are met.", 0, 1, type));
+          children.add(new Property("period", "Period", "The timeframe in this exception is valid.", 0, 1, period));
+          children.add(new Property("actor", "", "Who or what is controlled by this Exception. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor));
+          children.add(new Property("action", "CodeableConcept", "Actions controlled by this Exception.", 0, java.lang.Integer.MAX_VALUE, action));
+          children.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this exception. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
+          children.add(new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception.", 0, java.lang.Integer.MAX_VALUE, purpose));
+          children.add(new Property("class", "Coding", "The class of information covered by this exception. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to.", 0, java.lang.Integer.MAX_VALUE, class_));
+          children.add(new Property("code", "Coding", "If this code is found in an instance, then the exception applies.", 0, java.lang.Integer.MAX_VALUE, code));
+          children.add(new Property("dataPeriod", "Period", "Clinical or Operational Relevant period of time that bounds the data controlled by this exception.", 0, 1, dataPeriod));
+          children.add(new Property("data", "", "The resources controlled by this exception, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "Action  to take - permit or deny - when the exception conditions are met.", 0, 1, type);
+          case -991726143: /*period*/  return new Property("period", "Period", "The timeframe in this exception is valid.", 0, 1, period);
+          case 92645877: /*actor*/  return new Property("actor", "", "Who or what is controlled by this Exception. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor);
+          case -1422950858: /*action*/  return new Property("action", "CodeableConcept", "Actions controlled by this Exception.", 0, java.lang.Integer.MAX_VALUE, action);
+          case -722296940: /*securityLabel*/  return new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this exception. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel);
+          case -220463842: /*purpose*/  return new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this exception.", 0, java.lang.Integer.MAX_VALUE, purpose);
+          case 94742904: /*class*/  return new Property("class", "Coding", "The class of information covered by this exception. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to.", 0, java.lang.Integer.MAX_VALUE, class_);
+          case 3059181: /*code*/  return new Property("code", "Coding", "If this code is found in an instance, then the exception applies.", 0, java.lang.Integer.MAX_VALUE, code);
+          case 1177250315: /*dataPeriod*/  return new Property("dataPeriod", "Period", "Clinical or Operational Relevant period of time that bounds the data controlled by this exception.", 0, 1, dataPeriod);
+          case 3076010: /*data*/  return new Property("data", "", "The resources controlled by this exception, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1889,12 +1938,12 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExceptComponent))
+        if (!(other_ instanceof ExceptComponent))
           return false;
-        ExceptComponent o = (ExceptComponent) other;
+        ExceptComponent o = (ExceptComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(period, o.period, true) && compareDeep(actor, o.actor, true)
            && compareDeep(action, o.action, true) && compareDeep(securityLabel, o.securityLabel, true) && compareDeep(purpose, o.purpose, true)
            && compareDeep(class_, o.class_, true) && compareDeep(code, o.code, true) && compareDeep(dataPeriod, o.dataPeriod, true)
@@ -1902,12 +1951,12 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExceptComponent))
+        if (!(other_ instanceof ExceptComponent))
           return false;
-        ExceptComponent o = (ExceptComponent) other;
+        ExceptComponent o = (ExceptComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -1982,7 +2031,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #role} (How the individual is involved in the resources content that is described in the exception.)
          */
-        public ExceptActorComponent setRole(CodeableConcept value) { 
+        public ExceptActorComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -2006,7 +2055,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #reference} (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
-        public ExceptActorComponent setReference(Reference value) { 
+        public ExceptActorComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -2026,10 +2075,20 @@ public class Consent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, reference));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, 1, role));
+          children.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, 1, role);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2110,22 +2169,22 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExceptActorComponent))
+        if (!(other_ instanceof ExceptActorComponent))
           return false;
-        ExceptActorComponent o = (ExceptActorComponent) other;
+        ExceptActorComponent o = (ExceptActorComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(reference, o.reference, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExceptActorComponent))
+        if (!(other_ instanceof ExceptActorComponent))
           return false;
-        ExceptActorComponent o = (ExceptActorComponent) other;
+        ExceptActorComponent o = (ExceptActorComponent) other_;
         return true;
       }
 
@@ -2244,7 +2303,7 @@ public class Consent extends DomainResource {
         /**
          * @param value {@link #reference} (A reference to a specific resource that defines which resources are covered by this consent.)
          */
-        public ExceptDataComponent setReference(Reference value) { 
+        public ExceptDataComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -2264,10 +2323,20 @@ public class Consent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("meaning", "code", "How the resource reference is interpreted when testing consent restrictions.", 0, java.lang.Integer.MAX_VALUE, meaning));
-          childrenList.add(new Property("reference", "Reference(Any)", "A reference to a specific resource that defines which resources are covered by this consent.", 0, java.lang.Integer.MAX_VALUE, reference));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("meaning", "code", "How the resource reference is interpreted when testing consent restrictions.", 0, 1, meaning));
+          children.add(new Property("reference", "Reference(Any)", "A reference to a specific resource that defines which resources are covered by this consent.", 0, 1, reference));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 938160637: /*meaning*/  return new Property("meaning", "code", "How the resource reference is interpreted when testing consent restrictions.", 0, 1, meaning);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Any)", "A reference to a specific resource that defines which resources are covered by this consent.", 0, 1, reference);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2349,22 +2418,22 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExceptDataComponent))
+        if (!(other_ instanceof ExceptDataComponent))
           return false;
-        ExceptDataComponent o = (ExceptDataComponent) other;
+        ExceptDataComponent o = (ExceptDataComponent) other_;
         return compareDeep(meaning, o.meaning, true) && compareDeep(reference, o.reference, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExceptDataComponent))
+        if (!(other_ instanceof ExceptDataComponent))
           return false;
-        ExceptDataComponent o = (ExceptDataComponent) other;
+        ExceptDataComponent o = (ExceptDataComponent) other_;
         return compareValues(meaning, o.meaning, true);
       }
 
@@ -2562,7 +2631,7 @@ public class Consent extends DomainResource {
     /**
      * @param value {@link #identifier} (Unique identifier for this copy of the Consent Statement.)
      */
-    public Consent setIdentifier(Identifier value) { 
+    public Consent setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -2684,7 +2753,7 @@ public class Consent extends DomainResource {
     /**
      * @param value {@link #patient} (The patient/healthcare consumer to whom this consent applies.)
      */
-    public Consent setPatient(Reference value) { 
+    public Consent setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -2728,7 +2797,7 @@ public class Consent extends DomainResource {
     /**
      * @param value {@link #period} (Relevant time or time-period when this Consent is applicable.)
      */
-    public Consent setPeriod(Period value) { 
+    public Consent setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -3037,39 +3106,45 @@ public class Consent extends DomainResource {
      * @return {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Attachment getSourceAttachment() throws FHIRException { 
+      if (this.source == null)
+        return null;
       if (!(this.source instanceof Attachment))
         throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Attachment) this.source;
     }
 
     public boolean hasSourceAttachment() { 
-      return this.source instanceof Attachment;
+      return this != null && this.source instanceof Attachment;
     }
 
     /**
      * @return {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Identifier getSourceIdentifier() throws FHIRException { 
+      if (this.source == null)
+        return null;
       if (!(this.source instanceof Identifier))
         throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Identifier) this.source;
     }
 
     public boolean hasSourceIdentifier() { 
-      return this.source instanceof Identifier;
+      return this != null && this.source instanceof Identifier;
     }
 
     /**
      * @return {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Reference getSourceReference() throws FHIRException { 
+      if (this.source == null)
+        return null;
       if (!(this.source instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Reference) this.source;
     }
 
     public boolean hasSourceReference() { 
-      return this.source instanceof Reference;
+      return this != null && this.source instanceof Reference;
     }
 
     public boolean hasSource() { 
@@ -3079,7 +3154,9 @@ public class Consent extends DomainResource {
     /**
      * @param value {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
-    public Consent setSource(Type value) { 
+    public Consent setSource(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Attachment || value instanceof Identifier || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for Consent.source[x]: "+value.fhirType());
       this.source = value;
       return this;
     }
@@ -3311,7 +3388,7 @@ public class Consent extends DomainResource {
     /**
      * @param value {@link #dataPeriod} (Clinical or Operational Relevant period of time that bounds the data controlled by this consent.)
      */
-    public Consent setDataPeriod(Period value) { 
+    public Consent setDataPeriod(Period value)  { 
       this.dataPeriod = value;
       return this;
     }
@@ -3422,26 +3499,56 @@ public class Consent extends DomainResource {
       return getExcept().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Indicates the current state of this consent.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("period", "Period", "Relevant time or time-period when this Consent is applicable.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, java.lang.Integer.MAX_VALUE, dateTime));
-        childrenList.add(new Property("consentingParty", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, consentingParty));
-        childrenList.add(new Property("actor", "", "Who or what is controlled by this consent. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor));
-        childrenList.add(new Property("action", "CodeableConcept", "Actions controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, action));
-        childrenList.add(new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy));
-        childrenList.add(new Property("policyRule", "uri", "A referece to the specific computable policy.", 0, java.lang.Integer.MAX_VALUE, policyRule));
-        childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-        childrenList.add(new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, purpose));
-        childrenList.add(new Property("dataPeriod", "Period", "Clinical or Operational Relevant period of time that bounds the data controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, dataPeriod));
-        childrenList.add(new Property("data", "", "The resources controlled by this consent, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data));
-        childrenList.add(new Property("except", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, java.lang.Integer.MAX_VALUE, except));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, 1, identifier));
+        children.add(new Property("status", "code", "Indicates the current state of this consent.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, 1, patient));
+        children.add(new Property("period", "Period", "Relevant time or time-period when this Consent is applicable.", 0, 1, period));
+        children.add(new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, 1, dateTime));
+        children.add(new Property("consentingParty", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, consentingParty));
+        children.add(new Property("actor", "", "Who or what is controlled by this consent. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor));
+        children.add(new Property("action", "CodeableConcept", "Actions controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, action));
+        children.add(new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization));
+        children.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source));
+        children.add(new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy));
+        children.add(new Property("policyRule", "uri", "A referece to the specific computable policy.", 0, 1, policyRule));
+        children.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
+        children.add(new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, purpose));
+        children.add(new Property("dataPeriod", "Period", "Clinical or Operational Relevant period of time that bounds the data controlled by this consent.", 0, 1, dataPeriod));
+        children.add(new Property("data", "", "The resources controlled by this consent, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data));
+        children.add(new Property("except", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, java.lang.Integer.MAX_VALUE, except));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, 1, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates the current state of this consent.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, 1, patient);
+        case -991726143: /*period*/  return new Property("period", "Period", "Relevant time or time-period when this Consent is applicable.", 0, 1, period);
+        case 1792749467: /*dateTime*/  return new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, 1, dateTime);
+        case -1886702018: /*consentingParty*/  return new Property("consentingParty", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Either the Grantor, which is the entity responsible for granting the rights listed in a Consent Directive or the Grantee, which is the entity responsible for complying with the Consent Directive, including any obligations or limitations on authorizations and enforcement of prohibitions.", 0, java.lang.Integer.MAX_VALUE, consentingParty);
+        case 92645877: /*actor*/  return new Property("actor", "", "Who or what is controlled by this consent. Use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, java.lang.Integer.MAX_VALUE, actor);
+        case -1422950858: /*action*/  return new Property("action", "CodeableConcept", "Actions controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, action);
+        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization that manages the consent, and the framework within which it is executed.", 0, java.lang.Integer.MAX_VALUE, organization);
+        case -1698413947: /*source[x]*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
+        case -896505829: /*source*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
+        case 1964406686: /*sourceAttachment*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
+        case -1985492188: /*sourceIdentifier*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
+        case -244259472: /*sourceReference*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
+        case -982670030: /*policy*/  return new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy);
+        case 1593493326: /*policyRule*/  return new Property("policyRule", "uri", "A referece to the specific computable policy.", 0, 1, policyRule);
+        case -722296940: /*securityLabel*/  return new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel);
+        case -220463842: /*purpose*/  return new Property("purpose", "Coding", "The context of the activities a user is taking - why the user is accessing the data - that are controlled by this consent.", 0, java.lang.Integer.MAX_VALUE, purpose);
+        case 1177250315: /*dataPeriod*/  return new Property("dataPeriod", "Period", "Clinical or Operational Relevant period of time that bounds the data controlled by this consent.", 0, 1, dataPeriod);
+        case 3076010: /*data*/  return new Property("data", "", "The resources controlled by this consent, if specific resources are referenced.", 0, java.lang.Integer.MAX_VALUE, data);
+        case -1289550567: /*except*/  return new Property("except", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, java.lang.Integer.MAX_VALUE, except);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3777,12 +3884,12 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Consent))
+        if (!(other_ instanceof Consent))
           return false;
-        Consent o = (Consent) other;
+        Consent o = (Consent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(patient, o.patient, true) && compareDeep(period, o.period, true) && compareDeep(dateTime, o.dateTime, true)
            && compareDeep(consentingParty, o.consentingParty, true) && compareDeep(actor, o.actor, true) && compareDeep(action, o.action, true)
@@ -3793,12 +3900,12 @@ public class Consent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Consent))
+        if (!(other_ instanceof Consent))
           return false;
-        Consent o = (Consent) other;
+        Consent o = (Consent) other_;
         return compareValues(status, o.status, true) && compareValues(dateTime, o.dateTime, true) && compareValues(policyRule, o.policyRule, true)
           ;
       }

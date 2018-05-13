@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.dstu3.elementmodel.Element;
+import org.hl7.fhir.dstu3.elementmodel.ObjectConverter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.utilities.Utilities;
@@ -103,6 +104,10 @@ private Map<String, Object> userData;
 		return false;
 	}
 	
+  public boolean isBooleanPrimitive() {
+    return false;
+  }
+
 	public boolean hasPrimitiveValue() {
 		return isPrimitive();
 	}
@@ -422,7 +427,9 @@ private Map<String, Object> userData;
 	public CodeableConcept castToCodeableConcept(Base b) throws FHIRException {
 		if (b instanceof CodeableConcept)
 			return (CodeableConcept) b;
-		else if (b instanceof CodeType) {
+    else if (b instanceof Element) {
+      return ObjectConverter.readAsCodeableConcept((Element) b);
+    } else if (b instanceof CodeType) {
 		  CodeableConcept cc = new CodeableConcept();
 		  cc.addCoding().setCode(((CodeType) b).asStringValue());
 		  return cc;
@@ -433,7 +440,9 @@ private Map<String, Object> userData;
 	public Coding castToCoding(Base b) throws FHIRException {
 		if (b instanceof Coding)
 			return (Coding) b;
-		else
+    else if (b instanceof Element) {
+      return ObjectConverter.readAsCoding((Element) b);
+		} else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Coding");
 	}
 	
@@ -660,10 +669,6 @@ private Map<String, Object> userData;
   	return false;
 	}
 
-  public Property getNamedProperty(String _name) throws FHIRException {
-    return getChildByName(_name);
-  }
-
 	public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
 		if (checkValid)
 			throw new FHIRException("Attempt to read invalid property '"+name+"' on type "+fhirType());
@@ -698,4 +703,14 @@ private Map<String, Object> userData;
 
   public abstract String getIdBase();
   public abstract void setIdBase(String value);
+
+  public Property getNamedProperty(String _name) throws FHIRException {
+    return getNamedProperty(_name.hashCode(), _name, false);
+  }
+  public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+    if (_checkValid)
+      throw new FHIRException("Attempt to read invalid property '"+_name+"' on type "+fhirType());
+    return null; 
+  }
+
 }

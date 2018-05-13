@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A task to be performed.
  */
@@ -676,7 +677,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #agent} (The device, practitioner, etc. who initiated the task.)
          */
-        public TaskRequesterComponent setAgent(Reference value) { 
+        public TaskRequesterComponent setAgent(Reference value)  { 
           this.agent = value;
           return this;
         }
@@ -715,7 +716,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #onBehalfOf} (The organization the device or practitioner was acting on behalf of when they initiated the task.)
          */
-        public TaskRequesterComponent setOnBehalfOf(Reference value) { 
+        public TaskRequesterComponent setOnBehalfOf(Reference value)  { 
           this.onBehalfOf = value;
           return this;
         }
@@ -740,10 +741,20 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("agent", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The device, practitioner, etc. who initiated the task.", 0, java.lang.Integer.MAX_VALUE, agent));
-          childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of when they initiated the task.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("agent", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The device, practitioner, etc. who initiated the task.", 0, 1, agent));
+          children.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of when they initiated the task.", 0, 1, onBehalfOf));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 92750597: /*agent*/  return new Property("agent", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "The device, practitioner, etc. who initiated the task.", 0, 1, agent);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of when they initiated the task.", 0, 1, onBehalfOf);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -824,22 +835,22 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TaskRequesterComponent))
+        if (!(other_ instanceof TaskRequesterComponent))
           return false;
-        TaskRequesterComponent o = (TaskRequesterComponent) other;
+        TaskRequesterComponent o = (TaskRequesterComponent) other_;
         return compareDeep(agent, o.agent, true) && compareDeep(onBehalfOf, o.onBehalfOf, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TaskRequesterComponent))
+        if (!(other_ instanceof TaskRequesterComponent))
           return false;
-        TaskRequesterComponent o = (TaskRequesterComponent) other;
+        TaskRequesterComponent o = (TaskRequesterComponent) other_;
         return true;
       }
 
@@ -955,7 +966,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #period} (Over what time-period is fulfillment sought.)
          */
-        public TaskRestrictionComponent setPeriod(Period value) { 
+        public TaskRestrictionComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
@@ -1023,11 +1034,22 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return this.recipientTarget;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("repetitions", "positiveInt", "Indicates the number of times the requested action should occur.", 0, java.lang.Integer.MAX_VALUE, repetitions));
-          childrenList.add(new Property("period", "Period", "Over what time-period is fulfillment sought.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("recipient", "Reference(Patient|Practitioner|RelatedPerson|Group|Organization)", "For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?", 0, java.lang.Integer.MAX_VALUE, recipient));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("repetitions", "positiveInt", "Indicates the number of times the requested action should occur.", 0, 1, repetitions));
+          children.add(new Property("period", "Period", "Over what time-period is fulfillment sought.", 0, 1, period));
+          children.add(new Property("recipient", "Reference(Patient|Practitioner|RelatedPerson|Group|Organization)", "For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?", 0, java.lang.Integer.MAX_VALUE, recipient));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 984367650: /*repetitions*/  return new Property("repetitions", "positiveInt", "Indicates the number of times the requested action should occur.", 0, 1, repetitions);
+          case -991726143: /*period*/  return new Property("period", "Period", "Over what time-period is fulfillment sought.", 0, 1, period);
+          case 820081177: /*recipient*/  return new Property("recipient", "Reference(Patient|Practitioner|RelatedPerson|Group|Organization)", "For requests that are targeted to more than on potential recipient/target, for whom is fulfillment sought?", 0, java.lang.Integer.MAX_VALUE, recipient);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1123,23 +1145,23 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TaskRestrictionComponent))
+        if (!(other_ instanceof TaskRestrictionComponent))
           return false;
-        TaskRestrictionComponent o = (TaskRestrictionComponent) other;
+        TaskRestrictionComponent o = (TaskRestrictionComponent) other_;
         return compareDeep(repetitions, o.repetitions, true) && compareDeep(period, o.period, true) && compareDeep(recipient, o.recipient, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TaskRestrictionComponent))
+        if (!(other_ instanceof TaskRestrictionComponent))
           return false;
-        TaskRestrictionComponent o = (TaskRestrictionComponent) other;
+        TaskRestrictionComponent o = (TaskRestrictionComponent) other_;
         return compareValues(repetitions, o.repetitions, true);
       }
 
@@ -1208,7 +1230,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #type} (A code or description indicating how the input is intended to be used as part of the task execution.)
          */
-        public ParameterComponent setType(CodeableConcept value) { 
+        public ParameterComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -1227,15 +1249,62 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #value} (The value of the input parameter as a basic type.)
          */
-        public ParameterComponent setValue(org.hl7.fhir.dstu3.model.Type value) { 
+        public ParameterComponent setValue(org.hl7.fhir.dstu3.model.Type value)  { 
           this.value = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "A code or description indicating how the input is intended to be used as part of the task execution.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "A code or description indicating how the input is intended to be used as part of the task execution.", 0, 1, type));
+          children.add(new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A code or description indicating how the input is intended to be used as part of the task execution.", 0, 1, type);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -786218365: /*valueCanonical*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -766192449: /*valueDate*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 231604844: /*valueId*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -497880704: /*valueMarkdown*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1410172354: /*valueUrl*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -765667124: /*valueUuid*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -67108992: /*valueAnnotation*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -475566732: /*valueAttachment*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1887705029: /*valueCoding*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 2030761548: /*valueRange*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 2030767386: /*valueRatio*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -962229101: /*valueSampledData*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -540985785: /*valueSignature*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "The value of the input parameter as a basic type.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1445,22 +1514,22 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ParameterComponent))
+        if (!(other_ instanceof ParameterComponent))
           return false;
-        ParameterComponent o = (ParameterComponent) other;
+        ParameterComponent o = (ParameterComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ParameterComponent))
+        if (!(other_ instanceof ParameterComponent))
           return false;
-        ParameterComponent o = (ParameterComponent) other;
+        ParameterComponent o = (ParameterComponent) other_;
         return true;
       }
 
@@ -1528,7 +1597,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #type} (The name of the Output parameter.)
          */
-        public TaskOutputComponent setType(CodeableConcept value) { 
+        public TaskOutputComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -1547,15 +1616,62 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #value} (The value of the Output parameter as a basic type.)
          */
-        public TaskOutputComponent setValue(org.hl7.fhir.dstu3.model.Type value) { 
+        public TaskOutputComponent setValue(org.hl7.fhir.dstu3.model.Type value)  { 
           this.value = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "The name of the Output parameter.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "The name of the Output parameter.", 0, 1, type));
+          children.add(new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The name of the Output parameter.", 0, 1, type);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -786218365: /*valueCanonical*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -766192449: /*valueDate*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 231604844: /*valueId*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -497880704: /*valueMarkdown*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1410172354: /*valueUrl*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -765667124: /*valueUuid*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -67108992: /*valueAnnotation*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -475566732: /*valueAttachment*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1887705029: /*valueCoding*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 2030761548: /*valueRange*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 2030767386: /*valueRatio*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -962229101: /*valueSampledData*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -540985785: /*valueSignature*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "The value of the Output parameter as a basic type.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1765,22 +1881,22 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TaskOutputComponent))
+        if (!(other_ instanceof TaskOutputComponent))
           return false;
-        TaskOutputComponent o = (TaskOutputComponent) other;
+        TaskOutputComponent o = (TaskOutputComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TaskOutputComponent))
+        if (!(other_ instanceof TaskOutputComponent))
           return false;
-        TaskOutputComponent o = (TaskOutputComponent) other;
+        TaskOutputComponent o = (TaskOutputComponent) other_;
         return true;
       }
 
@@ -2105,26 +2221,30 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * @return {@link #definition} (A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.)
      */
     public UriType getDefinitionUriType() throws FHIRException { 
+      if (this.definition == null)
+        return null;
       if (!(this.definition instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.definition.getClass().getName()+" was encountered");
       return (UriType) this.definition;
     }
 
     public boolean hasDefinitionUriType() { 
-      return this.definition instanceof UriType;
+      return this != null && this.definition instanceof UriType;
     }
 
     /**
      * @return {@link #definition} (A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.)
      */
     public Reference getDefinitionReference() throws FHIRException { 
+      if (this.definition == null)
+        return null;
       if (!(this.definition instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.definition.getClass().getName()+" was encountered");
       return (Reference) this.definition;
     }
 
     public boolean hasDefinitionReference() { 
-      return this.definition instanceof Reference;
+      return this != null && this.definition instanceof Reference;
     }
 
     public boolean hasDefinition() { 
@@ -2134,7 +2254,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #definition} (A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.)
      */
-    public Task setDefinition(Type value) { 
+    public Task setDefinition(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof UriType || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for Task.definition[x]: "+value.fhirType());
       this.definition = value;
       return this;
     }
@@ -2221,7 +2343,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #groupIdentifier} (An identifier that links together multiple tasks and other requests that were created in the same context.)
      */
-    public Task setGroupIdentifier(Identifier value) { 
+    public Task setGroupIdentifier(Identifier value)  { 
       this.groupIdentifier = value;
       return this;
     }
@@ -2365,7 +2487,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #statusReason} (An explanation as to why this task is held, failed, was refused, etc.)
      */
-    public Task setStatusReason(CodeableConcept value) { 
+    public Task setStatusReason(CodeableConcept value)  { 
       this.statusReason = value;
       return this;
     }
@@ -2389,7 +2511,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #businessStatus} (Contains business-specific nuances of the business state.)
      */
-    public Task setBusinessStatus(CodeableConcept value) { 
+    public Task setBusinessStatus(CodeableConcept value)  { 
       this.businessStatus = value;
       return this;
     }
@@ -2507,7 +2629,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #code} (A name or code (or both) briefly describing what the task involves.)
      */
-    public Task setCode(CodeableConcept value) { 
+    public Task setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -2580,7 +2702,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #focus} (The request being actioned or the resource being manipulated by this task.)
      */
-    public Task setFocus(Reference value) { 
+    public Task setFocus(Reference value)  { 
       this.focus = value;
       return this;
     }
@@ -2619,7 +2741,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #for_} (The entity who benefits from the performance of the service specified in the task (e.g., the patient).)
      */
-    public Task setFor(Reference value) { 
+    public Task setFor(Reference value)  { 
       this.for_ = value;
       return this;
     }
@@ -2658,7 +2780,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.)
      */
-    public Task setContext(Reference value) { 
+    public Task setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -2697,7 +2819,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #executionPeriod} (Identifies the time action was first taken against the task (start) and/or the time final action was taken against the task prior to marking it as completed (end).)
      */
-    public Task setExecutionPeriod(Period value) { 
+    public Task setExecutionPeriod(Period value)  { 
       this.executionPeriod = value;
       return this;
     }
@@ -2819,7 +2941,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #requester} (The creator of the task.)
      */
-    public Task setRequester(TaskRequesterComponent value) { 
+    public Task setRequester(TaskRequesterComponent value)  { 
       this.requester = value;
       return this;
     }
@@ -2896,7 +3018,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #owner} (Individual organization or Device currently responsible for task execution.)
      */
-    public Task setOwner(Reference value) { 
+    public Task setOwner(Reference value)  { 
       this.owner = value;
       return this;
     }
@@ -2935,7 +3057,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #reason} (A description or code indicating why this task needs to be performed.)
      */
-    public Task setReason(CodeableConcept value) { 
+    public Task setReason(CodeableConcept value)  { 
       this.reason = value;
       return this;
     }
@@ -3087,7 +3209,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #restriction} (If the Task.focus is a request resource and the task is seeking fulfillment (i.e is asking for the request to be actioned), this element identifies any limitations on what parts of the referenced request should be actioned.)
      */
-    public Task setRestriction(TaskRestrictionComponent value) { 
+    public Task setRestriction(TaskRestrictionComponent value)  { 
       this.restriction = value;
       return this;
     }
@@ -3198,35 +3320,73 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       return getOutput().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The business identifier for this task.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("basedOn", "Reference(Any)", "BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("groupIdentifier", "Identifier", "An identifier that links together multiple tasks and other requests that were created in the same context.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
-        childrenList.add(new Property("partOf", "Reference(Task)", "Task that this particular task is part of.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("status", "code", "The current status of the task.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("statusReason", "CodeableConcept", "An explanation as to why this task is held, failed, was refused, etc.", 0, java.lang.Integer.MAX_VALUE, statusReason));
-        childrenList.add(new Property("businessStatus", "CodeableConcept", "Contains business-specific nuances of the business state.", 0, java.lang.Integer.MAX_VALUE, businessStatus));
-        childrenList.add(new Property("intent", "code", "Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.", 0, java.lang.Integer.MAX_VALUE, intent));
-        childrenList.add(new Property("priority", "code", "Indicates how quickly the Task should be addressed with respect to other requests.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("code", "CodeableConcept", "A name or code (or both) briefly describing what the task involves.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("description", "string", "A free-text description of what is to be performed.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("focus", "Reference(Any)", "The request being actioned or the resource being manipulated by this task.", 0, java.lang.Integer.MAX_VALUE, focus));
-        childrenList.add(new Property("for", "Reference(Any)", "The entity who benefits from the performance of the service specified in the task (e.g., the patient).", 0, java.lang.Integer.MAX_VALUE, for_));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("executionPeriod", "Period", "Identifies the time action was first taken against the task (start) and/or the time final action was taken against the task prior to marking it as completed (end).", 0, java.lang.Integer.MAX_VALUE, executionPeriod));
-        childrenList.add(new Property("authoredOn", "dateTime", "The date and time this task was created.", 0, java.lang.Integer.MAX_VALUE, authoredOn));
-        childrenList.add(new Property("lastModified", "dateTime", "The date and time of last modification to this task.", 0, java.lang.Integer.MAX_VALUE, lastModified));
-        childrenList.add(new Property("requester", "", "The creator of the task.", 0, java.lang.Integer.MAX_VALUE, requester));
-        childrenList.add(new Property("performerType", "CodeableConcept", "The type of participant that can execute the task.", 0, java.lang.Integer.MAX_VALUE, performerType));
-        childrenList.add(new Property("owner", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "Individual organization or Device currently responsible for task execution.", 0, java.lang.Integer.MAX_VALUE, owner));
-        childrenList.add(new Property("reason", "CodeableConcept", "A description or code indicating why this task needs to be performed.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("note", "Annotation", "Free-text information captured about the task as it progresses.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this Task that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the task.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
-        childrenList.add(new Property("restriction", "", "If the Task.focus is a request resource and the task is seeking fulfillment (i.e is asking for the request to be actioned), this element identifies any limitations on what parts of the referenced request should be actioned.", 0, java.lang.Integer.MAX_VALUE, restriction));
-        childrenList.add(new Property("input", "", "Additional information that may be needed in the execution of the task.", 0, java.lang.Integer.MAX_VALUE, input));
-        childrenList.add(new Property("output", "", "Outputs produced by the Task.", 0, java.lang.Integer.MAX_VALUE, output));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The business identifier for this task.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, 1, definition));
+        children.add(new Property("basedOn", "Reference(Any)", "BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("groupIdentifier", "Identifier", "An identifier that links together multiple tasks and other requests that were created in the same context.", 0, 1, groupIdentifier));
+        children.add(new Property("partOf", "Reference(Task)", "Task that this particular task is part of.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("status", "code", "The current status of the task.", 0, 1, status));
+        children.add(new Property("statusReason", "CodeableConcept", "An explanation as to why this task is held, failed, was refused, etc.", 0, 1, statusReason));
+        children.add(new Property("businessStatus", "CodeableConcept", "Contains business-specific nuances of the business state.", 0, 1, businessStatus));
+        children.add(new Property("intent", "code", "Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.", 0, 1, intent));
+        children.add(new Property("priority", "code", "Indicates how quickly the Task should be addressed with respect to other requests.", 0, 1, priority));
+        children.add(new Property("code", "CodeableConcept", "A name or code (or both) briefly describing what the task involves.", 0, 1, code));
+        children.add(new Property("description", "string", "A free-text description of what is to be performed.", 0, 1, description));
+        children.add(new Property("focus", "Reference(Any)", "The request being actioned or the resource being manipulated by this task.", 0, 1, focus));
+        children.add(new Property("for", "Reference(Any)", "The entity who benefits from the performance of the service specified in the task (e.g., the patient).", 0, 1, for_));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.", 0, 1, context));
+        children.add(new Property("executionPeriod", "Period", "Identifies the time action was first taken against the task (start) and/or the time final action was taken against the task prior to marking it as completed (end).", 0, 1, executionPeriod));
+        children.add(new Property("authoredOn", "dateTime", "The date and time this task was created.", 0, 1, authoredOn));
+        children.add(new Property("lastModified", "dateTime", "The date and time of last modification to this task.", 0, 1, lastModified));
+        children.add(new Property("requester", "", "The creator of the task.", 0, 1, requester));
+        children.add(new Property("performerType", "CodeableConcept", "The type of participant that can execute the task.", 0, java.lang.Integer.MAX_VALUE, performerType));
+        children.add(new Property("owner", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "Individual organization or Device currently responsible for task execution.", 0, 1, owner));
+        children.add(new Property("reason", "CodeableConcept", "A description or code indicating why this task needs to be performed.", 0, 1, reason));
+        children.add(new Property("note", "Annotation", "Free-text information captured about the task as it progresses.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this Task that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the task.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
+        children.add(new Property("restriction", "", "If the Task.focus is a request resource and the task is seeking fulfillment (i.e is asking for the request to be actioned), this element identifies any limitations on what parts of the referenced request should be actioned.", 0, 1, restriction));
+        children.add(new Property("input", "", "Additional information that may be needed in the execution of the task.", 0, java.lang.Integer.MAX_VALUE, input));
+        children.add(new Property("output", "", "Outputs produced by the Task.", 0, java.lang.Integer.MAX_VALUE, output));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The business identifier for this task.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1139422643: /*definition[x]*/  return new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, 1, definition);
+        case -1014418093: /*definition*/  return new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, 1, definition);
+        case -1139428583: /*definitionUri*/  return new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, 1, definition);
+        case -820021448: /*definitionReference*/  return new Property("definition[x]", "uri|Reference(ActivityDefinition)", "A reference to a formal or informal definition of the task.  For example, a protocol, a step within a defined workflow definition, etc.", 0, 1, definition);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(Any)", "BasedOn refers to a higher-level authorization that triggered the creation of the task.  It references a \"request\" resource such as a ProcedureRequest, MedicationRequest, ProcedureRequest, CarePlan, etc. which is distinct from the \"request\" resource the task is seeking to fulfil.  This latter resource is referenced by FocusOn.  For example, based on a ProcedureRequest (= BasedOn), a task is created to fulfil a procedureRequest ( = FocusOn ) to collect a specimen from a patient.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -445338488: /*groupIdentifier*/  return new Property("groupIdentifier", "Identifier", "An identifier that links together multiple tasks and other requests that were created in the same context.", 0, 1, groupIdentifier);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Task)", "Task that this particular task is part of.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -892481550: /*status*/  return new Property("status", "code", "The current status of the task.", 0, 1, status);
+        case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "An explanation as to why this task is held, failed, was refused, etc.", 0, 1, statusReason);
+        case 2008591314: /*businessStatus*/  return new Property("businessStatus", "CodeableConcept", "Contains business-specific nuances of the business state.", 0, 1, businessStatus);
+        case -1183762788: /*intent*/  return new Property("intent", "code", "Indicates the \"level\" of actionability associated with the Task.  I.e. Is this a proposed task, a planned task, an actionable task, etc.", 0, 1, intent);
+        case -1165461084: /*priority*/  return new Property("priority", "code", "Indicates how quickly the Task should be addressed with respect to other requests.", 0, 1, priority);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A name or code (or both) briefly describing what the task involves.", 0, 1, code);
+        case -1724546052: /*description*/  return new Property("description", "string", "A free-text description of what is to be performed.", 0, 1, description);
+        case 97604824: /*focus*/  return new Property("focus", "Reference(Any)", "The request being actioned or the resource being manipulated by this task.", 0, 1, focus);
+        case 101577: /*for*/  return new Property("for", "Reference(Any)", "The entity who benefits from the performance of the service specified in the task (e.g., the patient).", 0, 1, for_);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this task was created.", 0, 1, context);
+        case 1218624249: /*executionPeriod*/  return new Property("executionPeriod", "Period", "Identifies the time action was first taken against the task (start) and/or the time final action was taken against the task prior to marking it as completed (end).", 0, 1, executionPeriod);
+        case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "The date and time this task was created.", 0, 1, authoredOn);
+        case 1959003007: /*lastModified*/  return new Property("lastModified", "dateTime", "The date and time of last modification to this task.", 0, 1, lastModified);
+        case 693933948: /*requester*/  return new Property("requester", "", "The creator of the task.", 0, 1, requester);
+        case -901444568: /*performerType*/  return new Property("performerType", "CodeableConcept", "The type of participant that can execute the task.", 0, java.lang.Integer.MAX_VALUE, performerType);
+        case 106164915: /*owner*/  return new Property("owner", "Reference(Device|Organization|Patient|Practitioner|RelatedPerson)", "Individual organization or Device currently responsible for task execution.", 0, 1, owner);
+        case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "A description or code indicating why this task needs to be performed.", 0, 1, reason);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Free-text information captured about the task as it progresses.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 1538891575: /*relevantHistory*/  return new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this Task that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the task.", 0, java.lang.Integer.MAX_VALUE, relevantHistory);
+        case -1561062452: /*restriction*/  return new Property("restriction", "", "If the Task.focus is a request resource and the task is seeking fulfillment (i.e is asking for the request to be actioned), this element identifies any limitations on what parts of the referenced request should be actioned.", 0, 1, restriction);
+        case 100358090: /*input*/  return new Property("input", "", "Additional information that may be needed in the execution of the task.", 0, java.lang.Integer.MAX_VALUE, input);
+        case -1005512447: /*output*/  return new Property("output", "", "Outputs produced by the Task.", 0, java.lang.Integer.MAX_VALUE, output);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3670,12 +3830,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Task))
+        if (!(other_ instanceof Task))
           return false;
-        Task o = (Task) other;
+        Task o = (Task) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
            && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true) && compareDeep(statusReason, o.statusReason, true)
@@ -3690,12 +3850,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Task))
+        if (!(other_ instanceof Task))
           return false;
-        Task o = (Task) other;
+        Task o = (Task) other_;
         return compareValues(status, o.status, true) && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true)
            && compareValues(description, o.description, true) && compareValues(authoredOn, o.authoredOn, true)
            && compareValues(lastModified, o.lastModified, true);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -214,14 +214,14 @@ public class AppointmentResponse extends DomainResource {
     protected List<CodeableConcept> participantType;
 
     /**
-     * A Person, Location/HealthcareService or Device that is participating in the appointment.
+     * A Person, Location, HealthcareService, or Device that is participating in the appointment.
      */
     @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Person, Location/HealthcareService or Device", formalDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment." )
+    @Description(shortDefinition="Person, Location, HealthcareService, or Device", formalDefinition="A Person, Location, HealthcareService, or Device that is participating in the appointment." )
     protected Reference actor;
 
     /**
-     * The actual object that is the target of the reference (A Person, Location/HealthcareService or Device that is participating in the appointment.)
+     * The actual object that is the target of the reference (A Person, Location, HealthcareService, or Device that is participating in the appointment.)
      */
     protected Resource actorTarget;
 
@@ -507,7 +507,7 @@ public class AppointmentResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #actor} (A Person, Location/HealthcareService or Device that is participating in the appointment.)
+     * @return {@link #actor} (A Person, Location, HealthcareService, or Device that is participating in the appointment.)
      */
     public Reference getActor() { 
       if (this.actor == null)
@@ -523,7 +523,7 @@ public class AppointmentResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #actor} (A Person, Location/HealthcareService or Device that is participating in the appointment.)
+     * @param value {@link #actor} (A Person, Location, HealthcareService, or Device that is participating in the appointment.)
      */
     public AppointmentResponse setActor(Reference value) { 
       this.actor = value;
@@ -531,14 +531,14 @@ public class AppointmentResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A Person, Location/HealthcareService or Device that is participating in the appointment.)
+     * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A Person, Location, HealthcareService, or Device that is participating in the appointment.)
      */
     public Resource getActorTarget() { 
       return this.actorTarget;
     }
 
     /**
-     * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A Person, Location/HealthcareService or Device that is participating in the appointment.)
+     * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A Person, Location, HealthcareService, or Device that is participating in the appointment.)
      */
     public AppointmentResponse setActorTarget(Resource value) { 
       this.actorTarget = value;
@@ -646,7 +646,7 @@ public class AppointmentResponse extends DomainResource {
         children.add(new Property("start", "instant", "Date/Time that the appointment is to take place, or requested new start time.", 0, 1, start));
         children.add(new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, 1, end));
         children.add(new Property("participantType", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, participantType));
-        children.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, 1, actor));
+        children.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location, HealthcareService, or Device that is participating in the appointment.", 0, 1, actor));
         children.add(new Property("participantStatus", "code", "Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, 1, participantStatus));
         children.add(new Property("comment", "string", "Additional comments about the appointment.", 0, 1, comment));
       }
@@ -659,7 +659,7 @@ public class AppointmentResponse extends DomainResource {
         case 109757538: /*start*/  return new Property("start", "instant", "Date/Time that the appointment is to take place, or requested new start time.", 0, 1, start);
         case 100571: /*end*/  return new Property("end", "instant", "This may be either the same as the appointment request to confirm the details of the appointment, or alternately a new time to request a re-negotiation of the end time.", 0, 1, end);
         case 841294093: /*participantType*/  return new Property("participantType", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, participantType);
-        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, 1, actor);
+        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location, HealthcareService, or Device that is participating in the appointment.", 0, 1, actor);
         case 996096261: /*participantStatus*/  return new Property("participantStatus", "code", "Participation status of the participant. When the status is declined or tentative if the start/end times are different to the appointment, then these times should be interpreted as a requested time change. When the status is accepted, the times can either be the time of the appointment (as a confirmation of the time) or can be empty.", 0, 1, participantStatus);
         case 950398559: /*comment*/  return new Property("comment", "string", "Additional comments about the appointment.", 0, 1, comment);
         default: return super.getNamedProperty(_hash, _name, _checkValid);

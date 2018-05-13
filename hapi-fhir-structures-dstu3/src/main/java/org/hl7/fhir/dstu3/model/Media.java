@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
@@ -522,7 +523,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #subtype} (Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.)
      */
-    public Media setSubtype(CodeableConcept value) { 
+    public Media setSubtype(CodeableConcept value)  { 
       this.subtype = value;
       return this;
     }
@@ -546,7 +547,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #view} (The name of the imaging view e.g. Lateral or Antero-posterior (AP).)
      */
-    public Media setView(CodeableConcept value) { 
+    public Media setView(CodeableConcept value)  { 
       this.view = value;
       return this;
     }
@@ -570,7 +571,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #subject} (Who/What this Media is a record of.)
      */
-    public Media setSubject(Reference value) { 
+    public Media setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -609,7 +610,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #context} (The encounter or episode of care that establishes the context for this media.)
      */
-    public Media setContext(Reference value) { 
+    public Media setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -640,26 +641,30 @@ public class Media extends DomainResource {
      * @return {@link #occurrence} (The date and time(s) at which the media was collected.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The date and time(s) at which the media was collected.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     public boolean hasOccurrence() { 
@@ -669,7 +674,9 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #occurrence} (The date and time(s) at which the media was collected.)
      */
-    public Media setOccurrence(Type value) { 
+    public Media setOccurrence(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new FHIRFormatError("Not the right type for Media.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -693,7 +700,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #operator} (The person who administered the collection of the image.)
      */
-    public Media setOperator(Reference value) { 
+    public Media setOperator(Reference value)  { 
       this.operator = value;
       return this;
     }
@@ -790,7 +797,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #bodySite} (Indicates the site on the subject's body where the media was collected (i.e. the target site).)
      */
-    public Media setBodySite(CodeableConcept value) { 
+    public Media setBodySite(CodeableConcept value)  { 
       this.bodySite = value;
       return this;
     }
@@ -814,7 +821,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #device} (The device used to collect the media.)
      */
-    public Media setDevice(Reference value) { 
+    public Media setDevice(Reference value)  { 
       this.device = value;
       return this;
     }
@@ -1033,7 +1040,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #content} (The actual content of the media - inline or by direct reference to the media source file.)
      */
-    public Media setContent(Attachment value) { 
+    public Media setContent(Attachment value)  { 
       this.content = value;
       return this;
     }
@@ -1091,26 +1098,55 @@ public class Media extends DomainResource {
       return getNote().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(ProcedureRequest)", "A procedure that is fulfilled in whole or in part by the creation of this media.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("type", "code", "Whether the media is a photo (still image), an audio recording, or a video recording.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("subtype", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, java.lang.Integer.MAX_VALUE, subtype));
-        childrenList.add(new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, java.lang.Integer.MAX_VALUE, view));
-        childrenList.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen)", "Who/What this Media is a record of.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this media.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("occurrence[x]", "dateTime|Period", "The date and time(s) at which the media was collected.", 0, java.lang.Integer.MAX_VALUE, occurrence));
-        childrenList.add(new Property("operator", "Reference(Practitioner)", "The person who administered the collection of the image.", 0, java.lang.Integer.MAX_VALUE, operator));
-        childrenList.add(new Property("reasonCode", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the media was collected (i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
-        childrenList.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to collect the media.", 0, java.lang.Integer.MAX_VALUE, device));
-        childrenList.add(new Property("height", "positiveInt", "Height of the image in pixels (photo/video).", 0, java.lang.Integer.MAX_VALUE, height));
-        childrenList.add(new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, java.lang.Integer.MAX_VALUE, width));
-        childrenList.add(new Property("frames", "positiveInt", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, java.lang.Integer.MAX_VALUE, frames));
-        childrenList.add(new Property("duration", "unsignedInt", "The duration of the recording in seconds - for audio and video.", 0, java.lang.Integer.MAX_VALUE, duration));
-        childrenList.add(new Property("content", "Attachment", "The actual content of the media - inline or by direct reference to the media source file.", 0, java.lang.Integer.MAX_VALUE, content));
-        childrenList.add(new Property("note", "Annotation", "Comments made about the media by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("basedOn", "Reference(ProcedureRequest)", "A procedure that is fulfilled in whole or in part by the creation of this media.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("type", "code", "Whether the media is a photo (still image), an audio recording, or a video recording.", 0, 1, type));
+        children.add(new Property("subtype", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, 1, subtype));
+        children.add(new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, 1, view));
+        children.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen)", "Who/What this Media is a record of.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this media.", 0, 1, context));
+        children.add(new Property("occurrence[x]", "dateTime|Period", "The date and time(s) at which the media was collected.", 0, 1, occurrence));
+        children.add(new Property("operator", "Reference(Practitioner)", "The person who administered the collection of the image.", 0, 1, operator));
+        children.add(new Property("reasonCode", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the media was collected (i.e. the target site).", 0, 1, bodySite));
+        children.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to collect the media.", 0, 1, device));
+        children.add(new Property("height", "positiveInt", "Height of the image in pixels (photo/video).", 0, 1, height));
+        children.add(new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, 1, width));
+        children.add(new Property("frames", "positiveInt", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, 1, frames));
+        children.add(new Property("duration", "unsignedInt", "The duration of the recording in seconds - for audio and video.", 0, 1, duration));
+        children.add(new Property("content", "Attachment", "The actual content of the media - inline or by direct reference to the media source file.", 0, 1, content));
+        children.add(new Property("note", "Annotation", "Comments made about the media by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ProcedureRequest)", "A procedure that is fulfilled in whole or in part by the creation of this media.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case 3575610: /*type*/  return new Property("type", "code", "Whether the media is a photo (still image), an audio recording, or a video recording.", 0, 1, type);
+        case -1867567750: /*subtype*/  return new Property("subtype", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, 1, subtype);
+        case 3619493: /*view*/  return new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, 1, view);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen)", "Who/What this Media is a record of.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this media.", 0, 1, context);
+        case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period", "The date and time(s) at which the media was collected.", 0, 1, occurrence);
+        case 1687874001: /*occurrence*/  return new Property("occurrence[x]", "dateTime|Period", "The date and time(s) at which the media was collected.", 0, 1, occurrence);
+        case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period", "The date and time(s) at which the media was collected.", 0, 1, occurrence);
+        case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period", "The date and time(s) at which the media was collected.", 0, 1, occurrence);
+        case -500553564: /*operator*/  return new Property("operator", "Reference(Practitioner)", "The person who administered the collection of the image.", 0, 1, operator);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the media was collected (i.e. the target site).", 0, 1, bodySite);
+        case -1335157162: /*device*/  return new Property("device", "Reference(Device|DeviceMetric)", "The device used to collect the media.", 0, 1, device);
+        case -1221029593: /*height*/  return new Property("height", "positiveInt", "Height of the image in pixels (photo/video).", 0, 1, height);
+        case 113126854: /*width*/  return new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, 1, width);
+        case -1266514778: /*frames*/  return new Property("frames", "positiveInt", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, 1, frames);
+        case -1992012396: /*duration*/  return new Property("duration", "unsignedInt", "The duration of the recording in seconds - for audio and video.", 0, 1, duration);
+        case 951530617: /*content*/  return new Property("content", "Attachment", "The actual content of the media - inline or by direct reference to the media source file.", 0, 1, content);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the media by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1422,12 +1458,12 @@ public class Media extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Media))
+        if (!(other_ instanceof Media))
           return false;
-        Media o = (Media) other;
+        Media o = (Media) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(type, o.type, true)
            && compareDeep(subtype, o.subtype, true) && compareDeep(view, o.view, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true) && compareDeep(operator, o.operator, true)
@@ -1438,12 +1474,12 @@ public class Media extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Media))
+        if (!(other_ instanceof Media))
           return false;
-        Media o = (Media) other;
+        Media o = (Media) other_;
         return compareValues(type, o.type, true) && compareValues(height, o.height, true) && compareValues(width, o.width, true)
            && compareValues(frames, o.frames, true) && compareValues(duration, o.duration, true);
       }

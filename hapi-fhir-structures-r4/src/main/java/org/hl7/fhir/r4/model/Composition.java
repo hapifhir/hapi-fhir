@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1094,26 +1094,30 @@ public class Composition extends DomainResource {
          * @return {@link #target} (The target composition/document of this relationship.)
          */
         public Identifier getTargetIdentifier() throws FHIRException { 
+          if (this.target == null)
+            return null;
           if (!(this.target instanceof Identifier))
             throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.target.getClass().getName()+" was encountered");
           return (Identifier) this.target;
         }
 
         public boolean hasTargetIdentifier() { 
-          return this.target instanceof Identifier;
+          return this != null && this.target instanceof Identifier;
         }
 
         /**
          * @return {@link #target} (The target composition/document of this relationship.)
          */
         public Reference getTargetReference() throws FHIRException { 
+          if (this.target == null)
+            return null;
           if (!(this.target instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.target.getClass().getName()+" was encountered");
           return (Reference) this.target;
         }
 
         public boolean hasTargetReference() { 
-          return this.target instanceof Reference;
+          return this != null && this.target instanceof Reference;
         }
 
         public boolean hasTarget() { 
@@ -1124,6 +1128,8 @@ public class Composition extends DomainResource {
          * @param value {@link #target} (The target composition/document of this relationship.)
          */
         public CompositionRelatesToComponent setTarget(Type value) { 
+          if (value != null && !(value instanceof Identifier || value instanceof Reference))
+            throw new Error("Not the right type for Composition.relatesTo.target[x]: "+value.fhirType());
           this.target = value;
           return this;
         }

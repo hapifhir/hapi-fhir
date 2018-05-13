@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the questionnaire being responded to.
  */
@@ -416,7 +417,7 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * @param value {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
          */
-        public QuestionnaireResponseItemComponent setSubject(Reference value) { 
+        public QuestionnaireResponseItemComponent setSubject(Reference value)  { 
           this.subject = value;
           return this;
         }
@@ -542,14 +543,28 @@ public class QuestionnaireResponse extends DomainResource {
           return getItem().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("linkId", "string", "The item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
-          childrenList.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item.", 0, java.lang.Integer.MAX_VALUE, definition));
-          childrenList.add(new Property("text", "string", "Text that is displayed above the contents of the group or as the text of the question being answered.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, subject));
-          childrenList.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
-          childrenList.add(new Property("item", "@QuestionnaireResponse.item", "Questions or sub-groups nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("linkId", "string", "The item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.", 0, 1, linkId));
+          children.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item.", 0, 1, definition));
+          children.add(new Property("text", "string", "Text that is displayed above the contents of the group or as the text of the question being answered.", 0, 1, text));
+          children.add(new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, 1, subject));
+          children.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
+          children.add(new Property("item", "@QuestionnaireResponse.item", "Questions or sub-groups nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1102667083: /*linkId*/  return new Property("linkId", "string", "The item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.", 0, 1, linkId);
+          case -1014418093: /*definition*/  return new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item.", 0, 1, definition);
+          case 3556653: /*text*/  return new Property("text", "string", "Text that is displayed above the contents of the group or as the text of the question being answered.", 0, 1, text);
+          case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, 1, subject);
+          case -1412808770: /*answer*/  return new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer);
+          case 3242771: /*item*/  return new Property("item", "@QuestionnaireResponse.item", "Questions or sub-groups nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -685,24 +700,24 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemComponent))
           return false;
-        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other;
+        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other_;
         return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(text, o.text, true)
            && compareDeep(subject, o.subject, true) && compareDeep(answer, o.answer, true) && compareDeep(item, o.item, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemComponent))
           return false;
-        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other;
+        QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other_;
         return compareValues(linkId, o.linkId, true) && compareValues(definition, o.definition, true) && compareValues(text, o.text, true)
           ;
       }
@@ -756,156 +771,180 @@ public class QuestionnaireResponse extends DomainResource {
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
         public boolean hasValueBooleanType() { 
-          return this.value instanceof BooleanType;
+          return this != null && this.value instanceof BooleanType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DecimalType getValueDecimalType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
         }
 
         public boolean hasValueDecimalType() { 
-          return this.value instanceof DecimalType;
+          return this != null && this.value instanceof DecimalType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
         }
 
         public boolean hasValueIntegerType() { 
-          return this.value instanceof IntegerType;
+          return this != null && this.value instanceof IntegerType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DateType getValueDateType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
         }
 
         public boolean hasValueDateType() { 
-          return this.value instanceof DateType;
+          return this != null && this.value instanceof DateType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
         public boolean hasValueDateTimeType() { 
-          return this.value instanceof DateTimeType;
+          return this != null && this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public TimeType getValueTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
         }
 
         public boolean hasValueTimeType() { 
-          return this.value instanceof TimeType;
+          return this != null && this.value instanceof TimeType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public StringType getValueStringType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
         public boolean hasValueStringType() { 
-          return this.value instanceof StringType;
+          return this != null && this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public UriType getValueUriType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof UriType))
             throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (UriType) this.value;
         }
 
         public boolean hasValueUriType() { 
-          return this.value instanceof UriType;
+          return this != null && this.value instanceof UriType;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Attachment getValueAttachment() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
         public boolean hasValueAttachment() { 
-          return this.value instanceof Attachment;
+          return this != null && this.value instanceof Attachment;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Coding getValueCoding() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
         }
 
         public boolean hasValueCoding() { 
-          return this.value instanceof Coding;
+          return this != null && this.value instanceof Coding;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
         public Reference getValueReference() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
         }
 
         public boolean hasValueReference() { 
-          return this.value instanceof Reference;
+          return this != null && this.value instanceof Reference;
         }
 
         public boolean hasValue() { 
@@ -915,7 +954,9 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * @param value {@link #value} (The answer (or one of the answers) provided by the respondent to the question.)
          */
-        public QuestionnaireResponseItemAnswerComponent setValue(Type value) { 
+        public QuestionnaireResponseItemAnswerComponent setValue(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof BooleanType || value instanceof DecimalType || value instanceof IntegerType || value instanceof DateType || value instanceof DateTimeType || value instanceof TimeType || value instanceof StringType || value instanceof UriType || value instanceof Attachment || value instanceof Coding || value instanceof Quantity || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for QuestionnaireResponse.item.answer.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -973,10 +1014,33 @@ public class QuestionnaireResponse extends DomainResource {
           return getItem().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("item", "@QuestionnaireResponse.item", "Nested groups and/or questions found within this particular answer.", 0, java.lang.Integer.MAX_VALUE, item));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value));
+          children.add(new Property("item", "@QuestionnaireResponse.item", "Nested groups and/or questions found within this particular answer.", 0, java.lang.Integer.MAX_VALUE, item));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -766192449: /*valueDate*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -1410172357: /*valueUri*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -475566732: /*valueAttachment*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -1887705029: /*valueCoding*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "boolean|decimal|integer|date|dateTime|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondent to the question.", 0, 1, value);
+          case 3242771: /*item*/  return new Property("item", "@QuestionnaireResponse.item", "Nested groups and/or questions found within this particular answer.", 0, java.lang.Integer.MAX_VALUE, item);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1105,22 +1169,22 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemAnswerComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemAnswerComponent))
           return false;
-        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other;
+        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other_;
         return compareDeep(value, o.value, true) && compareDeep(item, o.item, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponseItemAnswerComponent))
+        if (!(other_ instanceof QuestionnaireResponseItemAnswerComponent))
           return false;
-        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other;
+        QuestionnaireResponseItemAnswerComponent o = (QuestionnaireResponseItemAnswerComponent) other_;
         return true;
       }
 
@@ -1284,7 +1348,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * @param value {@link #identifier} (A business identifier assigned to a particular completed (or partially completed) questionnaire.)
      */
-    public QuestionnaireResponse setIdentifier(Identifier value) { 
+    public QuestionnaireResponse setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -1434,7 +1498,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * @param value {@link #questionnaire} (The Questionnaire that defines and organizes the questions for which answers are being provided.)
      */
-    public QuestionnaireResponse setQuestionnaire(Reference value) { 
+    public QuestionnaireResponse setQuestionnaire(Reference value)  { 
       this.questionnaire = value;
       return this;
     }
@@ -1523,7 +1587,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * @param value {@link #subject} (The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
      */
-    public QuestionnaireResponse setSubject(Reference value) { 
+    public QuestionnaireResponse setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1562,7 +1626,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * @param value {@link #context} (The encounter or episode of care with primary association to the questionnaire response.)
      */
-    public QuestionnaireResponse setContext(Reference value) { 
+    public QuestionnaireResponse setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1650,7 +1714,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * @param value {@link #author} (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
-    public QuestionnaireResponse setAuthor(Reference value) { 
+    public QuestionnaireResponse setAuthor(Reference value)  { 
       this.author = value;
       return this;
     }
@@ -1689,7 +1753,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * @param value {@link #source} (The person who answered the questions about the subject.)
      */
-    public QuestionnaireResponse setSource(Reference value) { 
+    public QuestionnaireResponse setSource(Reference value)  { 
       this.source = value;
       return this;
     }
@@ -1762,19 +1826,38 @@ public class QuestionnaireResponse extends DomainResource {
       return getItem().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("parent", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, parent));
-        childrenList.add(new Property("questionnaire", "Reference(Questionnaire)", "The Questionnaire that defines and organizes the questions for which answers are being provided.", 0, java.lang.Integer.MAX_VALUE, questionnaire));
-        childrenList.add(new Property("status", "code", "The position of the questionnaire response within its overall lifecycle.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care with primary association to the questionnaire response.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("authored", "dateTime", "The date and/or time that this set of answers were last changed.", 0, java.lang.Integer.MAX_VALUE, authored));
-        childrenList.add(new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("item", "", "A group or question item from the original questionnaire for which answers are provided.", 0, java.lang.Integer.MAX_VALUE, item));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, 1, identifier));
+        children.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("parent", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, parent));
+        children.add(new Property("questionnaire", "Reference(Questionnaire)", "The Questionnaire that defines and organizes the questions for which answers are being provided.", 0, 1, questionnaire));
+        children.add(new Property("status", "code", "The position of the questionnaire response within its overall lifecycle.", 0, 1, status));
+        children.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care with primary association to the questionnaire response.", 0, 1, context));
+        children.add(new Property("authored", "dateTime", "The date and/or time that this set of answers were last changed.", 0, 1, authored));
+        children.add(new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, 1, author));
+        children.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, 1, source));
+        children.add(new Property("item", "", "A group or question item from the original questionnaire for which answers are provided.", 0, java.lang.Integer.MAX_VALUE, item));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, 1, identifier);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "The order, proposal or plan that is fulfilled in whole or in part by this QuestionnaireResponse.  For example, a ProcedureRequest seeking an intake assessment or a decision support recommendation to assess for post-partum depression.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -995424086: /*parent*/  return new Property("parent", "Reference(Observation|Procedure)", "A procedure or observation that this questionnaire was performed as part of the execution of.  For example, the surgery a checklist was executed as part of.", 0, java.lang.Integer.MAX_VALUE, parent);
+        case -1017049693: /*questionnaire*/  return new Property("questionnaire", "Reference(Questionnaire)", "The Questionnaire that defines and organizes the questions for which answers are being provided.", 0, 1, questionnaire);
+        case -892481550: /*status*/  return new Property("status", "code", "The position of the questionnaire response within its overall lifecycle.", 0, 1, status);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care with primary association to the questionnaire response.", 0, 1, context);
+        case 1433073514: /*authored*/  return new Property("authored", "dateTime", "The date and/or time that this set of answers were last changed.", 0, 1, authored);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, 1, author);
+        case -896505829: /*source*/  return new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, 1, source);
+        case 3242771: /*item*/  return new Property("item", "", "A group or question item from the original questionnaire for which answers are provided.", 0, java.lang.Integer.MAX_VALUE, item);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1990,12 +2073,12 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponse))
+        if (!(other_ instanceof QuestionnaireResponse))
           return false;
-        QuestionnaireResponse o = (QuestionnaireResponse) other;
+        QuestionnaireResponse o = (QuestionnaireResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
            && compareDeep(questionnaire, o.questionnaire, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(authored, o.authored, true) && compareDeep(author, o.author, true)
@@ -2003,12 +2086,12 @@ public class QuestionnaireResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof QuestionnaireResponse))
+        if (!(other_ instanceof QuestionnaireResponse))
           return false;
-        QuestionnaireResponse o = (QuestionnaireResponse) other;
+        QuestionnaireResponse o = (QuestionnaireResponse) other_;
         return compareValues(status, o.status, true) && compareValues(authored, o.authored, true);
       }
 

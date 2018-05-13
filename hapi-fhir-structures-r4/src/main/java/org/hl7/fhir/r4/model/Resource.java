@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -63,10 +63,10 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     protected Meta meta;
 
     /**
-     * A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.
+     * A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
      */
     @Child(name = "implicitRules", type = {UriType.class}, order=2, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="A set of rules under which this content was created", formalDefinition="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content." )
+    @Description(shortDefinition="A set of rules under which this content was created", formalDefinition="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc." )
     protected UriType implicitRules;
 
     /**
@@ -160,7 +160,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
     /**
-     * @return {@link #implicitRules} (A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.). This is the underlying object with id, value and extensions. The accessor "getImplicitRules" gives direct access to the value
+     * @return {@link #implicitRules} (A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.). This is the underlying object with id, value and extensions. The accessor "getImplicitRules" gives direct access to the value
      */
     public UriType getImplicitRulesElement() { 
       if (this.implicitRules == null)
@@ -180,7 +180,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
     /**
-     * @param value {@link #implicitRules} (A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.). This is the underlying object with id, value and extensions. The accessor "getImplicitRules" gives direct access to the value
+     * @param value {@link #implicitRules} (A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.). This is the underlying object with id, value and extensions. The accessor "getImplicitRules" gives direct access to the value
      */
     public Resource setImplicitRulesElement(UriType value) { 
       this.implicitRules = value;
@@ -188,14 +188,14 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     }
 
     /**
-     * @return A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.
+     * @return A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
      */
     public String getImplicitRules() { 
       return this.implicitRules == null ? null : this.implicitRules.getValue();
     }
 
     /**
-     * @param value A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.
+     * @param value A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
      */
     public Resource setImplicitRules(String value) { 
       if (Utilities.noString(value))
@@ -260,7 +260,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       protected void listChildren(List<Property> children) {
         children.add(new Property("id", "id", "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.", 0, 1, id));
         children.add(new Property("meta", "Meta", "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.", 0, 1, meta));
-        children.add(new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.", 0, 1, implicitRules));
+        children.add(new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.", 0, 1, implicitRules));
         children.add(new Property("language", "code", "The base language in which the resource is written.", 0, 1, language));
       }
 
@@ -269,7 +269,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
         switch (_hash) {
         case 3355: /*id*/  return new Property("id", "id", "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.", 0, 1, id);
         case 3347973: /*meta*/  return new Property("meta", "Meta", "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.", 0, 1, meta);
-        case -961826286: /*implicitRules*/  return new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.", 0, 1, implicitRules);
+        case -961826286: /*implicitRules*/  return new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.", 0, 1, implicitRules);
         case -1613589672: /*language*/  return new Property("language", "code", "The base language in which the resource is written.", 0, 1, language);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }

@@ -6868,7 +6868,7 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s156"><Data ss:Type="String">ReferralCategory</Data></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Codes identifying the stage lifecycle stage of a request</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Codes identifying the lifecycle stage of a request</Data></Cell>
     <Cell ss:StyleID="s126"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s126"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s157" ss:HRef="http://hl7.org/fhir/ValueSet/request-intent"><Data

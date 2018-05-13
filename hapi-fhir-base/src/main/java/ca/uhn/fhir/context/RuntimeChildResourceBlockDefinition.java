@@ -43,15 +43,15 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	}
 
 	@Override
-	public RuntimeResourceBlockDefinition getChildByName(String theName) {
+	public BaseRuntimeElementCompositeDefinition getChildByName(String theName) {
 		if (getElementName().equals(theName)) {
 			return getDefinition();
 		}
 		return null;
 	}
 
-	private RuntimeResourceBlockDefinition getDefinition() {
-		return (RuntimeResourceBlockDefinition) myContext.getElementDefinition(myResourceBlockType);
+	private BaseRuntimeElementCompositeDefinition getDefinition() {
+		return (BaseRuntimeElementCompositeDefinition) myContext.getElementDefinition(myResourceBlockType);
 	}
 
 	@Override

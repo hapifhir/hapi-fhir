@@ -1,14 +1,14 @@
 package org.hl7.fhir.instance.hapi.validation;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -37,7 +37,16 @@ public class ValidationSupportChain implements IValidationSupport {
     myChain.add(theValidationSupport);
   }
 
-  @Override
+	@Override
+	public List<StructureDefinition> allStructures() {
+		ArrayList<StructureDefinition> retVal = new ArrayList<>();
+		for (IValidationSupport next : myChain) {
+			retVal.addAll(next.allStructures());
+		}
+		return retVal;
+	}
+
+	@Override
   public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
     for (IValidationSupport next : myChain) {
       if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {

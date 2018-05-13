@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -54,7 +54,7 @@ public class MedicationDispense extends DomainResource {
          */
         PREPARATION, 
         /**
-         * The dispensed producut is ready for pickup.
+         * The dispensed product is ready for pickup.
          */
         INPROGRESS, 
         /**
@@ -138,7 +138,7 @@ public class MedicationDispense extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. initial compounding or packaging of medication). Preparation stages may be tracked for billing purposes.";
-            case INPROGRESS: return "The dispensed producut is ready for pickup.";
+            case INPROGRESS: return "The dispensed product is ready for pickup.";
             case CANCELLED: return "The dispensed product was not and will never be picked up by the patient.";
             case ONHOLD: return "The dispense process is paused while waiting for an external event to reactivate the dispense.  For example, new stock has arrived or the prescriber has called.";
             case COMPLETED: return "The dispensed product has been picked up.";
@@ -480,10 +480,10 @@ public class MedicationDispense extends DomainResource {
         protected CodeableConcept type;
 
         /**
-         * Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.
+         * Indicates the reason for the substitution (or lack of substitution) from what was prescribed.
          */
         @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Why was substitution made", formalDefinition="Indicates the reason for the substitution of (or lack of substitution) from what was prescribed." )
+        @Description(shortDefinition="Why was substitution made", formalDefinition="Indicates the reason for the substitution (or lack of substitution) from what was prescribed." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-SubstanceAdminSubstitutionReason")
         protected List<CodeableConcept> reason;
 
@@ -586,7 +586,7 @@ public class MedicationDispense extends DomainResource {
         }
 
         /**
-         * @return {@link #reason} (Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.)
+         * @return {@link #reason} (Indicates the reason for the substitution (or lack of substitution) from what was prescribed.)
          */
         public List<CodeableConcept> getReason() { 
           if (this.reason == null)
@@ -717,7 +717,7 @@ public class MedicationDispense extends DomainResource {
           super.listChildren(children);
           children.add(new Property("wasSubstituted", "boolean", "True if the dispenser dispensed a different drug or product from what was prescribed.", 0, 1, wasSubstituted));
           children.add(new Property("type", "CodeableConcept", "A code signifying whether a different drug was dispensed from what was prescribed.", 0, 1, type));
-          children.add(new Property("reason", "CodeableConcept", "Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason));
+          children.add(new Property("reason", "CodeableConcept", "Indicates the reason for the substitution (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason));
           children.add(new Property("responsibleParty", "Reference(Practitioner)", "The person or organization that has primary responsibility for the substitution.", 0, java.lang.Integer.MAX_VALUE, responsibleParty));
         }
 
@@ -726,7 +726,7 @@ public class MedicationDispense extends DomainResource {
           switch (_hash) {
           case -592113567: /*wasSubstituted*/  return new Property("wasSubstituted", "boolean", "True if the dispenser dispensed a different drug or product from what was prescribed.", 0, 1, wasSubstituted);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A code signifying whether a different drug was dispensed from what was prescribed.", 0, 1, type);
-          case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason);
+          case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Indicates the reason for the substitution (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason);
           case 1511509392: /*responsibleParty*/  return new Property("responsibleParty", "Reference(Practitioner)", "The person or organization that has primary responsibility for the substitution.", 0, java.lang.Integer.MAX_VALUE, responsibleParty);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -882,13 +882,13 @@ public class MedicationDispense extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * The procedure that the dispense is done because of.
+     * The procedure that trigger the dispense.
      */
     @Child(name = "partOf", type = {Procedure.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Event that dispense is part of", formalDefinition="The procedure that the dispense is done because of." )
+    @Description(shortDefinition="Event that dispense is part of", formalDefinition="The procedure that trigger the dispense." )
     protected List<Reference> partOf;
     /**
-     * The actual objects that are the target of the reference (The procedure that the dispense is done because of.)
+     * The actual objects that are the target of the reference (The procedure that trigger the dispense.)
      */
     protected List<Procedure> partOfTarget;
 
@@ -902,10 +902,10 @@ public class MedicationDispense extends DomainResource {
     protected Enumeration<MedicationDispenseStatus> status;
 
     /**
-     * Indicates type of medication dispense and where the medication is expected to be consumed or administered.
+     * Indicates the type of medication dispense and where the medication is expected to be consumed or administered.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Type of medication dispense", formalDefinition="Indicates type of medication dispense and where the medication is expected to be consumed or administered." )
+    @Description(shortDefinition="Type of medication dispense", formalDefinition="Indicates the type of medication dispense and where the medication is expected to be consumed or administered." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-dispense-category")
     protected CodeableConcept category;
 
@@ -961,14 +961,14 @@ public class MedicationDispense extends DomainResource {
     protected List<MedicationDispensePerformerComponent> performer;
 
     /**
-     * The principal physical locaiton where the dispense was performed.
+     * The principal physical location where the dispense was performed.
      */
     @Child(name = "location", type = {Location.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Where the dispense occurred", formalDefinition="The principal physical locaiton where the dispense was performed." )
+    @Description(shortDefinition="Where the dispense occurred", formalDefinition="The principal physical location where the dispense was performed." )
     protected Reference location;
 
     /**
-     * The actual object that is the target of the reference (The principal physical locaiton where the dispense was performed.)
+     * The actual object that is the target of the reference (The principal physical location where the dispense was performed.)
      */
     protected Location locationTarget;
 
@@ -1066,13 +1066,13 @@ public class MedicationDispense extends DomainResource {
     protected MedicationDispenseSubstitutionComponent substitution;
 
     /**
-     * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.
+     * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. drug-drug interaction, duplicate therapy, dosage alert etc.
      */
     @Child(name = "detectedIssue", type = {DetectedIssue.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Clinical issue with action", formalDefinition="Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc." )
+    @Description(shortDefinition="Clinical issue with action", formalDefinition="Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. drug-drug interaction, duplicate therapy, dosage alert etc." )
     protected List<Reference> detectedIssue;
     /**
-     * The actual objects that are the target of the reference (Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.)
+     * The actual objects that are the target of the reference (Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. drug-drug interaction, duplicate therapy, dosage alert etc.)
      */
     protected List<DetectedIssue> detectedIssueTarget;
 
@@ -1089,7 +1089,7 @@ public class MedicationDispense extends DomainResource {
      * A summary of the events of interest that have occurred, such as when the dispense was verified.
      */
     @Child(name = "eventHistory", type = {Provenance.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of releveant lifecycle events", formalDefinition="A summary of the events of interest that have occurred, such as when the dispense was verified." )
+    @Description(shortDefinition="A list of relevant lifecycle events", formalDefinition="A summary of the events of interest that have occurred, such as when the dispense was verified." )
     protected List<Reference> eventHistory;
     /**
      * The actual objects that are the target of the reference (A summary of the events of interest that have occurred, such as when the dispense was verified.)
@@ -1169,7 +1169,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #partOf} (The procedure that the dispense is done because of.)
+     * @return {@link #partOf} (The procedure that trigger the dispense.)
      */
     public List<Reference> getPartOf() { 
       if (this.partOf == null)
@@ -1289,7 +1289,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Indicates type of medication dispense and where the medication is expected to be consumed or administered.)
+     * @return {@link #category} (Indicates the type of medication dispense and where the medication is expected to be consumed or administered.)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -1305,7 +1305,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (Indicates type of medication dispense and where the medication is expected to be consumed or administered.)
+     * @param value {@link #category} (Indicates the type of medication dispense and where the medication is expected to be consumed or administered.)
      */
     public MedicationDispense setCategory(CodeableConcept value) { 
       this.category = value;
@@ -1323,26 +1323,30 @@ public class MedicationDispense extends DomainResource {
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
+      if (this.medication == null)
+        return null;
       if (!(this.medication instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (CodeableConcept) this.medication;
     }
 
     public boolean hasMedicationCodeableConcept() { 
-      return this.medication instanceof CodeableConcept;
+      return this != null && this.medication instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public Reference getMedicationReference() throws FHIRException { 
+      if (this.medication == null)
+        return null;
       if (!(this.medication instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
     }
 
     public boolean hasMedicationReference() { 
-      return this.medication instanceof Reference;
+      return this != null && this.medication instanceof Reference;
     }
 
     public boolean hasMedication() { 
@@ -1353,6 +1357,8 @@ public class MedicationDispense extends DomainResource {
      * @param value {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public MedicationDispense setMedication(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for MedicationDispense.medication[x]: "+value.fhirType());
       this.medication = value;
       return this;
     }
@@ -1552,7 +1558,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #location} (The principal physical locaiton where the dispense was performed.)
+     * @return {@link #location} (The principal physical location where the dispense was performed.)
      */
     public Reference getLocation() { 
       if (this.location == null)
@@ -1568,7 +1574,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} (The principal physical locaiton where the dispense was performed.)
+     * @param value {@link #location} (The principal physical location where the dispense was performed.)
      */
     public MedicationDispense setLocation(Reference value) { 
       this.location = value;
@@ -1576,7 +1582,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The principal physical locaiton where the dispense was performed.)
+     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The principal physical location where the dispense was performed.)
      */
     public Location getLocationTarget() { 
       if (this.locationTarget == null)
@@ -1588,7 +1594,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The principal physical locaiton where the dispense was performed.)
+     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The principal physical location where the dispense was performed.)
      */
     public MedicationDispense setLocationTarget(Location value) { 
       this.locationTarget = value;
@@ -2078,7 +2084,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #detectedIssue} (Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.)
+     * @return {@link #detectedIssue} (Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. drug-drug interaction, duplicate therapy, dosage alert etc.)
      */
     public List<Reference> getDetectedIssue() { 
       if (this.detectedIssue == null)
@@ -2163,26 +2169,30 @@ public class MedicationDispense extends DomainResource {
      * @return {@link #statusReason} (Indicates the reason why a dispense was not performed.)
      */
     public CodeableConcept getStatusReasonCodeableConcept() throws FHIRException { 
+      if (this.statusReason == null)
+        return null;
       if (!(this.statusReason instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.statusReason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.statusReason;
     }
 
     public boolean hasStatusReasonCodeableConcept() { 
-      return this.statusReason instanceof CodeableConcept;
+      return this != null && this.statusReason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #statusReason} (Indicates the reason why a dispense was not performed.)
      */
     public Reference getStatusReasonReference() throws FHIRException { 
+      if (this.statusReason == null)
+        return null;
       if (!(this.statusReason instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.statusReason.getClass().getName()+" was encountered");
       return (Reference) this.statusReason;
     }
 
     public boolean hasStatusReasonReference() { 
-      return this.statusReason instanceof Reference;
+      return this != null && this.statusReason instanceof Reference;
     }
 
     public boolean hasStatusReason() { 
@@ -2193,6 +2203,8 @@ public class MedicationDispense extends DomainResource {
      * @param value {@link #statusReason} (Indicates the reason why a dispense was not performed.)
      */
     public MedicationDispense setStatusReason(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for MedicationDispense.statusReason[x]: "+value.fhirType());
       this.statusReason = value;
       return this;
     }
@@ -2275,15 +2287,15 @@ public class MedicationDispense extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("partOf", "Reference(Procedure)", "The procedure that the dispense is done because of.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("partOf", "Reference(Procedure)", "The procedure that trigger the dispense.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, 1, status));
-        children.add(new Property("category", "CodeableConcept", "Indicates type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "Indicates the type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or the group to whom the medication will be given.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, 1, context));
         children.add(new Property("supportingInformation", "Reference(Any)", "Additional information that supports the medication being dispensed.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
         children.add(new Property("performer", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, performer));
-        children.add(new Property("location", "Reference(Location)", "The principal physical locaiton where the dispense was performed.", 0, 1, location));
+        children.add(new Property("location", "Reference(Location)", "The principal physical location where the dispense was performed.", 0, 1, location));
         children.add(new Property("authorizingPrescription", "Reference(MedicationRequest)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription));
         children.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type));
         children.add(new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, 1, quantity));
@@ -2295,7 +2307,7 @@ public class MedicationDispense extends DomainResource {
         children.add(new Property("note", "Annotation", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
         children.add(new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.", 0, 1, substitution));
-        children.add(new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue));
+        children.add(new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue));
         children.add(new Property("statusReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, statusReason));
         children.add(new Property("eventHistory", "Reference(Provenance)", "A summary of the events of interest that have occurred, such as when the dispense was verified.", 0, java.lang.Integer.MAX_VALUE, eventHistory));
       }
@@ -2304,9 +2316,9 @@ public class MedicationDispense extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Procedure)", "The procedure that the dispense is done because of.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Procedure)", "The procedure that trigger the dispense.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, 1, status);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case -209845038: /*medicationCodeableConcept*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
@@ -2315,7 +2327,7 @@ public class MedicationDispense extends DomainResource {
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, 1, context);
         case -1248768647: /*supportingInformation*/  return new Property("supportingInformation", "Reference(Any)", "Additional information that supports the medication being dispensed.", 0, java.lang.Integer.MAX_VALUE, supportingInformation);
         case 481140686: /*performer*/  return new Property("performer", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, performer);
-        case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The principal physical locaiton where the dispense was performed.", 0, 1, location);
+        case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The principal physical location where the dispense was performed.", 0, 1, location);
         case -1237557856: /*authorizingPrescription*/  return new Property("authorizingPrescription", "Reference(MedicationRequest)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type);
         case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, 1, quantity);
@@ -2327,7 +2339,7 @@ public class MedicationDispense extends DomainResource {
         case 3387378: /*note*/  return new Property("note", "Annotation", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note);
         case -1201373865: /*dosageInstruction*/  return new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction);
         case 826147581: /*substitution*/  return new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.", 0, 1, substitution);
-        case 51602295: /*detectedIssue*/  return new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue);
+        case 51602295: /*detectedIssue*/  return new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue);
         case -1421632534: /*statusReason[x]*/  return new Property("statusReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, statusReason);
         case 2051346646: /*statusReason*/  return new Property("statusReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, statusReason);
         case 2082934763: /*statusReasonCodeableConcept*/  return new Property("statusReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, statusReason);
@@ -2795,17 +2807,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>Return dispenses with this external identifier</b><br>
+   * Description: <b>Returns dispenses with this external identifier</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identifier", type="token" )
+  @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Returns dispenses with this external identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>Return dispenses with this external identifier</b><br>
+   * Description: <b>Returns dispenses with this external identifier</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.identifier</b><br>
    * </p>
@@ -2815,17 +2827,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>performer</b>
    * <p>
-   * Description: <b>Return dispenses performed by a specific individual</b><br>
+   * Description: <b>Returns dispenses performed by a specific individual</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.performer.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="MedicationDispense.performer.actor", description="Return dispenses performed by a specific individual", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="performer", path="MedicationDispense.performer.actor", description="Returns dispenses performed by a specific individual", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
    * <p>
-   * Description: <b>Return dispenses performed by a specific individual</b><br>
+   * Description: <b>Returns dispenses performed by a specific individual</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.performer.actor</b><br>
    * </p>
@@ -2841,17 +2853,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>code</b>
    * <p>
-   * Description: <b>Return dispenses of this medicine code</b><br>
+   * Description: <b>Returns dispenses of this medicine code</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationDispense.medication.as(CodeableConcept)", description="Return dispenses of this medicine code", type="token" )
+  @SearchParamDefinition(name="code", path="MedicationDispense.medication.as(CodeableConcept)", description="Returns dispenses of this medicine code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
    * <p>
-   * Description: <b>Return dispenses of this medicine code</b><br>
+   * Description: <b>Returns dispenses of this medicine code</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
    * </p>
@@ -2887,17 +2899,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>subject</b>
    * <p>
-   * Description: <b>The identity of a patient to list dispenses  for</b><br>
+   * Description: <b>The identity of a patient for whom to list dispenses</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="MedicationDispense.subject", description="The identity of a patient to list dispenses  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class } )
+  @SearchParamDefinition(name="subject", path="MedicationDispense.subject", description="The identity of a patient for whom to list dispenses", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Group.class, Patient.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
    * <p>
-   * Description: <b>The identity of a patient to list dispenses  for</b><br>
+   * Description: <b>The identity of a patient for whom to list dispenses</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.subject</b><br>
    * </p>
@@ -2913,17 +2925,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>destination</b>
    * <p>
-   * Description: <b>Return dispenses that should be sent to a specific destination</b><br>
+   * Description: <b>Returns dispenses that should be sent to a specific destination</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.destination</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a specific destination", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Returns dispenses that should be sent to a specific destination", type="reference", target={Location.class } )
   public static final String SP_DESTINATION = "destination";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>destination</b>
    * <p>
-   * Description: <b>Return dispenses that should be sent to a specific destination</b><br>
+   * Description: <b>Returns dispenses that should be sent to a specific destination</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.destination</b><br>
    * </p>
@@ -2939,17 +2951,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>medication</b>
    * <p>
-   * Description: <b>Return dispenses of this medicine resource</b><br>
+   * Description: <b>Returns dispenses of this medicine resource</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationDispense.medication.as(Reference)", description="Return dispenses of this medicine resource", type="reference", target={Medication.class } )
+  @SearchParamDefinition(name="medication", path="MedicationDispense.medication.as(Reference)", description="Returns dispenses of this medicine resource", type="reference", target={Medication.class } )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
    * <p>
-   * Description: <b>Return dispenses of this medicine resource</b><br>
+   * Description: <b>Returns dispenses of this medicine resource</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.medicationReference</b><br>
    * </p>
@@ -2965,17 +2977,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>responsibleparty</b>
    * <p>
-   * Description: <b>Return dispenses with the specified responsible party</b><br>
+   * Description: <b>Returns dispenses with the specified responsible party</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return dispenses with the specified responsible party", type="reference", target={Practitioner.class } )
+  @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Returns dispenses with the specified responsible party", type="reference", target={Practitioner.class } )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsibleparty</b>
    * <p>
-   * Description: <b>Return dispenses with the specified responsible party</b><br>
+   * Description: <b>Returns dispenses with the specified responsible party</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
    * </p>
@@ -2991,17 +3003,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>Return dispenses of a specific type</b><br>
+   * Description: <b>Returns dispenses of a specific type</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return dispenses of a specific type", type="token" )
+  @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Returns dispenses of a specific type", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>Return dispenses of a specific type</b><br>
+   * Description: <b>Returns dispenses of a specific type</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.type</b><br>
    * </p>
@@ -3129,17 +3141,17 @@ public class MedicationDispense extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>Return dispenses with a specified dispense status</b><br>
+   * Description: <b>Returns dispenses with a specified dispense status</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Return dispenses with a specified dispense status", type="token" )
+  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Returns dispenses with a specified dispense status", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>Return dispenses with a specified dispense status</b><br>
+   * Description: <b>Returns dispenses with a specified dispense status</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MedicationDispense.status</b><br>
    * </p>

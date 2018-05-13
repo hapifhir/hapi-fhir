@@ -46,11 +46,12 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.TranslatingUtilities;
 import org.hl7.fhir.utilities.Utilities;
-
-import com.github.rjeschke.txtmark.Processor;
 
 
 public class HierarchicalTableGenerator extends TranslatingUtilities {
@@ -83,6 +84,7 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
     private String hint;
     private String style;
     private Map<String, String> attributes;
+    private List<XhtmlNode> children;
     
     public Piece(String tag) {
       super();
@@ -120,8 +122,9 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
       this.tag = tag;
     }
 
-    public void setText(String text) {
+    public Piece setText(String text) {
       this.text = text;
+      return this;
     }
 
     public void setHint(String hint) {
@@ -147,6 +150,17 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
       else
         this.hint += (this.hint.endsWith(".") || this.hint.endsWith("?") ? " " : ". ")+text;
     }
+    
+    public boolean hasChildren() {
+      return children != null && !children.isEmpty();
+    }
+
+    public List<XhtmlNode> getChildren() {
+      if (children == null)
+        children = new ArrayList<XhtmlNode>();
+      return children;
+    }
+    
   }
   
   public class Cell {
@@ -172,14 +186,17 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
     }
     public Cell addMarkdown(String md) {
       try {
-        String html = Processor.process("[$PROFILE$]: extended\n" + md);
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(md);
+        HtmlRenderer renderer = HtmlRenderer.builder().escapeHtml(true).build();
+        String html = renderer.render(document);  
         pieces.addAll(htmlToParagraphPieces(html));
       } catch (Exception e) {
         e.printStackTrace();
       }
       return this;
     }
-    private List<Piece> htmlToParagraphPieces(String html) {
+    private List<Piece> htmlToParagraphPieces(String html) throws IOException, FHIRException {
       List<Piece> myPieces = new ArrayList<Piece>();
       String[] paragraphs = html.replace("<p>", "").split("<\\/p>|<br  \\/>");
       for (int i=0;i<paragraphs.length;i++) {
@@ -194,12 +211,52 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
       
       return myPieces;
     }
-    private List<Piece> htmlFormattingToPieces(String html) {
+    private List<Piece> htmlFormattingToPieces(String html) throws IOException, FHIRException {
       List<Piece> myPieces = new ArrayList<Piece>();
-      //Todo: At least handle bold and italics and turn them into formatted spans.  (Will need to handle nesting though)
-      myPieces.add(new Piece(null, html, null));
-      
+      if (html.contains(("<"))) {
+        XhtmlNode node = new XhtmlParser().parseFragment("<p>"+html+"</p>");
+        for (XhtmlNode c : node.getChildNodes()) {
+          addNode(myPieces, c);
+        }
+      } else
+        myPieces.add(new Piece(null, html, null));        
       return myPieces;
+    }
+    private void addNode(List<Piece> list, XhtmlNode c) {
+      if (c.getNodeType() == NodeType.Text)
+        list.add(new Piece(null, c.getContent(), null));
+      else if (c.getNodeType() == NodeType.Element) {
+        if (c.getName().equals("a")) {
+          list.add(new Piece(c.getAttribute("href"), c.allText(), c.getAttribute("title")));                    
+        } else if (c.getName().equals("b") || c.getName().equals("em") || c.getName().equals("strong")) {
+          list.add(new Piece(null, c.allText(), null).setStyle("font-face: bold"));                    
+        } else if (c.getName().equals("code")) {
+          list.add(new Piece(null, c.allText(), null).setStyle("padding: 2px 4px; color: #005c00; background-color: #f9f2f4; white-space: nowrap; border-radius: 4px"));                    
+        } else if (c.getName().equals("i")) {
+          list.add(new Piece(null, c.allText(), null).setStyle("font-style: italic"));
+        } else if (c.getName().equals("pre")) {
+          Piece p = new Piece(c.getName()).setStyle("white-space: pre; font-family: courier");
+          list.add(p);
+          p.getChildren().addAll(c.getChildNodes());
+        } else if (c.getName().equals("ul") || c.getName().equals("ol")) {
+          Piece p = new Piece(c.getName());
+          list.add(p);
+          p.getChildren().addAll(c.getChildNodes());
+        } else if (c.getName().equals("i")) {
+          list.add(new Piece(null, c.allText(), null).setStyle("font-style: italic"));                    
+        } else if (c.getName().equals("h1")||c.getName().equals("h2")||c.getName().equals("h3")||c.getName().equals("h4")) {
+          Piece p = new Piece(c.getName());
+          list.add(p);
+          p.getChildren().addAll(c.getChildNodes());
+        } else if (c.getName().equals("br")) {
+          list.add(new Piece(c.getName()));
+        } else {
+          
+          throw new Error("Not handled yet: "+c.getName());
+        }
+      } else
+        throw new Error("Unhandled type "+c.getNodeType().toString());
+
     }
     public void addStyle(String style) {
       for (Piece p : pieces)
@@ -501,6 +558,8 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
         if (p.getHint() != null)
           tag.setAttribute("title", p.getHint());
         addStyle(tag, p);
+        if (p.hasChildren())
+          tag.getChildNodes().addAll(p.getChildren());
       } else if (!Utilities.noString(p.getReference())) {
         XhtmlNode a = addStyle(tc.addTag("a"), p);
         a.setAttribute("href", p.getReference());

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
@@ -320,15 +321,25 @@ public class EpisodeOfCare extends DomainResource {
         /**
          * @param value {@link #period} (The period during this EpisodeOfCare that the specific status applied.)
          */
-        public EpisodeOfCareStatusHistoryComponent setPeriod(Period value) { 
+        public EpisodeOfCareStatusHistoryComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, java.lang.Integer.MAX_VALUE, status));
-          childrenList.add(new Property("period", "Period", "The period during this EpisodeOfCare that the specific status applied.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, 1, status));
+          children.add(new Property("period", "Period", "The period during this EpisodeOfCare that the specific status applied.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -892481550: /*status*/  return new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, 1, status);
+          case -991726143: /*period*/  return new Property("period", "Period", "The period during this EpisodeOfCare that the specific status applied.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -410,22 +421,22 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EpisodeOfCareStatusHistoryComponent))
+        if (!(other_ instanceof EpisodeOfCareStatusHistoryComponent))
           return false;
-        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other;
+        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other_;
         return compareDeep(status, o.status, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EpisodeOfCareStatusHistoryComponent))
+        if (!(other_ instanceof EpisodeOfCareStatusHistoryComponent))
           return false;
-        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other;
+        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -505,7 +516,7 @@ public class EpisodeOfCare extends DomainResource {
         /**
          * @param value {@link #condition} (A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.)
          */
-        public DiagnosisComponent setCondition(Reference value) { 
+        public DiagnosisComponent setCondition(Reference value)  { 
           this.condition = value;
           return this;
         }
@@ -549,7 +560,7 @@ public class EpisodeOfCare extends DomainResource {
         /**
          * @param value {@link #role} (Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).)
          */
-        public DiagnosisComponent setRole(CodeableConcept value) { 
+        public DiagnosisComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -599,11 +610,22 @@ public class EpisodeOfCare extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, java.lang.Integer.MAX_VALUE, condition));
-          childrenList.add(new Property("role", "CodeableConcept", "Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, java.lang.Integer.MAX_VALUE, rank));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, 1, condition));
+          children.add(new Property("role", "CodeableConcept", "Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).", 0, 1, role));
+          children.add(new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, 1, rank));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -861311717: /*condition*/  return new Property("condition", "Reference(Condition)", "A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.", 0, 1, condition);
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Role that this diagnosis has within the episode of care (e.g. admission, billing, discharge …).", 0, 1, role);
+          case 3492908: /*rank*/  return new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, 1, rank);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -696,23 +718,23 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareDeep(condition, o.condition, true) && compareDeep(role, o.role, true) && compareDeep(rank, o.rank, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareValues(rank, o.rank, true);
       }
 
@@ -1137,7 +1159,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * @param value {@link #patient} (The patient who is the focus of this episode of care.)
      */
-    public EpisodeOfCare setPatient(Reference value) { 
+    public EpisodeOfCare setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1181,7 +1203,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * @param value {@link #managingOrganization} (The organization that has assumed the specific responsibilities for the specified duration.)
      */
-    public EpisodeOfCare setManagingOrganization(Reference value) { 
+    public EpisodeOfCare setManagingOrganization(Reference value)  { 
       this.managingOrganization = value;
       return this;
     }
@@ -1225,7 +1247,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * @param value {@link #period} (The interval during which the managing organization assumes the defined responsibility.)
      */
-    public EpisodeOfCare setPeriod(Period value) { 
+    public EpisodeOfCare setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -1324,7 +1346,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * @param value {@link #careManager} (The practitioner that is the care manager/care co-ordinator for this patient.)
      */
-    public EpisodeOfCare setCareManager(Reference value) { 
+    public EpisodeOfCare setCareManager(Reference value)  { 
       this.careManager = value;
       return this;
     }
@@ -1499,20 +1521,40 @@ public class EpisodeOfCare extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("statusHistory", "", "The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).", 0, java.lang.Integer.MAX_VALUE, statusHistory));
-        childrenList.add(new Property("type", "CodeableConcept", "A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("diagnosis", "", "The list of diagnosis relevant to this episode of care.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient who is the focus of this episode of care.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
-        childrenList.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("referralRequest", "Reference(ReferralRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
-        childrenList.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, java.lang.Integer.MAX_VALUE, careManager));
-        childrenList.add(new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team));
-        childrenList.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, 1, status));
+        children.add(new Property("statusHistory", "", "The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).", 0, java.lang.Integer.MAX_VALUE, statusHistory));
+        children.add(new Property("type", "CodeableConcept", "A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care.", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("diagnosis", "", "The list of diagnosis relevant to this episode of care.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
+        children.add(new Property("patient", "Reference(Patient)", "The patient who is the focus of this episode of care.", 0, 1, patient));
+        children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, 1, managingOrganization));
+        children.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, 1, period));
+        children.add(new Property("referralRequest", "Reference(ReferralRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
+        children.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, 1, careManager));
+        children.add(new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team));
+        children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The EpisodeOfCare may be known by different identifiers for different contexts of use, such as when an external agency is tracking the Episode for funding purposes.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "planned | waitlist | active | onhold | finished | cancelled.", 0, 1, status);
+        case -986695614: /*statusHistory*/  return new Property("statusHistory", "", "The history of statuses that the EpisodeOfCare has been through (without requiring processing the history of the resource).", 0, java.lang.Integer.MAX_VALUE, statusHistory);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A classification of the type of episode of care; e.g. specialist referral, disease management, type of funded care.", 0, java.lang.Integer.MAX_VALUE, type);
+        case 1196993265: /*diagnosis*/  return new Property("diagnosis", "", "The list of diagnosis relevant to this episode of care.", 0, java.lang.Integer.MAX_VALUE, diagnosis);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient who is the focus of this episode of care.", 0, 1, patient);
+        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, 1, managingOrganization);
+        case -991726143: /*period*/  return new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, 1, period);
+        case -310299598: /*referralRequest*/  return new Property("referralRequest", "Reference(ReferralRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest);
+        case -1147746468: /*careManager*/  return new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, 1, careManager);
+        case 3555933: /*team*/  return new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team);
+        case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1754,12 +1796,12 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EpisodeOfCare))
+        if (!(other_ instanceof EpisodeOfCare))
           return false;
-        EpisodeOfCare o = (EpisodeOfCare) other;
+        EpisodeOfCare o = (EpisodeOfCare) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
            && compareDeep(type, o.type, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(patient, o.patient, true)
            && compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(period, o.period, true)
@@ -1768,12 +1810,12 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EpisodeOfCare))
+        if (!(other_ instanceof EpisodeOfCare))
           return false;
-        EpisodeOfCare o = (EpisodeOfCare) other;
+        EpisodeOfCare o = (EpisodeOfCare) other_;
         return compareValues(status, o.status, true);
       }
 

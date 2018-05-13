@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
  */
@@ -887,39 +888,45 @@ public class Timing extends Type implements ICompositeType {
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public Duration getBoundsDuration() throws FHIRException { 
+          if (this.bounds == null)
+            return null;
           if (!(this.bounds instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Duration) this.bounds;
         }
 
         public boolean hasBoundsDuration() { 
-          return this.bounds instanceof Duration;
+          return this != null && this.bounds instanceof Duration;
         }
 
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public Range getBoundsRange() throws FHIRException { 
+          if (this.bounds == null)
+            return null;
           if (!(this.bounds instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Range) this.bounds;
         }
 
         public boolean hasBoundsRange() { 
-          return this.bounds instanceof Range;
+          return this != null && this.bounds instanceof Range;
         }
 
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public Period getBoundsPeriod() throws FHIRException { 
+          if (this.bounds == null)
+            return null;
           if (!(this.bounds instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Period) this.bounds;
         }
 
         public boolean hasBoundsPeriod() { 
-          return this.bounds instanceof Period;
+          return this != null && this.bounds instanceof Period;
         }
 
         public boolean hasBounds() { 
@@ -929,7 +936,9 @@ public class Timing extends Type implements ICompositeType {
         /**
          * @param value {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
-        public TimingRepeatComponent setBounds(Type value) { 
+        public TimingRepeatComponent setBounds(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof Duration || value instanceof Range || value instanceof Period))
+            throw new FHIRFormatError("Not the right type for Timing.repeat.bounds[x]: "+value.fhirType());
           this.bounds = value;
           return this;
         }
@@ -1597,7 +1606,7 @@ public class Timing extends Type implements ICompositeType {
           if (this.timeOfDay == null)
             return false;
           for (TimeType v : this.timeOfDay)
-            if (v.equals(value)) // time
+            if (v.getValue().equals(value)) // time
               return true;
           return false;
         }
@@ -1708,23 +1717,50 @@ public class Timing extends Type implements ICompositeType {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, java.lang.Integer.MAX_VALUE, bounds));
-          childrenList.add(new Property("count", "integer", "A total count of the desired number of repetitions.", 0, java.lang.Integer.MAX_VALUE, count));
-          childrenList.add(new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, java.lang.Integer.MAX_VALUE, countMax));
-          childrenList.add(new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, java.lang.Integer.MAX_VALUE, duration));
-          childrenList.add(new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, java.lang.Integer.MAX_VALUE, durationMax));
-          childrenList.add(new Property("durationUnit", "code", "The units of time for the duration, in UCUM units.", 0, java.lang.Integer.MAX_VALUE, durationUnit));
-          childrenList.add(new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, java.lang.Integer.MAX_VALUE, frequency));
-          childrenList.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, java.lang.Integer.MAX_VALUE, frequencyMax));
-          childrenList.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, java.lang.Integer.MAX_VALUE, periodMax));
-          childrenList.add(new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, java.lang.Integer.MAX_VALUE, periodUnit));
-          childrenList.add(new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek));
-          childrenList.add(new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay));
-          childrenList.add(new Property("when", "code", "Real world events that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
-          childrenList.add(new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, java.lang.Integer.MAX_VALUE, offset));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds));
+          children.add(new Property("count", "integer", "A total count of the desired number of repetitions.", 0, 1, count));
+          children.add(new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, 1, countMax));
+          children.add(new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, 1, duration));
+          children.add(new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, 1, durationMax));
+          children.add(new Property("durationUnit", "code", "The units of time for the duration, in UCUM units.", 0, 1, durationUnit));
+          children.add(new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, 1, frequency));
+          children.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, 1, frequencyMax));
+          children.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, 1, period));
+          children.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, 1, periodMax));
+          children.add(new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, 1, periodUnit));
+          children.add(new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek));
+          children.add(new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay));
+          children.add(new Property("when", "code", "Real world events that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
+          children.add(new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, 1, offset));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1149635157: /*bounds[x]*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
+          case -1383205195: /*bounds*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
+          case -189193367: /*boundsDuration*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
+          case -1001768056: /*boundsRange*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
+          case -1043481386: /*boundsPeriod*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
+          case 94851343: /*count*/  return new Property("count", "integer", "A total count of the desired number of repetitions.", 0, 1, count);
+          case -372044331: /*countMax*/  return new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, 1, countMax);
+          case -1992012396: /*duration*/  return new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, 1, duration);
+          case -478083280: /*durationMax*/  return new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, 1, durationMax);
+          case -1935429320: /*durationUnit*/  return new Property("durationUnit", "code", "The units of time for the duration, in UCUM units.", 0, 1, durationUnit);
+          case -70023844: /*frequency*/  return new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, 1, frequency);
+          case 1273846376: /*frequencyMax*/  return new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, 1, frequencyMax);
+          case -991726143: /*period*/  return new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, 1, period);
+          case 566580195: /*periodMax*/  return new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, 1, periodMax);
+          case 384367333: /*periodUnit*/  return new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, 1, periodUnit);
+          case -730552025: /*dayOfWeek*/  return new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek);
+          case 21434232: /*timeOfDay*/  return new Property("timeOfDay", "time", "Specified time of day for action to take place.", 0, java.lang.Integer.MAX_VALUE, timeOfDay);
+          case 3648314: /*when*/  return new Property("when", "code", "Real world events that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when);
+          case -1019779949: /*offset*/  return new Property("offset", "unsignedInt", "The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event.", 0, 1, offset);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1989,12 +2025,12 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TimingRepeatComponent))
+        if (!(other_ instanceof TimingRepeatComponent))
           return false;
-        TimingRepeatComponent o = (TimingRepeatComponent) other;
+        TimingRepeatComponent o = (TimingRepeatComponent) other_;
         return compareDeep(bounds, o.bounds, true) && compareDeep(count, o.count, true) && compareDeep(countMax, o.countMax, true)
            && compareDeep(duration, o.duration, true) && compareDeep(durationMax, o.durationMax, true) && compareDeep(durationUnit, o.durationUnit, true)
            && compareDeep(frequency, o.frequency, true) && compareDeep(frequencyMax, o.frequencyMax, true)
@@ -2004,12 +2040,12 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TimingRepeatComponent))
+        if (!(other_ instanceof TimingRepeatComponent))
           return false;
-        TimingRepeatComponent o = (TimingRepeatComponent) other;
+        TimingRepeatComponent o = (TimingRepeatComponent) other_;
         return compareValues(count, o.count, true) && compareValues(countMax, o.countMax, true) && compareValues(duration, o.duration, true)
            && compareValues(durationMax, o.durationMax, true) && compareValues(durationUnit, o.durationUnit, true)
            && compareValues(frequency, o.frequency, true) && compareValues(frequencyMax, o.frequencyMax, true)
@@ -2118,7 +2154,7 @@ public class Timing extends Type implements ICompositeType {
       if (this.event == null)
         return false;
       for (DateTimeType v : this.event)
-        if (v.equals(value)) // dateTime
+        if (v.getValue().equals(value)) // dateTime
           return true;
       return false;
     }
@@ -2142,7 +2178,7 @@ public class Timing extends Type implements ICompositeType {
     /**
      * @param value {@link #repeat} (A set of rules that describe when the event is scheduled.)
      */
-    public Timing setRepeat(TimingRepeatComponent value) { 
+    public Timing setRepeat(TimingRepeatComponent value)  { 
       this.repeat = value;
       return this;
     }
@@ -2166,16 +2202,27 @@ public class Timing extends Type implements ICompositeType {
     /**
      * @param value {@link #code} (A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).)
      */
-    public Timing setCode(CodeableConcept value) { 
+    public Timing setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event));
-        childrenList.add(new Property("repeat", "", "A set of rules that describe when the event is scheduled.", 0, java.lang.Integer.MAX_VALUE, repeat));
-        childrenList.add(new Property("code", "CodeableConcept", "A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, java.lang.Integer.MAX_VALUE, code));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event));
+        children.add(new Property("repeat", "", "A set of rules that describe when the event is scheduled.", 0, 1, repeat));
+        children.add(new Property("code", "CodeableConcept", "A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, 1, code));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 96891546: /*event*/  return new Property("event", "dateTime", "Identifies specific times when the event occurs.", 0, java.lang.Integer.MAX_VALUE, event);
+        case -934531685: /*repeat*/  return new Property("repeat", "", "A set of rules that describe when the event is scheduled.", 0, 1, repeat);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code for the timing schedule. Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).", 0, 1, code);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2281,23 +2328,23 @@ public class Timing extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Timing))
+        if (!(other_ instanceof Timing))
           return false;
-        Timing o = (Timing) other;
+        Timing o = (Timing) other_;
         return compareDeep(event, o.event, true) && compareDeep(repeat, o.repeat, true) && compareDeep(code, o.code, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Timing))
+        if (!(other_ instanceof Timing))
           return false;
-        Timing o = (Timing) other;
+        Timing o = (Timing) other_;
         return compareValues(event, o.event, true);
       }
 

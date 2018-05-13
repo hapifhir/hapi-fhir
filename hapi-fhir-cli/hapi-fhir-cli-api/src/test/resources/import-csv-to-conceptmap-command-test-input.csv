@@ -1,0 +1,13 @@
+SOURCE_CODE_SYSTEM,SOURCE_CODE_SYSTEM_VERSION,TARGET_CODE_SYSTEM,TARGET_CODE_SYSTEM_VERSION,SOURCE_CODE,SOURCE_DISPLAY,TARGET_CODE,TARGET_DISPLAY,EQUIVALENCE,COMMENT
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1a,Display 1a,Code 2a,Display 2a,equal,2a This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1b,Display 1b,Code 2b,Display 2b,equal,2b This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1c,Display 1c,Code 2c,Display 2c,equal,2c This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/2,Version 2t,Code 1d,Display 1d,Code 2d,Display 2d,equal,2d This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1a,Display 1a,Code 3a,Display 3a,equal,3a This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1b,Display 1b,Code 3b,Display 3b,equal,3b This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1c,Display 1c,Code 3c,Display 3c,equal,3c This is a comment.
+http://example.com/codesystem/1,Version 1s,http://example.com/codesystem/3,Version 3t,Code 1d,Display 1d,Code 3d,Display 3d,equal,3d This is a comment.
+http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2a,Display 2a,Code 3a,Display 3a,equal,3a This is a comment.
+http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2b,Display 2b,Code 3b,Display 3b,equal,3b This is a comment.
+http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2c,Display 2c,Code 3c,Display 3c,equal,3c This is a comment.
+http://example.com/codesystem/2,Version 2s,http://example.com/codesystem/3,Version 3t,Code 2d,Display 2d,Code 3d,Display 3d,equal,3d This is a comment.

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -603,6 +603,10 @@ public enum V3ActCode {
          * Any category of inpatient encounter except 'acute'
          */
         NONAC, 
+        /**
+         * An encounter where the patient usually will start in different encounter, such as one in the emergency department (EMER) but then transition to this type of encounter because they require a significant period of treatment and monitoring to determine whether or not their condition warrants an inpatient admission or discharge. In the majority of cases the decision about admission or discharge will occur within a time period determined by local, regional or national regulation, often between 24 and 48 hours.
+         */
+        OBSENC, 
         /**
          * A patient encounter where patient is scheduled or planned to receive service delivery in the future, and the patient is given a pre-admission account number. When the patient comes back for subsequent service, the pre-admission encounter is selected and is encapsulated into the service registration, and a new account number is generated.
 
@@ -2877,12 +2881,14 @@ public enum V3ActCode {
          */
         HIV, 
         /**
-         * Policy for handling psychiatry information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to psychiatry information that is deemed sensitive.
+         * Policy for handling information related to sexual assault or repeated, threatening sexual harassment that occurred while the patient was in the military, which is afforded heightened confidentiality. 
+
+                        Access control concerns for military sexual trauma is based on the patient being subject to control by a higher ranking military perpetrator and/or censure by others within the military unit.  Due to the relatively unfettered access to healthcare information by higher ranking military personnel and those who have command over the patient, there is a need to sequester this information outside of the typical controls on access to military health records.
 
                         
-                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
          */
-        PSY, 
+        MST, 
         /**
          * Policy for handling sickle cell disease information, which is afforded heightened confidentiality.  Information handling protocols are based on organizational policies related to sickle cell disease information, which is deemed sensitive.
 
@@ -2891,14 +2897,9 @@ public enum V3ActCode {
          */
         SCA, 
         /**
-         * Information about provision of social services.
-
-                        
-                           Usage Note: This is a temporary addition to FHIR to be proposed in harmonization.
-         */
-        SOC, 
-        /**
          * Policy for handling sexual assault, abuse, or domestic violence information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to sexual assault, abuse, or domestic violence information that is deemed sensitive.
+
+                        SDV code covers violence perpetrated by related and non-related persons. This code should be specific to physical and mental trauma caused by a related person only.  The access control concerns are keeping the patient safe from the perpetrator who may have an abusive psychological control over the patient, may be stalking the patient, or may try to manipulate care givers into allowing the perpetrator to make contact with the patient.  The definition needs to be clarified.
 
                         
                            Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
@@ -2911,6 +2912,91 @@ public enum V3ActCode {
                            Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
          */
         SEX, 
+        /**
+         * Policy for handling information deemed specially protected by law or policy including substance abuse, substance use, psychiatric, mental health, behavioral health, and cognitive disorders, which is afforded heightened confidentiality.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        SPI, 
+        /**
+         * Policy for handling information related to behavioral and emotional disturbances affecting social adjustment and physical health, which is afforded heightened confidentiality.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        BH, 
+        /**
+         * Policy for handling information related to cognitive disability disorders and conditions caused by these disorders, which are afforded heightened confidentiality.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+
+                        Examples may include dementia, traumatic brain injury, attention deficit, hearing and visual disability such as dyslexia and other disorders and related conditions which impair learning and self-sufficiency.  However, the cognitive disabilities to which this term may apply  versus other behavioral health categories varies by jurisdiction and organizational policy in part due to overlap with other behavioral health conditions. Implementers should constrain to those diagnoses applicable in the domain in which this code is used.
+         */
+        COGN, 
+        /**
+         * Policy for handling information related to developmental disability disorders and conditions caused by these disorders, which is afforded heightened confidentiality.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+
+                        A diverse group of chronic conditions that are due to mental or physical impairments impacting activities of daily living, self-care, language acuity, learning, mobility, independent living and economic self-sufficiency. Examples may include Down syndrome and  Autism spectrum. However, the developmental disabilities to which this term applies versus other behavioral health categories varies by jurisdiction and organizational policy in part due to overlap with other behavioral health conditions.  Implementers should constrain to those diagnoses applicable in the domain in which this code is used.
+         */
+        DVD, 
+        /**
+         * Policy for handling information related to emotional disturbance disorders and conditions caused by these disorders, which is afforded heightened confidentiality.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+
+                        Typical used to characterize behavioral and mental health issues of adolescents where the disorder may be temporarily diagnosed in order to avoid the potential and unnecessary stigmatizing diagnoses of disorder long term.
+         */
+        EMOTDIS, 
+        /**
+         * Policy for handling information related to psychological disorders, which is afforded heightened confidentiality. Mental health information may be deemed specifically sensitive and distinct from physical health, substance use disorders, and behavioral disabilities and disorders in some jurisdictions.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        MH, 
+        /**
+         * Policy for handling psychiatry psychiatric disorder information, which is afforded heightened confidentiality. 
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+         */
+        PSY, 
+        /**
+         * Policy for handling psychotherapy note information, which is afforded heightened confidentiality. 
+
+                        
+                           Usage Note: In some jurisdiction, disclosure of psychotherapy notes requires patient consent.
+
+                        If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+         */
+        PSYTHPN, 
+        /**
+         * Policy for handling information related to alcohol or drug use disorders and conditions caused by these disorders, which is afforded heightened confidentiality. 
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        SUD, 
+        /**
+         * Policy for handling information related to alcohol use disorders and conditions caused by these disorders, which is afforded heightened confidentiality. 
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        ETHUD, 
+        /**
+         * Policy for handling information related to opioid use disorders and conditions caused by these disorders, which is afforded heightened confidentiality. 
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        OPIOIDUD, 
         /**
          * Policy for handling sexually transmitted disease information, which will be afforded heightened confidentiality.
  Information handling protocols based on organizational policies related to sexually transmitted disease information that is deemed sensitive.
@@ -2929,6 +3015,15 @@ public enum V3ActCode {
                            Open Issue: This definition conflates a rule and a characteristic, and there may be a similar issue with ts sibling codes.
          */
         TBOO, 
+        /**
+         * Policy for handling information related to harm by violence, which is afforded heightened confidentiality. Harm by violence is perpetrated by an unrelated person.
+
+                        Access control concerns for information about mental or physical harm resulting from violence caused by an unrelated person may include manipulation of care givers or access to records that enable the perpetrator contact or locate the patient, but the perpetrator will likely not have established abusive psychological control over the patient. 
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+         */
+        VIO, 
         /**
          * Types of sensitivity policies that apply to Acts.  Act.confidentialityCode is defined in the RIM as "constraints around appropriate disclosure of information about this Act, regardless of mood."
 
@@ -3063,17 +3158,28 @@ public enum V3ActCode {
          */
         EMP, 
         /**
-         * Policy for handling information reported by the patient about another person, e.g., a family member, which will be afforded heightened confidentiality. Sensitive information reported by the patient about another person, e.g., family members may be deemed sensitive by default.  The flag may be set or cleared on patient's request.  
+         * Policy for specially protecting information reported by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive for another reason.) For example information reported by the patient about another person, e.g., a family member, may be deemed sensitive by default. Organizational policy may allow the sensitivity tag to be cleared on patient's request. 
 
                         
-                           Usage Note: For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.
+
+                        For example, VA deems employee information sensitive by default.  Information about a patient who is being stalked or a victim of abuse or violence may be deemed sensitive by default per a provider organization's policies.
          */
         PDS, 
         /**
-         * For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+         * Policy for handling information about a patient, which a physician or other licensed healthcare provider deems sensitive.  Once tagged by the provider, this may trigger alerts for follow up actions according to organizational policy or jurisdictional law.
 
                         
-                           Usage Note: For use within an enterprise that provides heightened confidentiality to certain types of information designated by a patient as sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+                           Usage Note: For use within an enterprise that provides heightened confidentiality to certain types of information designated by a physician as sensitive. If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
+
+                        Use cases in which this code could be used are, e.g.,  in systems that lack the ability to automatically detect sensitive information and must rely on manual tagging; a system that lacks an applicable sensitivity tag, or for ad hoc situations where criticality of the situation requires that the tagging be done immediately by the provider before coding or transcription of consult notes can be completed, e.g., upon detection of a patient with suicidal tendencies or potential for violence.
+         */
+        PHY, 
+        /**
+         * Policy for specially protecting information reported by or about a patient, which the patient deems sensitive, and the patient requests that collection, access, use, or disclosure of that information be restricted.  For example, a minor patient may request that information about reproductive health not be disclosed to the patient's family or to particular providers and payers.
+
+                        
+                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.
          */
         PRS, 
         /**
@@ -3191,6 +3297,47 @@ public enum V3ActCode {
                            refrain from redisclosure without consent
          */
         SECURITYPOLICY, 
+        /**
+         * Authorisation policies are essentially security policies related to access-control and specify what activities a subject is permitted or forbidden to do, to a set of target objects. They are designed to protect target objects so are interpreted by access control agents or the run-time systems at the target system.
+
+                        A positive authorisation policy defines the actions that a subject is permitted to perform on a target. A negative authorisation policy specifies the actions that a subject is forbidden to perform on a target. Positive authorisation policies may also include filters to transform the parameters associated with their actions.  (Based on PONDERS)
+         */
+        AUTHPOL, 
+        /**
+         * An access control policy specific to the type of access control scheme, which is used to enforce one or more authorization policies.  
+
+                        
+                           Usage Note: Access control schemes are the type of access control policy, which is comprised of access control policy rules concerning the provision of the access control service.
+
+                        There are two categories of access control policies, rule-based and identity-based, which are identified in CCITT Rec. X.800 aka ISO 7498-2. Rule-based access control policies are intended to apply to all access requests by any initiator on any target in a security domain. Identity-based access control policies are based on rules specific to an individual initiator, a group of initiators, entities acting on behalf of initiators, or originators acting in a specific role. Context can modify rule-based or identity-based access control policies. Context rules may define the entire policy in effect. Real systems will usually employ a combination of these policy types; if a rule-based policy is used, then an identity-based policy is usually in effect also.
+
+                        An access control scheme may be based on access control lists, capabilities, labels, and context or a combination of these.  An access control scheme is a component of an access control mechanism or "service") along with the supporting mechanisms required by that scheme to provide access control decision information (ADI) supplied by the scheme to the access decision facility (ADF also known as a PDP). (Based on ISO/IEC 10181-3:1996)
+
+                        
+                           Examples: 
+                        
+
+                        
+                           Attribute Based Access Control (ABAC)
+                           Discretionary Access Control (DAC)
+                           History Based Access Control (HBAC)
+                           Identity Based Access Control (IBAC)
+                           Mandatory Access Control (MAC)
+                           Organization Based Access Control (OrBAC)
+                           Relationship Based Access Control (RelBac)
+                           Responsibility Based Access Control (RespBAC)
+                           Risk Adaptable Access Control (RAdAC)
+                        >
+         */
+        ACCESSCONSCHEME, 
+        /**
+         * Delegation policies specify which actions subjects are allowed to delegate to others. A delegation policy thus specifies an authorisation to delegate. Subjects must already possess the access rights to be delegated.
+
+                        Delegation policies are aimed at subjects delegating rights to servers or third parties to perform actions on their behalf and are not meant to be the means by which security administrators would assign rights to subjects. A negative delegation policy identifies what delegations are forbidden.
+
+                        A Delegation policy specifies the authorisation policy from which delegated rights are derived, the grantors, which are the entities which can delegate these access rights, and the grantees, which are the entities to which the access rights can be delegated. There are two types of delegation policy, positive and negative. (Based on PONDERS)
+         */
+        DELEPOL, 
         /**
          * Conveys the mandated workflow action that an information custodian, receiver, or user must perform.  
 
@@ -4241,6 +4388,18 @@ public enum V3ActCode {
          * Criteria for specifying the patients to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs). Details often include information based upon specific age groups, diagnoses, diagnostic and procedure codes, and enrollment periods.
          */
         IPPOP, 
+        /**
+         * Defines the observation to be performed for each patient or event in the measure population. Measure observations for each case in the population are aggregated to determine the overall measure score for the population.
+
+                        
+                           Examples: 
+                        
+
+                        
+                           the median time from arrival in the Emergency Room to departure
+                           the median time from decision to admit to a hospital to the actual admission for Emergency Room patients
+         */
+        MSROBS, 
         /**
          * Criteria for specifying
 the measure population as a narrative description (e.g., all patients seen in the Emergency Department during the measurement period).  This is used only in continuous variable eMeasures.
@@ -5482,6 +5641,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return ACUTE;
         if ("NONAC".equals(codeString))
           return NONAC;
+        if ("OBSENC".equals(codeString))
+          return OBSENC;
         if ("PRENC".equals(codeString))
           return PRENC;
         if ("SS".equals(codeString))
@@ -6424,20 +6585,42 @@ the measure population as a narrative description (e.g., all patients seen in th
           return GDIS;
         if ("HIV".equals(codeString))
           return HIV;
-        if ("PSY".equals(codeString))
-          return PSY;
+        if ("MST".equals(codeString))
+          return MST;
         if ("SCA".equals(codeString))
           return SCA;
-        if ("SOC".equals(codeString))
-          return SOC;
         if ("SDV".equals(codeString))
           return SDV;
         if ("SEX".equals(codeString))
           return SEX;
+        if ("SPI".equals(codeString))
+          return SPI;
+        if ("BH".equals(codeString))
+          return BH;
+        if ("COGN".equals(codeString))
+          return COGN;
+        if ("DVD".equals(codeString))
+          return DVD;
+        if ("EMOTDIS".equals(codeString))
+          return EMOTDIS;
+        if ("MH".equals(codeString))
+          return MH;
+        if ("PSY".equals(codeString))
+          return PSY;
+        if ("PSYTHPN".equals(codeString))
+          return PSYTHPN;
+        if ("SUD".equals(codeString))
+          return SUD;
+        if ("ETHUD".equals(codeString))
+          return ETHUD;
+        if ("OPIOIDUD".equals(codeString))
+          return OPIOIDUD;
         if ("STD".equals(codeString))
           return STD;
         if ("TBOO".equals(codeString))
           return TBOO;
+        if ("VIO".equals(codeString))
+          return VIO;
         if ("SICKLE".equals(codeString))
           return SICKLE;
         if ("_EntitySensitivityPolicyType".equals(codeString))
@@ -6478,6 +6661,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return EMP;
         if ("PDS".equals(codeString))
           return PDS;
+        if ("PHY".equals(codeString))
+          return PHY;
         if ("PRS".equals(codeString))
           return PRS;
         if ("COMPT".equals(codeString))
@@ -6516,6 +6701,12 @@ the measure population as a narrative description (e.g., all patients seen in th
           return COVPOL;
         if ("SecurityPolicy".equals(codeString))
           return SECURITYPOLICY;
+        if ("AUTHPOL".equals(codeString))
+          return AUTHPOL;
+        if ("ACCESSCONSCHEME".equals(codeString))
+          return ACCESSCONSCHEME;
+        if ("DELEPOL".equals(codeString))
+          return DELEPOL;
         if ("ObligationPolicy".equals(codeString))
           return OBLIGATIONPOLICY;
         if ("ANONY".equals(codeString))
@@ -7000,6 +7191,8 @@ the measure population as a narrative description (e.g., all patients seen in th
           return IPOP;
         if ("IPPOP".equals(codeString))
           return IPPOP;
+        if ("MSROBS".equals(codeString))
+          return MSROBS;
         if ("MSRPOPL".equals(codeString))
           return MSRPOPL;
         if ("MSRPOPLEX".equals(codeString))
@@ -7551,6 +7744,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case IMP: return "IMP";
             case ACUTE: return "ACUTE";
             case NONAC: return "NONAC";
+            case OBSENC: return "OBSENC";
             case PRENC: return "PRENC";
             case SS: return "SS";
             case VR: return "VR";
@@ -8022,13 +8216,24 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ETH: return "ETH";
             case GDIS: return "GDIS";
             case HIV: return "HIV";
-            case PSY: return "PSY";
+            case MST: return "MST";
             case SCA: return "SCA";
-            case SOC: return "SOC";
             case SDV: return "SDV";
             case SEX: return "SEX";
+            case SPI: return "SPI";
+            case BH: return "BH";
+            case COGN: return "COGN";
+            case DVD: return "DVD";
+            case EMOTDIS: return "EMOTDIS";
+            case MH: return "MH";
+            case PSY: return "PSY";
+            case PSYTHPN: return "PSYTHPN";
+            case SUD: return "SUD";
+            case ETHUD: return "ETHUD";
+            case OPIOIDUD: return "OPIOIDUD";
             case STD: return "STD";
             case TBOO: return "TBOO";
+            case VIO: return "VIO";
             case SICKLE: return "SICKLE";
             case _ENTITYSENSITIVITYPOLICYTYPE: return "_EntitySensitivityPolicyType";
             case DEMO: return "DEMO";
@@ -8049,6 +8254,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DRGIS: return "DRGIS";
             case EMP: return "EMP";
             case PDS: return "PDS";
+            case PHY: return "PHY";
             case PRS: return "PRS";
             case COMPT: return "COMPT";
             case ACOCOMPT: return "ACOCOMPT";
@@ -8068,6 +8274,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TRSTMEC: return "TRSTMEC";
             case COVPOL: return "COVPOL";
             case SECURITYPOLICY: return "SecurityPolicy";
+            case AUTHPOL: return "AUTHPOL";
+            case ACCESSCONSCHEME: return "ACCESSCONSCHEME";
+            case DELEPOL: return "DELEPOL";
             case OBLIGATIONPOLICY: return "ObligationPolicy";
             case ANONY: return "ANONY";
             case AOD: return "AOD";
@@ -8310,6 +8519,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DENOM: return "DENOM";
             case IPOP: return "IPOP";
             case IPPOP: return "IPPOP";
+            case MSROBS: return "MSROBS";
             case MSRPOPL: return "MSRPOPL";
             case MSRPOPLEX: return "MSRPOPLEX";
             case NUMER: return "NUMER";
@@ -8658,6 +8868,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case IMP: return "A patient encounter where a patient is admitted by a hospital or equivalent facility, assigned to a location where patients generally stay at least overnight and provided with room, board, and continuous nursing service.";
             case ACUTE: return "An acute inpatient encounter.";
             case NONAC: return "Any category of inpatient encounter except 'acute'";
+            case OBSENC: return "An encounter where the patient usually will start in different encounter, such as one in the emergency department (EMER) but then transition to this type of encounter because they require a significant period of treatment and monitoring to determine whether or not their condition warrants an inpatient admission or discharge. In the majority of cases the decision about admission or discharge will occur within a time period determined by local, regional or national regulation, often between 24 and 48 hours.";
             case PRENC: return "A patient encounter where patient is scheduled or planned to receive service delivery in the future, and the patient is given a pre-admission account number. When the patient comes back for subsequent service, the pre-admission encounter is selected and is encapsulated into the service registration, and a new account number is generated.\r\n\n                        \n                           Usage Note: This is intended to be used in advance of encounter types such as ambulatory, inpatient encounter, virtual, etc.";
             case SS: return "An encounter where the patient is admitted to a health care facility for a predetermined length of time, usually less than 24 hours.";
             case VR: return "A patient encounter where the patient and the practitioner(s) are not in the same physical location. Examples include telephone conference, email exchange, robotic surgery, and televideo conference.";
@@ -9129,13 +9340,24 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ETH: return "Policy for handling alcohol or drug-abuse information, which will be afforded heightened confidentiality.  Information handling protocols based on organizational policies related to alcohol or drug-abuse information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case GDIS: return "Policy for handling genetic disease information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to genetic disease information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case HIV: return "Policy for handling HIV or AIDS information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to HIV or AIDS information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
-            case PSY: return "Policy for handling psychiatry information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to psychiatry information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case MST: return "Policy for handling information related to sexual assault or repeated, threatening sexual harassment that occurred while the patient was in the military, which is afforded heightened confidentiality. \r\n\n                        Access control concerns for military sexual trauma is based on the patient being subject to control by a higher ranking military perpetrator and/or censure by others within the military unit.  Due to the relatively unfettered access to healthcare information by higher ranking military personnel and those who have command over the patient, there is a need to sequester this information outside of the typical controls on access to military health records.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
             case SCA: return "Policy for handling sickle cell disease information, which is afforded heightened confidentiality.  Information handling protocols are based on organizational policies related to sickle cell disease information, which is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then the Act valued with this ActCode should be associated with an Act valued with any applicable laws from the ActPrivacyLaw code system.";
-            case SOC: return "Information about provision of social services.\r\n\n                        \n                           Usage Note: This is a temporary addition to FHIR to be proposed in harmonization.";
-            case SDV: return "Policy for handling sexual assault, abuse, or domestic violence information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to sexual assault, abuse, or domestic violence information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case SDV: return "Policy for handling sexual assault, abuse, or domestic violence information, which will be afforded heightened confidentiality. Information handling protocols based on organizational policies related to sexual assault, abuse, or domestic violence information that is deemed sensitive.\r\n\n                        SDV code covers violence perpetrated by related and non-related persons. This code should be specific to physical and mental trauma caused by a related person only.  The access control concerns are keeping the patient safe from the perpetrator who may have an abusive psychological control over the patient, may be stalking the patient, or may try to manipulate care givers into allowing the perpetrator to make contact with the patient.  The definition needs to be clarified.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case SEX: return "Policy for handling sexuality and reproductive health information, which will be afforded heightened confidentiality.  Information handling protocols based on organizational policies related to sexuality and reproductive health information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case SPI: return "Policy for handling information deemed specially protected by law or policy including substance abuse, substance use, psychiatric, mental health, behavioral health, and cognitive disorders, which is afforded heightened confidentiality.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
+            case BH: return "Policy for handling information related to behavioral and emotional disturbances affecting social adjustment and physical health, which is afforded heightened confidentiality.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
+            case COGN: return "Policy for handling information related to cognitive disability disorders and conditions caused by these disorders, which are afforded heightened confidentiality.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.\r\n\n                        Examples may include dementia, traumatic brain injury, attention deficit, hearing and visual disability such as dyslexia and other disorders and related conditions which impair learning and self-sufficiency.  However, the cognitive disabilities to which this term may apply  versus other behavioral health categories varies by jurisdiction and organizational policy in part due to overlap with other behavioral health conditions. Implementers should constrain to those diagnoses applicable in the domain in which this code is used.";
+            case DVD: return "Policy for handling information related to developmental disability disorders and conditions caused by these disorders, which is afforded heightened confidentiality.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.\r\n\n                        A diverse group of chronic conditions that are due to mental or physical impairments impacting activities of daily living, self-care, language acuity, learning, mobility, independent living and economic self-sufficiency. Examples may include Down syndrome and  Autism spectrum. However, the developmental disabilities to which this term applies versus other behavioral health categories varies by jurisdiction and organizational policy in part due to overlap with other behavioral health conditions.  Implementers should constrain to those diagnoses applicable in the domain in which this code is used.";
+            case EMOTDIS: return "Policy for handling information related to emotional disturbance disorders and conditions caused by these disorders, which is afforded heightened confidentiality.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.\r\n\n                        Typical used to characterize behavioral and mental health issues of adolescents where the disorder may be temporarily diagnosed in order to avoid the potential and unnecessary stigmatizing diagnoses of disorder long term.";
+            case MH: return "Policy for handling information related to psychological disorders, which is afforded heightened confidentiality. Mental health information may be deemed specifically sensitive and distinct from physical health, substance use disorders, and behavioral disabilities and disorders in some jurisdictions.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
+            case PSY: return "Policy for handling psychiatry psychiatric disorder information, which is afforded heightened confidentiality. \r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case PSYTHPN: return "Policy for handling psychotherapy note information, which is afforded heightened confidentiality. \r\n\n                        \n                           Usage Note: In some jurisdiction, disclosure of psychotherapy notes requires patient consent.\r\n\n                        If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case SUD: return "Policy for handling information related to alcohol or drug use disorders and conditions caused by these disorders, which is afforded heightened confidentiality. \r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
+            case ETHUD: return "Policy for handling information related to alcohol use disorders and conditions caused by these disorders, which is afforded heightened confidentiality. \r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
+            case OPIOIDUD: return "Policy for handling information related to opioid use disorders and conditions caused by these disorders, which is afforded heightened confidentiality. \r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
             case STD: return "Policy for handling sexually transmitted disease information, which will be afforded heightened confidentiality.\n Information handling protocols based on organizational policies related to sexually transmitted disease information that is deemed sensitive.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case TBOO: return "Policy for handling information not to be initially disclosed or discussed with patient except by a physician assigned to patient in this case. Information handling protocols based on organizational policies related to sensitive patient information that must be initially discussed with the patient by an attending physician before being disclosed to the patient.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.\r\n\n                        \n                           Open Issue: This definition conflates a rule and a characteristic, and there may be a similar issue with ts sibling codes.";
+            case VIO: return "Policy for handling information related to harm by violence, which is afforded heightened confidentiality. Harm by violence is perpetrated by an unrelated person.\r\n\n                        Access control concerns for information about mental or physical harm resulting from violence caused by an unrelated person may include manipulation of care givers or access to records that enable the perpetrator contact or locate the patient, but the perpetrator will likely not have established abusive psychological control over the patient. \r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.";
             case SICKLE: return "Types of sensitivity policies that apply to Acts.  Act.confidentialityCode is defined in the RIM as \"constraints around appropriate disclosure of information about this Act, regardless of mood.\"\r\n\n                        \n                           Usage Note: ActSensitivity codes are used to bind information to an Act.confidentialityCode according to local sensitivity policy so that those confidentiality codes can then govern its handling across enterprises.  Internally to a policy domain, however, local policies guide the access control system on how end users in that policy domain are able to use information tagged with these sensitivity values.";
             case _ENTITYSENSITIVITYPOLICYTYPE: return "Types of sensitivity policies that may apply to a sensitive attribute on an Entity.\r\n\n                        \n                           Usage Note: EntitySensitivity codes are used to convey a policy that is applicable to sensitive information conveyed by an entity attribute.  May be used to bind a Role.confidentialityCode associated with an Entity per organizational policy.  Role.confidentialityCode is defined in the RIM as \"an indication of the appropriate disclosure of information about this Role with respect to the playing Entity.\"";
             case DEMO: return "Policy for handling all demographic information about an information subject, which will be afforded heightened confidentiality. Policies may govern sensitivity of information related to all demographic about an information subject, the disclosure of which could impact the privacy, well-being, or safety of that subject.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
@@ -9155,8 +9377,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DIA: return "Policy for handling information related to a diagnosis, health condition or health problem, which will be afforded heightened confidentiality.  Diagnostic, health condition or health problem related information may be deemed sensitive by organizational policy, and require heightened confidentiality.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to  diagnostic, health condition or health problem related information deemed sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case DRGIS: return "Policy for handling information related to a drug, which will be afforded heightened confidentiality. Drug information may be deemed sensitive by organizational policy, and require heightened confidentiality.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to drug information deemed sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case EMP: return "Policy for handling information related to an employee, which will be afforded heightened confidentiality. When a patient is an employee, an enterprise may have a policy that requires heightened confidentiality.  Information deemed sensitive typically includes health information and patient role information including patient status, demographics, next of kin, and location.\r\n\n                        \n                           Usage Note: Policy for handling information related to an employee, which will be afforded heightened confidentiality.  Description:  When a patient is an employee, an enterprise may have a policy that requires heightened confidentiality.  Information deemed sensitive typically includes health information and patient role information including patient status, demographics, next of kin, and location.";
-            case PDS: return "Policy for handling information reported by the patient about another person, e.g., a family member, which will be afforded heightened confidentiality. Sensitive information reported by the patient about another person, e.g., family members may be deemed sensitive by default.  The flag may be set or cleared on patient's request.  \r\n\n                        \n                           Usage Note: For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
-            case PRS: return "For sensitive information relayed by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive.)   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to certain types of information designated by a patient as sensitive.   If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
+            case PDS: return "Policy for specially protecting information reported by or about a patient, which is deemed sensitive within the enterprise (i.e., by default regardless of whether the patient requested that the information be deemed sensitive for another reason.) For example information reported by the patient about another person, e.g., a family member, may be deemed sensitive by default. Organizational policy may allow the sensitivity tag to be cleared on patient's request. \r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law in addition to this more generic code.\r\n\n                        For example, VA deems employee information sensitive by default.  Information about a patient who is being stalked or a victim of abuse or violence may be deemed sensitive by default per a provider organization's policies.";
+            case PHY: return "Policy for handling information about a patient, which a physician or other licensed healthcare provider deems sensitive.  Once tagged by the provider, this may trigger alerts for follow up actions according to organizational policy or jurisdictional law.\r\n\n                        \n                           Usage Note: For use within an enterprise that provides heightened confidentiality to certain types of information designated by a physician as sensitive. If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.\r\n\n                        Use cases in which this code could be used are, e.g.,  in systems that lack the ability to automatically detect sensitive information and must rely on manual tagging; a system that lacks an applicable sensitivity tag, or for ad hoc situations where criticality of the situation requires that the tagging be done immediately by the provider before coding or transcription of consult notes can be completed, e.g., upon detection of a patient with suicidal tendencies or potential for violence.";
+            case PRS: return "Policy for specially protecting information reported by or about a patient, which the patient deems sensitive, and the patient requests that collection, access, use, or disclosure of that information be restricted.  For example, a minor patient may request that information about reproductive health not be disclosed to the patient's family or to particular providers and payers.\r\n\n                        \n                           Usage Note: If there is a jurisdictional mandate, then use the applicable ActPrivacyLaw code system, and specify the law rather than or in addition to this more generic code.";
             case COMPT: return "This is the healthcare analog to the US Intelligence Community's concept of a Special Access Program.  Compartment codes may be used in as a field value in an initiator's clearance to indicate permission to access and use an IT Resource with a security label having the same compartment value in security category label field.\r\n\n                        Map: Aligns with ISO 2382-8 definition of Compartment - \"A division of data into isolated blocks with separate security controls for the purpose of reducing risk.\"";
             case ACOCOMPT: return "A group of health care entities, which may include health care providers, care givers, hospitals, facilities, health plans, and other health care constituents who coordinate care for reimbursement based on quality metrics for improving outcomes and lowering costs, and may be authorized to access the consumer's health information because of membership in that group.\r\n\n                        Security Compartment Labels assigned to a consumer's information use in accountable care workflows should be met or exceeded by the Security Compartment attribute claimed by a participant in a an accountable care workflow who is requesting access to that information";
             case CTCOMPT: return "Care coordination across participants in a care plan requires sharing of a healthcare consumer's information specific to that workflow.  A care team member should only have access to that information while participating in that workflow or for other authorized uses.\r\n\n                        Security Compartment Labels assigned to a consumer's information use in care coordination workflows should be met or exceeded by the Security Compartment attribute claimed by a participant in a care team member workflow who is requesting access to that information";
@@ -9175,6 +9398,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TRSTMEC: return "Type of security metadata about a security architecture system component that supports enforcement of security policies.";
             case COVPOL: return "Description:A mandate, obligation, requirement, rule, or expectation unilaterally imposed on benefit coverage under a policy or program by a sponsor, underwriter or payor on:\r\n\n                        \n                           \n                              The activity of another party\r\n\n                           \n                           \n                              The behavior of another party\r\n\n                           \n                           \n                              The manner in which an act is executed\r\n\n                           \n                        \n                        \n                           Examples:A clinical protocol imposed by a payer to which a provider must adhere in order to be paid for providing the service.  A formulary from which a provider must select prescribed drugs in order for the patient to incur a lower copay.";
             case SECURITYPOLICY: return "Types of security policies that further specify the ActClassPolicy value set.\r\n\n                        \n                           Examples:\n                        \r\n\n                        \n                           obligation to encrypt\n                           refrain from redisclosure without consent";
+            case AUTHPOL: return "Authorisation policies are essentially security policies related to access-control and specify what activities a subject is permitted or forbidden to do, to a set of target objects. They are designed to protect target objects so are interpreted by access control agents or the run-time systems at the target system.\r\n\n                        A positive authorisation policy defines the actions that a subject is permitted to perform on a target. A negative authorisation policy specifies the actions that a subject is forbidden to perform on a target. Positive authorisation policies may also include filters to transform the parameters associated with their actions.  (Based on PONDERS)";
+            case ACCESSCONSCHEME: return "An access control policy specific to the type of access control scheme, which is used to enforce one or more authorization policies.  \r\n\n                        \n                           Usage Note: Access control schemes are the type of access control policy, which is comprised of access control policy rules concerning the provision of the access control service.\r\n\n                        There are two categories of access control policies, rule-based and identity-based, which are identified in CCITT Rec. X.800 aka ISO 7498-2. Rule-based access control policies are intended to apply to all access requests by any initiator on any target in a security domain. Identity-based access control policies are based on rules specific to an individual initiator, a group of initiators, entities acting on behalf of initiators, or originators acting in a specific role. Context can modify rule-based or identity-based access control policies. Context rules may define the entire policy in effect. Real systems will usually employ a combination of these policy types; if a rule-based policy is used, then an identity-based policy is usually in effect also.\r\n\n                        An access control scheme may be based on access control lists, capabilities, labels, and context or a combination of these.  An access control scheme is a component of an access control mechanism or \"service\") along with the supporting mechanisms required by that scheme to provide access control decision information (ADI) supplied by the scheme to the access decision facility (ADF also known as a PDP). (Based on ISO/IEC 10181-3:1996)\r\n\n                        \n                           Examples: \n                        \r\n\n                        \n                           Attribute Based Access Control (ABAC)\n                           Discretionary Access Control (DAC)\n                           History Based Access Control (HBAC)\n                           Identity Based Access Control (IBAC)\n                           Mandatory Access Control (MAC)\n                           Organization Based Access Control (OrBAC)\n                           Relationship Based Access Control (RelBac)\n                           Responsibility Based Access Control (RespBAC)\n                           Risk Adaptable Access Control (RAdAC)\n                        >";
+            case DELEPOL: return "Delegation policies specify which actions subjects are allowed to delegate to others. A delegation policy thus specifies an authorisation to delegate. Subjects must already possess the access rights to be delegated.\r\n\n                        Delegation policies are aimed at subjects delegating rights to servers or third parties to perform actions on their behalf and are not meant to be the means by which security administrators would assign rights to subjects. A negative delegation policy identifies what delegations are forbidden.\r\n\n                        A Delegation policy specifies the authorisation policy from which delegated rights are derived, the grantors, which are the entities which can delegate these access rights, and the grantees, which are the entities to which the access rights can be delegated. There are two types of delegation policy, positive and negative. (Based on PONDERS)";
             case OBLIGATIONPOLICY: return "Conveys the mandated workflow action that an information custodian, receiver, or user must perform.  \r\n\n                        \n                           Usage Notes: Per ISO 22600-2, ObligationPolicy instances 'are event-triggered and define actions to be performed by manager agent'. Per HL7 Composite Security and Privacy Domain Analysis Model:  This value set refers to the action required to receive the permission specified in the privacy rule. Per OASIS XACML, an obligation is an operation specified in a policy or policy that is performed in conjunction with the enforcement of an access control decision.";
             case ANONY: return "Custodian system must remove any information that could result in identifying the information subject.";
             case AOD: return "Custodian system must make available to an information subject upon request an accounting of certain disclosures of the individualâ€™s protected health information over a period of time.  Policy may dictate that the accounting include information about the information disclosed,  the date of disclosure, the identification of the receiver, the purpose of the disclosure, the time in which the disclosing entity must provide a response and the time period for which accountings of disclosure can be requested.";
@@ -9417,6 +9643,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DENOM: return "Criteria for specifying the entities to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs).  The denominator can be the same as the initial population, or it may be a subset of the initial population to further constrain it for the purpose of the eMeasure. Different measures within an eMeasure set may have different denominators. Continuous Variable eMeasures do not have a denominator, but instead define a measure population.";
             case IPOP: return "Criteria for specifying the entities to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs).";
             case IPPOP: return "Criteria for specifying the patients to be evaluated by a specific quality measure, based on a shared common set of characteristics (within a specific measurement set to which a given measure belongs). Details often include information based upon specific age groups, diagnoses, diagnostic and procedure codes, and enrollment periods.";
+            case MSROBS: return "Defines the observation to be performed for each patient or event in the measure population. Measure observations for each case in the population are aggregated to determine the overall measure score for the population.\r\n\n                        \n                           Examples: \n                        \r\n\n                        \n                           the median time from arrival in the Emergency Room to departure\n                           the median time from decision to admit to a hospital to the actual admission for Emergency Room patients";
             case MSRPOPL: return "Criteria for specifying\nthe measure population as a narrative description (e.g., all patients seen in the Emergency Department during the measurement period).  This is used only in continuous variable eMeasures.";
             case MSRPOPLEX: return "Criteria for specifying subjects who should be removed from the eMeasure's Initial Population and Measure Population. Measure Population Exclusions are used in Continuous Variable measures to help narrow the Measure Population before determining the value(s) of the continuous variable(s).";
             case NUMER: return "Criteria for specifying the processes or outcomes expected for each patient, procedure, or other unit of measurement defined in the denominator for proportion measures, or related to (but not directly derived from) the denominator for ratio measures (e.g., a numerator listing the number of central line blood stream infections and a denominator indicating the days per thousand of central line usage in a specific time period).";
@@ -9762,6 +9989,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case IMP: return "inpatient encounter";
             case ACUTE: return "inpatient acute";
             case NONAC: return "inpatient non-acute";
+            case OBSENC: return "observation encounter";
             case PRENC: return "pre-admission";
             case SS: return "short stay";
             case VR: return "virtual";
@@ -10233,13 +10461,24 @@ the measure population as a narrative description (e.g., all patients seen in th
             case ETH: return "substance abuse information sensitivity";
             case GDIS: return "genetic disease information sensitivity";
             case HIV: return "HIV/AIDS information sensitivity";
-            case PSY: return "psychiatry information sensitivity";
-            case SCA: return "sickle cell anemia";
-            case SOC: return "social services sensitivity";
+            case MST: return "military sexual trauma information sensitivity";
+            case SCA: return "sickle cell anemia information sensitivity";
             case SDV: return "sexual assault, abuse, or domestic violence information sensitivity";
             case SEX: return "sexuality and reproductive health information sensitivity";
+            case SPI: return "specially protected information sensitivity";
+            case BH: return "behavioral health information sensitivity";
+            case COGN: return "cognitive disability information sensitivity";
+            case DVD: return "developmental disability information sensitivity";
+            case EMOTDIS: return "emotional disturbance information sensitivity";
+            case MH: return "mental health information sensitivity";
+            case PSY: return "psychiatry disorder information sensitivity";
+            case PSYTHPN: return "psychotherapy note information sensitivity";
+            case SUD: return "substance use disorder information sensitivity";
+            case ETHUD: return "alcohol use disorder information sensitivity";
+            case OPIOIDUD: return "opioid use disorder information sensitivity";
             case STD: return "sexually transmitted disease information sensitivity";
             case TBOO: return "taboo";
+            case VIO: return "violence information sensitivity";
             case SICKLE: return "sickle cell";
             case _ENTITYSENSITIVITYPOLICYTYPE: return "EntityInformationSensitivityPolicy";
             case DEMO: return "all demographic information sensitivity";
@@ -10259,8 +10498,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DIA: return "diagnosis information sensitivity";
             case DRGIS: return "drug information sensitivity";
             case EMP: return "employee information sensitivity";
-            case PDS: return "patient default sensitivity";
-            case PRS: return "patient requested sensitivity";
+            case PDS: return "patient default information sensitivity";
+            case PHY: return "physician requested information sensitivity";
+            case PRS: return "patient requested information sensitivity";
             case COMPT: return "compartment";
             case ACOCOMPT: return "accountable care organization compartment";
             case CTCOMPT: return "care team compartment";
@@ -10279,6 +10519,9 @@ the measure population as a narrative description (e.g., all patients seen in th
             case TRSTMEC: return "trust mechanism";
             case COVPOL: return "benefit policy";
             case SECURITYPOLICY: return "security policy";
+            case AUTHPOL: return "authorization policy";
+            case ACCESSCONSCHEME: return "access control scheme";
+            case DELEPOL: return "delegation policy";
             case OBLIGATIONPOLICY: return "obligation policy";
             case ANONY: return "anonymize";
             case AOD: return "accounting of disclosure";
@@ -10521,6 +10764,7 @@ the measure population as a narrative description (e.g., all patients seen in th
             case DENOM: return "denominator";
             case IPOP: return "initial population";
             case IPPOP: return "initial patient population";
+            case MSROBS: return "measure observation";
             case MSRPOPL: return "measure population";
             case MSRPOPLEX: return "measure population exclusions";
             case NUMER: return "numerator";

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -325,26 +325,30 @@ public class Provenance extends DomainResource {
          * @return {@link #who} (The individual, device or organization that participated in the event.)
          */
         public Identifier getWhoIdentifier() throws FHIRException { 
+          if (this.who == null)
+            return null;
           if (!(this.who instanceof Identifier))
             throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.who.getClass().getName()+" was encountered");
           return (Identifier) this.who;
         }
 
         public boolean hasWhoIdentifier() { 
-          return this.who instanceof Identifier;
+          return this != null && this.who instanceof Identifier;
         }
 
         /**
          * @return {@link #who} (The individual, device or organization that participated in the event.)
          */
         public Reference getWhoReference() throws FHIRException { 
+          if (this.who == null)
+            return null;
           if (!(this.who instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
           return (Reference) this.who;
         }
 
         public boolean hasWhoReference() { 
-          return this.who instanceof Reference;
+          return this != null && this.who instanceof Reference;
         }
 
         public boolean hasWho() { 
@@ -355,6 +359,8 @@ public class Provenance extends DomainResource {
          * @param value {@link #who} (The individual, device or organization that participated in the event.)
          */
         public ProvenanceAgentComponent setWho(Type value) { 
+          if (value != null && !(value instanceof Identifier || value instanceof Reference))
+            throw new Error("Not the right type for Provenance.agent.who[x]: "+value.fhirType());
           this.who = value;
           return this;
         }
@@ -370,26 +376,30 @@ public class Provenance extends DomainResource {
          * @return {@link #onBehalfOf} (The individual, device, or organization for whom the change was made.)
          */
         public Identifier getOnBehalfOfIdentifier() throws FHIRException { 
+          if (this.onBehalfOf == null)
+            return null;
           if (!(this.onBehalfOf instanceof Identifier))
             throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
           return (Identifier) this.onBehalfOf;
         }
 
         public boolean hasOnBehalfOfIdentifier() { 
-          return this.onBehalfOf instanceof Identifier;
+          return this != null && this.onBehalfOf instanceof Identifier;
         }
 
         /**
          * @return {@link #onBehalfOf} (The individual, device, or organization for whom the change was made.)
          */
         public Reference getOnBehalfOfReference() throws FHIRException { 
+          if (this.onBehalfOf == null)
+            return null;
           if (!(this.onBehalfOf instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
           return (Reference) this.onBehalfOf;
         }
 
         public boolean hasOnBehalfOfReference() { 
-          return this.onBehalfOf instanceof Reference;
+          return this != null && this.onBehalfOf instanceof Reference;
         }
 
         public boolean hasOnBehalfOf() { 
@@ -400,6 +410,8 @@ public class Provenance extends DomainResource {
          * @param value {@link #onBehalfOf} (The individual, device, or organization for whom the change was made.)
          */
         public ProvenanceAgentComponent setOnBehalfOf(Type value) { 
+          if (value != null && !(value instanceof Identifier || value instanceof Reference))
+            throw new Error("Not the right type for Provenance.agent.onBehalfOf[x]: "+value.fhirType());
           this.onBehalfOf = value;
           return this;
         }
@@ -677,26 +689,30 @@ public class Provenance extends DomainResource {
          * @return {@link #what} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
         public Identifier getWhatIdentifier() throws FHIRException { 
+          if (this.what == null)
+            return null;
           if (!(this.what instanceof Identifier))
             throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.what.getClass().getName()+" was encountered");
           return (Identifier) this.what;
         }
 
         public boolean hasWhatIdentifier() { 
-          return this.what instanceof Identifier;
+          return this != null && this.what instanceof Identifier;
         }
 
         /**
          * @return {@link #what} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
         public Reference getWhatReference() throws FHIRException { 
+          if (this.what == null)
+            return null;
           if (!(this.what instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.what.getClass().getName()+" was encountered");
           return (Reference) this.what;
         }
 
         public boolean hasWhatReference() { 
-          return this.what instanceof Reference;
+          return this != null && this.what instanceof Reference;
         }
 
         public boolean hasWhat() { 
@@ -707,6 +723,8 @@ public class Provenance extends DomainResource {
          * @param value {@link #what} (Identity of the  Entity used. May be a logical or physical uri and maybe absolute or relative.)
          */
         public ProvenanceEntityComponent setWhat(Type value) { 
+          if (value != null && !(value instanceof Identifier || value instanceof Reference))
+            throw new Error("Not the right type for Provenance.entity.what[x]: "+value.fhirType());
           this.what = value;
           return this;
         }
@@ -1089,26 +1107,30 @@ public class Provenance extends DomainResource {
      * @return {@link #occurred} (The period during which the activity occurred.)
      */
     public Period getOccurredPeriod() throws FHIRException { 
+      if (this.occurred == null)
+        return null;
       if (!(this.occurred instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurred.getClass().getName()+" was encountered");
       return (Period) this.occurred;
     }
 
     public boolean hasOccurredPeriod() { 
-      return this.occurred instanceof Period;
+      return this != null && this.occurred instanceof Period;
     }
 
     /**
      * @return {@link #occurred} (The period during which the activity occurred.)
      */
     public DateTimeType getOccurredDateTimeType() throws FHIRException { 
+      if (this.occurred == null)
+        return null;
       if (!(this.occurred instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurred.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurred;
     }
 
     public boolean hasOccurredDateTimeType() { 
-      return this.occurred instanceof DateTimeType;
+      return this != null && this.occurred instanceof DateTimeType;
     }
 
     public boolean hasOccurred() { 
@@ -1119,6 +1141,8 @@ public class Provenance extends DomainResource {
      * @param value {@link #occurred} (The period during which the activity occurred.)
      */
     public Provenance setOccurred(Type value) { 
+      if (value != null && !(value instanceof Period || value instanceof DateTimeType))
+        throw new Error("Not the right type for Provenance.occurred[x]: "+value.fhirType());
       this.occurred = value;
       return this;
     }

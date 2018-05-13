@@ -29,15 +29,18 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.dstu3.model;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.apache.commons.lang3.Validate;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 /**
  * Primitive type "date" in FHIR: any day in a gregorian calendar
  */
-import java.util.*;
-
-import org.apache.commons.lang3.Validate;
-
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Represents a FHIR date datatype. Valid precisions values for this type are:

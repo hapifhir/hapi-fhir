@@ -168,9 +168,9 @@
 					"reference": "urn:uuid:29e3a213-0df4-41e0-88f8-e3be83277022"
 				},
 				"occurrenceDateTime": "2011-12-01T09:49:12-05:00",
-				"performer": {
+				"performer": [{
 					"reference": "#1"
-				}
+				}]
 			},
 			"request": {
 				"method": "PUT",

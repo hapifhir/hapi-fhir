@@ -21,27 +21,35 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
+import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.helger.commons.io.file.FileHelper;
+import com.google.common.base.Charsets;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public class ValidateCommand extends BaseCommand {
-
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateCommand.class);
 
 	@Override
@@ -60,19 +68,34 @@ public class ValidateCommand extends BaseCommand {
 		addFhirVersionOption(retVal);
 
 		OptionGroup source = new OptionGroup();
-		source.addOption(new Option("n", "file", true, "The name of the file to validate"));
-		source.addOption(new Option("d", "data", true, "The text to validate"));
+		addOptionalOption(retVal, source, "n", "file", "filename", "The name of the file to validate");
+		addOptionalOption(retVal, source, "d", "data", "text", "The text to validate");
 		retVal.addOptionGroup(source);
 
-		retVal.addOption("x", "xsd", false, "Validate using Schemas");
-		retVal.addOption("s", "sch", false, "Validate using Schematrons");
 		retVal.addOption("p", "profile", false, "Validate using Profiles (StructureDefinition / ValueSet)");
 		retVal.addOption("r", "fetch-remote", false,
 			"Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
-		retVal.addOption(new Option("l", "fetch-local", true, "Fetch a profile locally and use it if referenced"));
-		retVal.addOption("e", "encoding", false, "File encoding (default is UTF-8)");
+		addOptionalOption(retVal, "l", "fetch-local", "filename", "Fetch a profile locally and use it if referenced");
+		addOptionalOption(retVal, null, "igpack", true, "If specified, provides the filename of an IGPack file to include in validation");
+		addOptionalOption(retVal, "x", "xsd", false, "Validate using Schemas");
+		addOptionalOption(retVal, "s", "sch", false, "Validate using Schematrons");
+		addOptionalOption(retVal, "e", "encoding","encoding", "File encoding (default is UTF-8)");
 
-		return retVal;
+    return retVal;
+	}
+
+	private String loadFile(String theFileName) throws ParseException {
+		return new String(loadFileAsByteArray(theFileName), Charsets.UTF_8);
+	}
+
+	private byte[] loadFileAsByteArray(String theFileName) throws ParseException {
+		byte[] input;
+		try {
+			input = IOUtils.toByteArray(new FileInputStream(new File(theFileName)));
+		} catch (IOException e) {
+			throw new ParseException("Failed to load file '" + theFileName + "' - Error: " + e.toString());
+		}
+		return input;
 	}
 
 	@Override
@@ -112,14 +135,16 @@ public class ValidateCommand extends BaseCommand {
 		if (theCommandLine.hasOption("l")) {
 			String localProfile = theCommandLine.getOptionValue("l");
 			ourLog.info("Loading profile: {}", localProfile);
-			String input;
-			try {
-				input = IOUtils.toString(new FileReader(new File(localProfile)));
-			} catch (IOException e) {
-				throw new ParseException("Failed to load file '" + localProfile + "' - Error: " + e.toString());
-			}
+			String input = loadFile(localProfile);
 
 			localProfileResource = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
+		}
+
+		byte[] igPack = null;
+		String igpackFilename = null;
+		if (theCommandLine.hasOption("igpack")) {
+			igpackFilename = theCommandLine.getOptionValue("igpack");
+			igPack = loadFileAsByteArray(igpackFilename);
 		}
 
 		if (theCommandLine.hasOption("p")) {
@@ -129,6 +154,14 @@ public class ValidateCommand extends BaseCommand {
 					val.registerValidatorModule(instanceValidator);
 					org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
 						new org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport());
+					if (igPack != null) {
+						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
+						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
+						IgPackParserDstu2 parser = new IgPackParserDstu2(hl7orgCtx);
+						org.hl7.fhir.instance.hapi.validation.IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						validationSupport.addValidationSupport(igValidationSupport);
+					}
+
 					if (localProfileResource != null) {
 						org.hl7.fhir.instance.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.instance.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
 						instanceValidator.setStructureDefintion(convertedSd);
@@ -143,6 +176,12 @@ public class ValidateCommand extends BaseCommand {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport());
+					if (igPack != null) {
+						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
+						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						validationSupport.addValidationSupport(igValidationSupport);
+					}
+
 					if (localProfileResource != null) {
 						instanceValidator.setStructureDefintion((StructureDefinition) localProfileResource);
 					}
@@ -193,7 +232,7 @@ public class ValidateCommand extends BaseCommand {
 		if (results.isSuccessful()) {
 			ourLog.info("Validation successful!");
 		} else {
-			ourLog.warn("Validation FAILED");
+			throw new CommandFailureException("Validation failed");
 		}
 	}
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretations, and formatted representation of diagnostic reports.
  */
@@ -326,7 +327,7 @@ public class DiagnosticReport extends DomainResource {
         /**
          * @param value {@link #role} (Describes the type of participation (e.g.  a responsible party, author, or verifier).)
          */
-        public DiagnosticReportPerformerComponent setRole(CodeableConcept value) { 
+        public DiagnosticReportPerformerComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -350,7 +351,7 @@ public class DiagnosticReport extends DomainResource {
         /**
          * @param value {@link #actor} (The reference to the  practitioner or organization involved in producing the report. For example, the diagnostic service that is responsible for issuing the report.)
          */
-        public DiagnosticReportPerformerComponent setActor(Reference value) { 
+        public DiagnosticReportPerformerComponent setActor(Reference value)  { 
           this.actor = value;
           return this;
         }
@@ -370,10 +371,20 @@ public class DiagnosticReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "Describes the type of participation (e.g.  a responsible party, author, or verifier).", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("actor", "Reference(Practitioner|Organization)", "The reference to the  practitioner or organization involved in producing the report. For example, the diagnostic service that is responsible for issuing the report.", 0, java.lang.Integer.MAX_VALUE, actor));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("role", "CodeableConcept", "Describes the type of participation (e.g.  a responsible party, author, or verifier).", 0, 1, role));
+          children.add(new Property("actor", "Reference(Practitioner|Organization)", "The reference to the  practitioner or organization involved in producing the report. For example, the diagnostic service that is responsible for issuing the report.", 0, 1, actor));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Describes the type of participation (e.g.  a responsible party, author, or verifier).", 0, 1, role);
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|Organization)", "The reference to the  practitioner or organization involved in producing the report. For example, the diagnostic service that is responsible for issuing the report.", 0, 1, actor);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -454,22 +465,22 @@ public class DiagnosticReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosticReportPerformerComponent))
+        if (!(other_ instanceof DiagnosticReportPerformerComponent))
           return false;
-        DiagnosticReportPerformerComponent o = (DiagnosticReportPerformerComponent) other;
+        DiagnosticReportPerformerComponent o = (DiagnosticReportPerformerComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosticReportPerformerComponent))
+        if (!(other_ instanceof DiagnosticReportPerformerComponent))
           return false;
-        DiagnosticReportPerformerComponent o = (DiagnosticReportPerformerComponent) other;
+        DiagnosticReportPerformerComponent o = (DiagnosticReportPerformerComponent) other_;
         return true;
       }
 
@@ -590,7 +601,7 @@ public class DiagnosticReport extends DomainResource {
         /**
          * @param value {@link #link} (Reference to the image source.)
          */
-        public DiagnosticReportImageComponent setLink(Reference value) { 
+        public DiagnosticReportImageComponent setLink(Reference value)  { 
           this.link = value;
           return this;
         }
@@ -615,10 +626,20 @@ public class DiagnosticReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("comment", "string", "A comment about the image. Typically, this is used to provide an explanation for why the image is included, or to draw the viewer's attention to important features.", 0, java.lang.Integer.MAX_VALUE, comment));
-          childrenList.add(new Property("link", "Reference(Media)", "Reference to the image source.", 0, java.lang.Integer.MAX_VALUE, link));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("comment", "string", "A comment about the image. Typically, this is used to provide an explanation for why the image is included, or to draw the viewer's attention to important features.", 0, 1, comment));
+          children.add(new Property("link", "Reference(Media)", "Reference to the image source.", 0, 1, link));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 950398559: /*comment*/  return new Property("comment", "string", "A comment about the image. Typically, this is used to provide an explanation for why the image is included, or to draw the viewer's attention to important features.", 0, 1, comment);
+          case 3321850: /*link*/  return new Property("link", "Reference(Media)", "Reference to the image source.", 0, 1, link);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -698,22 +719,22 @@ public class DiagnosticReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosticReportImageComponent))
+        if (!(other_ instanceof DiagnosticReportImageComponent))
           return false;
-        DiagnosticReportImageComponent o = (DiagnosticReportImageComponent) other;
+        DiagnosticReportImageComponent o = (DiagnosticReportImageComponent) other_;
         return compareDeep(comment, o.comment, true) && compareDeep(link, o.link, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosticReportImageComponent))
+        if (!(other_ instanceof DiagnosticReportImageComponent))
           return false;
-        DiagnosticReportImageComponent o = (DiagnosticReportImageComponent) other;
+        DiagnosticReportImageComponent o = (DiagnosticReportImageComponent) other_;
         return compareValues(comment, o.comment, true);
       }
 
@@ -1079,7 +1100,7 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @param value {@link #category} (A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
      */
-    public DiagnosticReport setCategory(CodeableConcept value) { 
+    public DiagnosticReport setCategory(CodeableConcept value)  { 
       this.category = value;
       return this;
     }
@@ -1103,7 +1124,7 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @param value {@link #code} (A code or name that describes this diagnostic report.)
      */
-    public DiagnosticReport setCode(CodeableConcept value) { 
+    public DiagnosticReport setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -1127,7 +1148,7 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @param value {@link #subject} (The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.)
      */
-    public DiagnosticReport setSubject(Reference value) { 
+    public DiagnosticReport setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1166,7 +1187,7 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @param value {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.)
      */
-    public DiagnosticReport setContext(Reference value) { 
+    public DiagnosticReport setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1197,26 +1218,30 @@ public class DiagnosticReport extends DomainResource {
      * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
     public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
     public boolean hasEffectiveDateTimeType() { 
-      return this.effective instanceof DateTimeType;
+      return this != null && this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
     public Period getEffectivePeriod() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
     public boolean hasEffectivePeriod() { 
-      return this.effective instanceof Period;
+      return this != null && this.effective instanceof Period;
     }
 
     public boolean hasEffective() { 
@@ -1226,7 +1251,9 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @param value {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public DiagnosticReport setEffective(Type value) { 
+    public DiagnosticReport setEffective(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new FHIRFormatError("Not the right type for DiagnosticReport.effective[x]: "+value.fhirType());
       this.effective = value;
       return this;
     }
@@ -1754,25 +1781,53 @@ public class DiagnosticReport extends DomainResource {
       return getPresentedForm().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this report by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "Details concerning a test or procedure requested.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("status", "code", "The status of the diagnostic report as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("code", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, effective));
-        childrenList.add(new Property("issued", "instant", "The date and time that this version of the report was released from the source diagnostic service.", 0, java.lang.Integer.MAX_VALUE, issued));
-        childrenList.add(new Property("performer", "", "Indicates who or what participated in producing the report.", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("specimen", "Reference(Specimen)", "Details about the specimens on which this diagnostic report is based.", 0, java.lang.Integer.MAX_VALUE, specimen));
-        childrenList.add(new Property("result", "Reference(Observation)", "Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\").", 0, java.lang.Integer.MAX_VALUE, result));
-        childrenList.add(new Property("imagingStudy", "Reference(ImagingStudy|ImagingManifest)", "One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
-        childrenList.add(new Property("image", "", "A list of key images associated with this report. The images are generally created during the diagnostic process, and may be directly of the patient, or of treated specimens (i.e. slides of interest).", 0, java.lang.Integer.MAX_VALUE, image));
-        childrenList.add(new Property("conclusion", "string", "Concise and clinically contextualized impression / summary of the diagnostic report.", 0, java.lang.Integer.MAX_VALUE, conclusion));
-        childrenList.add(new Property("codedDiagnosis", "CodeableConcept", "Codes for the conclusion.", 0, java.lang.Integer.MAX_VALUE, codedDiagnosis));
-        childrenList.add(new Property("presentedForm", "Attachment", "Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.", 0, java.lang.Integer.MAX_VALUE, presentedForm));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifiers assigned to this report by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("basedOn", "Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "Details concerning a test or procedure requested.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("status", "code", "The status of the diagnostic report as a whole.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, 1, category));
+        children.add(new Property("code", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, 1, code));
+        children.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.", 0, 1, context));
+        children.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective));
+        children.add(new Property("issued", "instant", "The date and time that this version of the report was released from the source diagnostic service.", 0, 1, issued));
+        children.add(new Property("performer", "", "Indicates who or what participated in producing the report.", 0, java.lang.Integer.MAX_VALUE, performer));
+        children.add(new Property("specimen", "Reference(Specimen)", "Details about the specimens on which this diagnostic report is based.", 0, java.lang.Integer.MAX_VALUE, specimen));
+        children.add(new Property("result", "Reference(Observation)", "Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\").", 0, java.lang.Integer.MAX_VALUE, result));
+        children.add(new Property("imagingStudy", "Reference(ImagingStudy|ImagingManifest)", "One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
+        children.add(new Property("image", "", "A list of key images associated with this report. The images are generally created during the diagnostic process, and may be directly of the patient, or of treated specimens (i.e. slides of interest).", 0, java.lang.Integer.MAX_VALUE, image));
+        children.add(new Property("conclusion", "string", "Concise and clinically contextualized impression / summary of the diagnostic report.", 0, 1, conclusion));
+        children.add(new Property("codedDiagnosis", "CodeableConcept", "Codes for the conclusion.", 0, java.lang.Integer.MAX_VALUE, codedDiagnosis));
+        children.add(new Property("presentedForm", "Attachment", "Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.", 0, java.lang.Integer.MAX_VALUE, presentedForm));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this report by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "Details concerning a test or procedure requested.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the diagnostic report as a whole.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, 1, category);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, 1, code);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.", 0, 1, context);
+        case 247104889: /*effective[x]*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -1468651097: /*effective*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -275306910: /*effectiveDateTime*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -403934648: /*effectivePeriod*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -1179159893: /*issued*/  return new Property("issued", "instant", "The date and time that this version of the report was released from the source diagnostic service.", 0, 1, issued);
+        case 481140686: /*performer*/  return new Property("performer", "", "Indicates who or what participated in producing the report.", 0, java.lang.Integer.MAX_VALUE, performer);
+        case -2132868344: /*specimen*/  return new Property("specimen", "Reference(Specimen)", "Details about the specimens on which this diagnostic report is based.", 0, java.lang.Integer.MAX_VALUE, specimen);
+        case -934426595: /*result*/  return new Property("result", "Reference(Observation)", "Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\").", 0, java.lang.Integer.MAX_VALUE, result);
+        case -814900911: /*imagingStudy*/  return new Property("imagingStudy", "Reference(ImagingStudy|ImagingManifest)", "One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images.", 0, java.lang.Integer.MAX_VALUE, imagingStudy);
+        case 100313435: /*image*/  return new Property("image", "", "A list of key images associated with this report. The images are generally created during the diagnostic process, and may be directly of the patient, or of treated specimens (i.e. slides of interest).", 0, java.lang.Integer.MAX_VALUE, image);
+        case -1731259873: /*conclusion*/  return new Property("conclusion", "string", "Concise and clinically contextualized impression / summary of the diagnostic report.", 0, 1, conclusion);
+        case -1364269926: /*codedDiagnosis*/  return new Property("codedDiagnosis", "CodeableConcept", "Codes for the conclusion.", 0, java.lang.Integer.MAX_VALUE, codedDiagnosis);
+        case 230090366: /*presentedForm*/  return new Property("presentedForm", "Attachment", "Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.", 0, java.lang.Integer.MAX_VALUE, presentedForm);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2088,12 +2143,12 @@ public class DiagnosticReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosticReport))
+        if (!(other_ instanceof DiagnosticReport))
           return false;
-        DiagnosticReport o = (DiagnosticReport) other;
+        DiagnosticReport o = (DiagnosticReport) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(status, o.status, true)
            && compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true)
@@ -2104,12 +2159,12 @@ public class DiagnosticReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosticReport))
+        if (!(other_ instanceof DiagnosticReport))
           return false;
-        DiagnosticReport o = (DiagnosticReport) other;
+        DiagnosticReport o = (DiagnosticReport) other_;
         return compareValues(status, o.status, true) && compareValues(issued, o.issued, true) && compareValues(conclusion, o.conclusion, true)
           ;
       }

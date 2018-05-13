@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data.
  */
@@ -158,26 +159,30 @@ public class DataRequirement extends Type implements ICompositeType {
          * @return {@link #valueSet} (The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
         public StringType getValueSetStringType() throws FHIRException { 
+          if (this.valueSet == null)
+            return null;
           if (!(this.valueSet instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (StringType) this.valueSet;
         }
 
         public boolean hasValueSetStringType() { 
-          return this.valueSet instanceof StringType;
+          return this != null && this.valueSet instanceof StringType;
         }
 
         /**
          * @return {@link #valueSet} (The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
         public Reference getValueSetReference() throws FHIRException { 
+          if (this.valueSet == null)
+            return null;
           if (!(this.valueSet instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (Reference) this.valueSet;
         }
 
         public boolean hasValueSetReference() { 
-          return this.valueSet instanceof Reference;
+          return this != null && this.valueSet instanceof Reference;
         }
 
         public boolean hasValueSet() { 
@@ -187,7 +192,9 @@ public class DataRequirement extends Type implements ICompositeType {
         /**
          * @param value {@link #valueSet} (The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
-        public DataRequirementCodeFilterComponent setValueSet(Type value) { 
+        public DataRequirementCodeFilterComponent setValueSet(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof StringType || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for DataRequirement.codeFilter.valueSet[x]: "+value.fhirType());
           this.valueSet = value;
           return this;
         }
@@ -248,7 +255,7 @@ public class DataRequirement extends Type implements ICompositeType {
           if (this.valueCode == null)
             return false;
           for (CodeType v : this.valueCode)
-            if (v.equals(value)) // code
+            if (v.getValue().equals(value)) // code
               return true;
           return false;
         }
@@ -359,13 +366,29 @@ public class DataRequirement extends Type implements ICompositeType {
           return getValueCodeableConcept().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, java.lang.Integer.MAX_VALUE, valueSet));
-          childrenList.add(new Property("valueCode", "code", "The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, valueCode));
-          childrenList.add(new Property("valueCoding", "Coding", "The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings.", 0, java.lang.Integer.MAX_VALUE, valueCoding));
-          childrenList.add(new Property("valueCodeableConcept", "CodeableConcept", "The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts.", 0, java.lang.Integer.MAX_VALUE, valueCodeableConcept));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path));
+          children.add(new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet));
+          children.add(new Property("valueCode", "code", "The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, valueCode));
+          children.add(new Property("valueCoding", "Coding", "The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings.", 0, java.lang.Integer.MAX_VALUE, valueCoding));
+          children.add(new Property("valueCodeableConcept", "CodeableConcept", "The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts.", 0, java.lang.Integer.MAX_VALUE, valueCodeableConcept));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3433509: /*path*/  return new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path);
+          case -1438410321: /*valueSet[x]*/  return new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case -1410174671: /*valueSet*/  return new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case -1025157982: /*valueSetString*/  return new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case 295220506: /*valueSetReference*/  return new Property("valueSet[x]", "string|Reference(ValueSet)", "The valueset for the code filter. The valueSet and value elements are exclusive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case -766209282: /*valueCode*/  return new Property("valueCode", "code", "The codes for the code filter. Only one of valueSet, valueCode, valueCoding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, valueCode);
+          case -1887705029: /*valueCoding*/  return new Property("valueCoding", "Coding", "The Codings for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified Codings.", 0, java.lang.Integer.MAX_VALUE, valueCoding);
+          case 924902896: /*valueCodeableConcept*/  return new Property("valueCodeableConcept", "CodeableConcept", "The CodeableConcepts for the code filter. Only one of valueSet, valueCode, valueConding, or valueCodeableConcept may be specified. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified CodeableConcepts.", 0, java.lang.Integer.MAX_VALUE, valueCodeableConcept);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -498,24 +521,24 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DataRequirementCodeFilterComponent))
+        if (!(other_ instanceof DataRequirementCodeFilterComponent))
           return false;
-        DataRequirementCodeFilterComponent o = (DataRequirementCodeFilterComponent) other;
+        DataRequirementCodeFilterComponent o = (DataRequirementCodeFilterComponent) other_;
         return compareDeep(path, o.path, true) && compareDeep(valueSet, o.valueSet, true) && compareDeep(valueCode, o.valueCode, true)
            && compareDeep(valueCoding, o.valueCoding, true) && compareDeep(valueCodeableConcept, o.valueCodeableConcept, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DataRequirementCodeFilterComponent))
+        if (!(other_ instanceof DataRequirementCodeFilterComponent))
           return false;
-        DataRequirementCodeFilterComponent o = (DataRequirementCodeFilterComponent) other;
+        DataRequirementCodeFilterComponent o = (DataRequirementCodeFilterComponent) other_;
         return compareValues(path, o.path, true) && compareValues(valueCode, o.valueCode, true);
       }
 
@@ -620,39 +643,45 @@ public class DataRequirement extends Type implements ICompositeType {
          * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
         public boolean hasValueDateTimeType() { 
-          return this.value instanceof DateTimeType;
+          return this != null && this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public Period getValuePeriod() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Period) this.value;
         }
 
         public boolean hasValuePeriod() { 
-          return this.value instanceof Period;
+          return this != null && this.value instanceof Period;
         }
 
         /**
          * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
         public Duration getValueDuration() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Duration) this.value;
         }
 
         public boolean hasValueDuration() { 
-          return this.value instanceof Duration;
+          return this != null && this.value instanceof Duration;
         }
 
         public boolean hasValue() { 
@@ -662,15 +691,31 @@ public class DataRequirement extends Type implements ICompositeType {
         /**
          * @param value {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.)
          */
-        public DataRequirementDateFilterComponent setValue(Type value) { 
+        public DataRequirementDateFilterComponent setValue(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Duration))
+            throw new FHIRFormatError("Not the right type for DataRequirement.dateFilter.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("path", "string", "The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.", 0, java.lang.Integer.MAX_VALUE, path));
-          childrenList.add(new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("path", "string", "The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.", 0, 1, path));
+          children.add(new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3433509: /*path*/  return new Property("path", "string", "The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.", 0, 1, path);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, 1, value);
+          case 1558135333: /*valueDuration*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration from now.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -759,22 +804,22 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DataRequirementDateFilterComponent))
+        if (!(other_ instanceof DataRequirementDateFilterComponent))
           return false;
-        DataRequirementDateFilterComponent o = (DataRequirementDateFilterComponent) other;
+        DataRequirementDateFilterComponent o = (DataRequirementDateFilterComponent) other_;
         return compareDeep(path, o.path, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DataRequirementDateFilterComponent))
+        if (!(other_ instanceof DataRequirementDateFilterComponent))
           return false;
-        DataRequirementDateFilterComponent o = (DataRequirementDateFilterComponent) other;
+        DataRequirementDateFilterComponent o = (DataRequirementDateFilterComponent) other_;
         return compareValues(path, o.path, true);
       }
 
@@ -943,7 +988,7 @@ public class DataRequirement extends Type implements ICompositeType {
       if (this.profile == null)
         return false;
       for (UriType v : this.profile)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1004,7 +1049,7 @@ public class DataRequirement extends Type implements ICompositeType {
       if (this.mustSupport == null)
         return false;
       for (StringType v : this.mustSupport)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -1115,13 +1160,26 @@ public class DataRequirement extends Type implements ICompositeType {
       return getDateFilter().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
-        childrenList.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
-        childrenList.add(new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
-        childrenList.add(new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, 1, type));
+        children.add(new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
+        children.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
+        children.add(new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
+        children.add(new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3575610: /*type*/  return new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, 1, type);
+        case -309425751: /*profile*/  return new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile);
+        case -1402857082: /*mustSupport*/  return new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport);
+        case -1303674939: /*codeFilter*/  return new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data.", 0, java.lang.Integer.MAX_VALUE, codeFilter);
+        case 149531846: /*dateFilter*/  return new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements.", 0, java.lang.Integer.MAX_VALUE, dateFilter);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1261,23 +1319,23 @@ public class DataRequirement extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DataRequirement))
+        if (!(other_ instanceof DataRequirement))
           return false;
-        DataRequirement o = (DataRequirement) other;
+        DataRequirement o = (DataRequirement) other_;
         return compareDeep(type, o.type, true) && compareDeep(profile, o.profile, true) && compareDeep(mustSupport, o.mustSupport, true)
            && compareDeep(codeFilter, o.codeFilter, true) && compareDeep(dateFilter, o.dateFilter, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DataRequirement))
+        if (!(other_ instanceof DataRequirement))
           return false;
-        DataRequirement o = (DataRequirement) other;
+        DataRequirement o = (DataRequirement) other_;
         return compareValues(type, o.type, true) && compareValues(profile, o.profile, true) && compareValues(mustSupport, o.mustSupport, true)
           ;
       }

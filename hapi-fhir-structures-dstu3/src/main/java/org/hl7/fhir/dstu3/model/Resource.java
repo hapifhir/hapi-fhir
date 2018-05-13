@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This is the base resource type for everything.
  */
@@ -154,7 +155,7 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     /**
      * @param value {@link #meta} (The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.)
      */
-    public Resource setMeta(Meta value) { 
+    public Resource setMeta(Meta value)  { 
       this.meta = value;
       return this;
     }
@@ -257,11 +258,23 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        childrenList.add(new Property("id", "id", "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.", 0, java.lang.Integer.MAX_VALUE, id));
-        childrenList.add(new Property("meta", "Meta", "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.", 0, java.lang.Integer.MAX_VALUE, meta));
-        childrenList.add(new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.", 0, java.lang.Integer.MAX_VALUE, implicitRules));
-        childrenList.add(new Property("language", "code", "The base language in which the resource is written.", 0, java.lang.Integer.MAX_VALUE, language));
+      protected void listChildren(List<Property> children) {
+        children.add(new Property("id", "id", "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.", 0, 1, id));
+        children.add(new Property("meta", "Meta", "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.", 0, 1, meta));
+        children.add(new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.", 0, 1, implicitRules));
+        children.add(new Property("language", "code", "The base language in which the resource is written.", 0, 1, language));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3355: /*id*/  return new Property("id", "id", "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.", 0, 1, id);
+        case 3347973: /*meta*/  return new Property("meta", "Meta", "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.", 0, 1, meta);
+        case -961826286: /*implicitRules*/  return new Property("implicitRules", "uri", "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.", 0, 1, implicitRules);
+        case -1613589672: /*language*/  return new Property("language", "code", "The base language in which the resource is written.", 0, 1, language);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -369,23 +382,23 @@ public abstract class Resource extends BaseResource implements IAnyResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Resource))
+        if (!(other_ instanceof Resource))
           return false;
-        Resource o = (Resource) other;
+        Resource o = (Resource) other_;
         return compareDeep(id, o.id, true) && compareDeep(meta, o.meta, true) && compareDeep(implicitRules, o.implicitRules, true)
            && compareDeep(language, o.language, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Resource))
+        if (!(other_ instanceof Resource))
           return false;
-        Resource o = (Resource) other;
+        Resource o = (Resource) other_;
         return compareValues(id, o.id, true) && compareValues(implicitRules, o.implicitRules, true) && compareValues(language, o.language, true)
           ;
       }

@@ -132,7 +132,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
-		List<IdDt> list = new ArrayList<IdDt>();
+		List<IdDt> list = new ArrayList<>();
 		for (Entry next : found.getEntry()) {
 			list.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
@@ -140,7 +140,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (Entry next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
