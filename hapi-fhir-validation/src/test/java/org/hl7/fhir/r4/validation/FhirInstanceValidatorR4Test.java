@@ -194,6 +194,25 @@ public class FhirInstanceValidatorR4Test {
 		return retVal;
 	}
 
+	/**
+	 * See #938
+	 */
+	@Test
+	public void testValidateEmptyElement() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">" +
+			"<active value=\"\"/>" +
+			"</Patient>";
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("primitive types must have a value or must have child extensions", all.get(0).getMessage());
+	}
+
+
 	private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
 		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
 
