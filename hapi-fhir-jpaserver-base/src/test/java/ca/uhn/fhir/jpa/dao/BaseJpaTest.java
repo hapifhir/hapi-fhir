@@ -30,6 +30,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mockito;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,8 +49,6 @@ import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
-
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
@@ -53,13 +56,12 @@ public abstract class BaseJpaTest {
 	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
-
-	@Rule
-	public LoggingRule myLoggingRule = new LoggingRule();
 
 	@After
 	public final void afterPerformCleanup() {
@@ -76,7 +78,30 @@ public abstract class BaseJpaTest {
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 	}
 
+	@Before
+	public void beforeRandomizeLocale() {
+		randomizeLocale();
+	}
+
 	protected abstract FhirContext getContext();
+
+	protected abstract PlatformTransactionManager getTxManager();
+
+	public TransactionTemplate newTxTemplate() {
+		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
+		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		retVal.afterPropertiesSet();
+		return retVal;
+	}
+
+	public void runInTransaction(Runnable theRunnable) {
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				theRunnable.run();
+			}
+		});
+	}
 
 	/**
 	 * Sleep until at least 1 ms has elapsed
@@ -237,11 +262,6 @@ public abstract class BaseJpaTest {
 			retVal.add(next.getValue());
 		}
 		return retVal.toArray(new String[retVal.size()]);
-	}
-
-	@Before
-	public void beforeRandomizeLocale() {
-		randomizeLocale();
 	}
 
 	@AfterClass

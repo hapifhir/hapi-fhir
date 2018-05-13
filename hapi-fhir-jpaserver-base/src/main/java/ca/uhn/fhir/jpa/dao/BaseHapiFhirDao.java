@@ -297,12 +297,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return toExpungeOutcome(theExpungeOptions, remainingCount);
 	}
 
-	private void doExpungeEverythingQuery(String theQuery) {
-		StopWatch sw = new StopWatch();
-		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
-	}
-
 	private void doExpungeEverything() {
 
 		ourLog.info("** BEGINNING GLOBAL $expunge **");
@@ -366,6 +360,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		});
 
 		ourLog.info("** COMPLETED GLOBAL $expunge **");
+	}
+
+	private void doExpungeEverythingQuery(String theQuery) {
+		StopWatch sw = new StopWatch();
+		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
+		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
 	}
 
 	private void expungeCurrentVersionOfResource(Long theResourceId) {
@@ -2081,7 +2081,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 					if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
 						ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 						if (existing != null) {
-							throw new PreconditionFailedException("Can not create resource of type " + theEntity.getResourceType() + " as it would create a duplicate index matching query: " + next.getIndexString() + " (existing index belongs to " + existing.getResource().getIdDt().toUnqualifiedVersionless().getValue() + ")");
+							String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+							throw new PreconditionFailedException(msg);
 						}
 					}
 					ourLog.debug("Persisting unique index: {}", next);

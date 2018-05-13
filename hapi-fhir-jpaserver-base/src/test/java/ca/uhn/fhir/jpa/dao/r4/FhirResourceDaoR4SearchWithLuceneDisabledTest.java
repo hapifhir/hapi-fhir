@@ -104,6 +104,11 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	}
 
 	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
+
+	@Override
 	protected FhirContext getContext() {
 		return myFhirCtx;
 	}

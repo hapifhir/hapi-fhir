@@ -301,6 +301,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
+
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
 		if (stream == null) {

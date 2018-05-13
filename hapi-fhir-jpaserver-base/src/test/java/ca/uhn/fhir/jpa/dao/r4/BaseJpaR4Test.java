@@ -324,20 +324,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
-	public TransactionTemplate newTxTemplate() {
-		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		retVal.afterPropertiesSet();
-		return retVal;
-	}
-
-	public void runInTransaction(Runnable theRunnable) {
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				theRunnable.run();
-			}
-		});
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	@AfterClass
