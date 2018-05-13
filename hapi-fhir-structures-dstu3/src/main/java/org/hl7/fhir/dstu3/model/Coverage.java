@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Financial instrument which may be used to reimburse or pay for health care products and services.
  */
@@ -855,20 +856,40 @@ public class Coverage extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("group", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify an employer group. May also be referred to as a Policy or Group ID.", 0, java.lang.Integer.MAX_VALUE, group));
-          childrenList.add(new Property("groupDisplay", "string", "A short description for the group.", 0, java.lang.Integer.MAX_VALUE, groupDisplay));
-          childrenList.add(new Property("subGroup", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a subset of an employer group.", 0, java.lang.Integer.MAX_VALUE, subGroup));
-          childrenList.add(new Property("subGroupDisplay", "string", "A short description for the subgroup.", 0, java.lang.Integer.MAX_VALUE, subGroupDisplay));
-          childrenList.add(new Property("plan", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a collection of benefits provided to employees. May be referred to as a Section or Division ID.", 0, java.lang.Integer.MAX_VALUE, plan));
-          childrenList.add(new Property("planDisplay", "string", "A short description for the plan.", 0, java.lang.Integer.MAX_VALUE, planDisplay));
-          childrenList.add(new Property("subPlan", "string", "Identifies a sub-style or sub-collective of coverage issued by the underwriter, for example may be used to identify a subset of a collection of benefits provided to employees.", 0, java.lang.Integer.MAX_VALUE, subPlan));
-          childrenList.add(new Property("subPlanDisplay", "string", "A short description for the subplan.", 0, java.lang.Integer.MAX_VALUE, subPlanDisplay));
-          childrenList.add(new Property("class", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.", 0, java.lang.Integer.MAX_VALUE, class_));
-          childrenList.add(new Property("classDisplay", "string", "A short description for the class.", 0, java.lang.Integer.MAX_VALUE, classDisplay));
-          childrenList.add(new Property("subClass", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.", 0, java.lang.Integer.MAX_VALUE, subClass));
-          childrenList.add(new Property("subClassDisplay", "string", "A short description for the subclass.", 0, java.lang.Integer.MAX_VALUE, subClassDisplay));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("group", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify an employer group. May also be referred to as a Policy or Group ID.", 0, 1, group));
+          children.add(new Property("groupDisplay", "string", "A short description for the group.", 0, 1, groupDisplay));
+          children.add(new Property("subGroup", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a subset of an employer group.", 0, 1, subGroup));
+          children.add(new Property("subGroupDisplay", "string", "A short description for the subgroup.", 0, 1, subGroupDisplay));
+          children.add(new Property("plan", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a collection of benefits provided to employees. May be referred to as a Section or Division ID.", 0, 1, plan));
+          children.add(new Property("planDisplay", "string", "A short description for the plan.", 0, 1, planDisplay));
+          children.add(new Property("subPlan", "string", "Identifies a sub-style or sub-collective of coverage issued by the underwriter, for example may be used to identify a subset of a collection of benefits provided to employees.", 0, 1, subPlan));
+          children.add(new Property("subPlanDisplay", "string", "A short description for the subplan.", 0, 1, subPlanDisplay));
+          children.add(new Property("class", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.", 0, 1, class_));
+          children.add(new Property("classDisplay", "string", "A short description for the class.", 0, 1, classDisplay));
+          children.add(new Property("subClass", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.", 0, 1, subClass));
+          children.add(new Property("subClassDisplay", "string", "A short description for the subclass.", 0, 1, subClassDisplay));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 98629247: /*group*/  return new Property("group", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify an employer group. May also be referred to as a Policy or Group ID.", 0, 1, group);
+          case 1322335555: /*groupDisplay*/  return new Property("groupDisplay", "string", "A short description for the group.", 0, 1, groupDisplay);
+          case -2101792737: /*subGroup*/  return new Property("subGroup", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a subset of an employer group.", 0, 1, subGroup);
+          case 1051914147: /*subGroupDisplay*/  return new Property("subGroupDisplay", "string", "A short description for the subgroup.", 0, 1, subGroupDisplay);
+          case 3443497: /*plan*/  return new Property("plan", "string", "Identifies a style or collective of coverage issued by the underwriter, for example may be used to identify a collection of benefits provided to employees. May be referred to as a Section or Division ID.", 0, 1, plan);
+          case -896076455: /*planDisplay*/  return new Property("planDisplay", "string", "A short description for the plan.", 0, 1, planDisplay);
+          case -1868653175: /*subPlan*/  return new Property("subPlan", "string", "Identifies a sub-style or sub-collective of coverage issued by the underwriter, for example may be used to identify a subset of a collection of benefits provided to employees.", 0, 1, subPlan);
+          case -1736083719: /*subPlanDisplay*/  return new Property("subPlanDisplay", "string", "A short description for the subplan.", 0, 1, subPlanDisplay);
+          case 94742904: /*class*/  return new Property("class", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage such as a level of deductables or co-payment.", 0, 1, class_);
+          case 1707405354: /*classDisplay*/  return new Property("classDisplay", "string", "A short description for the class.", 0, 1, classDisplay);
+          case -2105679080: /*subClass*/  return new Property("subClass", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a subclass of coverage such as a sub-level of deductables or co-payment.", 0, 1, subClass);
+          case 1436983946: /*subClassDisplay*/  return new Property("subClassDisplay", "string", "A short description for the subclass.", 0, 1, subClassDisplay);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1067,12 +1088,12 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GroupComponent))
+        if (!(other_ instanceof GroupComponent))
           return false;
-        GroupComponent o = (GroupComponent) other;
+        GroupComponent o = (GroupComponent) other_;
         return compareDeep(group, o.group, true) && compareDeep(groupDisplay, o.groupDisplay, true) && compareDeep(subGroup, o.subGroup, true)
            && compareDeep(subGroupDisplay, o.subGroupDisplay, true) && compareDeep(plan, o.plan, true) && compareDeep(planDisplay, o.planDisplay, true)
            && compareDeep(subPlan, o.subPlan, true) && compareDeep(subPlanDisplay, o.subPlanDisplay, true)
@@ -1081,12 +1102,12 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GroupComponent))
+        if (!(other_ instanceof GroupComponent))
           return false;
-        GroupComponent o = (GroupComponent) other;
+        GroupComponent o = (GroupComponent) other_;
         return compareValues(group, o.group, true) && compareValues(groupDisplay, o.groupDisplay, true) && compareValues(subGroup, o.subGroup, true)
            && compareValues(subGroupDisplay, o.subGroupDisplay, true) && compareValues(plan, o.plan, true) && compareValues(planDisplay, o.planDisplay, true)
            && compareValues(subPlan, o.subPlan, true) && compareValues(subPlanDisplay, o.subPlanDisplay, true)
@@ -1377,7 +1398,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #type} (The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.)
      */
-    public Coverage setType(CodeableConcept value) { 
+    public Coverage setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -1401,7 +1422,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #policyHolder} (The party who 'owns' the insurance policy,  may be an individual, corporation or the subscriber's employer.)
      */
-    public Coverage setPolicyHolder(Reference value) { 
+    public Coverage setPolicyHolder(Reference value)  { 
       this.policyHolder = value;
       return this;
     }
@@ -1440,7 +1461,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #subscriber} (The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.)
      */
-    public Coverage setSubscriber(Reference value) { 
+    public Coverage setSubscriber(Reference value)  { 
       this.subscriber = value;
       return this;
     }
@@ -1528,7 +1549,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #beneficiary} (The party who benefits from the insurance coverage., the patient when services are provided.)
      */
-    public Coverage setBeneficiary(Reference value) { 
+    public Coverage setBeneficiary(Reference value)  { 
       this.beneficiary = value;
       return this;
     }
@@ -1572,7 +1593,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #relationship} (The relationship of beneficiary (patient) to the subscriber.)
      */
-    public Coverage setRelationship(CodeableConcept value) { 
+    public Coverage setRelationship(CodeableConcept value)  { 
       this.relationship = value;
       return this;
     }
@@ -1596,7 +1617,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #period} (Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.)
      */
-    public Coverage setPeriod(Period value) { 
+    public Coverage setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -1683,7 +1704,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #grouping} (A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.)
      */
-    public Coverage setGrouping(GroupComponent value) { 
+    public Coverage setGrouping(GroupComponent value)  { 
       this.grouping = value;
       return this;
     }
@@ -1955,24 +1976,48 @@ public class Coverage extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("type", "CodeableConcept", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("policyHolder", "Reference(Patient|RelatedPerson|Organization)", "The party who 'owns' the insurance policy,  may be an individual, corporation or the subscriber's employer.", 0, java.lang.Integer.MAX_VALUE, policyHolder));
-        childrenList.add(new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, java.lang.Integer.MAX_VALUE, subscriber));
-        childrenList.add(new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, java.lang.Integer.MAX_VALUE, subscriberId));
-        childrenList.add(new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, java.lang.Integer.MAX_VALUE, beneficiary));
-        childrenList.add(new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, java.lang.Integer.MAX_VALUE, relationship));
-        childrenList.add(new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor));
-        childrenList.add(new Property("grouping", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, grouping));
-        childrenList.add(new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, java.lang.Integer.MAX_VALUE, dependent));
-        childrenList.add(new Property("sequence", "string", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, java.lang.Integer.MAX_VALUE, sequence));
-        childrenList.add(new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, java.lang.Integer.MAX_VALUE, order));
-        childrenList.add(new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, java.lang.Integer.MAX_VALUE, network));
-        childrenList.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("type", "CodeableConcept", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.", 0, 1, type));
+        children.add(new Property("policyHolder", "Reference(Patient|RelatedPerson|Organization)", "The party who 'owns' the insurance policy,  may be an individual, corporation or the subscriber's employer.", 0, 1, policyHolder));
+        children.add(new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, 1, subscriber));
+        children.add(new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, 1, subscriberId));
+        children.add(new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, 1, beneficiary));
+        children.add(new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, 1, relationship));
+        children.add(new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, 1, period));
+        children.add(new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor));
+        children.add(new Property("grouping", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, grouping));
+        children.add(new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent));
+        children.add(new Property("sequence", "string", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, 1, sequence));
+        children.add(new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order));
+        children.add(new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, 1, network));
+        children.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.", 0, 1, type);
+        case 2046898558: /*policyHolder*/  return new Property("policyHolder", "Reference(Patient|RelatedPerson|Organization)", "The party who 'owns' the insurance policy,  may be an individual, corporation or the subscriber's employer.", 0, 1, policyHolder);
+        case -1219769240: /*subscriber*/  return new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, 1, subscriber);
+        case 327834531: /*subscriberId*/  return new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, 1, subscriberId);
+        case -565102875: /*beneficiary*/  return new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, 1, beneficiary);
+        case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, 1, relationship);
+        case -991726143: /*period*/  return new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, 1, period);
+        case 106443915: /*payor*/  return new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor);
+        case 506371331: /*grouping*/  return new Property("grouping", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, grouping);
+        case -1109226753: /*dependent*/  return new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent);
+        case 1349547969: /*sequence*/  return new Property("sequence", "string", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, 1, sequence);
+        case 106006350: /*order*/  return new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order);
+        case 1843485230: /*network*/  return new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, 1, network);
+        case -566947566: /*contract*/  return new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2249,12 +2294,12 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Coverage))
+        if (!(other_ instanceof Coverage))
           return false;
-        Coverage o = (Coverage) other;
+        Coverage o = (Coverage) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(policyHolder, o.policyHolder, true) && compareDeep(subscriber, o.subscriber, true)
            && compareDeep(subscriberId, o.subscriberId, true) && compareDeep(beneficiary, o.beneficiary, true)
@@ -2265,12 +2310,12 @@ public class Coverage extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Coverage))
+        if (!(other_ instanceof Coverage))
           return false;
-        Coverage o = (Coverage) other;
+        Coverage o = (Coverage) other_;
         return compareValues(status, o.status, true) && compareValues(subscriberId, o.subscriberId, true) && compareValues(dependent, o.dependent, true)
            && compareValues(sequence, o.sequence, true) && compareValues(order, o.order, true) && compareValues(network, o.network, true)
           ;

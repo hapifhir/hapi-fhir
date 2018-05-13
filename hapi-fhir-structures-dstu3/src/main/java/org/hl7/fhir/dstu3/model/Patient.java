@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
@@ -312,7 +313,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #name} (A name associated with the contact person.)
          */
-        public ContactComponent setName(HumanName value) { 
+        public ContactComponent setName(HumanName value)  { 
           this.name = value;
           return this;
         }
@@ -389,7 +390,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #address} (Address for the contact person.)
          */
-        public ContactComponent setAddress(Address value) { 
+        public ContactComponent setAddress(Address value)  { 
           this.address = value;
           return this;
         }
@@ -462,7 +463,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #organization} (Organization on behalf of which the contact is acting or for which the contact is working.)
          */
-        public ContactComponent setOrganization(Reference value) { 
+        public ContactComponent setOrganization(Reference value)  { 
           this.organization = value;
           return this;
         }
@@ -506,20 +507,35 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #period} (The period during which this contact person or organization is valid to be contacted relating to this patient.)
          */
-        public ContactComponent setPeriod(Period value) { 
+        public ContactComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between the patient and the contact person.", 0, java.lang.Integer.MAX_VALUE, relationship));
-          childrenList.add(new Property("name", "HumanName", "A name associated with the contact person.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
-          childrenList.add(new Property("address", "Address", "Address for the contact person.", 0, java.lang.Integer.MAX_VALUE, address));
-          childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
-          childrenList.add(new Property("organization", "Reference(Organization)", "Organization on behalf of which the contact is acting or for which the contact is working.", 0, java.lang.Integer.MAX_VALUE, organization));
-          childrenList.add(new Property("period", "Period", "The period during which this contact person or organization is valid to be contacted relating to this patient.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between the patient and the contact person.", 0, java.lang.Integer.MAX_VALUE, relationship));
+          children.add(new Property("name", "HumanName", "A name associated with the contact person.", 0, 1, name));
+          children.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
+          children.add(new Property("address", "Address", "Address for the contact person.", 0, 1, address));
+          children.add(new Property("gender", "code", "Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes.", 0, 1, gender));
+          children.add(new Property("organization", "Reference(Organization)", "Organization on behalf of which the contact is acting or for which the contact is working.", 0, 1, organization));
+          children.add(new Property("period", "Period", "The period during which this contact person or organization is valid to be contacted relating to this patient.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The nature of the relationship between the patient and the contact person.", 0, java.lang.Integer.MAX_VALUE, relationship);
+          case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the contact person.", 0, 1, name);
+          case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom);
+          case -1147692044: /*address*/  return new Property("address", "Address", "Address for the contact person.", 0, 1, address);
+          case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes.", 0, 1, gender);
+          case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "Organization on behalf of which the contact is acting or for which the contact is working.", 0, 1, organization);
+          case -991726143: /*period*/  return new Property("period", "Period", "The period during which this contact person or organization is valid to be contacted relating to this patient.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -672,24 +688,24 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContactComponent))
+        if (!(other_ instanceof ContactComponent))
           return false;
-        ContactComponent o = (ContactComponent) other;
+        ContactComponent o = (ContactComponent) other_;
         return compareDeep(relationship, o.relationship, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true) && compareDeep(organization, o.organization, true)
            && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContactComponent))
+        if (!(other_ instanceof ContactComponent))
           return false;
-        ContactComponent o = (ContactComponent) other;
+        ContactComponent o = (ContactComponent) other_;
         return compareValues(gender, o.gender, true);
       }
 
@@ -767,7 +783,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #species} (Identifies the high level taxonomic categorization of the kind of animal.)
          */
-        public AnimalComponent setSpecies(CodeableConcept value) { 
+        public AnimalComponent setSpecies(CodeableConcept value)  { 
           this.species = value;
           return this;
         }
@@ -791,7 +807,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #breed} (Identifies the detailed categorization of the kind of animal.)
          */
-        public AnimalComponent setBreed(CodeableConcept value) { 
+        public AnimalComponent setBreed(CodeableConcept value)  { 
           this.breed = value;
           return this;
         }
@@ -815,16 +831,27 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #genderStatus} (Indicates the current state of the animal's reproductive organs.)
          */
-        public AnimalComponent setGenderStatus(CodeableConcept value) { 
+        public AnimalComponent setGenderStatus(CodeableConcept value)  { 
           this.genderStatus = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("species", "CodeableConcept", "Identifies the high level taxonomic categorization of the kind of animal.", 0, java.lang.Integer.MAX_VALUE, species));
-          childrenList.add(new Property("breed", "CodeableConcept", "Identifies the detailed categorization of the kind of animal.", 0, java.lang.Integer.MAX_VALUE, breed));
-          childrenList.add(new Property("genderStatus", "CodeableConcept", "Indicates the current state of the animal's reproductive organs.", 0, java.lang.Integer.MAX_VALUE, genderStatus));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("species", "CodeableConcept", "Identifies the high level taxonomic categorization of the kind of animal.", 0, 1, species));
+          children.add(new Property("breed", "CodeableConcept", "Identifies the detailed categorization of the kind of animal.", 0, 1, breed));
+          children.add(new Property("genderStatus", "CodeableConcept", "Indicates the current state of the animal's reproductive organs.", 0, 1, genderStatus));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -2008465092: /*species*/  return new Property("species", "CodeableConcept", "Identifies the high level taxonomic categorization of the kind of animal.", 0, 1, species);
+          case 94001524: /*breed*/  return new Property("breed", "CodeableConcept", "Identifies the detailed categorization of the kind of animal.", 0, 1, breed);
+          case -678569453: /*genderStatus*/  return new Property("genderStatus", "CodeableConcept", "Indicates the current state of the animal's reproductive organs.", 0, 1, genderStatus);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -918,23 +945,23 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AnimalComponent))
+        if (!(other_ instanceof AnimalComponent))
           return false;
-        AnimalComponent o = (AnimalComponent) other;
+        AnimalComponent o = (AnimalComponent) other_;
         return compareDeep(species, o.species, true) && compareDeep(breed, o.breed, true) && compareDeep(genderStatus, o.genderStatus, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AnimalComponent))
+        if (!(other_ instanceof AnimalComponent))
           return false;
-        AnimalComponent o = (AnimalComponent) other;
+        AnimalComponent o = (AnimalComponent) other_;
         return true;
       }
 
@@ -1003,7 +1030,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #language} (The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. "en" for English, or "en-US" for American English versus "en-EN" for England English.)
          */
-        public PatientCommunicationComponent setLanguage(CodeableConcept value) { 
+        public PatientCommunicationComponent setLanguage(CodeableConcept value)  { 
           this.language = value;
           return this;
         }
@@ -1053,10 +1080,20 @@ public class Patient extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("preferred", "boolean", "Indicates whether or not the patient prefers this language (over other languages he masters up a certain level).", 0, java.lang.Integer.MAX_VALUE, preferred));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, 1, language));
+          children.add(new Property("preferred", "boolean", "Indicates whether or not the patient prefers this language (over other languages he masters up a certain level).", 0, 1, preferred));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1613589672: /*language*/  return new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, 1, language);
+          case -1294005119: /*preferred*/  return new Property("preferred", "boolean", "Indicates whether or not the patient prefers this language (over other languages he masters up a certain level).", 0, 1, preferred);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1136,22 +1173,22 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PatientCommunicationComponent))
+        if (!(other_ instanceof PatientCommunicationComponent))
           return false;
-        PatientCommunicationComponent o = (PatientCommunicationComponent) other;
+        PatientCommunicationComponent o = (PatientCommunicationComponent) other_;
         return compareDeep(language, o.language, true) && compareDeep(preferred, o.preferred, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PatientCommunicationComponent))
+        if (!(other_ instanceof PatientCommunicationComponent))
           return false;
-        PatientCommunicationComponent o = (PatientCommunicationComponent) other;
+        PatientCommunicationComponent o = (PatientCommunicationComponent) other_;
         return compareValues(preferred, o.preferred, true);
       }
 
@@ -1225,7 +1262,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #other} (The other patient resource that the link refers to.)
          */
-        public PatientLinkComponent setOther(Reference value) { 
+        public PatientLinkComponent setOther(Reference value)  { 
           this.other = value;
           return this;
         }
@@ -1290,10 +1327,20 @@ public class Patient extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("other", "Reference(Patient|RelatedPerson)", "The other patient resource that the link refers to.", 0, java.lang.Integer.MAX_VALUE, other));
-          childrenList.add(new Property("type", "code", "The type of link between this patient resource and another patient resource.", 0, java.lang.Integer.MAX_VALUE, type));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("other", "Reference(Patient|RelatedPerson)", "The other patient resource that the link refers to.", 0, 1, other));
+          children.add(new Property("type", "code", "The type of link between this patient resource and another patient resource.", 0, 1, type));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 106069776: /*other*/  return new Property("other", "Reference(Patient|RelatedPerson)", "The other patient resource that the link refers to.", 0, 1, other);
+          case 3575610: /*type*/  return new Property("type", "code", "The type of link between this patient resource and another patient resource.", 0, 1, type);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1375,22 +1422,22 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PatientLinkComponent))
+        if (!(other_ instanceof PatientLinkComponent))
           return false;
-        PatientLinkComponent o = (PatientLinkComponent) other;
+        PatientLinkComponent o = (PatientLinkComponent) other_;
         return compareDeep(other, o.other, true) && compareDeep(type, o.type, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PatientLinkComponent))
+        if (!(other_ instanceof PatientLinkComponent))
           return false;
-        PatientLinkComponent o = (PatientLinkComponent) other;
+        PatientLinkComponent o = (PatientLinkComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -1858,26 +1905,30 @@ public class Patient extends DomainResource {
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
     public BooleanType getDeceasedBooleanType() throws FHIRException { 
+      if (this.deceased == null)
+        return null;
       if (!(this.deceased instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (BooleanType) this.deceased;
     }
 
     public boolean hasDeceasedBooleanType() { 
-      return this.deceased instanceof BooleanType;
+      return this != null && this.deceased instanceof BooleanType;
     }
 
     /**
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
     public DateTimeType getDeceasedDateTimeType() throws FHIRException { 
+      if (this.deceased == null)
+        return null;
       if (!(this.deceased instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateTimeType) this.deceased;
     }
 
     public boolean hasDeceasedDateTimeType() { 
-      return this.deceased instanceof DateTimeType;
+      return this != null && this.deceased instanceof DateTimeType;
     }
 
     public boolean hasDeceased() { 
@@ -1887,7 +1938,9 @@ public class Patient extends DomainResource {
     /**
      * @param value {@link #deceased} (Indicates if the individual is deceased or not.)
      */
-    public Patient setDeceased(Type value) { 
+    public Patient setDeceased(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof BooleanType || value instanceof DateTimeType))
+        throw new FHIRFormatError("Not the right type for Patient.deceased[x]: "+value.fhirType());
       this.deceased = value;
       return this;
     }
@@ -1964,7 +2017,7 @@ public class Patient extends DomainResource {
     /**
      * @param value {@link #maritalStatus} (This field contains a patient's most recent marital (civil) status.)
      */
-    public Patient setMaritalStatus(CodeableConcept value) { 
+    public Patient setMaritalStatus(CodeableConcept value)  { 
       this.maritalStatus = value;
       return this;
     }
@@ -1980,26 +2033,30 @@ public class Patient extends DomainResource {
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public BooleanType getMultipleBirthBooleanType() throws FHIRException { 
+      if (this.multipleBirth == null)
+        return null;
       if (!(this.multipleBirth instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (BooleanType) this.multipleBirth;
     }
 
     public boolean hasMultipleBirthBooleanType() { 
-      return this.multipleBirth instanceof BooleanType;
+      return this != null && this.multipleBirth instanceof BooleanType;
     }
 
     /**
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public IntegerType getMultipleBirthIntegerType() throws FHIRException { 
+      if (this.multipleBirth == null)
+        return null;
       if (!(this.multipleBirth instanceof IntegerType))
         throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (IntegerType) this.multipleBirth;
     }
 
     public boolean hasMultipleBirthIntegerType() { 
-      return this.multipleBirth instanceof IntegerType;
+      return this != null && this.multipleBirth instanceof IntegerType;
     }
 
     public boolean hasMultipleBirth() { 
@@ -2009,7 +2066,9 @@ public class Patient extends DomainResource {
     /**
      * @param value {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
-    public Patient setMultipleBirth(Type value) { 
+    public Patient setMultipleBirth(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof BooleanType || value instanceof IntegerType))
+        throw new FHIRFormatError("Not the right type for Patient.multipleBirth[x]: "+value.fhirType());
       this.multipleBirth = value;
       return this;
     }
@@ -2139,7 +2198,7 @@ public class Patient extends DomainResource {
     /**
      * @param value {@link #animal} (This patient is known to be an animal.)
      */
-    public Patient setAnimal(AnimalComponent value) { 
+    public Patient setAnimal(AnimalComponent value)  { 
       this.animal = value;
       return this;
     }
@@ -2279,7 +2338,7 @@ public class Patient extends DomainResource {
     /**
      * @param value {@link #managingOrganization} (Organization that is the custodian of the patient record.)
      */
-    public Patient setManagingOrganization(Reference value) { 
+    public Patient setManagingOrganization(Reference value)  { 
       this.managingOrganization = value;
       return this;
     }
@@ -2357,25 +2416,56 @@ public class Patient extends DomainResource {
       return getLink().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "An identifier for this patient.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("active", "boolean", "Whether this patient record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("name", "HumanName", "A name associated with the individual.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
-        childrenList.add(new Property("birthDate", "date", "The date of birth for the individual.", 0, java.lang.Integer.MAX_VALUE, birthDate));
-        childrenList.add(new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, java.lang.Integer.MAX_VALUE, deceased));
-        childrenList.add(new Property("address", "Address", "Addresses for the individual.", 0, java.lang.Integer.MAX_VALUE, address));
-        childrenList.add(new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, java.lang.Integer.MAX_VALUE, maritalStatus));
-        childrenList.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, java.lang.Integer.MAX_VALUE, multipleBirth));
-        childrenList.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
-        childrenList.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("animal", "", "This patient is known to be an animal.", 0, java.lang.Integer.MAX_VALUE, animal));
-        childrenList.add(new Property("communication", "", "Languages which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
-        childrenList.add(new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
-        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
-        childrenList.add(new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "An identifier for this patient.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("active", "boolean", "Whether this patient record is in active use.", 0, 1, active));
+        children.add(new Property("name", "HumanName", "A name associated with the individual.", 0, java.lang.Integer.MAX_VALUE, name));
+        children.add(new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        children.add(new Property("gender", "code", "Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.", 0, 1, gender));
+        children.add(new Property("birthDate", "date", "The date of birth for the individual.", 0, 1, birthDate));
+        children.add(new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased));
+        children.add(new Property("address", "Address", "Addresses for the individual.", 0, java.lang.Integer.MAX_VALUE, address));
+        children.add(new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, 1, maritalStatus));
+        children.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth));
+        children.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
+        children.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal));
+        children.add(new Property("communication", "", "Languages which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
+        children.add(new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
+        children.add(new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization));
+        children.add(new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "An identifier for this patient.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this patient record is in active use.", 0, 1, active);
+        case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the individual.", 0, java.lang.Integer.MAX_VALUE, name);
+        case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom);
+        case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.", 0, 1, gender);
+        case -1210031859: /*birthDate*/  return new Property("birthDate", "date", "The date of birth for the individual.", 0, 1, birthDate);
+        case -1311442804: /*deceased[x]*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
+        case 561497972: /*deceased*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
+        case 497463828: /*deceasedBoolean*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
+        case -1971804369: /*deceasedDateTime*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
+        case -1147692044: /*address*/  return new Property("address", "Address", "Addresses for the individual.", 0, java.lang.Integer.MAX_VALUE, address);
+        case 1756919302: /*maritalStatus*/  return new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, 1, maritalStatus);
+        case -1764672111: /*multipleBirth[x]*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case -677369713: /*multipleBirth*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case -247534439: /*multipleBirthBoolean*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case 1645805999: /*multipleBirthInteger*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo);
+        case 951526432: /*contact*/  return new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1413116420: /*animal*/  return new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal);
+        case -1035284522: /*communication*/  return new Property("communication", "", "Languages which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication);
+        case 1488292898: /*generalPractitioner*/  return new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner);
+        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization);
+        case 3321850: /*link*/  return new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2696,12 +2786,12 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Patient))
+        if (!(other_ instanceof Patient))
           return false;
-        Patient o = (Patient) other;
+        Patient o = (Patient) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(name, o.name, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true)
            && compareDeep(deceased, o.deceased, true) && compareDeep(address, o.address, true) && compareDeep(maritalStatus, o.maritalStatus, true)
@@ -2712,12 +2802,12 @@ public class Patient extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Patient))
+        if (!(other_ instanceof Patient))
           return false;
-        Patient o = (Patient) other;
+        Patient o = (Patient) other_;
         return compareValues(active, o.active, true) && compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true)
           ;
       }

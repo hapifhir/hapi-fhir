@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
+ * The subscription resource is used to define a push-based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system can take an appropriate action.
  */
 @ResourceDef(name="Subscription", profile="http://hl7.org/fhir/Profile/Subscription")
 public class Subscription extends DomainResource {
@@ -333,7 +333,7 @@ public class Subscription extends DomainResource {
          * The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
          */
         @Child(name = "payload", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Mimetype to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification." )
+        @Description(shortDefinition="MIME type to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification." )
         protected StringType payload;
 
         /**
@@ -756,7 +756,7 @@ public class Subscription extends DomainResource {
      * The rules that the server should use to determine when to generate notifications for this subscription.
      */
     @Child(name = "criteria", type = {StringType.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Rule for server push criteria", formalDefinition="The rules that the server should use to determine when to generate notifications for this subscription." )
+    @Description(shortDefinition="Rule for server push", formalDefinition="The rules that the server should use to determine when to generate notifications for this subscription." )
     protected StringType criteria;
 
     /**

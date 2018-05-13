@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.
  */
@@ -426,7 +427,7 @@ public class Endpoint extends DomainResource {
     /**
      * @param value {@link #connectionType} (A coded value that represents the technical details of the usage of this endpoint, such as what WSDLs should be used in what way. (e.g. XDS.b/DICOM/cds-hook).)
      */
-    public Endpoint setConnectionType(Coding value) { 
+    public Endpoint setConnectionType(Coding value)  { 
       this.connectionType = value;
       return this;
     }
@@ -499,7 +500,7 @@ public class Endpoint extends DomainResource {
     /**
      * @param value {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
      */
-    public Endpoint setManagingOrganization(Reference value) { 
+    public Endpoint setManagingOrganization(Reference value)  { 
       this.managingOrganization = value;
       return this;
     }
@@ -596,7 +597,7 @@ public class Endpoint extends DomainResource {
     /**
      * @param value {@link #period} (The interval during which the endpoint is expected to be operational.)
      */
-    public Endpoint setPeriod(Period value) { 
+    public Endpoint setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -710,7 +711,7 @@ public class Endpoint extends DomainResource {
       if (this.payloadMimeType == null)
         return false;
       for (CodeType v : this.payloadMimeType)
-        if (v.equals(value)) // code
+        if (v.getValue().equals(value)) // code
           return true;
       return false;
     }
@@ -816,24 +817,43 @@ public class Endpoint extends DomainResource {
       if (this.header == null)
         return false;
       for (StringType v : this.header)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the endpoint across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "active | suspended | error | off | test.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("connectionType", "Coding", "A coded value that represents the technical details of the usage of this endpoint, such as what WSDLs should be used in what way. (e.g. XDS.b/DICOM/cds-hook).", 0, java.lang.Integer.MAX_VALUE, connectionType));
-        childrenList.add(new Property("name", "string", "A friendly name that this endpoint can be referred to with.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
-        childrenList.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType));
-        childrenList.add(new Property("payloadMimeType", "code", "The mime type to send the payload in - e.g. application/fhir+xml, application/fhir+json. If the mime type is not specified, then the sender could send any content (including no content depending on the connectionType).", 0, java.lang.Integer.MAX_VALUE, payloadMimeType));
-        childrenList.add(new Property("address", "uri", "The uri that describes the actual end-point to connect to.", 0, java.lang.Integer.MAX_VALUE, address));
-        childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the endpoint across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "active | suspended | error | off | test.", 0, 1, status));
+        children.add(new Property("connectionType", "Coding", "A coded value that represents the technical details of the usage of this endpoint, such as what WSDLs should be used in what way. (e.g. XDS.b/DICOM/cds-hook).", 0, 1, connectionType));
+        children.add(new Property("name", "string", "A friendly name that this endpoint can be referred to with.", 0, 1, name));
+        children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, 1, managingOrganization));
+        children.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, 1, period));
+        children.add(new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType));
+        children.add(new Property("payloadMimeType", "code", "The mime type to send the payload in - e.g. application/fhir+xml, application/fhir+json. If the mime type is not specified, then the sender could send any content (including no content depending on the connectionType).", 0, java.lang.Integer.MAX_VALUE, payloadMimeType));
+        children.add(new Property("address", "uri", "The uri that describes the actual end-point to connect to.", 0, 1, address));
+        children.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for the organization that is used to identify the endpoint across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "active | suspended | error | off | test.", 0, 1, status);
+        case 1270211384: /*connectionType*/  return new Property("connectionType", "Coding", "A coded value that represents the technical details of the usage of this endpoint, such as what WSDLs should be used in what way. (e.g. XDS.b/DICOM/cds-hook).", 0, 1, connectionType);
+        case 3373707: /*name*/  return new Property("name", "string", "A friendly name that this endpoint can be referred to with.", 0, 1, name);
+        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, 1, managingOrganization);
+        case 951526432: /*contact*/  return new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -991726143: /*period*/  return new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, 1, period);
+        case 909929960: /*payloadType*/  return new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType);
+        case -1702836932: /*payloadMimeType*/  return new Property("payloadMimeType", "code", "The mime type to send the payload in - e.g. application/fhir+xml, application/fhir+json. If the mime type is not specified, then the sender could send any content (including no content depending on the connectionType).", 0, java.lang.Integer.MAX_VALUE, payloadMimeType);
+        case -1147692044: /*address*/  return new Property("address", "uri", "The uri that describes the actual end-point to connect to.", 0, 1, address);
+        case -1221270899: /*header*/  return new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1054,12 +1074,12 @@ public class Endpoint extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Endpoint))
+        if (!(other_ instanceof Endpoint))
           return false;
-        Endpoint o = (Endpoint) other;
+        Endpoint o = (Endpoint) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(connectionType, o.connectionType, true)
            && compareDeep(name, o.name, true) && compareDeep(managingOrganization, o.managingOrganization, true)
            && compareDeep(contact, o.contact, true) && compareDeep(period, o.period, true) && compareDeep(payloadType, o.payloadType, true)
@@ -1068,12 +1088,12 @@ public class Endpoint extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Endpoint))
+        if (!(other_ instanceof Endpoint))
           return false;
-        Endpoint o = (Endpoint) other;
+        Endpoint o = (Endpoint) other_;
         return compareValues(status, o.status, true) && compareValues(name, o.name, true) && compareValues(payloadMimeType, o.payloadMimeType, true)
            && compareValues(address, o.address, true) && compareValues(header, o.header, true);
       }

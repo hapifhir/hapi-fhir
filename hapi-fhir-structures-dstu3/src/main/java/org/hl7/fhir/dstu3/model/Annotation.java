@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A  text note which also  contains information about who made the statement and when.
  */
@@ -96,26 +97,30 @@ public class Annotation extends Type implements ICompositeType {
      * @return {@link #author} (The individual responsible for making the annotation.)
      */
     public Reference getAuthorReference() throws FHIRException { 
+      if (this.author == null)
+        return null;
       if (!(this.author instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.author.getClass().getName()+" was encountered");
       return (Reference) this.author;
     }
 
     public boolean hasAuthorReference() { 
-      return this.author instanceof Reference;
+      return this != null && this.author instanceof Reference;
     }
 
     /**
      * @return {@link #author} (The individual responsible for making the annotation.)
      */
     public StringType getAuthorStringType() throws FHIRException { 
+      if (this.author == null)
+        return null;
       if (!(this.author instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.author.getClass().getName()+" was encountered");
       return (StringType) this.author;
     }
 
     public boolean hasAuthorStringType() { 
-      return this.author instanceof StringType;
+      return this != null && this.author instanceof StringType;
     }
 
     public boolean hasAuthor() { 
@@ -125,7 +130,9 @@ public class Annotation extends Type implements ICompositeType {
     /**
      * @param value {@link #author} (The individual responsible for making the annotation.)
      */
-    public Annotation setAuthor(Type value) { 
+    public Annotation setAuthor(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Reference || value instanceof StringType))
+        throw new FHIRFormatError("Not the right type for Annotation.author[x]: "+value.fhirType());
       this.author = value;
       return this;
     }
@@ -224,11 +231,25 @@ public class Annotation extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("time", "dateTime", "Indicates when this particular annotation was made.", 0, java.lang.Integer.MAX_VALUE, time));
-        childrenList.add(new Property("text", "string", "The text of the annotation.", 0, java.lang.Integer.MAX_VALUE, text));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author));
+        children.add(new Property("time", "dateTime", "Indicates when this particular annotation was made.", 0, 1, time));
+        children.add(new Property("text", "string", "The text of the annotation.", 0, 1, text));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 1475597077: /*author[x]*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case 305515008: /*authorReference*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case 290249084: /*authorString*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case 3560141: /*time*/  return new Property("time", "dateTime", "Indicates when this particular annotation was made.", 0, 1, time);
+        case 3556653: /*text*/  return new Property("text", "string", "The text of the annotation.", 0, 1, text);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -334,23 +355,23 @@ public class Annotation extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Annotation))
+        if (!(other_ instanceof Annotation))
           return false;
-        Annotation o = (Annotation) other;
+        Annotation o = (Annotation) other_;
         return compareDeep(author, o.author, true) && compareDeep(time, o.time, true) && compareDeep(text, o.text, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Annotation))
+        if (!(other_ instanceof Annotation))
           return false;
-        Annotation o = (Annotation) other;
+        Annotation o = (Annotation) other_;
         return compareValues(time, o.time, true) && compareValues(text, o.text, true);
       }
 

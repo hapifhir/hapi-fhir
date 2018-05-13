@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
+ * Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.
  */
 @ResourceDef(name="Location", profile="http://hl7.org/fhir/Profile/Location")
 public class Location extends DomainResource {
@@ -1213,10 +1213,10 @@ public class Location extends DomainResource {
     protected Enumeration<LocationStatus> status;
 
     /**
-     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
+     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
      */
     @Child(name = "operationalStatus", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
+    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0116")
     protected Coding operationalStatus;
 
@@ -1228,10 +1228,10 @@ public class Location extends DomainResource {
     protected StringType name;
 
     /**
-     * A list of alternate names that the location is known as, or was known as in the past.
+     * A list of alternate names that the location is known as or was known as in the past.
      */
     @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of alternate names that the location is known as, or was known as in the past", formalDefinition="A list of alternate names that the location is known as, or was known as in the past." )
+    @Description(shortDefinition="A list of alternate names that the location is known as or was known as in the past", formalDefinition="A list of alternate names that the location is known as or was known as in the past." )
     protected List<StringType> alias;
 
     /**
@@ -1448,7 +1448,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
      */
     public Coding getOperationalStatus() { 
       if (this.operationalStatus == null)
@@ -1464,7 +1464,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
      */
     public Location setOperationalStatus(Coding value) { 
       this.operationalStatus = value;
@@ -1521,7 +1521,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public List<StringType> getAlias() { 
       if (this.alias == null)
@@ -1547,7 +1547,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public StringType addAliasElement() {//2 
       StringType t = new StringType();
@@ -1558,7 +1558,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public Location addAlias(String value) { //1
       StringType t = new StringType();
@@ -1570,7 +1570,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public boolean hasAlias(String value) { 
       if (this.alias == null)
@@ -2126,9 +2126,9 @@ public class Location extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status));
-        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
+        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
         children.add(new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name));
-        children.add(new Property("alias", "string", "A list of alternate names that the location is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         children.add(new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description));
         children.add(new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode));
         children.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -2148,9 +2148,9 @@ public class Location extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status);
-        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
+        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
         case 3373707: /*name*/  return new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name);
-        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
         case -1724546052: /*description*/  return new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description);
         case 3357091: /*mode*/  return new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type);

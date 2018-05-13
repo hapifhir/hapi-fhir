@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,7 +57,7 @@ public enum TaskStatus {
          */
         REJECTED, 
         /**
-         * Task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.
+         * The task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.
          */
         READY, 
         /**
@@ -65,11 +65,11 @@ public enum TaskStatus {
          */
         CANCELLED, 
         /**
-         * Task has been started but is not yet complete.
+         * The task has been started but is not yet complete.
          */
         INPROGRESS, 
         /**
-         * Task has been started but work has been paused.
+         * The task has been started but work has been paused.
          */
         ONHOLD, 
         /**
@@ -144,10 +144,10 @@ public enum TaskStatus {
             case RECEIVED: return "A potential performer has claimed ownership of the task and is evaluating whether to perform it.";
             case ACCEPTED: return "The potential performer has agreed to execute the task but has not yet started work.";
             case REJECTED: return "The potential performer who claimed ownership of the task has decided not to execute it prior to performing any action.";
-            case READY: return "Task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.";
+            case READY: return "The task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.";
             case CANCELLED: return "The task was not completed.";
-            case INPROGRESS: return "Task has been started but is not yet complete.";
-            case ONHOLD: return "Task has been started but work has been paused.";
+            case INPROGRESS: return "The task has been started but is not yet complete.";
+            case ONHOLD: return "The task has been started but work has been paused.";
             case FAILED: return "The task was attempted but could not be completed due to some error.";
             case COMPLETED: return "The task has been completed.";
             case ENTEREDINERROR: return "The task should never have existed and is retained only because of the possibility it may have used.";

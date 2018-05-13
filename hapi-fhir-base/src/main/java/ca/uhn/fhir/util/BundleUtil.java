@@ -123,6 +123,19 @@ public class BundleUtil {
 		return null;
 	}
 
+	public static Integer getTotal(FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
+		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
+		if (entries.size() > 0) {
+			IPrimitiveType<Number> typeElement = (IPrimitiveType<Number>) entries.get(0);
+			if (typeElement != null && typeElement.getValue() != null) {
+				return typeElement.getValue().intValue();
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Extract all of the resources from a given bundle
 	 */

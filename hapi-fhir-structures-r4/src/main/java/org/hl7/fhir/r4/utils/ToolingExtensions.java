@@ -86,6 +86,7 @@ public class ToolingExtensions {
   public static final String EXT_ALLOWEDRESOURCE = "http://hl7.org/fhir/StructureDefinition/questionnaire-allowedResource";
   public static final String EXT_REFERENCEFILTER = "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter";
   public static final String EXT_CODE_GENERATION_PARENT = "http://hl7.org/fhir/StructureDefinition/structuredefinition-codegen-super";
+  public static final String EXT_HIERARCHY = "http://hl7.org/fhir/StructureDefinition/structuredefinition-hierarchy";
 
   // unregistered?
   public static final String EXT_MAPPING_PREFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-prefix";
@@ -167,6 +168,22 @@ public class ToolingExtensions {
       else
         e.getExtension().add(Factory.newExtension(url, new StringType(content), true));   
     }
+  }
+
+  public static void addBooleanExtension(Element e, String url, boolean content) {
+    Extension ex = getExtension(e, url);
+    if (ex != null)
+      ex.setValue(new BooleanType(content));
+    else
+      e.getExtension().add(Factory.newExtension(url, new BooleanType(content), true));   
+  }
+
+  public static void addBooleanExtension(DomainResource e, String url, boolean content) {
+    Extension ex = getExtension(e, url);
+    if (ex != null)
+      ex.setValue(new BooleanType(content));
+    else
+      e.getExtension().add(Factory.newExtension(url, new BooleanType(content), true));   
   }
 
   public static void addIntegerExtension(DomainResource dr, String url, int value) {

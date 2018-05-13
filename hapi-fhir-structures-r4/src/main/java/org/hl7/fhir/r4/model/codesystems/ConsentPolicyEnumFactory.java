@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -57,8 +57,6 @@ public class ConsentPolicyEnumFactory implements EnumFactory<ConsentPolicy> {
       return ConsentPolicy.MDHHS5515;
     if ("nyssipp".equals(codeString))
       return ConsentPolicy.NYSSIPP;
-    if ("ssa-827".equals(codeString))
-      return ConsentPolicy.SSA827;
     if ("va-10-0484".equals(codeString))
       return ConsentPolicy.VA100484;
     if ("va-10-0485".equals(codeString))
@@ -89,8 +87,6 @@ public class ConsentPolicyEnumFactory implements EnumFactory<ConsentPolicy> {
       return ConsentPolicy.NCI;
     if ("nih-grdr".equals(codeString))
       return ConsentPolicy.NIHGRDR;
-    if ("va-10-10116".equals(codeString))
-      return ConsentPolicy.VA1010116;
     if ("nih-527".equals(codeString))
       return ConsentPolicy.NIH527;
     if ("ga4gh".equals(codeString))
@@ -117,8 +113,6 @@ public class ConsentPolicyEnumFactory implements EnumFactory<ConsentPolicy> {
       return "mdhhs-5515";
     if (code == ConsentPolicy.NYSSIPP)
       return "nyssipp";
-    if (code == ConsentPolicy.SSA827)
-      return "ssa-827";
     if (code == ConsentPolicy.VA100484)
       return "va-10-0484";
     if (code == ConsentPolicy.VA100485)
@@ -149,8 +143,6 @@ public class ConsentPolicyEnumFactory implements EnumFactory<ConsentPolicy> {
       return "nci";
     if (code == ConsentPolicy.NIHGRDR)
       return "nih-grdr";
-    if (code == ConsentPolicy.VA1010116)
-      return "va-10-10116";
     if (code == ConsentPolicy.NIH527)
       return "nih-527";
     if (code == ConsentPolicy.GA4GH)

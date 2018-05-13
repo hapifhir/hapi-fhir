@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -247,6 +248,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		createCodeSystem();
 
+		Validate.notNull(myTermSvc);
 		myTermSvc.saveDeferred();
 		myTermSvc.saveDeferred();
 		myTermSvc.saveDeferred();
@@ -430,5 +432,4 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
 }

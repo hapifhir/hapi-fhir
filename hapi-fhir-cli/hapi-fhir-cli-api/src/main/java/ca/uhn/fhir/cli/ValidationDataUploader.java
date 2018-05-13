@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationDataUploader extends BaseCommand {
-
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationDataUploader.class);
 
 	private ArrayList<IIdType> myExcludes = new ArrayList<>();
@@ -167,7 +167,7 @@ public class ValidationDataUploader extends BaseCommand {
 
 	}
 
-	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx) throws CommandFailureException {
+	private void uploadDefinitionsDstu2(CommandLine theCommandLine, FhirContext ctx) throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 
 		ourLog.info("Uploading definitions to server");
@@ -267,7 +267,7 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException {
+	private void uploadDefinitionsDstu3(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 		ourLog.info("Uploading definitions to server");
 
@@ -365,7 +365,7 @@ public class ValidationDataUploader extends BaseCommand {
 		ourLog.info("Finished uploading definitions to server (took {} ms)", delay);
 	}
 
-	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException {
+	private void uploadDefinitionsR4(CommandLine theCommandLine, FhirContext theCtx) throws CommandFailureException, ParseException {
 		IGenericClient client = newClient(theCommandLine);
 		ourLog.info("Uploading definitions to server");
 

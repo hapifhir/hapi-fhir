@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
@@ -28,8 +27,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import java.util.Map;
 
 /*
  * #%L
@@ -54,6 +51,11 @@ import java.util.Map;
 @Configuration
 @EnableTransactionManagement
 public class BaseDstu3Config extends BaseConfig {
+
+	@Override
+	public FhirContext fhirContext() {
+		return fhirContextDstu3();
+	}
 
 	@Bean
 	@Primary

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides enrollment and plan details from the processing of an Enrollment resource.
  */
@@ -388,7 +389,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * @param value {@link #request} (Original request resource reference.)
      */
-    public EnrollmentResponse setRequest(Reference value) { 
+    public EnrollmentResponse setRequest(Reference value)  { 
       this.request = value;
       return this;
     }
@@ -432,7 +433,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * @param value {@link #outcome} (Processing status: error, complete.)
      */
-    public EnrollmentResponse setOutcome(CodeableConcept value) { 
+    public EnrollmentResponse setOutcome(CodeableConcept value)  { 
       this.outcome = value;
       return this;
     }
@@ -554,7 +555,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * @param value {@link #organization} (The Insurer who produced this adjudicated response.)
      */
-    public EnrollmentResponse setOrganization(Reference value) { 
+    public EnrollmentResponse setOrganization(Reference value)  { 
       this.organization = value;
       return this;
     }
@@ -598,7 +599,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public EnrollmentResponse setRequestProvider(Reference value) { 
+    public EnrollmentResponse setRequestProvider(Reference value)  { 
       this.requestProvider = value;
       return this;
     }
@@ -642,7 +643,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public EnrollmentResponse setRequestOrganization(Reference value) { 
+    public EnrollmentResponse setRequestOrganization(Reference value)  { 
       this.requestOrganization = value;
       return this;
     }
@@ -667,17 +668,34 @@ public class EnrollmentResponse extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("request", "Reference(EnrollmentRequest)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("outcome", "CodeableConcept", "Processing status: error, complete.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
-        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("request", "Reference(EnrollmentRequest)", "Original request resource reference.", 0, 1, request));
+        children.add(new Property("outcome", "CodeableConcept", "Processing status: error, complete.", 0, 1, outcome));
+        children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
+        children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
+        children.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization));
+        children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
+        children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case 1095692943: /*request*/  return new Property("request", "Reference(EnrollmentRequest)", "Original request resource reference.", 0, 1, request);
+        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Processing status: error, complete.", 0, 1, outcome);
+        case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
+        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization);
+        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
+        case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -860,12 +878,12 @@ public class EnrollmentResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EnrollmentResponse))
+        if (!(other_ instanceof EnrollmentResponse))
           return false;
-        EnrollmentResponse o = (EnrollmentResponse) other;
+        EnrollmentResponse o = (EnrollmentResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
            && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(created, o.created, true)
            && compareDeep(organization, o.organization, true) && compareDeep(requestProvider, o.requestProvider, true)
@@ -873,12 +891,12 @@ public class EnrollmentResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EnrollmentResponse))
+        if (!(other_ instanceof EnrollmentResponse))
           return false;
-        EnrollmentResponse o = (EnrollmentResponse) other;
+        EnrollmentResponse o = (EnrollmentResponse) other_;
         return compareValues(status, o.status, true) && compareValues(disposition, o.disposition, true) && compareValues(created, o.created, true)
           ;
       }

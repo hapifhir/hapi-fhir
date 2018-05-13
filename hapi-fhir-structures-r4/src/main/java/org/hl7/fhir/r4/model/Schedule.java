@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -56,17 +56,17 @@ public class Schedule extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Whether this schedule record is in active use, or should not be used (such as was entered in error).
+     * Whether this schedule record is in active use or should not be used (such as was entered in error).
      */
     @Child(name = "active", type = {BooleanType.class}, order=1, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="Whether this schedule is in active use", formalDefinition="Whether this schedule record is in active use, or should not be used (such as was entered in error)." )
+    @Description(shortDefinition="Whether this schedule is in active use", formalDefinition="Whether this schedule record is in active use or should not be used (such as was entered in error)." )
     protected BooleanType active;
 
     /**
-     * A broad categorisation of the service that is to be performed during this appointment.
+     * A broad categorization of the service that is to be performed during this appointment.
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @Description(shortDefinition="High-level category", formalDefinition="A broad categorization of the service that is to be performed during this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected List<CodeableConcept> serviceCategory;
 
@@ -74,7 +74,7 @@ public class Schedule extends DomainResource {
      * The specific service that is to be performed during this appointment.
      */
     @Child(name = "serviceType", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The specific service that is to be performed during this appointment", formalDefinition="The specific service that is to be performed during this appointment." )
+    @Description(shortDefinition="Specific service", formalDefinition="The specific service that is to be performed during this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-type")
     protected List<CodeableConcept> serviceType;
 
@@ -82,18 +82,18 @@ public class Schedule extends DomainResource {
      * The specialty of a practitioner that would be required to perform the service requested in this appointment.
      */
     @Child(name = "specialty", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment", formalDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment." )
+    @Description(shortDefinition="Type of specialty needed", formalDefinition="The specialty of a practitioner that would be required to perform the service requested in this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-practice-codes")
     protected List<CodeableConcept> specialty;
 
     /**
-     * The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.
+     * The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.
      */
     @Child(name = "actor", type = {Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson", formalDefinition="The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson." )
+    @Description(shortDefinition="E.g. HealthCareService, Location, Practitioner, etc.", formalDefinition="The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson." )
     protected List<Reference> actor;
     /**
-     * The actual objects that are the target of the reference (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
+     * The actual objects that are the target of the reference (The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
      */
     protected List<Resource> actorTarget;
 
@@ -102,14 +102,14 @@ public class Schedule extends DomainResource {
      * The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.
      */
     @Child(name = "planningHorizon", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates", formalDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates." )
+    @Description(shortDefinition="Period of time covered by schedule", formalDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates." )
     protected Period planningHorizon;
 
     /**
      * Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.
      */
     @Child(name = "comment", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated", formalDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated." )
+    @Description(shortDefinition="Comments on availability", formalDefinition="Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated." )
     protected StringType comment;
 
     private static final long serialVersionUID = 203182600L;
@@ -175,7 +175,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #active} (Whether this schedule record is in active use, or should not be used (such as was entered in error).). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     * @return {@link #active} (Whether this schedule record is in active use or should not be used (such as was entered in error).). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
      */
     public BooleanType getActiveElement() { 
       if (this.active == null)
@@ -195,7 +195,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @param value {@link #active} (Whether this schedule record is in active use, or should not be used (such as was entered in error).). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     * @param value {@link #active} (Whether this schedule record is in active use or should not be used (such as was entered in error).). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
      */
     public Schedule setActiveElement(BooleanType value) { 
       this.active = value;
@@ -203,14 +203,14 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return Whether this schedule record is in active use, or should not be used (such as was entered in error).
+     * @return Whether this schedule record is in active use or should not be used (such as was entered in error).
      */
     public boolean getActive() { 
       return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
     }
 
     /**
-     * @param value Whether this schedule record is in active use, or should not be used (such as was entered in error).
+     * @param value Whether this schedule record is in active use or should not be used (such as was entered in error).
      */
     public Schedule setActive(boolean value) { 
         if (this.active == null)
@@ -220,7 +220,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
+     * @return {@link #serviceCategory} (A broad categorization of the service that is to be performed during this appointment.)
      */
     public List<CodeableConcept> getServiceCategory() { 
       if (this.serviceCategory == null)
@@ -379,7 +379,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #actor} (The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
+     * @return {@link #actor} (The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
      */
     public List<Reference> getActor() { 
       if (this.actor == null)
@@ -517,11 +517,11 @@ public class Schedule extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("active", "boolean", "Whether this schedule record is in active use, or should not be used (such as was entered in error).", 0, 1, active));
-        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
+        children.add(new Property("active", "boolean", "Whether this schedule record is in active use or should not be used (such as was entered in error).", 0, 1, active));
+        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         children.add(new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        children.add(new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
+        children.add(new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
         children.add(new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, 1, planningHorizon));
         children.add(new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.", 0, 1, comment));
       }
@@ -530,11 +530,11 @@ public class Schedule extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this schedule record is in active use, or should not be used (such as was entered in error).", 0, 1, active);
-        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this schedule record is in active use or should not be used (such as was entered in error).", 0, 1, active);
+        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
-        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are expected to usually be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor);
+        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor);
         case -1718507650: /*planningHorizon*/  return new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, 1, planningHorizon);
         case 950398559: /*comment*/  return new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.", 0, 1, comment);
         default: return super.getNamedProperty(_hash, _name, _checkValid);

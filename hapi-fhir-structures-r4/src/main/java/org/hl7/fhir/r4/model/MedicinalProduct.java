@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1366,10 +1366,10 @@ public class MedicinalProduct extends DomainResource {
     protected Identifier identifier;
 
     /**
-     * Regulatory type, e.g Investigational or Authorized.
+     * Regulatory type, e.g. Investigational or Authorized.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Regulatory type, e.g Investigational or Authorized", formalDefinition="Regulatory type, e.g Investigational or Authorized." )
+    @Description(shortDefinition="Regulatory type, e.g. Investigational or Authorized", formalDefinition="Regulatory type, e.g. Investigational or Authorized." )
     protected CodeableConcept type;
 
     /**
@@ -1454,7 +1454,7 @@ public class MedicinalProduct extends DomainResource {
      * Clinical particulars, indications etc.
      */
     @Child(name = "clinicalParticulars", type = {MedicinalProductClinicals.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Clinical particulars, indications etc", formalDefinition="Clinical particulars, indications etc." )
+    @Description(shortDefinition="Clinical particulars, indications etc.", formalDefinition="Clinical particulars, indications etc." )
     protected List<Reference> clinicalParticulars;
     /**
      * The actual objects that are the target of the reference (Clinical particulars, indications etc.)
@@ -1549,7 +1549,7 @@ public class MedicinalProduct extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Regulatory type, e.g Investigational or Authorized.)
+     * @return {@link #type} (Regulatory type, e.g. Investigational or Authorized.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -1565,7 +1565,7 @@ public class MedicinalProduct extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Regulatory type, e.g Investigational or Authorized.)
+     * @param value {@link #type} (Regulatory type, e.g. Investigational or Authorized.)
      */
     public MedicinalProduct setType(CodeableConcept value) { 
       this.type = value;
@@ -2363,7 +2363,7 @@ public class MedicinalProduct extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Business idenfifier for this product. Could be an MPID.", 0, 1, identifier));
-        children.add(new Property("type", "CodeableConcept", "Regulatory type, e.g Investigational or Authorized.", 0, 1, type));
+        children.add(new Property("type", "CodeableConcept", "Regulatory type, e.g. Investigational or Authorized.", 0, 1, type));
         children.add(new Property("combinedPharmaceuticalDoseForm", "CodeableConcept", "The dose form for a single part product, or combined form of a multiple part product.", 0, 1, combinedPharmaceuticalDoseForm));
         children.add(new Property("additionalMonitoringIndicator", "CodeableConcept", "Whether the Medicinal Product is subject to additional monitoring for regulatory reasons.", 0, 1, additionalMonitoringIndicator));
         children.add(new Property("specialMeasures", "string", "Whether the Medicinal Product is subject to special measures for regulatory reasons.", 0, java.lang.Integer.MAX_VALUE, specialMeasures));
@@ -2385,7 +2385,7 @@ public class MedicinalProduct extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business idenfifier for this product. Could be an MPID.", 0, 1, identifier);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Regulatory type, e.g Investigational or Authorized.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Regulatory type, e.g. Investigational or Authorized.", 0, 1, type);
         case -1992898487: /*combinedPharmaceuticalDoseForm*/  return new Property("combinedPharmaceuticalDoseForm", "CodeableConcept", "The dose form for a single part product, or combined form of a multiple part product.", 0, 1, combinedPharmaceuticalDoseForm);
         case 1935999744: /*additionalMonitoringIndicator*/  return new Property("additionalMonitoringIndicator", "CodeableConcept", "Whether the Medicinal Product is subject to additional monitoring for regulatory reasons.", 0, 1, additionalMonitoringIndicator);
         case 975102638: /*specialMeasures*/  return new Property("specialMeasures", "string", "Whether the Medicinal Product is subject to special measures for regulatory reasons.", 0, java.lang.Integer.MAX_VALUE, specialMeasures);

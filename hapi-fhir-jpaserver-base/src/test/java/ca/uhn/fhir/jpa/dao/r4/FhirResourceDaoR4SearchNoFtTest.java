@@ -464,12 +464,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testIndexNoDuplicatesNumber() {
 		final ImmunizationRecommendation res = new ImmunizationRecommendation();
-		res.addRecommendation().setDoseNumber(1);
-		res.addRecommendation().setDoseNumber(1);
-		res.addRecommendation().setDoseNumber(1);
-		res.addRecommendation().setDoseNumber(2);
-		res.addRecommendation().setDoseNumber(2);
-		res.addRecommendation().setDoseNumber(2);
+		res.addRecommendation().setDoseNumber(new PositiveIntType(1));
+		res.addRecommendation().setDoseNumber(new PositiveIntType(1));
+		res.addRecommendation().setDoseNumber(new PositiveIntType(1));
+		res.addRecommendation().setDoseNumber(new PositiveIntType(2));
+		res.addRecommendation().setDoseNumber(new PositiveIntType(2));
+		res.addRecommendation().setDoseNumber(new PositiveIntType(2));
 
 		IIdType id = myImmunizationRecommendationDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1410,12 +1410,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	public void testSearchNumberParam() {
 		ImmunizationRecommendation e1 = new ImmunizationRecommendation();
 		e1.addIdentifier().setSystem("foo").setValue("testSearchNumberParam01");
-		e1.addRecommendation().setDoseNumber(4 * 24 * 60);
+		e1.addRecommendation().setDoseNumber(new PositiveIntType(4 * 24 * 60));
 		IIdType id1 = myImmunizationRecommendationDao.create(e1, mySrd).getId();
 
 		ImmunizationRecommendation e2 = new ImmunizationRecommendation();
 		e2.addIdentifier().setSystem("foo").setValue("testSearchNumberParam02");
-		e2.addRecommendation().setDoseNumber(4);
+		e2.addRecommendation().setDoseNumber(new PositiveIntType(4));
 		IIdType id2 = myImmunizationRecommendationDao.create(e2, mySrd).getId();
 		{
 			IBundleProvider found = myImmunizationRecommendationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ImmunizationRecommendation.SP_DOSE_NUMBER, new NumberParam(">2")));
@@ -1436,11 +1436,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchNumberWrongParam() {
 		ImmunizationRecommendation ir1 = new ImmunizationRecommendation();
-		ir1.addRecommendation().setDoseNumber(1);
+		ir1.addRecommendation().setDoseNumber(new PositiveIntType(1));
 		String id1 = myImmunizationRecommendationDao.create(ir1).getId().toUnqualifiedVersionless().getValue();
 
 		ImmunizationRecommendation ir2 = new ImmunizationRecommendation();
-		ir2.addRecommendation().setDoseNumber(2);
+		ir2.addRecommendation().setDoseNumber(new PositiveIntType(2));
 		String id2 = myImmunizationRecommendationDao.create(ir2).getId().toUnqualifiedVersionless().getValue();
 
 		{

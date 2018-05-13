@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*
  * #%L
@@ -70,6 +71,7 @@ public class HapiLocalizer {
 		for (ResourceBundle nextBundle : myBundle) {
 			if (nextBundle.containsKey(theQualifiedKey)) {
 				formatString = nextBundle.getString(theQualifiedKey);
+				formatString = trim(formatString);
 			}
 			if (isNotBlank(formatString)) {
 				break;

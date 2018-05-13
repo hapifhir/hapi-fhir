@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -590,7 +590,7 @@ public class Claim extends DomainResource {
         /**
          * Party to be reimbursed: Subscriber, provider, other.
          */
-        @Child(name = "party", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "party", type = {Practitioner.class, PractitionerRole.class, Organization.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Party to receive the payable", formalDefinition="Party to be reimbursed: Subscriber, provider, other." )
         protected Reference party;
 
@@ -707,7 +707,7 @@ public class Claim extends DomainResource {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Type of Party to be reimbursed: Subscriber, provider, other.", 0, 1, type));
           children.add(new Property("resource", "Coding", "organization | patient | practitioner | relatedperson.", 0, 1, resource));
-          children.add(new Property("party", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, party));
+          children.add(new Property("party", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson)", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, party));
         }
 
         @Override
@@ -715,7 +715,7 @@ public class Claim extends DomainResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of Party to be reimbursed: Subscriber, provider, other.", 0, 1, type);
           case -341064690: /*resource*/  return new Property("resource", "Coding", "organization | patient | practitioner | relatedperson.", 0, 1, resource);
-          case 106437350: /*party*/  return new Property("party", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, party);
+          case 106437350: /*party*/  return new Property("party", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson)", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, party);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -855,7 +855,7 @@ public class Claim extends DomainResource {
         /**
          * Member of the team who provided the overall service.
          */
-        @Child(name = "provider", type = {Practitioner.class, Organization.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "provider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Provider individual or organization", formalDefinition="Member of the team who provided the overall service." )
         protected Reference provider;
 
@@ -1085,7 +1085,7 @@ public class Claim extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("sequence", "positiveInt", "Sequence of the careTeam which serves to order and provide a link.", 0, 1, sequence));
-          children.add(new Property("provider", "Reference(Practitioner|Organization)", "Member of the team who provided the overall service.", 0, 1, provider));
+          children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "Member of the team who provided the overall service.", 0, 1, provider));
           children.add(new Property("responsible", "boolean", "The party who is billing and responsible for the claimed good or service rendered to the patient.", 0, 1, responsible));
           children.add(new Property("role", "CodeableConcept", "The lead, assisting or supervising practitioner and their discipline if a multidisiplinary team.", 0, 1, role));
           children.add(new Property("qualification", "CodeableConcept", "The qualification which is applicable for this service.", 0, 1, qualification));
@@ -1095,7 +1095,7 @@ public class Claim extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 1349547969: /*sequence*/  return new Property("sequence", "positiveInt", "Sequence of the careTeam which serves to order and provide a link.", 0, 1, sequence);
-          case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|Organization)", "Member of the team who provided the overall service.", 0, 1, provider);
+          case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "Member of the team who provided the overall service.", 0, 1, provider);
           case 1847674614: /*responsible*/  return new Property("responsible", "boolean", "The party who is billing and responsible for the claimed good or service rendered to the patient.", 0, 1, responsible);
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "The lead, assisting or supervising practitioner and their discipline if a multidisiplinary team.", 0, 1, role);
           case -631333393: /*qualification*/  return new Property("qualification", "CodeableConcept", "The qualification which is applicable for this service.", 0, 1, qualification);
@@ -1287,7 +1287,7 @@ public class Claim extends DomainResource {
         /**
          * Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.
          */
-        @Child(name = "value", type = {StringType.class, Quantity.class, Attachment.class, Reference.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {BooleanType.class, StringType.class, Quantity.class, Attachment.class, Reference.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Additional Data or supporting information", formalDefinition="Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data." )
         protected Type value;
 
@@ -1421,26 +1421,30 @@ public class Claim extends DomainResource {
          * @return {@link #timing} (The date when or period to which this information refers.)
          */
         public DateType getTimingDateType() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (DateType) this.timing;
         }
 
         public boolean hasTimingDateType() { 
-          return this.timing instanceof DateType;
+          return this != null && this.timing instanceof DateType;
         }
 
         /**
          * @return {@link #timing} (The date when or period to which this information refers.)
          */
         public Period getTimingPeriod() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Period) this.timing;
         }
 
         public boolean hasTimingPeriod() { 
-          return this.timing instanceof Period;
+          return this != null && this.timing instanceof Period;
         }
 
         public boolean hasTiming() { 
@@ -1451,6 +1455,8 @@ public class Claim extends DomainResource {
          * @param value {@link #timing} (The date when or period to which this information refers.)
          */
         public SpecialConditionComponent setTiming(Type value) { 
+          if (value != null && !(value instanceof DateType || value instanceof Period))
+            throw new Error("Not the right type for Claim.information.timing[x]: "+value.fhirType());
           this.timing = value;
           return this;
         }
@@ -1465,53 +1471,76 @@ public class Claim extends DomainResource {
         /**
          * @return {@link #value} (Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.)
          */
+        public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
+          if (!(this.value instanceof BooleanType))
+            throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
+          return (BooleanType) this.value;
+        }
+
+        public boolean hasValueBooleanType() { 
+          return this != null && this.value instanceof BooleanType;
+        }
+
+        /**
+         * @return {@link #value} (Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.)
+         */
         public StringType getValueStringType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
         public boolean hasValueStringType() { 
-          return this.value instanceof StringType;
+          return this != null && this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.)
          */
         public Attachment getValueAttachment() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
         public boolean hasValueAttachment() { 
-          return this.value instanceof Attachment;
+          return this != null && this.value instanceof Attachment;
         }
 
         /**
          * @return {@link #value} (Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.)
          */
         public Reference getValueReference() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
         }
 
         public boolean hasValueReference() { 
-          return this.value instanceof Reference;
+          return this != null && this.value instanceof Reference;
         }
 
         public boolean hasValue() { 
@@ -1522,6 +1551,8 @@ public class Claim extends DomainResource {
          * @param value {@link #value} (Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.)
          */
         public SpecialConditionComponent setValue(Type value) { 
+          if (value != null && !(value instanceof BooleanType || value instanceof StringType || value instanceof Quantity || value instanceof Attachment || value instanceof Reference))
+            throw new Error("Not the right type for Claim.information.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -1556,7 +1587,7 @@ public class Claim extends DomainResource {
           children.add(new Property("category", "CodeableConcept", "The general class of the information supplied: information; exception; accident, employment; onset, etc.", 0, 1, category));
           children.add(new Property("code", "CodeableConcept", "System and code pertaining to the specific information regarding special conditions relating to the setting, treatment or patient  for which care is sought which may influence the adjudication.", 0, 1, code));
           children.add(new Property("timing[x]", "date|Period", "The date when or period to which this information refers.", 0, 1, timing));
-          children.add(new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value));
+          children.add(new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value));
           children.add(new Property("reason", "CodeableConcept", "For example, provides the reason for: the additional stay, or missing tooth or any other situation where a reason code is required in addition to the content.", 0, 1, reason));
         }
 
@@ -1570,12 +1601,13 @@ public class Claim extends DomainResource {
           case -873664438: /*timing*/  return new Property("timing[x]", "date|Period", "The date when or period to which this information refers.", 0, 1, timing);
           case 807935768: /*timingDate*/  return new Property("timing[x]", "date|Period", "The date when or period to which this information refers.", 0, 1, timing);
           case -615615829: /*timingPeriod*/  return new Property("timing[x]", "date|Period", "The date when or period to which this information refers.", 0, 1, timing);
-          case -1410166417: /*value[x]*/  return new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
-          case 111972721: /*value*/  return new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
-          case -1424603934: /*valueString*/  return new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
-          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
-          case -475566732: /*valueAttachment*/  return new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
-          case 1755241690: /*valueReference*/  return new Property("value[x]", "string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case -475566732: /*valueAttachment*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "boolean|string|Quantity|Attachment|Reference(Any)", "Additional data or information such as resources, documents, images etc. including references to the data or the actual inclusion of the data.", 0, 1, value);
           case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "For example, provides the reason for: the additional stay, or missing tooth or any other situation where a reason code is required in addition to the content.", 0, 1, reason);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1664,7 +1696,7 @@ public class Claim extends DomainResource {
         case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -873664438: /*timing*/ return new String[] {"date", "Period"};
-        case 111972721: /*value*/ return new String[] {"string", "Quantity", "Attachment", "Reference"};
+        case 111972721: /*value*/ return new String[] {"boolean", "string", "Quantity", "Attachment", "Reference"};
         case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1691,6 +1723,10 @@ public class Claim extends DomainResource {
         else if (name.equals("timingPeriod")) {
           this.timing = new Period();
           return this.timing;
+        }
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
+          return this.value;
         }
         else if (name.equals("valueString")) {
           this.value = new StringType();
@@ -1869,26 +1905,30 @@ public class Claim extends DomainResource {
          * @return {@link #diagnosis} (The diagnosis.)
          */
         public CodeableConcept getDiagnosisCodeableConcept() throws FHIRException { 
+          if (this.diagnosis == null)
+            return null;
           if (!(this.diagnosis instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.diagnosis.getClass().getName()+" was encountered");
           return (CodeableConcept) this.diagnosis;
         }
 
         public boolean hasDiagnosisCodeableConcept() { 
-          return this.diagnosis instanceof CodeableConcept;
+          return this != null && this.diagnosis instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #diagnosis} (The diagnosis.)
          */
         public Reference getDiagnosisReference() throws FHIRException { 
+          if (this.diagnosis == null)
+            return null;
           if (!(this.diagnosis instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.diagnosis.getClass().getName()+" was encountered");
           return (Reference) this.diagnosis;
         }
 
         public boolean hasDiagnosisReference() { 
-          return this.diagnosis instanceof Reference;
+          return this != null && this.diagnosis instanceof Reference;
         }
 
         public boolean hasDiagnosis() { 
@@ -1899,6 +1939,8 @@ public class Claim extends DomainResource {
          * @param value {@link #diagnosis} (The diagnosis.)
          */
         public DiagnosisComponent setDiagnosis(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for Claim.diagnosis.diagnosis[x]: "+value.fhirType());
           this.diagnosis = value;
           return this;
         }
@@ -2293,26 +2335,30 @@ public class Claim extends DomainResource {
          * @return {@link #procedure} (The procedure code.)
          */
         public CodeableConcept getProcedureCodeableConcept() throws FHIRException { 
+          if (this.procedure == null)
+            return null;
           if (!(this.procedure instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.procedure.getClass().getName()+" was encountered");
           return (CodeableConcept) this.procedure;
         }
 
         public boolean hasProcedureCodeableConcept() { 
-          return this.procedure instanceof CodeableConcept;
+          return this != null && this.procedure instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #procedure} (The procedure code.)
          */
         public Reference getProcedureReference() throws FHIRException { 
+          if (this.procedure == null)
+            return null;
           if (!(this.procedure instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.procedure.getClass().getName()+" was encountered");
           return (Reference) this.procedure;
         }
 
         public boolean hasProcedureReference() { 
-          return this.procedure instanceof Reference;
+          return this != null && this.procedure instanceof Reference;
         }
 
         public boolean hasProcedure() { 
@@ -2323,6 +2369,8 @@ public class Claim extends DomainResource {
          * @param value {@link #procedure} (The procedure code.)
          */
         public ProcedureComponent setProcedure(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for Claim.procedure.procedure[x]: "+value.fhirType());
           this.procedure = value;
           return this;
         }
@@ -3191,26 +3239,30 @@ public class Claim extends DomainResource {
          * @return {@link #location} (Accident Place.)
          */
         public Address getLocationAddress() throws FHIRException { 
+          if (this.location == null)
+            return null;
           if (!(this.location instanceof Address))
             throw new FHIRException("Type mismatch: the type Address was expected, but "+this.location.getClass().getName()+" was encountered");
           return (Address) this.location;
         }
 
         public boolean hasLocationAddress() { 
-          return this.location instanceof Address;
+          return this != null && this.location instanceof Address;
         }
 
         /**
          * @return {@link #location} (Accident Place.)
          */
         public Reference getLocationReference() throws FHIRException { 
+          if (this.location == null)
+            return null;
           if (!(this.location instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.location.getClass().getName()+" was encountered");
           return (Reference) this.location;
         }
 
         public boolean hasLocationReference() { 
-          return this.location instanceof Reference;
+          return this != null && this.location instanceof Reference;
         }
 
         public boolean hasLocation() { 
@@ -3221,6 +3273,8 @@ public class Claim extends DomainResource {
          * @param value {@link #location} (Accident Place.)
          */
         public AccidentComponent setLocation(Type value) { 
+          if (value != null && !(value instanceof Address || value instanceof Reference))
+            throw new Error("Not the right type for Claim.accident.location[x]: "+value.fhirType());
           this.location = value;
           return this;
         }
@@ -3505,10 +3559,10 @@ public class Claim extends DomainResource {
 
 
         /**
-         * Physical service site on the patient (limb, tooth, etc).
+         * Physical service site on the patient (limb, tooth, etc.).
          */
         @Child(name = "bodySite", type = {CodeableConcept.class}, order=18, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc)." )
+        @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc.)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/tooth")
         protected CodeableConcept bodySite;
 
@@ -4034,26 +4088,30 @@ public class Claim extends DomainResource {
          * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
          */
         public DateType getServicedDateType() throws FHIRException { 
+          if (this.serviced == null)
+            return null;
           if (!(this.serviced instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.serviced.getClass().getName()+" was encountered");
           return (DateType) this.serviced;
         }
 
         public boolean hasServicedDateType() { 
-          return this.serviced instanceof DateType;
+          return this != null && this.serviced instanceof DateType;
         }
 
         /**
          * @return {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
          */
         public Period getServicedPeriod() throws FHIRException { 
+          if (this.serviced == null)
+            return null;
           if (!(this.serviced instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.serviced.getClass().getName()+" was encountered");
           return (Period) this.serviced;
         }
 
         public boolean hasServicedPeriod() { 
-          return this.serviced instanceof Period;
+          return this != null && this.serviced instanceof Period;
         }
 
         public boolean hasServiced() { 
@@ -4064,6 +4122,8 @@ public class Claim extends DomainResource {
          * @param value {@link #serviced} (The date or dates when the enclosed suite of services were performed or completed.)
          */
         public ItemComponent setServiced(Type value) { 
+          if (value != null && !(value instanceof DateType || value instanceof Period))
+            throw new Error("Not the right type for Claim.item.serviced[x]: "+value.fhirType());
           this.serviced = value;
           return this;
         }
@@ -4079,39 +4139,45 @@ public class Claim extends DomainResource {
          * @return {@link #location} (Where the service was provided.)
          */
         public CodeableConcept getLocationCodeableConcept() throws FHIRException { 
+          if (this.location == null)
+            return null;
           if (!(this.location instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.location.getClass().getName()+" was encountered");
           return (CodeableConcept) this.location;
         }
 
         public boolean hasLocationCodeableConcept() { 
-          return this.location instanceof CodeableConcept;
+          return this != null && this.location instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #location} (Where the service was provided.)
          */
         public Address getLocationAddress() throws FHIRException { 
+          if (this.location == null)
+            return null;
           if (!(this.location instanceof Address))
             throw new FHIRException("Type mismatch: the type Address was expected, but "+this.location.getClass().getName()+" was encountered");
           return (Address) this.location;
         }
 
         public boolean hasLocationAddress() { 
-          return this.location instanceof Address;
+          return this != null && this.location instanceof Address;
         }
 
         /**
          * @return {@link #location} (Where the service was provided.)
          */
         public Reference getLocationReference() throws FHIRException { 
+          if (this.location == null)
+            return null;
           if (!(this.location instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.location.getClass().getName()+" was encountered");
           return (Reference) this.location;
         }
 
         public boolean hasLocationReference() { 
-          return this.location instanceof Reference;
+          return this != null && this.location instanceof Reference;
         }
 
         public boolean hasLocation() { 
@@ -4122,6 +4188,8 @@ public class Claim extends DomainResource {
          * @param value {@link #location} (Where the service was provided.)
          */
         public ItemComponent setLocation(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Address || value instanceof Reference))
+            throw new Error("Not the right type for Claim.item.location[x]: "+value.fhirType());
           this.location = value;
           return this;
         }
@@ -4341,7 +4409,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @return {@link #bodySite} (Physical service site on the patient (limb, tooth, etc).)
+         * @return {@link #bodySite} (Physical service site on the patient (limb, tooth, etc.).)
          */
         public CodeableConcept getBodySite() { 
           if (this.bodySite == null)
@@ -4357,7 +4425,7 @@ public class Claim extends DomainResource {
         }
 
         /**
-         * @param value {@link #bodySite} (Physical service site on the patient (limb, tooth, etc).)
+         * @param value {@link #bodySite} (Physical service site on the patient (limb, tooth, etc.).)
          */
         public ItemComponent setBodySite(CodeableConcept value) { 
           this.bodySite = value;
@@ -4564,7 +4632,7 @@ public class Claim extends DomainResource {
           children.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor));
           children.add(new Property("net", "Money", "The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
           children.add(new Property("udi", "Reference(Device)", "List of Unique Device Identifiers associated with this line item.", 0, java.lang.Integer.MAX_VALUE, udi));
-          children.add(new Property("bodySite", "CodeableConcept", "Physical service site on the patient (limb, tooth, etc).", 0, 1, bodySite));
+          children.add(new Property("bodySite", "CodeableConcept", "Physical service site on the patient (limb, tooth, etc.).", 0, 1, bodySite));
           children.add(new Property("subSite", "CodeableConcept", "A region or surface of the site, eg. limb region or tooth surface(s).", 0, java.lang.Integer.MAX_VALUE, subSite));
           children.add(new Property("encounter", "Reference(Encounter)", "A billed item may include goods or services provided in multiple encounters.", 0, java.lang.Integer.MAX_VALUE, encounter));
           children.add(new Property("detail", "", "Second tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, detail));
@@ -4597,7 +4665,7 @@ public class Claim extends DomainResource {
           case -1282148017: /*factor*/  return new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor);
           case 108957: /*net*/  return new Property("net", "Money", "The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
           case 115642: /*udi*/  return new Property("udi", "Reference(Device)", "List of Unique Device Identifiers associated with this line item.", 0, java.lang.Integer.MAX_VALUE, udi);
-          case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Physical service site on the patient (limb, tooth, etc).", 0, 1, bodySite);
+          case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Physical service site on the patient (limb, tooth, etc.).", 0, 1, bodySite);
           case -1868566105: /*subSite*/  return new Property("subSite", "CodeableConcept", "A region or surface of the site, eg. limb region or tooth surface(s).", 0, java.lang.Integer.MAX_VALUE, subSite);
           case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "A billed item may include goods or services provided in multiple encounters.", 0, java.lang.Integer.MAX_VALUE, encounter);
           case -1335224239: /*detail*/  return new Property("detail", "", "Second tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, detail);
@@ -6791,14 +6859,14 @@ public class Claim extends DomainResource {
     /**
      * Person who created the invoice/claim/pre-determination or pre-authorization.
      */
-    @Child(name = "enterer", type = {Practitioner.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "enterer", type = {Practitioner.class, PractitionerRole.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Author", formalDefinition="Person who created the invoice/claim/pre-determination or pre-authorization." )
     protected Reference enterer;
 
     /**
      * The actual object that is the target of the reference (Person who created the invoice/claim/pre-determination or pre-authorization.)
      */
-    protected Practitioner entererTarget;
+    protected Resource entererTarget;
 
     /**
      * The Insurer who is target of the request.
@@ -6815,31 +6883,19 @@ public class Claim extends DomainResource {
     /**
      * The provider which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name = "provider", type = {Practitioner.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "provider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible provider", formalDefinition="The provider which is responsible for the bill, claim pre-determination, pre-authorization." )
     protected Reference provider;
 
     /**
      * The actual object that is the target of the reference (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    protected Practitioner providerTarget;
-
-    /**
-     * The organization which is responsible for the bill, claim pre-determination, pre-authorization.
-     */
-    @Child(name = "organization", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the bill, claim pre-determination, pre-authorization." )
-    protected Reference organization;
-
-    /**
-     * The actual object that is the target of the reference (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    protected Organization organizationTarget;
+    protected Resource providerTarget;
 
     /**
      * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
      */
-    @Child(name = "priority", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "priority", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (STAT), best effort (NORMAL), deferred (DEFER)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/process-priority")
     protected CodeableConcept priority;
@@ -6847,7 +6903,7 @@ public class Claim extends DomainResource {
     /**
      * In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.
      */
-    @Child(name = "fundsReserve", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "fundsReserve", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Funds requested to be reserved", formalDefinition="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fundsreserve")
     protected CodeableConcept fundsReserve;
@@ -6855,14 +6911,14 @@ public class Claim extends DomainResource {
     /**
      * Other claims which are related to this claim such as prior claim versions or for related services.
      */
-    @Child(name = "related", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "related", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Related Claims which may be revelant to processing this claimn", formalDefinition="Other claims which are related to this claim such as prior claim versions or for related services." )
     protected List<RelatedClaimComponent> related;
 
     /**
      * Prescription to support the dispensing of Pharmacy or Vision products.
      */
-    @Child(name = "prescription", type = {MedicationRequest.class, VisionPrescription.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "prescription", type = {MedicationRequest.class, VisionPrescription.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Prescription authorizing services or products", formalDefinition="Prescription to support the dispensing of Pharmacy or Vision products." )
     protected Reference prescription;
 
@@ -6874,7 +6930,7 @@ public class Claim extends DomainResource {
     /**
      * Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products. For example, a physician may prescribe a medication which the pharmacy determines is contraindicated, or for which the patient has an intolerance, and therefor issues a new precription for an alternate medication which has the same theraputic intent. The prescription from the pharmacy becomes the 'prescription' and that from the physician becomes the 'original prescription'.
      */
-    @Child(name = "originalPrescription", type = {MedicationRequest.class}, order=16, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "originalPrescription", type = {MedicationRequest.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Original prescription if superceded by fulfiller", formalDefinition="Original prescription which has been superceded by this prescription to support the dispensing of pharmacy services, medications or products. For example, a physician may prescribe a medication which the pharmacy determines is contraindicated, or for which the patient has an intolerance, and therefor issues a new precription for an alternate medication which has the same theraputic intent. The prescription from the pharmacy becomes the 'prescription' and that from the physician becomes the 'original prescription'." )
     protected Reference originalPrescription;
 
@@ -6886,14 +6942,14 @@ public class Claim extends DomainResource {
     /**
      * The party to be reimbursed for the services.
      */
-    @Child(name = "payee", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "payee", type = {}, order=16, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Party to be paid any benefits payable", formalDefinition="The party to be reimbursed for the services." )
     protected PayeeComponent payee;
 
     /**
      * The referral resource which lists the date, practitioner, reason and other supporting information.
      */
-    @Child(name = "referral", type = {ServiceRequest.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "referral", type = {ServiceRequest.class}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Treatment Referral", formalDefinition="The referral resource which lists the date, practitioner, reason and other supporting information." )
     protected Reference referral;
 
@@ -6905,7 +6961,7 @@ public class Claim extends DomainResource {
     /**
      * Facility where the services were provided.
      */
-    @Child(name = "facility", type = {Location.class}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "facility", type = {Location.class}, order=18, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
     protected Reference facility;
 
@@ -6917,74 +6973,60 @@ public class Claim extends DomainResource {
     /**
      * The members of the team who provided the overall service as well as their role and whether responsible and qualifications.
      */
-    @Child(name = "careTeam", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "careTeam", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Members of the care team", formalDefinition="The members of the team who provided the overall service as well as their role and whether responsible and qualifications." )
     protected List<CareTeamComponent> careTeam;
 
     /**
      * Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required.
      */
-    @Child(name = "information", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "information", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Exceptions, special considerations, the condition, situation, prior or concurrent issues", formalDefinition="Additional information codes regarding exceptions, special considerations, the condition, situation, prior or concurrent issues. Often there are mutiple jurisdiction specific valuesets which are required." )
     protected List<SpecialConditionComponent> information;
 
     /**
      * List of patient diagnosis for which care is sought.
      */
-    @Child(name = "diagnosis", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "diagnosis", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="List of Diagnosis", formalDefinition="List of patient diagnosis for which care is sought." )
     protected List<DiagnosisComponent> diagnosis;
 
     /**
      * Ordered list of patient procedures performed to support the adjudication.
      */
-    @Child(name = "procedure", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "procedure", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Procedures performed", formalDefinition="Ordered list of patient procedures performed to support the adjudication." )
     protected List<ProcedureComponent> procedure;
 
     /**
      * Financial instrument by which payment information for health care.
      */
-    @Child(name = "insurance", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "insurance", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<InsuranceComponent> insurance;
 
     /**
      * An accident which resulted in the need for healthcare services.
      */
-    @Child(name = "accident", type = {}, order=25, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "accident", type = {}, order=24, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Details about an accident", formalDefinition="An accident which resulted in the need for healthcare services." )
     protected AccidentComponent accident;
 
     /**
-     * The start and optional end dates of when the patient was precluded from working due to the treatable condition(s).
-     */
-    @Child(name = "employmentImpacted", type = {Period.class}, order=26, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Period unable to work", formalDefinition="The start and optional end dates of when the patient was precluded from working due to the treatable condition(s)." )
-    protected Period employmentImpacted;
-
-    /**
-     * The start and optional end dates of when the patient was confined to a treatment center.
-     */
-    @Child(name = "hospitalization", type = {Period.class}, order=27, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Period in hospital", formalDefinition="The start and optional end dates of when the patient was confined to a treatment center." )
-    protected Period hospitalization;
-
-    /**
      * First tier of goods and services.
      */
-    @Child(name = "item", type = {}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "item", type = {}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Goods and Services", formalDefinition="First tier of goods and services." )
     protected List<ItemComponent> item;
 
     /**
      * The total value of the claim.
      */
-    @Child(name = "total", type = {Money.class}, order=29, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "total", type = {Money.class}, order=26, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Total claim cost", formalDefinition="The total value of the claim." )
     protected Money total;
 
-    private static final long serialVersionUID = 1349991484L;
+    private static final long serialVersionUID = 624765238L;
 
   /**
    * Constructor
@@ -7365,19 +7407,14 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #enterer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Person who created the invoice/claim/pre-determination or pre-authorization.)
      */
-    public Practitioner getEntererTarget() { 
-      if (this.entererTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Claim.enterer");
-        else if (Configuration.doAutoCreate())
-          this.entererTarget = new Practitioner(); // aa
+    public Resource getEntererTarget() { 
       return this.entererTarget;
     }
 
     /**
      * @param value {@link #enterer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Person who created the invoice/claim/pre-determination or pre-authorization.)
      */
-    public Claim setEntererTarget(Practitioner value) { 
+    public Claim setEntererTarget(Resource value) { 
       this.entererTarget = value;
       return this;
     }
@@ -7453,64 +7490,15 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #provider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    public Practitioner getProviderTarget() { 
-      if (this.providerTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Claim.provider");
-        else if (Configuration.doAutoCreate())
-          this.providerTarget = new Practitioner(); // aa
+    public Resource getProviderTarget() { 
       return this.providerTarget;
     }
 
     /**
      * @param value {@link #provider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The provider which is responsible for the bill, claim pre-determination, pre-authorization.)
      */
-    public Claim setProviderTarget(Practitioner value) { 
+    public Claim setProviderTarget(Resource value) { 
       this.providerTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #organization} (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Reference getOrganization() { 
-      if (this.organization == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Claim.organization");
-        else if (Configuration.doAutoCreate())
-          this.organization = new Reference(); // cc
-      return this.organization;
-    }
-
-    public boolean hasOrganization() { 
-      return this.organization != null && !this.organization.isEmpty();
-    }
-
-    /**
-     * @param value {@link #organization} (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Claim setOrganization(Reference value) { 
-      this.organization = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Organization getOrganizationTarget() { 
-      if (this.organizationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Claim.organization");
-        else if (Configuration.doAutoCreate())
-          this.organizationTarget = new Organization(); // aa
-      return this.organizationTarget;
-    }
-
-    /**
-     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the bill, claim pre-determination, pre-authorization.)
-     */
-    public Claim setOrganizationTarget(Organization value) { 
-      this.organizationTarget = value;
       return this;
     }
 
@@ -8100,54 +8088,6 @@ public class Claim extends DomainResource {
     }
 
     /**
-     * @return {@link #employmentImpacted} (The start and optional end dates of when the patient was precluded from working due to the treatable condition(s).)
-     */
-    public Period getEmploymentImpacted() { 
-      if (this.employmentImpacted == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Claim.employmentImpacted");
-        else if (Configuration.doAutoCreate())
-          this.employmentImpacted = new Period(); // cc
-      return this.employmentImpacted;
-    }
-
-    public boolean hasEmploymentImpacted() { 
-      return this.employmentImpacted != null && !this.employmentImpacted.isEmpty();
-    }
-
-    /**
-     * @param value {@link #employmentImpacted} (The start and optional end dates of when the patient was precluded from working due to the treatable condition(s).)
-     */
-    public Claim setEmploymentImpacted(Period value) { 
-      this.employmentImpacted = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #hospitalization} (The start and optional end dates of when the patient was confined to a treatment center.)
-     */
-    public Period getHospitalization() { 
-      if (this.hospitalization == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Claim.hospitalization");
-        else if (Configuration.doAutoCreate())
-          this.hospitalization = new Period(); // cc
-      return this.hospitalization;
-    }
-
-    public boolean hasHospitalization() { 
-      return this.hospitalization != null && !this.hospitalization.isEmpty();
-    }
-
-    /**
-     * @param value {@link #hospitalization} (The start and optional end dates of when the patient was confined to a treatment center.)
-     */
-    public Claim setHospitalization(Period value) { 
-      this.hospitalization = value;
-      return this;
-    }
-
-    /**
      * @return {@link #item} (First tier of goods and services.)
      */
     public List<ItemComponent> getItem() { 
@@ -8234,10 +8174,9 @@ public class Claim extends DomainResource {
         children.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient));
         children.add(new Property("billablePeriod", "Period", "The billable period for which charges are being submitted.", 0, 1, billablePeriod));
         children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
-        children.add(new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, 1, enterer));
+        children.add(new Property("enterer", "Reference(Practitioner|PractitionerRole)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, 1, enterer));
         children.add(new Property("insurer", "Reference(Organization)", "The Insurer who is target of the request.", 0, 1, insurer));
-        children.add(new Property("provider", "Reference(Practitioner)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, 1, provider));
-        children.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the bill, claim pre-determination, pre-authorization.", 0, 1, organization));
+        children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, 1, provider));
         children.add(new Property("priority", "CodeableConcept", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, 1, priority));
         children.add(new Property("fundsReserve", "CodeableConcept", "In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.", 0, 1, fundsReserve));
         children.add(new Property("related", "", "Other claims which are related to this claim such as prior claim versions or for related services.", 0, java.lang.Integer.MAX_VALUE, related));
@@ -8252,8 +8191,6 @@ public class Claim extends DomainResource {
         children.add(new Property("procedure", "", "Ordered list of patient procedures performed to support the adjudication.", 0, java.lang.Integer.MAX_VALUE, procedure));
         children.add(new Property("insurance", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, insurance));
         children.add(new Property("accident", "", "An accident which resulted in the need for healthcare services.", 0, 1, accident));
-        children.add(new Property("employmentImpacted", "Period", "The start and optional end dates of when the patient was precluded from working due to the treatable condition(s).", 0, 1, employmentImpacted));
-        children.add(new Property("hospitalization", "Period", "The start and optional end dates of when the patient was confined to a treatment center.", 0, 1, hospitalization));
         children.add(new Property("item", "", "First tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, item));
         children.add(new Property("total", "Money", "The total value of the claim.", 0, 1, total));
       }
@@ -8269,10 +8206,9 @@ public class Claim extends DomainResource {
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient);
         case -332066046: /*billablePeriod*/  return new Property("billablePeriod", "Period", "The billable period for which charges are being submitted.", 0, 1, billablePeriod);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
-        case -1591951995: /*enterer*/  return new Property("enterer", "Reference(Practitioner)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, 1, enterer);
+        case -1591951995: /*enterer*/  return new Property("enterer", "Reference(Practitioner|PractitionerRole)", "Person who created the invoice/claim/pre-determination or pre-authorization.", 0, 1, enterer);
         case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who is target of the request.", 0, 1, insurer);
-        case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, 1, provider);
-        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization which is responsible for the bill, claim pre-determination, pre-authorization.", 0, 1, organization);
+        case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, 1, provider);
         case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Immediate (STAT), best effort (NORMAL), deferred (DEFER).", 0, 1, priority);
         case 1314609806: /*fundsReserve*/  return new Property("fundsReserve", "CodeableConcept", "In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.", 0, 1, fundsReserve);
         case 1090493483: /*related*/  return new Property("related", "", "Other claims which are related to this claim such as prior claim versions or for related services.", 0, java.lang.Integer.MAX_VALUE, related);
@@ -8287,8 +8223,6 @@ public class Claim extends DomainResource {
         case -1095204141: /*procedure*/  return new Property("procedure", "", "Ordered list of patient procedures performed to support the adjudication.", 0, java.lang.Integer.MAX_VALUE, procedure);
         case 73049818: /*insurance*/  return new Property("insurance", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, insurance);
         case -2143202801: /*accident*/  return new Property("accident", "", "An accident which resulted in the need for healthcare services.", 0, 1, accident);
-        case 1051487345: /*employmentImpacted*/  return new Property("employmentImpacted", "Period", "The start and optional end dates of when the patient was precluded from working due to the treatable condition(s).", 0, 1, employmentImpacted);
-        case 1057894634: /*hospitalization*/  return new Property("hospitalization", "Period", "The start and optional end dates of when the patient was confined to a treatment center.", 0, 1, hospitalization);
         case 3242771: /*item*/  return new Property("item", "", "First tier of goods and services.", 0, java.lang.Integer.MAX_VALUE, item);
         case 110549828: /*total*/  return new Property("total", "Money", "The total value of the claim.", 0, 1, total);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -8310,7 +8244,6 @@ public class Claim extends DomainResource {
         case -1591951995: /*enterer*/ return this.enterer == null ? new Base[0] : new Base[] {this.enterer}; // Reference
         case 1957615864: /*insurer*/ return this.insurer == null ? new Base[0] : new Base[] {this.insurer}; // Reference
         case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Reference
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // CodeableConcept
         case 1314609806: /*fundsReserve*/ return this.fundsReserve == null ? new Base[0] : new Base[] {this.fundsReserve}; // CodeableConcept
         case 1090493483: /*related*/ return this.related == null ? new Base[0] : this.related.toArray(new Base[this.related.size()]); // RelatedClaimComponent
@@ -8325,8 +8258,6 @@ public class Claim extends DomainResource {
         case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : this.procedure.toArray(new Base[this.procedure.size()]); // ProcedureComponent
         case 73049818: /*insurance*/ return this.insurance == null ? new Base[0] : this.insurance.toArray(new Base[this.insurance.size()]); // InsuranceComponent
         case -2143202801: /*accident*/ return this.accident == null ? new Base[0] : new Base[] {this.accident}; // AccidentComponent
-        case 1051487345: /*employmentImpacted*/ return this.employmentImpacted == null ? new Base[0] : new Base[] {this.employmentImpacted}; // Period
-        case 1057894634: /*hospitalization*/ return this.hospitalization == null ? new Base[0] : new Base[] {this.hospitalization}; // Period
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ItemComponent
         case 110549828: /*total*/ return this.total == null ? new Base[0] : new Base[] {this.total}; // Money
         default: return super.getProperty(hash, name, checkValid);
@@ -8372,9 +8303,6 @@ public class Claim extends DomainResource {
         case -987494927: // provider
           this.provider = castToReference(value); // Reference
           return value;
-        case 1178922291: // organization
-          this.organization = castToReference(value); // Reference
-          return value;
         case -1165461084: // priority
           this.priority = castToCodeableConcept(value); // CodeableConcept
           return value;
@@ -8417,12 +8345,6 @@ public class Claim extends DomainResource {
         case -2143202801: // accident
           this.accident = (AccidentComponent) value; // AccidentComponent
           return value;
-        case 1051487345: // employmentImpacted
-          this.employmentImpacted = castToPeriod(value); // Period
-          return value;
-        case 1057894634: // hospitalization
-          this.hospitalization = castToPeriod(value); // Period
-          return value;
         case 3242771: // item
           this.getItem().add((ItemComponent) value); // ItemComponent
           return value;
@@ -8460,8 +8382,6 @@ public class Claim extends DomainResource {
           this.insurer = castToReference(value); // Reference
         } else if (name.equals("provider")) {
           this.provider = castToReference(value); // Reference
-        } else if (name.equals("organization")) {
-          this.organization = castToReference(value); // Reference
         } else if (name.equals("priority")) {
           this.priority = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("fundsReserve")) {
@@ -8490,10 +8410,6 @@ public class Claim extends DomainResource {
           this.getInsurance().add((InsuranceComponent) value);
         } else if (name.equals("accident")) {
           this.accident = (AccidentComponent) value; // AccidentComponent
-        } else if (name.equals("employmentImpacted")) {
-          this.employmentImpacted = castToPeriod(value); // Period
-        } else if (name.equals("hospitalization")) {
-          this.hospitalization = castToPeriod(value); // Period
         } else if (name.equals("item")) {
           this.getItem().add((ItemComponent) value);
         } else if (name.equals("total")) {
@@ -8517,7 +8433,6 @@ public class Claim extends DomainResource {
         case -1591951995:  return getEnterer(); 
         case 1957615864:  return getInsurer(); 
         case -987494927:  return getProvider(); 
-        case 1178922291:  return getOrganization(); 
         case -1165461084:  return getPriority(); 
         case 1314609806:  return getFundsReserve(); 
         case 1090493483:  return addRelated(); 
@@ -8532,8 +8447,6 @@ public class Claim extends DomainResource {
         case -1095204141:  return addProcedure(); 
         case 73049818:  return addInsurance(); 
         case -2143202801:  return getAccident(); 
-        case 1051487345:  return getEmploymentImpacted(); 
-        case 1057894634:  return getHospitalization(); 
         case 3242771:  return addItem(); 
         case 110549828:  return getTotal(); 
         default: return super.makeProperty(hash, name);
@@ -8555,7 +8468,6 @@ public class Claim extends DomainResource {
         case -1591951995: /*enterer*/ return new String[] {"Reference"};
         case 1957615864: /*insurer*/ return new String[] {"Reference"};
         case -987494927: /*provider*/ return new String[] {"Reference"};
-        case 1178922291: /*organization*/ return new String[] {"Reference"};
         case -1165461084: /*priority*/ return new String[] {"CodeableConcept"};
         case 1314609806: /*fundsReserve*/ return new String[] {"CodeableConcept"};
         case 1090493483: /*related*/ return new String[] {};
@@ -8570,8 +8482,6 @@ public class Claim extends DomainResource {
         case -1095204141: /*procedure*/ return new String[] {};
         case 73049818: /*insurance*/ return new String[] {};
         case -2143202801: /*accident*/ return new String[] {};
-        case 1051487345: /*employmentImpacted*/ return new String[] {"Period"};
-        case 1057894634: /*hospitalization*/ return new String[] {"Period"};
         case 3242771: /*item*/ return new String[] {};
         case 110549828: /*total*/ return new String[] {"Money"};
         default: return super.getTypesForProperty(hash, name);
@@ -8619,10 +8529,6 @@ public class Claim extends DomainResource {
         else if (name.equals("provider")) {
           this.provider = new Reference();
           return this.provider;
-        }
-        else if (name.equals("organization")) {
-          this.organization = new Reference();
-          return this.organization;
         }
         else if (name.equals("priority")) {
           this.priority = new CodeableConcept();
@@ -8674,14 +8580,6 @@ public class Claim extends DomainResource {
           this.accident = new AccidentComponent();
           return this.accident;
         }
-        else if (name.equals("employmentImpacted")) {
-          this.employmentImpacted = new Period();
-          return this.employmentImpacted;
-        }
-        else if (name.equals("hospitalization")) {
-          this.hospitalization = new Period();
-          return this.hospitalization;
-        }
         else if (name.equals("item")) {
           return addItem();
         }
@@ -8720,7 +8618,6 @@ public class Claim extends DomainResource {
         dst.enterer = enterer == null ? null : enterer.copy();
         dst.insurer = insurer == null ? null : insurer.copy();
         dst.provider = provider == null ? null : provider.copy();
-        dst.organization = organization == null ? null : organization.copy();
         dst.priority = priority == null ? null : priority.copy();
         dst.fundsReserve = fundsReserve == null ? null : fundsReserve.copy();
         if (related != null) {
@@ -8759,8 +8656,6 @@ public class Claim extends DomainResource {
             dst.insurance.add(i.copy());
         };
         dst.accident = accident == null ? null : accident.copy();
-        dst.employmentImpacted = employmentImpacted == null ? null : employmentImpacted.copy();
-        dst.hospitalization = hospitalization == null ? null : hospitalization.copy();
         if (item != null) {
           dst.item = new ArrayList<ItemComponent>();
           for (ItemComponent i : item)
@@ -8785,12 +8680,11 @@ public class Claim extends DomainResource {
            && compareDeep(subType, o.subType, true) && compareDeep(use, o.use, true) && compareDeep(patient, o.patient, true)
            && compareDeep(billablePeriod, o.billablePeriod, true) && compareDeep(created, o.created, true)
            && compareDeep(enterer, o.enterer, true) && compareDeep(insurer, o.insurer, true) && compareDeep(provider, o.provider, true)
-           && compareDeep(organization, o.organization, true) && compareDeep(priority, o.priority, true) && compareDeep(fundsReserve, o.fundsReserve, true)
-           && compareDeep(related, o.related, true) && compareDeep(prescription, o.prescription, true) && compareDeep(originalPrescription, o.originalPrescription, true)
+           && compareDeep(priority, o.priority, true) && compareDeep(fundsReserve, o.fundsReserve, true) && compareDeep(related, o.related, true)
+           && compareDeep(prescription, o.prescription, true) && compareDeep(originalPrescription, o.originalPrescription, true)
            && compareDeep(payee, o.payee, true) && compareDeep(referral, o.referral, true) && compareDeep(facility, o.facility, true)
            && compareDeep(careTeam, o.careTeam, true) && compareDeep(information, o.information, true) && compareDeep(diagnosis, o.diagnosis, true)
            && compareDeep(procedure, o.procedure, true) && compareDeep(insurance, o.insurance, true) && compareDeep(accident, o.accident, true)
-           && compareDeep(employmentImpacted, o.employmentImpacted, true) && compareDeep(hospitalization, o.hospitalization, true)
            && compareDeep(item, o.item, true) && compareDeep(total, o.total, true);
       }
 
@@ -8808,9 +8702,9 @@ public class Claim extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
           , subType, use, patient, billablePeriod, created, enterer, insurer, provider
-          , organization, priority, fundsReserve, related, prescription, originalPrescription
-          , payee, referral, facility, careTeam, information, diagnosis, procedure, insurance
-          , accident, employmentImpacted, hospitalization, item, total);
+          , priority, fundsReserve, related, prescription, originalPrescription, payee, referral
+          , facility, careTeam, information, diagnosis, procedure, insurance, accident, item
+          , total);
       }
 
   @Override
@@ -8826,7 +8720,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.careTeam.provider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="care-team", path="Claim.careTeam.provider", description="Member of the CareTeam", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="care-team", path="Claim.careTeam.provider", description="Member of the CareTeam", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_CARE_TEAM = "care-team";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>care-team</b>
@@ -8958,7 +8852,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.payee.party</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payee", path="Claim.payee.party", description="The party receiving any payment for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="payee", path="Claim.payee.party", description="The party receiving any payment for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PAYEE = "payee";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payee</b>
@@ -8984,7 +8878,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.provider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="provider", path="Claim.provider", description="Provider responsible for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="provider", path="Claim.provider", description="Provider responsible for the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_PROVIDER = "provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>provider</b>
@@ -9055,32 +8949,6 @@ public class Claim extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_INSURER = new ca.uhn.fhir.model.api.Include("Claim:insurer").toLocked();
 
  /**
-   * Search parameter: <b>organization</b>
-   * <p>
-   * Description: <b>The reference to the providing organization</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Claim.organization</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization", path="Claim.organization", description="The reference to the providing organization", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION = "organization";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
-   * <p>
-   * Description: <b>The reference to the providing organization</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Claim.organization</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Claim:organization</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("Claim:organization").toLocked();
-
- /**
    * Search parameter: <b>enterer</b>
    * <p>
    * Description: <b>The party responsible for the entry of the Claim</b><br>
@@ -9088,7 +8956,7 @@ public class Claim extends DomainResource {
    * Path: <b>Claim.enterer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="enterer", path="Claim.enterer", description="The party responsible for the entry of the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="enterer", path="Claim.enterer", description="The party responsible for the entry of the Claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class, PractitionerRole.class } )
   public static final String SP_ENTERER = "enterer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>enterer</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
  */
@@ -154,7 +155,7 @@ public class Parameters extends Resource implements IBaseParameters {
         /**
          * @param value {@link #value} (If the parameter is a data type.)
          */
-        public ParametersParameterComponent setValue(org.hl7.fhir.dstu3.model.Type value) { 
+        public ParametersParameterComponent setValue(org.hl7.fhir.dstu3.model.Type value)  { 
           this.value = value;
           return this;
         }
@@ -173,7 +174,7 @@ public class Parameters extends Resource implements IBaseParameters {
         /**
          * @param value {@link #resource} (If the parameter is a whole resource.)
          */
-        public ParametersParameterComponent setResource(Resource value) { 
+        public ParametersParameterComponent setResource(Resource value)  { 
           this.resource = value;
           return this;
         }
@@ -231,12 +232,61 @@ public class Parameters extends Resource implements IBaseParameters {
           return getPart().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("value[x]", "*", "If the parameter is a data type.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("resource", "Resource", "If the parameter is a whole resource.", 0, java.lang.Integer.MAX_VALUE, resource));
-          childrenList.add(new Property("part", "@Parameters.parameter", "A named part of a multi-part parameter.", 0, java.lang.Integer.MAX_VALUE, part));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, 1, name));
+          children.add(new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value));
+          children.add(new Property("resource", "Resource", "If the parameter is a whole resource.", 0, 1, resource));
+          children.add(new Property("part", "@Parameters.parameter", "A named part of a multi-part parameter.", 0, java.lang.Integer.MAX_VALUE, part));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, 1, name);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -786218365: /*valueCanonical*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -766209282: /*valueCode*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -766192449: /*valueDate*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 231604844: /*valueId*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -497880704: /*valueMarkdown*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1410172354: /*valueUrl*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -765667124: /*valueUuid*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -67108992: /*valueAnnotation*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -475566732: /*valueAttachment*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1887705029: /*valueCoding*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 2030761548: /*valueRange*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 2030767386: /*valueRatio*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -962229101: /*valueSampledData*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -540985785: /*valueSignature*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "If the parameter is a data type.", 0, 1, value);
+          case -341064690: /*resource*/  return new Property("resource", "Resource", "If the parameter is a whole resource.", 0, 1, resource);
+          case 3433459: /*part*/  return new Property("part", "@Parameters.parameter", "A named part of a multi-part parameter.", 0, java.lang.Integer.MAX_VALUE, part);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -473,23 +523,23 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ParametersParameterComponent))
+        if (!(other_ instanceof ParametersParameterComponent))
           return false;
-        ParametersParameterComponent o = (ParametersParameterComponent) other;
+        ParametersParameterComponent o = (ParametersParameterComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(value, o.value, true) && compareDeep(resource, o.resource, true)
            && compareDeep(part, o.part, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ParametersParameterComponent))
+        if (!(other_ instanceof ParametersParameterComponent))
           return false;
-        ParametersParameterComponent o = (ParametersParameterComponent) other;
+        ParametersParameterComponent o = (ParametersParameterComponent) other_;
         return compareValues(name, o.name, true);
       }
 
@@ -574,9 +624,18 @@ public class Parameters extends Resource implements IBaseParameters {
       return getParameter().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("parameter", "", "A parameter passed to or received from the operation.", 0, java.lang.Integer.MAX_VALUE, parameter));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("parameter", "", "A parameter passed to or received from the operation.", 0, java.lang.Integer.MAX_VALUE, parameter));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 1954460585: /*parameter*/  return new Property("parameter", "", "A parameter passed to or received from the operation.", 0, java.lang.Integer.MAX_VALUE, parameter);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -656,22 +715,22 @@ public class Parameters extends Resource implements IBaseParameters {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Parameters))
+        if (!(other_ instanceof Parameters))
           return false;
-        Parameters o = (Parameters) other;
+        Parameters o = (Parameters) other_;
         return compareDeep(parameter, o.parameter, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Parameters))
+        if (!(other_ instanceof Parameters))
           return false;
-        Parameters o = (Parameters) other;
+        Parameters o = (Parameters) other_;
         return true;
       }
 

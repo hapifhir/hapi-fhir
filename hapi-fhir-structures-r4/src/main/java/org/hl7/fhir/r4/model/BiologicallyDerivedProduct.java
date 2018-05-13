@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -521,26 +521,30 @@ public class BiologicallyDerivedProduct extends DomainResource {
          * @return {@link #collected} (Time of product collection.)
          */
         public DateTimeType getCollectedDateTimeType() throws FHIRException { 
+          if (this.collected == null)
+            return null;
           if (!(this.collected instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (DateTimeType) this.collected;
         }
 
         public boolean hasCollectedDateTimeType() { 
-          return this.collected instanceof DateTimeType;
+          return this != null && this.collected instanceof DateTimeType;
         }
 
         /**
          * @return {@link #collected} (Time of product collection.)
          */
         public Period getCollectedPeriod() throws FHIRException { 
+          if (this.collected == null)
+            return null;
           if (!(this.collected instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (Period) this.collected;
         }
 
         public boolean hasCollectedPeriod() { 
-          return this.collected instanceof Period;
+          return this != null && this.collected instanceof Period;
         }
 
         public boolean hasCollected() { 
@@ -551,6 +555,8 @@ public class BiologicallyDerivedProduct extends DomainResource {
          * @param value {@link #collected} (Time of product collection.)
          */
         public BiologicallyDerivedProductCollectionComponent setCollected(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+            throw new Error("Not the right type for BiologicallyDerivedProduct.collection.collected[x]: "+value.fhirType());
           this.collected = value;
           return this;
         }
@@ -877,26 +883,30 @@ public class BiologicallyDerivedProduct extends DomainResource {
          * @return {@link #time} (Time of processing.)
          */
         public DateTimeType getTimeDateTimeType() throws FHIRException { 
+          if (this.time == null)
+            return null;
           if (!(this.time instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.time.getClass().getName()+" was encountered");
           return (DateTimeType) this.time;
         }
 
         public boolean hasTimeDateTimeType() { 
-          return this.time instanceof DateTimeType;
+          return this != null && this.time instanceof DateTimeType;
         }
 
         /**
          * @return {@link #time} (Time of processing.)
          */
         public Period getTimePeriod() throws FHIRException { 
+          if (this.time == null)
+            return null;
           if (!(this.time instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.time.getClass().getName()+" was encountered");
           return (Period) this.time;
         }
 
         public boolean hasTimePeriod() { 
-          return this.time instanceof Period;
+          return this != null && this.time instanceof Period;
         }
 
         public boolean hasTime() { 
@@ -907,6 +917,8 @@ public class BiologicallyDerivedProduct extends DomainResource {
          * @param value {@link #time} (Time of processing.)
          */
         public BiologicallyDerivedProductProcessingComponent setTime(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+            throw new Error("Not the right type for BiologicallyDerivedProduct.processing.time[x]: "+value.fhirType());
           this.time = value;
           return this;
         }
@@ -1159,26 +1171,30 @@ public class BiologicallyDerivedProduct extends DomainResource {
          * @return {@link #time} (Time of manipulation.)
          */
         public DateTimeType getTimeDateTimeType() throws FHIRException { 
+          if (this.time == null)
+            return null;
           if (!(this.time instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.time.getClass().getName()+" was encountered");
           return (DateTimeType) this.time;
         }
 
         public boolean hasTimeDateTimeType() { 
-          return this.time instanceof DateTimeType;
+          return this != null && this.time instanceof DateTimeType;
         }
 
         /**
          * @return {@link #time} (Time of manipulation.)
          */
         public Period getTimePeriod() throws FHIRException { 
+          if (this.time == null)
+            return null;
           if (!(this.time instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.time.getClass().getName()+" was encountered");
           return (Period) this.time;
         }
 
         public boolean hasTimePeriod() { 
-          return this.time instanceof Period;
+          return this != null && this.time instanceof Period;
         }
 
         public boolean hasTime() { 
@@ -1189,6 +1205,8 @@ public class BiologicallyDerivedProduct extends DomainResource {
          * @param value {@link #time} (Time of manipulation.)
          */
         public BiologicallyDerivedProductManipulationComponent setTime(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+            throw new Error("Not the right type for BiologicallyDerivedProduct.manipulation.time[x]: "+value.fhirType());
           this.time = value;
           return this;
         }

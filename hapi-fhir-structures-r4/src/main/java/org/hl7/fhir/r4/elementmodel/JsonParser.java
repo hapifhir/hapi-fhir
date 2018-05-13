@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.elementmodel.Element.SpecialElement;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
@@ -176,11 +177,26 @@ public class JsonParser extends ParserBase {
 				parseChildComplexInstance(npath, object, context, property, name, am);
 			}
 		} else {
+		  if (property.isList()) {
+	      logError(line(e), col(e), npath, IssueType.INVALID, "This property must be an Array, not "+describeType(e), IssueSeverity.ERROR);
+		  }
 			parseChildComplexInstance(npath, object, context, property, name, e);
 		}
 	}
 
-	private void parseChildComplexInstance(String npath, JsonObject object, Element context, Property property, String name, JsonElement e) throws FHIRException {
+	private String describeType(JsonElement e) {
+	  if (e.isJsonArray())
+	    return "an Array";
+	  if (e.isJsonObject())
+      return "an Object";
+    if (e.isJsonPrimitive())
+      return "a primitive property";
+    if (e.isJsonNull())
+      return "a Null";
+    return null;
+  }
+
+  private void parseChildComplexInstance(String npath, JsonObject object, Element context, Property property, String name, JsonElement e) throws FHIRException {
 		if (e instanceof JsonObject) {
 			JsonObject child = (JsonObject) e;
 			Element n = new Element(name, property).markLocation(line(child), col(child));
@@ -268,7 +284,7 @@ public class JsonParser extends ParserBase {
 			logError(line(res), col(res), npath, IssueType.INVALID, "Unable to find resourceType property", IssueSeverity.FATAL);
 		} else {
 			String name = rt.getAsString();
-			StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+name);
+			StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(name));
 			if (sd == null)
 				throw new FHIRFormatError("Contained resource does not appear to be a FHIR resource (unknown name '"+name+"')");
 			parent.updateProperty(new Property(context, sd.getSnapshot().getElement().get(0), sd), SpecialElement.fromProperty(parent.getProperty()), elementProperty);

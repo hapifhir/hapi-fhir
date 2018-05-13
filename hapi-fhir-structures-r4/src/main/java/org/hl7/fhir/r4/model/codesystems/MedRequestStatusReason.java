@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -73,7 +73,7 @@ public enum MedRequestStatusReason {
          */
         SDDI, 
         /**
-         * Another short-term co-occurring therapy fulfills the same purpose as this therapy. This therapy will be resumed when the co-occuring therapy is complete.
+         * Another short-term concurrent therapy fulfills the same purpose as this therapy. This therapy will be resumed when the concurrent therapy is complete.
          */
         SDUPTHER, 
         /**
@@ -155,7 +155,7 @@ public enum MedRequestStatusReason {
             case PREG: return "The patient is pregnant or breast feeding. The therapy will be resumed when the pregnancy is complete and the patient is no longer breastfeeding.";
             case SALG: return "The patient is believed to be allergic to a substance that is part of the therapy and the therapy is being temporarily withdrawn to confirm.";
             case SDDI: return "The drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete.";
-            case SDUPTHER: return "Another short-term co-occurring therapy fulfills the same purpose as this therapy. This therapy will be resumed when the co-occuring therapy is complete.";
+            case SDUPTHER: return "Another short-term concurrent therapy fulfills the same purpose as this therapy. This therapy will be resumed when the concurrent therapy is complete.";
             case SINTOL: return "The patient is believed to have an intolerance to a substance that is part of the therapy and the therapy is being temporarily withdrawn to confirm.";
             case SURG: return "The drug is contraindicated for patients receiving surgery and the patient is scheduled to be admitted for surgery in the near future. The drug will be resumed when the patient has sufficiently recovered from the surgery.";
             case WASHOUT: return "The patient was previously receiving a medication contraindicated with the current medication. The current medication will remain on hold until the prior medication has been cleansed from their system.";

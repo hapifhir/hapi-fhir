@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.*;
 import org.hl7.fhir.r4.model.Coding;
-import org.springframework.validation.ValidationUtils;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -49,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS")
 })
 public class TermConcept implements Serializable {
-	private static final int MAX_DESC_LENGTH = 400;
+	protected static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 
 	private static final long serialVersionUID = 1L;

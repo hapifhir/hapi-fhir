@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,11 +49,11 @@ public enum AddressUse {
          */
         TEMP, 
         /**
-         * This address is no longer in use (or was never correct, but retained for records).
+         * This address is no longer in use (or was never correct but retained for records).
          */
         OLD, 
         /**
-         * An address to be used to send bills, invoices, receipts etc
+         * An address to be used to send bills, invoices, receipts etc.
          */
         BILLING, 
         /**
@@ -93,8 +93,8 @@ public enum AddressUse {
             case HOME: return "A communication address at a home.";
             case WORK: return "An office address. First choice for business related contacts during business hours.";
             case TEMP: return "A temporary address. The period can provide more detailed information.";
-            case OLD: return "This address is no longer in use (or was never correct, but retained for records).";
-            case BILLING: return "An address to be used to send bills, invoices, receipts etc";
+            case OLD: return "This address is no longer in use (or was never correct but retained for records).";
+            case BILLING: return "An address to be used to send bills, invoices, receipts etc.";
             default: return "?";
           }
         }

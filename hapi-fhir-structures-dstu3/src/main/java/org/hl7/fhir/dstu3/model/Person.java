@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Demographics and administrative information about a person independent of a specific health-related context.
  */
@@ -231,7 +232,7 @@ public class Person extends DomainResource {
         /**
          * @param value {@link #target} (The resource to which this actual person is associated.)
          */
-        public PersonLinkComponent setTarget(Reference value) { 
+        public PersonLinkComponent setTarget(Reference value)  { 
           this.target = value;
           return this;
         }
@@ -300,10 +301,20 @@ public class Person extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("target", "Reference(Patient|Practitioner|RelatedPerson|Person)", "The resource to which this actual person is associated.", 0, java.lang.Integer.MAX_VALUE, target));
-          childrenList.add(new Property("assurance", "code", "Level of assurance that this link is actually associated with the target resource.", 0, java.lang.Integer.MAX_VALUE, assurance));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("target", "Reference(Patient|Practitioner|RelatedPerson|Person)", "The resource to which this actual person is associated.", 0, 1, target));
+          children.add(new Property("assurance", "code", "Level of assurance that this link is actually associated with the target resource.", 0, 1, assurance));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -880905839: /*target*/  return new Property("target", "Reference(Patient|Practitioner|RelatedPerson|Person)", "The resource to which this actual person is associated.", 0, 1, target);
+          case 1771900717: /*assurance*/  return new Property("assurance", "code", "Level of assurance that this link is actually associated with the target resource.", 0, 1, assurance);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -385,22 +396,22 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PersonLinkComponent))
+        if (!(other_ instanceof PersonLinkComponent))
           return false;
-        PersonLinkComponent o = (PersonLinkComponent) other;
+        PersonLinkComponent o = (PersonLinkComponent) other_;
         return compareDeep(target, o.target, true) && compareDeep(assurance, o.assurance, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PersonLinkComponent))
+        if (!(other_ instanceof PersonLinkComponent))
           return false;
-        PersonLinkComponent o = (PersonLinkComponent) other;
+        PersonLinkComponent o = (PersonLinkComponent) other_;
         return compareValues(assurance, o.assurance, true);
       }
 
@@ -829,7 +840,7 @@ public class Person extends DomainResource {
     /**
      * @param value {@link #photo} (An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.)
      */
-    public Person setPhoto(Attachment value) { 
+    public Person setPhoto(Attachment value)  { 
       this.photo = value;
       return this;
     }
@@ -853,7 +864,7 @@ public class Person extends DomainResource {
     /**
      * @param value {@link #managingOrganization} (The organization that is the custodian of the person record.)
      */
-    public Person setManagingOrganization(Reference value) { 
+    public Person setManagingOrganization(Reference value)  { 
       this.managingOrganization = value;
       return this;
     }
@@ -976,18 +987,36 @@ public class Person extends DomainResource {
       return getLink().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("gender", "code", "Administrative Gender.", 0, java.lang.Integer.MAX_VALUE, gender));
-        childrenList.add(new Property("birthDate", "date", "The birth date for the person.", 0, java.lang.Integer.MAX_VALUE, birthDate));
-        childrenList.add(new Property("address", "Address", "One or more addresses for the person.", 0, java.lang.Integer.MAX_VALUE, address));
-        childrenList.add(new Property("photo", "Attachment", "An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.", 0, java.lang.Integer.MAX_VALUE, photo));
-        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization that is the custodian of the person record.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
-        childrenList.add(new Property("active", "boolean", "Whether this person's record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("link", "", "Link to a resource that concerns the same actual person.", 0, java.lang.Integer.MAX_VALUE, link));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
+        children.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        children.add(new Property("gender", "code", "Administrative Gender.", 0, 1, gender));
+        children.add(new Property("birthDate", "date", "The birth date for the person.", 0, 1, birthDate));
+        children.add(new Property("address", "Address", "One or more addresses for the person.", 0, java.lang.Integer.MAX_VALUE, address));
+        children.add(new Property("photo", "Attachment", "An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.", 0, 1, photo));
+        children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that is the custodian of the person record.", 0, 1, managingOrganization));
+        children.add(new Property("active", "boolean", "Whether this person's record is in active use.", 0, 1, active));
+        children.add(new Property("link", "", "Link to a resource that concerns the same actual person.", 0, java.lang.Integer.MAX_VALUE, link));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name);
+        case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom);
+        case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender.", 0, 1, gender);
+        case -1210031859: /*birthDate*/  return new Property("birthDate", "date", "The birth date for the person.", 0, 1, birthDate);
+        case -1147692044: /*address*/  return new Property("address", "Address", "One or more addresses for the person.", 0, java.lang.Integer.MAX_VALUE, address);
+        case 106642994: /*photo*/  return new Property("photo", "Attachment", "An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.", 0, 1, photo);
+        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that is the custodian of the person record.", 0, 1, managingOrganization);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this person's record is in active use.", 0, 1, active);
+        case 3321850: /*link*/  return new Property("link", "", "Link to a resource that concerns the same actual person.", 0, java.lang.Integer.MAX_VALUE, link);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1195,12 +1224,12 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Person))
+        if (!(other_ instanceof Person))
           return false;
-        Person o = (Person) other;
+        Person o = (Person) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true)
            && compareDeep(photo, o.photo, true) && compareDeep(managingOrganization, o.managingOrganization, true)
@@ -1208,12 +1237,12 @@ public class Person extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Person))
+        if (!(other_ instanceof Person))
           return false;
-        Person o = (Person) other;
+        Person o = (Person) other_;
         return compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true) && compareValues(active, o.active, true)
           ;
       }

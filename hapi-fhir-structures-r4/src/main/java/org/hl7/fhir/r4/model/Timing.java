@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
  */
 @DatatypeDef(name="Timing")
-public class Timing extends Type implements ICompositeType {
+public class Timing extends BackboneType implements ICompositeType {
 
     public enum UnitsOfTime {
         /**
@@ -394,51 +394,51 @@ public class Timing extends Type implements ICompositeType {
 
     public enum EventTiming {
         /**
-         * Event occurs during the morning. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation
          */
         MORN, 
         /**
-         * Event occurs during the early morning. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation
          */
         MORN_EARLY, 
         /**
-         * Event occurs during the late morning. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation
          */
         MORN_LATE, 
         /**
-         * Event occurs around 12:00pm. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation
          */
         NOON, 
         /**
-         * Event occurs during the afternoon. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation
          */
         AFT, 
         /**
-         * Event occurs during the early afternoon. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation
          */
         AFT_EARLY, 
         /**
-         * Event occurs during the late afternoon. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation
          */
         AFT_LATE, 
         /**
-         * Event occurs during the evening. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation
          */
         EVE, 
         /**
-         * Event occurs during the early evening. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation
          */
         EVE_EARLY, 
         /**
-         * Event occurs during the late evening. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation
          */
         EVE_LATE, 
         /**
-         * Event occurs during the night. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation
          */
         NIGHT, 
         /**
-         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by instition convention or patient interpretation
+         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation
          */
         PHS, 
         /**
@@ -625,18 +625,18 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by instition convention or patient interpretation";
-            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by instition convention or patient interpretation";
-            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by instition convention or patient interpretation";
-            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by instition convention or patient interpretation";
-            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by instition convention or patient interpretation";
-            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by instition convention or patient interpretation";
-            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by instition convention or patient interpretation";
-            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by instition convention or patient interpretation";
-            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by instition convention or patient interpretation";
-            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by instition convention or patient interpretation";
-            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by instition convention or patient interpretation";
-            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by instition convention or patient interpretation";
+            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation";
+            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation";
+            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation";
+            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation";
+            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
+            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
+            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
+            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation";
+            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation";
+            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation";
+            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation";
+            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation";
             case HS: return "";
             case WAKE: return "";
             case C: return "";
@@ -999,39 +999,45 @@ public class Timing extends Type implements ICompositeType {
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public Duration getBoundsDuration() throws FHIRException { 
+          if (this.bounds == null)
+            return null;
           if (!(this.bounds instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Duration) this.bounds;
         }
 
         public boolean hasBoundsDuration() { 
-          return this.bounds instanceof Duration;
+          return this != null && this.bounds instanceof Duration;
         }
 
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public Range getBoundsRange() throws FHIRException { 
+          if (this.bounds == null)
+            return null;
           if (!(this.bounds instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Range) this.bounds;
         }
 
         public boolean hasBoundsRange() { 
-          return this.bounds instanceof Range;
+          return this != null && this.bounds instanceof Range;
         }
 
         /**
          * @return {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public Period getBoundsPeriod() throws FHIRException { 
+          if (this.bounds == null)
+            return null;
           if (!(this.bounds instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Period) this.bounds;
         }
 
         public boolean hasBoundsPeriod() { 
-          return this.bounds instanceof Period;
+          return this != null && this.bounds instanceof Period;
         }
 
         public boolean hasBounds() { 
@@ -1042,6 +1048,8 @@ public class Timing extends Type implements ICompositeType {
          * @param value {@link #bounds} (Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.)
          */
         public TimingRepeatComponent setBounds(Type value) { 
+          if (value != null && !(value instanceof Duration || value instanceof Range || value instanceof Period))
+            throw new Error("Not the right type for Timing.repeat.bounds[x]: "+value.fhirType());
           this.bounds = value;
           return this;
         }

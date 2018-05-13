@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A technical identifier - identifies some entity uniquely and unambiguously.
  */
@@ -298,7 +299,7 @@ public class Identifier extends Type implements ICompositeType {
     /**
      * @param value {@link #type} (A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.)
      */
-    public Identifier setType(CodeableConcept value) { 
+    public Identifier setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -420,7 +421,7 @@ public class Identifier extends Type implements ICompositeType {
     /**
      * @param value {@link #period} (Time period during which identifier is/was valid for use.)
      */
-    public Identifier setPeriod(Period value) { 
+    public Identifier setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -444,7 +445,7 @@ public class Identifier extends Type implements ICompositeType {
     /**
      * @param value {@link #assigner} (Organization that issued/manages the identifier.)
      */
-    public Identifier setAssigner(Reference value) { 
+    public Identifier setAssigner(Reference value)  { 
       this.assigner = value;
       return this;
     }
@@ -469,14 +470,28 @@ public class Identifier extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("use", "code", "The purpose of this identifier.", 0, java.lang.Integer.MAX_VALUE, use));
-        childrenList.add(new Property("type", "CodeableConcept", "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("system", "uri", "Establishes the namespace for the value - that is, a URL that describes a set values that are unique.", 0, java.lang.Integer.MAX_VALUE, system));
-        childrenList.add(new Property("value", "string", "The portion of the identifier typically relevant to the user and which is unique within the context of the system.", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("period", "Period", "Time period during which identifier is/was valid for use.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("assigner", "Reference(Organization)", "Organization that issued/manages the identifier.", 0, java.lang.Integer.MAX_VALUE, assigner));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("use", "code", "The purpose of this identifier.", 0, 1, use));
+        children.add(new Property("type", "CodeableConcept", "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.", 0, 1, type));
+        children.add(new Property("system", "uri", "Establishes the namespace for the value - that is, a URL that describes a set values that are unique.", 0, 1, system));
+        children.add(new Property("value", "string", "The portion of the identifier typically relevant to the user and which is unique within the context of the system.", 0, 1, value));
+        children.add(new Property("period", "Period", "Time period during which identifier is/was valid for use.", 0, 1, period));
+        children.add(new Property("assigner", "Reference(Organization)", "Organization that issued/manages the identifier.", 0, 1, assigner));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 116103: /*use*/  return new Property("use", "code", "The purpose of this identifier.", 0, 1, use);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.", 0, 1, type);
+        case -887328209: /*system*/  return new Property("system", "uri", "Establishes the namespace for the value - that is, a URL that describes a set values that are unique.", 0, 1, system);
+        case 111972721: /*value*/  return new Property("value", "string", "The portion of the identifier typically relevant to the user and which is unique within the context of the system.", 0, 1, value);
+        case -991726143: /*period*/  return new Property("period", "Period", "Time period during which identifier is/was valid for use.", 0, 1, period);
+        case -369881636: /*assigner*/  return new Property("assigner", "Reference(Organization)", "Organization that issued/manages the identifier.", 0, 1, assigner);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -617,24 +632,24 @@ public class Identifier extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Identifier))
+        if (!(other_ instanceof Identifier))
           return false;
-        Identifier o = (Identifier) other;
+        Identifier o = (Identifier) other_;
         return compareDeep(use, o.use, true) && compareDeep(type, o.type, true) && compareDeep(system, o.system, true)
            && compareDeep(value, o.value, true) && compareDeep(period, o.period, true) && compareDeep(assigner, o.assigner, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Identifier))
+        if (!(other_ instanceof Identifier))
           return false;
-        Identifier o = (Identifier) other;
+        Identifier o = (Identifier) other_;
         return compareValues(use, o.use, true) && compareValues(system, o.system, true) && compareValues(value, o.value, true)
           ;
       }

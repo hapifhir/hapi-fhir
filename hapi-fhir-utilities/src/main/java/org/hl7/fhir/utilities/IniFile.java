@@ -26,6 +26,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.Timestamp;
@@ -713,6 +715,47 @@ public final class IniFile
         return blnRet;
     }
 
+    public boolean save(OutputStream stream) 
+    {
+        boolean    blnRet    = false;
+        String     strName   = null;
+        String     strTemp   = null;
+        Iterator<String>   itrSec    = null;
+        INISection objSec    = null;
+        OutputStreamWriter objWriter = null;
+
+        try
+        {
+            if (this.mhmapSections.size() == 0) return false;
+            objWriter = new OutputStreamWriter(stream, "UTF-8");
+            itrSec = this.mhmapSections.keySet().iterator();
+            while (itrSec.hasNext())
+            {
+                strName = (String) itrSec.next();
+                objSec = (INISection) this.mhmapSections.get(strName);
+                strTemp = objSec.toString();
+                objWriter.write(strTemp);
+                objWriter.write("\r\n");
+                objSec = null;
+            }
+            blnRet = true;
+        }
+        catch (IOException IOExIgnore)
+        {
+        }
+        finally
+        {
+            if (objWriter != null)
+            {
+                closeWriter(objWriter);
+                objWriter = null;
+            }
+            if (itrSec != null) itrSec = null;
+        }
+        return blnRet;
+    }
+
+    
 /*------------------------------------------------------------------------------
  * Helper functions
  *----------------------------------------------------------------------------*/

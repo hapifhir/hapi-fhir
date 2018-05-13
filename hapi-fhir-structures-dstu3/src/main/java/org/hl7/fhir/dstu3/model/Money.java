@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An amount of economic utility in some recognized currency.
  */
@@ -55,8 +56,16 @@ public class Money extends Quantity implements ICompositeType {
       super();
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -117,22 +126,22 @@ public class Money extends Quantity implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Money))
+        if (!(other_ instanceof Money))
           return false;
-        Money o = (Money) other;
+        Money o = (Money) other_;
         return true;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Money))
+        if (!(other_ instanceof Money))
           return false;
-        Money o = (Money) other;
+        Money o = (Money) other_;
         return true;
       }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -2845,10 +2845,10 @@ public class TestReport extends DomainResource {
     protected List<TestReportTestComponent> test;
 
     /**
-     * The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).
+     * The results of the series of operations required to clean up after all the tests were executed (successfully or otherwise).
      */
     @Child(name = "teardown", type = {}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The results of running the series of required clean up steps", formalDefinition="The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise)." )
+    @Description(shortDefinition="The results of running the series of required clean up steps", formalDefinition="The results of the series of operations required to clean up after all the tests were executed (successfully or otherwise)." )
     protected TestReportTeardownComponent teardown;
 
     private static final long serialVersionUID = 79474516L;
@@ -3373,7 +3373,7 @@ public class TestReport extends DomainResource {
     }
 
     /**
-     * @return {@link #teardown} (The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).)
+     * @return {@link #teardown} (The results of the series of operations required to clean up after all the tests were executed (successfully or otherwise).)
      */
     public TestReportTeardownComponent getTeardown() { 
       if (this.teardown == null)
@@ -3389,7 +3389,7 @@ public class TestReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #teardown} (The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).)
+     * @param value {@link #teardown} (The results of the series of operations required to clean up after all the tests were executed (successfully or otherwise).)
      */
     public TestReport setTeardown(TestReportTeardownComponent value) { 
       this.teardown = value;
@@ -3409,7 +3409,7 @@ public class TestReport extends DomainResource {
         children.add(new Property("participant", "", "A participant in the test execution, either the execution engine, a client, or a server.", 0, java.lang.Integer.MAX_VALUE, participant));
         children.add(new Property("setup", "", "The results of the series of required setup operations before the tests were executed.", 0, 1, setup));
         children.add(new Property("test", "", "A test executed from the test script.", 0, java.lang.Integer.MAX_VALUE, test));
-        children.add(new Property("teardown", "", "The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).", 0, 1, teardown));
+        children.add(new Property("teardown", "", "The results of the series of operations required to clean up after all the tests were executed (successfully or otherwise).", 0, 1, teardown));
       }
 
       @Override
@@ -3426,7 +3426,7 @@ public class TestReport extends DomainResource {
         case 767422259: /*participant*/  return new Property("participant", "", "A participant in the test execution, either the execution engine, a client, or a server.", 0, java.lang.Integer.MAX_VALUE, participant);
         case 109329021: /*setup*/  return new Property("setup", "", "The results of the series of required setup operations before the tests were executed.", 0, 1, setup);
         case 3556498: /*test*/  return new Property("test", "", "A test executed from the test script.", 0, java.lang.Integer.MAX_VALUE, test);
-        case -1663474172: /*teardown*/  return new Property("teardown", "", "The results of the series of operations required to clean up after the all the tests were executed (successfully or otherwise).", 0, 1, teardown);
+        case -1663474172: /*teardown*/  return new Property("teardown", "", "The results of the series of operations required to clean up after all the tests were executed (successfully or otherwise).", 0, 1, teardown);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

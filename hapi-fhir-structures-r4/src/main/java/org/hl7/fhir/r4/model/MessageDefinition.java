@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
  */
 @ResourceDef(name="MessageDefinition", profile="http://hl7.org/fhir/Profile/MessageDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "replaces", "event[x]", "category", "focus", "responseRequired", "allowedResponse"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "replaces", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "event[x]", "category", "focus", "responseRequired", "allowedResponse"})
 public class MessageDefinition extends MetadataResource {
 
     public enum MessageSignificanceCategory {
@@ -70,11 +70,11 @@ public class MessageDefinition extends MetadataResource {
         public static MessageSignificanceCategory fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("Consequence".equals(codeString))
+        if ("consequence".equals(codeString))
           return CONSEQUENCE;
-        if ("Currency".equals(codeString))
+        if ("currency".equals(codeString))
           return CURRENCY;
-        if ("Notification".equals(codeString))
+        if ("notification".equals(codeString))
           return NOTIFICATION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
@@ -83,9 +83,9 @@ public class MessageDefinition extends MetadataResource {
         }
         public String toCode() {
           switch (this) {
-            case CONSEQUENCE: return "Consequence";
-            case CURRENCY: return "Currency";
-            case NOTIFICATION: return "Notification";
+            case CONSEQUENCE: return "consequence";
+            case CURRENCY: return "currency";
+            case NOTIFICATION: return "notification";
             default: return "?";
           }
         }
@@ -120,11 +120,11 @@ public class MessageDefinition extends MetadataResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("Consequence".equals(codeString))
+        if ("consequence".equals(codeString))
           return MessageSignificanceCategory.CONSEQUENCE;
-        if ("Currency".equals(codeString))
+        if ("currency".equals(codeString))
           return MessageSignificanceCategory.CURRENCY;
-        if ("Notification".equals(codeString))
+        if ("notification".equals(codeString))
           return MessageSignificanceCategory.NOTIFICATION;
         throw new IllegalArgumentException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
@@ -136,21 +136,21 @@ public class MessageDefinition extends MetadataResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("Consequence".equals(codeString))
+        if ("consequence".equals(codeString))
           return new Enumeration<MessageSignificanceCategory>(this, MessageSignificanceCategory.CONSEQUENCE);
-        if ("Currency".equals(codeString))
+        if ("currency".equals(codeString))
           return new Enumeration<MessageSignificanceCategory>(this, MessageSignificanceCategory.CURRENCY);
-        if ("Notification".equals(codeString))
+        if ("notification".equals(codeString))
           return new Enumeration<MessageSignificanceCategory>(this, MessageSignificanceCategory.NOTIFICATION);
         throw new FHIRException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
     public String toCode(MessageSignificanceCategory code) {
       if (code == MessageSignificanceCategory.CONSEQUENCE)
-        return "Consequence";
+        return "consequence";
       if (code == MessageSignificanceCategory.CURRENCY)
-        return "Currency";
+        return "currency";
       if (code == MessageSignificanceCategory.NOTIFICATION)
-        return "Notification";
+        return "notification";
       return "?";
       }
     public String toSystem(MessageSignificanceCategory code) {
@@ -929,39 +929,39 @@ public class MessageDefinition extends MetadataResource {
     protected Identifier identifier;
 
     /**
-     * Explaination of why this message definition is needed and why it has been designed as it has.
+     * A MessageDefinition that is superseded by this definition.
      */
-    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why this message definition is defined", formalDefinition="Explaination of why this message definition is needed and why it has been designed as it has." )
+    @Child(name = "replaces", type = {CanonicalType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Takes the place of", formalDefinition="A MessageDefinition that is superseded by this definition." )
+    protected List<CanonicalType> replaces;
+
+    /**
+     * Explanation of why this message definition is needed and why it has been designed as it has.
+     */
+    @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Why this message definition is defined", formalDefinition="Explanation of why this message definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
      * A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition.
      */
-    @Child(name = "copyright", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "copyright", type = {MarkdownType.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition." )
     protected MarkdownType copyright;
 
     /**
      * The MessageDefinition that is the basis for the contents of this resource.
      */
-    @Child(name = "base", type = {CanonicalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "base", type = {CanonicalType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Definition this one is based on", formalDefinition="The MessageDefinition that is the basis for the contents of this resource." )
     protected CanonicalType base;
 
     /**
      * Identifies a protocol or workflow that this MessageDefinition represents a step in.
      */
-    @Child(name = "parent", type = {CanonicalType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "parent", type = {CanonicalType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Protocol/workflow this is part of", formalDefinition="Identifies a protocol or workflow that this MessageDefinition represents a step in." )
     protected List<CanonicalType> parent;
-
-    /**
-     * A MessageDefinition that is superseded by this definition.
-     */
-    @Child(name = "replaces", type = {CanonicalType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Takes the place of", formalDefinition="A MessageDefinition that is superseded by this definition." )
-    protected List<CanonicalType> replaces;
 
     /**
      * Event code or link to the EventDefinition.
@@ -1001,7 +1001,7 @@ public class MessageDefinition extends MetadataResource {
     @Description(shortDefinition="Responses to this message", formalDefinition="Indicates what types of messages may be sent as an application-level response to this message." )
     protected List<MessageDefinitionAllowedResponseComponent> allowedResponse;
 
-    private static final long serialVersionUID = -1933071625L;
+    private static final long serialVersionUID = -74603085L;
 
   /**
    * Constructor
@@ -1021,7 +1021,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this message definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1041,7 +1041,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this message definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public MessageDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1049,14 +1049,14 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this message definition is (or will be) published.
+     * @return An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this message definition is (or will be) published.
+     * @param value An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.
      */
     public MessageDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1241,6 +1241,67 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
+     * @return {@link #replaces} (A MessageDefinition that is superseded by this definition.)
+     */
+    public List<CanonicalType> getReplaces() { 
+      if (this.replaces == null)
+        this.replaces = new ArrayList<CanonicalType>();
+      return this.replaces;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MessageDefinition setReplaces(List<CanonicalType> theReplaces) { 
+      this.replaces = theReplaces;
+      return this;
+    }
+
+    public boolean hasReplaces() { 
+      if (this.replaces == null)
+        return false;
+      for (CanonicalType item : this.replaces)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #replaces} (A MessageDefinition that is superseded by this definition.)
+     */
+    public CanonicalType addReplacesElement() {//2 
+      CanonicalType t = new CanonicalType();
+      if (this.replaces == null)
+        this.replaces = new ArrayList<CanonicalType>();
+      this.replaces.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #replaces} (A MessageDefinition that is superseded by this definition.)
+     */
+    public MessageDefinition addReplaces(String value) { //1
+      CanonicalType t = new CanonicalType();
+      t.setValue(value);
+      if (this.replaces == null)
+        this.replaces = new ArrayList<CanonicalType>();
+      this.replaces.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #replaces} (A MessageDefinition that is superseded by this definition.)
+     */
+    public boolean hasReplaces(String value) { 
+      if (this.replaces == null)
+        return false;
+      for (CanonicalType v : this.replaces)
+        if (v.getValue().equals(value)) // canonical(MessageDefinition)
+          return true;
+      return false;
+    }
+
+    /**
      * @return {@link #status} (The status of this message definition. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<PublicationStatus> getStatusElement() { 
@@ -1286,7 +1347,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1306,7 +1367,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public MessageDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1314,14 +1375,14 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public MessageDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1331,7 +1392,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the message definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the message definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1351,7 +1412,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the message definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the message definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public MessageDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1359,14 +1420,14 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the message definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.
+     * @return The date  (and optionally time) when the message definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the message definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.
+     * @param value The date  (and optionally time) when the message definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.
      */
     public MessageDefinition setDate(Date value) { 
         if (this.date == null)
@@ -1376,7 +1437,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the message definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the message definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -1396,7 +1457,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the message definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the message definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public MessageDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -1404,14 +1465,14 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the message definition.
+     * @return The name of the organization or individual that published the message definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the message definition.
+     * @param value The name of the organization or individual that published the message definition.
      */
     public MessageDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -1633,7 +1694,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this message definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this message definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -1653,7 +1714,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this message definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this message definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MessageDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -1661,14 +1722,14 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return Explaination of why this message definition is needed and why it has been designed as it has.
+     * @return Explanation of why this message definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this message definition is needed and why it has been designed as it has.
+     * @param value Explanation of why this message definition is needed and why it has been designed as it has.
      */
     public MessageDefinition setPurpose(String value) { 
       if (value == null)
@@ -1841,67 +1902,6 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #replaces} (A MessageDefinition that is superseded by this definition.)
-     */
-    public List<CanonicalType> getReplaces() { 
-      if (this.replaces == null)
-        this.replaces = new ArrayList<CanonicalType>();
-      return this.replaces;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public MessageDefinition setReplaces(List<CanonicalType> theReplaces) { 
-      this.replaces = theReplaces;
-      return this;
-    }
-
-    public boolean hasReplaces() { 
-      if (this.replaces == null)
-        return false;
-      for (CanonicalType item : this.replaces)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #replaces} (A MessageDefinition that is superseded by this definition.)
-     */
-    public CanonicalType addReplacesElement() {//2 
-      CanonicalType t = new CanonicalType();
-      if (this.replaces == null)
-        this.replaces = new ArrayList<CanonicalType>();
-      this.replaces.add(t);
-      return t;
-    }
-
-    /**
-     * @param value {@link #replaces} (A MessageDefinition that is superseded by this definition.)
-     */
-    public MessageDefinition addReplaces(String value) { //1
-      CanonicalType t = new CanonicalType();
-      t.setValue(value);
-      if (this.replaces == null)
-        this.replaces = new ArrayList<CanonicalType>();
-      this.replaces.add(t);
-      return this;
-    }
-
-    /**
-     * @param value {@link #replaces} (A MessageDefinition that is superseded by this definition.)
-     */
-    public boolean hasReplaces(String value) { 
-      if (this.replaces == null)
-        return false;
-      for (CanonicalType v : this.replaces)
-        if (v.getValue().equals(value)) // canonical(MessageDefinition)
-          return true;
-      return false;
-    }
-
-    /**
      * @return {@link #event} (Event code or link to the EventDefinition.)
      */
     public Type getEvent() { 
@@ -1912,26 +1912,30 @@ public class MessageDefinition extends MetadataResource {
      * @return {@link #event} (Event code or link to the EventDefinition.)
      */
     public Coding getEventCoding() throws FHIRException { 
+      if (this.event == null)
+        return null;
       if (!(this.event instanceof Coding))
         throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.event.getClass().getName()+" was encountered");
       return (Coding) this.event;
     }
 
     public boolean hasEventCoding() { 
-      return this.event instanceof Coding;
+      return this != null && this.event instanceof Coding;
     }
 
     /**
      * @return {@link #event} (Event code or link to the EventDefinition.)
      */
     public UriType getEventUriType() throws FHIRException { 
+      if (this.event == null)
+        return null;
       if (!(this.event instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.event.getClass().getName()+" was encountered");
       return (UriType) this.event;
     }
 
     public boolean hasEventUriType() { 
-      return this.event instanceof UriType;
+      return this != null && this.event instanceof UriType;
     }
 
     public boolean hasEvent() { 
@@ -1942,6 +1946,8 @@ public class MessageDefinition extends MetadataResource {
      * @param value {@link #event} (Event code or link to the EventDefinition.)
      */
     public MessageDefinition setEvent(Type value) { 
+      if (value != null && !(value instanceof Coding || value instanceof UriType))
+        throw new Error("Not the right type for MessageDefinition.event[x]: "+value.fhirType());
       this.event = value;
       return this;
     }
@@ -2152,24 +2158,24 @@ public class MessageDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this message definition is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the message definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the message definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the message definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the message definition.", 0, 1, title));
+        children.add(new Property("replaces", "canonical(MessageDefinition)", "A MessageDefinition that is superseded by this definition.", 0, java.lang.Integer.MAX_VALUE, replaces));
         children.add(new Property("status", "code", "The status of this message definition. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the message definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the message definition.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the message definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the message definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the message definition from a consumer's perspective.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate message definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the message definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this message definition is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this message definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition.", 0, 1, copyright));
         children.add(new Property("base", "canonical(MessageDefinition)", "The MessageDefinition that is the basis for the contents of this resource.", 0, 1, base));
         children.add(new Property("parent", "canonical(ActivityDefinition|PlanDefinition)", "Identifies a protocol or workflow that this MessageDefinition represents a step in.", 0, java.lang.Integer.MAX_VALUE, parent));
-        children.add(new Property("replaces", "canonical(MessageDefinition)", "A MessageDefinition that is superseded by this definition.", 0, java.lang.Integer.MAX_VALUE, replaces));
         children.add(new Property("event[x]", "Coding|uri", "Event code or link to the EventDefinition.", 0, 1, event));
         children.add(new Property("category", "code", "The impact of the content of the message.", 0, 1, category));
         children.add(new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus));
@@ -2180,24 +2186,24 @@ public class MessageDefinition extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this message definition is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the message definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the message definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the message definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the message definition.", 0, 1, title);
+        case -430332865: /*replaces*/  return new Property("replaces", "canonical(MessageDefinition)", "A MessageDefinition that is superseded by this definition.", 0, java.lang.Integer.MAX_VALUE, replaces);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this message definition. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the message definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the message definition.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this message definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the message definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the message definition changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the message definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the message definition from a consumer's perspective.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate message definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the message definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this message definition is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this message definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition.", 0, 1, copyright);
         case 3016401: /*base*/  return new Property("base", "canonical(MessageDefinition)", "The MessageDefinition that is the basis for the contents of this resource.", 0, 1, base);
         case -995424086: /*parent*/  return new Property("parent", "canonical(ActivityDefinition|PlanDefinition)", "Identifies a protocol or workflow that this MessageDefinition represents a step in.", 0, java.lang.Integer.MAX_VALUE, parent);
-        case -430332865: /*replaces*/  return new Property("replaces", "canonical(MessageDefinition)", "A MessageDefinition that is superseded by this definition.", 0, java.lang.Integer.MAX_VALUE, replaces);
         case 278115238: /*event[x]*/  return new Property("event[x]", "Coding|uri", "Event code or link to the EventDefinition.", 0, 1, event);
         case 96891546: /*event*/  return new Property("event[x]", "Coding|uri", "Event code or link to the EventDefinition.", 0, 1, event);
         case -355957084: /*eventCoding*/  return new Property("event[x]", "Coding|uri", "Event code or link to the EventDefinition.", 0, 1, event);
@@ -2219,6 +2225,7 @@ public class MessageDefinition extends MetadataResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // CanonicalType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
@@ -2231,7 +2238,6 @@ public class MessageDefinition extends MetadataResource {
         case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // CanonicalType
         case -995424086: /*parent*/ return this.parent == null ? new Base[0] : this.parent.toArray(new Base[this.parent.size()]); // CanonicalType
-        case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // CanonicalType
         case 96891546: /*event*/ return this.event == null ? new Base[0] : new Base[] {this.event}; // Type
         case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Enumeration<MessageSignificanceCategory>
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // MessageDefinitionFocusComponent
@@ -2259,6 +2265,9 @@ public class MessageDefinition extends MetadataResource {
           return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
+          return value;
+        case -430332865: // replaces
+          this.getReplaces().add(castToCanonical(value)); // CanonicalType
           return value;
         case -892481550: // status
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
@@ -2297,9 +2306,6 @@ public class MessageDefinition extends MetadataResource {
         case -995424086: // parent
           this.getParent().add(castToCanonical(value)); // CanonicalType
           return value;
-        case -430332865: // replaces
-          this.getReplaces().add(castToCanonical(value)); // CanonicalType
-          return value;
         case 96891546: // event
           this.event = castToType(value); // Type
           return value;
@@ -2334,6 +2340,8 @@ public class MessageDefinition extends MetadataResource {
           this.name = castToString(value); // StringType
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
+        } else if (name.equals("replaces")) {
+          this.getReplaces().add(castToCanonical(value));
         } else if (name.equals("status")) {
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -2359,8 +2367,6 @@ public class MessageDefinition extends MetadataResource {
           this.base = castToCanonical(value); // CanonicalType
         } else if (name.equals("parent")) {
           this.getParent().add(castToCanonical(value));
-        } else if (name.equals("replaces")) {
-          this.getReplaces().add(castToCanonical(value));
         } else if (name.equals("event[x]")) {
           this.event = castToType(value); // Type
         } else if (name.equals("category")) {
@@ -2386,6 +2392,7 @@ public class MessageDefinition extends MetadataResource {
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
         case 110371416:  return getTitleElement();
+        case -430332865:  return addReplacesElement();
         case -892481550:  return getStatusElement();
         case -404562712:  return getExperimentalElement();
         case 3076014:  return getDateElement();
@@ -2398,7 +2405,6 @@ public class MessageDefinition extends MetadataResource {
         case 1522889671:  return getCopyrightElement();
         case 3016401:  return getBaseElement();
         case -995424086:  return addParentElement();
-        case -430332865:  return addReplacesElement();
         case 278115238:  return getEvent(); 
         case 96891546:  return getEvent(); 
         case 50511102:  return getCategoryElement();
@@ -2418,6 +2424,7 @@ public class MessageDefinition extends MetadataResource {
         case 351608024: /*version*/ return new String[] {"string"};
         case 3373707: /*name*/ return new String[] {"string"};
         case 110371416: /*title*/ return new String[] {"string"};
+        case -430332865: /*replaces*/ return new String[] {"canonical"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -404562712: /*experimental*/ return new String[] {"boolean"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
@@ -2430,7 +2437,6 @@ public class MessageDefinition extends MetadataResource {
         case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 3016401: /*base*/ return new String[] {"canonical"};
         case -995424086: /*parent*/ return new String[] {"canonical"};
-        case -430332865: /*replaces*/ return new String[] {"canonical"};
         case 96891546: /*event*/ return new String[] {"Coding", "uri"};
         case 50511102: /*category*/ return new String[] {"code"};
         case 97604824: /*focus*/ return new String[] {};
@@ -2458,6 +2464,9 @@ public class MessageDefinition extends MetadataResource {
         }
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.title");
+        }
+        else if (name.equals("replaces")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.replaces");
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.status");
@@ -2494,9 +2503,6 @@ public class MessageDefinition extends MetadataResource {
         }
         else if (name.equals("parent")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.parent");
-        }
-        else if (name.equals("replaces")) {
-          throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.replaces");
         }
         else if (name.equals("eventCoding")) {
           this.event = new Coding();
@@ -2535,6 +2541,11 @@ public class MessageDefinition extends MetadataResource {
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
+        if (replaces != null) {
+          dst.replaces = new ArrayList<CanonicalType>();
+          for (CanonicalType i : replaces)
+            dst.replaces.add(i.copy());
+        };
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.date = date == null ? null : date.copy();
@@ -2563,11 +2574,6 @@ public class MessageDefinition extends MetadataResource {
           for (CanonicalType i : parent)
             dst.parent.add(i.copy());
         };
-        if (replaces != null) {
-          dst.replaces = new ArrayList<CanonicalType>();
-          for (CanonicalType i : replaces)
-            dst.replaces.add(i.copy());
-        };
         dst.event = event == null ? null : event.copy();
         dst.category = category == null ? null : category.copy();
         if (focus != null) {
@@ -2595,8 +2601,8 @@ public class MessageDefinition extends MetadataResource {
         if (!(other_ instanceof MessageDefinition))
           return false;
         MessageDefinition o = (MessageDefinition) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
-           && compareDeep(base, o.base, true) && compareDeep(parent, o.parent, true) && compareDeep(replaces, o.replaces, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(replaces, o.replaces, true) && compareDeep(purpose, o.purpose, true)
+           && compareDeep(copyright, o.copyright, true) && compareDeep(base, o.base, true) && compareDeep(parent, o.parent, true)
            && compareDeep(event, o.event, true) && compareDeep(category, o.category, true) && compareDeep(focus, o.focus, true)
            && compareDeep(responseRequired, o.responseRequired, true) && compareDeep(allowedResponse, o.allowedResponse, true)
           ;
@@ -2614,8 +2620,8 @@ public class MessageDefinition extends MetadataResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, copyright
-          , base, parent, replaces, event, category, focus, responseRequired, allowedResponse
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, replaces, purpose
+          , copyright, base, parent, event, category, focus, responseRequired, allowedResponse
           );
       }
 
@@ -2827,17 +2833,17 @@ public class MessageDefinition extends MetadataResource {
  /**
    * Search parameter: <b>event</b>
    * <p>
-   * Description: <b>The event that triggers the message or link to the event definiton.</b><br>
+   * Description: <b>The event that triggers the message or link to the event definition.</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MessageDefinition.event[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event", path="MessageDefinition.event", description="The event that triggers the message or link to the event definiton.", type="token" )
+  @SearchParamDefinition(name="event", path="MessageDefinition.event", description="The event that triggers the message or link to the event definition.", type="token" )
   public static final String SP_EVENT = "event";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event</b>
    * <p>
-   * Description: <b>The event that triggers the message or link to the event definiton.</b><br>
+   * Description: <b>The event that triggers the message or link to the event definition.</b><br>
    * Type: <b>token</b><br>
    * Path: <b>MessageDefinition.event[x]</b><br>
    * </p>

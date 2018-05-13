@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides eligibility and plan details from the processing of an Eligibility resource.
  */
@@ -234,7 +235,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #coverage} (A suite of updated or additional Coverages from the Insurer.)
          */
-        public InsuranceComponent setCoverage(Reference value) { 
+        public InsuranceComponent setCoverage(Reference value)  { 
           this.coverage = value;
           return this;
         }
@@ -278,7 +279,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #contract} (The contract resource which may provide more detailed information.)
          */
-        public InsuranceComponent setContract(Reference value) { 
+        public InsuranceComponent setContract(Reference value)  { 
           this.contract = value;
           return this;
         }
@@ -356,11 +357,22 @@ public class EligibilityResponse extends DomainResource {
           return getBenefitBalance().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("coverage", "Reference(Coverage)", "A suite of updated or additional Coverages from the Insurer.", 0, java.lang.Integer.MAX_VALUE, coverage));
-          childrenList.add(new Property("contract", "Reference(Contract)", "The contract resource which may provide more detailed information.", 0, java.lang.Integer.MAX_VALUE, contract));
-          childrenList.add(new Property("benefitBalance", "", "Benefits and optionally current balances by Category.", 0, java.lang.Integer.MAX_VALUE, benefitBalance));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("coverage", "Reference(Coverage)", "A suite of updated or additional Coverages from the Insurer.", 0, 1, coverage));
+          children.add(new Property("contract", "Reference(Contract)", "The contract resource which may provide more detailed information.", 0, 1, contract));
+          children.add(new Property("benefitBalance", "", "Benefits and optionally current balances by Category.", 0, java.lang.Integer.MAX_VALUE, benefitBalance));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -351767064: /*coverage*/  return new Property("coverage", "Reference(Coverage)", "A suite of updated or additional Coverages from the Insurer.", 0, 1, coverage);
+          case -566947566: /*contract*/  return new Property("contract", "Reference(Contract)", "The contract resource which may provide more detailed information.", 0, 1, contract);
+          case 596003397: /*benefitBalance*/  return new Property("benefitBalance", "", "Benefits and optionally current balances by Category.", 0, java.lang.Integer.MAX_VALUE, benefitBalance);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -457,23 +469,23 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareDeep(coverage, o.coverage, true) && compareDeep(contract, o.contract, true) && compareDeep(benefitBalance, o.benefitBalance, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return true;
       }
 
@@ -595,7 +607,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #category} (Dental, Vision, Medical, Pharmacy, Rehab etc.)
          */
-        public BenefitsComponent setCategory(CodeableConcept value) { 
+        public BenefitsComponent setCategory(CodeableConcept value)  { 
           this.category = value;
           return this;
         }
@@ -619,7 +631,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #subCategory} (Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.)
          */
-        public BenefitsComponent setSubCategory(CodeableConcept value) { 
+        public BenefitsComponent setSubCategory(CodeableConcept value)  { 
           this.subCategory = value;
           return this;
         }
@@ -786,7 +798,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #network} (Network designation.)
          */
-        public BenefitsComponent setNetwork(CodeableConcept value) { 
+        public BenefitsComponent setNetwork(CodeableConcept value)  { 
           this.network = value;
           return this;
         }
@@ -810,7 +822,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #unit} (Unit designation: individual or family.)
          */
-        public BenefitsComponent setUnit(CodeableConcept value) { 
+        public BenefitsComponent setUnit(CodeableConcept value)  { 
           this.unit = value;
           return this;
         }
@@ -834,7 +846,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #term} (The term or period of the values such as 'maximum lifetime benefit' or 'maximum annual vistis'.)
          */
-        public BenefitsComponent setTerm(CodeableConcept value) { 
+        public BenefitsComponent setTerm(CodeableConcept value)  { 
           this.term = value;
           return this;
         }
@@ -892,17 +904,34 @@ public class EligibilityResponse extends DomainResource {
           return getFinancial().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("category", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, java.lang.Integer.MAX_VALUE, category));
-          childrenList.add(new Property("subCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, java.lang.Integer.MAX_VALUE, subCategory));
-          childrenList.add(new Property("excluded", "boolean", "True if the indicated class of service is excluded from the plan, missing or False indicated the service is included in the coverage.", 0, java.lang.Integer.MAX_VALUE, excluded));
-          childrenList.add(new Property("name", "string", "A short name or tag for the benefit, for example MED01, or DENT2.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "A richer description of the benefit, for example 'DENT2 covers 100% of basic, 50% of major but exclused Ortho, Implants and Costmetic services'.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("network", "CodeableConcept", "Network designation.", 0, java.lang.Integer.MAX_VALUE, network));
-          childrenList.add(new Property("unit", "CodeableConcept", "Unit designation: individual or family.", 0, java.lang.Integer.MAX_VALUE, unit));
-          childrenList.add(new Property("term", "CodeableConcept", "The term or period of the values such as 'maximum lifetime benefit' or 'maximum annual vistis'.", 0, java.lang.Integer.MAX_VALUE, term));
-          childrenList.add(new Property("financial", "", "Benefits Used to date.", 0, java.lang.Integer.MAX_VALUE, financial));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("category", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, 1, category));
+          children.add(new Property("subCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, 1, subCategory));
+          children.add(new Property("excluded", "boolean", "True if the indicated class of service is excluded from the plan, missing or False indicated the service is included in the coverage.", 0, 1, excluded));
+          children.add(new Property("name", "string", "A short name or tag for the benefit, for example MED01, or DENT2.", 0, 1, name));
+          children.add(new Property("description", "string", "A richer description of the benefit, for example 'DENT2 covers 100% of basic, 50% of major but exclused Ortho, Implants and Costmetic services'.", 0, 1, description));
+          children.add(new Property("network", "CodeableConcept", "Network designation.", 0, 1, network));
+          children.add(new Property("unit", "CodeableConcept", "Unit designation: individual or family.", 0, 1, unit));
+          children.add(new Property("term", "CodeableConcept", "The term or period of the values such as 'maximum lifetime benefit' or 'maximum annual vistis'.", 0, 1, term));
+          children.add(new Property("financial", "", "Benefits Used to date.", 0, java.lang.Integer.MAX_VALUE, financial));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Dental, Vision, Medical, Pharmacy, Rehab etc.", 0, 1, category);
+          case 1365024606: /*subCategory*/  return new Property("subCategory", "CodeableConcept", "Dental: basic, major, ortho; Vision exam, glasses, contacts; etc.", 0, 1, subCategory);
+          case 1994055114: /*excluded*/  return new Property("excluded", "boolean", "True if the indicated class of service is excluded from the plan, missing or False indicated the service is included in the coverage.", 0, 1, excluded);
+          case 3373707: /*name*/  return new Property("name", "string", "A short name or tag for the benefit, for example MED01, or DENT2.", 0, 1, name);
+          case -1724546052: /*description*/  return new Property("description", "string", "A richer description of the benefit, for example 'DENT2 covers 100% of basic, 50% of major but exclused Ortho, Implants and Costmetic services'.", 0, 1, description);
+          case 1843485230: /*network*/  return new Property("network", "CodeableConcept", "Network designation.", 0, 1, network);
+          case 3594628: /*unit*/  return new Property("unit", "CodeableConcept", "Unit designation: individual or family.", 0, 1, unit);
+          case 3556460: /*term*/  return new Property("term", "CodeableConcept", "The term or period of the values such as 'maximum lifetime benefit' or 'maximum annual vistis'.", 0, 1, term);
+          case 357555337: /*financial*/  return new Property("financial", "", "Benefits Used to date.", 0, java.lang.Integer.MAX_VALUE, financial);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1074,12 +1103,12 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof BenefitsComponent))
+        if (!(other_ instanceof BenefitsComponent))
           return false;
-        BenefitsComponent o = (BenefitsComponent) other;
+        BenefitsComponent o = (BenefitsComponent) other_;
         return compareDeep(category, o.category, true) && compareDeep(subCategory, o.subCategory, true)
            && compareDeep(excluded, o.excluded, true) && compareDeep(name, o.name, true) && compareDeep(description, o.description, true)
            && compareDeep(network, o.network, true) && compareDeep(unit, o.unit, true) && compareDeep(term, o.term, true)
@@ -1087,12 +1116,12 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof BenefitsComponent))
+        if (!(other_ instanceof BenefitsComponent))
           return false;
-        BenefitsComponent o = (BenefitsComponent) other;
+        BenefitsComponent o = (BenefitsComponent) other_;
         return compareValues(excluded, o.excluded, true) && compareValues(name, o.name, true) && compareValues(description, o.description, true)
           ;
       }
@@ -1169,7 +1198,7 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #type} (Deductable, visits, benefit amount.)
          */
-        public BenefitComponent setType(CodeableConcept value) { 
+        public BenefitComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -1185,39 +1214,45 @@ public class EligibilityResponse extends DomainResource {
          * @return {@link #allowed} (Benefits allowed.)
          */
         public UnsignedIntType getAllowedUnsignedIntType() throws FHIRException { 
+          if (this.allowed == null)
+            return null;
           if (!(this.allowed instanceof UnsignedIntType))
             throw new FHIRException("Type mismatch: the type UnsignedIntType was expected, but "+this.allowed.getClass().getName()+" was encountered");
           return (UnsignedIntType) this.allowed;
         }
 
         public boolean hasAllowedUnsignedIntType() { 
-          return this.allowed instanceof UnsignedIntType;
+          return this != null && this.allowed instanceof UnsignedIntType;
         }
 
         /**
          * @return {@link #allowed} (Benefits allowed.)
          */
         public StringType getAllowedStringType() throws FHIRException { 
+          if (this.allowed == null)
+            return null;
           if (!(this.allowed instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.allowed.getClass().getName()+" was encountered");
           return (StringType) this.allowed;
         }
 
         public boolean hasAllowedStringType() { 
-          return this.allowed instanceof StringType;
+          return this != null && this.allowed instanceof StringType;
         }
 
         /**
          * @return {@link #allowed} (Benefits allowed.)
          */
         public Money getAllowedMoney() throws FHIRException { 
+          if (this.allowed == null)
+            return null;
           if (!(this.allowed instanceof Money))
             throw new FHIRException("Type mismatch: the type Money was expected, but "+this.allowed.getClass().getName()+" was encountered");
           return (Money) this.allowed;
         }
 
         public boolean hasAllowedMoney() { 
-          return this.allowed instanceof Money;
+          return this != null && this.allowed instanceof Money;
         }
 
         public boolean hasAllowed() { 
@@ -1227,7 +1262,9 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #allowed} (Benefits allowed.)
          */
-        public BenefitComponent setAllowed(Type value) { 
+        public BenefitComponent setAllowed(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof UnsignedIntType || value instanceof StringType || value instanceof Money))
+            throw new FHIRFormatError("Not the right type for EligibilityResponse.insurance.benefitBalance.financial.allowed[x]: "+value.fhirType());
           this.allowed = value;
           return this;
         }
@@ -1243,26 +1280,30 @@ public class EligibilityResponse extends DomainResource {
          * @return {@link #used} (Benefits used.)
          */
         public UnsignedIntType getUsedUnsignedIntType() throws FHIRException { 
+          if (this.used == null)
+            return null;
           if (!(this.used instanceof UnsignedIntType))
             throw new FHIRException("Type mismatch: the type UnsignedIntType was expected, but "+this.used.getClass().getName()+" was encountered");
           return (UnsignedIntType) this.used;
         }
 
         public boolean hasUsedUnsignedIntType() { 
-          return this.used instanceof UnsignedIntType;
+          return this != null && this.used instanceof UnsignedIntType;
         }
 
         /**
          * @return {@link #used} (Benefits used.)
          */
         public Money getUsedMoney() throws FHIRException { 
+          if (this.used == null)
+            return null;
           if (!(this.used instanceof Money))
             throw new FHIRException("Type mismatch: the type Money was expected, but "+this.used.getClass().getName()+" was encountered");
           return (Money) this.used;
         }
 
         public boolean hasUsedMoney() { 
-          return this.used instanceof Money;
+          return this != null && this.used instanceof Money;
         }
 
         public boolean hasUsed() { 
@@ -1272,16 +1313,36 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #used} (Benefits used.)
          */
-        public BenefitComponent setUsed(Type value) { 
+        public BenefitComponent setUsed(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof UnsignedIntType || value instanceof Money))
+            throw new FHIRFormatError("Not the right type for EligibilityResponse.insurance.benefitBalance.financial.used[x]: "+value.fhirType());
           this.used = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "Deductable, visits, benefit amount.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, java.lang.Integer.MAX_VALUE, allowed));
-          childrenList.add(new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, java.lang.Integer.MAX_VALUE, used));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "Deductable, visits, benefit amount.", 0, 1, type));
+          children.add(new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, 1, allowed));
+          children.add(new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, 1, used));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Deductable, visits, benefit amount.", 0, 1, type);
+          case -1336663592: /*allowed[x]*/  return new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, 1, allowed);
+          case -911343192: /*allowed*/  return new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, 1, allowed);
+          case 1668802034: /*allowedUnsignedInt*/  return new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, 1, allowed);
+          case -2135265319: /*allowedString*/  return new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, 1, allowed);
+          case -351668232: /*allowedMoney*/  return new Property("allowed[x]", "unsignedInt|string|Money", "Benefits allowed.", 0, 1, allowed);
+          case -147553373: /*used[x]*/  return new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, 1, used);
+          case 3599293: /*used*/  return new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, 1, used);
+          case 1252740285: /*usedUnsignedInt*/  return new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, 1, used);
+          case -78048509: /*usedMoney*/  return new Property("used[x]", "unsignedInt|Money", "Benefits used.", 0, 1, used);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1389,23 +1450,23 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof BenefitComponent))
+        if (!(other_ instanceof BenefitComponent))
           return false;
-        BenefitComponent o = (BenefitComponent) other;
+        BenefitComponent o = (BenefitComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(allowed, o.allowed, true) && compareDeep(used, o.used, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof BenefitComponent))
+        if (!(other_ instanceof BenefitComponent))
           return false;
-        BenefitComponent o = (BenefitComponent) other;
+        BenefitComponent o = (BenefitComponent) other_;
         return true;
       }
 
@@ -1466,14 +1527,23 @@ public class EligibilityResponse extends DomainResource {
         /**
          * @param value {@link #code} (An error code,from a specified code system, which details why the eligibility check could not be performed.)
          */
-        public ErrorsComponent setCode(CodeableConcept value) { 
+        public ErrorsComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the eligibility check could not be performed.", 0, java.lang.Integer.MAX_VALUE, code));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the eligibility check could not be performed.", 0, 1, code));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the eligibility check could not be performed.", 0, 1, code);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1541,22 +1611,22 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ErrorsComponent))
+        if (!(other_ instanceof ErrorsComponent))
           return false;
-        ErrorsComponent o = (ErrorsComponent) other;
+        ErrorsComponent o = (ErrorsComponent) other_;
         return compareDeep(code, o.code, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ErrorsComponent))
+        if (!(other_ instanceof ErrorsComponent))
           return false;
-        ErrorsComponent o = (ErrorsComponent) other;
+        ErrorsComponent o = (ErrorsComponent) other_;
         return true;
       }
 
@@ -1864,7 +1934,7 @@ public class EligibilityResponse extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public EligibilityResponse setRequestProvider(Reference value) { 
+    public EligibilityResponse setRequestProvider(Reference value)  { 
       this.requestProvider = value;
       return this;
     }
@@ -1908,7 +1978,7 @@ public class EligibilityResponse extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public EligibilityResponse setRequestOrganization(Reference value) { 
+    public EligibilityResponse setRequestOrganization(Reference value)  { 
       this.requestOrganization = value;
       return this;
     }
@@ -1952,7 +2022,7 @@ public class EligibilityResponse extends DomainResource {
     /**
      * @param value {@link #request} (Original request resource reference.)
      */
-    public EligibilityResponse setRequest(Reference value) { 
+    public EligibilityResponse setRequest(Reference value)  { 
       this.request = value;
       return this;
     }
@@ -1996,7 +2066,7 @@ public class EligibilityResponse extends DomainResource {
     /**
      * @param value {@link #outcome} (Transaction status: error, complete.)
      */
-    public EligibilityResponse setOutcome(CodeableConcept value) { 
+    public EligibilityResponse setOutcome(CodeableConcept value)  { 
       this.outcome = value;
       return this;
     }
@@ -2069,7 +2139,7 @@ public class EligibilityResponse extends DomainResource {
     /**
      * @param value {@link #insurer} (The Insurer who produced this adjudicated response.)
      */
-    public EligibilityResponse setInsurer(Reference value) { 
+    public EligibilityResponse setInsurer(Reference value)  { 
       this.insurer = value;
       return this;
     }
@@ -2211,7 +2281,7 @@ public class EligibilityResponse extends DomainResource {
     /**
      * @param value {@link #form} (The form to be used for printing the content.)
      */
-    public EligibilityResponse setForm(CodeableConcept value) { 
+    public EligibilityResponse setForm(CodeableConcept value)  { 
       this.form = value;
       return this;
     }
@@ -2269,21 +2339,42 @@ public class EligibilityResponse extends DomainResource {
       return getError().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
-        childrenList.add(new Property("request", "Reference(EligibilityRequest)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
-        childrenList.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, insurer));
-        childrenList.add(new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, java.lang.Integer.MAX_VALUE, inforce));
-        childrenList.add(new Property("insurance", "", "The insurer may provide both the details for the requested coverage as well as details for additional coverages known to the insurer.", 0, java.lang.Integer.MAX_VALUE, insurance));
-        childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
-        childrenList.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
+        children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
+        children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
+        children.add(new Property("request", "Reference(EligibilityRequest)", "Original request resource reference.", 0, 1, request));
+        children.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete.", 0, 1, outcome));
+        children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
+        children.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer));
+        children.add(new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, 1, inforce));
+        children.add(new Property("insurance", "", "The insurer may provide both the details for the requested coverage as well as details for additional coverages known to the insurer.", 0, java.lang.Integer.MAX_VALUE, insurance));
+        children.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form));
+        children.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
+        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
+        case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
+        case 1095692943: /*request*/  return new Property("request", "Reference(EligibilityRequest)", "Original request resource reference.", 0, 1, request);
+        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Transaction status: error, complete.", 0, 1, outcome);
+        case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
+        case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer);
+        case 1945431270: /*inforce*/  return new Property("inforce", "boolean", "Flag indicating if the coverage provided is inforce currently  if no service date(s) specified or for the whole duration of the service dates.", 0, 1, inforce);
+        case 73049818: /*insurance*/  return new Property("insurance", "", "The insurer may provide both the details for the requested coverage as well as details for additional coverages known to the insurer.", 0, java.lang.Integer.MAX_VALUE, insurance);
+        case 3148996: /*form*/  return new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form);
+        case 96784904: /*error*/  return new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2523,12 +2614,12 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EligibilityResponse))
+        if (!(other_ instanceof EligibilityResponse))
           return false;
-        EligibilityResponse o = (EligibilityResponse) other;
+        EligibilityResponse o = (EligibilityResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(created, o.created, true)
            && compareDeep(requestProvider, o.requestProvider, true) && compareDeep(requestOrganization, o.requestOrganization, true)
            && compareDeep(request, o.request, true) && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true)
@@ -2537,12 +2628,12 @@ public class EligibilityResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EligibilityResponse))
+        if (!(other_ instanceof EligibilityResponse))
           return false;
-        EligibilityResponse o = (EligibilityResponse) other;
+        EligibilityResponse o = (EligibilityResponse) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
            && compareValues(inforce, o.inforce, true);
       }

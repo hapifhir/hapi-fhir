@@ -24,10 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -36,12 +34,10 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class UploadTerminologyCommand extends BaseCommand {
-
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
-	private static final String BASE_URL_PARAM = "t";
 	private static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "upload-external-code-system";
 
 	@Override
@@ -59,10 +55,11 @@ public class UploadTerminologyCommand extends BaseCommand {
 		Options options = new Options();
 
 		addFhirVersionOption(options);
-		addRequiredOption(options, "t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
+		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addBasicAuthOption(options);
+		addVerboseLoggingOption(options);
 
 		return options;
 	}
@@ -71,13 +68,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		parseFhirContext(theCommandLine);
 		FhirContext ctx = getFhirContext();
-
-		String targetServer = theCommandLine.getOptionValue(BASE_URL_PARAM);
-		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified");
-		} else if (targetServer.startsWith("http") == false && targetServer.startsWith("file") == false) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
-		}
 
 		String termUrl = theCommandLine.getOptionValue("u");
 		if (isBlank(termUrl)) {
@@ -88,8 +78,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 		if (datafile == null || datafile.length == 0) {
 			throw new ParseException("No data file provided");
 		}
-
-		String bearerToken = theCommandLine.getOptionValue("b");
 
 		IGenericClient client = super.newClient(theCommandLine);
 		IBaseParameters inputParameters;
@@ -104,11 +92,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 			throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());
 		}
 
-		if (isNotBlank(bearerToken)) {
-			client.registerInterceptor(new BearerTokenAuthInterceptor(bearerToken));
-		}
-
-		if (theCommandLine.hasOption('v')) {
+		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 

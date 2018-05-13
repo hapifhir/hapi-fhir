@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum SupplyrequestReason {
          */
         PATIENTCARE, 
         /**
-         * The supply has been requested for for creating or replenishing ward stock.
+         * The supply has been requested for creating or replenishing ward stock.
          */
         WARDSTOCK, 
         /**
@@ -70,7 +70,7 @@ public enum SupplyrequestReason {
         public String getDefinition() {
           switch (this) {
             case PATIENTCARE: return "The supply has been requested for use in direct patient care.";
-            case WARDSTOCK: return "The supply has been requested for for creating or replenishing ward stock.";
+            case WARDSTOCK: return "The supply has been requested for creating or replenishing ward stock.";
             default: return "?";
           }
         }

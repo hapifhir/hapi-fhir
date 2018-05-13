@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -73,10 +73,6 @@ public enum ConsentPolicy {
          */
         NYSSIPP, 
         /**
-         * SSA Form SSA-827 (Authorization to Disclose Information to the Social Security Administration (SSA))and its affiliated State disability determination services use Form SSA-827, Authorization to Disclose Information to the Social Security Administration (SSA) to obtain medical and other information needed to determine whether or not a claimant is disabled. Comment: Opt-in Consent Directive. Note: Form is available at https://www.socialsecurity.gov/forms/ssa-827-inst-sp.pdf 
-         */
-        SSA827, 
-        /**
          * VA Form 10-0484 Revocation for Release of Individually-Identifiable Health Information enables a veteran to revoke authorization for the VA to release specified copies of individually-identifiable health information with the non-VA health care provider organizations participating in the eHealth Exchange and partnering with VA. Comment: Opt-in Consent Directive with status = rescinded (aka 'revoked'). Note: Form is available at http://www.va.gov/vaforms/medical/pdf/vha-10-0484-fill.pdf
          */
         VA100484, 
@@ -104,6 +100,10 @@ public enum ConsentPolicy {
          * VA Form 21-4142 (Authorization and Consent to Release Information to the Department of Veterans Affairs (VA) enables a veteran to authorize the US Veterans Administration [VA] to request veteranâ€™s health information from non-VA providers. Aka VA Compensation Application Note: Form is available at http://www.vba.va.gov/pubs/forms/VBA-21-4142-ARE.pdf . For additional information regarding VA Form 21-4142, refer to the following website: www.benefits.va.gov/compensation/consent_privateproviders
          */
         VA214142, 
+        /**
+         * SA Form SSA-827 (Authorization to Disclose Information to the Social Security Administration (SSA)). Form is available at https://www.socialsecurity.gov/forms/ssa-827-inst-sp.pdf
+         */
+        SSA827, 
         /**
          * Michigan DCH-3927 Consent to Share Behavioral Health Information for Care Coordination Purposes, which combines 42 CFR Part 2 and Michigan Mental Health Code, Act 258 of 1974. Form is available at http://www.michigan.gov/documents/mdch/DCH-3927_Consent_to_Share_Health_Information_477005_7.docx
          */
@@ -165,8 +165,6 @@ public enum ConsentPolicy {
           return MDHHS5515;
         if ("nyssipp".equals(codeString))
           return NYSSIPP;
-        if ("ssa-827".equals(codeString))
-          return SSA827;
         if ("va-10-0484".equals(codeString))
           return VA100484;
         if ("va-10-0485".equals(codeString))
@@ -197,8 +195,6 @@ public enum ConsentPolicy {
           return NCI;
         if ("nih-grdr".equals(codeString))
           return NIHGRDR;
-        if ("va-10-10116".equals(codeString))
-          return VA1010116;
         if ("nih-527".equals(codeString))
           return NIH527;
         if ("ga4gh".equals(codeString))
@@ -221,6 +217,7 @@ public enum ConsentPolicy {
             case VA105345: return "va-10-5345";
             case VA105345A: return "va-10-5345a";
             case VA105345AMHV: return "va-10-5345a-MHV";
+            case VA1010116: return "va-10-10116";
             case VA214142: return "va-21-4142";
             case SSA827: return "ssa-827";
             case DCH3927: return "dch-3927";
@@ -230,7 +227,6 @@ public enum ConsentPolicy {
             case NIHHIPAA: return "nih-hipaa";
             case NCI: return "nci";
             case NIHGRDR: return "nih-grdr";
-            case VA1010116: return "va-10-10116";
             case NIH527: return "nih-527";
             case GA4GH: return "ga4gh";
             default: return "?";
@@ -255,6 +251,7 @@ public enum ConsentPolicy {
             case VA105345: return "VA Form 10-5345 Request for and Authorization to Release Medical Records or Health Information enables a veteran to request and authorize the VA to release specified copies of protected health information (PHI), such as hospital summary or outpatient treatment notes, which may include information about conditions governed under Title 38 Section 7332 (drug abuse, alcoholism or alcohol abuse, testing for or infection with HIV, and sickle cell anemia). Comment: Opt-in Consent Directive. Note: Form is available at http://www.va.gov/vaforms/medical/pdf/vha-10-5345-fill.pdf";
             case VA105345A: return "VA Form 10-5345a Individuals' Request for a Copy of Their Own Health Information enables a veteran to request and authorize the VA to release specified copies of protected health information (PHI), such as hospital summary or outpatient treatment notes. Note: Form is available at http://www.va.gov/vaforms/medical/pdf/vha-10-5345a-fill.pdf";
             case VA105345AMHV: return "VA Form 10-5345a-MHV Individualâ€™s Request for a Copy of their own health information from MyHealtheVet enables a veteran to receive a copy of all available personal health information to be delivered through the veteranâ€™s My HealtheVet account. Note: Form is available at http://www.va.gov/vaforms/medical/pdf/vha-10-5345a-MHV-fill.pdf";
+            case VA1010116: return "VA Form 10-10116 Revocation of Authorization for Use and Release of Individually Identifiable Health Information for Veterans Health Administration Research. Comment: Opt-in with Restriction Consent Directive with status = 'completed'. Note: Form is available at http://www.northerncalifornia.va.gov/northerncalifornia/services/rnd/docs/vha-10-10116.pdf ";
             case VA214142: return "VA Form 21-4142 (Authorization and Consent to Release Information to the Department of Veterans Affairs (VA) enables a veteran to authorize the US Veterans Administration [VA] to request veteranâ€™s health information from non-VA providers. Aka VA Compensation Application Note: Form is available at http://www.vba.va.gov/pubs/forms/VBA-21-4142-ARE.pdf . For additional information regarding VA Form 21-4142, refer to the following website: www.benefits.va.gov/compensation/consent_privateproviders";
             case SSA827: return "SA Form SSA-827 (Authorization to Disclose Information to the Social Security Administration (SSA)). Form is available at https://www.socialsecurity.gov/forms/ssa-827-inst-sp.pdf";
             case DCH3927: return "Michigan DCH-3927 Consent to Share Behavioral Health Information for Care Coordination Purposes, which combines 42 CFR Part 2 and Michigan Mental Health Code, Act 258 of 1974. Form is available at http://www.michigan.gov/documents/mdch/DCH-3927_Consent_to_Share_Health_Information_477005_7.docx";
@@ -264,7 +261,6 @@ public enum ConsentPolicy {
             case NIHHIPAA: return "Guidance and template form https://privacyruleandresearch.nih.gov/pdf/authorization.pdf";
             case NCI: return "see http://ctep.cancer.gov/protocolDevelopment/docs/Informed_Consent_Template.docx";
             case NIHGRDR: return "Global Rare Disease Patient Registry and Data Repository (GRDR) consent is an agreement of a healthcare consumer to permit collection, access, use and disclosure of de-identified rare disease information and collection of bio-specimens, medical information, family history and other related information from patients to permit the registry collection of health and genetic information, and specimens for pseudonymized disclosure for research purpose of use. https://rarediseases.info.nih.gov/files/informed_consent_template.pdf";
-            case VA1010116: return "VA Form 10-10116 Revocation of Authorization for Use and Release of Individually Identifiable Health Information for Veterans Health Administration Research. Note: VA Form 10-10116 is available @ http://www.northerncalifornia.va.gov/northerncalifornia/services/rnd/docs/vha-10-10116.pdf";
             case NIH527: return "NIH Authorization for the Release of Medical Information is a patient’s consent for the National Institutes of Health Clinical Center to release medical information to care providers, which can be revoked. Note: Consent Form available @ http://cc.nih.gov/participate/_pdf/NIH-527.pdf";
             case GA4GH: return "Global Alliance for Genomic Health Data Sharing Consent Form is an example of the GA4GH Population origins and ancestry research consent form. Consenters agree to permitting a specified research project to collect ancestry and genetic information in controlled-access databases, and to allow other researchers to use deidentified information from those databases. http://www.commonaccord.org/index.php?action=doc&file=Wx/org/genomicsandhealth/REWG/Demo/Roberta_Robinson_US";
             default: return "?";
@@ -286,6 +282,7 @@ public enum ConsentPolicy {
             case VA105345: return "VA Form 10-5345";
             case VA105345A: return "VA Form 10-5345a";
             case VA105345AMHV: return "VA Form 10-5345a-MHV";
+            case VA1010116: return "VA Form 10-10-10116";
             case VA214142: return "VA Form 21-4142";
             case SSA827: return "SSA Authorization to Disclose";
             case DCH3927: return "Michigan behavior and mental health consent";
@@ -295,7 +292,6 @@ public enum ConsentPolicy {
             case NIHHIPAA: return "HHS NIH HIPAA Research Authorization";
             case NCI: return "NCI Cancer Clinical Trial consent";
             case NIHGRDR: return "NIH Global Rare Disease Patient Registry and Data Repository consent";
-            case VA1010116: return "VA Form 10-10116";
             case NIH527: return "NIH Authorization for the Release of Medical Information";
             case GA4GH: return "Population origins and ancestry research consent";
             default: return "?";
