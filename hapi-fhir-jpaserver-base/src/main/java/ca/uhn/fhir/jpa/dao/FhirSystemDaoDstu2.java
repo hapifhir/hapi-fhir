@@ -104,15 +104,20 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					Bundle subRequestBundle = new Bundle();
 					subRequestBundle.setType(BundleTypeEnum.TRANSACTION);
 					subRequestBundle.addEntry(nextRequestEntry);
-
-					Bundle subResponseBundle = transaction((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
-					return subResponseBundle;
+					return transaction((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
 				}
 			};
 
 			BaseServerResponseException caughtEx;
 			try {
-				Bundle nextResponseBundle = txTemplate.execute(callback);
+				Bundle nextResponseBundle;
+				if (nextRequestEntry.getRequest().getMethodElement().getValueAsEnum() == HTTPVerbEnum.GET) {
+					// Don't process GETs in a transaction because they'll
+					// create their own
+					nextResponseBundle = callback.doInTransaction(null);
+				} else {
+					nextResponseBundle = txTemplate.execute(callback);
+				}
 				caughtEx = null;
 
 				Entry subResponseEntry = nextResponseBundle.getEntry().get(0);
