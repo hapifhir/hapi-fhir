@@ -123,7 +123,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private boolean myProcessDeferred = true;
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
-//	@Autowired(required = false)
+	@Autowired(required = false)
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
 
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
