@@ -51,6 +51,16 @@
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>oss-snapshot</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
@@ -469,8 +479,8 @@
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<ph_schematron_version>5.0.3</ph_schematron_version>
-		<ph_commons_version>9.1.0</ph_commons_version>
+		<ph_schematron_version>5.0.4-SNAPSHOT</ph_schematron_version>
+		<ph_commons_version>9.1.1-SNAPSHOT</ph_commons_version>
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<spring_version>5.0.3.RELEASE</spring_version>
