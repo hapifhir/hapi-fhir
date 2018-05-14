@@ -68,6 +68,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.TypedQuery;
@@ -156,13 +157,18 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			return batch(theRequestDetails, theRequest);
 		}
 
-		if (transactionType == null) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		return txTemplate.execute(t-> doTransaction(theRequestDetails, theRequest, theActionName, transactionType));
+	}
+
+	private Bundle doTransaction(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, BundleTypeEnum theTransactionType) {
+		if (theTransactionType == null) {
 			String message = "Transactiion Bundle did not specify valid Bundle.type, assuming " + BundleTypeEnum.TRANSACTION.getCode();
 			ourLog.warn(message);
-			transactionType = BundleTypeEnum.TRANSACTION;
+			theTransactionType = BundleTypeEnum.TRANSACTION;
 		}
-		if (transactionType != BundleTypeEnum.TRANSACTION) {
-			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType.getCode());
+		if (theTransactionType != BundleTypeEnum.TRANSACTION) {
+			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + theTransactionType.getCode());
 		}
 
 		ourLog.info("Beginning {} with {} resources", theActionName, theRequest.getEntry().size());
@@ -186,7 +192,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 */
 		Bundle response = new Bundle();
 		List<Entry> getEntries = new ArrayList<Entry>();
-		IdentityHashMap<Entry, Integer> originalRequestOrder = new IdentityHashMap<Bundle.Entry, Integer>();
+		IdentityHashMap<Entry, Integer> originalRequestOrder = new IdentityHashMap<Entry, Integer>();
 		for (int i = 0; i < theRequest.getEntry().size(); i++) {
 			originalRequestOrder.put(theRequest.getEntry().get(i), i);
 			response.addEntry();
@@ -277,7 +283,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					// DELETE
 					String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
 					UrlParts parts = UrlUtil.parseUrl(url);
-					ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
+					IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb.getCode(), url);
 					int status = Constants.STATUS_HTTP_204_NO_CONTENT;
 					if (parts.getResourceId() != null) {
 						DaoMethodOutcome outcome = dao.delete(new IdDt(parts.getResourceType(), parts.getResourceId()), deleteConflicts, theRequestDetails);
@@ -447,7 +453,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}
-				for (java.util.Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
+				for (Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
 					String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
 					requestDetails.addParameter(nextParamEntry.getKey(), nextValue);
 				}
@@ -493,7 +499,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		ourLog.info("Flushing context after {}", theActionName);
 		myEntityManager.flush();
 
-		for (java.util.Map.Entry<Entry, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
+		for (Map.Entry<Entry, ResourceTable> nextEntry : entriesToProcess.entrySet()) {
 			nextEntry.getKey().getResponse().setLocation(nextEntry.getValue().getIdDt().toUnqualified().getValue());
 			nextEntry.getKey().getResponse().setEtag(nextEntry.getValue().getIdDt().getVersionIdPart());
 		}
