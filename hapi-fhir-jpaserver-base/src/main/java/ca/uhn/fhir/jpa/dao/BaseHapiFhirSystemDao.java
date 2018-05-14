@@ -265,7 +265,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	public Integer performReindexingPass(final Integer theCount) {
 		if (!myReindexLock.tryLock()) {
 			return null;

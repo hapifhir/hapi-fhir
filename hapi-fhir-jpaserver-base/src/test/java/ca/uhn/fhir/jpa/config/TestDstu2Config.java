@@ -38,9 +38,18 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		 * starvation
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+
+		// FIXME: remove
+		ourMaxThreads = 1;
 	}
 
 	private Exception myLastStackTrace;
+	private String myLastStackTraceThreadName;
+
+	@Bean(name="maxDatabaseThreadsForTest")
+	public Integer getMaxThread(){
+		return ourMaxThreads;
+	}
 
 	@Bean()
 	public DaoConfig daoConfig() {
@@ -60,6 +69,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
+
 //					if ("true".equals(System.getStringProperty("ci"))) {
 					fail("Exceeded maximum wait for connection: " + e.toString());
 //					}
@@ -71,6 +81,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 					throw new Exception();
 				} catch (Exception e) {
 					myLastStackTrace = e;
+					myLastStackTraceThreadName = Thread.currentThread().getName();
 				}
 
 				return retVal;
@@ -91,6 +102,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 					b.append(")");
 				}
 				ourLog.info(b.toString());
+				ourLog.info("Last connection thread: {}", myLastStackTraceThreadName);
 			}
 
 		};

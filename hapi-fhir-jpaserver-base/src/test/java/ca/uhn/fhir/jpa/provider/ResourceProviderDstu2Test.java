@@ -1488,6 +1488,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
+		StopWatch sw = new StopWatch();
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
 			.operation()
 			.onInstance(new IdDt(pid))
@@ -1498,7 +1499,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 
 		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValueAsString());
+		assertEquals("Total should be null but was "+response.getTotalElement().getValueAsString() +" in " + sw.toString(), null, response.getTotalElement().getValueAsString());
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
 		// Load page 2
