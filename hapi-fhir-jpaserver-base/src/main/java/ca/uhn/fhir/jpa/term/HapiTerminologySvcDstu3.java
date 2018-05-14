@@ -59,13 +59,13 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	protected FhirContext myContext;
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
-	@Autowired
-	@Qualifier("myValueSetDaoDstu3")
+//	@Autowired
+//	@Qualifier("myValueSetDaoDstu3")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
-	@Autowired
-	@Qualifier("myConceptMapDaoDstu3")
+//	@Autowired
+//	@Qualifier("myConceptMapDaoDstu3")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
-	@Autowired
+//	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;

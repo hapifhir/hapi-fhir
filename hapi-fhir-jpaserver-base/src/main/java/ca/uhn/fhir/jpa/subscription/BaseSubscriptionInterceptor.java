@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -37,6 +36,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -99,6 +99,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
+	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
 	/**
 	 * Constructor
@@ -242,6 +243,26 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
+
+	@SuppressWarnings("unchecked")
+	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
+		if (myResourceTypeToDao == null) {
+			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
+			for (IFhirResourceDao<?> next : myResourceDaos) {
+				theResourceTypeToDao.put(next.getResourceType(), next);
+			}
+
+			if (this instanceof IFhirResourceDao<?>) {
+				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
+				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
+			}
+
+			myResourceTypeToDao = theResourceTypeToDao;
+		}
+
+		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
+		return dao;
+	}
 
 	public SubscribableChannel getDeliveryChannel() {
 		return myDeliveryChannel;

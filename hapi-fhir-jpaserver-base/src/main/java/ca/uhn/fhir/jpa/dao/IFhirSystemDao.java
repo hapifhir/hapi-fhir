@@ -40,8 +40,6 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions);
 
-	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
-
 	Map<String, Long> getResourceCounts();
 
 	/**

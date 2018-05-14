@@ -123,7 +123,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IBaseResource payloadResource = theMsg.getPayload(getContext());
 
 		if (theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IFhirResourceDao dao = getSubscriptionDao().getDao(payloadResource.getClass());
+			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(payloadResource.getClass());
 			try {
 				payloadResource = dao.read(payloadResource.getIdElement().toVersionless());
 			} catch (ResourceGoneException e) {

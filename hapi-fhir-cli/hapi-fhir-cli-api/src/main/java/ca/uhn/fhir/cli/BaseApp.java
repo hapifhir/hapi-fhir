@@ -233,10 +233,10 @@ public abstract class BaseApp {
 			} else {
 				System.exit(1);
 			}
-		} catch (Exception e) {
-			ourLog.error("Error during execution: ", e);
+		} catch (Throwable t) {
+			ourLog.error("Error during execution: ", t);
 			if ("true".equals(System.getProperty("test"))) {
-				throw new CommandFailureException("Error: " + e.toString(), e);
+				throw new CommandFailureException("Error: " + t.toString(), t);
 			} else {
 				System.exit(1);
 			}
