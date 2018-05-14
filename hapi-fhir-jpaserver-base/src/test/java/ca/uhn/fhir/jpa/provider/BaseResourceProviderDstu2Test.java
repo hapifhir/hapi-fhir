@@ -49,7 +49,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static PlatformTransactionManager ourTxManager;
-	protected Integer ourConnectionPoolSize;
+	protected static Integer ourConnectionPoolSize;
 
 	public BaseResourceProviderDstu2Test() {
 		super();
