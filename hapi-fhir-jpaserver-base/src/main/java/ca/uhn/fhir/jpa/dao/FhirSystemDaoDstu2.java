@@ -595,7 +595,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
 		if (theRequestDetails != null) {
