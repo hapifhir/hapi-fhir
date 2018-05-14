@@ -159,7 +159,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return doExpunge(null, null, null, theExpungeOptions);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Map<String, Long> getResourceCounts() {
 		Map<String, Long> retVal = new HashMap<>();
