@@ -38,9 +38,6 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		 * starvation
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
-
-		// FIXME: remove
-		ourMaxThreads = 1;
 	}
 
 	private Exception myLastStackTrace;
