@@ -11,9 +11,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import java.util.Collections;
@@ -28,9 +31,9 @@ import java.util.List;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,29 +43,22 @@ import java.util.List;
  */
 
 @Transactional(value = TxType.REQUIRED)
-public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
+public class JpaValidationSupportR4 implements IJpaValidationSupportR4, ApplicationContextAware {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportR4.class);
 
-	@Autowired
-	@Qualifier("myStructureDefinitionDaoR4")
 	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
-
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDao<ValueSet> myValueSetDao;
-
-	@Autowired
-	@Qualifier("myQuestionnaireDaoR4")
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
-	@Autowired
-	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Autowired
 	private FhirContext myR4Ctx;
+	private ApplicationContext myApplicationContext;
 
+	/**
+	 * Constructor
+	 */
 	public JpaValidationSupportR4() {
 		super();
 	}
@@ -161,6 +157,19 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
+
+	@PostConstruct
+	public void start() {
+		myStructureDefinitionDao = myApplicationContext.getBean("myStructureDefinitionDaoR4", IFhirResourceDao.class);
+		myValueSetDao = myApplicationContext.getBean("myValueSetDaoR4", IFhirResourceDao.class);
+		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoR4", IFhirResourceDao.class);
+		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoR4", IFhirResourceDao.class);
 	}
 
 	@Override
