@@ -172,7 +172,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	@Transactional(propagation = Propagation.SUPPORTS)
 	@Nullable
 	@Override
 	public Map<String, Long> getResourceCountsFromCache() {

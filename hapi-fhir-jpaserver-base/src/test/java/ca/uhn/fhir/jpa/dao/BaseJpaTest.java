@@ -20,6 +20,10 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.jdbc.Work;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -30,6 +34,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mockito;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -38,8 +44,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
 import static org.junit.Assert.*;
@@ -64,7 +73,7 @@ public abstract class BaseJpaTest {
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 
 	@After
-	public final void afterPerformCleanup() {
+	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
 	}
 
@@ -76,6 +85,32 @@ public abstract class BaseJpaTest {
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+	}
+
+	@After
+	public void afterValidateNoTransaction() {
+		PlatformTransactionManager txManager = getTxManager();
+		if (txManager != null) {
+			JpaTransactionManager hibernateTxManager = (JpaTransactionManager) txManager;
+			SessionFactory sessionFactory = (SessionFactory) hibernateTxManager.getEntityManagerFactory();
+			AtomicBoolean isReadOnly = new AtomicBoolean();
+			Session currentSession;
+			try {
+				currentSession = sessionFactory.getCurrentSession();
+			} catch (HibernateException e) {
+				currentSession = null;
+			}
+			if (currentSession != null) {
+				currentSession.doWork(new Work() {
+
+					public void execute(Connection connection) throws SQLException {
+						isReadOnly.set(connection.isReadOnly());
+					}
+				});
+
+				assertFalse(isReadOnly.get());
+			}
+		}
 	}
 
 	@Before
