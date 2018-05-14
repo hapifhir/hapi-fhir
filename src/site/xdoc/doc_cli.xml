@@ -32,7 +32,18 @@
 				</p>
 				<img src="./images/hapi-fhir-cli.png" alt="Basic screen shot" style="margin-left: 40px;"/>
 			</subsection>
-			
+
+			<subsection name="Download and Installation - Mac/OSX">
+
+				<p>
+					hapi-fhir-cli is available as a <a href="https://brew.sh/">Homebrew</a> package
+					for Mac. It can be installed using the following command:
+				</p>
+				<code>brew install hapi-fhir-cli</code>
+
+
+			</subsection>
+
 			<subsection name="Troubleshooting">
 				<p>
 					<b>Note on Java version support:</b> The HAPI library is designed to

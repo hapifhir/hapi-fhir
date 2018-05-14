@@ -252,6 +252,7 @@ public class ConnectionWrapper implements Connection {
 
 	@Override
 	public void setReadOnly(boolean theReadOnly) throws SQLException {
+		ourLog.info("Setting connection as readonly");
 		myWrap.setReadOnly(theReadOnly);
 	}
 

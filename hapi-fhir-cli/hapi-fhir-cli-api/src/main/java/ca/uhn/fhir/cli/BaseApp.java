@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import com.phloc.commons.io.file.FileUtils;
+import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -60,7 +60,7 @@ public abstract class BaseApp {
 		System.out.println("------------------------------------------------------------");
 		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 		System.out.println("------------------------------------------------------------");
-		System.out.println("Max configured JVM memory (Xmx): " + FileUtils.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		System.out.println("Max configured JVM memory (Xmx): " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		System.out.println("Detected Java version: " + System.getProperty("java.version"));
 		System.out.println("------------------------------------------------------------");
 	}
@@ -233,10 +233,10 @@ public abstract class BaseApp {
 			} else {
 				System.exit(1);
 			}
-		} catch (Exception e) {
-			ourLog.error("Error during execution: ", e);
+		} catch (Throwable t) {
+			ourLog.error("Error during execution: ", t);
 			if ("true".equals(System.getProperty("test"))) {
-				throw new CommandFailureException("Error: " + e.toString(), e);
+				throw new CommandFailureException("Error: " + t.toString(), t);
 			} else {
 				System.exit(1);
 			}

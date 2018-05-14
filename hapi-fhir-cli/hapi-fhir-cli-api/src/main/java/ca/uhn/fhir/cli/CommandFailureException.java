@@ -30,7 +30,7 @@ public class CommandFailureException extends Error {
 		super(theMessage);
 	}
 
-	public CommandFailureException(String theString, Exception theCause) {
+	public CommandFailureException(String theString, Throwable theCause) {
 		super(theString, theCause);
 	}
 

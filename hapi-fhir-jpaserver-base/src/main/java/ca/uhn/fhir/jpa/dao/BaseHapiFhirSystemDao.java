@@ -159,7 +159,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return doExpunge(null, null, null, theExpungeOptions);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Map<String, Long> getResourceCounts() {
 		Map<String, Long> retVal = new HashMap<>();
@@ -172,7 +172,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		return retVal;
 	}
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	@Transactional(propagation = Propagation.SUPPORTS)
 	@Nullable
 	@Override
 	public Map<String, Long> getResourceCountsFromCache() {
@@ -265,7 +265,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	public Integer performReindexingPass(final Integer theCount) {
 		if (!myReindexLock.tryLock()) {
 			return null;

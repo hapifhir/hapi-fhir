@@ -162,6 +162,11 @@
 				an unspecified error was thrown by the JPA server. An HTTP 409
 				(Conflict) with an informative error message is now thrown.
 			</action>
+			<action type="fix">
+				A bug in the JPA server's DSTU2 transaction processing routine caused it
+				to occasionally consume two database connections, which could lead to deadlocks
+				under heavy load. This has been fixed.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

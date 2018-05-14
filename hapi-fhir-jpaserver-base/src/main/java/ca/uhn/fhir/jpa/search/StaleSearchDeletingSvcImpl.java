@@ -77,7 +77,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	public void pollForStaleSearchesAndDeleteThem() {
 		if (!myDaoConfig.isExpireSearchResults()) {
 			return;
@@ -127,7 +127,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	}
 
 	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
 		if (!myDaoConfig.isSchedulingDisabled()) {

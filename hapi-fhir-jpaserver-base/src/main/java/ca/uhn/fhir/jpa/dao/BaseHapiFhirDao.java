@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,7 +73,10 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Reference;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -100,7 +103,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("WeakerAccess")
 @Repository
-public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
+public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, ApplicationContextAware {
 
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
@@ -186,9 +189,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
-	private List<IFhirResourceDao<?>> myResourceDaos;
-	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
-	@Autowired
 	private ISearchDao mySearchDao;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
@@ -200,6 +200,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	private ApplicationContext myApplicationContext;
+	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
 	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
@@ -695,6 +697,29 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return retVal;
 	}
 
+
+	@SuppressWarnings("unchecked")
+	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
+		if (myResourceTypeToDao == null) {
+			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
+			Map<String, IFhirResourceDao> daos = myApplicationContext.getBeansOfType(IFhirResourceDao.class, false, false);
+			for (IFhirResourceDao<?> next : daos.values()) {
+				theResourceTypeToDao.put(next.getResourceType(), next);
+			}
+
+			if (this instanceof IFhirResourceDao<?>) {
+				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
+				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
+			}
+
+			myResourceTypeToDao = theResourceTypeToDao;
+		}
+
+		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
+		return dao;
+	}
+
+
 	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
 	}
@@ -896,6 +921,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 		return myConfig;
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
+
 	public void setConfig(DaoConfig theConfig) {
 		myConfig = theConfig;
 	}
@@ -920,26 +950,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 			}
 			return retVal;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		if (myResourceTypeToDao == null) {
-			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
-			for (IFhirResourceDao<?> next : myResourceDaos) {
-				theResourceTypeToDao.put(next.getResourceType(), next);
-			}
-
-			if (this instanceof IFhirResourceDao<?>) {
-				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
-				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
-			}
-
-			myResourceTypeToDao = theResourceTypeToDao;
-		}
-
-		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
-		return dao;
 	}
 
 	public IResourceIndexedCompositeStringUniqueDao getResourceIndexedCompositeStringUniqueDao() {

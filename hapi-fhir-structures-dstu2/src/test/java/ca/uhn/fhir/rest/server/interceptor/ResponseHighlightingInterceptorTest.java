@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.phloc.commons.collections.iterate.ArrayEnumeration;
+import com.helger.collection.iterate.ArrayEnumeration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -130,7 +130,7 @@ public class ResponseHighlightingInterceptorTest {
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
 			@Override
 			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
+				return new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9");
 			}
 		});
 		when(req.getHeader(Constants.HEADER_ORIGIN)).thenAnswer(new Answer<String>() {
