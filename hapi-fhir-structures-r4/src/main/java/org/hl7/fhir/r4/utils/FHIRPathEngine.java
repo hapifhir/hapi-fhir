@@ -1,10 +1,11 @@
 package org.hl7.fhir.r4.utils;
 
 //import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.util.ElementUtil;
+
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.http.protocol.ExecutionContext;
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumException;
@@ -24,7 +25,12 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine.IEvaluationContext.FunctionDetails;
 import org.hl7.fhir.utilities.Utilities;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.length;
 
 /**
  * 
@@ -731,7 +737,7 @@ public class FHIRPathEngine {
           String s = lexer.take();
           if (s.equals("year") || s.equals("years"))
             ucum = "a";
-          else if (s.equals("month") || s.equals("month"))
+          else if (s.equals("month") || s.equals("months"))
             ucum = "mo";
           else if (s.equals("week") || s.equals("weeks"))
             ucum = "wk";
@@ -2072,8 +2078,9 @@ public class FHIRPathEngine {
         result.add(item);
     } else 
       getChildrenByName(item, exp.getName(), result);
-    // todo: GG 1st April 201 - why do this? 
     if (result.size() == 0 && atEntry && context.appInfo != null) {
+      // well, we didn't get a match on the name - we'll see if the name matches a constant known by the context.
+      // (if the name does match, and the user wants to get the constant value, they'll have to try harder...
       Base temp = hostServices.resolveConstant(context.appInfo, exp.getName());
       if (temp != null) {
         result.add(temp);
@@ -3280,7 +3287,7 @@ public class FHIRPathEngine {
         return Quantity.fromUcum(v, s.substring(1, s.length()-1));
       if (s.equals("year") || s.equals("years"))
         return Quantity.fromUcum(v, "a");
-      else if (s.equals("month") || s.equals("month"))
+      else if (s.equals("month") || s.equals("months"))
         return Quantity.fromUcum(v, "mo");
       else if (s.equals("week") || s.equals("weeks"))
         return Quantity.fromUcum(v, "wk");
