@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -219,6 +221,30 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
+
+	@Override
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		RestOperationTypeEnum retVal = super.getRestOperationType(theRequestDetails);
+
+		if (retVal == RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE) {
+			if (theRequestDetails.getId() == null) {
+				retVal = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+			}
+		}
+
+		return retVal;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("name", myName)
+			.append("methodName", getMethod().getDeclaringClass().getSimpleName() + "." + getMethod().getName())
+			.append("serverLevel", myCanOperateAtServerLevel)
+			.append("typeLevel", myCanOperateAtTypeLevel)
+			.append("instanceLevel", myCanOperateAtInstanceLevel)
+			.toString();
+	}
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
