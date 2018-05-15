@@ -65,8 +65,8 @@
 		Schematron resource validation. Otherwise, they may be omitted. 
 		-->
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<exclusions>
 				<exclusion>
 					<artifactId>Saxon-HE</artifactId>
@@ -75,8 +75,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 		    <version>4.3.3</version>
 		</dependency>
 

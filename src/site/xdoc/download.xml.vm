@@ -541,13 +541,14 @@ System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEv
 
 			</subsection>
 
-			<subsection name="Phloc-Schematron">
+			<subsection name="Ph-Schematron">
 
 				<p>
 					If you are using the
 					<a href="./doc_validation.html">Schematron Validatioon</a>
-					module, you will also need to include the Phloc library on your
-					classpath.
+					module, you will also need to include the Ph-Schematron library on your
+					classpath. (Note that prior to HAPI FHIR 3.4.0 we used Phloc-Schamtron
+					instead, but that lirary has been discontinued)
 				</p>
 				<p>
 					If you are using Maven, this library is not added by default (it is
@@ -556,16 +557,15 @@ System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEv
 					dependencies to your project POM.xml
 				</p>
 				<source><![CDATA[<dependency>
-    <groupId>com.phloc</groupId>
-    <artifactId>phloc-schematron</artifactId>
-    <version>${phloc_schematron_version}</version>
+	<groupId>com.helger</groupId>
+	<artifactId>ph-schematron</artifactId>
+	<version>${ph_schematron_version}</version>
 </dependency>
 <dependency>
-    <groupId>com.phloc</groupId>
-    <artifactId>phloc-commons</artifactId>
-    <version>${phloc_commons_version}</version>
+	<groupId>com.helger</groupId>
+	<artifactId>ph-commons</artifactId>
+	<version>${ph_commons_version}</version>
 </dependency>]]></source>
-
 			</subsection>
 
 

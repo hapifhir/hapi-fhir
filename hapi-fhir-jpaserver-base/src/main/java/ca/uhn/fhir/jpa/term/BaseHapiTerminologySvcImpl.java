@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -56,7 +55,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -80,7 +82,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
+public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc, ApplicationContextAware {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
@@ -123,14 +125,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private boolean myProcessDeferred = true;
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
-	@Autowired(required = false)
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
-
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
-
-
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
+	private ApplicationContext myApplicationContext;
 
 	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
 		if (theAddedCodes.add(theConcept.getCode())) {
@@ -205,6 +204,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				.maximumSize(10000)
 				.expireAfterWrite(timeout, TimeUnit.MINUTES)
 				.build();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public void clearDeferred() {
+		myDeferredValueSets.clear();
+		myDeferredConceptMaps.clear();
+		myDeferredConcepts.clear();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public void clearTranslationCache() {
+		myTranslationCache.invalidateAll();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting()
+	public void clearTranslationWithReverseCache() {
+		myTranslationWithReverseCache.invalidateAll();
 	}
 
 	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
@@ -789,8 +814,18 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
+
+	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
+	}
+
+	@PostConstruct
+	public void start() {
+		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
 	}
 
 	@Override
@@ -1256,32 +1291,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	@VisibleForTesting
 	public static void clearOurLastResultsFromTranslationWithReverseCache() {
 		ourLastResultsFromTranslationWithReverseCache = false;
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public void clearTranslationCache() {
-		myTranslationCache.invalidateAll();
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	public void clearDeferred() {
-		myDeferredValueSets.clear();
-		myDeferredConceptMaps.clear();
-		myDeferredConcepts.clear();
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting()
-	public void clearTranslationWithReverseCache() {
-		myTranslationWithReverseCache.invalidateAll();
 	}
 
 	/**

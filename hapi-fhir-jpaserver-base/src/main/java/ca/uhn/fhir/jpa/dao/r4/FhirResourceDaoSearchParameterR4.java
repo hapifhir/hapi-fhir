@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -57,6 +59,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 	 */
 	@Override
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
+	@Transactional(propagation = Propagation.NEVER)
 	public void performReindexingPass() {
 		if (getConfig().isSchedulingDisabled()) {
 			return;

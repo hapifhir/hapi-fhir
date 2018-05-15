@@ -11,14 +11,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.UriType;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -102,16 +100,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.addTarget()
 			.setCode("34567");
 
-		runInTransaction(() -> {
-			try {
-				runInTransaction(() -> {
-					myConceptMapDao.create(conceptMap);
-				});
-				fail();
-			} catch (UnprocessableEntityException e) {
-				assertEquals("ConceptMap has no value for ConceptMap.url", e.getMessage());
-			}
-		});
+		try {
+			runInTransaction(() -> {
+				myConceptMapDao.create(conceptMap);
+			});
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("ConceptMap has no value for ConceptMap.url", e.getMessage());
+		}
 
 	}
 

@@ -113,6 +113,7 @@ public class LoincHandler implements IRecordHandler {
 								ourLog.warn("Unable to find part code with TYPE[{}] and NAME[{}]", key.getPartType(), key.getPartName());
 							}
 							break;
+						case DECIMAL:
 						case CODE:
 						case INTEGER:
 						case BOOLEAN:

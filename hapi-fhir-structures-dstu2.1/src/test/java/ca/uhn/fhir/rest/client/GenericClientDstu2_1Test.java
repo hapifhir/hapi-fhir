@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import com.helger.commons.io.stream.StringInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.*;
@@ -29,7 +30,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.base.Charsets;
-import com.phloc.commons.io.streams.StringInputStream;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -83,7 +83,7 @@ public class GenericClientDstu2_1Test {
 		return body;
 	}
 
-	private ArgumentCaptor<HttpUriRequest> prepareClientForSearchResponse() throws IOException, ClientProtocolException {
+	private ArgumentCaptor<HttpUriRequest> prepareClientForSearchResponse() throws IOException {
 		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -92,7 +92,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
@@ -111,7 +111,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -149,7 +149,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -187,7 +187,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -225,7 +225,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -264,7 +264,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -303,7 +303,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -330,7 +330,7 @@ public class GenericClientDstu2_1Test {
 	}
 
 	@Test
-	public void testPatchInvalid() throws Exception {
+	public void testPatchInvalid() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
@@ -354,7 +354,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
@@ -398,7 +398,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -441,7 +441,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -505,7 +505,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -537,14 +537,14 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
-			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
+			public Header[] answer(InvocationOnMock theInvocation) {
 				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
 					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
 				} else {
@@ -586,14 +586,14 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
-			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
+			public Header[] answer(InvocationOnMock theInvocation) {
 				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				myAnswerCount++;
 				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
 			}
@@ -625,7 +625,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -652,7 +652,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -697,7 +697,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -737,7 +737,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -773,7 +773,7 @@ public class GenericClientDstu2_1Test {
 			private int myCount = 0;
 
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				final String respString;
 				if (myCount == 1 || myCount == 2) {
 					ourLog.info("Encoding patient");
@@ -822,7 +822,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				final String respString;
 				if (myAnswerCount >= 1) {
 					ourLog.info("Encoding patient");
@@ -872,7 +872,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				final String respString;
 				if (myAnswerCount >= 1) {
 					ourLog.info("Encoding patient");
@@ -912,7 +912,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
-			public StringInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public StringInputStream answer(InvocationOnMock theInvocation) {
 				return new StringInputStream("HELLO", Charsets.UTF_8);
 			}
 		});
@@ -937,7 +937,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
 			@Override
-			public StringInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public StringInputStream answer(InvocationOnMock theInvocation) {
 				return new StringInputStream("not implemented", Charsets.UTF_8);
 			}
 		});
@@ -968,7 +968,7 @@ public class GenericClientDstu2_1Test {
 				.forResource(Patient.class)
 				.where(Patient.FAMILY.matches().value((String) null))
 				.and(Patient.BIRTHDATE.exactly().day((Date) null))
-				.and(Patient.GENDER.exactly().code((String) null))
+				.and(Patient.GENDER.exactly().code(null))
 				.and(Patient.ORGANIZATION.hasId((String) null))
 				.returnBundle(Bundle.class)
 				.execute();
@@ -1019,7 +1019,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(encoded), Charset.forName("UTF-8"));
 			}
 		});
@@ -1064,7 +1064,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(encoded), Charset.forName("UTF-8"));
 			}
 		});
@@ -1121,7 +1121,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(null);
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1152,7 +1152,7 @@ public class GenericClientDstu2_1Test {
 		// when(myHttpResponse.getEntity().getContentType()).thenReturn(null);
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1179,7 +1179,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
@@ -1286,7 +1286,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
@@ -1405,7 +1405,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
@@ -1497,7 +1497,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
 			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public InputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
 			}
 		});
@@ -1564,7 +1564,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1601,7 +1601,7 @@ public class GenericClientDstu2_1Test {
 	}
 
 	@Test
-	public void testTransactionWithInvalidBody() throws Exception {
+	public void testTransactionWithInvalidBody() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		// Transaction
@@ -1652,7 +1652,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1691,14 +1691,14 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
-			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
+			public Header[] answer(InvocationOnMock theInvocation) {
 				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				if (myAnswerCount++ == 0) {
 					return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
 				} else {
@@ -1739,14 +1739,14 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
-			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
+			public Header[] answer(InvocationOnMock theInvocation) {
 				return new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3") };
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				myAnswerCount++;
 				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
 			}
@@ -1784,7 +1784,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1821,7 +1821,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1842,7 +1842,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1870,14 +1870,14 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
-			public Header[] answer(InvocationOnMock theInvocation) throws Throwable {
+			public Header[] answer(InvocationOnMock theInvocation) {
 				return new Header[] {};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp0)), Charset.forName("UTF-8"));
 			}
 		});
@@ -1910,7 +1910,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});
@@ -1948,7 +1948,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+			public ReaderInputStream answer(InvocationOnMock theInvocation) {
 				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
 			}
 		});

@@ -366,9 +366,15 @@ public class StructureMapUtilities {
   private static void renderGroup(StringBuilder b, StructureMapGroupComponent g) {
 		b.append("group ");
     switch (g.getTypeMode()) {
-    case TYPES: b.append("for types");
-    case TYPEANDTYPES: b.append("for type+types ");
-    default: // NONE, NULL
+      case TYPES:
+        b.append("for types");
+        break;
+      case TYPEANDTYPES:
+        b.append("for type+types ");
+        break;
+      case NONE:
+      case NULL:
+        break;
     }
       b.append("for types ");
 		b.append(g.getName());
