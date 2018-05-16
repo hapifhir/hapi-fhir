@@ -38,6 +38,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.hamcrest.Matchers.*;
@@ -412,6 +413,7 @@ public class FhirInstanceValidatorR4Test {
 	}
 
 	@Test
+	@Ignore
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -438,20 +440,22 @@ public class FhirInstanceValidatorR4Test {
 			ourLog.trace(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 
 			ValidationResult output = myVal.validateWithResult(next);
-			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+			List<SingleValidationMessage> results = logResultsAndReturnAll(output);
 
-//			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
-//			// we can remove this
-//			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-generate")) {
-//				assertEquals(1, errors.size());
-//				assertEquals("A search type can only be specified for parameters of type string [searchType implies type = 'string']", errors.get(0).getMessage());
-//				continue;
-//			}
+			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
+			// we can remove this. Tracker #17207 was filed about this
+			// https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_item_id=17207
 			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-snapshot")) {
-				assertEquals(1, errors.size());
-				assertEquals("A search type can only be specified for parameters of type string [searchType.exists() implies type = 'string']", errors.get(0).getMessage());
+				assertEquals(1, results.size());
+				assertEquals("A search type can only be specified for parameters of type string [searchType.exists() implies type = 'string']", results.get(0).getMessage());
 				continue;
 			}
+
+
+			List<SingleValidationMessage> errors = results
+				.stream()
+				.filter(t -> t.getSeverity() != ResultSeverityEnum.INFORMATION)
+				.collect(Collectors.toList());
 
 			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
 		}
