@@ -6,13 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.lang3.StringUtils;
@@ -250,7 +244,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
         return laterVersion(newParts[i], oldParts[i]);
     }
     // This should never happen
-    throw new Error("Delimited versions have exact match for delimiter '"+delimiter+"' : "+newParts+" vs "+oldParts);
+    throw new Error("Delimited versions have exact match for delimiter '"+delimiter+"' : "+ Arrays.asList(newParts)+" vs "+Arrays.asList(oldParts));
   }
   
   protected <T extends MetadataResource> void seeMetadataResource(T r, Map<String, T> map, boolean addId) throws FHIRException {
@@ -1045,6 +1039,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
             return (T) maps.get(uri);
           if (transforms.containsKey(uri))
             return (T) transforms.get(uri);
+          if (questionnaires.containsKey(uri))
+            return (T) questionnaires.get(uri);
           return null;      
         } else if (class_ == StructureDefinition.class) {
           return (T) structures.get(uri);
@@ -1052,6 +1048,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           return (T) valueSets.get(uri);
         } else if (class_ == CodeSystem.class) {
           return (T) codeSystems.get(uri);
+        } else if (class_ == ConceptMap.class) {
+          return (T) maps.get(uri);
         } else if (class_ == OperationDefinition.class) {
           OperationDefinition od = operations.get(uri);
           return (T) od;
@@ -1069,7 +1067,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
         }
       }
       if (class_ == Questionnaire.class)
-        return null;
+        return (T) questionnaires.get(uri);
       if (class_ == null) {
         if (uri.matches(Constants.URI_REGEX) && !uri.contains("ValueSet"))
           return null;

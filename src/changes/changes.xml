@@ -167,6 +167,11 @@
 				to occasionally consume two database connections, which could lead to deadlocks
 				under heavy load. This has been fixed.
 			</action>
+			<action type="fix">
+				AuthorizationInterceptor sometimes incorrectly identified an operation
+				invocation at the type level as being at the instance level if the method
+				indicated that the IdParam parameter was optional. This has been fixed.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
