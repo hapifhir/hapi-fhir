@@ -411,11 +411,7 @@ public class FhirInstanceValidatorR4Test {
 		ourLog.info("Took {} ms -- {}ms / pass", delay, per);
 	}
 
-	/**
-	 * // TODO: reenable
-	 */
 	@Test
-	 @Ignore
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -444,11 +440,16 @@ public class FhirInstanceValidatorR4Test {
 			ValidationResult output = myVal.validateWithResult(next);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
-			// we can remove this
-			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-generate")) {
+//			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
+//			// we can remove this
+//			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-generate")) {
+//				assertEquals(1, errors.size());
+//				assertEquals("A search type can only be specified for parameters of type string [searchType implies type = 'string']", errors.get(0).getMessage());
+//				continue;
+//			}
+			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-snapshot")) {
 				assertEquals(1, errors.size());
-				assertEquals("A search type can only be specified for parameters of type string [searchType implies type = 'string']", errors.get(0).getMessage());
+				assertEquals("A search type can only be specified for parameters of type string [searchType.exists() implies type = 'string']", errors.get(0).getMessage());
 				continue;
 			}
 
