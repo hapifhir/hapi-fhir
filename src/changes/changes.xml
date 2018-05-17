@@ -178,6 +178,12 @@
 				pull request! These have also been added to the list of definitions uploaded
 				by the CLI "upload-definitions" command.
 			</action>
+			<action type="fix">
+				A workaround for an invalid search parameter path in the R4 consent
+				resource has been implemented. This path was preventing some Consent
+				resources from successfully being uploaded to the JPA server. Thanks to
+				Anthony Sute for identifying this.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

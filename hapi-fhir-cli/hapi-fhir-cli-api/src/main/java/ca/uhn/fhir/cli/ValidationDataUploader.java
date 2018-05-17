@@ -506,19 +506,19 @@ public class ValidationDataUploader extends BaseCommand {
 		}
 	}
 
-	private void uploadR4Profiles(FhirContext ctx, IGenericClient client, String name) throws CommandFailureException {
+	private void uploadR4Profiles(FhirContext theContext, IGenericClient theClient, String theName) throws CommandFailureException {
 		int total;
 		int count;
 		org.hl7.fhir.r4.model.Bundle bundle;
-		ourLog.info("Uploading " + name);
+		ourLog.info("Uploading " + theName);
 		String vsContents;
 		try {
-			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), "UTF-8");
+			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/" + theName + ".xml"), "UTF-8");
 		} catch (IOException e) {
 			throw new CommandFailureException(e.toString());
 		}
 
-		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
+		bundle = theContext.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		filterBundle(bundle);
 		total = bundle.getEntry().size();
 		count = 1;
@@ -547,9 +547,9 @@ public class ValidationDataUploader extends BaseCommand {
 				continue;
 			}
 
-			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {name, count, total, next.getIdElement().getValue()});
+			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {theName, count, total, next.getIdElement().getValue()});
 			try {
-				client.update().resource(next).execute();
+				theClient.update().resource(next).execute();
 			} catch (BaseServerResponseException e) {
 				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}

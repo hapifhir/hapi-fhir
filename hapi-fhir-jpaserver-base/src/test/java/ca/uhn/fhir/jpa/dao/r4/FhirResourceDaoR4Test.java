@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -2966,7 +2967,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		// The first would be better, but JPA doesn't do NULLS LAST 
+		// The first would be better, but JPA doesn't do NULLS LAST
 		// assertThat(actual, contains(id3, id2, id1, id4));
 		assertThat(actual, contains(id4, id3, id2, id1));
 
@@ -3284,7 +3285,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		// The first would be better, but JPA doesn't do NULLS LAST 
+		// The first would be better, but JPA doesn't do NULLS LAST
 		// assertThat(actual, contains(id3, id2, id1, id4));
 		assertThat(actual, contains(id4, id3, id2, id1));
 	}
@@ -3736,6 +3737,26 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(e.getMessage(), containsString("clients may only assign IDs which contain at least one non-numeric"));
 		}
 
+	}
+
+	/**
+	 * Make sure this can upload successfully (indexer failed at one point)
+	 */
+	@Test
+	public void testUploadConsentWithSourceAttachment() {
+		Consent consent = new Consent();
+		consent.setSource(new Attachment().setUrl("http://foo"));
+		myConsentDao.create(consent);
+	}
+
+	/**
+	 * Make sure this can upload successfully (indexer failed at one point)
+	 */
+	@Test
+	public void testUploadExtensionStructureDefinition() {
+		StructureDefinition ext = myValidationSupport.fetchStructureDefinition(myFhirCtx, "http://hl7.org/fhir/StructureDefinition/familymemberhistory-type");
+		Validate.notNull(ext);
+		myStructureDefinitionDao.update(ext);
 	}
 
 	@AfterClass
