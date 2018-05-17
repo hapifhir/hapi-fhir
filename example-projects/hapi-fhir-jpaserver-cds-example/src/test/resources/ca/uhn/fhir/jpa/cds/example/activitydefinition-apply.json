@@ -1,10 +1,6 @@
 {
   "resourceType": "ActivityDefinition",
   "id": "ad-apply-example",
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">ActivityDefinition $apply operation example.</div>"
-  },
   "status": "draft",
   "description": "This is a test.",
   "library": [
