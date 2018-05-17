@@ -596,7 +596,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   private void checkElementUsage(List<ValidationMessage> errors, Element element, NodeStack stack) {
     String elementUsage = element.getUserString("elementSupported");
-	  hint(errors, IssueType.INFORMATIONAL, element.line(),element.col(), stack.getLiteralPath(), elementUsage == null || elementUsage.equals("Y"), "Instance includes element that is not marked as 'mustSupport' and was validated against profiles declaring mustSupport=true");
+    hint(errors, IssueType.INFORMATIONAL, element.line(),element.col(), stack.getLiteralPath(), elementUsage==null || elementUsage.equals("Y"), "Instance includes element that is not marked as 'mustSupport' in the corresponding profile and was validated against a profile containing mustSupport=true elements.");
     if (element.hasChildren()) {
       String prevName = "";
       int elementCount = 0;
