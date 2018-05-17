@@ -105,7 +105,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<ResourceIndexedSearchParamDate>();
+		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<>();
+		String resourceType = theEntity.getResourceType();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -163,6 +164,9 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last(), firstValue);
 				} else if (nextObject instanceof StringType) {
 					// CarePlan.activitydate can be a string
+					continue;
+				} else if (resourceType.equals("Consent") && nextPath.equals("Consent.source")) {
+					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					continue;
 				} else {
 					if (!multiType) {

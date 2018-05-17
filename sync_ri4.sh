@@ -60,3 +60,4 @@ cp ~/workspace/fhir/trunk/build/publish/profiles-*.xml       hapi-fhir-validatio
 cp ~/workspace/fhir/trunk/build/publish/v2-tables.xml        hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
 cp ~/workspace/fhir/trunk/build/publish/v3-codesystems.xml   hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
 cp ~/workspace/fhir/trunk/build/publish/valuesets.xml        hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
+cp ~/workspace/fhir/trunk/build/publish/extension-definitions.xml hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/extension/

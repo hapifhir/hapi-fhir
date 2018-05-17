@@ -511,6 +511,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@SuppressWarnings("unchecked")
 	protected Set<String> extractResourceLinks(ResourceTable theEntity, IBaseResource theResource, Set<ResourceLink> theLinks, Date theUpdateTime) {
 		HashSet<String> retVal = new HashSet<>();
+		String resourceType = theEntity.getResourceType();
 
 		/*
 		 * For now we don't try to load any of the links in a bundle if it's the actual bundle we're storing..
@@ -579,6 +580,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 						continue;
 					}
 				} else if (myContext.getElementDefinition((Class<? extends IBase>) nextObject.getClass()).getName().equals("uri")) {
+					continue;
+				} else if (resourceType.equals("Consent") && nextPathAndRef.getPath().equals("Consent.source")) {
+					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					continue;
 				} else {
 					if (!multiType) {

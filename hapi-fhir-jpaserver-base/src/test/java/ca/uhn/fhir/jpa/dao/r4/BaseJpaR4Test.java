@@ -212,6 +212,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myStructureDefinitionDaoR4")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 	@Autowired
+	@Qualifier("myConsentDaoR4")
+	protected IFhirResourceDao<Consent> myConsentDao;
+	@Autowired
 	@Qualifier("mySubscriptionDaoR4")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
 	@Autowired
