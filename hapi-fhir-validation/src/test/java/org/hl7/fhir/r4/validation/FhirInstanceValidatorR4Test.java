@@ -191,7 +191,6 @@ public class FhirInstanceValidatorR4Test {
 
 			retVal.add(next);
 		}
-
 		return retVal;
 	}
 
@@ -1034,6 +1033,24 @@ public class FhirInstanceValidatorR4Test {
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
+	}
+
+	@Test
+	public void testMultiplePerformer() {
+		Observation o = new Observation();
+		Practitioner p1 = new Practitioner();
+		Practitioner p2 = new Practitioner();
+
+		o.addPerformer(new Reference(p1));
+		o.addPerformer(new Reference(p2));
+
+		ValidationResult output = myVal.validateWithResult(o);
+		List<SingleValidationMessage> valMessages = logResultsAndReturnAll(output);
+		List<String> messages = new ArrayList<>();
+		for (String msg : messages) {
+			messages.add(msg);
+		}
+		assertThat(messages, not(hasItem("All observations should have a performer")));
 	}
 
 	@Test
