@@ -23,6 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -103,7 +104,7 @@ public class ValidateCommand extends BaseCommand {
 		parseFhirContext(theCommandLine);
 
 		String fileName = theCommandLine.getOptionValue("n");
-		String contents = theCommandLine.getOptionValue("c");
+		String contents = theCommandLine.getOptionValue("d");
 		if (isNotBlank(fileName) && isNotBlank(contents)) {
 			throw new ParseException("Can not supply both a file (-n) and data (-d)");
 		}
@@ -199,7 +200,12 @@ public class ValidateCommand extends BaseCommand {
 		val.setValidateAgainstStandardSchema(theCommandLine.hasOption("x"));
 		val.setValidateAgainstStandardSchematron(theCommandLine.hasOption("s"));
 
-		ValidationResult results = val.validateWithResult(contents);
+		ValidationResult results;
+		try {
+			results = val.validateWithResult(contents);
+		} catch (DataFormatException e) {
+			throw new CommandFailureException(e.getMessage());
+		}
 
 		StringBuilder b = new StringBuilder("Validation results:" + ansi().boldOff());
 		int count = 0;

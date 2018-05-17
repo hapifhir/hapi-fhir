@@ -152,6 +152,13 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
 	}
 
+	/**
+	 * Subclasses may override if they want, to do any cleanup they need to do.
+	 */
+	public void cleanup() {
+		// nothing
+	}
+
 	@Override
 	public int compareTo(BaseCommand theO) {
 		return getCommandName().compareTo(theO.getCommandName());

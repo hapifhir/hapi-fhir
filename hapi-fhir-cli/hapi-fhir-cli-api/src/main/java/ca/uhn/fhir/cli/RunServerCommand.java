@@ -29,6 +29,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.web.context.ContextLoader;
@@ -192,8 +193,21 @@ public class RunServerCommand extends BaseCommand {
 		ourLog.info("Server started on port {}", myPort);
 		ourLog.info("Web Testing UI : http://localhost:{}/", myPort);
 		ourLog.info("Server Base URL: http://localhost:{}{}", myPort, path);
-		
-		
+
+		// Never quit.. We'll let the user ctrl-C their way out.
+		loopForever();
+
+	}
+
+	@SuppressWarnings("InfiniteLoopStatement")
+	private void loopForever() {
+		while (true) {
+			try {
+				Thread.sleep(DateUtils.MILLIS_PER_MINUTE);
+			} catch (InterruptedException theE) {
+				// ignore
+			}
+		}
 	}
 
 	public static void main(String[] theArgs) {

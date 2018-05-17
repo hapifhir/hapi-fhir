@@ -160,6 +160,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
+	@Qualifier("myConsentDaoDstu3")
+	protected IFhirResourceDao<Consent> myConsentDao;
+	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")

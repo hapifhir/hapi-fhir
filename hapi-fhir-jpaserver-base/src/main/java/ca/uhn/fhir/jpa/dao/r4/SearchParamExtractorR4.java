@@ -468,6 +468,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				continue;
 			}
 
+			String resourceType = theEntity.getResourceType();
 			String nextPath = nextSpDef.getPath();
 			if (isBlank(nextPath)) {
 				continue;
@@ -478,8 +479,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				multiType = true;
 			}
 
-			List<String> systems = new ArrayList<String>();
-			List<String> codes = new ArrayList<String>();
+			List<String> systems = new ArrayList<>();
+			List<String> codes = new ArrayList<>();
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 
@@ -555,9 +556,15 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				} else if (nextObject instanceof LocationPositionComponent) {
 					ourLog.warn("Position search not currently supported, not indexing location");
 					continue;
+				} else if (nextObject instanceof StructureDefinition.StructureDefinitionContextComponent) {
+					ourLog.warn("StructureDefinition context indexing not currently supported"); // TODO: implement this
+					continue;
+				} else if (resourceType.equals("Consent") && nextPath.equals("Consent.source")) {
+					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
+					continue;
 				} else {
 					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
+						throw new ConfigurationException("Search param " + nextSpDef.getName() + " with path " + nextPath + " is of unexpected datatype: " + nextObject.getClass());
 					} else {
 						continue;
 					}
