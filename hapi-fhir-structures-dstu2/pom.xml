@@ -103,13 +103,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<scope>test</scope><!-- <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> </exclusion> </exclusions> -->
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<scope>test</scope>
 		</dependency>
 

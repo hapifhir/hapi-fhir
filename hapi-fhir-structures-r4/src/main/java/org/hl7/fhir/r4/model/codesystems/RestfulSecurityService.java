@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RestfulSecurityService {
 
         /**
-         * Oauth (unspecified version see oauth.net).
+         * OAuth (unspecified version see oauth.net).
          */
         OAUTH, 
         /**
@@ -97,7 +97,7 @@ public enum RestfulSecurityService {
         }
         public String getDefinition() {
           switch (this) {
-            case OAUTH: return "Oauth (unspecified version see oauth.net).";
+            case OAUTH: return "OAuth (unspecified version see oauth.net).";
             case SMARTONFHIR: return "OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/).";
             case NTLM: return "Microsoft NTLM Authentication.";
             case BASIC: return "Basic authentication defined in HTTP specification.";

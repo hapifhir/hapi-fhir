@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupUnmappedMode;
 import org.hl7.fhir.dstu3.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.dstu3.model.Constants;
@@ -78,6 +79,7 @@ import org.hl7.fhir.dstu3.utils.FHIRLexer.FHIRLexerException;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine.IEvaluationContext;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.TextFile;
@@ -283,6 +285,16 @@ public class StructureMapUtilities {
     }
     b.append("\r\n");
     for (ConceptMapGroupComponent cg : cm.getGroup()) {
+      if (cg.hasUnmapped()) {
+        b.append("  unmapped for ");
+        b.append(prefix);
+        b.append(" = ");
+        b.append(cg.getUnmapped().getMode());
+        b.append("\r\n"); 
+      }   
+    }
+    
+    for (ConceptMapGroupComponent cg : cm.getGroup()) {
       for (SourceElementComponent ce : cg.getElement()) {
         b.append("  ");
         b.append(prefixesSrc.get(cg.getSource()));
@@ -353,16 +365,18 @@ public class StructureMapUtilities {
   
   private static void renderGroup(StringBuilder b, StructureMapGroupComponent g) {
 		b.append("group ");
-      switch (g.getTypeMode()) {
+    switch (g.getTypeMode()) {
       case TYPES:
         b.append("for types");
         break;
       case TYPEANDTYPES:
         b.append("for type+types ");
         break;
-      default: // NONE, NULL
+      case NONE:
+      case NULL:
         break;
-      }
+    }
+      b.append("for types ");
 		b.append(g.getName());
 		if (g.hasExtends()) {
 			b.append(" extends ");
@@ -670,6 +684,18 @@ public class StructureMapUtilities {
 			lexer.token("=");
 			String v = lexer.readConstant("prefix url");
 			prefixes.put(n, v);
+		}
+		while (lexer.hasToken("unmapped")) {
+		  lexer.token("unmapped");
+      lexer.token("for");
+      String n = readPrefix(prefixes, lexer);
+      ConceptMapGroupComponent g = getGroup(map, n, null);
+		  lexer.token("=");
+      String v = lexer.take();
+      if (v.equals("provided")) {
+        g.getUnmapped().setMode(ConceptMapGroupUnmappedMode.PROVIDED);
+      } else
+        lexer.error("Only unmapped mode PROVIDED is supported at this time");
 		}
 		while (!lexer.hasToken("}")) {
 		  String srcs = readPrefix(prefixes, lexer);
@@ -1025,7 +1051,7 @@ public class StructureMapUtilities {
 	}
 
 
-	private void parseParameter(StructureMapGroupRuleTargetComponent target, FHIRLexer lexer) throws FHIRLexerException {
+	private void parseParameter(StructureMapGroupRuleTargetComponent target, FHIRLexer lexer) throws FHIRLexerException, FHIRFormatError {
 		if (!lexer.isConstant(true)) {
 			target.addParameter().setValue(new IdType(lexer.take()));
 		} else if (lexer.isStringConstant())
@@ -2467,7 +2493,7 @@ public class StructureMapUtilities {
       if (isCompatibleType(t, tr.getCode()))
         return tr.getCode(); // note what is returned - the base type, not the inferred mapping type
     }
-    throw new FHIRException("The type "+t+" is not compatible with the allowed types for "+pvb.getDefinition().getPath());
+    throw new FHIRException("The type "+t+" is not compatible with the allowed types for "+pvb.getDefinition().getPath()+" ("+pvb.getDefinition().typeSummary()+")");
   }
 
   private boolean profilesMatch(List<String> profiles, String profile) {
@@ -2669,7 +2695,6 @@ public class StructureMapUtilities {
     b.append("\r\n");
     b.append(suffix);
     b.append("\r\n");
-    TextFile.stringToFile(b.toString(), "c:\\temp\\test.map");
     StructureMap map = parse(b.toString());
     map.setId(tail(map.getUrl()));
     if (!map.hasStatus())

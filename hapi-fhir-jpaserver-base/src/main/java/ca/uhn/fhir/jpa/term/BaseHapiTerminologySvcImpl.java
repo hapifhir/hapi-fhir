@@ -55,7 +55,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -79,7 +82,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
+public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc, ApplicationContextAware {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
@@ -122,14 +125,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private boolean myProcessDeferred = true;
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
-	@Autowired(required = false)
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
-
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
-
-
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
+	private ApplicationContext myApplicationContext;
 
 	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
 		if (theAddedCodes.add(theConcept.getCode())) {
@@ -204,6 +204,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				.maximumSize(10000)
 				.expireAfterWrite(timeout, TimeUnit.MINUTES)
 				.build();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public void clearDeferred() {
+		myDeferredValueSets.clear();
+		myDeferredConceptMaps.clear();
+		myDeferredConcepts.clear();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public void clearTranslationCache() {
+		myTranslationCache.invalidateAll();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting()
+	public void clearTranslationWithReverseCache() {
+		myTranslationWithReverseCache.invalidateAll();
 	}
 
 	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
@@ -788,8 +814,18 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
+
+	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
+	}
+
+	@PostConstruct
+	public void start() {
+		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
 	}
 
 	@Override
@@ -918,10 +954,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.info("Storing TermConceptMap...");
+		ourLog.info("Storing TermConceptMap {}", theConceptMap.getIdElement().getValue());
 
-		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied.");
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConceptMap.getUrl(), "No URL supplied.");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
 
 		TermConceptMap termConceptMap = new TermConceptMap();
 		termConceptMap.setResource(theResourceTable);
@@ -958,11 +994,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
-				String source = theConceptMap.getSourceUriType().getValueAsString();
+				String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 				if (isNotBlank(source)) {
 					termConceptMap.setSource(source);
 				}
-				String target = theConceptMap.getTargetUriType().getValueAsString();
+				String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
 				if (isNotBlank(target)) {
 					termConceptMap.setTarget(target);
 				}
@@ -974,6 +1010,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
 				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+					if (isBlank(group.getSource())) {
+						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
+					}
+					if (isBlank(group.getTarget())) {
+						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
+					}
 					termConceptMapGroup = new TermConceptMapGroup();
 					termConceptMapGroup.setConceptMap(termConceptMap);
 					termConceptMapGroup.setSource(group.getSource());
@@ -1013,7 +1055,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				BaseHapiTerminologySvcImpl.class,
 				"cannotCreateDuplicateConceptMapUrl",
 				conceptMapUrl,
-				existingTermConceptMap.getResourcePid());
+				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 
 			throw new UnprocessableEntityException(msg);
 		}
@@ -1036,6 +1078,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest) {
 		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();
 
@@ -1116,6 +1159,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest) {
 		List<TermConceptMapGroupElement> retVal = new ArrayList<>();
 
@@ -1237,7 +1281,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	static void clearOurLastResultsFromTranslationCache() {
+	public static void clearOurLastResultsFromTranslationCache() {
 		ourLastResultsFromTranslationCache = false;
 	}
 
@@ -1245,24 +1289,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	static void clearOurLastResultsFromTranslationWithReverseCache() {
+	public static void clearOurLastResultsFromTranslationWithReverseCache() {
 		ourLastResultsFromTranslationWithReverseCache = false;
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting
-	void clearTranslationCache() {
-		myTranslationCache.invalidateAll();
-	}
-
-	/**
-	 * This method is present only for unit tests, do not call from client code
-	 */
-	@VisibleForTesting()
-	void clearTranslationWithReverseCache() {
-		myTranslationWithReverseCache.invalidateAll();
 	}
 
 	/**

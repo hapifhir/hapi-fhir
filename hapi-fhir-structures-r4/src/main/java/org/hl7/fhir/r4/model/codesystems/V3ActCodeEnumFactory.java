@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -305,6 +305,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.ACUTE;
     if ("NONAC".equals(codeString))
       return V3ActCode.NONAC;
+    if ("OBSENC".equals(codeString))
+      return V3ActCode.OBSENC;
     if ("PRENC".equals(codeString))
       return V3ActCode.PRENC;
     if ("SS".equals(codeString))
@@ -1247,20 +1249,42 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.GDIS;
     if ("HIV".equals(codeString))
       return V3ActCode.HIV;
-    if ("PSY".equals(codeString))
-      return V3ActCode.PSY;
+    if ("MST".equals(codeString))
+      return V3ActCode.MST;
     if ("SCA".equals(codeString))
       return V3ActCode.SCA;
-    if ("SOC".equals(codeString))
-      return V3ActCode.SOC;
     if ("SDV".equals(codeString))
       return V3ActCode.SDV;
     if ("SEX".equals(codeString))
       return V3ActCode.SEX;
+    if ("SPI".equals(codeString))
+      return V3ActCode.SPI;
+    if ("BH".equals(codeString))
+      return V3ActCode.BH;
+    if ("COGN".equals(codeString))
+      return V3ActCode.COGN;
+    if ("DVD".equals(codeString))
+      return V3ActCode.DVD;
+    if ("EMOTDIS".equals(codeString))
+      return V3ActCode.EMOTDIS;
+    if ("MH".equals(codeString))
+      return V3ActCode.MH;
+    if ("PSY".equals(codeString))
+      return V3ActCode.PSY;
+    if ("PSYTHPN".equals(codeString))
+      return V3ActCode.PSYTHPN;
+    if ("SUD".equals(codeString))
+      return V3ActCode.SUD;
+    if ("ETHUD".equals(codeString))
+      return V3ActCode.ETHUD;
+    if ("OPIOIDUD".equals(codeString))
+      return V3ActCode.OPIOIDUD;
     if ("STD".equals(codeString))
       return V3ActCode.STD;
     if ("TBOO".equals(codeString))
       return V3ActCode.TBOO;
+    if ("VIO".equals(codeString))
+      return V3ActCode.VIO;
     if ("SICKLE".equals(codeString))
       return V3ActCode.SICKLE;
     if ("_EntitySensitivityPolicyType".equals(codeString))
@@ -1301,6 +1325,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.EMP;
     if ("PDS".equals(codeString))
       return V3ActCode.PDS;
+    if ("PHY".equals(codeString))
+      return V3ActCode.PHY;
     if ("PRS".equals(codeString))
       return V3ActCode.PRS;
     if ("COMPT".equals(codeString))
@@ -1339,6 +1365,12 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.COVPOL;
     if ("SecurityPolicy".equals(codeString))
       return V3ActCode.SECURITYPOLICY;
+    if ("AUTHPOL".equals(codeString))
+      return V3ActCode.AUTHPOL;
+    if ("ACCESSCONSCHEME".equals(codeString))
+      return V3ActCode.ACCESSCONSCHEME;
+    if ("DELEPOL".equals(codeString))
+      return V3ActCode.DELEPOL;
     if ("ObligationPolicy".equals(codeString))
       return V3ActCode.OBLIGATIONPOLICY;
     if ("ANONY".equals(codeString))
@@ -1823,6 +1855,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return V3ActCode.IPOP;
     if ("IPPOP".equals(codeString))
       return V3ActCode.IPPOP;
+    if ("MSROBS".equals(codeString))
+      return V3ActCode.MSROBS;
     if ("MSRPOPL".equals(codeString))
       return V3ActCode.MSRPOPL;
     if ("MSRPOPLEX".equals(codeString))
@@ -2507,6 +2541,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "ACUTE";
     if (code == V3ActCode.NONAC)
       return "NONAC";
+    if (code == V3ActCode.OBSENC)
+      return "OBSENC";
     if (code == V3ActCode.PRENC)
       return "PRENC";
     if (code == V3ActCode.SS)
@@ -3449,20 +3485,42 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "GDIS";
     if (code == V3ActCode.HIV)
       return "HIV";
-    if (code == V3ActCode.PSY)
-      return "PSY";
+    if (code == V3ActCode.MST)
+      return "MST";
     if (code == V3ActCode.SCA)
       return "SCA";
-    if (code == V3ActCode.SOC)
-      return "SOC";
     if (code == V3ActCode.SDV)
       return "SDV";
     if (code == V3ActCode.SEX)
       return "SEX";
+    if (code == V3ActCode.SPI)
+      return "SPI";
+    if (code == V3ActCode.BH)
+      return "BH";
+    if (code == V3ActCode.COGN)
+      return "COGN";
+    if (code == V3ActCode.DVD)
+      return "DVD";
+    if (code == V3ActCode.EMOTDIS)
+      return "EMOTDIS";
+    if (code == V3ActCode.MH)
+      return "MH";
+    if (code == V3ActCode.PSY)
+      return "PSY";
+    if (code == V3ActCode.PSYTHPN)
+      return "PSYTHPN";
+    if (code == V3ActCode.SUD)
+      return "SUD";
+    if (code == V3ActCode.ETHUD)
+      return "ETHUD";
+    if (code == V3ActCode.OPIOIDUD)
+      return "OPIOIDUD";
     if (code == V3ActCode.STD)
       return "STD";
     if (code == V3ActCode.TBOO)
       return "TBOO";
+    if (code == V3ActCode.VIO)
+      return "VIO";
     if (code == V3ActCode.SICKLE)
       return "SICKLE";
     if (code == V3ActCode._ENTITYSENSITIVITYPOLICYTYPE)
@@ -3503,6 +3561,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "EMP";
     if (code == V3ActCode.PDS)
       return "PDS";
+    if (code == V3ActCode.PHY)
+      return "PHY";
     if (code == V3ActCode.PRS)
       return "PRS";
     if (code == V3ActCode.COMPT)
@@ -3541,6 +3601,12 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "COVPOL";
     if (code == V3ActCode.SECURITYPOLICY)
       return "SecurityPolicy";
+    if (code == V3ActCode.AUTHPOL)
+      return "AUTHPOL";
+    if (code == V3ActCode.ACCESSCONSCHEME)
+      return "ACCESSCONSCHEME";
+    if (code == V3ActCode.DELEPOL)
+      return "DELEPOL";
     if (code == V3ActCode.OBLIGATIONPOLICY)
       return "ObligationPolicy";
     if (code == V3ActCode.ANONY)
@@ -4025,6 +4091,8 @@ public class V3ActCodeEnumFactory implements EnumFactory<V3ActCode> {
       return "IPOP";
     if (code == V3ActCode.IPPOP)
       return "IPPOP";
+    if (code == V3ActCode.MSROBS)
+      return "MSROBS";
     if (code == V3ActCode.MSRPOPL)
       return "MSRPOPL";
     if (code == V3ActCode.MSRPOPLEX)

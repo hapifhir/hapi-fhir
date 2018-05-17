@@ -27,6 +27,7 @@
       <sch:assert test="not(parent::f:contained and f:text)">If the resource is contained in another resource, it SHALL NOT contain any narrative (inherited)</sch:assert>
       <sch:assert test="not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))">If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated (inherited)</sch:assert>
       <sch:assert test="not(exists(for $contained in f:contained return $contained[not(parent::*/descendant::f:reference/@value=concat('#', $contained/*/id/@value) or descendant::f:reference[@value='#'])]))">If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource (inherited)</sch:assert>
+      <sch:assert test="f:status/@value='active' or exists(f:compose) or not(exists(f:expansion)">Status must = 'active' if expansion is present and compose is absent (inherited)</sch:assert>
       <sch:assert test="exists(f:compose) or exists(f:expansion)">Value set SHALL contain at least one of a compose or an expansion element (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>

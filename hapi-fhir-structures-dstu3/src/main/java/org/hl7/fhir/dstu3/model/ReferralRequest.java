@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */
@@ -596,7 +597,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #agent} (The device, practitioner, etc. who initiated the request.)
          */
-        public ReferralRequestRequesterComponent setAgent(Reference value) { 
+        public ReferralRequestRequesterComponent setAgent(Reference value)  { 
           this.agent = value;
           return this;
         }
@@ -635,7 +636,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #onBehalfOf} (The organization the device or practitioner was acting on behalf of.)
          */
-        public ReferralRequestRequesterComponent setOnBehalfOf(Reference value) { 
+        public ReferralRequestRequesterComponent setOnBehalfOf(Reference value)  { 
           this.onBehalfOf = value;
           return this;
         }
@@ -660,10 +661,20 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("agent", "Reference(Practitioner|Organization|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who initiated the request.", 0, java.lang.Integer.MAX_VALUE, agent));
-          childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("agent", "Reference(Practitioner|Organization|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who initiated the request.", 0, 1, agent));
+          children.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, 1, onBehalfOf));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 92750597: /*agent*/  return new Property("agent", "Reference(Practitioner|Organization|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who initiated the request.", 0, 1, agent);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, 1, onBehalfOf);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -744,22 +755,22 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ReferralRequestRequesterComponent))
+        if (!(other_ instanceof ReferralRequestRequesterComponent))
           return false;
-        ReferralRequestRequesterComponent o = (ReferralRequestRequesterComponent) other;
+        ReferralRequestRequesterComponent o = (ReferralRequestRequesterComponent) other_;
         return compareDeep(agent, o.agent, true) && compareDeep(onBehalfOf, o.onBehalfOf, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ReferralRequestRequesterComponent))
+        if (!(other_ instanceof ReferralRequestRequesterComponent))
           return false;
-        ReferralRequestRequesterComponent o = (ReferralRequestRequesterComponent) other;
+        ReferralRequestRequesterComponent o = (ReferralRequestRequesterComponent) other_;
         return true;
       }
 
@@ -1279,7 +1290,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #groupIdentifier} (The business identifier of the logical "grouping" request/order that this referral is a part of.)
      */
-    public ReferralRequest setGroupIdentifier(Identifier value) { 
+    public ReferralRequest setGroupIdentifier(Identifier value)  { 
       this.groupIdentifier = value;
       return this;
     }
@@ -1393,7 +1404,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #type} (An indication of the type of referral (or where applicable the type of transfer of care) request.)
      */
-    public ReferralRequest setType(CodeableConcept value) { 
+    public ReferralRequest setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -1519,7 +1530,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #subject} (The patient who is the subject of a referral or transfer of care request.)
      */
-    public ReferralRequest setSubject(Reference value) { 
+    public ReferralRequest setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1558,7 +1569,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #context} (The encounter at which the request for referral or transfer of care is initiated.)
      */
-    public ReferralRequest setContext(Reference value) { 
+    public ReferralRequest setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1589,26 +1600,30 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * @return {@link #occurrence} (The period of time within which the services identified in the referral/transfer of care is specified or required to occur.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The period of time within which the services identified in the referral/transfer of care is specified or required to occur.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     public boolean hasOccurrence() { 
@@ -1618,7 +1633,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #occurrence} (The period of time within which the services identified in the referral/transfer of care is specified or required to occur.)
      */
-    public ReferralRequest setOccurrence(Type value) { 
+    public ReferralRequest setOccurrence(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new FHIRFormatError("Not the right type for ReferralRequest.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1691,7 +1708,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #requester} (The individual who initiated the request and has responsibility for its activation.)
      */
-    public ReferralRequest setRequester(ReferralRequestRequesterComponent value) { 
+    public ReferralRequest setRequester(ReferralRequestRequesterComponent value)  { 
       this.requester = value;
       return this;
     }
@@ -1715,7 +1732,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #specialty} (Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.)
      */
-    public ReferralRequest setSpecialty(CodeableConcept value) { 
+    public ReferralRequest setSpecialty(CodeableConcept value)  { 
       this.specialty = value;
       return this;
     }
@@ -2139,31 +2156,65 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Business identifier that uniquely identifies the referral/care transfer request instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("replaces", "Reference(ReferralRequest)", "Completed or terminated request(s) whose function is taken by this new request.", 0, java.lang.Integer.MAX_VALUE, replaces));
-        childrenList.add(new Property("groupIdentifier", "Identifier", "The business identifier of the logical \"grouping\" request/order that this referral is a part of.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
-        childrenList.add(new Property("status", "code", "The status of the authorization/intention reflected by the referral request record.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("intent", "code", "Distinguishes the \"level\" of authorization/demand implicit in this request.", 0, java.lang.Integer.MAX_VALUE, intent));
-        childrenList.add(new Property("type", "CodeableConcept", "An indication of the type of referral (or where applicable the type of transfer of care) request.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("priority", "code", "An indication of the urgency of referral (or where applicable the type of transfer of care) request.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("serviceRequested", "CodeableConcept", "The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.", 0, java.lang.Integer.MAX_VALUE, serviceRequested));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient who is the subject of a referral or transfer of care request.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter at which the request for referral or transfer of care is initiated.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("occurrence[x]", "dateTime|Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, java.lang.Integer.MAX_VALUE, occurrence));
-        childrenList.add(new Property("authoredOn", "dateTime", "Date/DateTime of creation for draft requests and date of activation for active requests.", 0, java.lang.Integer.MAX_VALUE, authoredOn));
-        childrenList.add(new Property("requester", "", "The individual who initiated the request and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester));
-        childrenList.add(new Property("specialty", "CodeableConcept", "Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        childrenList.add(new Property("recipient", "Reference(Practitioner|Organization|HealthcareService)", "The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request.", 0, java.lang.Integer.MAX_VALUE, recipient));
-        childrenList.add(new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        childrenList.add(new Property("reasonReference", "Reference(Condition|Observation)", "Indicates another resource whose existence justifies this request.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
-        childrenList.add(new Property("description", "string", "The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("supportingInfo", "Reference(Any)", "Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
-        childrenList.add(new Property("note", "Annotation", "Comments made about the referral request by any of the participants.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this resource or fulfilling request or event resources that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the resource.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Business identifier that uniquely identifies the referral/care transfer request instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, definition));
+        children.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("replaces", "Reference(ReferralRequest)", "Completed or terminated request(s) whose function is taken by this new request.", 0, java.lang.Integer.MAX_VALUE, replaces));
+        children.add(new Property("groupIdentifier", "Identifier", "The business identifier of the logical \"grouping\" request/order that this referral is a part of.", 0, 1, groupIdentifier));
+        children.add(new Property("status", "code", "The status of the authorization/intention reflected by the referral request record.", 0, 1, status));
+        children.add(new Property("intent", "code", "Distinguishes the \"level\" of authorization/demand implicit in this request.", 0, 1, intent));
+        children.add(new Property("type", "CodeableConcept", "An indication of the type of referral (or where applicable the type of transfer of care) request.", 0, 1, type));
+        children.add(new Property("priority", "code", "An indication of the urgency of referral (or where applicable the type of transfer of care) request.", 0, 1, priority));
+        children.add(new Property("serviceRequested", "CodeableConcept", "The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.", 0, java.lang.Integer.MAX_VALUE, serviceRequested));
+        children.add(new Property("subject", "Reference(Patient|Group)", "The patient who is the subject of a referral or transfer of care request.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter at which the request for referral or transfer of care is initiated.", 0, 1, context));
+        children.add(new Property("occurrence[x]", "dateTime|Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, 1, occurrence));
+        children.add(new Property("authoredOn", "dateTime", "Date/DateTime of creation for draft requests and date of activation for active requests.", 0, 1, authoredOn));
+        children.add(new Property("requester", "", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester));
+        children.add(new Property("specialty", "CodeableConcept", "Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.", 0, 1, specialty));
+        children.add(new Property("recipient", "Reference(Practitioner|Organization|HealthcareService)", "The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request.", 0, java.lang.Integer.MAX_VALUE, recipient));
+        children.add(new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation)", "Indicates another resource whose existence justifies this request.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("description", "string", "The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.", 0, 1, description));
+        children.add(new Property("supportingInfo", "Reference(Any)", "Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
+        children.add(new Property("note", "Annotation", "Comments made about the referral request by any of the participants.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this resource or fulfilling request or event resources that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the resource.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier that uniquely identifies the referral/care transfer request instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1014418093: /*definition*/  return new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "A protocol, guideline, orderset or other definition that is adhered to in whole or in part by this request.", 0, java.lang.Integer.MAX_VALUE, definition);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "Indicates any plans, proposals or orders that this request is intended to satisfy - in whole or in part.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -430332865: /*replaces*/  return new Property("replaces", "Reference(ReferralRequest)", "Completed or terminated request(s) whose function is taken by this new request.", 0, java.lang.Integer.MAX_VALUE, replaces);
+        case -445338488: /*groupIdentifier*/  return new Property("groupIdentifier", "Identifier", "The business identifier of the logical \"grouping\" request/order that this referral is a part of.", 0, 1, groupIdentifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the authorization/intention reflected by the referral request record.", 0, 1, status);
+        case -1183762788: /*intent*/  return new Property("intent", "code", "Distinguishes the \"level\" of authorization/demand implicit in this request.", 0, 1, intent);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "An indication of the type of referral (or where applicable the type of transfer of care) request.", 0, 1, type);
+        case -1165461084: /*priority*/  return new Property("priority", "code", "An indication of the urgency of referral (or where applicable the type of transfer of care) request.", 0, 1, priority);
+        case 190229561: /*serviceRequested*/  return new Property("serviceRequested", "CodeableConcept", "The service(s) that is/are requested to be provided to the patient.  For example: cardiac pacemaker insertion.", 0, java.lang.Integer.MAX_VALUE, serviceRequested);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient who is the subject of a referral or transfer of care request.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter at which the request for referral or transfer of care is initiated.", 0, 1, context);
+        case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, 1, occurrence);
+        case 1687874001: /*occurrence*/  return new Property("occurrence[x]", "dateTime|Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, 1, occurrence);
+        case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, 1, occurrence);
+        case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period", "The period of time within which the services identified in the referral/transfer of care is specified or required to occur.", 0, 1, occurrence);
+        case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "Date/DateTime of creation for draft requests and date of activation for active requests.", 0, 1, authoredOn);
+        case 693933948: /*requester*/  return new Property("requester", "", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester);
+        case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "Indication of the clinical domain or discipline to which the referral or transfer of care request is sent.  For example: Cardiology Gastroenterology Diabetology.", 0, 1, specialty);
+        case 820081177: /*recipient*/  return new Property("recipient", "Reference(Practitioner|Organization|HealthcareService)", "The healthcare provider(s) or provider organization(s) who/which is to receive the referral/transfer of care request.", 0, java.lang.Integer.MAX_VALUE, recipient);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why referral/transfer of care is requested.  For example:  Pathological Anomalies, Disabled (physical or mental),  Behavioral Management.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation)", "Indicates another resource whose existence justifies this request.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case -1724546052: /*description*/  return new Property("description", "string", "The reason element gives a short description of why the referral is being made, the description expands on this to support a more complete clinical summary.", 0, 1, description);
+        case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Any additional (administrative, financial or clinical) information required to support request for referral or transfer of care.  For example: Presenting problems/chief complaints Medical History Family History Alerts Allergy/Intolerance and Adverse Reactions Medications Observations/Assessments (may include cognitive and fundtional assessments) Diagnostic Reports Care Plan.", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the referral request by any of the participants.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 1538891575: /*relevantHistory*/  return new Property("relevantHistory", "Reference(Provenance)", "Links to Provenance records for past versions of this resource or fulfilling request or event resources that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the resource.", 0, java.lang.Integer.MAX_VALUE, relevantHistory);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2565,12 +2616,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ReferralRequest))
+        if (!(other_ instanceof ReferralRequest))
           return false;
-        ReferralRequest o = (ReferralRequest) other;
+        ReferralRequest o = (ReferralRequest) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(type, o.type, true)
@@ -2583,12 +2634,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ReferralRequest))
+        if (!(other_ instanceof ReferralRequest))
           return false;
-        ReferralRequest o = (ReferralRequest) other;
+        ReferralRequest o = (ReferralRequest) other_;
         return compareValues(status, o.status, true) && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true)
            && compareValues(authoredOn, o.authoredOn, true) && compareValues(description, o.description, true)
           ;

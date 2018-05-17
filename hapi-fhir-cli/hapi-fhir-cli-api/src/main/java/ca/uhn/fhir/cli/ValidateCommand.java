@@ -23,12 +23,13 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.helger.commons.io.file.FileHelper;
 import com.google.common.base.Charsets;
-import com.phloc.commons.io.file.FileUtils;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -80,7 +81,8 @@ public class ValidateCommand extends BaseCommand {
 		addOptionalOption(retVal, "x", "xsd", false, "Validate using Schemas");
 		addOptionalOption(retVal, "s", "sch", false, "Validate using Schematrons");
 		addOptionalOption(retVal, "e", "encoding","encoding", "File encoding (default is UTF-8)");
-		return retVal;
+
+    return retVal;
 	}
 
 	private String loadFile(String theFileName) throws ParseException {
@@ -102,7 +104,7 @@ public class ValidateCommand extends BaseCommand {
 		parseFhirContext(theCommandLine);
 
 		String fileName = theCommandLine.getOptionValue("n");
-		String contents = theCommandLine.getOptionValue("c");
+		String contents = theCommandLine.getOptionValue("d");
 		if (isNotBlank(fileName) && isNotBlank(contents)) {
 			throw new ParseException("Can not supply both a file (-n) and data (-d)");
 		}
@@ -119,7 +121,7 @@ public class ValidateCommand extends BaseCommand {
 			} catch (IOException e) {
 				throw new CommandFailureException(e);
 			}
-			ourLog.info("Fully read - Size is {}", FileUtils.getFileSizeDisplay(contents.length()));
+			ourLog.info("Fully read - Size is {}", FileHelper.getFileSizeDisplay(contents.length()));
 		}
 
 		ca.uhn.fhir.rest.api.EncodingEnum enc = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(defaultString(contents));
@@ -198,7 +200,12 @@ public class ValidateCommand extends BaseCommand {
 		val.setValidateAgainstStandardSchema(theCommandLine.hasOption("x"));
 		val.setValidateAgainstStandardSchematron(theCommandLine.hasOption("s"));
 
-		ValidationResult results = val.validateWithResult(contents);
+		ValidationResult results;
+		try {
+			results = val.validateWithResult(contents);
+		} catch (DataFormatException e) {
+			throw new CommandFailureException(e.getMessage());
+		}
 
 		StringBuilder b = new StringBuilder("Validation results:" + ansi().boldOff());
 		int count = 0;

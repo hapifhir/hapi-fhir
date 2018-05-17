@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */
@@ -531,13 +532,26 @@ public class Quantity extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("value", "decimal", "The value of the measured amount. The value includes an implicit precision in the presentation of the value.", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is \"<\" , then the real value is < stated value.", 0, java.lang.Integer.MAX_VALUE, comparator));
-        childrenList.add(new Property("unit", "string", "A human-readable form of the unit.", 0, java.lang.Integer.MAX_VALUE, unit));
-        childrenList.add(new Property("system", "uri", "The identification of the system that provides the coded form of the unit.", 0, java.lang.Integer.MAX_VALUE, system));
-        childrenList.add(new Property("code", "code", "A computer processable form of the unit in some unit representation system.", 0, java.lang.Integer.MAX_VALUE, code));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("value", "decimal", "The value of the measured amount. The value includes an implicit precision in the presentation of the value.", 0, 1, value));
+        children.add(new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is \"<\" , then the real value is < stated value.", 0, 1, comparator));
+        children.add(new Property("unit", "string", "A human-readable form of the unit.", 0, 1, unit));
+        children.add(new Property("system", "uri", "The identification of the system that provides the coded form of the unit.", 0, 1, system));
+        children.add(new Property("code", "code", "A computer processable form of the unit in some unit representation system.", 0, 1, code));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 111972721: /*value*/  return new Property("value", "decimal", "The value of the measured amount. The value includes an implicit precision in the presentation of the value.", 0, 1, value);
+        case -844673834: /*comparator*/  return new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is \"<\" , then the real value is < stated value.", 0, 1, comparator);
+        case 3594628: /*unit*/  return new Property("unit", "string", "A human-readable form of the unit.", 0, 1, unit);
+        case -887328209: /*system*/  return new Property("system", "uri", "The identification of the system that provides the coded form of the unit.", 0, 1, system);
+        case 3059181: /*code*/  return new Property("code", "code", "A computer processable form of the unit in some unit representation system.", 0, 1, code);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -663,23 +677,23 @@ public class Quantity extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Quantity))
+        if (!(other_ instanceof Quantity))
           return false;
-        Quantity o = (Quantity) other;
+        Quantity o = (Quantity) other_;
         return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(unit, o.unit, true)
            && compareDeep(system, o.system, true) && compareDeep(code, o.code, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Quantity))
+        if (!(other_ instanceof Quantity))
           return false;
-        Quantity o = (Quantity) other;
+        Quantity o = (Quantity) other_;
         return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(unit, o.unit, true)
            && compareValues(system, o.system, true) && compareValues(code, o.code, true);
       }

@@ -72,7 +72,8 @@ public abstract class XmlParserBase extends ParserBase implements IParser {
 	// -- in descendent generated code --------------------------------------
 
 	abstract protected Resource parseResource(XmlPullParser xpp) throws XmlPullParserException, IOException, FHIRFormatError ;
-	abstract protected Type parseType(XmlPullParser xml, String type) throws XmlPullParserException, IOException, FHIRFormatError ;
+  abstract protected Type parseType(XmlPullParser xml, String type) throws XmlPullParserException, IOException, FHIRFormatError ;
+  abstract protected Type parseAnyType(XmlPullParser xml, String type) throws XmlPullParserException, IOException, FHIRFormatError ;
 	abstract protected void composeType(String prefix, Type type) throws IOException ;
 
 	/* -- entry points --------------------------------------------------- */
@@ -114,6 +115,15 @@ public abstract class XmlParserBase extends ParserBase implements IParser {
 		}
 	}
 
+  @Override
+  public Type parseAnyType(InputStream input, String knownType) throws IOException, FHIRFormatError  {
+    try {
+      XmlPullParser xml = loadXml(input);
+      return parseAnyType(xml, knownType);
+    } catch (XmlPullParserException e) {
+      throw new FHIRFormatError(e.getMessage(), e);
+    }
+  }
 
 	/**
 	 * Compose a resource to a stream, possibly using pretty presentation for a human reader (used in the spec, for example, but not normally in production)

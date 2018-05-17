@@ -140,7 +140,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		RequestDetails req = new ServletSubRequestDetails();
 		req.setSubRequest(true);
 
-		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionDao().getDao(responseResourceDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionInterceptor().getDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
 		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);

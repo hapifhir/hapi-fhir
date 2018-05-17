@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -150,6 +150,13 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected void addVerboseLoggingOption(Options theOptions) {
 		addOptionalOption(theOptions, VERBOSE_LOGGING_PARAM, VERBOSE_LOGGING_PARAM_LONGOPT, false, VERBOSE_LOGGING_PARAM_DESC);
+	}
+
+	/**
+	 * Subclasses may override if they want, to do any cleanup they need to do.
+	 */
+	public void cleanup() {
+		// nothing
 	}
 
 	@Override

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum QuestionnaireAnswersStatus {
 
         /**
-         * This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.
+         * This QuestionnaireResponse has been partially filled out with answers but changes or additions are still expected to be made to it.
          */
         INPROGRESS, 
         /**
-         * This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.
+         * This QuestionnaireResponse has been filled out with answers and the current content is regarded as definitive.
          */
         COMPLETED, 
         /**
@@ -53,7 +53,7 @@ public enum QuestionnaireAnswersStatus {
          */
         ENTEREDINERROR, 
         /**
-         * This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.
+         * This QuestionnaireResponse has been partially filled out with answers but has been abandoned. It is unknown whether changes or additions are expected to be made to it.
          */
         STOPPED, 
         /**
@@ -90,11 +90,11 @@ public enum QuestionnaireAnswersStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.";
-            case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
+            case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers but changes or additions are still expected to be made to it.";
+            case COMPLETED: return "This QuestionnaireResponse has been filled out with answers and the current content is regarded as definitive.";
             case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
             case ENTEREDINERROR: return "This QuestionnaireResponse was entered in error and voided.";
-            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.";
+            case STOPPED: return "This QuestionnaireResponse has been partially filled out with answers but has been abandoned. It is unknown whether changes or additions are expected to be made to it.";
             default: return "?";
           }
         }

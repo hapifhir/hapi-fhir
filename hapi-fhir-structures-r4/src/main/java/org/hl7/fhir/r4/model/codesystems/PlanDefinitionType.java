@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,13 +41,17 @@ public enum PlanDefinitionType {
          */
         ORDERSET, 
         /**
-         * A set of activities that can be performed that have relationships in terms of order, pre-conditions, etc.
+         * Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships
          */
-        PROTOCOL, 
+        CLINICALPROTOCOL, 
         /**
          * A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events
          */
         ECARULE, 
+        /**
+         * Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective
+         */
+        WORKFLOWDEFINITION, 
         /**
          * added to help the parsers
          */
@@ -57,17 +61,20 @@ public enum PlanDefinitionType {
                 return null;
         if ("order-set".equals(codeString))
           return ORDERSET;
-        if ("protocol".equals(codeString))
-          return PROTOCOL;
+        if ("clinical-protocol".equals(codeString))
+          return CLINICALPROTOCOL;
         if ("eca-rule".equals(codeString))
           return ECARULE;
+        if ("workflow-definition".equals(codeString))
+          return WORKFLOWDEFINITION;
         throw new FHIRException("Unknown PlanDefinitionType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case ORDERSET: return "order-set";
-            case PROTOCOL: return "protocol";
+            case CLINICALPROTOCOL: return "clinical-protocol";
             case ECARULE: return "eca-rule";
+            case WORKFLOWDEFINITION: return "workflow-definition";
             default: return "?";
           }
         }
@@ -77,16 +84,18 @@ public enum PlanDefinitionType {
         public String getDefinition() {
           switch (this) {
             case ORDERSET: return "A pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system";
-            case PROTOCOL: return "A set of activities that can be performed that have relationships in terms of order, pre-conditions, etc.";
+            case CLINICALPROTOCOL: return "Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships";
             case ECARULE: return "A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events";
+            case WORKFLOWDEFINITION: return "Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case ORDERSET: return "Order Set";
-            case PROTOCOL: return "Protocol";
+            case CLINICALPROTOCOL: return "Clinical Protocol";
             case ECARULE: return "ECA Rule";
+            case WORKFLOWDEFINITION: return "Workflow Definition";
             default: return "?";
           }
     }

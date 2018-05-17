@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -48,6 +48,114 @@ import org.hl7.fhir.exceptions.FHIRException;
  */
 @ResourceDef(name="ProductPlan", profile="http://hl7.org/fhir/Profile/ProductPlan")
 public class ProductPlan extends DomainResource {
+
+    public enum BenefitCostApplicability {
+        /**
+         * Provider is contracted with the health insurance company to provide services to plan members for specific pre-negotiated rates
+         */
+        INNETWORK, 
+        /**
+         * Provider is  not contracted with the health insurance company to provide services to plan members for specific pre-negotiated rates
+         */
+        OUTOFNETWORK, 
+        /**
+         * Other applicability
+         */
+        OTHER, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static BenefitCostApplicability fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("in-network".equals(codeString))
+          return INNETWORK;
+        if ("out-of-network".equals(codeString))
+          return OUTOFNETWORK;
+        if ("other".equals(codeString))
+          return OTHER;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown BenefitCostApplicability code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case INNETWORK: return "in-network";
+            case OUTOFNETWORK: return "out-of-network";
+            case OTHER: return "other";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case INNETWORK: return "http://hl7.org/fhir/applicability";
+            case OUTOFNETWORK: return "http://hl7.org/fhir/applicability";
+            case OTHER: return "http://hl7.org/fhir/applicability";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case INNETWORK: return "Provider is contracted with the health insurance company to provide services to plan members for specific pre-negotiated rates";
+            case OUTOFNETWORK: return "Provider is  not contracted with the health insurance company to provide services to plan members for specific pre-negotiated rates";
+            case OTHER: return "Other applicability";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case INNETWORK: return "In Network";
+            case OUTOFNETWORK: return "Out of Network";
+            case OTHER: return "Other";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class BenefitCostApplicabilityEnumFactory implements EnumFactory<BenefitCostApplicability> {
+    public BenefitCostApplicability fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("in-network".equals(codeString))
+          return BenefitCostApplicability.INNETWORK;
+        if ("out-of-network".equals(codeString))
+          return BenefitCostApplicability.OUTOFNETWORK;
+        if ("other".equals(codeString))
+          return BenefitCostApplicability.OTHER;
+        throw new IllegalArgumentException("Unknown BenefitCostApplicability code '"+codeString+"'");
+        }
+        public Enumeration<BenefitCostApplicability> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<BenefitCostApplicability>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("in-network".equals(codeString))
+          return new Enumeration<BenefitCostApplicability>(this, BenefitCostApplicability.INNETWORK);
+        if ("out-of-network".equals(codeString))
+          return new Enumeration<BenefitCostApplicability>(this, BenefitCostApplicability.OUTOFNETWORK);
+        if ("other".equals(codeString))
+          return new Enumeration<BenefitCostApplicability>(this, BenefitCostApplicability.OTHER);
+        throw new FHIRException("Unknown BenefitCostApplicability code '"+codeString+"'");
+        }
+    public String toCode(BenefitCostApplicability code) {
+      if (code == BenefitCostApplicability.INNETWORK)
+        return "in-network";
+      if (code == BenefitCostApplicability.OUTOFNETWORK)
+        return "out-of-network";
+      if (code == BenefitCostApplicability.OTHER)
+        return "other";
+      return "?";
+      }
+    public String toSystem(BenefitCostApplicability code) {
+      return code.getSystem();
+      }
+    }
 
     @Block()
     public static class ProductPlanContactComponent extends BackboneElement implements IBaseBackboneElement {
@@ -383,13 +491,25 @@ public class ProductPlan extends DomainResource {
         protected CodeableConcept type;
 
         /**
+         * Reference to the network that providing the type of coverage.
+         */
+        @Child(name = "network", type = {Organization.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="What networks provide coverage", formalDefinition="Reference to the network that providing the type of coverage." )
+        protected List<Reference> network;
+        /**
+         * The actual objects that are the target of the reference (Reference to the network that providing the type of coverage.)
+         */
+        protected List<Organization> networkTarget;
+
+
+        /**
          * Specific benefits under this type of coverage.
          */
-        @Child(name = "benefit", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Specific benefits under this type of coverage", formalDefinition="Specific benefits under this type of coverage." )
+        @Child(name = "benefit", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="List of benefits", formalDefinition="Specific benefits under this type of coverage." )
         protected List<ProductPlanCoverageBenefitComponent> benefit;
 
-        private static final long serialVersionUID = 1896654378L;
+        private static final long serialVersionUID = -1381201025L;
 
     /**
      * Constructor
@@ -428,6 +548,81 @@ public class ProductPlan extends DomainResource {
         public ProductPlanCoverageComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
+        }
+
+        /**
+         * @return {@link #network} (Reference to the network that providing the type of coverage.)
+         */
+        public List<Reference> getNetwork() { 
+          if (this.network == null)
+            this.network = new ArrayList<Reference>();
+          return this.network;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ProductPlanCoverageComponent setNetwork(List<Reference> theNetwork) { 
+          this.network = theNetwork;
+          return this;
+        }
+
+        public boolean hasNetwork() { 
+          if (this.network == null)
+            return false;
+          for (Reference item : this.network)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addNetwork() { //3
+          Reference t = new Reference();
+          if (this.network == null)
+            this.network = new ArrayList<Reference>();
+          this.network.add(t);
+          return t;
+        }
+
+        public ProductPlanCoverageComponent addNetwork(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.network == null)
+            this.network = new ArrayList<Reference>();
+          this.network.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #network}, creating it if it does not already exist
+         */
+        public Reference getNetworkFirstRep() { 
+          if (getNetwork().isEmpty()) {
+            addNetwork();
+          }
+          return getNetwork().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Organization> getNetworkTarget() { 
+          if (this.networkTarget == null)
+            this.networkTarget = new ArrayList<Organization>();
+          return this.networkTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public Organization addNetworkTarget() { 
+          Organization r = new Organization();
+          if (this.networkTarget == null)
+            this.networkTarget = new ArrayList<Organization>();
+          this.networkTarget.add(r);
+          return r;
         }
 
         /**
@@ -486,6 +681,7 @@ public class ProductPlan extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Type of coverage  (Medical; Dental; Mental Health; Substance Abuse; Vision; Drug; Short Term; Long Term Care; Hospice; Home Health).", 0, 1, type));
+          children.add(new Property("network", "Reference(Organization)", "Reference to the network that providing the type of coverage.", 0, java.lang.Integer.MAX_VALUE, network));
           children.add(new Property("benefit", "", "Specific benefits under this type of coverage.", 0, java.lang.Integer.MAX_VALUE, benefit));
         }
 
@@ -493,6 +689,7 @@ public class ProductPlan extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of coverage  (Medical; Dental; Mental Health; Substance Abuse; Vision; Drug; Short Term; Long Term Care; Hospice; Home Health).", 0, 1, type);
+          case 1843485230: /*network*/  return new Property("network", "Reference(Organization)", "Reference to the network that providing the type of coverage.", 0, java.lang.Integer.MAX_VALUE, network);
           case -222710633: /*benefit*/  return new Property("benefit", "", "Specific benefits under this type of coverage.", 0, java.lang.Integer.MAX_VALUE, benefit);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -503,6 +700,7 @@ public class ProductPlan extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 1843485230: /*network*/ return this.network == null ? new Base[0] : this.network.toArray(new Base[this.network.size()]); // Reference
         case -222710633: /*benefit*/ return this.benefit == null ? new Base[0] : this.benefit.toArray(new Base[this.benefit.size()]); // ProductPlanCoverageBenefitComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -514,6 +712,9 @@ public class ProductPlan extends DomainResource {
         switch (hash) {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 1843485230: // network
+          this.getNetwork().add(castToReference(value)); // Reference
           return value;
         case -222710633: // benefit
           this.getBenefit().add((ProductPlanCoverageBenefitComponent) value); // ProductPlanCoverageBenefitComponent
@@ -527,6 +728,8 @@ public class ProductPlan extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("network")) {
+          this.getNetwork().add(castToReference(value));
         } else if (name.equals("benefit")) {
           this.getBenefit().add((ProductPlanCoverageBenefitComponent) value);
         } else
@@ -538,6 +741,7 @@ public class ProductPlan extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getType(); 
+        case 1843485230:  return addNetwork(); 
         case -222710633:  return addBenefit(); 
         default: return super.makeProperty(hash, name);
         }
@@ -548,6 +752,7 @@ public class ProductPlan extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 1843485230: /*network*/ return new String[] {"Reference"};
         case -222710633: /*benefit*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -560,6 +765,9 @@ public class ProductPlan extends DomainResource {
           this.type = new CodeableConcept();
           return this.type;
         }
+        else if (name.equals("network")) {
+          return addNetwork();
+        }
         else if (name.equals("benefit")) {
           return addBenefit();
         }
@@ -571,6 +779,11 @@ public class ProductPlan extends DomainResource {
         ProductPlanCoverageComponent dst = new ProductPlanCoverageComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
+        if (network != null) {
+          dst.network = new ArrayList<Reference>();
+          for (Reference i : network)
+            dst.network.add(i.copy());
+        };
         if (benefit != null) {
           dst.benefit = new ArrayList<ProductPlanCoverageBenefitComponent>();
           for (ProductPlanCoverageBenefitComponent i : benefit)
@@ -586,7 +799,8 @@ public class ProductPlan extends DomainResource {
         if (!(other_ instanceof ProductPlanCoverageComponent))
           return false;
         ProductPlanCoverageComponent o = (ProductPlanCoverageComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(benefit, o.benefit, true);
+        return compareDeep(type, o.type, true) && compareDeep(network, o.network, true) && compareDeep(benefit, o.benefit, true)
+          ;
       }
 
       @Override
@@ -600,7 +814,7 @@ public class ProductPlan extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, benefit);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, network, benefit);
       }
 
   public String fhirType() {
@@ -620,13 +834,20 @@ public class ProductPlan extends DomainResource {
         protected CodeableConcept type;
 
         /**
-         * Specific benefit and related value.
+         * The referral requirements to have access/coverage for this benefit.
          */
-        @Child(name = "item", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Specific benefit and related value", formalDefinition="Specific benefit and related value." )
-        protected List<ProductPlanCoverageBenefitItemComponent> item;
+        @Child(name = "requirement", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Referral requirements", formalDefinition="The referral requirements to have access/coverage for this benefit." )
+        protected StringType requirement;
 
-        private static final long serialVersionUID = 1238381103L;
+        /**
+         * The specific limits on the benefit.
+         */
+        @Child(name = "limit", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Benefit limits", formalDefinition="The specific limits on the benefit." )
+        protected List<ProductPlanCoverageBenefitLimitComponent> limit;
+
+        private static final long serialVersionUID = 74403513L;
 
     /**
      * Constructor
@@ -668,69 +889,120 @@ public class ProductPlan extends DomainResource {
         }
 
         /**
-         * @return {@link #item} (Specific benefit and related value.)
+         * @return {@link #requirement} (The referral requirements to have access/coverage for this benefit.). This is the underlying object with id, value and extensions. The accessor "getRequirement" gives direct access to the value
          */
-        public List<ProductPlanCoverageBenefitItemComponent> getItem() { 
-          if (this.item == null)
-            this.item = new ArrayList<ProductPlanCoverageBenefitItemComponent>();
-          return this.item;
+        public StringType getRequirementElement() { 
+          if (this.requirement == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanCoverageBenefitComponent.requirement");
+            else if (Configuration.doAutoCreate())
+              this.requirement = new StringType(); // bb
+          return this.requirement;
+        }
+
+        public boolean hasRequirementElement() { 
+          return this.requirement != null && !this.requirement.isEmpty();
+        }
+
+        public boolean hasRequirement() { 
+          return this.requirement != null && !this.requirement.isEmpty();
+        }
+
+        /**
+         * @param value {@link #requirement} (The referral requirements to have access/coverage for this benefit.). This is the underlying object with id, value and extensions. The accessor "getRequirement" gives direct access to the value
+         */
+        public ProductPlanCoverageBenefitComponent setRequirementElement(StringType value) { 
+          this.requirement = value;
+          return this;
+        }
+
+        /**
+         * @return The referral requirements to have access/coverage for this benefit.
+         */
+        public String getRequirement() { 
+          return this.requirement == null ? null : this.requirement.getValue();
+        }
+
+        /**
+         * @param value The referral requirements to have access/coverage for this benefit.
+         */
+        public ProductPlanCoverageBenefitComponent setRequirement(String value) { 
+          if (Utilities.noString(value))
+            this.requirement = null;
+          else {
+            if (this.requirement == null)
+              this.requirement = new StringType();
+            this.requirement.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #limit} (The specific limits on the benefit.)
+         */
+        public List<ProductPlanCoverageBenefitLimitComponent> getLimit() { 
+          if (this.limit == null)
+            this.limit = new ArrayList<ProductPlanCoverageBenefitLimitComponent>();
+          return this.limit;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ProductPlanCoverageBenefitComponent setItem(List<ProductPlanCoverageBenefitItemComponent> theItem) { 
-          this.item = theItem;
+        public ProductPlanCoverageBenefitComponent setLimit(List<ProductPlanCoverageBenefitLimitComponent> theLimit) { 
+          this.limit = theLimit;
           return this;
         }
 
-        public boolean hasItem() { 
-          if (this.item == null)
+        public boolean hasLimit() { 
+          if (this.limit == null)
             return false;
-          for (ProductPlanCoverageBenefitItemComponent item : this.item)
+          for (ProductPlanCoverageBenefitLimitComponent item : this.limit)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public ProductPlanCoverageBenefitItemComponent addItem() { //3
-          ProductPlanCoverageBenefitItemComponent t = new ProductPlanCoverageBenefitItemComponent();
-          if (this.item == null)
-            this.item = new ArrayList<ProductPlanCoverageBenefitItemComponent>();
-          this.item.add(t);
+        public ProductPlanCoverageBenefitLimitComponent addLimit() { //3
+          ProductPlanCoverageBenefitLimitComponent t = new ProductPlanCoverageBenefitLimitComponent();
+          if (this.limit == null)
+            this.limit = new ArrayList<ProductPlanCoverageBenefitLimitComponent>();
+          this.limit.add(t);
           return t;
         }
 
-        public ProductPlanCoverageBenefitComponent addItem(ProductPlanCoverageBenefitItemComponent t) { //3
+        public ProductPlanCoverageBenefitComponent addLimit(ProductPlanCoverageBenefitLimitComponent t) { //3
           if (t == null)
             return this;
-          if (this.item == null)
-            this.item = new ArrayList<ProductPlanCoverageBenefitItemComponent>();
-          this.item.add(t);
+          if (this.limit == null)
+            this.limit = new ArrayList<ProductPlanCoverageBenefitLimitComponent>();
+          this.limit.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #item}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #limit}, creating it if it does not already exist
          */
-        public ProductPlanCoverageBenefitItemComponent getItemFirstRep() { 
-          if (getItem().isEmpty()) {
-            addItem();
+        public ProductPlanCoverageBenefitLimitComponent getLimitFirstRep() { 
+          if (getLimit().isEmpty()) {
+            addLimit();
           }
-          return getItem().get(0);
+          return getLimit().get(0);
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Type of benefit (primary care; speciality care; inpatient; outpatient).", 0, 1, type));
-          children.add(new Property("item", "", "Specific benefit and related value.", 0, java.lang.Integer.MAX_VALUE, item));
+          children.add(new Property("requirement", "string", "The referral requirements to have access/coverage for this benefit.", 0, 1, requirement));
+          children.add(new Property("limit", "", "The specific limits on the benefit.", 0, java.lang.Integer.MAX_VALUE, limit));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of benefit (primary care; speciality care; inpatient; outpatient).", 0, 1, type);
-          case 3242771: /*item*/  return new Property("item", "", "Specific benefit and related value.", 0, java.lang.Integer.MAX_VALUE, item);
+          case 363387971: /*requirement*/  return new Property("requirement", "string", "The referral requirements to have access/coverage for this benefit.", 0, 1, requirement);
+          case 102976443: /*limit*/  return new Property("limit", "", "The specific limits on the benefit.", 0, java.lang.Integer.MAX_VALUE, limit);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -740,7 +1012,8 @@ public class ProductPlan extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ProductPlanCoverageBenefitItemComponent
+        case 363387971: /*requirement*/ return this.requirement == null ? new Base[0] : new Base[] {this.requirement}; // StringType
+        case 102976443: /*limit*/ return this.limit == null ? new Base[0] : this.limit.toArray(new Base[this.limit.size()]); // ProductPlanCoverageBenefitLimitComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -752,8 +1025,11 @@ public class ProductPlan extends DomainResource {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 3242771: // item
-          this.getItem().add((ProductPlanCoverageBenefitItemComponent) value); // ProductPlanCoverageBenefitItemComponent
+        case 363387971: // requirement
+          this.requirement = castToString(value); // StringType
+          return value;
+        case 102976443: // limit
+          this.getLimit().add((ProductPlanCoverageBenefitLimitComponent) value); // ProductPlanCoverageBenefitLimitComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -764,8 +1040,10 @@ public class ProductPlan extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("item")) {
-          this.getItem().add((ProductPlanCoverageBenefitItemComponent) value);
+        } else if (name.equals("requirement")) {
+          this.requirement = castToString(value); // StringType
+        } else if (name.equals("limit")) {
+          this.getLimit().add((ProductPlanCoverageBenefitLimitComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -775,7 +1053,8 @@ public class ProductPlan extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getType(); 
-        case 3242771:  return addItem(); 
+        case 363387971:  return getRequirementElement();
+        case 102976443:  return addLimit(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -785,7 +1064,8 @@ public class ProductPlan extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 3242771: /*item*/ return new String[] {};
+        case 363387971: /*requirement*/ return new String[] {"string"};
+        case 102976443: /*limit*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -797,8 +1077,11 @@ public class ProductPlan extends DomainResource {
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("item")) {
-          return addItem();
+        else if (name.equals("requirement")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProductPlan.requirement");
+        }
+        else if (name.equals("limit")) {
+          return addLimit();
         }
         else
           return super.addChild(name);
@@ -808,10 +1091,11 @@ public class ProductPlan extends DomainResource {
         ProductPlanCoverageBenefitComponent dst = new ProductPlanCoverageBenefitComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        if (item != null) {
-          dst.item = new ArrayList<ProductPlanCoverageBenefitItemComponent>();
-          for (ProductPlanCoverageBenefitItemComponent i : item)
-            dst.item.add(i.copy());
+        dst.requirement = requirement == null ? null : requirement.copy();
+        if (limit != null) {
+          dst.limit = new ArrayList<ProductPlanCoverageBenefitLimitComponent>();
+          for (ProductPlanCoverageBenefitLimitComponent i : limit)
+            dst.limit.add(i.copy());
         };
         return dst;
       }
@@ -823,7 +1107,8 @@ public class ProductPlan extends DomainResource {
         if (!(other_ instanceof ProductPlanCoverageBenefitComponent))
           return false;
         ProductPlanCoverageBenefitComponent o = (ProductPlanCoverageBenefitComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(item, o.item, true);
+        return compareDeep(type, o.type, true) && compareDeep(requirement, o.requirement, true) && compareDeep(limit, o.limit, true)
+          ;
       }
 
       @Override
@@ -833,11 +1118,12 @@ public class ProductPlan extends DomainResource {
         if (!(other_ instanceof ProductPlanCoverageBenefitComponent))
           return false;
         ProductPlanCoverageBenefitComponent o = (ProductPlanCoverageBenefitComponent) other_;
-        return true;
+        return compareValues(requirement, o.requirement, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, item);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, requirement, limit
+          );
       }
 
   public String fhirType() {
@@ -848,45 +1134,61 @@ public class ProductPlan extends DomainResource {
   }
 
     @Block()
-    public static class ProductPlanCoverageBenefitItemComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ProductPlanCoverageBenefitLimitComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Coded Details of the specific benefit (days; visits).
+         * The maximum amount of a service item a plan will pay for a covered benefit.  For examples. wellness visits, or eyeglasses.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Coded Details of the specific benefit (days; visits)", formalDefinition="Coded Details of the specific benefit (days; visits)." )
+        @Child(name = "value", type = {Quantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Maximum value allowed", formalDefinition="The maximum amount of a service item a plan will pay for a covered benefit.  For examples. wellness visits, or eyeglasses." )
+        protected Quantity value;
+
+        /**
+         * The specific limit on the benefit.
+         */
+        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Benefit limit details", formalDefinition="The specific limit on the benefit." )
         protected CodeableConcept code;
 
+        private static final long serialVersionUID = -304318128L;
+
+    /**
+     * Constructor
+     */
+      public ProductPlanCoverageBenefitLimitComponent() {
+        super();
+      }
+
         /**
-         * Value of the specific benefit.
+         * @return {@link #value} (The maximum amount of a service item a plan will pay for a covered benefit.  For examples. wellness visits, or eyeglasses.)
          */
-        @Child(name = "benefitValue", type = {Quantity.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Value of the specific benefit", formalDefinition="Value of the specific benefit." )
-        protected Quantity benefitValue;
+        public Quantity getValue() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanCoverageBenefitLimitComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new Quantity(); // cc
+          return this.value;
+        }
 
-        private static final long serialVersionUID = 1339622901L;
-
-    /**
-     * Constructor
-     */
-      public ProductPlanCoverageBenefitItemComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ProductPlanCoverageBenefitItemComponent(CodeableConcept code) {
-        super();
-        this.code = code;
-      }
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
 
         /**
-         * @return {@link #code} (Coded Details of the specific benefit (days; visits).)
+         * @param value {@link #value} (The maximum amount of a service item a plan will pay for a covered benefit.  For examples. wellness visits, or eyeglasses.)
+         */
+        public ProductPlanCoverageBenefitLimitComponent setValue(Quantity value) { 
+          this.value = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #code} (The specific limit on the benefit.)
          */
         public CodeableConcept getCode() { 
           if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanCoverageBenefitItemComponent.code");
+              throw new Error("Attempt to auto-create ProductPlanCoverageBenefitLimitComponent.code");
             else if (Configuration.doAutoCreate())
               this.code = new CodeableConcept(); // cc
           return this.code;
@@ -897,48 +1199,24 @@ public class ProductPlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Coded Details of the specific benefit (days; visits).)
+         * @param value {@link #code} (The specific limit on the benefit.)
          */
-        public ProductPlanCoverageBenefitItemComponent setCode(CodeableConcept value) { 
+        public ProductPlanCoverageBenefitLimitComponent setCode(CodeableConcept value) { 
           this.code = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #benefitValue} (Value of the specific benefit.)
-         */
-        public Quantity getBenefitValue() { 
-          if (this.benefitValue == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanCoverageBenefitItemComponent.benefitValue");
-            else if (Configuration.doAutoCreate())
-              this.benefitValue = new Quantity(); // cc
-          return this.benefitValue;
-        }
-
-        public boolean hasBenefitValue() { 
-          return this.benefitValue != null && !this.benefitValue.isEmpty();
-        }
-
-        /**
-         * @param value {@link #benefitValue} (Value of the specific benefit.)
-         */
-        public ProductPlanCoverageBenefitItemComponent setBenefitValue(Quantity value) { 
-          this.benefitValue = value;
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("code", "CodeableConcept", "Coded Details of the specific benefit (days; visits).", 0, 1, code));
-          children.add(new Property("benefitValue", "Quantity", "Value of the specific benefit.", 0, 1, benefitValue));
+          children.add(new Property("value", "Quantity", "The maximum amount of a service item a plan will pay for a covered benefit.  For examples. wellness visits, or eyeglasses.", 0, 1, value));
+          children.add(new Property("code", "CodeableConcept", "The specific limit on the benefit.", 0, 1, code));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Coded Details of the specific benefit (days; visits).", 0, 1, code);
-          case 130822938: /*benefitValue*/  return new Property("benefitValue", "Quantity", "Value of the specific benefit.", 0, 1, benefitValue);
+          case 111972721: /*value*/  return new Property("value", "Quantity", "The maximum amount of a service item a plan will pay for a covered benefit.  For examples. wellness visits, or eyeglasses.", 0, 1, value);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The specific limit on the benefit.", 0, 1, code);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -947,8 +1225,8 @@ public class ProductPlan extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Quantity
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
-        case 130822938: /*benefitValue*/ return this.benefitValue == null ? new Base[0] : new Base[] {this.benefitValue}; // Quantity
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -957,11 +1235,11 @@ public class ProductPlan extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case 111972721: // value
+          this.value = castToQuantity(value); // Quantity
+          return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 130822938: // benefitValue
-          this.benefitValue = castToQuantity(value); // Quantity
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -970,10 +1248,10 @@ public class ProductPlan extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code")) {
+        if (name.equals("value")) {
+          this.value = castToQuantity(value); // Quantity
+        } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("benefitValue")) {
-          this.benefitValue = castToQuantity(value); // Quantity
         } else
           return super.setProperty(name, value);
         return value;
@@ -982,8 +1260,8 @@ public class ProductPlan extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 111972721:  return getValue(); 
         case 3059181:  return getCode(); 
-        case 130822938:  return getBenefitValue(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -992,8 +1270,8 @@ public class ProductPlan extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 111972721: /*value*/ return new String[] {"Quantity"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
-        case 130822938: /*benefitValue*/ return new String[] {"Quantity"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1001,23 +1279,23 @@ public class ProductPlan extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("code")) {
+        if (name.equals("value")) {
+          this.value = new Quantity();
+          return this.value;
+        }
+        else if (name.equals("code")) {
           this.code = new CodeableConcept();
           return this.code;
-        }
-        else if (name.equals("benefitValue")) {
-          this.benefitValue = new Quantity();
-          return this.benefitValue;
         }
         else
           return super.addChild(name);
       }
 
-      public ProductPlanCoverageBenefitItemComponent copy() {
-        ProductPlanCoverageBenefitItemComponent dst = new ProductPlanCoverageBenefitItemComponent();
+      public ProductPlanCoverageBenefitLimitComponent copy() {
+        ProductPlanCoverageBenefitLimitComponent dst = new ProductPlanCoverageBenefitLimitComponent();
         copyValues(dst);
+        dst.value = value == null ? null : value.copy();
         dst.code = code == null ? null : code.copy();
-        dst.benefitValue = benefitValue == null ? null : benefitValue.copy();
         return dst;
       }
 
@@ -1025,28 +1303,28 @@ public class ProductPlan extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof ProductPlanCoverageBenefitItemComponent))
+        if (!(other_ instanceof ProductPlanCoverageBenefitLimitComponent))
           return false;
-        ProductPlanCoverageBenefitItemComponent o = (ProductPlanCoverageBenefitItemComponent) other_;
-        return compareDeep(code, o.code, true) && compareDeep(benefitValue, o.benefitValue, true);
+        ProductPlanCoverageBenefitLimitComponent o = (ProductPlanCoverageBenefitLimitComponent) other_;
+        return compareDeep(value, o.value, true) && compareDeep(code, o.code, true);
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof ProductPlanCoverageBenefitItemComponent))
+        if (!(other_ instanceof ProductPlanCoverageBenefitLimitComponent))
           return false;
-        ProductPlanCoverageBenefitItemComponent o = (ProductPlanCoverageBenefitItemComponent) other_;
+        ProductPlanCoverageBenefitLimitComponent o = (ProductPlanCoverageBenefitLimitComponent) other_;
         return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, benefitValue);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, code);
       }
 
   public String fhirType() {
-    return "ProductPlan.coverage.benefit.item";
+    return "ProductPlan.coverage.benefit.limit";
 
   }
 
@@ -1055,34 +1333,58 @@ public class ProductPlan extends DomainResource {
     @Block()
     public static class ProductPlanPlanComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Type of plan (Platinum; Gold; Silver; Bronze; High Deductable; Low Deductable).
+         * Business identifiers assigned to this health insurance plan which remain constant as the resource is updated and propagates from server to server.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Type of plan", formalDefinition="Type of plan (Platinum; Gold; Silver; Bronze; High Deductable; Low Deductable)." )
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Business Identifier for Product", formalDefinition="Business identifiers assigned to this health insurance plan which remain constant as the resource is updated and propagates from server to server." )
+        protected List<Identifier> identifier;
+
+        /**
+         * Type of plan. For example, "Platinum" or "High Deductable".
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Type of plan", formalDefinition="Type of plan. For example, \"Platinum\" or \"High Deductable\"." )
         protected CodeableConcept type;
 
         /**
-         * Additional descriptive content about the plan.
+         * The geographic region in which a health insurance plan's benefits apply.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Additional descriptive content about the plan", formalDefinition="Additional descriptive content about the plan." )
-        protected StringType description;
+        @Child(name = "coverageArea", type = {Location.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Where product applies", formalDefinition="The geographic region in which a health insurance plan's benefits apply." )
+        protected Reference coverageArea;
 
         /**
-         * Plan premium.
+         * The actual object that is the target of the reference (The geographic region in which a health insurance plan's benefits apply.)
          */
-        @Child(name = "premium", type = {Money.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Plan premium", formalDefinition="Plan premium." )
-        protected Money premium;
+        protected Location coverageAreaTarget;
 
         /**
-         * List of the costs associated with plan benefits.
+         * Reference to the network that providing the type of coverage.
          */
-        @Child(name = "category", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="List of the costs associated with plan benefits", formalDefinition="List of the costs associated with plan benefits." )
-        protected List<ProductPlanPlanCategoryComponent> category;
+        @Child(name = "network", type = {Organization.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="What networks provide coverage", formalDefinition="Reference to the network that providing the type of coverage." )
+        protected List<Reference> network;
+        /**
+         * The actual objects that are the target of the reference (Reference to the network that providing the type of coverage.)
+         */
+        protected List<Organization> networkTarget;
 
-        private static final long serialVersionUID = -648921485L;
+
+        /**
+         * Overall costs associated with the plan.
+         */
+        @Child(name = "generalCost", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Overall costs", formalDefinition="Overall costs associated with the plan." )
+        protected List<ProductPlanPlanGeneralCostComponent> generalCost;
+
+        /**
+         * Costs associated with the coverage provided by the product.
+         */
+        @Child(name = "specificCost", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Specific costs", formalDefinition="Costs associated with the coverage provided by the product." )
+        protected List<ProductPlanPlanSpecificCostComponent> specificCost;
+
+        private static final long serialVersionUID = -316449985L;
 
     /**
      * Constructor
@@ -1092,7 +1394,60 @@ public class ProductPlan extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Type of plan (Platinum; Gold; Silver; Bronze; High Deductable; Low Deductable).)
+         * @return {@link #identifier} (Business identifiers assigned to this health insurance plan which remain constant as the resource is updated and propagates from server to server.)
+         */
+        public List<Identifier> getIdentifier() { 
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          return this.identifier;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ProductPlanPlanComponent setIdentifier(List<Identifier> theIdentifier) { 
+          this.identifier = theIdentifier;
+          return this;
+        }
+
+        public boolean hasIdentifier() { 
+          if (this.identifier == null)
+            return false;
+          for (Identifier item : this.identifier)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Identifier addIdentifier() { //3
+          Identifier t = new Identifier();
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          this.identifier.add(t);
+          return t;
+        }
+
+        public ProductPlanPlanComponent addIdentifier(Identifier t) { //3
+          if (t == null)
+            return this;
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          this.identifier.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
+        }
+
+        /**
+         * @return {@link #type} (Type of plan. For example, "Platinum" or "High Deductable".)
          */
         public CodeableConcept getType() { 
           if (this.type == null)
@@ -1108,7 +1463,7 @@ public class ProductPlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Type of plan (Platinum; Gold; Silver; Bronze; High Deductable; Low Deductable).)
+         * @param value {@link #type} (Type of plan. For example, "Platinum" or "High Deductable".)
          */
         public ProductPlanPlanComponent setType(CodeableConcept value) { 
           this.type = value;
@@ -1116,12 +1471,1064 @@ public class ProductPlan extends DomainResource {
         }
 
         /**
-         * @return {@link #description} (Additional descriptive content about the plan.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @return {@link #coverageArea} (The geographic region in which a health insurance plan's benefits apply.)
+         */
+        public Reference getCoverageArea() { 
+          if (this.coverageArea == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanComponent.coverageArea");
+            else if (Configuration.doAutoCreate())
+              this.coverageArea = new Reference(); // cc
+          return this.coverageArea;
+        }
+
+        public boolean hasCoverageArea() { 
+          return this.coverageArea != null && !this.coverageArea.isEmpty();
+        }
+
+        /**
+         * @param value {@link #coverageArea} (The geographic region in which a health insurance plan's benefits apply.)
+         */
+        public ProductPlanPlanComponent setCoverageArea(Reference value) { 
+          this.coverageArea = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #coverageArea} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The geographic region in which a health insurance plan's benefits apply.)
+         */
+        public Location getCoverageAreaTarget() { 
+          if (this.coverageAreaTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanComponent.coverageArea");
+            else if (Configuration.doAutoCreate())
+              this.coverageAreaTarget = new Location(); // aa
+          return this.coverageAreaTarget;
+        }
+
+        /**
+         * @param value {@link #coverageArea} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The geographic region in which a health insurance plan's benefits apply.)
+         */
+        public ProductPlanPlanComponent setCoverageAreaTarget(Location value) { 
+          this.coverageAreaTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #network} (Reference to the network that providing the type of coverage.)
+         */
+        public List<Reference> getNetwork() { 
+          if (this.network == null)
+            this.network = new ArrayList<Reference>();
+          return this.network;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ProductPlanPlanComponent setNetwork(List<Reference> theNetwork) { 
+          this.network = theNetwork;
+          return this;
+        }
+
+        public boolean hasNetwork() { 
+          if (this.network == null)
+            return false;
+          for (Reference item : this.network)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addNetwork() { //3
+          Reference t = new Reference();
+          if (this.network == null)
+            this.network = new ArrayList<Reference>();
+          this.network.add(t);
+          return t;
+        }
+
+        public ProductPlanPlanComponent addNetwork(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.network == null)
+            this.network = new ArrayList<Reference>();
+          this.network.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #network}, creating it if it does not already exist
+         */
+        public Reference getNetworkFirstRep() { 
+          if (getNetwork().isEmpty()) {
+            addNetwork();
+          }
+          return getNetwork().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Organization> getNetworkTarget() { 
+          if (this.networkTarget == null)
+            this.networkTarget = new ArrayList<Organization>();
+          return this.networkTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public Organization addNetworkTarget() { 
+          Organization r = new Organization();
+          if (this.networkTarget == null)
+            this.networkTarget = new ArrayList<Organization>();
+          this.networkTarget.add(r);
+          return r;
+        }
+
+        /**
+         * @return {@link #generalCost} (Overall costs associated with the plan.)
+         */
+        public List<ProductPlanPlanGeneralCostComponent> getGeneralCost() { 
+          if (this.generalCost == null)
+            this.generalCost = new ArrayList<ProductPlanPlanGeneralCostComponent>();
+          return this.generalCost;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ProductPlanPlanComponent setGeneralCost(List<ProductPlanPlanGeneralCostComponent> theGeneralCost) { 
+          this.generalCost = theGeneralCost;
+          return this;
+        }
+
+        public boolean hasGeneralCost() { 
+          if (this.generalCost == null)
+            return false;
+          for (ProductPlanPlanGeneralCostComponent item : this.generalCost)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public ProductPlanPlanGeneralCostComponent addGeneralCost() { //3
+          ProductPlanPlanGeneralCostComponent t = new ProductPlanPlanGeneralCostComponent();
+          if (this.generalCost == null)
+            this.generalCost = new ArrayList<ProductPlanPlanGeneralCostComponent>();
+          this.generalCost.add(t);
+          return t;
+        }
+
+        public ProductPlanPlanComponent addGeneralCost(ProductPlanPlanGeneralCostComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.generalCost == null)
+            this.generalCost = new ArrayList<ProductPlanPlanGeneralCostComponent>();
+          this.generalCost.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #generalCost}, creating it if it does not already exist
+         */
+        public ProductPlanPlanGeneralCostComponent getGeneralCostFirstRep() { 
+          if (getGeneralCost().isEmpty()) {
+            addGeneralCost();
+          }
+          return getGeneralCost().get(0);
+        }
+
+        /**
+         * @return {@link #specificCost} (Costs associated with the coverage provided by the product.)
+         */
+        public List<ProductPlanPlanSpecificCostComponent> getSpecificCost() { 
+          if (this.specificCost == null)
+            this.specificCost = new ArrayList<ProductPlanPlanSpecificCostComponent>();
+          return this.specificCost;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ProductPlanPlanComponent setSpecificCost(List<ProductPlanPlanSpecificCostComponent> theSpecificCost) { 
+          this.specificCost = theSpecificCost;
+          return this;
+        }
+
+        public boolean hasSpecificCost() { 
+          if (this.specificCost == null)
+            return false;
+          for (ProductPlanPlanSpecificCostComponent item : this.specificCost)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public ProductPlanPlanSpecificCostComponent addSpecificCost() { //3
+          ProductPlanPlanSpecificCostComponent t = new ProductPlanPlanSpecificCostComponent();
+          if (this.specificCost == null)
+            this.specificCost = new ArrayList<ProductPlanPlanSpecificCostComponent>();
+          this.specificCost.add(t);
+          return t;
+        }
+
+        public ProductPlanPlanComponent addSpecificCost(ProductPlanPlanSpecificCostComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.specificCost == null)
+            this.specificCost = new ArrayList<ProductPlanPlanSpecificCostComponent>();
+          this.specificCost.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #specificCost}, creating it if it does not already exist
+         */
+        public ProductPlanPlanSpecificCostComponent getSpecificCostFirstRep() { 
+          if (getSpecificCost().isEmpty()) {
+            addSpecificCost();
+          }
+          return getSpecificCost().get(0);
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this health insurance plan which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
+          children.add(new Property("type", "CodeableConcept", "Type of plan. For example, \"Platinum\" or \"High Deductable\".", 0, 1, type));
+          children.add(new Property("coverageArea", "Reference(Location)", "The geographic region in which a health insurance plan's benefits apply.", 0, 1, coverageArea));
+          children.add(new Property("network", "Reference(Organization)", "Reference to the network that providing the type of coverage.", 0, java.lang.Integer.MAX_VALUE, network));
+          children.add(new Property("generalCost", "", "Overall costs associated with the plan.", 0, java.lang.Integer.MAX_VALUE, generalCost));
+          children.add(new Property("specificCost", "", "Costs associated with the coverage provided by the product.", 0, java.lang.Integer.MAX_VALUE, specificCost));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this health insurance plan which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of plan. For example, \"Platinum\" or \"High Deductable\".", 0, 1, type);
+          case -1532328299: /*coverageArea*/  return new Property("coverageArea", "Reference(Location)", "The geographic region in which a health insurance plan's benefits apply.", 0, 1, coverageArea);
+          case 1843485230: /*network*/  return new Property("network", "Reference(Organization)", "Reference to the network that providing the type of coverage.", 0, java.lang.Integer.MAX_VALUE, network);
+          case 878344405: /*generalCost*/  return new Property("generalCost", "", "Overall costs associated with the plan.", 0, java.lang.Integer.MAX_VALUE, generalCost);
+          case -1205656545: /*specificCost*/  return new Property("specificCost", "", "Costs associated with the coverage provided by the product.", 0, java.lang.Integer.MAX_VALUE, specificCost);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1532328299: /*coverageArea*/ return this.coverageArea == null ? new Base[0] : new Base[] {this.coverageArea}; // Reference
+        case 1843485230: /*network*/ return this.network == null ? new Base[0] : this.network.toArray(new Base[this.network.size()]); // Reference
+        case 878344405: /*generalCost*/ return this.generalCost == null ? new Base[0] : this.generalCost.toArray(new Base[this.generalCost.size()]); // ProductPlanPlanGeneralCostComponent
+        case -1205656545: /*specificCost*/ return this.specificCost == null ? new Base[0] : this.specificCost.toArray(new Base[this.specificCost.size()]); // ProductPlanPlanSpecificCostComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          return value;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1532328299: // coverageArea
+          this.coverageArea = castToReference(value); // Reference
+          return value;
+        case 1843485230: // network
+          this.getNetwork().add(castToReference(value)); // Reference
+          return value;
+        case 878344405: // generalCost
+          this.getGeneralCost().add((ProductPlanPlanGeneralCostComponent) value); // ProductPlanPlanGeneralCostComponent
+          return value;
+        case -1205656545: // specificCost
+          this.getSpecificCost().add((ProductPlanPlanSpecificCostComponent) value); // ProductPlanPlanSpecificCostComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("identifier")) {
+          this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("coverageArea")) {
+          this.coverageArea = castToReference(value); // Reference
+        } else if (name.equals("network")) {
+          this.getNetwork().add(castToReference(value));
+        } else if (name.equals("generalCost")) {
+          this.getGeneralCost().add((ProductPlanPlanGeneralCostComponent) value);
+        } else if (name.equals("specificCost")) {
+          this.getSpecificCost().add((ProductPlanPlanSpecificCostComponent) value);
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855:  return addIdentifier(); 
+        case 3575610:  return getType(); 
+        case -1532328299:  return getCoverageArea(); 
+        case 1843485230:  return addNetwork(); 
+        case 878344405:  return addGeneralCost(); 
+        case -1205656545:  return addSpecificCost(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -1532328299: /*coverageArea*/ return new String[] {"Reference"};
+        case 1843485230: /*network*/ return new String[] {"Reference"};
+        case 878344405: /*generalCost*/ return new String[] {};
+        case -1205656545: /*specificCost*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("coverageArea")) {
+          this.coverageArea = new Reference();
+          return this.coverageArea;
+        }
+        else if (name.equals("network")) {
+          return addNetwork();
+        }
+        else if (name.equals("generalCost")) {
+          return addGeneralCost();
+        }
+        else if (name.equals("specificCost")) {
+          return addSpecificCost();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ProductPlanPlanComponent copy() {
+        ProductPlanPlanComponent dst = new ProductPlanPlanComponent();
+        copyValues(dst);
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
+        dst.type = type == null ? null : type.copy();
+        dst.coverageArea = coverageArea == null ? null : coverageArea.copy();
+        if (network != null) {
+          dst.network = new ArrayList<Reference>();
+          for (Reference i : network)
+            dst.network.add(i.copy());
+        };
+        if (generalCost != null) {
+          dst.generalCost = new ArrayList<ProductPlanPlanGeneralCostComponent>();
+          for (ProductPlanPlanGeneralCostComponent i : generalCost)
+            dst.generalCost.add(i.copy());
+        };
+        if (specificCost != null) {
+          dst.specificCost = new ArrayList<ProductPlanPlanSpecificCostComponent>();
+          for (ProductPlanPlanSpecificCostComponent i : specificCost)
+            dst.specificCost.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof ProductPlanPlanComponent))
+          return false;
+        ProductPlanPlanComponent o = (ProductPlanPlanComponent) other_;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(coverageArea, o.coverageArea, true)
+           && compareDeep(network, o.network, true) && compareDeep(generalCost, o.generalCost, true) && compareDeep(specificCost, o.specificCost, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof ProductPlanPlanComponent))
+          return false;
+        ProductPlanPlanComponent o = (ProductPlanPlanComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, coverageArea
+          , network, generalCost, specificCost);
+      }
+
+  public String fhirType() {
+    return "ProductPlan.plan";
+
+  }
+
+  }
+
+    @Block()
+    public static class ProductPlanPlanGeneralCostComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Type of cost.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Type of cost", formalDefinition="Type of cost." )
+        protected CodeableConcept type;
+
+        /**
+         * Number of participants enrolled in the plan.
+         */
+        @Child(name = "groupSize", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Number of enrollees", formalDefinition="Number of participants enrolled in the plan." )
+        protected PositiveIntType groupSize;
+
+        /**
+         * Value of the cost.
+         */
+        @Child(name = "cost", type = {Money.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Cost value", formalDefinition="Value of the cost." )
+        protected Money cost;
+
+        /**
+         * Additional information about the general costs associated with this plan.
+         */
+        @Child(name = "comment", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Additional cost information", formalDefinition="Additional information about the general costs associated with this plan." )
+        protected StringType comment;
+
+        private static final long serialVersionUID = 1563949866L;
+
+    /**
+     * Constructor
+     */
+      public ProductPlanPlanGeneralCostComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #type} (Type of cost.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanGeneralCostComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Type of cost.)
+         */
+        public ProductPlanPlanGeneralCostComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #groupSize} (Number of participants enrolled in the plan.). This is the underlying object with id, value and extensions. The accessor "getGroupSize" gives direct access to the value
+         */
+        public PositiveIntType getGroupSizeElement() { 
+          if (this.groupSize == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanGeneralCostComponent.groupSize");
+            else if (Configuration.doAutoCreate())
+              this.groupSize = new PositiveIntType(); // bb
+          return this.groupSize;
+        }
+
+        public boolean hasGroupSizeElement() { 
+          return this.groupSize != null && !this.groupSize.isEmpty();
+        }
+
+        public boolean hasGroupSize() { 
+          return this.groupSize != null && !this.groupSize.isEmpty();
+        }
+
+        /**
+         * @param value {@link #groupSize} (Number of participants enrolled in the plan.). This is the underlying object with id, value and extensions. The accessor "getGroupSize" gives direct access to the value
+         */
+        public ProductPlanPlanGeneralCostComponent setGroupSizeElement(PositiveIntType value) { 
+          this.groupSize = value;
+          return this;
+        }
+
+        /**
+         * @return Number of participants enrolled in the plan.
+         */
+        public int getGroupSize() { 
+          return this.groupSize == null || this.groupSize.isEmpty() ? 0 : this.groupSize.getValue();
+        }
+
+        /**
+         * @param value Number of participants enrolled in the plan.
+         */
+        public ProductPlanPlanGeneralCostComponent setGroupSize(int value) { 
+            if (this.groupSize == null)
+              this.groupSize = new PositiveIntType();
+            this.groupSize.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #cost} (Value of the cost.)
+         */
+        public Money getCost() { 
+          if (this.cost == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanGeneralCostComponent.cost");
+            else if (Configuration.doAutoCreate())
+              this.cost = new Money(); // cc
+          return this.cost;
+        }
+
+        public boolean hasCost() { 
+          return this.cost != null && !this.cost.isEmpty();
+        }
+
+        /**
+         * @param value {@link #cost} (Value of the cost.)
+         */
+        public ProductPlanPlanGeneralCostComponent setCost(Money value) { 
+          this.cost = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #comment} (Additional information about the general costs associated with this plan.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public StringType getCommentElement() { 
+          if (this.comment == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanGeneralCostComponent.comment");
+            else if (Configuration.doAutoCreate())
+              this.comment = new StringType(); // bb
+          return this.comment;
+        }
+
+        public boolean hasCommentElement() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        public boolean hasComment() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        /**
+         * @param value {@link #comment} (Additional information about the general costs associated with this plan.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public ProductPlanPlanGeneralCostComponent setCommentElement(StringType value) { 
+          this.comment = value;
+          return this;
+        }
+
+        /**
+         * @return Additional information about the general costs associated with this plan.
+         */
+        public String getComment() { 
+          return this.comment == null ? null : this.comment.getValue();
+        }
+
+        /**
+         * @param value Additional information about the general costs associated with this plan.
+         */
+        public ProductPlanPlanGeneralCostComponent setComment(String value) { 
+          if (Utilities.noString(value))
+            this.comment = null;
+          else {
+            if (this.comment == null)
+              this.comment = new StringType();
+            this.comment.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "Type of cost.", 0, 1, type));
+          children.add(new Property("groupSize", "positiveInt", "Number of participants enrolled in the plan.", 0, 1, groupSize));
+          children.add(new Property("cost", "Money", "Value of the cost.", 0, 1, cost));
+          children.add(new Property("comment", "string", "Additional information about the general costs associated with this plan.", 0, 1, comment));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of cost.", 0, 1, type);
+          case -1483017440: /*groupSize*/  return new Property("groupSize", "positiveInt", "Number of participants enrolled in the plan.", 0, 1, groupSize);
+          case 3059661: /*cost*/  return new Property("cost", "Money", "Value of the cost.", 0, 1, cost);
+          case 950398559: /*comment*/  return new Property("comment", "string", "Additional information about the general costs associated with this plan.", 0, 1, comment);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1483017440: /*groupSize*/ return this.groupSize == null ? new Base[0] : new Base[] {this.groupSize}; // PositiveIntType
+        case 3059661: /*cost*/ return this.cost == null ? new Base[0] : new Base[] {this.cost}; // Money
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1483017440: // groupSize
+          this.groupSize = castToPositiveInt(value); // PositiveIntType
+          return value;
+        case 3059661: // cost
+          this.cost = castToMoney(value); // Money
+          return value;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("groupSize")) {
+          this.groupSize = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("cost")) {
+          this.cost = castToMoney(value); // Money
+        } else if (name.equals("comment")) {
+          this.comment = castToString(value); // StringType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getType(); 
+        case -1483017440:  return getGroupSizeElement();
+        case 3059661:  return getCost(); 
+        case 950398559:  return getCommentElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -1483017440: /*groupSize*/ return new String[] {"positiveInt"};
+        case 3059661: /*cost*/ return new String[] {"Money"};
+        case 950398559: /*comment*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("groupSize")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProductPlan.groupSize");
+        }
+        else if (name.equals("cost")) {
+          this.cost = new Money();
+          return this.cost;
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ProductPlan.comment");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ProductPlanPlanGeneralCostComponent copy() {
+        ProductPlanPlanGeneralCostComponent dst = new ProductPlanPlanGeneralCostComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.groupSize = groupSize == null ? null : groupSize.copy();
+        dst.cost = cost == null ? null : cost.copy();
+        dst.comment = comment == null ? null : comment.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof ProductPlanPlanGeneralCostComponent))
+          return false;
+        ProductPlanPlanGeneralCostComponent o = (ProductPlanPlanGeneralCostComponent) other_;
+        return compareDeep(type, o.type, true) && compareDeep(groupSize, o.groupSize, true) && compareDeep(cost, o.cost, true)
+           && compareDeep(comment, o.comment, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof ProductPlanPlanGeneralCostComponent))
+          return false;
+        ProductPlanPlanGeneralCostComponent o = (ProductPlanPlanGeneralCostComponent) other_;
+        return compareValues(groupSize, o.groupSize, true) && compareValues(comment, o.comment, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, groupSize, cost, comment
+          );
+      }
+
+  public String fhirType() {
+    return "ProductPlan.plan.generalCost";
+
+  }
+
+  }
+
+    @Block()
+    public static class ProductPlanPlanSpecificCostComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).
+         */
+        @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="General category of benefit", formalDefinition="General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health)." )
+        protected CodeableConcept category;
+
+        /**
+         * List of the specific benefits under this category of benefit.
+         */
+        @Child(name = "benefit", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Benefits list", formalDefinition="List of the specific benefits under this category of benefit." )
+        protected List<ProductPlanPlanSpecificCostBenefitComponent> benefit;
+
+        private static final long serialVersionUID = 1629436006L;
+
+    /**
+     * Constructor
+     */
+      public ProductPlanPlanSpecificCostComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #category} (General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).)
+         */
+        public CodeableConcept getCategory() { 
+          if (this.category == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanSpecificCostComponent.category");
+            else if (Configuration.doAutoCreate())
+              this.category = new CodeableConcept(); // cc
+          return this.category;
+        }
+
+        public boolean hasCategory() { 
+          return this.category != null && !this.category.isEmpty();
+        }
+
+        /**
+         * @param value {@link #category} (General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).)
+         */
+        public ProductPlanPlanSpecificCostComponent setCategory(CodeableConcept value) { 
+          this.category = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #benefit} (List of the specific benefits under this category of benefit.)
+         */
+        public List<ProductPlanPlanSpecificCostBenefitComponent> getBenefit() { 
+          if (this.benefit == null)
+            this.benefit = new ArrayList<ProductPlanPlanSpecificCostBenefitComponent>();
+          return this.benefit;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public ProductPlanPlanSpecificCostComponent setBenefit(List<ProductPlanPlanSpecificCostBenefitComponent> theBenefit) { 
+          this.benefit = theBenefit;
+          return this;
+        }
+
+        public boolean hasBenefit() { 
+          if (this.benefit == null)
+            return false;
+          for (ProductPlanPlanSpecificCostBenefitComponent item : this.benefit)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public ProductPlanPlanSpecificCostBenefitComponent addBenefit() { //3
+          ProductPlanPlanSpecificCostBenefitComponent t = new ProductPlanPlanSpecificCostBenefitComponent();
+          if (this.benefit == null)
+            this.benefit = new ArrayList<ProductPlanPlanSpecificCostBenefitComponent>();
+          this.benefit.add(t);
+          return t;
+        }
+
+        public ProductPlanPlanSpecificCostComponent addBenefit(ProductPlanPlanSpecificCostBenefitComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.benefit == null)
+            this.benefit = new ArrayList<ProductPlanPlanSpecificCostBenefitComponent>();
+          this.benefit.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #benefit}, creating it if it does not already exist
+         */
+        public ProductPlanPlanSpecificCostBenefitComponent getBenefitFirstRep() { 
+          if (getBenefit().isEmpty()) {
+            addBenefit();
+          }
+          return getBenefit().get(0);
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("category", "CodeableConcept", "General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).", 0, 1, category));
+          children.add(new Property("benefit", "", "List of the specific benefits under this category of benefit.", 0, java.lang.Integer.MAX_VALUE, benefit));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).", 0, 1, category);
+          case -222710633: /*benefit*/  return new Property("benefit", "", "List of the specific benefits under this category of benefit.", 0, java.lang.Integer.MAX_VALUE, benefit);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case -222710633: /*benefit*/ return this.benefit == null ? new Base[0] : this.benefit.toArray(new Base[this.benefit.size()]); // ProductPlanPlanSpecificCostBenefitComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -222710633: // benefit
+          this.getBenefit().add((ProductPlanPlanSpecificCostBenefitComponent) value); // ProductPlanPlanSpecificCostBenefitComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("category")) {
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("benefit")) {
+          this.getBenefit().add((ProductPlanPlanSpecificCostBenefitComponent) value);
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102:  return getCategory(); 
+        case -222710633:  return addBenefit(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case -222710633: /*benefit*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
+        }
+        else if (name.equals("benefit")) {
+          return addBenefit();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ProductPlanPlanSpecificCostComponent copy() {
+        ProductPlanPlanSpecificCostComponent dst = new ProductPlanPlanSpecificCostComponent();
+        copyValues(dst);
+        dst.category = category == null ? null : category.copy();
+        if (benefit != null) {
+          dst.benefit = new ArrayList<ProductPlanPlanSpecificCostBenefitComponent>();
+          for (ProductPlanPlanSpecificCostBenefitComponent i : benefit)
+            dst.benefit.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof ProductPlanPlanSpecificCostComponent))
+          return false;
+        ProductPlanPlanSpecificCostComponent o = (ProductPlanPlanSpecificCostComponent) other_;
+        return compareDeep(category, o.category, true) && compareDeep(benefit, o.benefit, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof ProductPlanPlanSpecificCostComponent))
+          return false;
+        ProductPlanPlanSpecificCostComponent o = (ProductPlanPlanSpecificCostComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, benefit);
+      }
+
+  public String fhirType() {
+    return "ProductPlan.plan.specificCost";
+
+  }
+
+  }
+
+    @Block()
+    public static class ProductPlanPlanSpecificCostBenefitComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Type of specific benefit", formalDefinition="Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care)." )
+        protected CodeableConcept type;
+
+        /**
+         * Additional information about the specific benefit to qualify additional costs.
+         */
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Additional information", formalDefinition="Additional information about the specific benefit to qualify additional costs." )
+        protected StringType description;
+
+        /**
+         * List of the costs associated with a specific benefit.
+         */
+        @Child(name = "cost", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="List of the costs", formalDefinition="List of the costs associated with a specific benefit." )
+        protected List<ProductPlanPlanSpecificCostBenefitCostComponent> cost;
+
+        private static final long serialVersionUID = 1239135146L;
+
+    /**
+     * Constructor
+     */
+      public ProductPlanPlanSpecificCostBenefitComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ProductPlanPlanSpecificCostBenefitComponent(CodeableConcept type) {
+        super();
+        this.type = type;
+      }
+
+        /**
+         * @return {@link #type} (Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanSpecificCostBenefitComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).)
+         */
+        public ProductPlanPlanSpecificCostBenefitComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #description} (Additional information about the specific benefit to qualify additional costs.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public StringType getDescriptionElement() { 
           if (this.description == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanPlanComponent.description");
+              throw new Error("Attempt to auto-create ProductPlanPlanSpecificCostBenefitComponent.description");
             else if (Configuration.doAutoCreate())
               this.description = new StringType(); // bb
           return this.description;
@@ -1136,24 +2543,24 @@ public class ProductPlan extends DomainResource {
         }
 
         /**
-         * @param value {@link #description} (Additional descriptive content about the plan.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @param value {@link #description} (Additional information about the specific benefit to qualify additional costs.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
-        public ProductPlanPlanComponent setDescriptionElement(StringType value) { 
+        public ProductPlanPlanSpecificCostBenefitComponent setDescriptionElement(StringType value) { 
           this.description = value;
           return this;
         }
 
         /**
-         * @return Additional descriptive content about the plan.
+         * @return Additional information about the specific benefit to qualify additional costs.
          */
         public String getDescription() { 
           return this.description == null ? null : this.description.getValue();
         }
 
         /**
-         * @param value Additional descriptive content about the plan.
+         * @param value Additional information about the specific benefit to qualify additional costs.
          */
-        public ProductPlanPlanComponent setDescription(String value) { 
+        public ProductPlanPlanSpecificCostBenefitComponent setDescription(String value) { 
           if (Utilities.noString(value))
             this.description = null;
           else {
@@ -1165,97 +2572,71 @@ public class ProductPlan extends DomainResource {
         }
 
         /**
-         * @return {@link #premium} (Plan premium.)
+         * @return {@link #cost} (List of the costs associated with a specific benefit.)
          */
-        public Money getPremium() { 
-          if (this.premium == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanPlanComponent.premium");
-            else if (Configuration.doAutoCreate())
-              this.premium = new Money(); // cc
-          return this.premium;
-        }
-
-        public boolean hasPremium() { 
-          return this.premium != null && !this.premium.isEmpty();
-        }
-
-        /**
-         * @param value {@link #premium} (Plan premium.)
-         */
-        public ProductPlanPlanComponent setPremium(Money value) { 
-          this.premium = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #category} (List of the costs associated with plan benefits.)
-         */
-        public List<ProductPlanPlanCategoryComponent> getCategory() { 
-          if (this.category == null)
-            this.category = new ArrayList<ProductPlanPlanCategoryComponent>();
-          return this.category;
+        public List<ProductPlanPlanSpecificCostBenefitCostComponent> getCost() { 
+          if (this.cost == null)
+            this.cost = new ArrayList<ProductPlanPlanSpecificCostBenefitCostComponent>();
+          return this.cost;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ProductPlanPlanComponent setCategory(List<ProductPlanPlanCategoryComponent> theCategory) { 
-          this.category = theCategory;
+        public ProductPlanPlanSpecificCostBenefitComponent setCost(List<ProductPlanPlanSpecificCostBenefitCostComponent> theCost) { 
+          this.cost = theCost;
           return this;
         }
 
-        public boolean hasCategory() { 
-          if (this.category == null)
+        public boolean hasCost() { 
+          if (this.cost == null)
             return false;
-          for (ProductPlanPlanCategoryComponent item : this.category)
+          for (ProductPlanPlanSpecificCostBenefitCostComponent item : this.cost)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public ProductPlanPlanCategoryComponent addCategory() { //3
-          ProductPlanPlanCategoryComponent t = new ProductPlanPlanCategoryComponent();
-          if (this.category == null)
-            this.category = new ArrayList<ProductPlanPlanCategoryComponent>();
-          this.category.add(t);
+        public ProductPlanPlanSpecificCostBenefitCostComponent addCost() { //3
+          ProductPlanPlanSpecificCostBenefitCostComponent t = new ProductPlanPlanSpecificCostBenefitCostComponent();
+          if (this.cost == null)
+            this.cost = new ArrayList<ProductPlanPlanSpecificCostBenefitCostComponent>();
+          this.cost.add(t);
           return t;
         }
 
-        public ProductPlanPlanComponent addCategory(ProductPlanPlanCategoryComponent t) { //3
+        public ProductPlanPlanSpecificCostBenefitComponent addCost(ProductPlanPlanSpecificCostBenefitCostComponent t) { //3
           if (t == null)
             return this;
-          if (this.category == null)
-            this.category = new ArrayList<ProductPlanPlanCategoryComponent>();
-          this.category.add(t);
+          if (this.cost == null)
+            this.cost = new ArrayList<ProductPlanPlanSpecificCostBenefitCostComponent>();
+          this.cost.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #cost}, creating it if it does not already exist
          */
-        public ProductPlanPlanCategoryComponent getCategoryFirstRep() { 
-          if (getCategory().isEmpty()) {
-            addCategory();
+        public ProductPlanPlanSpecificCostBenefitCostComponent getCostFirstRep() { 
+          if (getCost().isEmpty()) {
+            addCost();
           }
-          return getCategory().get(0);
+          return getCost().get(0);
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("type", "CodeableConcept", "Type of plan (Platinum; Gold; Silver; Bronze; High Deductable; Low Deductable).", 0, 1, type));
-          children.add(new Property("description", "string", "Additional descriptive content about the plan.", 0, 1, description));
-          children.add(new Property("premium", "Money", "Plan premium.", 0, 1, premium));
-          children.add(new Property("category", "", "List of the costs associated with plan benefits.", 0, java.lang.Integer.MAX_VALUE, category));
+          children.add(new Property("type", "CodeableConcept", "Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).", 0, 1, type));
+          children.add(new Property("description", "string", "Additional information about the specific benefit to qualify additional costs.", 0, 1, description));
+          children.add(new Property("cost", "", "List of the costs associated with a specific benefit.", 0, java.lang.Integer.MAX_VALUE, cost));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of plan (Platinum; Gold; Silver; Bronze; High Deductable; Low Deductable).", 0, 1, type);
-          case -1724546052: /*description*/  return new Property("description", "string", "Additional descriptive content about the plan.", 0, 1, description);
-          case -318452137: /*premium*/  return new Property("premium", "Money", "Plan premium.", 0, 1, premium);
-          case 50511102: /*category*/  return new Property("category", "", "List of the costs associated with plan benefits.", 0, java.lang.Integer.MAX_VALUE, category);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).", 0, 1, type);
+          case -1724546052: /*description*/  return new Property("description", "string", "Additional information about the specific benefit to qualify additional costs.", 0, 1, description);
+          case 3059661: /*cost*/  return new Property("cost", "", "List of the costs associated with a specific benefit.", 0, java.lang.Integer.MAX_VALUE, cost);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1266,8 +2647,7 @@ public class ProductPlan extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
-        case -318452137: /*premium*/ return this.premium == null ? new Base[0] : new Base[] {this.premium}; // Money
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // ProductPlanPlanCategoryComponent
+        case 3059661: /*cost*/ return this.cost == null ? new Base[0] : this.cost.toArray(new Base[this.cost.size()]); // ProductPlanPlanSpecificCostBenefitCostComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1282,11 +2662,8 @@ public class ProductPlan extends DomainResource {
         case -1724546052: // description
           this.description = castToString(value); // StringType
           return value;
-        case -318452137: // premium
-          this.premium = castToMoney(value); // Money
-          return value;
-        case 50511102: // category
-          this.getCategory().add((ProductPlanPlanCategoryComponent) value); // ProductPlanPlanCategoryComponent
+        case 3059661: // cost
+          this.getCost().add((ProductPlanPlanSpecificCostBenefitCostComponent) value); // ProductPlanPlanSpecificCostBenefitCostComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1299,10 +2676,8 @@ public class ProductPlan extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
-        } else if (name.equals("premium")) {
-          this.premium = castToMoney(value); // Money
-        } else if (name.equals("category")) {
-          this.getCategory().add((ProductPlanPlanCategoryComponent) value);
+        } else if (name.equals("cost")) {
+          this.getCost().add((ProductPlanPlanSpecificCostBenefitCostComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1313,8 +2688,7 @@ public class ProductPlan extends DomainResource {
         switch (hash) {
         case 3575610:  return getType(); 
         case -1724546052:  return getDescriptionElement();
-        case -318452137:  return getPremium(); 
-        case 50511102:  return addCategory(); 
+        case 3059661:  return addCost(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1325,8 +2699,7 @@ public class ProductPlan extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -1724546052: /*description*/ return new String[] {"string"};
-        case -318452137: /*premium*/ return new String[] {"Money"};
-        case 50511102: /*category*/ return new String[] {};
+        case 3059661: /*cost*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1341,480 +2714,6 @@ public class ProductPlan extends DomainResource {
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type ProductPlan.description");
         }
-        else if (name.equals("premium")) {
-          this.premium = new Money();
-          return this.premium;
-        }
-        else if (name.equals("category")) {
-          return addCategory();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ProductPlanPlanComponent copy() {
-        ProductPlanPlanComponent dst = new ProductPlanPlanComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.description = description == null ? null : description.copy();
-        dst.premium = premium == null ? null : premium.copy();
-        if (category != null) {
-          dst.category = new ArrayList<ProductPlanPlanCategoryComponent>();
-          for (ProductPlanPlanCategoryComponent i : category)
-            dst.category.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ProductPlanPlanComponent))
-          return false;
-        ProductPlanPlanComponent o = (ProductPlanPlanComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(description, o.description, true) && compareDeep(premium, o.premium, true)
-           && compareDeep(category, o.category, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ProductPlanPlanComponent))
-          return false;
-        ProductPlanPlanComponent o = (ProductPlanPlanComponent) other_;
-        return compareValues(description, o.description, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, description, premium
-          , category);
-      }
-
-  public String fhirType() {
-    return "ProductPlan.plan";
-
-  }
-
-  }
-
-    @Block()
-    public static class ProductPlanPlanCategoryComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).
-         */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health)", formalDefinition="General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health)." )
-        protected CodeableConcept code;
-
-        /**
-         * List of the specific benefits under this category of benefit.
-         */
-        @Child(name = "benefit", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="List of the specific benefits under this category of benefit", formalDefinition="List of the specific benefits under this category of benefit." )
-        protected List<ProductPlanPlanCategoryBenefitComponent> benefit;
-
-        private static final long serialVersionUID = -1101029706L;
-
-    /**
-     * Constructor
-     */
-      public ProductPlanPlanCategoryComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #code} (General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).)
-         */
-        public CodeableConcept getCode() { 
-          if (this.code == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanPlanCategoryComponent.code");
-            else if (Configuration.doAutoCreate())
-              this.code = new CodeableConcept(); // cc
-          return this.code;
-        }
-
-        public boolean hasCode() { 
-          return this.code != null && !this.code.isEmpty();
-        }
-
-        /**
-         * @param value {@link #code} (General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).)
-         */
-        public ProductPlanPlanCategoryComponent setCode(CodeableConcept value) { 
-          this.code = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #benefit} (List of the specific benefits under this category of benefit.)
-         */
-        public List<ProductPlanPlanCategoryBenefitComponent> getBenefit() { 
-          if (this.benefit == null)
-            this.benefit = new ArrayList<ProductPlanPlanCategoryBenefitComponent>();
-          return this.benefit;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ProductPlanPlanCategoryComponent setBenefit(List<ProductPlanPlanCategoryBenefitComponent> theBenefit) { 
-          this.benefit = theBenefit;
-          return this;
-        }
-
-        public boolean hasBenefit() { 
-          if (this.benefit == null)
-            return false;
-          for (ProductPlanPlanCategoryBenefitComponent item : this.benefit)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ProductPlanPlanCategoryBenefitComponent addBenefit() { //3
-          ProductPlanPlanCategoryBenefitComponent t = new ProductPlanPlanCategoryBenefitComponent();
-          if (this.benefit == null)
-            this.benefit = new ArrayList<ProductPlanPlanCategoryBenefitComponent>();
-          this.benefit.add(t);
-          return t;
-        }
-
-        public ProductPlanPlanCategoryComponent addBenefit(ProductPlanPlanCategoryBenefitComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.benefit == null)
-            this.benefit = new ArrayList<ProductPlanPlanCategoryBenefitComponent>();
-          this.benefit.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #benefit}, creating it if it does not already exist
-         */
-        public ProductPlanPlanCategoryBenefitComponent getBenefitFirstRep() { 
-          if (getBenefit().isEmpty()) {
-            addBenefit();
-          }
-          return getBenefit().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("code", "CodeableConcept", "General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).", 0, 1, code));
-          children.add(new Property("benefit", "", "List of the specific benefits under this category of benefit.", 0, java.lang.Integer.MAX_VALUE, benefit));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "General category of benefit (Medical; Dental; Vision; Drug; Mental Health; Substance Abuse; Hospice, Home Health).", 0, 1, code);
-          case -222710633: /*benefit*/  return new Property("benefit", "", "List of the specific benefits under this category of benefit.", 0, java.lang.Integer.MAX_VALUE, benefit);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
-        case -222710633: /*benefit*/ return this.benefit == null ? new Base[0] : this.benefit.toArray(new Base[this.benefit.size()]); // ProductPlanPlanCategoryBenefitComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3059181: // code
-          this.code = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -222710633: // benefit
-          this.getBenefit().add((ProductPlanPlanCategoryBenefitComponent) value); // ProductPlanPlanCategoryBenefitComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("code")) {
-          this.code = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("benefit")) {
-          this.getBenefit().add((ProductPlanPlanCategoryBenefitComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3059181:  return getCode(); 
-        case -222710633:  return addBenefit(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
-        case -222710633: /*benefit*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("code")) {
-          this.code = new CodeableConcept();
-          return this.code;
-        }
-        else if (name.equals("benefit")) {
-          return addBenefit();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ProductPlanPlanCategoryComponent copy() {
-        ProductPlanPlanCategoryComponent dst = new ProductPlanPlanCategoryComponent();
-        copyValues(dst);
-        dst.code = code == null ? null : code.copy();
-        if (benefit != null) {
-          dst.benefit = new ArrayList<ProductPlanPlanCategoryBenefitComponent>();
-          for (ProductPlanPlanCategoryBenefitComponent i : benefit)
-            dst.benefit.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ProductPlanPlanCategoryComponent))
-          return false;
-        ProductPlanPlanCategoryComponent o = (ProductPlanPlanCategoryComponent) other_;
-        return compareDeep(code, o.code, true) && compareDeep(benefit, o.benefit, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ProductPlanPlanCategoryComponent))
-          return false;
-        ProductPlanPlanCategoryComponent o = (ProductPlanPlanCategoryComponent) other_;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, benefit);
-      }
-
-  public String fhirType() {
-    return "ProductPlan.plan.category";
-
-  }
-
-  }
-
-    @Block()
-    public static class ProductPlanPlanCategoryBenefitComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).
-         */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care)", formalDefinition="Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care)." )
-        protected CodeableConcept type;
-
-        /**
-         * List of the costs associated with a specific benefit.
-         */
-        @Child(name = "cost", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="List of the costs associated with a specific benefit", formalDefinition="List of the costs associated with a specific benefit." )
-        protected List<ProductPlanPlanCategoryBenefitCostComponent> cost;
-
-        private static final long serialVersionUID = -1945596688L;
-
-    /**
-     * Constructor
-     */
-      public ProductPlanPlanCategoryBenefitComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ProductPlanPlanCategoryBenefitComponent(CodeableConcept type) {
-        super();
-        this.type = type;
-      }
-
-        /**
-         * @return {@link #type} (Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).)
-         */
-        public CodeableConcept getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanPlanCategoryBenefitComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).)
-         */
-        public ProductPlanPlanCategoryBenefitComponent setType(CodeableConcept value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #cost} (List of the costs associated with a specific benefit.)
-         */
-        public List<ProductPlanPlanCategoryBenefitCostComponent> getCost() { 
-          if (this.cost == null)
-            this.cost = new ArrayList<ProductPlanPlanCategoryBenefitCostComponent>();
-          return this.cost;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ProductPlanPlanCategoryBenefitComponent setCost(List<ProductPlanPlanCategoryBenefitCostComponent> theCost) { 
-          this.cost = theCost;
-          return this;
-        }
-
-        public boolean hasCost() { 
-          if (this.cost == null)
-            return false;
-          for (ProductPlanPlanCategoryBenefitCostComponent item : this.cost)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ProductPlanPlanCategoryBenefitCostComponent addCost() { //3
-          ProductPlanPlanCategoryBenefitCostComponent t = new ProductPlanPlanCategoryBenefitCostComponent();
-          if (this.cost == null)
-            this.cost = new ArrayList<ProductPlanPlanCategoryBenefitCostComponent>();
-          this.cost.add(t);
-          return t;
-        }
-
-        public ProductPlanPlanCategoryBenefitComponent addCost(ProductPlanPlanCategoryBenefitCostComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.cost == null)
-            this.cost = new ArrayList<ProductPlanPlanCategoryBenefitCostComponent>();
-          this.cost.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #cost}, creating it if it does not already exist
-         */
-        public ProductPlanPlanCategoryBenefitCostComponent getCostFirstRep() { 
-          if (getCost().isEmpty()) {
-            addCost();
-          }
-          return getCost().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("type", "CodeableConcept", "Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).", 0, 1, type));
-          children.add(new Property("cost", "", "List of the costs associated with a specific benefit.", 0, java.lang.Integer.MAX_VALUE, cost));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of specific benefit (preventative; primary care office visit; speciality office visit; hospitalization; emergency room; urgent care).", 0, 1, type);
-          case 3059661: /*cost*/  return new Property("cost", "", "List of the costs associated with a specific benefit.", 0, java.lang.Integer.MAX_VALUE, cost);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 3059661: /*cost*/ return this.cost == null ? new Base[0] : this.cost.toArray(new Base[this.cost.size()]); // ProductPlanPlanCategoryBenefitCostComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 3059661: // cost
-          this.getCost().add((ProductPlanPlanCategoryBenefitCostComponent) value); // ProductPlanPlanCategoryBenefitCostComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("cost")) {
-          this.getCost().add((ProductPlanPlanCategoryBenefitCostComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); 
-        case 3059661:  return addCost(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 3059661: /*cost*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
-        }
         else if (name.equals("cost")) {
           return addCost();
         }
@@ -1822,13 +2721,14 @@ public class ProductPlan extends DomainResource {
           return super.addChild(name);
       }
 
-      public ProductPlanPlanCategoryBenefitComponent copy() {
-        ProductPlanPlanCategoryBenefitComponent dst = new ProductPlanPlanCategoryBenefitComponent();
+      public ProductPlanPlanSpecificCostBenefitComponent copy() {
+        ProductPlanPlanSpecificCostBenefitComponent dst = new ProductPlanPlanSpecificCostBenefitComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
+        dst.description = description == null ? null : description.copy();
         if (cost != null) {
-          dst.cost = new ArrayList<ProductPlanPlanCategoryBenefitCostComponent>();
-          for (ProductPlanPlanCategoryBenefitCostComponent i : cost)
+          dst.cost = new ArrayList<ProductPlanPlanSpecificCostBenefitCostComponent>();
+          for (ProductPlanPlanSpecificCostBenefitCostComponent i : cost)
             dst.cost.add(i.copy());
         };
         return dst;
@@ -1838,76 +2738,79 @@ public class ProductPlan extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof ProductPlanPlanCategoryBenefitComponent))
+        if (!(other_ instanceof ProductPlanPlanSpecificCostBenefitComponent))
           return false;
-        ProductPlanPlanCategoryBenefitComponent o = (ProductPlanPlanCategoryBenefitComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(cost, o.cost, true);
+        ProductPlanPlanSpecificCostBenefitComponent o = (ProductPlanPlanSpecificCostBenefitComponent) other_;
+        return compareDeep(type, o.type, true) && compareDeep(description, o.description, true) && compareDeep(cost, o.cost, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof ProductPlanPlanCategoryBenefitComponent))
+        if (!(other_ instanceof ProductPlanPlanSpecificCostBenefitComponent))
           return false;
-        ProductPlanPlanCategoryBenefitComponent o = (ProductPlanPlanCategoryBenefitComponent) other_;
-        return true;
+        ProductPlanPlanSpecificCostBenefitComponent o = (ProductPlanPlanSpecificCostBenefitComponent) other_;
+        return compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, cost);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, description, cost
+          );
       }
 
   public String fhirType() {
-    return "ProductPlan.plan.category.benefit";
+    return "ProductPlan.plan.specificCost.benefit";
 
   }
 
   }
 
     @Block()
-    public static class ProductPlanPlanCategoryBenefitCostComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ProductPlanPlanSpecificCostBenefitCostComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Type of cost (copay; individual cap; family cap; coinsurance; deductible).
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Type of cost (copay; individual cap; family cap; coinsurance; deductible)", formalDefinition="Type of cost (copay; individual cap; family cap; coinsurance; deductible)." )
+        @Description(shortDefinition="Type of cost", formalDefinition="Type of cost (copay; individual cap; family cap; coinsurance; deductible)." )
         protected CodeableConcept type;
 
         /**
          * Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).
          */
-        @Child(name = "applicability", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other)", formalDefinition="Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other)." )
-        protected List<Coding> applicability;
+        @Child(name = "applicability", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="in-network | out-of-network | other", formalDefinition="Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/applicability")
+        protected Enumeration<BenefitCostApplicability> applicability;
 
         /**
          * Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).
          */
-        @Child(name = "qualifiers", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA)", formalDefinition="Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA)." )
-        protected List<StringType> qualifiers;
+        @Child(name = "qualifiers", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Additional information about the cost", formalDefinition="Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA)." )
+        protected List<CodeableConcept> qualifiers;
 
         /**
          * The actual cost value.
          */
-        @Child(name = "value", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {Money.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The actual cost value", formalDefinition="The actual cost value." )
-        protected Quantity value;
+        protected Money value;
 
-        private static final long serialVersionUID = -1047196778L;
+        private static final long serialVersionUID = -2009981593L;
 
     /**
      * Constructor
      */
-      public ProductPlanPlanCategoryBenefitCostComponent() {
+      public ProductPlanPlanSpecificCostBenefitCostComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public ProductPlanPlanCategoryBenefitCostComponent(CodeableConcept type) {
+      public ProductPlanPlanSpecificCostBenefitCostComponent(CodeableConcept type) {
         super();
         this.type = type;
       }
@@ -1918,7 +2821,7 @@ public class ProductPlan extends DomainResource {
         public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanPlanCategoryBenefitCostComponent.type");
+              throw new Error("Attempt to auto-create ProductPlanPlanSpecificCostBenefitCostComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new CodeableConcept(); // cc
           return this.type;
@@ -1931,77 +2834,73 @@ public class ProductPlan extends DomainResource {
         /**
          * @param value {@link #type} (Type of cost (copay; individual cap; family cap; coinsurance; deductible).)
          */
-        public ProductPlanPlanCategoryBenefitCostComponent setType(CodeableConcept value) { 
+        public ProductPlanPlanSpecificCostBenefitCostComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
 
         /**
-         * @return {@link #applicability} (Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).)
+         * @return {@link #applicability} (Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).). This is the underlying object with id, value and extensions. The accessor "getApplicability" gives direct access to the value
          */
-        public List<Coding> getApplicability() { 
+        public Enumeration<BenefitCostApplicability> getApplicabilityElement() { 
           if (this.applicability == null)
-            this.applicability = new ArrayList<Coding>();
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ProductPlanPlanSpecificCostBenefitCostComponent.applicability");
+            else if (Configuration.doAutoCreate())
+              this.applicability = new Enumeration<BenefitCostApplicability>(new BenefitCostApplicabilityEnumFactory()); // bb
           return this.applicability;
         }
 
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ProductPlanPlanCategoryBenefitCostComponent setApplicability(List<Coding> theApplicability) { 
-          this.applicability = theApplicability;
-          return this;
+        public boolean hasApplicabilityElement() { 
+          return this.applicability != null && !this.applicability.isEmpty();
         }
 
         public boolean hasApplicability() { 
-          if (this.applicability == null)
-            return false;
-          for (Coding item : this.applicability)
-            if (!item.isEmpty())
-              return true;
-          return false;
+          return this.applicability != null && !this.applicability.isEmpty();
         }
 
-        public Coding addApplicability() { //3
-          Coding t = new Coding();
-          if (this.applicability == null)
-            this.applicability = new ArrayList<Coding>();
-          this.applicability.add(t);
-          return t;
-        }
-
-        public ProductPlanPlanCategoryBenefitCostComponent addApplicability(Coding t) { //3
-          if (t == null)
-            return this;
-          if (this.applicability == null)
-            this.applicability = new ArrayList<Coding>();
-          this.applicability.add(t);
+        /**
+         * @param value {@link #applicability} (Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).). This is the underlying object with id, value and extensions. The accessor "getApplicability" gives direct access to the value
+         */
+        public ProductPlanPlanSpecificCostBenefitCostComponent setApplicabilityElement(Enumeration<BenefitCostApplicability> value) { 
+          this.applicability = value;
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #applicability}, creating it if it does not already exist
+         * @return Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).
          */
-        public Coding getApplicabilityFirstRep() { 
-          if (getApplicability().isEmpty()) {
-            addApplicability();
+        public BenefitCostApplicability getApplicability() { 
+          return this.applicability == null ? null : this.applicability.getValue();
+        }
+
+        /**
+         * @param value Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).
+         */
+        public ProductPlanPlanSpecificCostBenefitCostComponent setApplicability(BenefitCostApplicability value) { 
+          if (value == null)
+            this.applicability = null;
+          else {
+            if (this.applicability == null)
+              this.applicability = new Enumeration<BenefitCostApplicability>(new BenefitCostApplicabilityEnumFactory());
+            this.applicability.setValue(value);
           }
-          return getApplicability().get(0);
+          return this;
         }
 
         /**
          * @return {@link #qualifiers} (Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).)
          */
-        public List<StringType> getQualifiers() { 
+        public List<CodeableConcept> getQualifiers() { 
           if (this.qualifiers == null)
-            this.qualifiers = new ArrayList<StringType>();
+            this.qualifiers = new ArrayList<CodeableConcept>();
           return this.qualifiers;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ProductPlanPlanCategoryBenefitCostComponent setQualifiers(List<StringType> theQualifiers) { 
+        public ProductPlanPlanSpecificCostBenefitCostComponent setQualifiers(List<CodeableConcept> theQualifiers) { 
           this.qualifiers = theQualifiers;
           return this;
         }
@@ -2009,56 +2908,48 @@ public class ProductPlan extends DomainResource {
         public boolean hasQualifiers() { 
           if (this.qualifiers == null)
             return false;
-          for (StringType item : this.qualifiers)
+          for (CodeableConcept item : this.qualifiers)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        /**
-         * @return {@link #qualifiers} (Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).)
-         */
-        public StringType addQualifiersElement() {//2 
-          StringType t = new StringType();
+        public CodeableConcept addQualifiers() { //3
+          CodeableConcept t = new CodeableConcept();
           if (this.qualifiers == null)
-            this.qualifiers = new ArrayList<StringType>();
+            this.qualifiers = new ArrayList<CodeableConcept>();
           this.qualifiers.add(t);
           return t;
         }
 
-        /**
-         * @param value {@link #qualifiers} (Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).)
-         */
-        public ProductPlanPlanCategoryBenefitCostComponent addQualifiers(String value) { //1
-          StringType t = new StringType();
-          t.setValue(value);
+        public ProductPlanPlanSpecificCostBenefitCostComponent addQualifiers(CodeableConcept t) { //3
+          if (t == null)
+            return this;
           if (this.qualifiers == null)
-            this.qualifiers = new ArrayList<StringType>();
+            this.qualifiers = new ArrayList<CodeableConcept>();
           this.qualifiers.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #qualifiers} (Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).)
+         * @return The first repetition of repeating field {@link #qualifiers}, creating it if it does not already exist
          */
-        public boolean hasQualifiers(String value) { 
-          if (this.qualifiers == null)
-            return false;
-          for (StringType v : this.qualifiers)
-            if (v.getValue().equals(value)) // string
-              return true;
-          return false;
+        public CodeableConcept getQualifiersFirstRep() { 
+          if (getQualifiers().isEmpty()) {
+            addQualifiers();
+          }
+          return getQualifiers().get(0);
         }
 
         /**
          * @return {@link #value} (The actual cost value.)
          */
-        public Quantity getValue() { 
+        public Money getValue() { 
           if (this.value == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProductPlanPlanCategoryBenefitCostComponent.value");
+              throw new Error("Attempt to auto-create ProductPlanPlanSpecificCostBenefitCostComponent.value");
             else if (Configuration.doAutoCreate())
-              this.value = new Quantity(); // cc
+              this.value = new Money(); // cc
           return this.value;
         }
 
@@ -2069,7 +2960,7 @@ public class ProductPlan extends DomainResource {
         /**
          * @param value {@link #value} (The actual cost value.)
          */
-        public ProductPlanPlanCategoryBenefitCostComponent setValue(Quantity value) { 
+        public ProductPlanPlanSpecificCostBenefitCostComponent setValue(Money value) { 
           this.value = value;
           return this;
         }
@@ -2077,18 +2968,18 @@ public class ProductPlan extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Type of cost (copay; individual cap; family cap; coinsurance; deductible).", 0, 1, type));
-          children.add(new Property("applicability", "Coding", "Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).", 0, java.lang.Integer.MAX_VALUE, applicability));
-          children.add(new Property("qualifiers", "string", "Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).", 0, java.lang.Integer.MAX_VALUE, qualifiers));
-          children.add(new Property("value", "Quantity", "The actual cost value.", 0, 1, value));
+          children.add(new Property("applicability", "code", "Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).", 0, 1, applicability));
+          children.add(new Property("qualifiers", "CodeableConcept", "Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).", 0, java.lang.Integer.MAX_VALUE, qualifiers));
+          children.add(new Property("value", "Money", "The actual cost value.", 0, 1, value));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of cost (copay; individual cap; family cap; coinsurance; deductible).", 0, 1, type);
-          case -1526770491: /*applicability*/  return new Property("applicability", "Coding", "Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).", 0, java.lang.Integer.MAX_VALUE, applicability);
-          case -31447799: /*qualifiers*/  return new Property("qualifiers", "string", "Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).", 0, java.lang.Integer.MAX_VALUE, qualifiers);
-          case 111972721: /*value*/  return new Property("value", "Quantity", "The actual cost value.", 0, 1, value);
+          case -1526770491: /*applicability*/  return new Property("applicability", "code", "Whether the cost applies to in-network or out-of-network providers (in-network; out-of-network; other).", 0, 1, applicability);
+          case -31447799: /*qualifiers*/  return new Property("qualifiers", "CodeableConcept", "Additional information about the cost, such as information about funding sources (e.g. HSA, HRA, FSA, RRA).", 0, java.lang.Integer.MAX_VALUE, qualifiers);
+          case 111972721: /*value*/  return new Property("value", "Money", "The actual cost value.", 0, 1, value);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2098,9 +2989,9 @@ public class ProductPlan extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -1526770491: /*applicability*/ return this.applicability == null ? new Base[0] : this.applicability.toArray(new Base[this.applicability.size()]); // Coding
-        case -31447799: /*qualifiers*/ return this.qualifiers == null ? new Base[0] : this.qualifiers.toArray(new Base[this.qualifiers.size()]); // StringType
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Quantity
+        case -1526770491: /*applicability*/ return this.applicability == null ? new Base[0] : new Base[] {this.applicability}; // Enumeration<BenefitCostApplicability>
+        case -31447799: /*qualifiers*/ return this.qualifiers == null ? new Base[0] : this.qualifiers.toArray(new Base[this.qualifiers.size()]); // CodeableConcept
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Money
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2113,13 +3004,14 @@ public class ProductPlan extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1526770491: // applicability
-          this.getApplicability().add(castToCoding(value)); // Coding
+          value = new BenefitCostApplicabilityEnumFactory().fromType(castToCode(value));
+          this.applicability = (Enumeration) value; // Enumeration<BenefitCostApplicability>
           return value;
         case -31447799: // qualifiers
-          this.getQualifiers().add(castToString(value)); // StringType
+          this.getQualifiers().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 111972721: // value
-          this.value = castToQuantity(value); // Quantity
+          this.value = castToMoney(value); // Money
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2131,11 +3023,12 @@ public class ProductPlan extends DomainResource {
         if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("applicability")) {
-          this.getApplicability().add(castToCoding(value));
+          value = new BenefitCostApplicabilityEnumFactory().fromType(castToCode(value));
+          this.applicability = (Enumeration) value; // Enumeration<BenefitCostApplicability>
         } else if (name.equals("qualifiers")) {
-          this.getQualifiers().add(castToString(value));
+          this.getQualifiers().add(castToCodeableConcept(value));
         } else if (name.equals("value")) {
-          this.value = castToQuantity(value); // Quantity
+          this.value = castToMoney(value); // Money
         } else
           return super.setProperty(name, value);
         return value;
@@ -2145,8 +3038,8 @@ public class ProductPlan extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getType(); 
-        case -1526770491:  return addApplicability(); 
-        case -31447799:  return addQualifiersElement();
+        case -1526770491:  return getApplicabilityElement();
+        case -31447799:  return addQualifiers(); 
         case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2157,9 +3050,9 @@ public class ProductPlan extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case -1526770491: /*applicability*/ return new String[] {"Coding"};
-        case -31447799: /*qualifiers*/ return new String[] {"string"};
-        case 111972721: /*value*/ return new String[] {"Quantity"};
+        case -1526770491: /*applicability*/ return new String[] {"code"};
+        case -31447799: /*qualifiers*/ return new String[] {"CodeableConcept"};
+        case 111972721: /*value*/ return new String[] {"Money"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2172,31 +3065,27 @@ public class ProductPlan extends DomainResource {
           return this.type;
         }
         else if (name.equals("applicability")) {
-          return addApplicability();
+          throw new FHIRException("Cannot call addChild on a primitive type ProductPlan.applicability");
         }
         else if (name.equals("qualifiers")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ProductPlan.qualifiers");
+          return addQualifiers();
         }
         else if (name.equals("value")) {
-          this.value = new Quantity();
+          this.value = new Money();
           return this.value;
         }
         else
           return super.addChild(name);
       }
 
-      public ProductPlanPlanCategoryBenefitCostComponent copy() {
-        ProductPlanPlanCategoryBenefitCostComponent dst = new ProductPlanPlanCategoryBenefitCostComponent();
+      public ProductPlanPlanSpecificCostBenefitCostComponent copy() {
+        ProductPlanPlanSpecificCostBenefitCostComponent dst = new ProductPlanPlanSpecificCostBenefitCostComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        if (applicability != null) {
-          dst.applicability = new ArrayList<Coding>();
-          for (Coding i : applicability)
-            dst.applicability.add(i.copy());
-        };
+        dst.applicability = applicability == null ? null : applicability.copy();
         if (qualifiers != null) {
-          dst.qualifiers = new ArrayList<StringType>();
-          for (StringType i : qualifiers)
+          dst.qualifiers = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : qualifiers)
             dst.qualifiers.add(i.copy());
         };
         dst.value = value == null ? null : value.copy();
@@ -2207,9 +3096,9 @@ public class ProductPlan extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof ProductPlanPlanCategoryBenefitCostComponent))
+        if (!(other_ instanceof ProductPlanPlanSpecificCostBenefitCostComponent))
           return false;
-        ProductPlanPlanCategoryBenefitCostComponent o = (ProductPlanPlanCategoryBenefitCostComponent) other_;
+        ProductPlanPlanSpecificCostBenefitCostComponent o = (ProductPlanPlanSpecificCostBenefitCostComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(applicability, o.applicability, true) && compareDeep(qualifiers, o.qualifiers, true)
            && compareDeep(value, o.value, true);
       }
@@ -2218,10 +3107,10 @@ public class ProductPlan extends DomainResource {
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof ProductPlanPlanCategoryBenefitCostComponent))
+        if (!(other_ instanceof ProductPlanPlanSpecificCostBenefitCostComponent))
           return false;
-        ProductPlanPlanCategoryBenefitCostComponent o = (ProductPlanPlanCategoryBenefitCostComponent) other_;
-        return compareValues(qualifiers, o.qualifiers, true);
+        ProductPlanPlanSpecificCostBenefitCostComponent o = (ProductPlanPlanSpecificCostBenefitCostComponent) other_;
+        return compareValues(applicability, o.applicability, true);
       }
 
       public boolean isEmpty() {
@@ -2230,133 +3119,138 @@ public class ProductPlan extends DomainResource {
       }
 
   public String fhirType() {
-    return "ProductPlan.plan.category.benefit.cost";
+    return "ProductPlan.plan.specificCost.benefit.cost";
 
   }
 
   }
 
     /**
-     * Identifier for the product/plan that is used to identify it across multiple disparate systems.
+     * Business identifiers assigned to this health insurance product which remain constant as the resource is updated and propagates from server to server.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Identifies this product/plan  across multiple systems", formalDefinition="Identifier for the product/plan that is used to identify it across multiple disparate systems." )
+    @Description(shortDefinition="Business Identifier for Product", formalDefinition="Business identifiers assigned to this health insurance product which remain constant as the resource is updated and propagates from server to server." )
     protected List<Identifier> identifier;
 
     /**
-     * Whether the organization's record is still in active use.
+     * The current state of the health insurance product.
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="draft | active | retired | unknown", formalDefinition="Whether the organization's record is still in active use." )
+    @Description(shortDefinition="draft | active | retired | unknown", formalDefinition="The current state of the health insurance product." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/publication-status")
     protected Enumeration<PublicationStatus> status;
 
     /**
-     * The type of product/plan.
+     * The kind of health insurance product.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Kind of product/plan", formalDefinition="The type of product/plan." )
+    @Description(shortDefinition="Kind of product", formalDefinition="The kind of health insurance product." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/productplan-type")
     protected List<CodeableConcept> type;
 
     /**
-     * Official name of the product/plan (as designated by the owner).
+     * Official name of the health insurance product as designated by the owner.
      */
     @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Official name", formalDefinition="Official name of the product/plan (as designated by the owner)." )
+    @Description(shortDefinition="Official name", formalDefinition="Official name of the health insurance product as designated by the owner." )
     protected StringType name;
 
     /**
-     * A list of alternate names that the product/plan is known as, or was known as in the past.
+     * A list of alternate names that the product is known as, or was known as in the past.
      */
     @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of alternate names that the product/plan is known as, or was known as in the past", formalDefinition="A list of alternate names that the product/plan is known as, or was known as in the past." )
+    @Description(shortDefinition="Alternate names", formalDefinition="A list of alternate names that the product is known as, or was known as in the past." )
     protected List<StringType> alias;
 
     /**
-     * The period of time that the product is available.
+     * The period of time that the health insurance product is available.
      */
     @Child(name = "period", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The time period the product/plan is available", formalDefinition="The period of time that the product is available." )
+    @Description(shortDefinition="When the product is available", formalDefinition="The period of time that the health insurance product is available." )
     protected Period period;
 
     /**
-     * Owner of the product/plan (typically a payer).
+     * The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.
      */
     @Child(name = "ownedBy", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Owner of the product/plan", formalDefinition="Owner of the product/plan (typically a payer)." )
+    @Description(shortDefinition="Plan issuer", formalDefinition="The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'." )
     protected Reference ownedBy;
 
     /**
-     * The actual object that is the target of the reference (Owner of the product/plan (typically a payer).)
+     * The actual object that is the target of the reference (The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.)
      */
     protected Organization ownedByTarget;
 
     /**
-     * Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).
+     * An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.
      */
     @Child(name = "administeredBy", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Administrator of the product/plan", formalDefinition="Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA)." )
+    @Description(shortDefinition="Product administrator", formalDefinition="An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner." )
     protected Reference administeredBy;
 
     /**
-     * The actual object that is the target of the reference (Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).)
+     * The actual object that is the target of the reference (An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.)
      */
     protected Organization administeredByTarget;
 
     /**
-     * An address for the organization.
+     * The geographic region in which a health insurance product's benefits apply.
      */
-    @Child(name = "address", type = {Address.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="An address for the organization", formalDefinition="An address for the organization." )
-    protected List<Address> address;
-
-    /**
-     * The geographic region in which this product/plan is available.
-     */
-    @Child(name = "coverageArea", type = {Location.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The geographic region in which this product/plan is available", formalDefinition="The geographic region in which this product/plan is available." )
+    @Child(name = "coverageArea", type = {Location.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Where product applies", formalDefinition="The geographic region in which a health insurance product's benefits apply." )
     protected Reference coverageArea;
 
     /**
-     * The actual object that is the target of the reference (The geographic region in which this product/plan is available.)
+     * The actual object that is the target of the reference (The geographic region in which a health insurance product's benefits apply.)
      */
     protected Location coverageAreaTarget;
 
     /**
-     * Contact for the product/plan for a certain purpose.
+     * The contact for the health insurance product for a certain purpose.
      */
-    @Child(name = "contact", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contact for the product/plan for a certain purpose", formalDefinition="Contact for the product/plan for a certain purpose." )
+    @Child(name = "contact", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Contact for the product", formalDefinition="The contact for the health insurance product for a certain purpose." )
     protected List<ProductPlanContactComponent> contact;
+
+    /**
+     * The technical endpoints providing access to services operated for the health insurance product.
+     */
+    @Child(name = "endpoint", type = {Endpoint.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Technical endpoint", formalDefinition="The technical endpoints providing access to services operated for the health insurance product." )
+    protected List<Reference> endpoint;
+    /**
+     * The actual objects that are the target of the reference (The technical endpoints providing access to services operated for the health insurance product.)
+     */
+    protected List<Endpoint> endpointTarget;
+
+
+    /**
+     * Reference to the network included in the health insurance product.
+     */
+    @Child(name = "network", type = {Organization.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="What networks are Included", formalDefinition="Reference to the network included in the health insurance product." )
+    protected List<Reference> network;
+    /**
+     * The actual objects that are the target of the reference (Reference to the network included in the health insurance product.)
+     */
+    protected List<Organization> networkTarget;
+
 
     /**
      * Details about the coverage offered by the insurance product.
      */
-    @Child(name = "coverage", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Details about the coverage offered by the insurance product", formalDefinition="Details about the coverage offered by the insurance product." )
+    @Child(name = "coverage", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Coverage details", formalDefinition="Details about the coverage offered by the insurance product." )
     protected List<ProductPlanCoverageComponent> coverage;
 
     /**
      * Details about an insurance plan.
      */
-    @Child(name = "plan", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Details about an insurance plan", formalDefinition="Details about an insurance plan." )
+    @Child(name = "plan", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Plan details", formalDefinition="Details about an insurance plan." )
     protected List<ProductPlanPlanComponent> plan;
 
-    /**
-     * Technical endpoints providing access to services operated for the organization.
-     */
-    @Child(name = "endpoint", type = {Endpoint.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Technical endpoints providing access to services operated for the organization", formalDefinition="Technical endpoints providing access to services operated for the organization." )
-    protected List<Reference> endpoint;
-    /**
-     * The actual objects that are the target of the reference (Technical endpoints providing access to services operated for the organization.)
-     */
-    protected List<Endpoint> endpointTarget;
-
-
-    private static final long serialVersionUID = -840176614L;
+    private static final long serialVersionUID = 106844035L;
 
   /**
    * Constructor
@@ -2366,7 +3260,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifier for the product/plan that is used to identify it across multiple disparate systems.)
+     * @return {@link #identifier} (Business identifiers assigned to this health insurance product which remain constant as the resource is updated and propagates from server to server.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -2419,7 +3313,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (Whether the organization's record is still in active use.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The current state of the health insurance product.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<PublicationStatus> getStatusElement() { 
       if (this.status == null)
@@ -2439,7 +3333,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (Whether the organization's record is still in active use.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The current state of the health insurance product.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public ProductPlan setStatusElement(Enumeration<PublicationStatus> value) { 
       this.status = value;
@@ -2447,14 +3341,14 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return Whether the organization's record is still in active use.
+     * @return The current state of the health insurance product.
      */
     public PublicationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Whether the organization's record is still in active use.
+     * @param value The current state of the health insurance product.
      */
     public ProductPlan setStatus(PublicationStatus value) { 
       if (value == null)
@@ -2468,7 +3362,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (The type of product/plan.)
+     * @return {@link #type} (The kind of health insurance product.)
      */
     public List<CodeableConcept> getType() { 
       if (this.type == null)
@@ -2521,7 +3415,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (Official name of the product/plan (as designated by the owner).). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (Official name of the health insurance product as designated by the owner.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -2541,7 +3435,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (Official name of the product/plan (as designated by the owner).). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (Official name of the health insurance product as designated by the owner.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public ProductPlan setNameElement(StringType value) { 
       this.name = value;
@@ -2549,14 +3443,14 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return Official name of the product/plan (as designated by the owner).
+     * @return Official name of the health insurance product as designated by the owner.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value Official name of the product/plan (as designated by the owner).
+     * @param value Official name of the health insurance product as designated by the owner.
      */
     public ProductPlan setName(String value) { 
       if (Utilities.noString(value))
@@ -2570,7 +3464,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the product/plan is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the product is known as, or was known as in the past.)
      */
     public List<StringType> getAlias() { 
       if (this.alias == null)
@@ -2596,7 +3490,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the product/plan is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the product is known as, or was known as in the past.)
      */
     public StringType addAliasElement() {//2 
       StringType t = new StringType();
@@ -2607,7 +3501,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the product/plan is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the product is known as, or was known as in the past.)
      */
     public ProductPlan addAlias(String value) { //1
       StringType t = new StringType();
@@ -2619,7 +3513,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the product/plan is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the product is known as, or was known as in the past.)
      */
     public boolean hasAlias(String value) { 
       if (this.alias == null)
@@ -2631,7 +3525,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #period} (The period of time that the product is available.)
+     * @return {@link #period} (The period of time that the health insurance product is available.)
      */
     public Period getPeriod() { 
       if (this.period == null)
@@ -2647,7 +3541,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #period} (The period of time that the product is available.)
+     * @param value {@link #period} (The period of time that the health insurance product is available.)
      */
     public ProductPlan setPeriod(Period value) { 
       this.period = value;
@@ -2655,7 +3549,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #ownedBy} (Owner of the product/plan (typically a payer).)
+     * @return {@link #ownedBy} (The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.)
      */
     public Reference getOwnedBy() { 
       if (this.ownedBy == null)
@@ -2671,7 +3565,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #ownedBy} (Owner of the product/plan (typically a payer).)
+     * @param value {@link #ownedBy} (The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.)
      */
     public ProductPlan setOwnedBy(Reference value) { 
       this.ownedBy = value;
@@ -2679,7 +3573,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #ownedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Owner of the product/plan (typically a payer).)
+     * @return {@link #ownedBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.)
      */
     public Organization getOwnedByTarget() { 
       if (this.ownedByTarget == null)
@@ -2691,7 +3585,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #ownedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Owner of the product/plan (typically a payer).)
+     * @param value {@link #ownedBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.)
      */
     public ProductPlan setOwnedByTarget(Organization value) { 
       this.ownedByTarget = value;
@@ -2699,7 +3593,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #administeredBy} (Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).)
+     * @return {@link #administeredBy} (An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.)
      */
     public Reference getAdministeredBy() { 
       if (this.administeredBy == null)
@@ -2715,7 +3609,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #administeredBy} (Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).)
+     * @param value {@link #administeredBy} (An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.)
      */
     public ProductPlan setAdministeredBy(Reference value) { 
       this.administeredBy = value;
@@ -2723,7 +3617,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #administeredBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).)
+     * @return {@link #administeredBy} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.)
      */
     public Organization getAdministeredByTarget() { 
       if (this.administeredByTarget == null)
@@ -2735,7 +3629,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #administeredBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).)
+     * @param value {@link #administeredBy} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.)
      */
     public ProductPlan setAdministeredByTarget(Organization value) { 
       this.administeredByTarget = value;
@@ -2743,60 +3637,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #address} (An address for the organization.)
-     */
-    public List<Address> getAddress() { 
-      if (this.address == null)
-        this.address = new ArrayList<Address>();
-      return this.address;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ProductPlan setAddress(List<Address> theAddress) { 
-      this.address = theAddress;
-      return this;
-    }
-
-    public boolean hasAddress() { 
-      if (this.address == null)
-        return false;
-      for (Address item : this.address)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public Address addAddress() { //3
-      Address t = new Address();
-      if (this.address == null)
-        this.address = new ArrayList<Address>();
-      this.address.add(t);
-      return t;
-    }
-
-    public ProductPlan addAddress(Address t) { //3
-      if (t == null)
-        return this;
-      if (this.address == null)
-        this.address = new ArrayList<Address>();
-      this.address.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #address}, creating it if it does not already exist
-     */
-    public Address getAddressFirstRep() { 
-      if (getAddress().isEmpty()) {
-        addAddress();
-      }
-      return getAddress().get(0);
-    }
-
-    /**
-     * @return {@link #coverageArea} (The geographic region in which this product/plan is available.)
+     * @return {@link #coverageArea} (The geographic region in which a health insurance product's benefits apply.)
      */
     public Reference getCoverageArea() { 
       if (this.coverageArea == null)
@@ -2812,7 +3653,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #coverageArea} (The geographic region in which this product/plan is available.)
+     * @param value {@link #coverageArea} (The geographic region in which a health insurance product's benefits apply.)
      */
     public ProductPlan setCoverageArea(Reference value) { 
       this.coverageArea = value;
@@ -2820,7 +3661,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #coverageArea} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The geographic region in which this product/plan is available.)
+     * @return {@link #coverageArea} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The geographic region in which a health insurance product's benefits apply.)
      */
     public Location getCoverageAreaTarget() { 
       if (this.coverageAreaTarget == null)
@@ -2832,7 +3673,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @param value {@link #coverageArea} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The geographic region in which this product/plan is available.)
+     * @param value {@link #coverageArea} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The geographic region in which a health insurance product's benefits apply.)
      */
     public ProductPlan setCoverageAreaTarget(Location value) { 
       this.coverageAreaTarget = value;
@@ -2840,7 +3681,7 @@ public class ProductPlan extends DomainResource {
     }
 
     /**
-     * @return {@link #contact} (Contact for the product/plan for a certain purpose.)
+     * @return {@link #contact} (The contact for the health insurance product for a certain purpose.)
      */
     public List<ProductPlanContactComponent> getContact() { 
       if (this.contact == null)
@@ -2890,6 +3731,156 @@ public class ProductPlan extends DomainResource {
         addContact();
       }
       return getContact().get(0);
+    }
+
+    /**
+     * @return {@link #endpoint} (The technical endpoints providing access to services operated for the health insurance product.)
+     */
+    public List<Reference> getEndpoint() { 
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      return this.endpoint;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProductPlan setEndpoint(List<Reference> theEndpoint) { 
+      this.endpoint = theEndpoint;
+      return this;
+    }
+
+    public boolean hasEndpoint() { 
+      if (this.endpoint == null)
+        return false;
+      for (Reference item : this.endpoint)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addEndpoint() { //3
+      Reference t = new Reference();
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      this.endpoint.add(t);
+      return t;
+    }
+
+    public ProductPlan addEndpoint(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.endpoint == null)
+        this.endpoint = new ArrayList<Reference>();
+      this.endpoint.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
+     */
+    public Reference getEndpointFirstRep() { 
+      if (getEndpoint().isEmpty()) {
+        addEndpoint();
+      }
+      return getEndpoint().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Endpoint> getEndpointTarget() { 
+      if (this.endpointTarget == null)
+        this.endpointTarget = new ArrayList<Endpoint>();
+      return this.endpointTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Endpoint addEndpointTarget() { 
+      Endpoint r = new Endpoint();
+      if (this.endpointTarget == null)
+        this.endpointTarget = new ArrayList<Endpoint>();
+      this.endpointTarget.add(r);
+      return r;
+    }
+
+    /**
+     * @return {@link #network} (Reference to the network included in the health insurance product.)
+     */
+    public List<Reference> getNetwork() { 
+      if (this.network == null)
+        this.network = new ArrayList<Reference>();
+      return this.network;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ProductPlan setNetwork(List<Reference> theNetwork) { 
+      this.network = theNetwork;
+      return this;
+    }
+
+    public boolean hasNetwork() { 
+      if (this.network == null)
+        return false;
+      for (Reference item : this.network)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addNetwork() { //3
+      Reference t = new Reference();
+      if (this.network == null)
+        this.network = new ArrayList<Reference>();
+      this.network.add(t);
+      return t;
+    }
+
+    public ProductPlan addNetwork(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.network == null)
+        this.network = new ArrayList<Reference>();
+      this.network.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #network}, creating it if it does not already exist
+     */
+    public Reference getNetworkFirstRep() { 
+      if (getNetwork().isEmpty()) {
+        addNetwork();
+      }
+      return getNetwork().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Organization> getNetworkTarget() { 
+      if (this.networkTarget == null)
+        this.networkTarget = new ArrayList<Organization>();
+      return this.networkTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Organization addNetworkTarget() { 
+      Organization r = new Organization();
+      if (this.networkTarget == null)
+        this.networkTarget = new ArrayList<Organization>();
+      this.networkTarget.add(r);
+      return r;
     }
 
     /**
@@ -2998,116 +3989,41 @@ public class ProductPlan extends DomainResource {
       return getPlan().get(0);
     }
 
-    /**
-     * @return {@link #endpoint} (Technical endpoints providing access to services operated for the organization.)
-     */
-    public List<Reference> getEndpoint() { 
-      if (this.endpoint == null)
-        this.endpoint = new ArrayList<Reference>();
-      return this.endpoint;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ProductPlan setEndpoint(List<Reference> theEndpoint) { 
-      this.endpoint = theEndpoint;
-      return this;
-    }
-
-    public boolean hasEndpoint() { 
-      if (this.endpoint == null)
-        return false;
-      for (Reference item : this.endpoint)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public Reference addEndpoint() { //3
-      Reference t = new Reference();
-      if (this.endpoint == null)
-        this.endpoint = new ArrayList<Reference>();
-      this.endpoint.add(t);
-      return t;
-    }
-
-    public ProductPlan addEndpoint(Reference t) { //3
-      if (t == null)
-        return this;
-      if (this.endpoint == null)
-        this.endpoint = new ArrayList<Reference>();
-      this.endpoint.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #endpoint}, creating it if it does not already exist
-     */
-    public Reference getEndpointFirstRep() { 
-      if (getEndpoint().isEmpty()) {
-        addEndpoint();
-      }
-      return getEndpoint().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Endpoint> getEndpointTarget() { 
-      if (this.endpointTarget == null)
-        this.endpointTarget = new ArrayList<Endpoint>();
-      return this.endpointTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public Endpoint addEndpointTarget() { 
-      Endpoint r = new Endpoint();
-      if (this.endpointTarget == null)
-        this.endpointTarget = new ArrayList<Endpoint>();
-      this.endpointTarget.add(r);
-      return r;
-    }
-
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Identifier for the product/plan that is used to identify it across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("status", "code", "Whether the organization's record is still in active use.", 0, 1, status));
-        children.add(new Property("type", "CodeableConcept", "The type of product/plan.", 0, java.lang.Integer.MAX_VALUE, type));
-        children.add(new Property("name", "string", "Official name of the product/plan (as designated by the owner).", 0, 1, name));
-        children.add(new Property("alias", "string", "A list of alternate names that the product/plan is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
-        children.add(new Property("period", "Period", "The period of time that the product is available.", 0, 1, period));
-        children.add(new Property("ownedBy", "Reference(Organization)", "Owner of the product/plan (typically a payer).", 0, 1, ownedBy));
-        children.add(new Property("administeredBy", "Reference(Organization)", "Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).", 0, 1, administeredBy));
-        children.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
-        children.add(new Property("coverageArea", "Reference(Location)", "The geographic region in which this product/plan is available.", 0, 1, coverageArea));
-        children.add(new Property("contact", "", "Contact for the product/plan for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this health insurance product which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The current state of the health insurance product.", 0, 1, status));
+        children.add(new Property("type", "CodeableConcept", "The kind of health insurance product.", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("name", "string", "Official name of the health insurance product as designated by the owner.", 0, 1, name));
+        children.add(new Property("alias", "string", "A list of alternate names that the product is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("period", "Period", "The period of time that the health insurance product is available.", 0, 1, period));
+        children.add(new Property("ownedBy", "Reference(Organization)", "The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.", 0, 1, ownedBy));
+        children.add(new Property("administeredBy", "Reference(Organization)", "An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.", 0, 1, administeredBy));
+        children.add(new Property("coverageArea", "Reference(Location)", "The geographic region in which a health insurance product's benefits apply.", 0, 1, coverageArea));
+        children.add(new Property("contact", "", "The contact for the health insurance product for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("endpoint", "Reference(Endpoint)", "The technical endpoints providing access to services operated for the health insurance product.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+        children.add(new Property("network", "Reference(Organization)", "Reference to the network included in the health insurance product.", 0, java.lang.Integer.MAX_VALUE, network));
         children.add(new Property("coverage", "", "Details about the coverage offered by the insurance product.", 0, java.lang.Integer.MAX_VALUE, coverage));
         children.add(new Property("plan", "", "Details about an insurance plan.", 0, java.lang.Integer.MAX_VALUE, plan));
-        children.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the organization.", 0, java.lang.Integer.MAX_VALUE, endpoint));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for the product/plan that is used to identify it across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -892481550: /*status*/  return new Property("status", "code", "Whether the organization's record is still in active use.", 0, 1, status);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of product/plan.", 0, java.lang.Integer.MAX_VALUE, type);
-        case 3373707: /*name*/  return new Property("name", "string", "Official name of the product/plan (as designated by the owner).", 0, 1, name);
-        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the product/plan is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
-        case -991726143: /*period*/  return new Property("period", "Period", "The period of time that the product is available.", 0, 1, period);
-        case -1054743076: /*ownedBy*/  return new Property("ownedBy", "Reference(Organization)", "Owner of the product/plan (typically a payer).", 0, 1, ownedBy);
-        case 898770462: /*administeredBy*/  return new Property("administeredBy", "Reference(Organization)", "Administrator of the product/plan (e.g. self-insured employer plan administered by a TPA).", 0, 1, administeredBy);
-        case -1147692044: /*address*/  return new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address);
-        case -1532328299: /*coverageArea*/  return new Property("coverageArea", "Reference(Location)", "The geographic region in which this product/plan is available.", 0, 1, coverageArea);
-        case 951526432: /*contact*/  return new Property("contact", "", "Contact for the product/plan for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this health insurance product which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The current state of the health insurance product.", 0, 1, status);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind of health insurance product.", 0, java.lang.Integer.MAX_VALUE, type);
+        case 3373707: /*name*/  return new Property("name", "string", "Official name of the health insurance product as designated by the owner.", 0, 1, name);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the product is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case -991726143: /*period*/  return new Property("period", "Period", "The period of time that the health insurance product is available.", 0, 1, period);
+        case -1054743076: /*ownedBy*/  return new Property("ownedBy", "Reference(Organization)", "The entity that is providing  the health insurance product and underwriting the risk.  This is typically an insurance carriers, other third-party payers, or health plan sponsors comonly referred to as 'payers'.", 0, 1, ownedBy);
+        case 898770462: /*administeredBy*/  return new Property("administeredBy", "Reference(Organization)", "An organization which administer other services such as underwriting, customer service and/or claims processing on behalf of the health insurance product owner.", 0, 1, administeredBy);
+        case -1532328299: /*coverageArea*/  return new Property("coverageArea", "Reference(Location)", "The geographic region in which a health insurance product's benefits apply.", 0, 1, coverageArea);
+        case 951526432: /*contact*/  return new Property("contact", "", "The contact for the health insurance product for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The technical endpoints providing access to services operated for the health insurance product.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+        case 1843485230: /*network*/  return new Property("network", "Reference(Organization)", "Reference to the network included in the health insurance product.", 0, java.lang.Integer.MAX_VALUE, network);
         case -351767064: /*coverage*/  return new Property("coverage", "", "Details about the coverage offered by the insurance product.", 0, java.lang.Integer.MAX_VALUE, coverage);
         case 3443497: /*plan*/  return new Property("plan", "", "Details about an insurance plan.", 0, java.lang.Integer.MAX_VALUE, plan);
-        case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the organization.", 0, java.lang.Integer.MAX_VALUE, endpoint);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -3124,12 +4040,12 @@ public class ProductPlan extends DomainResource {
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case -1054743076: /*ownedBy*/ return this.ownedBy == null ? new Base[0] : new Base[] {this.ownedBy}; // Reference
         case 898770462: /*administeredBy*/ return this.administeredBy == null ? new Base[0] : new Base[] {this.administeredBy}; // Reference
-        case -1147692044: /*address*/ return this.address == null ? new Base[0] : this.address.toArray(new Base[this.address.size()]); // Address
         case -1532328299: /*coverageArea*/ return this.coverageArea == null ? new Base[0] : new Base[] {this.coverageArea}; // Reference
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ProductPlanContactComponent
+        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
+        case 1843485230: /*network*/ return this.network == null ? new Base[0] : this.network.toArray(new Base[this.network.size()]); // Reference
         case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // ProductPlanCoverageComponent
         case 3443497: /*plan*/ return this.plan == null ? new Base[0] : this.plan.toArray(new Base[this.plan.size()]); // ProductPlanPlanComponent
-        case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3163,23 +4079,23 @@ public class ProductPlan extends DomainResource {
         case 898770462: // administeredBy
           this.administeredBy = castToReference(value); // Reference
           return value;
-        case -1147692044: // address
-          this.getAddress().add(castToAddress(value)); // Address
-          return value;
         case -1532328299: // coverageArea
           this.coverageArea = castToReference(value); // Reference
           return value;
         case 951526432: // contact
           this.getContact().add((ProductPlanContactComponent) value); // ProductPlanContactComponent
           return value;
+        case 1741102485: // endpoint
+          this.getEndpoint().add(castToReference(value)); // Reference
+          return value;
+        case 1843485230: // network
+          this.getNetwork().add(castToReference(value)); // Reference
+          return value;
         case -351767064: // coverage
           this.getCoverage().add((ProductPlanCoverageComponent) value); // ProductPlanCoverageComponent
           return value;
         case 3443497: // plan
           this.getPlan().add((ProductPlanPlanComponent) value); // ProductPlanPlanComponent
-          return value;
-        case 1741102485: // endpoint
-          this.getEndpoint().add(castToReference(value)); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -3205,18 +4121,18 @@ public class ProductPlan extends DomainResource {
           this.ownedBy = castToReference(value); // Reference
         } else if (name.equals("administeredBy")) {
           this.administeredBy = castToReference(value); // Reference
-        } else if (name.equals("address")) {
-          this.getAddress().add(castToAddress(value));
         } else if (name.equals("coverageArea")) {
           this.coverageArea = castToReference(value); // Reference
         } else if (name.equals("contact")) {
           this.getContact().add((ProductPlanContactComponent) value);
+        } else if (name.equals("endpoint")) {
+          this.getEndpoint().add(castToReference(value));
+        } else if (name.equals("network")) {
+          this.getNetwork().add(castToReference(value));
         } else if (name.equals("coverage")) {
           this.getCoverage().add((ProductPlanCoverageComponent) value);
         } else if (name.equals("plan")) {
           this.getPlan().add((ProductPlanPlanComponent) value);
-        } else if (name.equals("endpoint")) {
-          this.getEndpoint().add(castToReference(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -3233,12 +4149,12 @@ public class ProductPlan extends DomainResource {
         case -991726143:  return getPeriod(); 
         case -1054743076:  return getOwnedBy(); 
         case 898770462:  return getAdministeredBy(); 
-        case -1147692044:  return addAddress(); 
         case -1532328299:  return getCoverageArea(); 
         case 951526432:  return addContact(); 
+        case 1741102485:  return addEndpoint(); 
+        case 1843485230:  return addNetwork(); 
         case -351767064:  return addCoverage(); 
         case 3443497:  return addPlan(); 
-        case 1741102485:  return addEndpoint(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -3255,12 +4171,12 @@ public class ProductPlan extends DomainResource {
         case -991726143: /*period*/ return new String[] {"Period"};
         case -1054743076: /*ownedBy*/ return new String[] {"Reference"};
         case 898770462: /*administeredBy*/ return new String[] {"Reference"};
-        case -1147692044: /*address*/ return new String[] {"Address"};
         case -1532328299: /*coverageArea*/ return new String[] {"Reference"};
         case 951526432: /*contact*/ return new String[] {};
+        case 1741102485: /*endpoint*/ return new String[] {"Reference"};
+        case 1843485230: /*network*/ return new String[] {"Reference"};
         case -351767064: /*coverage*/ return new String[] {};
         case 3443497: /*plan*/ return new String[] {};
-        case 1741102485: /*endpoint*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -3295,9 +4211,6 @@ public class ProductPlan extends DomainResource {
           this.administeredBy = new Reference();
           return this.administeredBy;
         }
-        else if (name.equals("address")) {
-          return addAddress();
-        }
         else if (name.equals("coverageArea")) {
           this.coverageArea = new Reference();
           return this.coverageArea;
@@ -3305,14 +4218,17 @@ public class ProductPlan extends DomainResource {
         else if (name.equals("contact")) {
           return addContact();
         }
+        else if (name.equals("endpoint")) {
+          return addEndpoint();
+        }
+        else if (name.equals("network")) {
+          return addNetwork();
+        }
         else if (name.equals("coverage")) {
           return addCoverage();
         }
         else if (name.equals("plan")) {
           return addPlan();
-        }
-        else if (name.equals("endpoint")) {
-          return addEndpoint();
         }
         else
           return super.addChild(name);
@@ -3346,16 +4262,21 @@ public class ProductPlan extends DomainResource {
         dst.period = period == null ? null : period.copy();
         dst.ownedBy = ownedBy == null ? null : ownedBy.copy();
         dst.administeredBy = administeredBy == null ? null : administeredBy.copy();
-        if (address != null) {
-          dst.address = new ArrayList<Address>();
-          for (Address i : address)
-            dst.address.add(i.copy());
-        };
         dst.coverageArea = coverageArea == null ? null : coverageArea.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ProductPlanContactComponent>();
           for (ProductPlanContactComponent i : contact)
             dst.contact.add(i.copy());
+        };
+        if (endpoint != null) {
+          dst.endpoint = new ArrayList<Reference>();
+          for (Reference i : endpoint)
+            dst.endpoint.add(i.copy());
+        };
+        if (network != null) {
+          dst.network = new ArrayList<Reference>();
+          for (Reference i : network)
+            dst.network.add(i.copy());
         };
         if (coverage != null) {
           dst.coverage = new ArrayList<ProductPlanCoverageComponent>();
@@ -3366,11 +4287,6 @@ public class ProductPlan extends DomainResource {
           dst.plan = new ArrayList<ProductPlanPlanComponent>();
           for (ProductPlanPlanComponent i : plan)
             dst.plan.add(i.copy());
-        };
-        if (endpoint != null) {
-          dst.endpoint = new ArrayList<Reference>();
-          for (Reference i : endpoint)
-            dst.endpoint.add(i.copy());
         };
         return dst;
       }
@@ -3389,8 +4305,8 @@ public class ProductPlan extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(name, o.name, true) && compareDeep(alias, o.alias, true) && compareDeep(period, o.period, true)
            && compareDeep(ownedBy, o.ownedBy, true) && compareDeep(administeredBy, o.administeredBy, true)
-           && compareDeep(address, o.address, true) && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(contact, o.contact, true)
-           && compareDeep(coverage, o.coverage, true) && compareDeep(plan, o.plan, true) && compareDeep(endpoint, o.endpoint, true)
+           && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(contact, o.contact, true) && compareDeep(endpoint, o.endpoint, true)
+           && compareDeep(network, o.network, true) && compareDeep(coverage, o.coverage, true) && compareDeep(plan, o.plan, true)
           ;
       }
 
@@ -3407,8 +4323,8 @@ public class ProductPlan extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
-          , name, alias, period, ownedBy, administeredBy, address, coverageArea, contact
-          , coverage, plan, endpoint);
+          , name, alias, period, ownedBy, administeredBy, coverageArea, contact, endpoint
+          , network, coverage, plan);
       }
 
   @Override
@@ -3441,17 +4357,17 @@ public class ProductPlan extends DomainResource {
    * <p>
    * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address</b><br>
+   * Path: <b>ProductPlan.contact.address</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address", path="ProductPlan.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
+  @SearchParamDefinition(name="address", path="ProductPlan.contact.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
   public static final String SP_ADDRESS = "address";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address</b>
    * <p>
    * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address</b><br>
+   * Path: <b>ProductPlan.contact.address</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS);
@@ -3461,17 +4377,17 @@ public class ProductPlan extends DomainResource {
    * <p>
    * Description: <b>A state specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.state</b><br>
+   * Path: <b>ProductPlan.contact.address.state</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-state", path="ProductPlan.address.state", description="A state specified in an address", type="string" )
+  @SearchParamDefinition(name="address-state", path="ProductPlan.contact.address.state", description="A state specified in an address", type="string" )
   public static final String SP_ADDRESS_STATE = "address-state";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-state</b>
    * <p>
    * Description: <b>A state specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.state</b><br>
+   * Path: <b>ProductPlan.contact.address.state</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_STATE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_STATE);
@@ -3527,17 +4443,17 @@ public class ProductPlan extends DomainResource {
    * <p>
    * Description: <b>A postal code specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.postalCode</b><br>
+   * Path: <b>ProductPlan.contact.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-postalcode", path="ProductPlan.address.postalCode", description="A postal code specified in an address", type="string" )
+  @SearchParamDefinition(name="address-postalcode", path="ProductPlan.contact.address.postalCode", description="A postal code specified in an address", type="string" )
   public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
    * <p>
    * Description: <b>A postal code specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.postalCode</b><br>
+   * Path: <b>ProductPlan.contact.address.postalCode</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_POSTALCODE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_POSTALCODE);
@@ -3545,17 +4461,17 @@ public class ProductPlan extends DomainResource {
  /**
    * Search parameter: <b>administered-by</b>
    * <p>
-   * Description: <b>Administrator of the product/plan</b><br>
+   * Description: <b>Product administrator</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ProductPlan.administeredBy</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="administered-by", path="ProductPlan.administeredBy", description="Administrator of the product/plan", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="administered-by", path="ProductPlan.administeredBy", description="Product administrator", type="reference", target={Organization.class } )
   public static final String SP_ADMINISTERED_BY = "administered-by";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>administered-by</b>
    * <p>
-   * Description: <b>Administrator of the product/plan</b><br>
+   * Description: <b>Product administrator</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ProductPlan.administeredBy</b><br>
    * </p>
@@ -3573,17 +4489,17 @@ public class ProductPlan extends DomainResource {
    * <p>
    * Description: <b>A country specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.country</b><br>
+   * Path: <b>ProductPlan.contact.address.country</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-country", path="ProductPlan.address.country", description="A country specified in an address", type="string" )
+  @SearchParamDefinition(name="address-country", path="ProductPlan.contact.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESS_COUNTRY = "address-country";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-country</b>
    * <p>
    * Description: <b>A country specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.country</b><br>
+   * Path: <b>ProductPlan.contact.address.country</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_COUNTRY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_COUNTRY);
@@ -3591,17 +4507,17 @@ public class ProductPlan extends DomainResource {
  /**
    * Search parameter: <b>endpoint</b>
    * <p>
-   * Description: <b>Technical endpoints providing access to services operated for the organization</b><br>
+   * Description: <b>Technical endpoint</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ProductPlan.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="endpoint", path="ProductPlan.endpoint", description="Technical endpoints providing access to services operated for the organization", type="reference", target={Endpoint.class } )
+  @SearchParamDefinition(name="endpoint", path="ProductPlan.endpoint", description="Technical endpoint", type="reference", target={Endpoint.class } )
   public static final String SP_ENDPOINT = "endpoint";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
    * <p>
-   * Description: <b>Technical endpoints providing access to services operated for the organization</b><br>
+   * Description: <b>Technical endpoint</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ProductPlan.endpoint</b><br>
    * </p>
@@ -3659,17 +4575,17 @@ public class ProductPlan extends DomainResource {
    * <p>
    * Description: <b>A use code specified in an address</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ProductPlan.address.use</b><br>
+   * Path: <b>ProductPlan.contact.address.use</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-use", path="ProductPlan.address.use", description="A use code specified in an address", type="token" )
+  @SearchParamDefinition(name="address-use", path="ProductPlan.contact.address.use", description="A use code specified in an address", type="token" )
   public static final String SP_ADDRESS_USE = "address-use";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-use</b>
    * <p>
    * Description: <b>A use code specified in an address</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ProductPlan.address.use</b><br>
+   * Path: <b>ProductPlan.contact.address.use</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ADDRESS_USE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ADDRESS_USE);
@@ -3679,17 +4595,17 @@ public class ProductPlan extends DomainResource {
    * <p>
    * Description: <b>A city specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.city</b><br>
+   * Path: <b>ProductPlan.contact.address.city</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="address-city", path="ProductPlan.address.city", description="A city specified in an address", type="string" )
+  @SearchParamDefinition(name="address-city", path="ProductPlan.contact.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESS_CITY = "address-city";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
    * <p>
    * Description: <b>A city specified in an address</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>ProductPlan.address.city</b><br>
+   * Path: <b>ProductPlan.contact.address.city</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_CITY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_CITY);

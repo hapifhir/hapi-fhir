@@ -693,7 +693,7 @@
     <Cell ss:Index="5" ss:StyleID="s79"><Data ss:Type="String" x:Ticked="1">DomainResource</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">clinical.general</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="14" ss:StyleID="s77"><Data ss:Type="String">MedicinalProductClinicals</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22"><Data ss:Type="String">314;0</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="55" ss:StyleID="Default">

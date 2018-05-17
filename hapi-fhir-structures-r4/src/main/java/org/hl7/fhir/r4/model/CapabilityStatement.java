@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1245,10 +1245,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     @Block()
     public static class CapabilityStatementSoftwareComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Name software is known by.
+         * Name the software is known by.
          */
         @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="A name the software is known by", formalDefinition="Name software is known by." )
+        @Description(shortDefinition="A name the software is known by", formalDefinition="Name the software is known by." )
         protected StringType name;
 
         /**
@@ -1262,7 +1262,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
          * Date this version of the software was released.
          */
         @Child(name = "releaseDate", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Date this version released", formalDefinition="Date this version of the software was released." )
+        @Description(shortDefinition="Date this version was released", formalDefinition="Date this version of the software was released." )
         protected DateTimeType releaseDate;
 
         private static final long serialVersionUID = 1819769027L;
@@ -1283,7 +1283,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
         /**
-         * @return {@link #name} (Name software is known by.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #name} (Name the software is known by.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public StringType getNameElement() { 
           if (this.name == null)
@@ -1303,7 +1303,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #name} (Name software is known by.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #name} (Name the software is known by.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
         public CapabilityStatementSoftwareComponent setNameElement(StringType value) { 
           this.name = value;
@@ -1311,14 +1311,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return Name software is known by.
+         * @return Name the software is known by.
          */
         public String getName() { 
           return this.name == null ? null : this.name.getValue();
         }
 
         /**
-         * @param value Name software is known by.
+         * @param value Name the software is known by.
          */
         public CapabilityStatementSoftwareComponent setName(String value) { 
             if (this.name == null)
@@ -1427,7 +1427,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("name", "string", "Name software is known by.", 0, 1, name));
+          children.add(new Property("name", "string", "Name the software is known by.", 0, 1, name));
           children.add(new Property("version", "string", "The version identifier for the software covered by this statement.", 0, 1, version));
           children.add(new Property("releaseDate", "dateTime", "Date this version of the software was released.", 0, 1, releaseDate));
         }
@@ -1435,7 +1435,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3373707: /*name*/  return new Property("name", "string", "Name software is known by.", 0, 1, name);
+          case 3373707: /*name*/  return new Property("name", "string", "Name the software is known by.", 0, 1, name);
           case 351608024: /*version*/  return new Property("version", "string", "The version identifier for the software covered by this statement.", 0, 1, version);
           case 212873301: /*releaseDate*/  return new Property("releaseDate", "dateTime", "Date this version of the software was released.", 0, 1, releaseDate);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2515,10 +2515,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     @Block()
     public static class CapabilityStatementRestSecurityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Server adds CORS headers when responding to requests - this enables javascript applications to use the server.
+         * Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.
          */
         @Child(name = "cors", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Adds CORS Headers (http://enable-cors.org/)", formalDefinition="Server adds CORS headers when responding to requests - this enables javascript applications to use the server." )
+        @Description(shortDefinition="Adds CORS Headers (http://enable-cors.org/)", formalDefinition="Server adds CORS headers when responding to requests - this enables Javascript applications to use the server." )
         protected BooleanType cors;
 
         /**
@@ -2546,7 +2546,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       }
 
         /**
-         * @return {@link #cors} (Server adds CORS headers when responding to requests - this enables javascript applications to use the server.). This is the underlying object with id, value and extensions. The accessor "getCors" gives direct access to the value
+         * @return {@link #cors} (Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.). This is the underlying object with id, value and extensions. The accessor "getCors" gives direct access to the value
          */
         public BooleanType getCorsElement() { 
           if (this.cors == null)
@@ -2566,7 +2566,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #cors} (Server adds CORS headers when responding to requests - this enables javascript applications to use the server.). This is the underlying object with id, value and extensions. The accessor "getCors" gives direct access to the value
+         * @param value {@link #cors} (Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.). This is the underlying object with id, value and extensions. The accessor "getCors" gives direct access to the value
          */
         public CapabilityStatementRestSecurityComponent setCorsElement(BooleanType value) { 
           this.cors = value;
@@ -2574,14 +2574,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return Server adds CORS headers when responding to requests - this enables javascript applications to use the server.
+         * @return Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.
          */
         public boolean getCors() { 
           return this.cors == null || this.cors.isEmpty() ? false : this.cors.getValue();
         }
 
         /**
-         * @param value Server adds CORS headers when responding to requests - this enables javascript applications to use the server.
+         * @param value Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.
          */
         public CapabilityStatementRestSecurityComponent setCors(boolean value) { 
             if (this.cors == null)
@@ -2694,7 +2694,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("cors", "boolean", "Server adds CORS headers when responding to requests - this enables javascript applications to use the server.", 0, 1, cors));
+          children.add(new Property("cors", "boolean", "Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.", 0, 1, cors));
           children.add(new Property("service", "CodeableConcept", "Types of security services that are supported/required by the system.", 0, java.lang.Integer.MAX_VALUE, service));
           children.add(new Property("description", "string", "General description of how security works.", 0, 1, description));
         }
@@ -2702,7 +2702,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3059629: /*cors*/  return new Property("cors", "boolean", "Server adds CORS headers when responding to requests - this enables javascript applications to use the server.", 0, 1, cors);
+          case 3059629: /*cors*/  return new Property("cors", "boolean", "Server adds CORS headers when responding to requests - this enables Javascript applications to use the server.", 0, 1, cors);
           case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "Types of security services that are supported/required by the system.", 0, java.lang.Integer.MAX_VALUE, service);
           case -1724546052: /*description*/  return new Property("description", "string", "General description of how security works.", 0, 1, description);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2888,10 +2888,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected BooleanType readHistory;
 
         /**
-         * A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
+         * A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
          */
         @Child(name = "updateCreate", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="If update can commit to a new identity", formalDefinition="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server." )
+        @Description(shortDefinition="If update can commit to a new identity", formalDefinition="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server." )
         protected BooleanType updateCreate;
 
         /**
@@ -2954,10 +2954,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected List<CapabilityStatementRestResourceSearchParamComponent> searchParam;
 
         /**
-         * Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the opration, and the parameters.
+         * Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the operation, and the parameters.
          */
         @Child(name = "operation", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Definition of an resource operation", formalDefinition="Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the opration, and the parameters." )
+        @Description(shortDefinition="Definition of a resource operation", formalDefinition="Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the operation, and the parameters." )
         protected List<CapabilityStatementRestResourceOperationComponent> operation;
 
         private static final long serialVersionUID = -1843372337L;
@@ -3329,7 +3329,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return {@link #updateCreate} (A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.). This is the underlying object with id, value and extensions. The accessor "getUpdateCreate" gives direct access to the value
+         * @return {@link #updateCreate} (A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.). This is the underlying object with id, value and extensions. The accessor "getUpdateCreate" gives direct access to the value
          */
         public BooleanType getUpdateCreateElement() { 
           if (this.updateCreate == null)
@@ -3349,7 +3349,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #updateCreate} (A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.). This is the underlying object with id, value and extensions. The accessor "getUpdateCreate" gives direct access to the value
+         * @param value {@link #updateCreate} (A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.). This is the underlying object with id, value and extensions. The accessor "getUpdateCreate" gives direct access to the value
          */
         public CapabilityStatementRestResourceComponent setUpdateCreateElement(BooleanType value) { 
           this.updateCreate = value;
@@ -3357,14 +3357,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
+         * @return A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
          */
         public boolean getUpdateCreate() { 
           return this.updateCreate == null || this.updateCreate.isEmpty() ? false : this.updateCreate.getValue();
         }
 
         /**
-         * @param value A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
+         * @param value A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
          */
         public CapabilityStatementRestResourceComponent setUpdateCreate(boolean value) { 
             if (this.updateCreate == null)
@@ -3798,7 +3798,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return {@link #operation} (Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the opration, and the parameters.)
+         * @return {@link #operation} (Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the operation, and the parameters.)
          */
         public List<CapabilityStatementRestResourceOperationComponent> getOperation() { 
           if (this.operation == null)
@@ -3859,7 +3859,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           children.add(new Property("interaction", "", "Identifies a restful operation supported by the solution.", 0, java.lang.Integer.MAX_VALUE, interaction));
           children.add(new Property("versioning", "code", "This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.", 0, 1, versioning));
           children.add(new Property("readHistory", "boolean", "A flag for whether the server is able to return past versions as part of the vRead operation.", 0, 1, readHistory));
-          children.add(new Property("updateCreate", "boolean", "A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.", 0, 1, updateCreate));
+          children.add(new Property("updateCreate", "boolean", "A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.", 0, 1, updateCreate));
           children.add(new Property("conditionalCreate", "boolean", "A flag that indicates that the server supports conditional create.", 0, 1, conditionalCreate));
           children.add(new Property("conditionalRead", "code", "A code that indicates how the server supports conditional read.", 0, 1, conditionalRead));
           children.add(new Property("conditionalUpdate", "boolean", "A flag that indicates that the server supports conditional update.", 0, 1, conditionalUpdate));
@@ -3868,7 +3868,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           children.add(new Property("searchInclude", "string", "A list of _include values supported by the server.", 0, java.lang.Integer.MAX_VALUE, searchInclude));
           children.add(new Property("searchRevInclude", "string", "A list of _revinclude (reverse include) values supported by the server.", 0, java.lang.Integer.MAX_VALUE, searchRevInclude));
           children.add(new Property("searchParam", "", "Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.", 0, java.lang.Integer.MAX_VALUE, searchParam));
-          children.add(new Property("operation", "", "Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the opration, and the parameters.", 0, java.lang.Integer.MAX_VALUE, operation));
+          children.add(new Property("operation", "", "Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the operation, and the parameters.", 0, java.lang.Integer.MAX_VALUE, operation));
         }
 
         @Override
@@ -3881,7 +3881,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           case 1844104722: /*interaction*/  return new Property("interaction", "", "Identifies a restful operation supported by the solution.", 0, java.lang.Integer.MAX_VALUE, interaction);
           case -670487542: /*versioning*/  return new Property("versioning", "code", "This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources. If the value is 'versioned-update', then the server supports all the versioning features, including using e-tags for version integrity in the API.", 0, 1, versioning);
           case 187518494: /*readHistory*/  return new Property("readHistory", "boolean", "A flag for whether the server is able to return past versions as part of the vRead operation.", 0, 1, readHistory);
-          case -1400550619: /*updateCreate*/  return new Property("updateCreate", "boolean", "A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.", 0, 1, updateCreate);
+          case -1400550619: /*updateCreate*/  return new Property("updateCreate", "boolean", "A flag to indicate that the server allows or needs to allow the client to create new identities on the server (that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.", 0, 1, updateCreate);
           case 6401826: /*conditionalCreate*/  return new Property("conditionalCreate", "boolean", "A flag that indicates that the server supports conditional create.", 0, 1, conditionalCreate);
           case 822786364: /*conditionalRead*/  return new Property("conditionalRead", "code", "A code that indicates how the server supports conditional read.", 0, 1, conditionalRead);
           case 519849711: /*conditionalUpdate*/  return new Property("conditionalUpdate", "boolean", "A flag that indicates that the server supports conditional update.", 0, 1, conditionalUpdate);
@@ -3890,7 +3890,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           case -1035904544: /*searchInclude*/  return new Property("searchInclude", "string", "A list of _include values supported by the server.", 0, java.lang.Integer.MAX_VALUE, searchInclude);
           case -2123884979: /*searchRevInclude*/  return new Property("searchRevInclude", "string", "A list of _revinclude (reverse include) values supported by the server.", 0, java.lang.Integer.MAX_VALUE, searchRevInclude);
           case -553645115: /*searchParam*/  return new Property("searchParam", "", "Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.", 0, java.lang.Integer.MAX_VALUE, searchParam);
-          case 1662702951: /*operation*/  return new Property("operation", "", "Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the opration, and the parameters.", 0, java.lang.Integer.MAX_VALUE, operation);
+          case 1662702951: /*operation*/  return new Property("operation", "", "Definition of an operation or a named query together with its parameters and their meaning and type. Consult the definition of the operation for details about how to invoke the operation, and the parameters.", 0, java.lang.Integer.MAX_VALUE, operation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -4894,10 +4894,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected CanonicalType definition;
 
         /**
-         * Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.
+         * Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.
          */
         @Child(name = "documentation", type = {MarkdownType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Specific details about operation behavior", formalDefinition="Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation." )
+        @Description(shortDefinition="Specific details about operation behavior", formalDefinition="Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation." )
         protected MarkdownType documentation;
 
         private static final long serialVersionUID = -388608084L;
@@ -5009,7 +5009,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return {@link #documentation} (Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
+         * @return {@link #documentation} (Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
          */
         public MarkdownType getDocumentationElement() { 
           if (this.documentation == null)
@@ -5029,7 +5029,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #documentation} (Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
+         * @param value {@link #documentation} (Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.). This is the underlying object with id, value and extensions. The accessor "getDocumentation" gives direct access to the value
          */
         public CapabilityStatementRestResourceOperationComponent setDocumentationElement(MarkdownType value) { 
           this.documentation = value;
@@ -5037,14 +5037,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.
+         * @return Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.
          */
         public String getDocumentation() { 
           return this.documentation == null ? null : this.documentation.getValue();
         }
 
         /**
-         * @param value Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.
+         * @param value Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.
          */
         public CapabilityStatementRestResourceOperationComponent setDocumentation(String value) { 
           if (value == null)
@@ -5061,7 +5061,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           super.listChildren(children);
           children.add(new Property("name", "string", "The name of the operation or query. For an operation, this is the name  prefixed with $ and used in the URL. For a query, this is the name used in the _query parameter when the query is called.", 0, 1, name));
           children.add(new Property("definition", "canonical(OperationDefinition)", "Where the formal definition can be found.", 0, 1, definition));
-          children.add(new Property("documentation", "markdown", "Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.", 0, 1, documentation));
+          children.add(new Property("documentation", "markdown", "Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.", 0, 1, documentation));
         }
 
         @Override
@@ -5069,7 +5069,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           switch (_hash) {
           case 3373707: /*name*/  return new Property("name", "string", "The name of the operation or query. For an operation, this is the name  prefixed with $ and used in the URL. For a query, this is the name used in the _query parameter when the query is called.", 0, 1, name);
           case -1014418093: /*definition*/  return new Property("definition", "canonical(OperationDefinition)", "Where the formal definition can be found.", 0, 1, definition);
-          case 1587405498: /*documentation*/  return new Property("documentation", "markdown", "Documentation that describes anything special about the operation behaviour, possibly detailing different behaviour for system, type and instance-level invocation of the operation.", 0, 1, documentation);
+          case 1587405498: /*documentation*/  return new Property("documentation", "markdown", "Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.", 0, 1, documentation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -5859,10 +5859,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected Coding protocol;
 
         /**
-         * The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.
+         * The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.
          */
         @Child(name = "address", type = {UrlType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Network address or identifier of the end-point", formalDefinition="The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier." )
+        @Description(shortDefinition="Network address or identifier of the end-point", formalDefinition="The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier." )
         protected UrlType address;
 
         private static final long serialVersionUID = -236946103L;
@@ -5908,7 +5908,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return {@link #address} (The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.). This is the underlying object with id, value and extensions. The accessor "getAddress" gives direct access to the value
+         * @return {@link #address} (The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.). This is the underlying object with id, value and extensions. The accessor "getAddress" gives direct access to the value
          */
         public UrlType getAddressElement() { 
           if (this.address == null)
@@ -5928,7 +5928,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #address} (The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.). This is the underlying object with id, value and extensions. The accessor "getAddress" gives direct access to the value
+         * @param value {@link #address} (The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.). This is the underlying object with id, value and extensions. The accessor "getAddress" gives direct access to the value
          */
         public CapabilityStatementMessagingEndpointComponent setAddressElement(UrlType value) { 
           this.address = value;
@@ -5936,14 +5936,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.
+         * @return The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.
          */
         public String getAddress() { 
           return this.address == null ? null : this.address.getValue();
         }
 
         /**
-         * @param value The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.
+         * @param value The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.
          */
         public CapabilityStatementMessagingEndpointComponent setAddress(String value) { 
             if (this.address == null)
@@ -5955,14 +5955,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("protocol", "Coding", "A list of the messaging transport protocol(s) identifiers, supported by this endpoint.", 0, 1, protocol));
-          children.add(new Property("address", "url", "The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.", 0, 1, address));
+          children.add(new Property("address", "url", "The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.", 0, 1, address));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -989163880: /*protocol*/  return new Property("protocol", "Coding", "A list of the messaging transport protocol(s) identifiers, supported by this endpoint.", 0, 1, protocol);
-          case -1147692044: /*address*/  return new Property("address", "url", "The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.", 0, 1, address);
+          case -1147692044: /*address*/  return new Property("address", "url", "The network address of the endpoint. For solutions that do not use network addresses for routing, it can be just an identifier.", 0, 1, address);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -6342,10 +6342,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected StringType documentation;
 
         /**
-         * A constraint on a resource used in the document.
+         * A profile on the document Bundle that constrains which resources are present, and their contents.
          */
         @Child(name = "profile", type = {CanonicalType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Constraint on a resource used in the document", formalDefinition="A constraint on a resource used in the document." )
+        @Description(shortDefinition="Constraint on the resources used in the document", formalDefinition="A profile on the document Bundle that constrains which resources are present, and their contents." )
         protected CanonicalType profile;
 
         private static final long serialVersionUID = -47853274L;
@@ -6461,7 +6461,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return {@link #profile} (A constraint on a resource used in the document.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @return {@link #profile} (A profile on the document Bundle that constrains which resources are present, and their contents.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
         public CanonicalType getProfileElement() { 
           if (this.profile == null)
@@ -6481,7 +6481,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #profile} (A constraint on a resource used in the document.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @param value {@link #profile} (A profile on the document Bundle that constrains which resources are present, and their contents.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
          */
         public CapabilityStatementDocumentComponent setProfileElement(CanonicalType value) { 
           this.profile = value;
@@ -6489,14 +6489,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return A constraint on a resource used in the document.
+         * @return A profile on the document Bundle that constrains which resources are present, and their contents.
          */
         public String getProfile() { 
           return this.profile == null ? null : this.profile.getValue();
         }
 
         /**
-         * @param value A constraint on a resource used in the document.
+         * @param value A profile on the document Bundle that constrains which resources are present, and their contents.
          */
         public CapabilityStatementDocumentComponent setProfile(String value) { 
             if (this.profile == null)
@@ -6509,7 +6509,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           super.listChildren(children);
           children.add(new Property("mode", "code", "Mode of this document declaration - whether an application is a producer or consumer.", 0, 1, mode));
           children.add(new Property("documentation", "string", "A description of how the application supports or uses the specified document profile.  For example, when documents are created, what action is taken with consumed documents, etc.", 0, 1, documentation));
-          children.add(new Property("profile", "canonical(StructureDefinition)", "A constraint on a resource used in the document.", 0, 1, profile));
+          children.add(new Property("profile", "canonical(StructureDefinition)", "A profile on the document Bundle that constrains which resources are present, and their contents.", 0, 1, profile));
         }
 
         @Override
@@ -6517,7 +6517,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           switch (_hash) {
           case 3357091: /*mode*/  return new Property("mode", "code", "Mode of this document declaration - whether an application is a producer or consumer.", 0, 1, mode);
           case 1587405498: /*documentation*/  return new Property("documentation", "string", "A description of how the application supports or uses the specified document profile.  For example, when documents are created, what action is taken with consumed documents, etc.", 0, 1, documentation);
-          case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "A constraint on a resource used in the document.", 0, 1, profile);
+          case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "A profile on the document Bundle that constrains which resources are present, and their contents.", 0, 1, profile);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -6646,10 +6646,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
   }
 
     /**
-     * Explaination of why this capability statement is needed and why it has been designed as it has.
+     * Explanation of why this capability statement is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this capability statement is defined", formalDefinition="Explaination of why this capability statement is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this capability statement is defined", formalDefinition="Explanation of why this capability statement is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -6660,10 +6660,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     protected MarkdownType copyright;
 
     /**
-     * The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).
+     * The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).
      */
     @Child(name = "kind", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="instance | capability | requirements", formalDefinition="The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase)." )
+    @Description(shortDefinition="instance | capability | requirements", formalDefinition="The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/capability-statement-kind")
     protected Enumeration<CapabilityStatementKind> kind;
 
@@ -6759,7 +6759,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this capability statement is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this capability statement is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -6779,7 +6779,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this capability statement is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this capability statement is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public CapabilityStatement setUrlElement(UriType value) { 
       this.url = value;
@@ -6787,14 +6787,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this capability statement is (or will be) published.
+     * @return An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this capability statement is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this capability statement is (or will be) published.
+     * @param value An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this capability statement is (or will be) published.
      */
     public CapabilityStatement setUrl(String value) { 
       if (Utilities.noString(value))
@@ -7000,7 +7000,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -7020,7 +7020,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public CapabilityStatement setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -7028,14 +7028,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return A boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public CapabilityStatement setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -7045,7 +7045,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the capability statement was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -7065,7 +7065,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the capability statement was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public CapabilityStatement setDateElement(DateTimeType value) { 
       this.date = value;
@@ -7073,14 +7073,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return The date  (and optionally time) when the capability statement was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.
+     * @return The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the capability statement was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.
+     * @param value The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.
      */
     public CapabilityStatement setDate(Date value) { 
         if (this.date == null)
@@ -7090,7 +7090,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the capability statement.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the capability statement.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -7110,7 +7110,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the capability statement.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the capability statement.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public CapabilityStatement setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -7118,14 +7118,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return The name of the individual or organization that published the capability statement.
+     * @return The name of the organization or individual that published the capability statement.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the capability statement.
+     * @param value The name of the organization or individual that published the capability statement.
      */
     public CapabilityStatement setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -7347,7 +7347,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this capability statement is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this capability statement is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -7367,7 +7367,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this capability statement is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this capability statement is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public CapabilityStatement setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -7375,14 +7375,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return Explaination of why this capability statement is needed and why it has been designed as it has.
+     * @return Explanation of why this capability statement is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this capability statement is needed and why it has been designed as it has.
+     * @param value Explanation of why this capability statement is needed and why it has been designed as it has.
      */
     public CapabilityStatement setPurpose(String value) { 
       if (value == null)
@@ -7445,7 +7445,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #kind} (The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @return {@link #kind} (The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public Enumeration<CapabilityStatementKind> getKindElement() { 
       if (this.kind == null)
@@ -7465,7 +7465,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #kind} (The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
+     * @param value {@link #kind} (The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).). This is the underlying object with id, value and extensions. The accessor "getKind" gives direct access to the value
      */
     public CapabilityStatement setKindElement(Enumeration<CapabilityStatementKind> value) { 
       this.kind = value;
@@ -7473,14 +7473,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).
+     * @return The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).
      */
     public CapabilityStatementKind getKind() { 
       return this.kind == null ? null : this.kind.getValue();
     }
 
     /**
-     * @param value The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).
+     * @param value The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).
      */
     public CapabilityStatement setKind(CapabilityStatementKind value) { 
         if (this.kind == null)
@@ -7987,21 +7987,21 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this capability statement is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this capability statement is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the capability statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the capability statement author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the capability statement. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the capability statement.", 0, 1, title));
         children.add(new Property("status", "code", "The status of this capability statement. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the capability statement was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the capability statement.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the capability statement.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the capability statement from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate capability statement instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the capability statement is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this capability statement is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this capability statement is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the capability statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the capability statement.", 0, 1, copyright));
-        children.add(new Property("kind", "code", "The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).", 0, 1, kind));
+        children.add(new Property("kind", "code", "The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).", 0, 1, kind));
         children.add(new Property("instantiates", "canonical(CapabilityStatement)", "Reference to a canonical URL of another CapabilityStatement that this software implements or uses. This capability statement is a published API description that corresponds to a business service. The rest of the capability statement does not need to repeat the details of the referenced resource, but can do so.", 0, java.lang.Integer.MAX_VALUE, instantiates));
         children.add(new Property("software", "", "Software that is covered by this capability statement.  It is used when the capability statement describes the capabilities of a particular software version, independent of an installation.", 0, 1, software));
         children.add(new Property("implementation", "", "Identifies a specific implementation instance that is described by the capability statement - i.e. a particular installation, rather than the capabilities of a software program.", 0, 1, implementation));
@@ -8017,21 +8017,21 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this capability statement is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this capability statement when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this capability statement is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the capability statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the capability statement author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the capability statement. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the capability statement.", 0, 1, title);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this capability statement. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the capability statement was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the capability statement.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this capability statement is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the capability statement was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the capability statement changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the capability statement.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the capability statement from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate capability statement instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the capability statement is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this capability statement is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this capability statement is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the capability statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the capability statement.", 0, 1, copyright);
-        case 3292052: /*kind*/  return new Property("kind", "code", "The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).", 0, 1, kind);
+        case 3292052: /*kind*/  return new Property("kind", "code", "The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind, not instance of software) or a class of implementation (e.g. a desired purchase).", 0, 1, kind);
         case -246883639: /*instantiates*/  return new Property("instantiates", "canonical(CapabilityStatement)", "Reference to a canonical URL of another CapabilityStatement that this software implements or uses. This capability statement is a published API description that corresponds to a business service. The rest of the capability statement does not need to repeat the details of the referenced resource, but can do so.", 0, java.lang.Integer.MAX_VALUE, instantiates);
         case 1319330215: /*software*/  return new Property("software", "", "Software that is covered by this capability statement.  It is used when the capability statement describes the capabilities of a particular software version, independent of an installation.", 0, 1, software);
         case 1683336114: /*implementation*/  return new Property("implementation", "", "Identifies a specific implementation instance that is described by the capability statement - i.e. a particular installation, rather than the capabilities of a software program.", 0, 1, implementation);

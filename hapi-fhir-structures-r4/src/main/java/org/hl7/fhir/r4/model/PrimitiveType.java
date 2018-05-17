@@ -188,4 +188,12 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
       return super.getProperty(hash, name, checkValid);
   }
 
+  public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+    if (name.equals("value"))
+      return new String[] {fhirType(), "string"}; 
+    else
+      return super.getTypesForProperty(hash, name);
+
+  }
+
 }

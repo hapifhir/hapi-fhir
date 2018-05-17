@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.*;
 import org.junit.rules.TestRule;
@@ -37,6 +38,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.hamcrest.Matchers.*;
@@ -190,9 +192,61 @@ public class FhirInstanceValidatorR4Test {
 
 			retVal.add(next);
 		}
-
 		return retVal;
 	}
+
+	/**
+	 * See #938
+	 */
+	@Test
+	public void testValidateEmptyElement() {
+		String input = "<Patient xmlns=\"http://hl7.org/fhir\">" +
+			"<active value=\"\"/>" +
+			"</Patient>";
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("primitive types must have a value or must have child extensions", all.get(0).getMessage());
+	}
+
+	/**
+	 * See #942
+	 */
+	@Test
+	public void testValidateDoesntEnforceBestPracticesByDefault() {
+		Observation input = new Observation();
+		input.setStatus(ObservationStatus.AMENDED);
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+
+		FhirInstanceValidator instanceModule;
+		FhirValidator val;
+		ValidationResult result;
+		List<SingleValidationMessage> all;
+
+		// With BPs disabled
+		val = ourCtx.newValidator();
+		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		val.registerValidatorModule(instanceModule);
+		result = val.validateWithResult(input);
+		all = logResultsAndReturnAll(result);
+		assertTrue(result.isSuccessful());
+		assertThat(all, empty());
+
+		// With BPs enabled
+		val = ourCtx.newValidator();
+		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
+		instanceModule.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Error);
+		val.registerValidatorModule(instanceModule);
+		result = val.validateWithResult(input);
+		all = logResultsAndReturnAll(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("All observations should have a subject", all.get(0).getMessage());
+	}
+
 
 	private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
 		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
@@ -357,11 +411,8 @@ public class FhirInstanceValidatorR4Test {
 		ourLog.info("Took {} ms -- {}ms / pass", delay, per);
 	}
 
-	/**
-	 * // TODO: reenable
-	 */
 	@Test
-	 @Ignore
+	@Ignore
 	public void testValidateBuiltInProfiles() throws Exception {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
@@ -388,15 +439,22 @@ public class FhirInstanceValidatorR4Test {
 			ourLog.trace(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 
 			ValidationResult output = myVal.validateWithResult(next);
-			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+			List<SingleValidationMessage> results = logResultsAndReturnAll(output);
 
 			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
-			// we can remove this
-			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-generate")) {
-				assertEquals(1, errors.size());
-				assertEquals("A search type can only be specified for parameters of type string [searchType implies type = 'string']", errors.get(0).getMessage());
+			// we can remove this. Tracker #17207 was filed about this
+			// https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_item_id=17207
+			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-snapshot")) {
+				assertEquals(1, results.size());
+				assertEquals("A search type can only be specified for parameters of type string [searchType.exists() implies type = 'string']", results.get(0).getMessage());
 				continue;
 			}
+
+
+			List<SingleValidationMessage> errors = results
+				.stream()
+				.filter(t -> t.getSeverity() != ResultSeverityEnum.INFORMATION)
+				.collect(Collectors.toList());
 
 			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
 		}
@@ -980,6 +1038,24 @@ public class FhirInstanceValidatorR4Test {
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
+	}
+
+	@Test
+	public void testMultiplePerformer() {
+		Observation o = new Observation();
+		Practitioner p1 = new Practitioner();
+		Practitioner p2 = new Practitioner();
+
+		o.addPerformer(new Reference(p1));
+		o.addPerformer(new Reference(p2));
+
+		ValidationResult output = myVal.validateWithResult(o);
+		List<SingleValidationMessage> valMessages = logResultsAndReturnAll(output);
+		List<String> messages = new ArrayList<>();
+		for (String msg : messages) {
+			messages.add(msg);
+		}
+		assertThat(messages, not(hasItem("All observations should have a performer")));
 	}
 
 	@Test

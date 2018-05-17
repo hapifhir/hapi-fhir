@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -65,11 +65,11 @@ public enum ConceptMapEquivalence {
          */
         SPECIALIZES, 
         /**
-         * The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.
+         * The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is inexact SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.
          */
         INEXACT, 
         /**
-         * There is no match for this concept in the destination concept system.
+         * There is no match for this concept in the target code system.
          */
         UNMATCHED, 
         /**
@@ -132,8 +132,8 @@ public enum ConceptMapEquivalence {
             case SUBSUMES: return "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target).";
             case NARROWER: return "The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
             case SPECIALIZES: return "The target mapping specializes the meaning of the source concept (e.g. the target is-a source).";
-            case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
-            case UNMATCHED: return "There is no match for this concept in the destination concept system.";
+            case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is inexact SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
+            case UNMATCHED: return "There is no match for this concept in the target code system.";
             case DISJOINT: return "This is an explicit assertion that there is no mapping between the source and target concept.";
             default: return "?";
           }

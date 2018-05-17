@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -117,7 +117,7 @@ public class Specimen extends DomainResource {
             case AVAILABLE: return "Available";
             case UNAVAILABLE: return "Unavailable";
             case UNSATISFACTORY: return "Unsatisfactory";
-            case ENTEREDINERROR: return "Entered-in-error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -280,26 +280,30 @@ public class Specimen extends DomainResource {
          * @return {@link #collected} (Time when specimen was collected from subject - the physiologically relevant time.)
          */
         public DateTimeType getCollectedDateTimeType() throws FHIRException { 
+          if (this.collected == null)
+            return null;
           if (!(this.collected instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (DateTimeType) this.collected;
         }
 
         public boolean hasCollectedDateTimeType() { 
-          return this.collected instanceof DateTimeType;
+          return this != null && this.collected instanceof DateTimeType;
         }
 
         /**
          * @return {@link #collected} (Time when specimen was collected from subject - the physiologically relevant time.)
          */
         public Period getCollectedPeriod() throws FHIRException { 
+          if (this.collected == null)
+            return null;
           if (!(this.collected instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (Period) this.collected;
         }
 
         public boolean hasCollectedPeriod() { 
-          return this.collected instanceof Period;
+          return this != null && this.collected instanceof Period;
         }
 
         public boolean hasCollected() { 
@@ -310,6 +314,8 @@ public class Specimen extends DomainResource {
          * @param value {@link #collected} (Time when specimen was collected from subject - the physiologically relevant time.)
          */
         public SpecimenCollectionComponent setCollected(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+            throw new Error("Not the right type for Specimen.collection.collected[x]: "+value.fhirType());
           this.collected = value;
           return this;
         }
@@ -769,26 +775,30 @@ public class Specimen extends DomainResource {
          * @return {@link #time} (A record of the time or period when the specimen processing occurred.  For example the time of sample fixation or the period of time the sample was in formalin.)
          */
         public DateTimeType getTimeDateTimeType() throws FHIRException { 
+          if (this.time == null)
+            return null;
           if (!(this.time instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.time.getClass().getName()+" was encountered");
           return (DateTimeType) this.time;
         }
 
         public boolean hasTimeDateTimeType() { 
-          return this.time instanceof DateTimeType;
+          return this != null && this.time instanceof DateTimeType;
         }
 
         /**
          * @return {@link #time} (A record of the time or period when the specimen processing occurred.  For example the time of sample fixation or the period of time the sample was in formalin.)
          */
         public Period getTimePeriod() throws FHIRException { 
+          if (this.time == null)
+            return null;
           if (!(this.time instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.time.getClass().getName()+" was encountered");
           return (Period) this.time;
         }
 
         public boolean hasTimePeriod() { 
-          return this.time instanceof Period;
+          return this != null && this.time instanceof Period;
         }
 
         public boolean hasTime() { 
@@ -799,6 +809,8 @@ public class Specimen extends DomainResource {
          * @param value {@link #time} (A record of the time or period when the specimen processing occurred.  For example the time of sample fixation or the period of time the sample was in formalin.)
          */
         public SpecimenProcessingComponent setTime(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+            throw new Error("Not the right type for Specimen.processing.time[x]: "+value.fhirType());
           this.time = value;
           return this;
         }
@@ -1209,26 +1221,30 @@ public class Specimen extends DomainResource {
          * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public CodeableConcept getAdditiveCodeableConcept() throws FHIRException { 
+          if (this.additive == null)
+            return null;
           if (!(this.additive instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (CodeableConcept) this.additive;
         }
 
         public boolean hasAdditiveCodeableConcept() { 
-          return this.additive instanceof CodeableConcept;
+          return this != null && this.additive instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public Reference getAdditiveReference() throws FHIRException { 
+          if (this.additive == null)
+            return null;
           if (!(this.additive instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (Reference) this.additive;
         }
 
         public boolean hasAdditiveReference() { 
-          return this.additive instanceof Reference;
+          return this != null && this.additive instanceof Reference;
         }
 
         public boolean hasAdditive() { 
@@ -1239,6 +1255,8 @@ public class Specimen extends DomainResource {
          * @param value {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public SpecimenContainerComponent setAdditive(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for Specimen.container.additive[x]: "+value.fhirType());
           this.additive = value;
           return this;
         }
@@ -1471,14 +1489,14 @@ public class Specimen extends DomainResource {
     protected CodeableConcept type;
 
     /**
-     * Where the specimen came from. This may be from the patient(s) or from the environment or a device.
+     * Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.
      */
     @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class, Location.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device", formalDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device." )
+    @Description(shortDefinition="Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device", formalDefinition="Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (Where the specimen came from. This may be from the patient(s) or from the environment or a device.)
+     * The actual object that is the target of the reference (Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.)
      */
     protected Resource subjectTarget;
 
@@ -1709,7 +1727,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (Where the specimen came from. This may be from the patient(s) or from the environment or a device.)
+     * @return {@link #subject} (Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -1725,7 +1743,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (Where the specimen came from. This may be from the patient(s) or from the environment or a device.)
+     * @param value {@link #subject} (Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.)
      */
     public Specimen setSubject(Reference value) { 
       this.subject = value;
@@ -1733,14 +1751,14 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Where the specimen came from. This may be from the patient(s) or from the environment or a device.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Where the specimen came from. This may be from the patient(s) or from the environment or a device.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.)
      */
     public Specimen setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -2135,7 +2153,7 @@ public class Specimen extends DomainResource {
         children.add(new Property("accessionIdentifier", "Identifier", "The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.", 0, 1, accessionIdentifier));
         children.add(new Property("status", "code", "The availability of the specimen.", 0, 1, status));
         children.add(new Property("type", "CodeableConcept", "The kind of material that forms the specimen.", 0, 1, type));
-        children.add(new Property("subject", "Reference(Patient|Group|Device|Substance|Location)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, 1, subject));
+        children.add(new Property("subject", "Reference(Patient|Group|Device|Substance|Location)", "Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.", 0, 1, subject));
         children.add(new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, 1, receivedTime));
         children.add(new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.", 0, java.lang.Integer.MAX_VALUE, parent));
         children.add(new Property("request", "Reference(ServiceRequest)", "Details concerning a service request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request));
@@ -2152,7 +2170,7 @@ public class Specimen extends DomainResource {
         case 818734061: /*accessionIdentifier*/  return new Property("accessionIdentifier", "Identifier", "The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.", 0, 1, accessionIdentifier);
         case -892481550: /*status*/  return new Property("status", "code", "The availability of the specimen.", 0, 1, status);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind of material that forms the specimen.", 0, 1, type);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Substance|Location)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Substance|Location)", "Where the specimen came from. This may be from patient(s),from a location (e.g., the source of an environmental sample), or a sampling of a substance or a device.", 0, 1, subject);
         case -767961010: /*receivedTime*/  return new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, 1, receivedTime);
         case -995424086: /*parent*/  return new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of another specimen.", 0, java.lang.Integer.MAX_VALUE, parent);
         case 1095692943: /*request*/  return new Property("request", "Reference(ServiceRequest)", "Details concerning a service request that required a specimen to be collected.", 0, java.lang.Integer.MAX_VALUE, request);

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A reference to a code defined by a terminology system.
  */
@@ -344,13 +345,26 @@ public class Coding extends Type implements IBaseCoding, ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("system", "uri", "The identification of the code system that defines the meaning of the symbol in the code.", 0, java.lang.Integer.MAX_VALUE, system));
-        childrenList.add(new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, java.lang.Integer.MAX_VALUE, display));
-        childrenList.add(new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, java.lang.Integer.MAX_VALUE, userSelected));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("system", "uri", "The identification of the code system that defines the meaning of the symbol in the code.", 0, 1, system));
+        children.add(new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version));
+        children.add(new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, 1, code));
+        children.add(new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, 1, display));
+        children.add(new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, 1, userSelected));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -887328209: /*system*/  return new Property("system", "uri", "The identification of the code system that defines the meaning of the symbol in the code.", 0, 1, system);
+        case 351608024: /*version*/  return new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version);
+        case 3059181: /*code*/  return new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, 1, code);
+        case 1671764162: /*display*/  return new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, 1, display);
+        case 423643014: /*userSelected*/  return new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, 1, userSelected);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -474,23 +488,23 @@ public class Coding extends Type implements IBaseCoding, ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Coding))
+        if (!(other_ instanceof Coding))
           return false;
-        Coding o = (Coding) other;
+        Coding o = (Coding) other_;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(code, o.code, true)
            && compareDeep(display, o.display, true) && compareDeep(userSelected, o.userSelected, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Coding))
+        if (!(other_ instanceof Coding))
           return false;
-        Coding o = (Coding) other;
+        Coding o = (Coding) other_;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(code, o.code, true)
            && compareValues(display, o.display, true) && compareValues(userSelected, o.userSelected, true);
       }

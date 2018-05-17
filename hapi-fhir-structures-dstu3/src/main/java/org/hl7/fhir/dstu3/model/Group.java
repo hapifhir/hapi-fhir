@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
@@ -272,7 +273,7 @@ public class Group extends DomainResource {
         /**
          * @param value {@link #code} (A code that identifies the kind of trait being asserted.)
          */
-        public GroupCharacteristicComponent setCode(CodeableConcept value) { 
+        public GroupCharacteristicComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -288,52 +289,60 @@ public class Group extends DomainResource {
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
         public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
         public boolean hasValueCodeableConcept() { 
-          return this.value instanceof CodeableConcept;
+          return this != null && this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
         public boolean hasValueBooleanType() { 
-          return this.value instanceof BooleanType;
+          return this != null && this.value instanceof BooleanType;
         }
 
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
         public Range getValueRange() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
         }
 
         public boolean hasValueRange() { 
-          return this.value instanceof Range;
+          return this != null && this.value instanceof Range;
         }
 
         public boolean hasValue() { 
@@ -343,7 +352,9 @@ public class Group extends DomainResource {
         /**
          * @param value {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
-        public GroupCharacteristicComponent setValue(Type value) { 
+        public GroupCharacteristicComponent setValue(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof BooleanType || value instanceof Quantity || value instanceof Range))
+            throw new FHIRFormatError("Not the right type for Group.characteristic.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -412,17 +423,34 @@ public class Group extends DomainResource {
         /**
          * @param value {@link #period} (The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.)
          */
-        public GroupCharacteristicComponent setPeriod(Period value) { 
+        public GroupCharacteristicComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "A code that identifies the kind of trait being asserted.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("exclude", "boolean", "If true, indicates the characteristic is one that is NOT held by members of the group.", 0, java.lang.Integer.MAX_VALUE, exclude));
-          childrenList.add(new Property("period", "Period", "The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "A code that identifies the kind of trait being asserted.", 0, 1, code));
+          children.add(new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value));
+          children.add(new Property("exclude", "boolean", "If true, indicates the characteristic is one that is NOT held by members of the group.", 0, 1, exclude));
+          children.add(new Property("period", "Period", "The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that identifies the kind of trait being asserted.", 0, 1, code);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value);
+          case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value);
+          case 2030761548: /*valueRange*/  return new Property("value[x]", "CodeableConcept|boolean|Quantity|Range", "The value of the trait that holds (or does not hold - see 'exclude') for members of the group.", 0, 1, value);
+          case -1321148966: /*exclude*/  return new Property("exclude", "boolean", "If true, indicates the characteristic is one that is NOT held by members of the group.", 0, 1, exclude);
+          case -991726143: /*period*/  return new Property("period", "Period", "The period over which the characteristic is tested; e.g. the patient had an operation during the month of June.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -541,23 +569,23 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GroupCharacteristicComponent))
+        if (!(other_ instanceof GroupCharacteristicComponent))
           return false;
-        GroupCharacteristicComponent o = (GroupCharacteristicComponent) other;
+        GroupCharacteristicComponent o = (GroupCharacteristicComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(value, o.value, true) && compareDeep(exclude, o.exclude, true)
            && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GroupCharacteristicComponent))
+        if (!(other_ instanceof GroupCharacteristicComponent))
           return false;
-        GroupCharacteristicComponent o = (GroupCharacteristicComponent) other;
+        GroupCharacteristicComponent o = (GroupCharacteristicComponent) other_;
         return compareValues(exclude, o.exclude, true);
       }
 
@@ -637,7 +665,7 @@ public class Group extends DomainResource {
         /**
          * @param value {@link #entity} (A reference to the entity that is a member of the group. Must be consistent with Group.type.)
          */
-        public GroupMemberComponent setEntity(Reference value) { 
+        public GroupMemberComponent setEntity(Reference value)  { 
           this.entity = value;
           return this;
         }
@@ -676,7 +704,7 @@ public class Group extends DomainResource {
         /**
          * @param value {@link #period} (The period that the member was in the group, if known.)
          */
-        public GroupMemberComponent setPeriod(Period value) { 
+        public GroupMemberComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
@@ -726,11 +754,22 @@ public class Group extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("entity", "Reference(Patient|Practitioner|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, java.lang.Integer.MAX_VALUE, entity));
-          childrenList.add(new Property("period", "Period", "The period that the member was in the group, if known.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("inactive", "boolean", "A flag to indicate that the member is no longer in the group, but previously may have been a member.", 0, java.lang.Integer.MAX_VALUE, inactive));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("entity", "Reference(Patient|Practitioner|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, 1, entity));
+          children.add(new Property("period", "Period", "The period that the member was in the group, if known.", 0, 1, period));
+          children.add(new Property("inactive", "boolean", "A flag to indicate that the member is no longer in the group, but previously may have been a member.", 0, 1, inactive));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1298275357: /*entity*/  return new Property("entity", "Reference(Patient|Practitioner|Device|Medication|Substance)", "A reference to the entity that is a member of the group. Must be consistent with Group.type.", 0, 1, entity);
+          case -991726143: /*period*/  return new Property("period", "Period", "The period that the member was in the group, if known.", 0, 1, period);
+          case 24665195: /*inactive*/  return new Property("inactive", "boolean", "A flag to indicate that the member is no longer in the group, but previously may have been a member.", 0, 1, inactive);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -823,23 +862,23 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GroupMemberComponent))
+        if (!(other_ instanceof GroupMemberComponent))
           return false;
-        GroupMemberComponent o = (GroupMemberComponent) other;
+        GroupMemberComponent o = (GroupMemberComponent) other_;
         return compareDeep(entity, o.entity, true) && compareDeep(period, o.period, true) && compareDeep(inactive, o.inactive, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GroupMemberComponent))
+        if (!(other_ instanceof GroupMemberComponent))
           return false;
-        GroupMemberComponent o = (GroupMemberComponent) other;
+        GroupMemberComponent o = (GroupMemberComponent) other_;
         return compareValues(inactive, o.inactive, true);
       }
 
@@ -1144,7 +1183,7 @@ public class Group extends DomainResource {
     /**
      * @param value {@link #code} (Provides a specific type of resource the group includes; e.g. "cow", "syringe", etc.)
      */
-    public Group setCode(CodeableConcept value) { 
+    public Group setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -1349,17 +1388,34 @@ public class Group extends DomainResource {
       return getMember().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("active", "boolean", "Indicates whether the record for the group is available for use or is merely being retained for historical purposes.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, java.lang.Integer.MAX_VALUE, actual));
-        childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
-        childrenList.add(new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));
-        childrenList.add(new Property("member", "", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("active", "boolean", "Indicates whether the record for the group is available for use or is merely being retained for historical purposes.", 0, 1, active));
+        children.add(new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, 1, type));
+        children.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, 1, actual));
+        children.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, 1, code));
+        children.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, 1, name));
+        children.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, 1, quantity));
+        children.add(new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));
+        children.add(new Property("member", "", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Indicates whether the record for the group is available for use or is merely being retained for historical purposes.", 0, 1, active);
+        case 3575610: /*type*/  return new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, 1, type);
+        case -1422939762: /*actual*/  return new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, 1, actual);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, 1, code);
+        case 3373707: /*name*/  return new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, 1, name);
+        case -1285004149: /*quantity*/  return new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, 1, quantity);
+        case 366313883: /*characteristic*/  return new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic);
+        case -1077769574: /*member*/  return new Property("member", "", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1546,12 +1602,12 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Group))
+        if (!(other_ instanceof Group))
           return false;
-        Group o = (Group) other;
+        Group o = (Group) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(type, o.type, true)
            && compareDeep(actual, o.actual, true) && compareDeep(code, o.code, true) && compareDeep(name, o.name, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(characteristic, o.characteristic, true)
@@ -1559,12 +1615,12 @@ public class Group extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Group))
+        if (!(other_ instanceof Group))
           return false;
-        Group o = (Group) other;
+        Group o = (Group) other_;
         return compareValues(active, o.active, true) && compareValues(type, o.type, true) && compareValues(actual, o.actual, true)
            && compareValues(name, o.name, true) && compareValues(quantity, o.quantity, true);
       }

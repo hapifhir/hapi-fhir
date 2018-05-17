@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.TestUtil;
+import org.springframework.transaction.PlatformTransactionManager;
 
 public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 
@@ -61,5 +62,9 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 	protected FhirContext getContext() {
 		return ourCtx;
 	}
-	
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return null;
+	}
+
 }

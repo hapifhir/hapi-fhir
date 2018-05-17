@@ -982,7 +982,7 @@
     <Cell ss:StyleID="s64"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s70"><Data ss:Type="String">Reference range qualifier</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Codes to indicate what part of the targeted reference population it applies to. For example, the normal or therapeutic range.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">what kind of reference range this is - normal, recommended, therapeutic, etc, - for proper interpretation.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">what kind of reference range this is - normal, recommended, therapeutic, etc., - for proper interpretation.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">normal range is the default</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="20"><Data ss:Type="String">n.a.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>

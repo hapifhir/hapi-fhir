@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -274,16 +274,11 @@ public class RelatedArtifact extends Type implements ICompositeType {
     /**
      * The related resource, such as a library, value set, profile, or other knowledge resource.
      */
-    @Child(name = "resource", type = {Reference.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "resource", type = {CanonicalType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What resource is being referenced", formalDefinition="The related resource, such as a library, value set, profile, or other knowledge resource." )
-    protected Reference resource;
+    protected CanonicalType resource;
 
-    /**
-     * The actual object that is the target of the reference (The related resource, such as a library, value set, profile, or other knowledge resource.)
-     */
-    protected Resource resourceTarget;
-
-    private static final long serialVersionUID = 631878941L;
+    private static final long serialVersionUID = 365945959L;
 
   /**
    * Constructor
@@ -517,15 +512,19 @@ public class RelatedArtifact extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #resource} (The related resource, such as a library, value set, profile, or other knowledge resource.)
+     * @return {@link #resource} (The related resource, such as a library, value set, profile, or other knowledge resource.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
      */
-    public Reference getResource() { 
+    public CanonicalType getResourceElement() { 
       if (this.resource == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create RelatedArtifact.resource");
         else if (Configuration.doAutoCreate())
-          this.resource = new Reference(); // cc
+          this.resource = new CanonicalType(); // bb
       return this.resource;
+    }
+
+    public boolean hasResourceElement() { 
+      return this.resource != null && !this.resource.isEmpty();
     }
 
     public boolean hasResource() { 
@@ -533,25 +532,31 @@ public class RelatedArtifact extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #resource} (The related resource, such as a library, value set, profile, or other knowledge resource.)
+     * @param value {@link #resource} (The related resource, such as a library, value set, profile, or other knowledge resource.). This is the underlying object with id, value and extensions. The accessor "getResource" gives direct access to the value
      */
-    public RelatedArtifact setResource(Reference value) { 
+    public RelatedArtifact setResourceElement(CanonicalType value) { 
       this.resource = value;
       return this;
     }
 
     /**
-     * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The related resource, such as a library, value set, profile, or other knowledge resource.)
+     * @return The related resource, such as a library, value set, profile, or other knowledge resource.
      */
-    public Resource getResourceTarget() { 
-      return this.resourceTarget;
+    public String getResource() { 
+      return this.resource == null ? null : this.resource.getValue();
     }
 
     /**
-     * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The related resource, such as a library, value set, profile, or other knowledge resource.)
+     * @param value The related resource, such as a library, value set, profile, or other knowledge resource.
      */
-    public RelatedArtifact setResourceTarget(Resource value) { 
-      this.resourceTarget = value;
+    public RelatedArtifact setResource(String value) { 
+      if (Utilities.noString(value))
+        this.resource = null;
+      else {
+        if (this.resource == null)
+          this.resource = new CanonicalType();
+        this.resource.setValue(value);
+      }
       return this;
     }
 
@@ -562,7 +567,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         children.add(new Property("citation", "string", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation));
         children.add(new Property("url", "url", "A url for the artifact that can be followed to access the actual content.", 0, 1, url));
         children.add(new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, 1, document));
-        children.add(new Property("resource", "Reference(Any)", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource));
+        children.add(new Property("resource", "canonical", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource));
       }
 
       @Override
@@ -573,7 +578,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         case -1442706713: /*citation*/  return new Property("citation", "string", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation);
         case 116079: /*url*/  return new Property("url", "url", "A url for the artifact that can be followed to access the actual content.", 0, 1, url);
         case 861720859: /*document*/  return new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, 1, document);
-        case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource);
+        case -341064690: /*resource*/  return new Property("resource", "canonical", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -587,7 +592,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         case -1442706713: /*citation*/ return this.citation == null ? new Base[0] : new Base[] {this.citation}; // StringType
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UrlType
         case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Attachment
-        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
+        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -613,7 +618,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
           this.document = castToAttachment(value); // Attachment
           return value;
         case -341064690: // resource
-          this.resource = castToReference(value); // Reference
+          this.resource = castToCanonical(value); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -634,7 +639,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         } else if (name.equals("document")) {
           this.document = castToAttachment(value); // Attachment
         } else if (name.equals("resource")) {
-          this.resource = castToReference(value); // Reference
+          this.resource = castToCanonical(value); // CanonicalType
         } else
           return super.setProperty(name, value);
         return value;
@@ -648,7 +653,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         case -1442706713:  return getCitationElement();
         case 116079:  return getUrlElement();
         case 861720859:  return getDocument(); 
-        case -341064690:  return getResource(); 
+        case -341064690:  return getResourceElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -662,7 +667,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         case -1442706713: /*citation*/ return new String[] {"string"};
         case 116079: /*url*/ return new String[] {"url"};
         case 861720859: /*document*/ return new String[] {"Attachment"};
-        case -341064690: /*resource*/ return new String[] {"Reference"};
+        case -341064690: /*resource*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -687,8 +692,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
           return this.document;
         }
         else if (name.equals("resource")) {
-          this.resource = new Reference();
-          return this.resource;
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedArtifact.resource");
         }
         else
           return super.addChild(name);
@@ -735,7 +739,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
           return false;
         RelatedArtifact o = (RelatedArtifact) other_;
         return compareValues(type, o.type, true) && compareValues(display, o.display, true) && compareValues(citation, o.citation, true)
-           && compareValues(url, o.url, true);
+           && compareValues(url, o.url, true) && compareValues(resource, o.resource, true);
       }
 
       public boolean isEmpty() {

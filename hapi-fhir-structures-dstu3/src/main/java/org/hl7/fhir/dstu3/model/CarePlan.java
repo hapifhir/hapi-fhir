@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
@@ -763,7 +764,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #reference} (The details of the proposed activity represented in a specific resource.)
          */
-        public CarePlanActivityComponent setReference(Reference value) { 
+        public CarePlanActivityComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -802,18 +803,31 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #detail} (A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.)
          */
-        public CarePlanActivityComponent setDetail(CarePlanActivityDetailComponent value) { 
+        public CarePlanActivityComponent setDetail(CarePlanActivityDetailComponent value)  { 
           this.detail = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("outcomeCodeableConcept", "CodeableConcept", "Identifies the outcome at the point when the status of the activity is assessed.  For example, the outcome of an education activity could be patient understands (or not).", 0, java.lang.Integer.MAX_VALUE, outcomeCodeableConcept));
-          childrenList.add(new Property("outcomeReference", "Reference(Any)", "Details of the outcome or action resulting from the activity.  The reference to an \"event\" resource, such as Procedure or Encounter or Observation, is the result/outcome of the activity itself.  The activity can be conveyed using CarePlan.activity.detail OR using the CarePlan.activity.reference (a reference to a “request” resource).", 0, java.lang.Integer.MAX_VALUE, outcomeReference));
-          childrenList.add(new Property("progress", "Annotation", "Notes about the adherence/status/progress of the activity.", 0, java.lang.Integer.MAX_VALUE, progress));
-          childrenList.add(new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceRequest|MedicationRequest|NutritionOrder|Task|ProcedureRequest|ReferralRequest|VisionPrescription|RequestGroup)", "The details of the proposed activity represented in a specific resource.", 0, java.lang.Integer.MAX_VALUE, reference));
-          childrenList.add(new Property("detail", "", "A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("outcomeCodeableConcept", "CodeableConcept", "Identifies the outcome at the point when the status of the activity is assessed.  For example, the outcome of an education activity could be patient understands (or not).", 0, java.lang.Integer.MAX_VALUE, outcomeCodeableConcept));
+          children.add(new Property("outcomeReference", "Reference(Any)", "Details of the outcome or action resulting from the activity.  The reference to an \"event\" resource, such as Procedure or Encounter or Observation, is the result/outcome of the activity itself.  The activity can be conveyed using CarePlan.activity.detail OR using the CarePlan.activity.reference (a reference to a “request” resource).", 0, java.lang.Integer.MAX_VALUE, outcomeReference));
+          children.add(new Property("progress", "Annotation", "Notes about the adherence/status/progress of the activity.", 0, java.lang.Integer.MAX_VALUE, progress));
+          children.add(new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceRequest|MedicationRequest|NutritionOrder|Task|ProcedureRequest|ReferralRequest|VisionPrescription|RequestGroup)", "The details of the proposed activity represented in a specific resource.", 0, 1, reference));
+          children.add(new Property("detail", "", "A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.", 0, 1, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -511913489: /*outcomeCodeableConcept*/  return new Property("outcomeCodeableConcept", "CodeableConcept", "Identifies the outcome at the point when the status of the activity is assessed.  For example, the outcome of an education activity could be patient understands (or not).", 0, java.lang.Integer.MAX_VALUE, outcomeCodeableConcept);
+          case -782273511: /*outcomeReference*/  return new Property("outcomeReference", "Reference(Any)", "Details of the outcome or action resulting from the activity.  The reference to an \"event\" resource, such as Procedure or Encounter or Observation, is the result/outcome of the activity itself.  The activity can be conveyed using CarePlan.activity.detail OR using the CarePlan.activity.reference (a reference to a “request” resource).", 0, java.lang.Integer.MAX_VALUE, outcomeReference);
+          case -1001078227: /*progress*/  return new Property("progress", "Annotation", "Notes about the adherence/status/progress of the activity.", 0, java.lang.Integer.MAX_VALUE, progress);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceRequest|MedicationRequest|NutritionOrder|Task|ProcedureRequest|ReferralRequest|VisionPrescription|RequestGroup)", "The details of the proposed activity represented in a specific resource.", 0, 1, reference);
+          case -1335224239: /*detail*/  return new Property("detail", "", "A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.", 0, 1, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -942,24 +956,24 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CarePlanActivityComponent))
+        if (!(other_ instanceof CarePlanActivityComponent))
           return false;
-        CarePlanActivityComponent o = (CarePlanActivityComponent) other;
+        CarePlanActivityComponent o = (CarePlanActivityComponent) other_;
         return compareDeep(outcomeCodeableConcept, o.outcomeCodeableConcept, true) && compareDeep(outcomeReference, o.outcomeReference, true)
            && compareDeep(progress, o.progress, true) && compareDeep(reference, o.reference, true) && compareDeep(detail, o.detail, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CarePlanActivityComponent))
+        if (!(other_ instanceof CarePlanActivityComponent))
           return false;
-        CarePlanActivityComponent o = (CarePlanActivityComponent) other;
+        CarePlanActivityComponent o = (CarePlanActivityComponent) other_;
         return true;
       }
 
@@ -1155,7 +1169,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #category} (High-level categorization of the type of activity in a care plan.)
          */
-        public CarePlanActivityDetailComponent setCategory(CodeableConcept value) { 
+        public CarePlanActivityDetailComponent setCategory(CodeableConcept value)  { 
           this.category = value;
           return this;
         }
@@ -1179,7 +1193,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #definition} (Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.)
          */
-        public CarePlanActivityDetailComponent setDefinition(Reference value) { 
+        public CarePlanActivityDetailComponent setDefinition(Reference value)  { 
           this.definition = value;
           return this;
         }
@@ -1218,7 +1232,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #code} (Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.)
          */
-        public CarePlanActivityDetailComponent setCode(CodeableConcept value) { 
+        public CarePlanActivityDetailComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -1576,39 +1590,45 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
         public Timing getScheduledTiming() throws FHIRException { 
+          if (this.scheduled == null)
+            return null;
           if (!(this.scheduled instanceof Timing))
             throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Timing) this.scheduled;
         }
 
         public boolean hasScheduledTiming() { 
-          return this.scheduled instanceof Timing;
+          return this != null && this.scheduled instanceof Timing;
         }
 
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
         public Period getScheduledPeriod() throws FHIRException { 
+          if (this.scheduled == null)
+            return null;
           if (!(this.scheduled instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Period) this.scheduled;
         }
 
         public boolean hasScheduledPeriod() { 
-          return this.scheduled instanceof Period;
+          return this != null && this.scheduled instanceof Period;
         }
 
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
         public StringType getScheduledStringType() throws FHIRException { 
+          if (this.scheduled == null)
+            return null;
           if (!(this.scheduled instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (StringType) this.scheduled;
         }
 
         public boolean hasScheduledStringType() { 
-          return this.scheduled instanceof StringType;
+          return this != null && this.scheduled instanceof StringType;
         }
 
         public boolean hasScheduled() { 
@@ -1618,7 +1638,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
-        public CarePlanActivityDetailComponent setScheduled(Type value) { 
+        public CarePlanActivityDetailComponent setScheduled(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof Timing || value instanceof Period || value instanceof StringType))
+            throw new FHIRFormatError("Not the right type for CarePlan.activity.detail.scheduled[x]: "+value.fhirType());
           this.scheduled = value;
           return this;
         }
@@ -1642,7 +1664,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #location} (Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.)
          */
-        public CarePlanActivityDetailComponent setLocation(Reference value) { 
+        public CarePlanActivityDetailComponent setLocation(Reference value)  { 
           this.location = value;
           return this;
         }
@@ -1741,26 +1763,30 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
          * @return {@link #product} (Identifies the food, drug or other product to be consumed or supplied in the activity.)
          */
         public CodeableConcept getProductCodeableConcept() throws FHIRException { 
+          if (this.product == null)
+            return null;
           if (!(this.product instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.product.getClass().getName()+" was encountered");
           return (CodeableConcept) this.product;
         }
 
         public boolean hasProductCodeableConcept() { 
-          return this.product instanceof CodeableConcept;
+          return this != null && this.product instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #product} (Identifies the food, drug or other product to be consumed or supplied in the activity.)
          */
         public Reference getProductReference() throws FHIRException { 
+          if (this.product == null)
+            return null;
           if (!(this.product instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.product.getClass().getName()+" was encountered");
           return (Reference) this.product;
         }
 
         public boolean hasProductReference() { 
-          return this.product instanceof Reference;
+          return this != null && this.product instanceof Reference;
         }
 
         public boolean hasProduct() { 
@@ -1770,7 +1796,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #product} (Identifies the food, drug or other product to be consumed or supplied in the activity.)
          */
-        public CarePlanActivityDetailComponent setProduct(Type value) { 
+        public CarePlanActivityDetailComponent setProduct(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for CarePlan.activity.detail.product[x]: "+value.fhirType());
           this.product = value;
           return this;
         }
@@ -1794,7 +1822,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #dailyAmount} (Identifies the quantity expected to be consumed in a given day.)
          */
-        public CarePlanActivityDetailComponent setDailyAmount(SimpleQuantity value) { 
+        public CarePlanActivityDetailComponent setDailyAmount(SimpleQuantity value)  { 
           this.dailyAmount = value;
           return this;
         }
@@ -1818,7 +1846,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #quantity} (Identifies the quantity expected to be supplied, administered or consumed by the subject.)
          */
-        public CarePlanActivityDetailComponent setQuantity(SimpleQuantity value) { 
+        public CarePlanActivityDetailComponent setQuantity(SimpleQuantity value)  { 
           this.quantity = value;
           return this;
         }
@@ -1872,24 +1900,55 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("category", "CodeableConcept", "High-level categorization of the type of activity in a care plan.", 0, java.lang.Integer.MAX_VALUE, category));
-          childrenList.add(new Property("definition", "Reference(PlanDefinition|ActivityDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, java.lang.Integer.MAX_VALUE, definition));
-          childrenList.add(new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-          childrenList.add(new Property("reasonReference", "Reference(Condition)", "Provides the health condition(s) that drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
-          childrenList.add(new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal));
-          childrenList.add(new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, java.lang.Integer.MAX_VALUE, status));
-          childrenList.add(new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, java.lang.Integer.MAX_VALUE, statusReason));
-          childrenList.add(new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.", 0, java.lang.Integer.MAX_VALUE, prohibited));
-          childrenList.add(new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, java.lang.Integer.MAX_VALUE, scheduled));
-          childrenList.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("performer", "Reference(Practitioner|Organization|RelatedPerson|Patient|CareTeam)", "Identifies who's expected to be involved in the activity.", 0, java.lang.Integer.MAX_VALUE, performer));
-          childrenList.add(new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, java.lang.Integer.MAX_VALUE, product));
-          childrenList.add(new Property("dailyAmount", "SimpleQuantity", "Identifies the quantity expected to be consumed in a given day.", 0, java.lang.Integer.MAX_VALUE, dailyAmount));
-          childrenList.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be supplied, administered or consumed by the subject.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("description", "string", "This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.", 0, java.lang.Integer.MAX_VALUE, description));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("category", "CodeableConcept", "High-level categorization of the type of activity in a care plan.", 0, 1, category));
+          children.add(new Property("definition", "Reference(PlanDefinition|ActivityDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, 1, definition));
+          children.add(new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.", 0, 1, code));
+          children.add(new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+          children.add(new Property("reasonReference", "Reference(Condition)", "Provides the health condition(s) that drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+          children.add(new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal));
+          children.add(new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, 1, status));
+          children.add(new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason));
+          children.add(new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, prohibited));
+          children.add(new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled));
+          children.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, 1, location));
+          children.add(new Property("performer", "Reference(Practitioner|Organization|RelatedPerson|Patient|CareTeam)", "Identifies who's expected to be involved in the activity.", 0, java.lang.Integer.MAX_VALUE, performer));
+          children.add(new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, 1, product));
+          children.add(new Property("dailyAmount", "SimpleQuantity", "Identifies the quantity expected to be consumed in a given day.", 0, 1, dailyAmount));
+          children.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be supplied, administered or consumed by the subject.", 0, 1, quantity));
+          children.add(new Property("description", "string", "This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.", 0, 1, description));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "High-level categorization of the type of activity in a care plan.", 0, 1, category);
+          case -1014418093: /*definition*/  return new Property("definition", "Reference(PlanDefinition|ActivityDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, 1, definition);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. What lab test, what procedure, what kind of encounter.", 0, 1, code);
+          case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+          case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition)", "Provides the health condition(s) that drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+          case 3178259: /*goal*/  return new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal);
+          case -892481550: /*status*/  return new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, 1, status);
+          case 2051346646: /*statusReason*/  return new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason);
+          case 663275198: /*prohibited*/  return new Property("prohibited", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, prohibited);
+          case 1162627251: /*scheduled[x]*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
+          case -160710483: /*scheduled*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
+          case 998483799: /*scheduledTiming*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
+          case 880422094: /*scheduledPeriod*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
+          case 980162334: /*scheduledString*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
+          case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, 1, location);
+          case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|Organization|RelatedPerson|Patient|CareTeam)", "Identifies who's expected to be involved in the activity.", 0, java.lang.Integer.MAX_VALUE, performer);
+          case 1753005361: /*product[x]*/  return new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, 1, product);
+          case -309474065: /*product*/  return new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, 1, product);
+          case 906854066: /*productCodeableConcept*/  return new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, 1, product);
+          case -669667556: /*productReference*/  return new Property("product[x]", "CodeableConcept|Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, 1, product);
+          case -768908335: /*dailyAmount*/  return new Property("dailyAmount", "SimpleQuantity", "Identifies the quantity expected to be consumed in a given day.", 0, 1, dailyAmount);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be supplied, administered or consumed by the subject.", 0, 1, quantity);
+          case -1724546052: /*description*/  return new Property("description", "string", "This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.", 0, 1, description);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2176,12 +2235,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CarePlanActivityDetailComponent))
+        if (!(other_ instanceof CarePlanActivityDetailComponent))
           return false;
-        CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other;
+        CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other_;
         return compareDeep(category, o.category, true) && compareDeep(definition, o.definition, true) && compareDeep(code, o.code, true)
            && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
            && compareDeep(goal, o.goal, true) && compareDeep(status, o.status, true) && compareDeep(statusReason, o.statusReason, true)
@@ -2191,12 +2250,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CarePlanActivityDetailComponent))
+        if (!(other_ instanceof CarePlanActivityDetailComponent))
           return false;
-        CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other;
+        CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other_;
         return compareValues(status, o.status, true) && compareValues(statusReason, o.statusReason, true) && compareValues(prohibited, o.prohibited, true)
            && compareValues(description, o.description, true);
       }
@@ -3032,7 +3091,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #subject} (Identifies the patient or group whose intended care is described by the plan.)
      */
-    public CarePlan setSubject(Reference value) { 
+    public CarePlan setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -3071,7 +3130,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #context} (Identifies the original context in which this particular CarePlan was created.)
      */
-    public CarePlan setContext(Reference value) { 
+    public CarePlan setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -3110,7 +3169,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * @param value {@link #period} (Indicates when the plan did (or is intended to) come into effect and end.)
      */
-    public CarePlan setPeriod(Period value) { 
+    public CarePlan setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -3572,28 +3631,56 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       return getNote().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("definition", "Reference(PlanDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("basedOn", "Reference(CarePlan)", "A care plan that is fulfilled in whole or in part by this care plan.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("replaces", "Reference(CarePlan)", "Completed or terminated care plan whose function is taken by this new care plan.", 0, java.lang.Integer.MAX_VALUE, replaces));
-        childrenList.add(new Property("partOf", "Reference(CarePlan)", "A larger care plan of which this particular care plan is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("status", "code", "Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("intent", "code", "Indicates the level of authority/intentionality associated with the care plan and where the care plan fits into the workflow chain.", 0, java.lang.Integer.MAX_VALUE, intent));
-        childrenList.add(new Property("category", "CodeableConcept", "Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("title", "string", "Human-friendly name for the CarePlan.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("description", "string", "A description of the scope and nature of the plan.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular CarePlan was created.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("author", "Reference(Patient|Practitioner|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or ogranization who is responsible for the content of the care plan.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("careTeam", "Reference(CareTeam)", "Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.", 0, java.lang.Integer.MAX_VALUE, careTeam));
-        childrenList.add(new Property("addresses", "Reference(Condition)", "Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.", 0, java.lang.Integer.MAX_VALUE, addresses));
-        childrenList.add(new Property("supportingInfo", "Reference(Any)", "Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
-        childrenList.add(new Property("goal", "Reference(Goal)", "Describes the intended objective(s) of carrying out the care plan.", 0, java.lang.Integer.MAX_VALUE, goal));
-        childrenList.add(new Property("activity", "", "Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.", 0, java.lang.Integer.MAX_VALUE, activity));
-        childrenList.add(new Property("note", "Annotation", "General notes about the care plan not covered elsewhere.", 0, java.lang.Integer.MAX_VALUE, note));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("definition", "Reference(PlanDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.", 0, java.lang.Integer.MAX_VALUE, definition));
+        children.add(new Property("basedOn", "Reference(CarePlan)", "A care plan that is fulfilled in whole or in part by this care plan.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("replaces", "Reference(CarePlan)", "Completed or terminated care plan whose function is taken by this new care plan.", 0, java.lang.Integer.MAX_VALUE, replaces));
+        children.add(new Property("partOf", "Reference(CarePlan)", "A larger care plan of which this particular care plan is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("status", "code", "Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.", 0, 1, status));
+        children.add(new Property("intent", "code", "Indicates the level of authority/intentionality associated with the care plan and where the care plan fits into the workflow chain.", 0, 1, intent));
+        children.add(new Property("category", "CodeableConcept", "Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("title", "string", "Human-friendly name for the CarePlan.", 0, 1, title));
+        children.add(new Property("description", "string", "A description of the scope and nature of the plan.", 0, 1, description));
+        children.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular CarePlan was created.", 0, 1, context));
+        children.add(new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, 1, period));
+        children.add(new Property("author", "Reference(Patient|Practitioner|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or ogranization who is responsible for the content of the care plan.", 0, java.lang.Integer.MAX_VALUE, author));
+        children.add(new Property("careTeam", "Reference(CareTeam)", "Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.", 0, java.lang.Integer.MAX_VALUE, careTeam));
+        children.add(new Property("addresses", "Reference(Condition)", "Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.", 0, java.lang.Integer.MAX_VALUE, addresses));
+        children.add(new Property("supportingInfo", "Reference(Any)", "Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
+        children.add(new Property("goal", "Reference(Goal)", "Describes the intended objective(s) of carrying out the care plan.", 0, java.lang.Integer.MAX_VALUE, goal));
+        children.add(new Property("activity", "", "Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.", 0, java.lang.Integer.MAX_VALUE, activity));
+        children.add(new Property("note", "Annotation", "General notes about the care plan not covered elsewhere.", 0, java.lang.Integer.MAX_VALUE, note));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1014418093: /*definition*/  return new Property("definition", "Reference(PlanDefinition|Questionnaire)", "Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.", 0, java.lang.Integer.MAX_VALUE, definition);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan)", "A care plan that is fulfilled in whole or in part by this care plan.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -430332865: /*replaces*/  return new Property("replaces", "Reference(CarePlan)", "Completed or terminated care plan whose function is taken by this new care plan.", 0, java.lang.Integer.MAX_VALUE, replaces);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(CarePlan)", "A larger care plan of which this particular care plan is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.", 0, 1, status);
+        case -1183762788: /*intent*/  return new Property("intent", "code", "Indicates the level of authority/intentionality associated with the care plan and where the care plan fits into the workflow chain.", 0, 1, intent);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 110371416: /*title*/  return new Property("title", "string", "Human-friendly name for the CarePlan.", 0, 1, title);
+        case -1724546052: /*description*/  return new Property("description", "string", "A description of the scope and nature of the plan.", 0, 1, description);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular CarePlan was created.", 0, 1, context);
+        case -991726143: /*period*/  return new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, 1, period);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Patient|Practitioner|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or ogranization who is responsible for the content of the care plan.", 0, java.lang.Integer.MAX_VALUE, author);
+        case -7323378: /*careTeam*/  return new Property("careTeam", "Reference(CareTeam)", "Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.", 0, java.lang.Integer.MAX_VALUE, careTeam);
+        case 874544034: /*addresses*/  return new Property("addresses", "Reference(Condition)", "Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.", 0, java.lang.Integer.MAX_VALUE, addresses);
+        case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc.", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
+        case 3178259: /*goal*/  return new Property("goal", "Reference(Goal)", "Describes the intended objective(s) of carrying out the care plan.", 0, java.lang.Integer.MAX_VALUE, goal);
+        case -1655966961: /*activity*/  return new Property("activity", "", "Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.", 0, java.lang.Integer.MAX_VALUE, activity);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "General notes about the care plan not covered elsewhere.", 0, java.lang.Integer.MAX_VALUE, note);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3956,12 +4043,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CarePlan))
+        if (!(other_ instanceof CarePlan))
           return false;
-        CarePlan o = (CarePlan) other;
+        CarePlan o = (CarePlan) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(partOf, o.partOf, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true)
@@ -3973,12 +4060,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CarePlan))
+        if (!(other_ instanceof CarePlan))
           return false;
-        CarePlan o = (CarePlan) other;
+        CarePlan o = (CarePlan) other_;
         return compareValues(status, o.status, true) && compareValues(intent, o.intent, true) && compareValues(title, o.title, true)
            && compareValues(description, o.description, true);
       }

@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -158,6 +160,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myOrganizationDaoDstu3")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
+	@Qualifier("myConsentDaoDstu3")
+	protected IFhirResourceDao<Consent> myConsentDao;
+	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
 	@Qualifier("myPatientDaoDstu3")
@@ -231,11 +236,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoDstu3")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
-	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
-	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
+	@Autowired
+	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
 
 	@After()
 	public void afterCleanupDao() {
@@ -244,6 +249,16 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 		myDaoConfig.getInterceptors().clear();
+	}
+
+	@After
+	public void afterClearTerminologyCaches() {
+		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		baseHapiTerminologySvc.clearTranslationCache();
+		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearDeferred();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 	}
 
 	@After()
@@ -289,6 +304,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
+
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
 		if (stream == null) {
@@ -307,35 +327,26 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	}
 
 	@AfterClass
-	public static void afterClassClearContextBaseJpaDstu3Test() throws Exception {
+	public static void afterClassClearContextBaseJpaDstu3Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainDstu3.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
-		String linkNext = theBundle.getLink("next").getUrl();
-		linkNext = linkNext.substring(linkNext.indexOf('?'));
-		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
-		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		String uuid = uuidParams[0];
-		return uuid;
 	}
 
 	/**
 	 * Creates a single {@link org.hl7.fhir.dstu3.model.ConceptMap} entity that includes:
 	 * <br>
 	 * <ul>
-	 *     <li>
-	 *         One group with two elements, each identifying one target apiece.
-	 *     </li>
-	 *     <li>
-	 *         One group with one element, identifying two targets.
-	 *     </li>
-	 *     <li>
-	 * 	 	  One group with one element, identifying a target that also appears
-	 * 	 	  in the first element of the first group.
-	 * 	 </li>
+	 * <li>
+	 * One group with two elements, each identifying one target apiece.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying two targets.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying a target that also appears
+	 * in the first element of the first group.
+	 * </li>
 	 * </ul>
 	 * </br>
 	 * The first two groups identify the same source code system and different target code systems.
@@ -351,5 +362,14 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		} catch (FHIRException fe) {
 			throw new InternalErrorException(fe);
 		}
+	}
+
+	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
+		String linkNext = theBundle.getLink("next").getUrl();
+		linkNext = linkNext.substring(linkNext.indexOf('?'));
+		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
+		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
+		String uuid = uuidParams[0];
+		return uuid;
 	}
 }

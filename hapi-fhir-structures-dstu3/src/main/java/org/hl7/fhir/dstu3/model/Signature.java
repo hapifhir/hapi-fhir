@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
  */
@@ -218,26 +219,30 @@ public class Signature extends Type implements ICompositeType {
      * @return {@link #who} (A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).)
      */
     public UriType getWhoUriType() throws FHIRException { 
+      if (this.who == null)
+        return null;
       if (!(this.who instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
       return (UriType) this.who;
     }
 
     public boolean hasWhoUriType() { 
-      return this.who instanceof UriType;
+      return this != null && this.who instanceof UriType;
     }
 
     /**
      * @return {@link #who} (A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).)
      */
     public Reference getWhoReference() throws FHIRException { 
+      if (this.who == null)
+        return null;
       if (!(this.who instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
       return (Reference) this.who;
     }
 
     public boolean hasWhoReference() { 
-      return this.who instanceof Reference;
+      return this != null && this.who instanceof Reference;
     }
 
     public boolean hasWho() { 
@@ -247,7 +252,9 @@ public class Signature extends Type implements ICompositeType {
     /**
      * @param value {@link #who} (A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).)
      */
-    public Signature setWho(Type value) { 
+    public Signature setWho(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof UriType || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for Signature.who[x]: "+value.fhirType());
       this.who = value;
       return this;
     }
@@ -263,26 +270,30 @@ public class Signature extends Type implements ICompositeType {
      * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
      */
     public UriType getOnBehalfOfUriType() throws FHIRException { 
+      if (this.onBehalfOf == null)
+        return null;
       if (!(this.onBehalfOf instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
       return (UriType) this.onBehalfOf;
     }
 
     public boolean hasOnBehalfOfUriType() { 
-      return this.onBehalfOf instanceof UriType;
+      return this != null && this.onBehalfOf instanceof UriType;
     }
 
     /**
      * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
      */
     public Reference getOnBehalfOfReference() throws FHIRException { 
+      if (this.onBehalfOf == null)
+        return null;
       if (!(this.onBehalfOf instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
       return (Reference) this.onBehalfOf;
     }
 
     public boolean hasOnBehalfOfReference() { 
-      return this.onBehalfOf instanceof Reference;
+      return this != null && this.onBehalfOf instanceof Reference;
     }
 
     public boolean hasOnBehalfOf() { 
@@ -292,7 +303,9 @@ public class Signature extends Type implements ICompositeType {
     /**
      * @param value {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
      */
-    public Signature setOnBehalfOf(Type value) { 
+    public Signature setOnBehalfOf(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof UriType || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for Signature.onBehalfOf[x]: "+value.fhirType());
       this.onBehalfOf = value;
       return this;
     }
@@ -395,14 +408,34 @@ public class Signature extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("when", "instant", "When the digital signature was signed.", 0, java.lang.Integer.MAX_VALUE, when));
-        childrenList.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, java.lang.Integer.MAX_VALUE, who));
-        childrenList.add(new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
-        childrenList.add(new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.", 0, java.lang.Integer.MAX_VALUE, contentType));
-        childrenList.add(new Property("blob", "base64Binary", "The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.", 0, java.lang.Integer.MAX_VALUE, blob));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("when", "instant", "When the digital signature was signed.", 0, 1, when));
+        children.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who));
+        children.add(new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf));
+        children.add(new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.", 0, 1, contentType));
+        children.add(new Property("blob", "base64Binary", "The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.", 0, 1, blob));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3575610: /*type*/  return new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type);
+        case 3648314: /*when*/  return new Property("when", "instant", "When the digital signature was signed.", 0, 1, when);
+        case -788654078: /*who[x]*/  return new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who);
+        case 117694: /*who*/  return new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who);
+        case -788660018: /*whoUri*/  return new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who);
+        case 1017243949: /*whoReference*/  return new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who);
+        case 418120340: /*onBehalfOf[x]*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf);
+        case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf);
+        case 418114400: /*onBehalfOfUri*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf);
+        case -1136255425: /*onBehalfOfReference*/  return new Property("onBehalfOf[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf);
+        case -389131437: /*contentType*/  return new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature, etc.", 0, 1, contentType);
+        case 3026845: /*blob*/  return new Property("blob", "base64Binary", "The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.", 0, 1, blob);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -554,24 +587,24 @@ public class Signature extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Signature))
+        if (!(other_ instanceof Signature))
           return false;
-        Signature o = (Signature) other;
+        Signature o = (Signature) other_;
         return compareDeep(type, o.type, true) && compareDeep(when, o.when, true) && compareDeep(who, o.who, true)
            && compareDeep(onBehalfOf, o.onBehalfOf, true) && compareDeep(contentType, o.contentType, true)
            && compareDeep(blob, o.blob, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Signature))
+        if (!(other_ instanceof Signature))
           return false;
-        Signature o = (Signature) other;
+        Signature o = (Signature) other_;
         return compareValues(when, o.when, true) && compareValues(contentType, o.contentType, true) && compareValues(blob, o.blob, true)
           ;
       }

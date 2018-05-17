@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -204,7 +204,7 @@ public class EnrollmentResponse extends DomainResource {
      * Processing status: error, complete.
      */
     @Child(name = "outcome", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="received | complete | error | partial", formalDefinition="Processing status: error, complete." )
+    @Description(shortDefinition="queued | complete | error | partial", formalDefinition="Processing status: error, complete." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
     protected Enumeration<RemittanceOutcome> outcome;
 
@@ -237,28 +237,16 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestProvider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference requestProvider;
 
     /**
      * The actual object that is the target of the reference (The practitioner who is responsible for the services rendered to the patient.)
      */
-    protected Practitioner requestProviderTarget;
+    protected Resource requestProviderTarget;
 
-    /**
-     * The organization which is responsible for the services rendered to the patient.
-     */
-    @Child(name = "requestOrganization", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
-    protected Reference requestOrganization;
-
-    /**
-     * The actual object that is the target of the reference (The organization which is responsible for the services rendered to the patient.)
-     */
-    protected Organization requestOrganizationTarget;
-
-    private static final long serialVersionUID = 1059816193L;
+    private static final long serialVersionUID = -1759921458L;
 
   /**
    * Constructor
@@ -631,64 +619,15 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * @return {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public Practitioner getRequestProviderTarget() { 
-      if (this.requestProviderTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create EnrollmentResponse.requestProvider");
-        else if (Configuration.doAutoCreate())
-          this.requestProviderTarget = new Practitioner(); // aa
+    public Resource getRequestProviderTarget() { 
       return this.requestProviderTarget;
     }
 
     /**
      * @param value {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public EnrollmentResponse setRequestProviderTarget(Practitioner value) { 
+    public EnrollmentResponse setRequestProviderTarget(Resource value) { 
       this.requestProviderTarget = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Reference getRequestOrganization() { 
-      if (this.requestOrganization == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create EnrollmentResponse.requestOrganization");
-        else if (Configuration.doAutoCreate())
-          this.requestOrganization = new Reference(); // cc
-      return this.requestOrganization;
-    }
-
-    public boolean hasRequestOrganization() { 
-      return this.requestOrganization != null && !this.requestOrganization.isEmpty();
-    }
-
-    /**
-     * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
-     */
-    public EnrollmentResponse setRequestOrganization(Reference value) { 
-      this.requestOrganization = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
-     */
-    public Organization getRequestOrganizationTarget() { 
-      if (this.requestOrganizationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create EnrollmentResponse.requestOrganization");
-        else if (Configuration.doAutoCreate())
-          this.requestOrganizationTarget = new Organization(); // aa
-      return this.requestOrganizationTarget;
-    }
-
-    /**
-     * @param value {@link #requestOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is responsible for the services rendered to the patient.)
-     */
-    public EnrollmentResponse setRequestOrganizationTarget(Organization value) { 
-      this.requestOrganizationTarget = value;
       return this;
     }
 
@@ -701,8 +640,7 @@ public class EnrollmentResponse extends DomainResource {
         children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
         children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
         children.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization));
-        children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
-        children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
+        children.add(new Property("requestProvider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
       }
 
       @Override
@@ -715,8 +653,7 @@ public class EnrollmentResponse extends DomainResource {
         case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
         case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization);
-        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
-        case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
+        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -733,7 +670,6 @@ public class EnrollmentResponse extends DomainResource {
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
-        case 599053666: /*requestOrganization*/ return this.requestOrganization == null ? new Base[0] : new Base[] {this.requestOrganization}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -768,9 +704,6 @@ public class EnrollmentResponse extends DomainResource {
         case 1601527200: // requestProvider
           this.requestProvider = castToReference(value); // Reference
           return value;
-        case 599053666: // requestOrganization
-          this.requestOrganization = castToReference(value); // Reference
-          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -796,8 +729,6 @@ public class EnrollmentResponse extends DomainResource {
           this.organization = castToReference(value); // Reference
         } else if (name.equals("requestProvider")) {
           this.requestProvider = castToReference(value); // Reference
-        } else if (name.equals("requestOrganization")) {
-          this.requestOrganization = castToReference(value); // Reference
         } else
           return super.setProperty(name, value);
         return value;
@@ -814,7 +745,6 @@ public class EnrollmentResponse extends DomainResource {
         case 1028554472:  return getCreatedElement();
         case 1178922291:  return getOrganization(); 
         case 1601527200:  return getRequestProvider(); 
-        case 599053666:  return getRequestOrganization(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -831,7 +761,6 @@ public class EnrollmentResponse extends DomainResource {
         case 1028554472: /*created*/ return new String[] {"dateTime"};
         case 1178922291: /*organization*/ return new String[] {"Reference"};
         case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
-        case 599053666: /*requestOrganization*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -866,10 +795,6 @@ public class EnrollmentResponse extends DomainResource {
           this.requestProvider = new Reference();
           return this.requestProvider;
         }
-        else if (name.equals("requestOrganization")) {
-          this.requestOrganization = new Reference();
-          return this.requestOrganization;
-        }
         else
           return super.addChild(name);
       }
@@ -894,7 +819,6 @@ public class EnrollmentResponse extends DomainResource {
         dst.created = created == null ? null : created.copy();
         dst.organization = organization == null ? null : organization.copy();
         dst.requestProvider = requestProvider == null ? null : requestProvider.copy();
-        dst.requestOrganization = requestOrganization == null ? null : requestOrganization.copy();
         return dst;
       }
 
@@ -912,7 +836,7 @@ public class EnrollmentResponse extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
            && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(created, o.created, true)
            && compareDeep(organization, o.organization, true) && compareDeep(requestProvider, o.requestProvider, true)
-           && compareDeep(requestOrganization, o.requestOrganization, true);
+          ;
       }
 
       @Override
@@ -928,8 +852,7 @@ public class EnrollmentResponse extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, request
-          , outcome, disposition, created, organization, requestProvider, requestOrganization
-          );
+          , outcome, disposition, created, organization, requestProvider);
       }
 
   @Override
@@ -982,32 +905,6 @@ public class EnrollmentResponse extends DomainResource {
    * the path value of "<b>EnrollmentResponse:request</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST = new ca.uhn.fhir.model.api.Include("EnrollmentResponse:request").toLocked();
-
- /**
-   * Search parameter: <b>organization</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EnrollmentResponse.organization</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="organization", path="EnrollmentResponse.organization", description="The organization who generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION = "organization";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
-   * <p>
-   * Description: <b>The organization who generated this resource</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EnrollmentResponse.organization</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>EnrollmentResponse:organization</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("EnrollmentResponse:organization").toLocked();
 
  /**
    * Search parameter: <b>status</b>

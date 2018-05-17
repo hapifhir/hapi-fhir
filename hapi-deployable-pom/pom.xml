@@ -100,8 +100,8 @@
 							<artifactId>javax.mail-api</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>com.phloc</groupId>
-							<artifactId>phloc-commons</artifactId>
+							<groupId>com.helger</groupId>
+							<artifactId>ph-schematron</artifactId>
 						</dependency>
 						<dependency>
 							<groupId>commons-logging</groupId>
@@ -140,6 +140,7 @@
 						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
+						<ignoredResource>changelog.xml</ignoredResource>
 					</ignoredResourcePatterns>
 				</configuration>
 			</plugin>

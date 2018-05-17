@@ -45,27 +45,14 @@
 
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<optional>true</optional>
-			<exclusions><!--
-				<exclusion>
-					<artifactId>Saxon-HE</artifactId>
-					<groupId>net.sf.saxon</groupId>
-				</exclusion>-->
-			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<!-- Guava brings in a newer replacement for this dependency called com.google.code.findbugs:jsr305 -->
-					<groupId>com.google.code.findbugs</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 

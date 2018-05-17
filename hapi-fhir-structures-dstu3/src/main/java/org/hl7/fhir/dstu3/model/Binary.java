@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
@@ -157,7 +158,7 @@ public class Binary extends BaseBinary implements IBaseBinary {
     /**
      * @param value {@link #securityContext} (Treat this binary as if it was this other resource for access control purposes.)
      */
-    public Binary setSecurityContext(Reference value) { 
+    public Binary setSecurityContext(Reference value)  { 
       this.securityContext = value;
       return this;
     }
@@ -222,11 +223,22 @@ public class Binary extends BaseBinary implements IBaseBinary {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("contentType", "code", "MimeType of the binary content represented as a standard MimeType (BCP 13).", 0, java.lang.Integer.MAX_VALUE, contentType));
-        childrenList.add(new Property("securityContext", "Reference(Any)", "Treat this binary as if it was this other resource for access control purposes.", 0, java.lang.Integer.MAX_VALUE, securityContext));
-        childrenList.add(new Property("content", "base64Binary", "The actual content, base64 encoded.", 0, java.lang.Integer.MAX_VALUE, content));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("contentType", "code", "MimeType of the binary content represented as a standard MimeType (BCP 13).", 0, 1, contentType));
+        children.add(new Property("securityContext", "Reference(Any)", "Treat this binary as if it was this other resource for access control purposes.", 0, 1, securityContext));
+        children.add(new Property("content", "base64Binary", "The actual content, base64 encoded.", 0, 1, content));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -389131437: /*contentType*/  return new Property("contentType", "code", "MimeType of the binary content represented as a standard MimeType (BCP 13).", 0, 1, contentType);
+        case -1622888881: /*securityContext*/  return new Property("securityContext", "Reference(Any)", "Treat this binary as if it was this other resource for access control purposes.", 0, 1, securityContext);
+        case 951530617: /*content*/  return new Property("content", "base64Binary", "The actual content, base64 encoded.", 0, 1, content);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -327,23 +339,23 @@ public class Binary extends BaseBinary implements IBaseBinary {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Binary))
+        if (!(other_ instanceof Binary))
           return false;
-        Binary o = (Binary) other;
+        Binary o = (Binary) other_;
         return compareDeep(contentType, o.contentType, true) && compareDeep(securityContext, o.securityContext, true)
            && compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Binary))
+        if (!(other_ instanceof Binary))
           return false;
-        Binary o = (Binary) other;
+        Binary o = (Binary) other_;
         return compareValues(contentType, o.contentType, true) && compareValues(content, o.content, true);
       }
 

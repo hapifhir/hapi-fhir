@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An authorization for the supply of glasses and/or contact lenses to a patient.
  */
@@ -527,7 +528,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * @param value {@link #product} (Identifies the type of vision correction product which is required for the patient.)
          */
-        public VisionPrescriptionDispenseComponent setProduct(CodeableConcept value) { 
+        public VisionPrescriptionDispenseComponent setProduct(CodeableConcept value)  { 
           this.product = value;
           return this;
         }
@@ -1163,7 +1164,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * @param value {@link #duration} (The recommended maximum wear period for the lens.)
          */
-        public VisionPrescriptionDispenseComponent setDuration(SimpleQuantity value) { 
+        public VisionPrescriptionDispenseComponent setDuration(SimpleQuantity value)  { 
           this.duration = value;
           return this;
         }
@@ -1319,23 +1320,46 @@ public class VisionPrescription extends DomainResource {
           return getNote().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("product", "CodeableConcept", "Identifies the type of vision correction product which is required for the patient.", 0, java.lang.Integer.MAX_VALUE, product));
-          childrenList.add(new Property("eye", "code", "The eye for which the lens applies.", 0, java.lang.Integer.MAX_VALUE, eye));
-          childrenList.add(new Property("sphere", "decimal", "Lens power measured in diopters (0.25 units).", 0, java.lang.Integer.MAX_VALUE, sphere));
-          childrenList.add(new Property("cylinder", "decimal", "Power adjustment for astigmatism measured in diopters (0.25 units).", 0, java.lang.Integer.MAX_VALUE, cylinder));
-          childrenList.add(new Property("axis", "integer", "Adjustment for astigmatism measured in integer degrees.", 0, java.lang.Integer.MAX_VALUE, axis));
-          childrenList.add(new Property("prism", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, java.lang.Integer.MAX_VALUE, prism));
-          childrenList.add(new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, java.lang.Integer.MAX_VALUE, base));
-          childrenList.add(new Property("add", "decimal", "Power adjustment for multifocal lenses measured in diopters (0.25 units).", 0, java.lang.Integer.MAX_VALUE, add));
-          childrenList.add(new Property("power", "decimal", "Contact lens power measured in diopters (0.25 units).", 0, java.lang.Integer.MAX_VALUE, power));
-          childrenList.add(new Property("backCurve", "decimal", "Back curvature measured in millimeters.", 0, java.lang.Integer.MAX_VALUE, backCurve));
-          childrenList.add(new Property("diameter", "decimal", "Contact lens diameter measured in millimeters.", 0, java.lang.Integer.MAX_VALUE, diameter));
-          childrenList.add(new Property("duration", "SimpleQuantity", "The recommended maximum wear period for the lens.", 0, java.lang.Integer.MAX_VALUE, duration));
-          childrenList.add(new Property("color", "string", "Special color or pattern.", 0, java.lang.Integer.MAX_VALUE, color));
-          childrenList.add(new Property("brand", "string", "Brand recommendations or restrictions.", 0, java.lang.Integer.MAX_VALUE, brand));
-          childrenList.add(new Property("note", "Annotation", "Notes for special requirements such as coatings and lens materials.", 0, java.lang.Integer.MAX_VALUE, note));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("product", "CodeableConcept", "Identifies the type of vision correction product which is required for the patient.", 0, 1, product));
+          children.add(new Property("eye", "code", "The eye for which the lens applies.", 0, 1, eye));
+          children.add(new Property("sphere", "decimal", "Lens power measured in diopters (0.25 units).", 0, 1, sphere));
+          children.add(new Property("cylinder", "decimal", "Power adjustment for astigmatism measured in diopters (0.25 units).", 0, 1, cylinder));
+          children.add(new Property("axis", "integer", "Adjustment for astigmatism measured in integer degrees.", 0, 1, axis));
+          children.add(new Property("prism", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, 1, prism));
+          children.add(new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, 1, base));
+          children.add(new Property("add", "decimal", "Power adjustment for multifocal lenses measured in diopters (0.25 units).", 0, 1, add));
+          children.add(new Property("power", "decimal", "Contact lens power measured in diopters (0.25 units).", 0, 1, power));
+          children.add(new Property("backCurve", "decimal", "Back curvature measured in millimeters.", 0, 1, backCurve));
+          children.add(new Property("diameter", "decimal", "Contact lens diameter measured in millimeters.", 0, 1, diameter));
+          children.add(new Property("duration", "SimpleQuantity", "The recommended maximum wear period for the lens.", 0, 1, duration));
+          children.add(new Property("color", "string", "Special color or pattern.", 0, 1, color));
+          children.add(new Property("brand", "string", "Brand recommendations or restrictions.", 0, 1, brand));
+          children.add(new Property("note", "Annotation", "Notes for special requirements such as coatings and lens materials.", 0, java.lang.Integer.MAX_VALUE, note));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -309474065: /*product*/  return new Property("product", "CodeableConcept", "Identifies the type of vision correction product which is required for the patient.", 0, 1, product);
+          case 100913: /*eye*/  return new Property("eye", "code", "The eye for which the lens applies.", 0, 1, eye);
+          case -895981619: /*sphere*/  return new Property("sphere", "decimal", "Lens power measured in diopters (0.25 units).", 0, 1, sphere);
+          case -349378602: /*cylinder*/  return new Property("cylinder", "decimal", "Power adjustment for astigmatism measured in diopters (0.25 units).", 0, 1, cylinder);
+          case 3008417: /*axis*/  return new Property("axis", "integer", "Adjustment for astigmatism measured in integer degrees.", 0, 1, axis);
+          case 106935105: /*prism*/  return new Property("prism", "decimal", "Amount of prism to compensate for eye alignment in fractional units.", 0, 1, prism);
+          case 3016401: /*base*/  return new Property("base", "code", "The relative base, or reference lens edge, for the prism.", 0, 1, base);
+          case 96417: /*add*/  return new Property("add", "decimal", "Power adjustment for multifocal lenses measured in diopters (0.25 units).", 0, 1, add);
+          case 106858757: /*power*/  return new Property("power", "decimal", "Contact lens power measured in diopters (0.25 units).", 0, 1, power);
+          case 1309344840: /*backCurve*/  return new Property("backCurve", "decimal", "Back curvature measured in millimeters.", 0, 1, backCurve);
+          case -233204595: /*diameter*/  return new Property("diameter", "decimal", "Contact lens diameter measured in millimeters.", 0, 1, diameter);
+          case -1992012396: /*duration*/  return new Property("duration", "SimpleQuantity", "The recommended maximum wear period for the lens.", 0, 1, duration);
+          case 94842723: /*color*/  return new Property("color", "string", "Special color or pattern.", 0, 1, color);
+          case 93997959: /*brand*/  return new Property("brand", "string", "Brand recommendations or restrictions.", 0, 1, brand);
+          case 3387378: /*note*/  return new Property("note", "Annotation", "Notes for special requirements such as coatings and lens materials.", 0, java.lang.Integer.MAX_VALUE, note);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1580,12 +1604,12 @@ public class VisionPrescription extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof VisionPrescriptionDispenseComponent))
+        if (!(other_ instanceof VisionPrescriptionDispenseComponent))
           return false;
-        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other;
+        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other_;
         return compareDeep(product, o.product, true) && compareDeep(eye, o.eye, true) && compareDeep(sphere, o.sphere, true)
            && compareDeep(cylinder, o.cylinder, true) && compareDeep(axis, o.axis, true) && compareDeep(prism, o.prism, true)
            && compareDeep(base, o.base, true) && compareDeep(add, o.add, true) && compareDeep(power, o.power, true)
@@ -1595,12 +1619,12 @@ public class VisionPrescription extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof VisionPrescriptionDispenseComponent))
+        if (!(other_ instanceof VisionPrescriptionDispenseComponent))
           return false;
-        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other;
+        VisionPrescriptionDispenseComponent o = (VisionPrescriptionDispenseComponent) other_;
         return compareValues(eye, o.eye, true) && compareValues(sphere, o.sphere, true) && compareValues(cylinder, o.cylinder, true)
            && compareValues(axis, o.axis, true) && compareValues(prism, o.prism, true) && compareValues(base, o.base, true)
            && compareValues(add, o.add, true) && compareValues(power, o.power, true) && compareValues(backCurve, o.backCurve, true)
@@ -1823,7 +1847,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * @param value {@link #patient} (A link to a resource representing the person to whom the vision products will be supplied.)
      */
-    public VisionPrescription setPatient(Reference value) { 
+    public VisionPrescription setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1867,7 +1891,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * @param value {@link #encounter} (A link to a resource that identifies the particular occurrence of contact between patient and health care provider.)
      */
-    public VisionPrescription setEncounter(Reference value) { 
+    public VisionPrescription setEncounter(Reference value)  { 
       this.encounter = value;
       return this;
     }
@@ -1960,7 +1984,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * @param value {@link #prescriber} (The healthcare professional responsible for authorizing the prescription.)
      */
-    public VisionPrescription setPrescriber(Reference value) { 
+    public VisionPrescription setPrescriber(Reference value)  { 
       this.prescriber = value;
       return this;
     }
@@ -1996,26 +2020,30 @@ public class VisionPrescription extends DomainResource {
      * @return {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
     public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
+      if (this.reason == null)
+        return null;
       if (!(this.reason instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
     public boolean hasReasonCodeableConcept() { 
-      return this.reason instanceof CodeableConcept;
+      return this != null && this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
     public Reference getReasonReference() throws FHIRException { 
+      if (this.reason == null)
+        return null;
       if (!(this.reason instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
     public boolean hasReasonReference() { 
-      return this.reason instanceof Reference;
+      return this != null && this.reason instanceof Reference;
     }
 
     public boolean hasReason() { 
@@ -2025,7 +2053,9 @@ public class VisionPrescription extends DomainResource {
     /**
      * @param value {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
-    public VisionPrescription setReason(Type value) { 
+    public VisionPrescription setReason(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for VisionPrescription.reason[x]: "+value.fhirType());
       this.reason = value;
       return this;
     }
@@ -2083,16 +2113,35 @@ public class VisionPrescription extends DomainResource {
       return getDispense().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Business identifier which may be used by other parties to reference or identify the prescription.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the vision products will be supplied.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "A link to a resource that identifies the particular occurrence of contact between patient and health care provider.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, java.lang.Integer.MAX_VALUE, dateWritten));
-        childrenList.add(new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, java.lang.Integer.MAX_VALUE, prescriber));
-        childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("dispense", "", "Deals with details of the dispense part of the supply specification.", 0, java.lang.Integer.MAX_VALUE, dispense));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Business identifier which may be used by other parties to reference or identify the prescription.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the vision products will be supplied.", 0, 1, patient));
+        children.add(new Property("encounter", "Reference(Encounter)", "A link to a resource that identifies the particular occurrence of contact between patient and health care provider.", 0, 1, encounter));
+        children.add(new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, 1, dateWritten));
+        children.add(new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, 1, prescriber));
+        children.add(new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason));
+        children.add(new Property("dispense", "", "Deals with details of the dispense part of the supply specification.", 0, java.lang.Integer.MAX_VALUE, dispense));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier which may be used by other parties to reference or identify the prescription.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the vision products will be supplied.", 0, 1, patient);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "A link to a resource that identifies the particular occurrence of contact between patient and health care provider.", 0, 1, encounter);
+        case -1496880759: /*dateWritten*/  return new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, 1, dateWritten);
+        case 1430631077: /*prescriber*/  return new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, 1, prescriber);
+        case -669418564: /*reason[x]*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
+        case -934964668: /*reason*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
+        case -610155331: /*reasonCodeableConcept*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
+        case -1146218137: /*reasonReference*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
+        case 284885341: /*dispense*/  return new Property("dispense", "", "Deals with details of the dispense part of the supply specification.", 0, java.lang.Integer.MAX_VALUE, dispense);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2271,24 +2320,24 @@ public class VisionPrescription extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof VisionPrescription))
+        if (!(other_ instanceof VisionPrescription))
           return false;
-        VisionPrescription o = (VisionPrescription) other;
+        VisionPrescription o = (VisionPrescription) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(dateWritten, o.dateWritten, true) && compareDeep(prescriber, o.prescriber, true)
            && compareDeep(reason, o.reason, true) && compareDeep(dispense, o.dispense, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof VisionPrescription))
+        if (!(other_ instanceof VisionPrescription))
           return false;
-        VisionPrescription o = (VisionPrescription) other;
+        VisionPrescription o = (VisionPrescription) other_;
         return compareValues(status, o.status, true) && compareValues(dateWritten, o.dateWritten, true);
       }
 

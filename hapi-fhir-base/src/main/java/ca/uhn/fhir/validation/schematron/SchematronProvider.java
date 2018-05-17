@@ -30,16 +30,16 @@ import ca.uhn.fhir.validation.IValidatorModule;
 public class SchematronProvider {
 
 
-	private static final String I18N_KEY_NO_PHLOC_WARNING = FhirValidator.class.getName() + ".noPhlocWarningOnStartup";
+	private static final String I18N_KEY_NO_PH_WARNING = FhirValidator.class.getName() + ".noPhWarningOnStartup";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
 	
 	@CoverageIgnore
 	public static boolean isSchematronAvailable(FhirContext theFhirContext) {
 		try {
-			Class.forName("com.phloc.schematron.ISchematronResource");
+			Class.forName("com.helger.schematron.ISchematronResource");
 			return true;
 		} catch (ClassNotFoundException e) {
-			ourLog.info(theFhirContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_WARNING));
+			ourLog.info(theFhirContext.getLocalizer().getMessage(I18N_KEY_NO_PH_WARNING));
 			return false;
 		}
 	}

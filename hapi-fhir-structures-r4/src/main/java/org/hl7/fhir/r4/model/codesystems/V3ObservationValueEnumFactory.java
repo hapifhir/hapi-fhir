@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -217,6 +217,14 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return V3ObservationValue.CRITL;
     if ("CRITU".equals(codeString))
       return V3ObservationValue.CRITU;
+    if ("_EmploymentStatus".equals(codeString))
+      return V3ObservationValue._EMPLOYMENTSTATUS;
+    if ("Employed".equals(codeString))
+      return V3ObservationValue.EMPLOYED;
+    if ("NotInLaborForce".equals(codeString))
+      return V3ObservationValue.NOTINLABORFORCE;
+    if ("Unemployed".equals(codeString))
+      return V3ObservationValue.UNEMPLOYED;
     if ("_GeneticObservationValue".equals(codeString))
       return V3ObservationValue._GENETICOBSERVATIONVALUE;
     if ("Homozygote".equals(codeString))
@@ -503,6 +511,26 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return V3ObservationValue.INPNDUPD;
     if ("NELG".equals(codeString))
       return V3ObservationValue.NELG;
+    if ("_WorkSchedule".equals(codeString))
+      return V3ObservationValue._WORKSCHEDULE;
+    if ("DS".equals(codeString))
+      return V3ObservationValue.DS;
+    if ("EMS".equals(codeString))
+      return V3ObservationValue.EMS;
+    if ("ES".equals(codeString))
+      return V3ObservationValue.ES;
+    if ("NS".equals(codeString))
+      return V3ObservationValue.NS;
+    if ("RSWN".equals(codeString))
+      return V3ObservationValue.RSWN;
+    if ("RSWON".equals(codeString))
+      return V3ObservationValue.RSWON;
+    if ("SS".equals(codeString))
+      return V3ObservationValue.SS;
+    if ("VLS".equals(codeString))
+      return V3ObservationValue.VLS;
+    if ("VS".equals(codeString))
+      return V3ObservationValue.VS;
     if ("_AnnotationValue".equals(codeString))
       return V3ObservationValue._ANNOTATIONVALUE;
     if ("_CommonClinicalObservationValue".equals(codeString))
@@ -693,6 +721,14 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return "CRITL";
     if (code == V3ObservationValue.CRITU)
       return "CRITU";
+    if (code == V3ObservationValue._EMPLOYMENTSTATUS)
+      return "_EmploymentStatus";
+    if (code == V3ObservationValue.EMPLOYED)
+      return "Employed";
+    if (code == V3ObservationValue.NOTINLABORFORCE)
+      return "NotInLaborForce";
+    if (code == V3ObservationValue.UNEMPLOYED)
+      return "Unemployed";
     if (code == V3ObservationValue._GENETICOBSERVATIONVALUE)
       return "_GeneticObservationValue";
     if (code == V3ObservationValue.HOMOZYGOTE)
@@ -979,6 +1015,26 @@ public class V3ObservationValueEnumFactory implements EnumFactory<V3ObservationV
       return "INPNDUPD";
     if (code == V3ObservationValue.NELG)
       return "NELG";
+    if (code == V3ObservationValue._WORKSCHEDULE)
+      return "_WorkSchedule";
+    if (code == V3ObservationValue.DS)
+      return "DS";
+    if (code == V3ObservationValue.EMS)
+      return "EMS";
+    if (code == V3ObservationValue.ES)
+      return "ES";
+    if (code == V3ObservationValue.NS)
+      return "NS";
+    if (code == V3ObservationValue.RSWN)
+      return "RSWN";
+    if (code == V3ObservationValue.RSWON)
+      return "RSWON";
+    if (code == V3ObservationValue.SS)
+      return "SS";
+    if (code == V3ObservationValue.VLS)
+      return "VLS";
+    if (code == V3ObservationValue.VS)
+      return "VS";
     if (code == V3ObservationValue._ANNOTATIONVALUE)
       return "_AnnotationValue";
     if (code == V3ObservationValue._COMMONCLINICALOBSERVATIONVALUE)

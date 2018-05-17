@@ -88,17 +88,21 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
   private final Map<String, MetadataResource> canonicals = new HashMap<String, MetadataResource>();
   private final IWorkerContext context;
   private final String cacheFolder;
+
+  private Object lock;
 	
-	public ValueSetExpansionCache(IWorkerContext context) {
+	public ValueSetExpansionCache(IWorkerContext context, Object lock) {
     super();
     cacheFolder = null;
+    this.lock = lock;
     this.context = context;
   }
   
-	public ValueSetExpansionCache(IWorkerContext context, String cacheFolder) throws FHIRFormatError, IOException {
+	public ValueSetExpansionCache(IWorkerContext context, String cacheFolder, Object lock) throws FHIRFormatError, IOException {
     super();
     this.context = context;
     this.cacheFolder = cacheFolder;
+    this.lock = lock;
     if (this.cacheFolder != null)
       loadCache();
   }
@@ -147,18 +151,23 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
 	}
 
   public MetadataResource getStoredResource(String canonicalUri) {
+    synchronized (lock) {
     return canonicals.get(canonicalUri);
+    }
   }
 
   public void storeResource(MetadataResource md) throws IOException {
-    canonicals.put(md.getUrl(), md);
-    if (md.hasVersion())
-      canonicals.put(md.getUrl()+"|"+md.getVersion(), md);    
+    synchronized (lock) {
+      canonicals.put(md.getUrl(), md);
+      if (md.hasVersion())
+        canonicals.put(md.getUrl()+"|"+md.getVersion(), md);    
+    }
     if (cacheFolder != null) {
       FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFileName(md.getUrl()+"|"+md.getVersion())));
       context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, md);
       s.close();
     }
   }
+
 
 }

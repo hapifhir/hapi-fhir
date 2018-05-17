@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.
+ * The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.
  */
 @ResourceDef(name="MedicinalProductClinicals", profile="http://hl7.org/fhir/Profile/MedicinalProductClinicals")
 public class MedicinalProductClinicals extends DomainResource {
@@ -421,26 +421,30 @@ public class MedicinalProductClinicals extends DomainResource {
          * @return {@link #age} (The age of the specific population.)
          */
         public Range getAgeRange() throws FHIRException { 
+          if (this.age == null)
+            return null;
           if (!(this.age instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.age.getClass().getName()+" was encountered");
           return (Range) this.age;
         }
 
         public boolean hasAgeRange() { 
-          return this.age instanceof Range;
+          return this != null && this.age instanceof Range;
         }
 
         /**
          * @return {@link #age} (The age of the specific population.)
          */
         public CodeableConcept getAgeCodeableConcept() throws FHIRException { 
+          if (this.age == null)
+            return null;
           if (!(this.age instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.age.getClass().getName()+" was encountered");
           return (CodeableConcept) this.age;
         }
 
         public boolean hasAgeCodeableConcept() { 
-          return this.age instanceof CodeableConcept;
+          return this != null && this.age instanceof CodeableConcept;
         }
 
         public boolean hasAge() { 
@@ -451,6 +455,8 @@ public class MedicinalProductClinicals extends DomainResource {
          * @param value {@link #age} (The age of the specific population.)
          */
         public MedicinalProductClinicalsUndesirableEffectsPopulationComponent setAge(Type value) { 
+          if (value != null && !(value instanceof Range || value instanceof CodeableConcept))
+            throw new Error("Not the right type for MedicinalProductClinicals.undesirableEffects.population.age[x]: "+value.fhirType());
           this.age = value;
           return this;
         }
@@ -1367,26 +1373,30 @@ public class MedicinalProductClinicals extends DomainResource {
          * @return {@link #medication} (Reference to a specific medication (active substance, medicinal product or class of products) as part of an indication or contraindication.)
          */
         public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
+          if (this.medication == null)
+            return null;
           if (!(this.medication instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
           return (CodeableConcept) this.medication;
         }
 
         public boolean hasMedicationCodeableConcept() { 
-          return this.medication instanceof CodeableConcept;
+          return this != null && this.medication instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #medication} (Reference to a specific medication (active substance, medicinal product or class of products) as part of an indication or contraindication.)
          */
         public Reference getMedicationReference() throws FHIRException { 
+          if (this.medication == null)
+            return null;
           if (!(this.medication instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
           return (Reference) this.medication;
         }
 
         public boolean hasMedicationReference() { 
-          return this.medication instanceof Reference;
+          return this != null && this.medication instanceof Reference;
         }
 
         public boolean hasMedication() { 
@@ -1397,6 +1407,8 @@ public class MedicinalProductClinicals extends DomainResource {
          * @param value {@link #medication} (Reference to a specific medication (active substance, medicinal product or class of products) as part of an indication or contraindication.)
          */
         public MedicinalProductClinicalsTherapeuticIndicationOtherTherapyComponent setMedication(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for MedicinalProductClinicals.therapeuticIndication.otherTherapy.medication[x]: "+value.fhirType());
           this.medication = value;
           return this;
         }

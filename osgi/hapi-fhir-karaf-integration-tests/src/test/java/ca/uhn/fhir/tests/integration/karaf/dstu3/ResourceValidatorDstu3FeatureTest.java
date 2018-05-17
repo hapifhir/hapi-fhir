@@ -6,19 +6,12 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.tests.integration.karaf.ValidationConstants;
 import ca.uhn.fhir.validation.*;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
-import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -33,14 +26,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_VALIDATION_DSTU3;
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
+import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 
 /**
@@ -145,7 +134,9 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 		val.registerValidatorModule(new FhirInstanceValidator());
 
 		ValidationResult output = val.validateWithResult(p);
@@ -162,7 +153,9 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 		val.registerValidatorModule(new FhirInstanceValidator());
 
 		ValidationResult output = val.validateWithResult(p);
@@ -232,7 +225,9 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 		val.registerValidatorModule(new FhirInstanceValidator());
 
 		ValidationResult result = val.validateWithResult(q);
@@ -273,7 +268,9 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 		val.registerValidatorModule(new FhirInstanceValidator());
 
 		ValidationResult result = val.validateWithResult(encoded);
@@ -321,7 +318,9 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 		val.registerValidatorModule(new FhirInstanceValidator());
 
 		ValidationResult result = val.validateWithResult(messageString);
@@ -374,7 +373,9 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 		val.registerValidatorModule(new FhirInstanceValidator());
 
 		ValidationResult result = val.validateWithResult(messageString);

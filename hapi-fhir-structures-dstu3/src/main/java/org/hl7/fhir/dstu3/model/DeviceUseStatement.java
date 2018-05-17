@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.
  */
@@ -434,7 +435,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #subject} (The patient who used the device.)
      */
-    public DeviceUseStatement setSubject(Reference value) { 
+    public DeviceUseStatement setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -473,7 +474,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #whenUsed} (The time period over which the device was used.)
      */
-    public DeviceUseStatement setWhenUsed(Period value) { 
+    public DeviceUseStatement setWhenUsed(Period value)  { 
       this.whenUsed = value;
       return this;
     }
@@ -489,39 +490,45 @@ public class DeviceUseStatement extends DomainResource {
      * @return {@link #timing} (How often the device was used.)
      */
     public Timing getTimingTiming() throws FHIRException { 
+      if (this.timing == null)
+        return null;
       if (!(this.timing instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Timing) this.timing;
     }
 
     public boolean hasTimingTiming() { 
-      return this.timing instanceof Timing;
+      return this != null && this.timing instanceof Timing;
     }
 
     /**
      * @return {@link #timing} (How often the device was used.)
      */
     public Period getTimingPeriod() throws FHIRException { 
+      if (this.timing == null)
+        return null;
       if (!(this.timing instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Period) this.timing;
     }
 
     public boolean hasTimingPeriod() { 
-      return this.timing instanceof Period;
+      return this != null && this.timing instanceof Period;
     }
 
     /**
      * @return {@link #timing} (How often the device was used.)
      */
     public DateTimeType getTimingDateTimeType() throws FHIRException { 
+      if (this.timing == null)
+        return null;
       if (!(this.timing instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateTimeType) this.timing;
     }
 
     public boolean hasTimingDateTimeType() { 
-      return this.timing instanceof DateTimeType;
+      return this != null && this.timing instanceof DateTimeType;
     }
 
     public boolean hasTiming() { 
@@ -531,7 +538,9 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #timing} (How often the device was used.)
      */
-    public DeviceUseStatement setTiming(Type value) { 
+    public DeviceUseStatement setTiming(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Timing || value instanceof Period || value instanceof DateTimeType))
+        throw new FHIRFormatError("Not the right type for DeviceUseStatement.timing[x]: "+value.fhirType());
       this.timing = value;
       return this;
     }
@@ -604,7 +613,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #source} (Who reported the device was being used by the patient.)
      */
-    public DeviceUseStatement setSource(Reference value) { 
+    public DeviceUseStatement setSource(Reference value)  { 
       this.source = value;
       return this;
     }
@@ -643,7 +652,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #device} (The details of the device used.)
      */
-    public DeviceUseStatement setDevice(Reference value) { 
+    public DeviceUseStatement setDevice(Reference value)  { 
       this.device = value;
       return this;
     }
@@ -740,7 +749,7 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @param value {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
-    public DeviceUseStatement setBodySite(CodeableConcept value) { 
+    public DeviceUseStatement setBodySite(CodeableConcept value)  { 
       this.bodySite = value;
       return this;
     }
@@ -798,19 +807,42 @@ public class DeviceUseStatement extends DomainResource {
       return getNote().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "An external identifier for this statement such as an IRI.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient who used the device.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("whenUsed", "Period", "The time period over which the device was used.", 0, java.lang.Integer.MAX_VALUE, whenUsed));
-        childrenList.add(new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, java.lang.Integer.MAX_VALUE, timing));
-        childrenList.add(new Property("recordedOn", "dateTime", "The time at which the statement was made/recorded.", 0, java.lang.Integer.MAX_VALUE, recordedOn));
-        childrenList.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "Who reported the device was being used by the patient.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("device", "Reference(Device)", "The details of the device used.", 0, java.lang.Integer.MAX_VALUE, device));
-        childrenList.add(new Property("indication", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, indication));
-        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
-        childrenList.add(new Property("note", "Annotation", "Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "An external identifier for this statement such as an IRI.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed.", 0, 1, status));
+        children.add(new Property("subject", "Reference(Patient|Group)", "The patient who used the device.", 0, 1, subject));
+        children.add(new Property("whenUsed", "Period", "The time period over which the device was used.", 0, 1, whenUsed));
+        children.add(new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing));
+        children.add(new Property("recordedOn", "dateTime", "The time at which the statement was made/recorded.", 0, 1, recordedOn));
+        children.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "Who reported the device was being used by the patient.", 0, 1, source));
+        children.add(new Property("device", "Reference(Device)", "The details of the device used.", 0, 1, device));
+        children.add(new Property("indication", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, indication));
+        children.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, 1, bodySite));
+        children.add(new Property("note", "Annotation", "Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "An external identifier for this statement such as an IRI.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "A code representing the patient or other source's judgment about the state of the device used that this statement is about.  Generally this will be active or completed.", 0, 1, status);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient who used the device.", 0, 1, subject);
+        case 2042879511: /*whenUsed*/  return new Property("whenUsed", "Period", "The time period over which the device was used.", 0, 1, whenUsed);
+        case 164632566: /*timing[x]*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
+        case -873664438: /*timing*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
+        case -497554124: /*timingTiming*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
+        case -615615829: /*timingPeriod*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
+        case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "Timing|Period|dateTime", "How often the device was used.", 0, 1, timing);
+        case 735397551: /*recordedOn*/  return new Property("recordedOn", "dateTime", "The time at which the statement was made/recorded.", 0, 1, recordedOn);
+        case -896505829: /*source*/  return new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "Who reported the device was being used by the patient.", 0, 1, source);
+        case -1335157162: /*device*/  return new Property("device", "Reference(Device)", "The details of the device used.", 0, 1, device);
+        case -597168804: /*indication*/  return new Property("indication", "CodeableConcept", "Reason or justification for the use of the device.", 0, java.lang.Integer.MAX_VALUE, indication);
+        case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the device was used ( i.e. the target site).", 0, 1, bodySite);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Details about the device statement that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1035,12 +1067,12 @@ public class DeviceUseStatement extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceUseStatement))
+        if (!(other_ instanceof DeviceUseStatement))
           return false;
-        DeviceUseStatement o = (DeviceUseStatement) other;
+        DeviceUseStatement o = (DeviceUseStatement) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
            && compareDeep(whenUsed, o.whenUsed, true) && compareDeep(timing, o.timing, true) && compareDeep(recordedOn, o.recordedOn, true)
            && compareDeep(source, o.source, true) && compareDeep(device, o.device, true) && compareDeep(indication, o.indication, true)
@@ -1048,12 +1080,12 @@ public class DeviceUseStatement extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceUseStatement))
+        if (!(other_ instanceof DeviceUseStatement))
           return false;
-        DeviceUseStatement o = (DeviceUseStatement) other;
+        DeviceUseStatement o = (DeviceUseStatement) other_;
         return compareValues(status, o.status, true) && compareValues(recordedOn, o.recordedOn, true);
       }
 
