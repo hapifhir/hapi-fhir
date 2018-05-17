@@ -190,6 +190,11 @@
 				but have others used but not declared as mustSupport. Thanks to Patrick
 				Werner for the PR!
 			</action>
+			<action type="add" issue="926">
+				The HAPI FHIR CLI is now available for installation on OSX using the
+				(really excellent) Homebrew package manager thanks to an effort by
+				John Grimes to get it added. Thanks John!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
