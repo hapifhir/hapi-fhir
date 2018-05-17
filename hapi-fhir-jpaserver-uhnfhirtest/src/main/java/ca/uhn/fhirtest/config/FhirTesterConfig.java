@@ -86,7 +86,7 @@ public class FhirTesterConfig {
 				.withName("Health Intersections (DSTU2 FHIR)")
 			.addServer()
 				.withId("spark2")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
+				.withFhirVersion(FhirVersionEnum.DSTU3)
 				.withBaseUrl("http://vonk.furore.com/")
 				.withName("Vonk - Furore (STU3 FHIR)");
 		
