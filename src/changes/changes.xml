@@ -184,6 +184,12 @@
 				resources from successfully being uploaded to the JPA server. Thanks to
 				Anthony Sute for identifying this.
 			</action>
+			<action type="fix" issue="937">
+				A hard-to-understand validation message was fixed in the validator when 
+				validating against profiles that declare some elements as mustSupport
+				but have others used but not declared as mustSupport. Thanks to Patrick
+				Werner for the PR!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
