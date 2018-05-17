@@ -3621,7 +3621,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     // all observations should have a subject, a performer, and a time
 
     bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("subject") != null, "All observations should have a subject");
-    bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("performer") != null, "All observations should have a performer");
+    List<Element> performer = new ArrayList();element.getNamedChildren("performer", performer);
+	 bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), !performer.isEmpty(), "All observations should have a performer");
     bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("effectiveDateTime") != null || element.getNamedChild("effectivePeriod") != null,
         "All observations should have an effectiveDateTime or an effectivePeriod");
   }
