@@ -64,7 +64,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourLog.info(responseContent);
 		
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\"Failed to call access method\"/>"));
+		assertThat(responseContent, containsString("<diagnostics value=\"Failed to call access method: java.lang.Error: AAABBB\"/>"));
 	}
 
 
