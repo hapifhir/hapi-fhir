@@ -229,6 +229,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				try {
 					v.validate(null, messages, document, profile.getUrl());
 				} catch (Exception e) {
+					ourLog.error("Failure during validation", e);
 					throw new InternalErrorException("Unexpected failure while validating resource", e);
 				}
 			}

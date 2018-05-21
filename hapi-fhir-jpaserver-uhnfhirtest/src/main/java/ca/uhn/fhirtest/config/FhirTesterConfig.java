@@ -87,8 +87,8 @@ public class FhirTesterConfig {
 			.addServer()
 				.withId("spark2")
 				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("http://vonk.furore.com/")
-				.withName("Vonk - Furore (STU3 FHIR)");
+				.withBaseUrl("http://vonk.fire.ly/")
+				.withName("Vonk - Firely (STU3 FHIR)");
 		
 		return retVal;
 	}

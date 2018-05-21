@@ -108,6 +108,29 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.registerInterceptor(myCapturingInterceptor);
 	}
 
+	@Test
+	public void testDeleteConditional() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM").addGiven("GIV");
+		IIdType id = myPatientDao.create(p).getId();
+
+		myClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+
+		myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?family=FAM&given=giv")
+			.execute();
+
+		try {
+			myClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
+
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
