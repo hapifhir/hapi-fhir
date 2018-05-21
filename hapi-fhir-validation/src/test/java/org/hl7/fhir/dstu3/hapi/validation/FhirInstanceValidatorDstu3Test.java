@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.valueset.ProcedureStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -30,6 +31,8 @@ import org.junit.runner.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -67,9 +70,29 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
 
-	/**
-	 * See #873
-	 */
+	@Test
+	public void testStress() throws IOException {
+
+		String input = IOUtils.toString(new FileReader("/home/james/Downloads/history.json"));
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		val.validateWithResult(input);
+
+		StopWatch sw = new StopWatch();
+		int loops = 100;
+		for (int i = 0; i < loops; i++) {
+			val.validateWithResult(input);
+		}
+
+		ourLog.info("Validated {} times AVG {}ms/val", loops, sw.getMillisPerOperation(loops));
+	}
+
+
+		/**
+       * See #873
+       */
 	@Test
 	public void testCompareTimesWithDifferentTimezones() {
 		Procedure procedure = new Procedure();
