@@ -195,6 +195,12 @@
 				(really excellent) Homebrew package manager thanks to an effort by
 				John Grimes to get it added. Thanks John!
 			</action>
+			<action type="add" issue="953">
+				When the REST Server experiences an expected error (such as a NullPointerException)
+				in a resource provider class, a simple message of "Failed to call access method" is
+				returned to the user. This has been enhanced to also include the message from
+				the underlying exception.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
