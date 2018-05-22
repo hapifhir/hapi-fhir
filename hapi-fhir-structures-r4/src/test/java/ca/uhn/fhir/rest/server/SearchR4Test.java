@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -14,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,10 +28,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsString;
@@ -119,6 +120,43 @@ public class SearchR4Test {
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
 
+	}
+
+	/**
+	 * See #836
+	 */
+	@Test
+	public void testIncludeSingleParameter() throws Exception {
+		HttpGet httpGet;
+		String linkNext;
+		Bundle bundle;
+		String linkSelf;
+
+		// No include specified
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest");
+		bundle = executeAndReturnBundle(httpGet);
+		assertEquals(1, bundle.getEntry().size());
+
+		// * include specified
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
+		bundle = executeAndReturnBundle(httpGet);
+		assertEquals(2, bundle.getEntry().size());
+
+		// MedicationRequest:medication include specified
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("MedicationRequest:medication"));
+		bundle = executeAndReturnBundle(httpGet);
+		assertEquals(2, bundle.getEntry().size());
+
+	}
+
+	private Bundle executeAndReturnBundle(HttpGet theHttpGet) throws IOException {
+		Bundle bundle;
+		try (CloseableHttpResponse status = ourClient.execute(theHttpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		}
+		return bundle;
 	}
 
 	@Test
@@ -368,13 +406,14 @@ public class SearchR4Test {
 		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+		DummyMedicationRequestResourceProvider medRequestProvider = new DummyMedicationRequestResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		servlet.setResourceProviders(patientProvider);
+		servlet.setResourceProviders(patientProvider, medRequestProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -410,6 +449,32 @@ public class SearchR4Test {
 				retVal.add(patient);
 			}
 			return retVal;
+		}
+
+	}
+
+	public static class DummyMedicationRequestResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return MedicationRequest.class;
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Search()
+		public List<MedicationRequest> search(
+			@IncludeParam Set<Include> theIncludes
+		) {
+			MedicationRequest mr = new MedicationRequest();
+			mr.setId("1");
+			mr.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+
+			Medication m = new Medication();
+			m.setId("2");
+			m.setStatus(Medication.MedicationStatus.ENTEREDINERROR);
+			mr.setMedication(new Reference(m));
+
+			return Lists.newArrayList(mr);
 		}
 
 	}

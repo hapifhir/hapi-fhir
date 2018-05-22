@@ -201,6 +201,11 @@
 				returned to the user. This has been enhanced to also include the message from
 				the underlying exception.
 			</action>
+			<action type="fix" issue="836">
+				A bug in the plain server was fixed that prevented some includes from
+				correctly causing their targets to be included in the response bundle.
+				Thanks to GitHub user @RuthAlk for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

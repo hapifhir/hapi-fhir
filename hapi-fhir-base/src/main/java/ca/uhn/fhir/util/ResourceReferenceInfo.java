@@ -101,11 +101,11 @@ public class ResourceReferenceInfo {
 			if (resourceDef != null) {
 				RuntimeSearchParam searchParamDef = resourceDef.getSearchParam(paramName);
 				if (searchParamDef!=null) {
-					final String myCompleteName = myOwningResource + "." + myName;
+					final String completeName = myOwningResource + "." + myName;
 					boolean matched = false;
 					for (String s : searchParamDef.getPathsSplit()) {
-						if (s.equals(myCompleteName) ||
-								       s.startsWith(myCompleteName + ".")) {
+						if (s.equals(completeName) ||
+								       s.startsWith(completeName + ".")) {
 							matched = true; break;
 						}
 					}
