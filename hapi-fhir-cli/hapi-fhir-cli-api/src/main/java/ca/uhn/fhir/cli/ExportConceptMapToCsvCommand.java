@@ -26,6 +26,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -163,7 +164,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 				CSVFormat
 					.DEFAULT
 					.withRecordSeparator("\n")
-					.withHeader(Header.class));
+					.withHeader(Header.class).withQuoteMode(QuoteMode.ALL));
 
 			for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 				for (SourceElementComponent element : group.getElement()) {

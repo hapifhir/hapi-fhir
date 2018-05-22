@@ -176,6 +176,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 					.withHeader(Header.class)
 					.withFirstRecordAsHeader()
 					.withIgnoreHeaderCase()
+					.withIgnoreEmptyLines()
 					.withTrim());
 
 			retVal.setUrl(conceptMapUrl);
