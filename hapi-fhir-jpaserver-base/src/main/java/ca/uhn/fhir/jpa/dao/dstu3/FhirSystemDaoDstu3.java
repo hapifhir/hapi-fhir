@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,34 +19,12 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.persistence.TypedQuery;
-
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.rest.param.ParameterUtil;
-import org.apache.commons.lang3.Validate;
-import org.apache.http.NameValuePair;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.*;
-import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.instance.model.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.*;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import com.google.common.collect.ArrayListMultimap;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
@@ -54,18 +32,49 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
+import com.google.common.collect.ArrayListMultimap;
+import org.apache.commons.lang3.Validate;
+import org.apache.http.NameValuePair;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.instance.model.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.persistence.TypedQuery;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
@@ -90,8 +99,8 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 		for (final BundleEntryComponent nextRequestEntry : theRequest.getEntry()) {
 
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder(); 
-			
+			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+
 			TransactionCallback<Bundle> callback = new TransactionCallback<Bundle>() {
 				@Override
 				public Bundle doInTransaction(TransactionStatus theStatus) {
@@ -136,7 +145,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		}
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Batch completed in {}ms", new Object[] { delay });
+		ourLog.info("Batch completed in {}ms", new Object[] {delay});
 
 		return resp;
 	}
@@ -178,7 +187,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		 * We want to execute the transaction request bundle elements in the order
 		 * specified by the FHIR specification (see TransactionSorter) so we save the
 		 * original order in the request, then sort it.
-		 * 
+		 *
 		 * Entries with a type of GET are removed from the bundle so that they
 		 * can be processed at the very end. We do this because the incoming resources
 		 * are saved in a two-phase way in order to deal with interdependencies, and
@@ -212,11 +221,11 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		/*
 		 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
 		 * except GET) are performed in their own database transaction before we do the reads.
-		 * We do this because the reads (specifically the searches) often spawn their own 
-		 * secondary database transaction and if we allow that within the primary 
+		 * We do this because the reads (specifically the searches) often spawn their own
+		 * secondary database transaction and if we allow that within the primary
 		 * database transaction we can end up with deadlocks if the server is under
 		 * heavy load with lots of concurrent transactions using all available
-		 * database connections. 
+		 * database connections.
 		 */
 		TransactionTemplate txManager = new TransactionTemplate(myTxManager);
 		Map<BundleEntryComponent, ResourceTable> entriesToProcess = txManager.execute(new TransactionCallback<Map<BundleEntryComponent, ResourceTable>>() {
@@ -605,7 +614,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	 * was a GET search, this method is called on the bundle for the search result, that will be placed in the
 	 * outer bundle). This method applies the _summary and _content parameters to the output of
 	 * that bundle.
-	 * 
+	 * <p>
 	 * TODO: This isn't the most efficient way of doing this.. hopefully we can come up with something better in the future.
 	 */
 	private IBaseResource filterNestedBundle(RequestDetails theRequestDetails, IBaseResource theResource) {
@@ -614,13 +623,6 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
 	}
 
-	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		IFhirResourceDao<? extends IBaseResource> retVal = getDao(theClass);
-		if (retVal == null) {
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
-		}
-		return retVal;
-	}
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {
@@ -689,15 +691,15 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		Meta retVal = new Meta();
 		for (TagDefinition next : tagDefinitions) {
 			switch (next.getTagType()) {
-			case PROFILE:
-				retVal.addProfile(next.getCode());
-				break;
-			case SECURITY_LABEL:
-				retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-				break;
-			case TAG:
-				retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
-				break;
+				case PROFILE:
+					retVal.addProfile(next.getCode());
+					break;
+				case SECURITY_LABEL:
+					retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					break;
+				case TAG:
+					retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+					break;
 			}
 		}
 		return retVal;
@@ -725,7 +727,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	}
 
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdType, IdType> idSubstitutions, Map<IdType, DaoMethodOutcome> idToPersistedOutcome, IdType nextResourceId, DaoMethodOutcome outcome,
-			BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes, ServletRequestDetails theRequestDetails) {
+																				  BundleEntryComponent newEntry, String theResourceType, IBaseResource theRes, ServletRequestDetails theRequestDetails) {
 		IdType newId = (IdType) outcome.getId().toUnqualifiedVersionless();
 		IdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
@@ -774,7 +776,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 	/**
 	 * Transaction Order, per the spec:
-	 *
+	 * <p>
 	 * Process any DELETE interactions
 	 * Process any POST interactions
 	 * Process any PUT interactions
@@ -853,21 +855,21 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 			int o1 = 0;
 			if (theO1.getRequest().getMethodElement().getValue() != null) {
 				switch (theO1.getRequest().getMethodElement().getValue()) {
-				case DELETE:
-					o1 = 1;
-					break;
-				case POST:
-					o1 = 2;
-					break;
-				case PUT:
-					o1 = 3;
-					break;
-				case GET:
-					o1 = 4;
-					break;
-				case NULL:
-					o1 = 0;
-					break;
+					case DELETE:
+						o1 = 1;
+						break;
+					case POST:
+						o1 = 2;
+						break;
+					case PUT:
+						o1 = 3;
+						break;
+					case GET:
+						o1 = 4;
+						break;
+					case NULL:
+						o1 = 0;
+						break;
 				}
 			}
 			return o1;
@@ -877,8 +879,7 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 	//@formatter:off
 
-	private static class BaseServerResponseExceptionHolder
-	{
+	private static class BaseServerResponseExceptionHolder {
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {
