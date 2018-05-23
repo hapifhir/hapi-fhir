@@ -127,12 +127,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.deny("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
 					.allowAll("Default Rule")
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -238,13 +236,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -273,13 +269,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -308,13 +302,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -345,12 +337,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").delete().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").delete().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -379,12 +369,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
 					.denyAll("Default Rule")
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -500,11 +488,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").read().allResources().withAnyId()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -540,11 +526,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").metadata()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -564,11 +548,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.deny("Rule 1").metadata()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -588,11 +570,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("RULE 1").operation().withAnyName().onServer().andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -616,11 +596,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -653,12 +631,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -693,11 +669,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -729,11 +703,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("RULE 1").operation().named("opName").onInstance(new IdDt("http://example.com/Patient/1/_history/2")).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -859,11 +831,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
+				
 				return new RuleBuilder()
 					.allow("RULE 1").write().allResources().withAnyId().andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -917,11 +888,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("RULE 1").operation().named("opName").onServer().andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -966,11 +935,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("RULE 1").operation().named("opName").onType(Patient.class).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1037,11 +1004,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("RULE 1").operation().named("opName").onAnyType().andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1107,11 +1072,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1172,12 +1135,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1311,12 +1272,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1381,13 +1340,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1416,13 +1373,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 1b").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1123")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1475,12 +1430,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").createConditional().resourcesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1506,12 +1459,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").delete().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").deleteConditional().resourcesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1537,11 +1488,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 2").deleteConditional().resourcesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1565,12 +1514,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1599,12 +1546,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1673,13 +1618,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 3").updateConditional().resourcesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1705,13 +1648,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 3").updateConditional().resourcesOfType(Patient.class)
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1745,13 +1686,11 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 2").write().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.allow("Rule 3").updateConditional().allResources()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1825,11 +1764,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().instance("Patient/900").andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1863,12 +1800,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").write().instance("Observation/900").andThen()
 					.allow("Rule 1").write().instance("901").andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -1919,12 +1854,10 @@ public class AuthorizationInterceptorDstu2Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
 					.allow("Rule 1").read().instance("Observation/900").andThen()
 					.allow("Rule 1").read().instance("901").andThen()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -2103,6 +2036,7 @@ public class AuthorizationInterceptorDstu2Test {
 
 	}
 
+	@SuppressWarnings("unused")
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Create()

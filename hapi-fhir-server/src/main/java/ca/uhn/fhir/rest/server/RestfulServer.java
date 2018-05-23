@@ -1494,14 +1494,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			case OPTIONS:
 				doOptions(theReq, theResp);
 				break;
-			case PATCH:
-				break;
 			case POST:
 				doPost(theReq, theResp);
 				break;
 			case PUT:
 				doPut(theReq, theResp);
 				break;
+			case PATCH:
 			case TRACE:
 			case TRACK:
 			case HEAD:
