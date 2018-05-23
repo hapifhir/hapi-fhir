@@ -217,6 +217,11 @@
 				did not work. Thanks to Jason Owen for reporting and providing a test
 				case!
 			</action>
+			<action type="fix" issue="874">
+				An issue was corrected in the validator where Questionnaire references that
+				used contained resources caused an unexpected crash. Thanks to
+				Heinz-Dieter Conradi for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

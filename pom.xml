@@ -448,6 +448,10 @@
 			<id>jasonaown</id>
 			<name>Jason Owen</name>
 		</developer>
+		<developer>
+			<id>hdconradi</id>
+			<name>Heinz-Dieter Conradi</name>
+		</developer>
 	</developers>
 
 	<licenses>
