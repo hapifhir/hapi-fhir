@@ -1575,9 +1575,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
     if (pol.checkExists()) {
       if (we == null) {
-        if (fetcher == null)
-          throw new FHIRException("Resource resolution services not provided");
-        we = fetcher.fetch(hostContext.appContext, ref);
+        if (fetcher == null) {
+          if (!refType.equals("contained"))
+            throw new FHIRException("Resource resolution services not provided");
+        } else {
+          we = fetcher.fetch(hostContext.appContext, ref);
+        }
       }
       rule(errors, IssueType.STRUCTURE, element.line(), element.col(), path, we != null, "Unable to resolve resource '"+ref+"'");
     }
