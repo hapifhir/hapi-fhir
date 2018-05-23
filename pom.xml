@@ -439,6 +439,11 @@
 		<developer>
 			<id>RuthAlk</id>
 		</developer>
+		<developer>
+			<id>Tastelezz</id>
+			<name>Gaetano Gallo</name>
+			<organization>InterComponentWare AG</organization>
+		</developer>
 	</developers>
 
 	<licenses>

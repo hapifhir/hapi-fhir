@@ -206,6 +206,11 @@
 				correctly causing their targets to be included in the response bundle.
 				Thanks to GitHub user @RuthAlk for the pull request!
 			</action>
+			<action type="add" issue="857">
+				DateRangeParameter was enhanced to support convenient method chanining, and 
+				the parameter validation was improved to only change state after validating
+				that parameters were valid. Thanks to Gaetano Gallo for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
