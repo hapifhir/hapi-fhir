@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
@@ -365,6 +366,22 @@ public class FhirTerser {
 			for (String nextPath : nextParam.getPathsSplit()) {
 				for (IBaseReference nextValue : getValues(theSource, nextPath, IBaseReference.class)) {
 					String nextRef = nextValue.getReferenceElement().toUnqualifiedVersionless().getValue();
+
+					/*
+					 * If the reference isn't an explicit resource ID, but instead is just
+					 * a resource object, we'll calculate its ID and treat the target
+					 * as that.
+					 */
+					if (isBlank(nextRef) && nextValue.getResource() != null) {
+						IBaseResource nextTarget = nextValue.getResource();
+						IIdType nextTargetId = nextTarget.getIdElement().toUnqualifiedVersionless();
+						if (!nextTargetId.hasResourceType()) {
+							String resourceType = myContext.getResourceDefinition(nextTarget).getName();
+							nextTargetId.setParts(null, resourceType, nextTargetId.getIdPart(), null);
+						}
+						nextRef = nextTargetId.getValue();
+					}
+
 					if (wantRef.equals(nextRef)) {
 						return true;
 					}

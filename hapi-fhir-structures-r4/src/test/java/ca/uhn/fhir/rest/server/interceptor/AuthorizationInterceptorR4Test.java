@@ -391,6 +391,69 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	public void testAllowByCompartmentUsingUnqualifiedIds() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder().allow().read().resourcesOfType(CarePlan.class).inCompartment("Patient", new IdType("Patient/123")).andThen().denyAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		Patient patient;
+		CarePlan carePlan;
+
+		// Unqualified
+		patient = new Patient();
+		patient.setId("123");
+		carePlan = new CarePlan();
+		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+		carePlan.getSubject().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(carePlan);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/CarePlan/135154");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Qualified
+		patient = new Patient();
+		patient.setId("Patient/123");
+		carePlan = new CarePlan();
+		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+		carePlan.getSubject().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(carePlan);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/CarePlan/135154");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Wrong one
+		patient = new Patient();
+		patient.setId("456");
+		carePlan = new CarePlan();
+		carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
+		carePlan.getSubject().setResource(patient);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(carePlan);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/CarePlan/135154");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+
+	@Test
 	public void testBatchWhenOnlyTransactionAllowed() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

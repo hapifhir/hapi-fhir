@@ -248,6 +248,12 @@
 				the number of threads allocated to reindexing may now be adjusted via a
 				setting in the DaoConfig.
 			</action>
+			<action type="fix">
+				AuthorizationInterceptor did not correctly grant access to resources
+				by compartment when the reference on the target resource that pointed
+				to the compartment owner was defined using a resource object (ResourceReference#setResource)
+				instead of a reference (ResourceReference#setReference).
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

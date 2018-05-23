@@ -1,37 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
-import ca.uhn.fhir.jpa.rp.r4.*;
+import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.OrganizationResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -45,6 +19,35 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.junit.*;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
@@ -63,7 +66,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
-	
+
 	@Before
 	public void before() {
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
@@ -118,7 +121,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourClient.setLogRequestAndResponse(true);
 			myRestServer = restServer;
 		}
-		
+
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		myRestServer.setPagingProvider(myPagingProvider);
 	}
@@ -154,7 +157,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
-	
+
 	@Test
 	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
@@ -183,7 +186,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
-	
+
 	@Test
 	public void testEverythingType() throws Exception {
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
@@ -194,7 +197,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			http.close();
 		}
 	}
-	
+
 	@Test
 	public void testGetOperationDefinition() {
 		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
@@ -210,7 +213,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourLog.info(output);
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
-			IOUtils.closeQuietly(http);;
+			IOUtils.closeQuietly(http);
+			;
 		}
 
 		get = new HttpGet(ourServerBase + "/$perform-reindexing-pass");
@@ -220,7 +224,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourLog.info(output);
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
-			IOUtils.closeQuietly(http);;
+			IOUtils.closeQuietly(http);
+			;
 		}
 
 	}
@@ -236,6 +241,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		assertThat(http.getFirstHeader("Content-Type").getValue(), containsString("application/fhir+json"));
 	}
+
 
 	@Transactional(propagation = Propagation.NEVER)
 	@Test
@@ -320,7 +326,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 
 	}
-	
+
 	@Test
 	public void testTransactionCount() throws Exception {
 		for (int i = 0; i < 20; i++) {
@@ -577,33 +583,33 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		//@formatter:off
 		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
-				"    <id value=\"20160113160203\"/>\n" +
-				"    <type value=\"transaction\"/>\n" +
-				"    <entry>\n" +
-				"        <fullUrl value=\"urn:uuid:c72aa430-2ddc-456e-7a09-dea8264671d8\"/>\n" +
-				"        <resource>\n" +
-				"            <Encounter>\n" +
-				"                <identifier>\n" +
-				"                    <use value=\"official\"/>\n" +
-				"                    <system value=\"http://healthcare.example.org/identifiers/encounter\"/>\n" +
-				"                    <value value=\"845962.8975469\"/>\n" +
-				"                </identifier>\n" +
-				"                <status value=\"in-progress\"/>\n" +
-				"                <class value=\"inpatient\"/>\n" +
-				"                <patient>\n" +
-				"                    <reference value=\"Patient?family=van%20de%20Heuvelcx85ioqWJbI&amp;given=Pietercx85ioqWJbI\"/>\n" +
-				"                </patient>\n" +
-				"                <serviceProvider>\n" +
-				"                    <reference value=\"Organization?identifier=urn:oid:2.16.840.1.113883.2.4.6.1|07-8975469\"/>\n" +
-				"                </serviceProvider>\n" +
-				"            </Encounter>\n" +
-				"        </resource>\n" +
-				"        <request>\n" +
-				"            <method value=\"POST\"/>\n" +
-				"            <url value=\"Encounter\"/>\n" +
-				"        </request>\n" +
-				"    </entry>\n" +
-				"</Bundle>";
+			"    <id value=\"20160113160203\"/>\n" +
+			"    <type value=\"transaction\"/>\n" +
+			"    <entry>\n" +
+			"        <fullUrl value=\"urn:uuid:c72aa430-2ddc-456e-7a09-dea8264671d8\"/>\n" +
+			"        <resource>\n" +
+			"            <Encounter>\n" +
+			"                <identifier>\n" +
+			"                    <use value=\"official\"/>\n" +
+			"                    <system value=\"http://healthcare.example.org/identifiers/encounter\"/>\n" +
+			"                    <value value=\"845962.8975469\"/>\n" +
+			"                </identifier>\n" +
+			"                <status value=\"in-progress\"/>\n" +
+			"                <class value=\"inpatient\"/>\n" +
+			"                <patient>\n" +
+			"                    <reference value=\"Patient?family=van%20de%20Heuvelcx85ioqWJbI&amp;given=Pietercx85ioqWJbI\"/>\n" +
+			"                </patient>\n" +
+			"                <serviceProvider>\n" +
+			"                    <reference value=\"Organization?identifier=urn:oid:2.16.840.1.113883.2.4.6.1|07-8975469\"/>\n" +
+			"                </serviceProvider>\n" +
+			"            </Encounter>\n" +
+			"        </resource>\n" +
+			"        <request>\n" +
+			"            <method value=\"POST\"/>\n" +
+			"            <url value=\"Encounter\"/>\n" +
+			"        </request>\n" +
+			"    </entry>\n" +
+			"</Bundle>";
 		//@formatter:off
 
 		HttpPost req = new HttpPost(ourServerBase);

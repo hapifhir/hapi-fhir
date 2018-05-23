@@ -200,10 +200,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append("system", getSystem());
 		b.append("units", getUnits());
 		b.append("value", getValue());
+		b.append("missing", isMissing());
 		return b.build();
 	}
 
 	private static String toTruncatedString(BigDecimal theValue) {
+		if (theValue == null) {
+			return null;
+		}
 		return theValue.setScale(0, RoundingMode.FLOOR).toPlainString();
 	}
 
