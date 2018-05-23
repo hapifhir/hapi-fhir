@@ -596,7 +596,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   private void checkElementUsage(List<ValidationMessage> errors, Element element, NodeStack stack) {
     String elementUsage = element.getUserString("elementSupported");
-    hint(errors, IssueType.INFORMATIONAL, element.line(),element.col(), stack.getLiteralPath(), elementUsage==null || elementUsage.equals("Y"), "Instance includes element that is not marked as 'mustSupport' in the corresponding profile and was validated against a profile containing mustSupport=true elements.");
+	 hint(errors, IssueType.INFORMATIONAL, element.line(),element.col(), stack.getLiteralPath(), elementUsage==null || elementUsage.equals("Y"), "Instance includes element that is not marked as 'mustSupport' in the corresponding profile and was validated against a profile containing mustSupport=true elements.");
     if (element.hasChildren()) {
       String prevName = "";
       int elementCount = 0;
@@ -2608,21 +2608,18 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
     if (qItem.getType() == null) {
       fail(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), false, "Definition for item "+qItem.getLinkId() + " does not contain a type");
-    } else if (qItem.getType() == QuestionnaireItemType.GROUP) {
-      validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, element, stack, inProgress);
-    } else {
+    } else if (qItem.getType() == QuestionnaireItemType.DISPLAY) {
       List<Element> items = new ArrayList<Element>();
       element.getNamedChildren("item", items);
-      for (Element item : items) {
-        NodeStack ns = stack.push(item, -1, null, null);
-        rule(errors, IssueType.STRUCTURE, answers.get(0).line(), answers.get(0).col(), stack.getLiteralPath(), false, "Items not of type group should not have items - Item with linkId {0} of type {1} has {2} item(s)", qItem.getLinkId(), qItem.getType(), items.size());
-      }
+      rule(errors, IssueType.STRUCTURE, element.line(), element.col(), stack.getLiteralPath(), items.isEmpty(), "Items not of type DISPLAY should not have items - linkId {0}", qItem.getLinkId());
+    } else {
+      validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, element, stack, inProgress);
     }
   }
 
   private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, List<Element> elements, NodeStack stack, boolean inProgress) {
     if (elements.size() > 1)
-      rule(errors, IssueType.INVALID, elements.get(1).line(), elements.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response item with this linkId allowed");
+      rule(errors, IssueType.INVALID, elements.get(1).line(), elements.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response item with this linkId allowed - " + qItem.getLinkId());
     for (Element element : elements) {
       NodeStack ns = stack.push(element, -1, null, null);
       validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress);
@@ -3621,8 +3618,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     // all observations should have a subject, a performer, and a time
 
     bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("subject") != null, "All observations should have a subject");
-    List<Element> performer = new ArrayList();element.getNamedChildren("performer", performer);
-	 bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), !performer.isEmpty(), "All observations should have a performer");
+	  List<Element> performers = new ArrayList<>();
+	  element.getNamedChildren("performer", performers);
+	  bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), performers.size() > 0, "All observations should have a performer");
     bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("effectiveDateTime") != null || element.getNamedChild("effectivePeriod") != null,
         "All observations should have an effectiveDateTime or an effectivePeriod");
   }
