@@ -211,6 +211,12 @@
 				the parameter validation was improved to only change state after validating
 				that parameters were valid. Thanks to Gaetano Gallo for the pull request!
 			</action>
+			<action type="fix" issue="867">
+				The HumanName DSTU3+ datatype had convenience methods for testing
+				whether the name has a specific given name or not, but these methods
+				did not work. Thanks to Jason Owen for reporting and providing a test
+				case!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

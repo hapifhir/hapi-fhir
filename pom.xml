@@ -444,6 +444,10 @@
 			<name>Gaetano Gallo</name>
 			<organization>InterComponentWare AG</organization>
 		</developer>
+		<developer>
+			<id>jasonaown</id>
+			<name>Jason Owen</name>
+		</developer>
 	</developers>
 
 	<licenses>

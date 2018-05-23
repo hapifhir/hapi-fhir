@@ -1,10 +1,10 @@
-package org.hl7.fhir.dstu3.model;
+package org.hl7.fhir.r4.model;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class HumanNameDstu3Test {
+public class HumanNameR4Test {
 	/**
 	 * See #865
 	 */
