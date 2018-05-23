@@ -158,8 +158,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
-		String b = createPoweredByHeader();
-		theHttpResponse.addHeader(Constants.POWERED_BY_HEADER, b);
+		String poweredByHeader = createPoweredByHeader();
+		if (isNotBlank(poweredByHeader)) {
+			theHttpResponse.addHeader(Constants.POWERED_BY_HEADER, poweredByHeader);
+		}
 	}
 
 	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation, String resourceName) {
