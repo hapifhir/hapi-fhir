@@ -222,6 +222,10 @@
 				used contained resources caused an unexpected crash. Thanks to
 				Heinz-Dieter Conradi for the pull request!
 			</action>
+			<action type="add" issue="875">
+				An issue in the narrative generator template for the CodeableConcept
+				datatype was corrected. Thanks to @RuthAlk for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
