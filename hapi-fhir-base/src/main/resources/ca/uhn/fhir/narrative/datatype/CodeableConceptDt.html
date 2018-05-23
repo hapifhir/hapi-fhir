@@ -1,7 +1,7 @@
 <th:block th:if="${not resource.textElement.empty}" th:text="${resource.textElement.value}"/>
 <th:block th:if="${resource.textElement.empty}">
 	<th:block th:if="${!resource.coding.empty}">
-		<th:block th:if="${!resource.coding[0].displayElement.empty}" th:text="${!resource.coding[0].displayElement.value}"/>
+		<th:block th:if="${!resource.coding[0].displayElement.empty}" th:text="${resource.coding[0].displayElement.value}"/>
 		<th:block th:if="${resource.coding[0].displayElement.empty}">
 			<th:block th:if="${!resource.coding[0].codeElement.empty}">
 				<th:block th:text="${resource.coding[0].codeElement.value}"/>
