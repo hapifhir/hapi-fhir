@@ -44,8 +44,13 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			ourLog.warn("Unexpected payload type: {}", theMessage.getPayload());
 			return;
 		}
+
+		String subscriptionId = "(unknown?)";
+
 		try {
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
+			subscriptionId = msg.getSubscription().getIdElement(getContext()).getValue();
+
 			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription(getContext()))) {
 				return;
 			}
@@ -62,7 +67,7 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 				// can have placeholder IDs in them.
 				IIdType payloadId = msg.getPayloadId(getContext());
 				Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
-				IFhirResourceDao dao = getSubscriptionDao().getDao(type);
+				IFhirResourceDao dao = getSubscriptionInterceptor().getDao(type);
 				IBaseResource loadedPayload;
 				try {
 					loadedPayload = dao.read(payloadId);
@@ -77,8 +82,9 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 
 			handleMessage(msg);
 		} catch (Exception e) {
-			ourLog.error("Failure handling subscription payload", e);
-			throw new MessagingException(theMessage, "Failure handling subscription payload", e);
+			String msg = "Failure handling subscription payload for subscription: " + subscriptionId;
+			ourLog.error(msg, e);
+			throw new MessagingException(theMessage, msg, e);
 		}
 	}
 

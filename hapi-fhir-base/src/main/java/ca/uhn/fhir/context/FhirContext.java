@@ -149,8 +149,12 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
+		} else if (FhirVersionEnum.DSTU2_1.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU2_1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU3.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU3.getVersionImplementation();
+		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.R4.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
@@ -654,7 +658,7 @@ public class FhirContext {
 		nameToElementDefinition.putAll(myNameToElementDefinition);
 		for (Entry<String, BaseRuntimeElementDefinition<?>> next : scanner.getNameToElementDefinitions().entrySet()) {
 			if (!nameToElementDefinition.containsKey(next.getKey())) {
-				nameToElementDefinition.put(next.getKey(), next.getValue());
+				nameToElementDefinition.put(next.getKey().toLowerCase(), next.getValue());
 			}
 		}
 

@@ -20,6 +20,7 @@ package org.hl7.fhir.convertors;
  * #L%
  */
 
+
 /*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
@@ -55,25 +56,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionPropertyComponent;
+import org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind;
 import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Reference;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
+import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.FilterOperator;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ContactDetail;
+import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r4.model.ImplementationGuide.GuidePageGeneration;
 import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemOperator;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
 import org.hl7.fhir.r4.model.Timing.EventTiming;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 
 public class VersionConvertor_14_40 {
 
+  private static List<String> CANONICAL_URLS = new ArrayList<String>();
+  static {
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/codesystem-map");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/cqif-library");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/elementdefinition-inheritedExtensibleValueSet");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/elementdefinition-minValueSet");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/event-instantiatesCanonical");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/questionnaire-allowedProfile");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/questionnaire-deMap");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/questionnaire-sourceStructureMap");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/questionnaire-targetStructureMap");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/questionnaire-unit-valueSet");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/valueset-map");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/valueset-supplement");
+    CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/valueset-system");    
+  }
+  
   private static void copyElement(org.hl7.fhir.dstu2016may.model.Element src, org.hl7.fhir.r4.model.Element tgt) throws FHIRException {
     if (src.hasId())
       tgt.setId(src.getId());
@@ -352,6 +383,14 @@ public class VersionConvertor_14_40 {
     return tgt;
   }
 
+  public static org.hl7.fhir.r4.model.UrlType convertUriToUrl(org.hl7.fhir.dstu2016may.model.UriType src) throws FHIRException {
+    org.hl7.fhir.r4.model.UrlType tgt = new org.hl7.fhir.r4.model.UrlType();
+    if (src.hasValue())
+      tgt.setValue(src.getValue());
+    copyElement(src, tgt);
+    return tgt;
+  }
+
   public static org.hl7.fhir.dstu2016may.model.UriType convertUri(org.hl7.fhir.r4.model.UriType src) throws FHIRException {
     org.hl7.fhir.dstu2016may.model.UriType tgt = new org.hl7.fhir.dstu2016may.model.UriType();
     if (src.hasValue())
@@ -382,7 +421,11 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.Extension tgt = new org.hl7.fhir.r4.model.Extension();
     copyElement(src, tgt);
     tgt.setUrl(src.getUrl());
-    tgt.setValue(convertType(src.getValue()));
+    if (src.hasValue())
+      if (CANONICAL_URLS.contains(src.getUrl()) && src.getValue() instanceof org.hl7.fhir.dstu2016may.model.Reference)
+        tgt.setValue(convertReferenceToCanonical((Reference)src.getValue()));
+      else
+        tgt.setValue(convertType(src.getValue()));
     return tgt;
   }
 
@@ -392,7 +435,11 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.Extension tgt = new org.hl7.fhir.dstu2016may.model.Extension();
     copyElement(src, tgt);
     tgt.setUrl(src.getUrl());
-    tgt.setValue(convertType(src.getValue()));
+    if (src.hasValue())
+      if (CANONICAL_URLS.contains(src.getUrl()) && src.getValue() instanceof org.hl7.fhir.r4.model.CanonicalType)
+        tgt.setValue(convertCanonicalToReference((CanonicalType)src.getValue()));
+      else
+        tgt.setValue(convertType(src.getValue()));
     return tgt;
   }
 
@@ -1225,7 +1272,7 @@ public class VersionConvertor_14_40 {
     if (src.hasContentReference())
       tgt.setContentReference(src.getContentReference());
     for (org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent t : src.getType())
-      tgt.addType(convertTypeRefComponent(t));
+      convertTypeRefComponent(t, tgt.getType());
     tgt.setDefaultValue(convertType(src.getDefaultValue()));
     if (src.hasMeaningWhenMissing())
       tgt.setMeaningWhenMissing(src.getMeaningWhenMissing());
@@ -1245,6 +1292,12 @@ public class VersionConvertor_14_40 {
       tgt.setMustSupport(src.getMustSupport());
     if (src.hasIsModifier())
       tgt.setIsModifier(src.getIsModifier());
+    if (tgt.getIsModifier()) {
+      String reason = org.hl7.fhir.dstu2016may.utils.ToolingExtensions.readStringExtension(src, VersionConvertorConstants.MODIFIER_REASON_EXTENSION);
+      if (Utilities.noString(reason))
+        reason = VersionConvertorConstants.MODIFIER_REASON_LEGACY;
+      tgt.setIsModifierReason(reason);
+    }
     if (src.hasIsSummary())
       tgt.setIsSummary(src.getIsSummary());
     tgt.setBinding(convertElementDefinitionBindingComponent(src.getBinding()));
@@ -1288,7 +1341,7 @@ public class VersionConvertor_14_40 {
     if (src.hasContentReference())
       tgt.setContentReference(src.getContentReference());
     for (org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent t : src.getType())
-      tgt.addType(convertTypeRefComponent(t));
+      convertTypeRefComponent(t, tgt.getType());
     tgt.setDefaultValue(convertType(src.getDefaultValue()));
     if (src.hasMeaningWhenMissing())
       tgt.setMeaningWhenMissing(src.getMeaningWhenMissing());
@@ -1308,6 +1361,8 @@ public class VersionConvertor_14_40 {
       tgt.setMustSupport(src.getMustSupport());
     if (src.hasIsModifier())
       tgt.setIsModifier(src.getIsModifier());
+    if (src.hasIsModifierReason() && !VersionConvertorConstants.MODIFIER_REASON_LEGACY.equals(src.getIsModifierReason()))
+        org.hl7.fhir.dstu2016may.utils.ToolingExtensions.setStringExtension(tgt, VersionConvertorConstants.MODIFIER_REASON_EXTENSION, src.getIsModifierReason());
     if (src.hasIsSummary())
       tgt.setIsSummary(src.getIsSummary());
     if (src.hasBinding())
@@ -1361,7 +1416,7 @@ public class VersionConvertor_14_40 {
           else if (!e.getPath().startsWith(slicingElement.getPath() + "."))
             break;
           else if (e.getPath().equals(existsPath)) {
-            if (e.hasMin() && e.getMin() > 0)
+            if (e.hasMin() && e.getMin() > 0 && !e.hasFixed())
               existsSlicePresent = true;
             else if (e.hasMax() && e.getMax().equals("0"))
               notExistsSlicePresent = true;
@@ -1438,38 +1493,58 @@ public class VersionConvertor_14_40 {
     return tgt;
   }
 
-  public static org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent convertTypeRefComponent(org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent src) throws FHIRException {
-    if (src == null || src.isEmpty())
-      return null;
-    org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent tgt = new org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent();
-    copyElement(src, tgt);
-    tgt.setCode(src.getCode());
-    for (org.hl7.fhir.dstu2016may.model.UriType t : src.getProfile()) {
-      if (src.getCode().equals("Reference"))
-        tgt.setTargetProfile(t.getValueAsString());
-      else
-        tgt.setProfile(t.getValueAsString());
+  static void convertTypeRefComponent(org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent src, List<org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent> list) throws FHIRException {
+    if (src == null)
+      return ;
+    org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent tgt = null;
+    for (org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent t : list)
+      if (t.getCode().equals(src.getCode()))
+        tgt = t;
+    if (tgt == null) {
+      tgt = new org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent();
+      list.add(tgt);
+      copyElement(src, tgt);
+      tgt.setCode(src.getCode());
     }
-    for (org.hl7.fhir.dstu2016may.model.Enumeration<org.hl7.fhir.dstu2016may.model.ElementDefinition.AggregationMode> t : src.getAggregation())
-      tgt.addAggregation(convertAggregationMode(t.getValue()));
-    tgt.setVersioning(convertReferenceVersionRules(src.getVersioning()));
-    return tgt;
+    if (tgt.hasTarget()) {
+      for (org.hl7.fhir.dstu2016may.model.UriType u : src.getProfile())
+        tgt.addTargetProfile(u.getValue());
+    } else {
+      for (org.hl7.fhir.dstu2016may.model.UriType u : src.getProfile())
+        tgt.addProfile(u.getValue());
+    }
+    for (org.hl7.fhir.dstu2016may.model.Enumeration<org.hl7.fhir.dstu2016may.model.ElementDefinition.AggregationMode> t : src.getAggregation()) {
+      org.hl7.fhir.r4.model.ElementDefinition.AggregationMode a = convertAggregationMode(t.getValue());
+      if (!tgt.hasAggregation(a))
+        tgt.addAggregation(a);
+    }
+    if (src.hasVersioning())
+      tgt.setVersioning(convertReferenceVersionRules(src.getVersioning()));
   }
-
-  public static org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent convertTypeRefComponent(org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent src) throws FHIRException {
-    if (src == null || src.isEmpty())
-      return null;
+  
+  public static void convertTypeRefComponent(org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent src, List<org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent> list) throws FHIRException {
+    if (src == null)
+      return;
     org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent tgt = new org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent();
     copyElement(src, tgt);
     tgt.setCode(src.getCode());
-    if (src.hasCode() && "Reference".equals(src.getCode()))
-      tgt.addProfile(src.getTargetProfile());
-    else
-      tgt.addProfile(src.getProfile());
-    for (org.hl7.fhir.r4.model.Enumeration<org.hl7.fhir.r4.model.ElementDefinition.AggregationMode> t : src.getAggregation())
-      tgt.addAggregation(convertAggregationMode(t.getValue()));
-    tgt.setVersioning(convertReferenceVersionRules(src.getVersioning()));
-    return tgt;
+    list.add(tgt);
+    if (src.hasTarget()) {
+      for (org.hl7.fhir.r4.model.UriType u : src.getTargetProfile()) {
+        tgt.addProfile(u.getValue());
+      }
+    } else {
+      for (org.hl7.fhir.r4.model.UriType u : src.getProfile()) {
+        tgt.addProfile(u.getValue());
+      }
+    }
+    for (org.hl7.fhir.r4.model.Enumeration<org.hl7.fhir.r4.model.ElementDefinition.AggregationMode> t : src.getAggregation()) {
+      org.hl7.fhir.dstu2016may.model.ElementDefinition.AggregationMode a = convertAggregationMode(t.getValue());
+      if (!tgt.hasAggregation(a))
+        tgt.addAggregation(a);
+    }
+    if (src.hasVersioning())
+      tgt.setVersioning(convertReferenceVersionRules(src.getVersioning()));
   }
 
   private static org.hl7.fhir.r4.model.ElementDefinition.AggregationMode convertAggregationMode(org.hl7.fhir.dstu2016may.model.ElementDefinition.AggregationMode src) throws FHIRException {
@@ -1576,7 +1651,10 @@ public class VersionConvertor_14_40 {
     tgt.setStrength(convertBindingStrength(src.getStrength()));
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    tgt.setValueSet(convertType(src.getValueSet()));
+    if (src.hasValueSet()) {
+      org.hl7.fhir.r4.model.Type vs = convertType(src.getValueSet());
+      tgt.setValueSet(vs instanceof org.hl7.fhir.r4.model.Reference ? new CanonicalType(((org.hl7.fhir.r4.model.Reference) vs).getReference()) : vs);      
+    }
     return tgt;
   }
 
@@ -1588,7 +1666,7 @@ public class VersionConvertor_14_40 {
     tgt.setStrength(convertBindingStrength(src.getStrength()));
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    tgt.setValueSet(convertType(src.getValueSet()));
+    tgt.setValueSet(src.hasValueSetCanonicalType() ? new org.hl7.fhir.dstu2016may.model.Reference(src.getValueSetCanonicalType().getValue()) : convertType(src.getValueSet()));
     return tgt;
   }
 
@@ -2018,8 +2096,6 @@ public class VersionConvertor_14_40 {
       return convertAddress((org.hl7.fhir.dstu2016may.model.Address) src);
     if (src instanceof org.hl7.fhir.dstu2016may.model.ContactPoint)
       return convertContactPoint((org.hl7.fhir.dstu2016may.model.ContactPoint) src);
-    if (src instanceof org.hl7.fhir.dstu2016may.model.ElementDefinition)
-      return convertElementDefinition((org.hl7.fhir.dstu2016may.model.ElementDefinition) src, new ArrayList<org.hl7.fhir.dstu2016may.model.ElementDefinition>(), 0);
     if (src instanceof org.hl7.fhir.dstu2016may.model.HumanName)
       return convertHumanName((org.hl7.fhir.dstu2016may.model.HumanName) src);
     if (src instanceof org.hl7.fhir.dstu2016may.model.Meta)
@@ -2108,8 +2184,6 @@ public class VersionConvertor_14_40 {
       return convertAddress((org.hl7.fhir.r4.model.Address) src);
     if (src instanceof org.hl7.fhir.r4.model.ContactPoint)
       return convertContactPoint((org.hl7.fhir.r4.model.ContactPoint) src);
-    if (src instanceof org.hl7.fhir.r4.model.ElementDefinition)
-      return convertElementDefinition((org.hl7.fhir.r4.model.ElementDefinition) src);
     if (src instanceof org.hl7.fhir.r4.model.HumanName)
       return convertHumanName((org.hl7.fhir.r4.model.HumanName) src);
     if (src instanceof org.hl7.fhir.r4.model.Meta)
@@ -2995,8 +3069,10 @@ public class VersionConvertor_14_40 {
       tgt.setPurpose(src.getRequirements());
     if (src.hasCopyright())
       tgt.setCopyright(src.getCopyright());
-    tgt.setSource(convertType(src.getSource()));
-    tgt.setTarget(convertType(src.getTarget()));
+    org.hl7.fhir.r4.model.Type tt = convertType(src.getSource()); 
+    tgt.setSource(tt instanceof org.hl7.fhir.r4.model.Reference ? new CanonicalType(((org.hl7.fhir.r4.model.Reference) tt).getReference()) : tt);
+    tt = convertType(src.getTarget()); 
+    tgt.setTarget(tt instanceof org.hl7.fhir.r4.model.Reference ? new CanonicalType(((org.hl7.fhir.r4.model.Reference) tt).getReference()) : tt);
     for (org.hl7.fhir.dstu2016may.model.ConceptMap.SourceElementComponent t : src.getElement()) {
       List<SourceElementComponentWrapper> ws = convertSourceElementComponent(t);
       for (SourceElementComponentWrapper w : ws)
@@ -3049,6 +3125,14 @@ public class VersionConvertor_14_40 {
       tgt.setRequirements(src.getPurpose());
     if (src.hasCopyright())
       tgt.setCopyright(src.getCopyright());
+    if (src.getSource() instanceof CanonicalType)
+      tgt.setSource(convertCanonicalToReference((CanonicalType)src.getSource()));
+    else
+      tgt.setSource(convertType(src.getSource()));
+    if (src.getTarget() instanceof CanonicalType)
+      tgt.setTarget(convertCanonicalToReference((CanonicalType)src.getTarget()));
+    else
+      tgt.setTarget(convertType(src.getTarget()));
     tgt.setSource(convertType(src.getSource()));
     tgt.setTarget(convertType(src.getTarget()));
     for (org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent g : src.getGroup())
@@ -3200,7 +3284,7 @@ public class VersionConvertor_14_40 {
     copyElement(src, tgt);
     tgt.setProperty(src.getElement());
     tgt.setSystem(src.getSystem());
-    tgt.setCode(src.getCode());
+    tgt.setValue(src.getCode());
     return tgt;
   }
 
@@ -3211,7 +3295,7 @@ public class VersionConvertor_14_40 {
     copyElement(src, tgt);
     tgt.setElement(src.getProperty());
     tgt.setSystem(src.getSystem());
-    tgt.setCode(src.getCode());
+    tgt.setCode(src.getValue());
     return tgt;
   }
 
@@ -3251,7 +3335,7 @@ public class VersionConvertor_14_40 {
     tgt.setSoftware(convertConformanceSoftwareComponent(src.getSoftware()));
     tgt.setImplementation(convertConformanceImplementationComponent(src.getImplementation()));
     tgt.setFhirVersion(src.getFhirVersion());
-    tgt.setAcceptUnknown(convertUnknownContentCode(src.getAcceptUnknown()));
+//    tgt.setAcceptUnknown(convertUnknownContentCode(src.getAcceptUnknown()));
     for (org.hl7.fhir.dstu2016may.model.CodeType t : src.getFormat())
       tgt.addFormat(t.getValue());
 //    for (org.hl7.fhir.dstu2016may.model.Reference t : src.getProfile())
@@ -3263,6 +3347,18 @@ public class VersionConvertor_14_40 {
     for (org.hl7.fhir.dstu2016may.model.Conformance.ConformanceDocumentComponent t : src.getDocument())
       tgt.addDocument(convertConformanceDocumentComponent(t));
     return tgt;
+  }
+
+  private static CanonicalType convertReferenceToCanonical(Reference src) throws FHIRException {
+    CanonicalType dst = new CanonicalType(src.getReference());
+    copyElement(src, dst);
+    return dst;
+  }
+
+  private static Reference  convertCanonicalToReference(CanonicalType src) throws FHIRException {
+    Reference dst = new Reference(src.getValue());
+    copyElement(src, dst);
+    return dst;
   }
 
   public static org.hl7.fhir.dstu2016may.model.Conformance convertConformance(org.hl7.fhir.r4.model.CapabilityStatement src) throws FHIRException {
@@ -3300,13 +3396,13 @@ public class VersionConvertor_14_40 {
     tgt.setSoftware(convertConformanceSoftwareComponent(src.getSoftware()));
     tgt.setImplementation(convertConformanceImplementationComponent(src.getImplementation()));
     tgt.setFhirVersion(src.getFhirVersion());
-    tgt.setAcceptUnknown(convertUnknownContentCode(src.getAcceptUnknown()));
+//    tgt.setAcceptUnknown(convertUnknownContentCode(src.getAcceptUnknown()));
     for (org.hl7.fhir.r4.model.CodeType t : src.getFormat())
       tgt.addFormat(t.getValue());
     for (CapabilityStatementRestComponent r : src.getRest())
       for (CapabilityStatementRestResourceComponent rr : r.getResource())
-        for (org.hl7.fhir.r4.model.Reference t : rr.getSupportedProfile())
-          tgt.addProfile(convertReference(t));
+        for (org.hl7.fhir.r4.model.CanonicalType t : rr.getSupportedProfile())
+          tgt.addProfile(convertCanonicalToReference(t));
     for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent t : src.getRest())
       tgt.addRest(convertConformanceRestComponent(t));
     for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementMessagingComponent t : src.getMessaging())
@@ -3337,30 +3433,30 @@ public class VersionConvertor_14_40 {
     default: return org.hl7.fhir.dstu2016may.model.Conformance.ConformanceStatementKind.NULL;
     }
   }
-
-  private static org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode convertUnknownContentCode(org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode src) throws FHIRException {
-    if (src == null)
-      return null;
-    switch (src) {
-    case NO: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.NO;
-    case EXTENSIONS: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.EXTENSIONS;
-    case ELEMENTS: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.ELEMENTS;
-    case BOTH: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.BOTH;
-    default: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.NULL;
-    }
-  }
-
-  private static org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode convertUnknownContentCode(org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode src) throws FHIRException {
-    if (src == null)
-      return null;
-    switch (src) {
-    case NO: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.NO;
-    case EXTENSIONS: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.EXTENSIONS;
-    case ELEMENTS: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.ELEMENTS;
-    case BOTH: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.BOTH;
-    default: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.NULL;
-    }
-  }
+//
+//  private static org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode convertUnknownContentCode(org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode src) throws FHIRException {
+//    if (src == null)
+//      return null;
+//    switch (src) {
+//    case NO: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.NO;
+//    case EXTENSIONS: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.EXTENSIONS;
+//    case ELEMENTS: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.ELEMENTS;
+//    case BOTH: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.BOTH;
+//    default: return org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode.NULL;
+//    }
+//  }
+//
+//  private static org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode convertUnknownContentCode(org.hl7.fhir.r4.model.CapabilityStatement.UnknownContentCode src) throws FHIRException {
+//    if (src == null)
+//      return null;
+//    switch (src) {
+//    case NO: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.NO;
+//    case EXTENSIONS: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.EXTENSIONS;
+//    case ELEMENTS: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.ELEMENTS;
+//    case BOTH: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.BOTH;
+//    default: return org.hl7.fhir.dstu2016may.model.Conformance.UnknownContentCode.NULL;
+//    }
+//  }
 
   public static org.hl7.fhir.r4.model.ContactDetail convertConformanceContactComponent(org.hl7.fhir.dstu2016may.model.Conformance.ConformanceContactComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
@@ -3509,8 +3605,6 @@ public class VersionConvertor_14_40 {
       tgt.addService(convertCodeableConcept(t));
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    for (org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestSecurityCertificateComponent t : src.getCertificate())
-      tgt.addCertificate(convertConformanceRestSecurityCertificateComponent(t));
     return tgt;
   }
 
@@ -3525,32 +3619,6 @@ public class VersionConvertor_14_40 {
       tgt.addService(convertCodeableConcept(t));
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityCertificateComponent t : src.getCertificate())
-      tgt.addCertificate(convertConformanceRestSecurityCertificateComponent(t));
-    return tgt;
-  }
-
-  public static org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityCertificateComponent convertConformanceRestSecurityCertificateComponent(org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestSecurityCertificateComponent src) throws FHIRException {
-    if (src == null || src.isEmpty())
-      return null;
-    org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityCertificateComponent tgt = new org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityCertificateComponent();
-    copyElement(src, tgt);
-    if (src.hasType())
-      tgt.setType(src.getType());
-    if (src.hasBlob())
-      tgt.setBlob(src.getBlob());
-    return tgt;
-  }
-
-  public static org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestSecurityCertificateComponent convertConformanceRestSecurityCertificateComponent(org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityCertificateComponent src) throws FHIRException {
-    if (src == null || src.isEmpty())
-      return null;
-    org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestSecurityCertificateComponent tgt = new org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestSecurityCertificateComponent();
-    copyElement(src, tgt);
-    if (src.hasType())
-      tgt.setType(src.getType());
-    if (src.hasBlob())
-      tgt.setBlob(src.getBlob());
     return tgt;
   }
 
@@ -3560,7 +3628,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent tgt = new org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent();
     copyElement(src, tgt);
     tgt.setType(src.getType());
-    tgt.setProfile(convertReference(src.getProfile()));
+    tgt.setProfileElement(convertReferenceToCanonical(src.getProfile()));
     for (org.hl7.fhir.dstu2016may.model.Conformance.ResourceInteractionComponent t : src.getInteraction())
       tgt.addInteraction(convertResourceInteractionComponent(t));
     tgt.setVersioning(convertResourceVersionPolicy(src.getVersioning()));
@@ -3588,7 +3656,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestResourceComponent tgt = new org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestResourceComponent();
     copyElement(src, tgt);
     tgt.setType(src.getType());
-    tgt.setProfile(convertReference(src.getProfile()));
+    tgt.setProfile(convertCanonicalToReference(src.getProfileElement()));
     for (org.hl7.fhir.r4.model.CapabilityStatement.ResourceInteractionComponent t : src.getInteraction())
       tgt.addInteraction(convertResourceInteractionComponent(t));
     tgt.setVersioning(convertResourceVersionPolicy(src.getVersioning()));
@@ -3818,7 +3886,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceOperationComponent tgt = new org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceOperationComponent();
     copyElement(src, tgt);
     tgt.setName(src.getName());
-    tgt.setDefinition(convertReference(src.getDefinition()));
+    tgt.setDefinitionElement(convertReferenceToCanonical(src.getDefinition()));
     return tgt;
   }
 
@@ -3828,7 +3896,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestOperationComponent tgt = new org.hl7.fhir.dstu2016may.model.Conformance.ConformanceRestOperationComponent();
     copyElement(src, tgt);
     tgt.setName(src.getName());
-    tgt.setDefinition(convertReference(src.getDefinition()));
+    tgt.setDefinition(convertCanonicalToReference(src.getDefinitionElement()));
     return tgt;
   }
 
@@ -3908,7 +3976,7 @@ public class VersionConvertor_14_40 {
     tgt.setMode(convertDocumentMode(src.getMode()));
     if (src.hasDocumentation())
       tgt.setDocumentation(src.getDocumentation());
-    tgt.setProfile(convertReference(src.getProfile()));
+    tgt.setProfileElement(convertReferenceToCanonical(src.getProfile()));
     return tgt;
   }
 
@@ -3920,7 +3988,7 @@ public class VersionConvertor_14_40 {
     tgt.setMode(convertDocumentMode(src.getMode()));
     if (src.hasDocumentation())
       tgt.setDocumentation(src.getDocumentation());
-    tgt.setProfile(convertReference(src.getProfile()));
+    tgt.setProfile(convertCanonicalToReference(src.getProfileElement()));
     return tgt;
   }
 
@@ -4136,14 +4204,14 @@ public class VersionConvertor_14_40 {
     if (src.hasFhirVersion())
       tgt.setFhirVersion(src.getFhirVersion());
     for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent t : src.getDependency())
-      tgt.addDependency(convertImplementationGuideDependencyComponent(t));
+      tgt.addDependsOn(convertImplementationGuideDependencyComponent(t));
     for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent t : src.getPackage())
-      tgt.addPackage(convertImplementationGuidePackageComponent(t));
+      tgt.getDefinition().addPackage(convertImplementationGuidePackageComponent(tgt.getDefinition(), t));
     for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideGlobalComponent t : src.getGlobal())
       tgt.addGlobal(convertImplementationGuideGlobalComponent(t));
-    for (org.hl7.fhir.dstu2016may.model.UriType t : src.getBinary())
-      tgt.addBinary(t.getValue());
-    tgt.setPage(convertImplementationGuidePageComponent(src.getPage()));
+//    for (org.hl7.fhir.dstu2016may.model.UriType t : src.getBinary())
+//      tgt.addBinary(t.getValue());
+    tgt.getDefinition().setPage(convertImplementationGuidePageComponent(src.getPage()));
     return tgt;
   }
 
@@ -4176,16 +4244,28 @@ public class VersionConvertor_14_40 {
       tgt.setCopyright(src.getCopyright());
     if (src.hasFhirVersion())
       tgt.setFhirVersion(src.getFhirVersion());
-    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependencyComponent t : src.getDependency())
+    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependsOnComponent t : src.getDependsOn())
       tgt.addDependency(convertImplementationGuideDependencyComponent(t));
-    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageComponent t : src.getPackage())
+    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPackageComponent t : src.getDefinition().getPackage())
       tgt.addPackage(convertImplementationGuidePackageComponent(t));
+    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent t : src.getDefinition().getResource())
+      findPackage(tgt.getPackage(), t.getPackage()).addResource(convertImplementationGuidePackageResourceComponent(t));
     for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideGlobalComponent t : src.getGlobal())
       tgt.addGlobal(convertImplementationGuideGlobalComponent(t));
-    for (org.hl7.fhir.r4.model.UriType t : src.getBinary())
-      tgt.addBinary(t.getValue());
-    tgt.setPage(convertImplementationGuidePageComponent(src.getPage()));
+//    for (org.hl7.fhir.r4.model.UriType t : src.getBinary())
+//      tgt.addBinary(t.getValue());
+    tgt.setPage(convertImplementationGuidePageComponent(src.getDefinition().getPage()));
     return tgt;
+  }
+
+  private static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent findPackage(List<org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent> definition, String id) {
+    for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent t : definition)
+      if (t.getId().equals(id))
+        return t;
+    org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent t = new org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent();
+    t.setName("Default Package");
+    t.setId(id);
+    return t;
   }
 
   public static org.hl7.fhir.r4.model.ContactDetail convertImplementationGuideContactComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideContactComponent src) throws FHIRException {
@@ -4212,105 +4292,92 @@ public class VersionConvertor_14_40 {
     return tgt;
   }
 
-  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependencyComponent convertImplementationGuideDependencyComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent src) throws FHIRException {
+  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependsOnComponent convertImplementationGuideDependencyComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependencyComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependencyComponent();
+    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependsOnComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependsOnComponent();
     copyElement(src, tgt);
-    tgt.setType(convertGuideDependencyType(src.getType()));
     tgt.setUri(src.getUri());
     return tgt;
   }
 
-  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent convertImplementationGuideDependencyComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependencyComponent src) throws FHIRException {
+  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent convertImplementationGuideDependencyComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDependsOnComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent tgt = new org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideDependencyComponent();
     copyElement(src, tgt);
-    tgt.setType(convertGuideDependencyType(src.getType()));
+    tgt.setType(org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuideDependencyType.REFERENCE);
     tgt.setUri(src.getUri());
     return tgt;
   }
 
-  private static org.hl7.fhir.r4.model.ImplementationGuide.GuideDependencyType convertGuideDependencyType(org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuideDependencyType src) throws FHIRException {
-    if (src == null)
-      return null;
-    switch (src) {
-    case REFERENCE: return org.hl7.fhir.r4.model.ImplementationGuide.GuideDependencyType.REFERENCE;
-    case INCLUSION: return org.hl7.fhir.r4.model.ImplementationGuide.GuideDependencyType.INCLUSION;
-    default: return org.hl7.fhir.r4.model.ImplementationGuide.GuideDependencyType.NULL;
-    }
-  }
-
-  private static org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuideDependencyType convertGuideDependencyType(org.hl7.fhir.r4.model.ImplementationGuide.GuideDependencyType src) throws FHIRException {
-    if (src == null)
-      return null;
-    switch (src) {
-    case REFERENCE: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuideDependencyType.REFERENCE;
-    case INCLUSION: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuideDependencyType.INCLUSION;
-    default: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuideDependencyType.NULL;
-    }
-  }
-
-  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageComponent convertImplementationGuidePackageComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent src) throws FHIRException {
+  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPackageComponent convertImplementationGuidePackageComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionComponent context, org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageComponent();
+    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPackageComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPackageComponent();
+    tgt.setId("p"+(context.getPackage().size()+1));
     copyElement(src, tgt);
-    tgt.setName(src.getName());
+    if (src.hasName())
+      tgt.setName(src.getName());
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent t : src.getResource())
-      tgt.addResource(convertImplementationGuidePackageResourceComponent(t));
+    for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent t : src.getResource()) {
+      org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent tn = convertImplementationGuidePackageResourceComponent(t);
+      tn.setPackage(tgt.getId());
+      context.addResource(tn);
+    }
     return tgt;
   }
 
-  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent convertImplementationGuidePackageComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageComponent src) throws FHIRException {
+  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent convertImplementationGuidePackageComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPackageComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent tgt = new org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageComponent();
     copyElement(src, tgt);
+    tgt.setId(src.getId());
     tgt.setName(src.getName());
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageResourceComponent t : src.getResource())
-      tgt.addResource(convertImplementationGuidePackageResourceComponent(t));
     return tgt;
   }
 
-  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageResourceComponent convertImplementationGuidePackageResourceComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent src) throws FHIRException {
+  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent convertImplementationGuidePackageResourceComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageResourceComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageResourceComponent();
+    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent();
     copyElement(src, tgt);
-    tgt.setExample(src.getExample());
+    if (src.hasExampleFor()) {
+      Type t = convertType(src.getExampleFor());
+      tgt.setExample(t instanceof org.hl7.fhir.r4.model.Reference ? new CanonicalType(((org.hl7.fhir.r4.model.Reference) t).getReference()) : t);
+    } else if (src.hasExample())
+      tgt.setExample(new org.hl7.fhir.r4.model.BooleanType(src.getExample()));
     if (src.hasName())
       tgt.setName(src.getName());
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    if (src.hasAcronym())
-      tgt.setAcronym(src.getAcronym());
-    tgt.setSource(convertType(src.getSource()));
-    if (src.hasExampleFor())
-      tgt.setExampleFor(convertReference(src.getExampleFor()));
+    if (src.hasSourceReference())
+      tgt.setReference(convertReference(src.getSourceReference()));
+    else if (src.hasSourceUriType())
+      tgt.setReference(new org.hl7.fhir.r4.model.Reference(src.getSourceUriType().getValue()));
     return tgt;
   }
 
-  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent convertImplementationGuidePackageResourceComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePackageResourceComponent src) throws FHIRException {
+  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent convertImplementationGuidePackageResourceComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent tgt = new org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePackageResourceComponent();
     copyElement(src, tgt);
-    tgt.setExample(src.getExample());
+    if (src.hasExampleCanonicalType()) {
+      tgt.setExampleFor(convertCanonicalToReference(src.getExampleCanonicalType()));
+      tgt.setExample(true);
+    } else if (src.hasExampleBooleanType()) 
+      tgt.setExample(src.getExampleBooleanType().getValue());
     if (src.hasName())
       tgt.setName(src.getName());
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
-    if (src.hasAcronym())
-      tgt.setAcronym(src.getAcronym());
-    tgt.setSource(convertType(src.getSource()));
-    if (src.hasExampleFor())
-      tgt.setExampleFor(convertReference(src.getExampleFor()));
+    if (src.hasReference())
+      tgt.setSource(convertReference(src.getReference()));
     return tgt;
   }
 
@@ -4320,7 +4387,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideGlobalComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideGlobalComponent();
     copyElement(src, tgt);
     tgt.setType(src.getType());
-    tgt.setProfile(convertReference(src.getProfile()));
+    tgt.setProfileElement(convertReferenceToCanonical(src.getProfile()));
     return tgt;
   }
 
@@ -4330,78 +4397,54 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideGlobalComponent tgt = new org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuideGlobalComponent();
     copyElement(src, tgt);
     tgt.setType(src.getType());
-    tgt.setProfile(convertReference(src.getProfile()));
+    tgt.setProfile(convertCanonicalToReference(src.getProfileElement()));
     return tgt;
   }
 
-  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePageComponent convertImplementationGuidePageComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent src) throws FHIRException {
+  public static org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent convertImplementationGuidePageComponent(org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePageComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePageComponent();
+    org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent tgt = new org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent();
     copyElement(src, tgt);
-    tgt.setSource(src.getSource());
+    if (src.hasSource())
+      tgt.setName(convertUriToUrl(src.getSourceElement()));
     tgt.setTitle(src.getName());
-    tgt.setKind(convertGuidePageKind(src.getKind()));
-    for (org.hl7.fhir.dstu2016may.model.CodeType t : src.getType())
-      tgt.addType(t.getValue());
-    for (org.hl7.fhir.dstu2016may.model.StringType t : src.getPackage())
-      tgt.addPackage(t.getValue());
-    if (src.hasFormat())
-      tgt.setFormat(src.getFormat());
+    if (src.hasKind())
+      tgt.setGeneration(convertPageGeneration(src.getKind()));
     for (org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent t : src.getPage())
       tgt.addPage(convertImplementationGuidePageComponent(t));
     return tgt;
   }
 
-  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent convertImplementationGuidePageComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePageComponent src) throws FHIRException {
+  private static GuidePageGeneration convertPageGeneration(GuidePageKind kind) {
+    switch (kind) {
+    case PAGE: return GuidePageGeneration.HTML;
+    default: return GuidePageGeneration.GENERATED;
+    }
+  }
+
+
+  private static GuidePageKind convertPageGeneration(GuidePageGeneration generation) {
+    switch (generation) {
+    case HTML: return GuidePageKind.PAGE;
+    default: return GuidePageKind.RESOURCE;
+    }
+  }
+
+  public static org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent convertImplementationGuidePageComponent(org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent tgt = new org.hl7.fhir.dstu2016may.model.ImplementationGuide.ImplementationGuidePageComponent();
     copyElement(src, tgt);
-    tgt.setSource(src.getSource());
+    if (src.hasNameUrlType())
+      tgt.setSource(src.getNameUrlType().getValue());
     tgt.setName(src.getTitle());
-    tgt.setKind(convertGuidePageKind(src.getKind()));
-    for (org.hl7.fhir.r4.model.CodeType t : src.getType())
-      tgt.addType(t.getValue());
-    for (org.hl7.fhir.r4.model.StringType t : src.getPackage())
-      tgt.addPackage(t.getValue());
-    if (src.hasFormat())
-      tgt.setFormat(src.getFormat());
-    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuidePageComponent t : src.getPage())
+    if (src.hasGeneration())
+      tgt.setKind(convertPageGeneration(src.getGeneration()));
+      
+    for (org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent t : src.getPage())
       tgt.addPage(convertImplementationGuidePageComponent(t));
     return tgt;
-  }
-
-  private static org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind convertGuidePageKind(org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind src) throws FHIRException {
-    if (src == null)
-      return null;
-    switch (src) {
-    case PAGE: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.PAGE;
-    case EXAMPLE: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.EXAMPLE;
-    case LIST: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.LIST;
-    case INCLUDE: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.INCLUDE;
-    case DIRECTORY: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.DIRECTORY;
-    case DICTIONARY: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.DICTIONARY;
-    case TOC: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.TOC;
-    case RESOURCE: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.RESOURCE;
-    default: return org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind.NULL;
-    }
-  }
-
-  private static org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind convertGuidePageKind(org.hl7.fhir.r4.model.ImplementationGuide.GuidePageKind src) throws FHIRException {
-    if (src == null)
-      return null;
-    switch (src) {
-    case PAGE: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.PAGE;
-    case EXAMPLE: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.EXAMPLE;
-    case LIST: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.LIST;
-    case INCLUDE: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.INCLUDE;
-    case DIRECTORY: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.DIRECTORY;
-    case DICTIONARY: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.DICTIONARY;
-    case TOC: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.TOC;
-    case RESOURCE: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.RESOURCE;
-    default: return org.hl7.fhir.dstu2016may.model.ImplementationGuide.GuidePageKind.NULL;
-    }
   }
 
   public static org.hl7.fhir.r4.model.NamingSystem convertNamingSystem(org.hl7.fhir.dstu2016may.model.NamingSystem src) throws FHIRException {
@@ -4594,7 +4637,7 @@ public class VersionConvertor_14_40 {
     tgt.setCode(src.getCode());
     if (src.hasComment())
       tgt.setComment(src.getComment());
-    tgt.setBase(convertReference(src.getBase()));
+    tgt.setBaseElement(convertReferenceToCanonical(src.getBase()));
     tgt.setSystem(src.getSystem());
     for (org.hl7.fhir.dstu2016may.model.CodeType t : src.getType())
       tgt.addResource(t.getValue());
@@ -4639,7 +4682,7 @@ public class VersionConvertor_14_40 {
     tgt.setCode(src.getCode());
     if (src.hasComment())
       tgt.setComment(src.getComment());
-    tgt.setBase(convertReference(src.getBase()));
+    tgt.setBase(convertCanonicalToReference(src.getBaseElement()));
     tgt.setSystem(src.getSystem());
     if (src.getType())
       for (org.hl7.fhir.r4.model.CodeType t : src.getResource())
@@ -4763,7 +4806,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterBindingComponent tgt = new org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterBindingComponent();
     copyElement(src, tgt);
     tgt.setStrength(convertBindingStrength(src.getStrength()));
-    tgt.setValueSet(convertType(src.getValueSet()));
+    tgt.setValueSet(src.getValueSet() instanceof Reference ? convertReferenceToCanonical((Reference)src.getValueSet()): convertType(src.getValueSet()));
     return tgt;
   }
 
@@ -4773,7 +4816,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationDefinitionParameterBindingComponent tgt = new org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationDefinitionParameterBindingComponent();
     copyElement(src, tgt);
     tgt.setStrength(convertBindingStrength(src.getStrength()));
-    tgt.setValueSet(convertType(src.getValueSet()));
+    tgt.setValueSet(src.getValueSet() instanceof CanonicalType ? convertCanonicalToReference((CanonicalType)src.getValueSet()): convertType(src.getValueSet()));
     return tgt;
   }
 
@@ -5054,10 +5097,10 @@ public class VersionConvertor_14_40 {
       tgt.setReadOnly(src.getReadOnly());
     if (src.hasMaxLength())
       tgt.setMaxLength(src.getMaxLength());
-    tgt.setOptions(convertReference(src.getOptions()));
+    tgt.setOptionsElement(convertReferenceToCanonical(src.getOptions()));
     for (org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemOptionComponent t : src.getOption())
       tgt.addOption(convertQuestionnaireItemOptionComponent(t));
-    tgt.setInitial(convertType(src.getInitial()));
+    tgt.addInitial().setValue(convertType(src.getInitial()));
     for (org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemComponent t : src.getItem())
       tgt.addItem(convertQuestionnaireItemComponent(t));
     return tgt;
@@ -5087,10 +5130,11 @@ public class VersionConvertor_14_40 {
       tgt.setReadOnly(src.getReadOnly());
     if (src.hasMaxLength())
       tgt.setMaxLength(src.getMaxLength());
-    tgt.setOptions(convertReference(src.getOptions()));
+    tgt.setOptions(convertCanonicalToReference(src.getOptionsElement()));
     for (org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemOptionComponent t : src.getOption())
       tgt.addOption(convertQuestionnaireItemOptionComponent(t));
-    tgt.setInitial(convertType(src.getInitial()));
+    if (src.hasInitial())
+      tgt.setInitial(convertType(src.getInitialFirstRep().getValue()));
     for (org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent t : src.getItem())
       tgt.addItem(convertQuestionnaireItemComponent(t));
     return tgt;
@@ -5153,8 +5197,10 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemEnableWhenComponent tgt = new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemEnableWhenComponent();
     copyElement(src, tgt);
     tgt.setQuestion(src.getQuestion());
-    if (src.hasAnswered())
-      tgt.setHasAnswer(src.getAnswered());
+    if (src.hasAnswered()) {
+      tgt.setOperator(QuestionnaireItemOperator.EXISTS);
+      tgt.setAnswer(convertType(src.getAnsweredElement()));
+    }
     tgt.setAnswer(convertType(src.getAnswer()));
     return tgt;
   }
@@ -5165,9 +5211,10 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemEnableWhenComponent tgt = new org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemEnableWhenComponent();
     copyElement(src, tgt);
     tgt.setQuestion(src.getQuestion());
-    if (src.hasHasAnswer())
-      tgt.setAnswered(src.getHasAnswer());
-    tgt.setAnswer(convertType(src.getAnswer()));
+    if (src.hasOperator() && src.getOperator() == QuestionnaireItemOperator.EXISTS)
+      tgt.setAnswered(src.getAnswerBooleanType().getValue());
+    else 
+      tgt.setAnswer(convertType(src.getAnswer()));
     return tgt;
   }
 
@@ -5195,7 +5242,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.r4.model.QuestionnaireResponse tgt = new org.hl7.fhir.r4.model.QuestionnaireResponse();
     copyDomainResource(src, tgt);
     tgt.setIdentifier(convertIdentifier(src.getIdentifier()));
-    tgt.setQuestionnaire(convertReference(src.getQuestionnaire()));
+    tgt.setQuestionnaireElement(convertReferenceToCanonical(src.getQuestionnaire()));
     tgt.setStatus(convertQuestionnaireResponseStatus(src.getStatus()));
     tgt.setSubject(convertReference(src.getSubject()));
     tgt.setContext(convertReference(src.getEncounter()));
@@ -5214,7 +5261,7 @@ public class VersionConvertor_14_40 {
     org.hl7.fhir.dstu2016may.model.QuestionnaireResponse tgt = new org.hl7.fhir.dstu2016may.model.QuestionnaireResponse();
     copyDomainResource(src, tgt);
     tgt.setIdentifier(convertIdentifier(src.getIdentifier()));
-    tgt.setQuestionnaire(convertReference(src.getQuestionnaire()));
+    tgt.setQuestionnaire(convertCanonicalToReference(src.getQuestionnaireElement()));
     tgt.setStatus(convertQuestionnaireResponseStatus(src.getStatus()));
     tgt.setSubject(convertReference(src.getSubject()));
     tgt.setEncounter(convertReference(src.getContext()));
@@ -5470,11 +5517,13 @@ public class VersionConvertor_14_40 {
       tgt.setFhirVersion(src.getFhirVersion());
     for (org.hl7.fhir.dstu2016may.model.StructureDefinition.StructureDefinitionMappingComponent t : src.getMapping())
       tgt.addMapping(convertStructureDefinitionMappingComponent(t));
-    tgt.setKind(convertStructureDefinitionKind(src.getKind()));
+    tgt.setKind(convertStructureDefinitionKind(src.getKind(), src.getName()));
     tgt.setAbstract(src.getAbstract());
-    tgt.setContextType(convertExtensionContext(src.getContextType()));
-    for (org.hl7.fhir.dstu2016may.model.StringType t : src.getContext())
-      tgt.addContext(t.getValue());
+    for (org.hl7.fhir.dstu2016may.model.StringType t : src.getContext()) {
+      org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionContextComponent ec = tgt.addContext();
+      ec.setType(convertExtensionContext(src.getContextType()));
+      ec.setExpression(t.getValue());
+    }
     if (src.getDerivation() == org.hl7.fhir.dstu2016may.model.StructureDefinition.TypeDerivationRule.CONSTRAINT)
       tgt.setType(src.getBaseType());
     else
@@ -5489,6 +5538,13 @@ public class VersionConvertor_14_40 {
     if (src.hasDifferential()) {
       tgt.setDifferential(convertStructureDefinitionDifferentialComponent(src.getDifferential()));
       tgt.getDifferential().getElementFirstRep().getType().clear();
+    }
+    if (tgt.getDerivation() == TypeDerivationRule.SPECIALIZATION) {
+      for (ElementDefinition ed : tgt.getSnapshot().getElement()) {
+        if (!ed.hasBase()) {
+          ed.getBase().setPath(ed.getPath()).setMin(ed.getMin()).setMax(ed.getMax());
+        }
+      }
     }
     return tgt;
   }
@@ -5535,9 +5591,11 @@ public class VersionConvertor_14_40 {
       tgt.addMapping(convertStructureDefinitionMappingComponent(t));
     tgt.setKind(convertStructureDefinitionKind(src.getKind()));
     tgt.setAbstract(src.getAbstract());
-    tgt.setContextType(convertExtensionContext(src.getContextType()));
-    for (org.hl7.fhir.r4.model.StringType t : src.getContext())
-      tgt.addContext(t.getValue());
+    for (org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionContextComponent  t : src.getContext()) {
+      if (!tgt.hasContextType())
+        tgt.setContextType(convertExtensionContext(t.getType()));
+      tgt.addContext(t.getExpression());
+    }
     if (src.hasBaseDefinition())
       tgt.setBaseDefinition(src.getBaseDefinition());
     if (src.hasType() && src.getDerivation() == org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule.CONSTRAINT)
@@ -5549,11 +5607,15 @@ public class VersionConvertor_14_40 {
     return tgt;
   }
 
-  private static org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind convertStructureDefinitionKind(org.hl7.fhir.dstu2016may.model.StructureDefinition.StructureDefinitionKind src) throws FHIRException {
+  private static org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind convertStructureDefinitionKind(org.hl7.fhir.dstu2016may.model.StructureDefinition.StructureDefinitionKind src, String name) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
-    case DATATYPE: return org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind.COMPLEXTYPE;
+    case DATATYPE: 
+      if (name.substring(0, 1).toLowerCase().equals(name.substring(0,1)))
+        return org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind.PRIMITIVETYPE;
+      else
+        return org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind.COMPLEXTYPE;
     case RESOURCE: return org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind.RESOURCE;
     case LOGICAL: return org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind.LOGICAL;
     default: return org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind.NULL;
@@ -5572,23 +5634,23 @@ public class VersionConvertor_14_40 {
     }
   }
 
-  private static org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext convertExtensionContext(org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext src) throws FHIRException {
+  private static org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType convertExtensionContext(org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
-    case RESOURCE: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext.RESOURCE;
-    case DATATYPE: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext.DATATYPE;
-    case EXTENSION: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext.EXTENSION;
-    default: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext.NULL;
+    case RESOURCE: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType.FHIRPATH;
+    case DATATYPE: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType.ELEMENT;
+    case EXTENSION: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType.EXTENSION;
+    default: return org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType.NULL;
     }
   }
 
-  private static org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext convertExtensionContext(org.hl7.fhir.r4.model.StructureDefinition.ExtensionContext src) throws FHIRException {
+  private static org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext convertExtensionContext(org.hl7.fhir.r4.model.StructureDefinition.ExtensionContextType src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
-    case RESOURCE: return org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext.RESOURCE;
-    case DATATYPE: return org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext.DATATYPE;
+    case FHIRPATH: return org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext.RESOURCE;
+    case ELEMENT: return org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext.DATATYPE;
     case EXTENSION: return org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext.EXTENSION;
     default: return org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext.NULL;
     }
@@ -5939,7 +6001,7 @@ public class VersionConvertor_14_40 {
       tgt.setDestination(src.getDestination());
     for (org.hl7.fhir.dstu2016may.model.UriType t : src.getLink())
       tgt.addLink(t.getValue());
-    tgt.setCapabilities(convertReference(src.getConformance()));
+    tgt.setCapabilitiesElement(convertReferenceToCanonical(src.getConformance()));
     return tgt;
   }
 
@@ -5960,7 +6022,7 @@ public class VersionConvertor_14_40 {
       tgt.setDestination(src.getDestination());
     for (org.hl7.fhir.r4.model.UriType t : src.getLink())
       tgt.addLink(t.getValue());
-    tgt.setConformance(convertReference(src.getCapabilities()));
+    tgt.setConformance(convertCanonicalToReference(src.getCapabilitiesElement()));
     return tgt;
   }
 
@@ -6186,6 +6248,8 @@ public class VersionConvertor_14_40 {
       tgt.setLabel(src.getLabel());
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
+    tgt.setAccept(convertContentType(src.getAccept()));
+    tgt.setContentType(convertContentType(src.getContentType()));
     if (src.hasDestination())
       tgt.setDestination(src.getDestination());
     if (src.hasEncodeRequestUrl())
@@ -6218,6 +6282,8 @@ public class VersionConvertor_14_40 {
       tgt.setLabel(src.getLabel());
     if (src.hasDescription())
       tgt.setDescription(src.getDescription());
+    tgt.setAccept(convertContentType(src.getAccept()));
+    tgt.setContentType(convertContentType(src.getContentType()));
     if (src.hasDestination())
       tgt.setDestination(src.getDestination());
     if (src.hasEncodeRequestUrl())
@@ -6237,6 +6303,24 @@ public class VersionConvertor_14_40 {
     if (src.hasUrl())
       tgt.setUrl(src.getUrl());
     return tgt;
+  }
+
+  private static String convertContentType(org.hl7.fhir.dstu2016may.model.TestScript.ContentType src) throws FHIRException {
+    if (src == null)
+      return null;
+    switch (src) {
+    case XML: return "application/fhir+xml";
+    case JSON: return "application/fhir+json";
+    default: return null;
+  }
+}
+
+  private static org.hl7.fhir.dstu2016may.model.TestScript.ContentType convertContentType(String src) throws FHIRException {
+    if (src == null)
+      return null;
+    if (src.contains("xml")) return org.hl7.fhir.dstu2016may.model.TestScript.ContentType.XML;
+    if (src.contains("json")) return org.hl7.fhir.dstu2016may.model.TestScript.ContentType.JSON;
+    return org.hl7.fhir.dstu2016may.model.TestScript.ContentType.NULL;
   }
 
 
@@ -6274,6 +6358,7 @@ public class VersionConvertor_14_40 {
       tgt.setCompareToSourceId(src.getCompareToSourceId());
     if (src.hasCompareToSourcePath())
       tgt.setCompareToSourcePath(src.getCompareToSourcePath());
+    tgt.setContentType(convertContentType(src.getContentType()));
     if (src.hasHeaderField())
       tgt.setHeaderField(src.getHeaderField());
     if (src.hasMinimumId())
@@ -6315,6 +6400,7 @@ public class VersionConvertor_14_40 {
       tgt.setCompareToSourceId(src.getCompareToSourceId());
     if (src.hasCompareToSourcePath())
       tgt.setCompareToSourcePath(src.getCompareToSourcePath());
+    tgt.setContentType(convertContentType(src.getContentType()));
     if (src.hasHeaderField())
       tgt.setHeaderField(src.getHeaderField());
     if (src.hasMinimumId())

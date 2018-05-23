@@ -140,6 +140,8 @@ public class ContactPoint extends Type implements ICompositeType {
           return ContactPointSystem.PAGER;
         if ("other".equals(codeString))
           return ContactPointSystem.OTHER;
+        if ("url".equals(codeString))
+          return ContactPointSystem.OTHER;
         throw new IllegalArgumentException("Unknown ContactPointSystem code '"+codeString+"'");
         }
         public Enumeration<ContactPointSystem> fromType(Base code) throws FHIRException {

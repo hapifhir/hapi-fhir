@@ -19,6 +19,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.conformance.ProfileUtilities.ProfileKnowledgeProvider;
 import org.hl7.fhir.r4.context.IWorkerContext.ILoggingService.LogCategory;
@@ -64,6 +65,8 @@ import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
+import com.google.gson.JsonObject;
+
 import ca.uhn.fhir.parser.DataFormatException;
 
 /*
@@ -88,6 +91,7 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   private String revision;
   private String date;
   private IValidatorFactory validatorFactory;
+  private UcumService ucumService;
   
   public SimpleWorkerContext() {
     super();
@@ -100,7 +104,6 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   
   protected void copy(SimpleWorkerContext other) {
     super.copy(other);
-    systems.addAll(other.systems);
     questionnaire = other.questionnaire;
     binaries.putAll(other.binaries);
     version = other.version;
@@ -180,12 +183,14 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   }
 
   public String connectToTSServer(String url) throws URISyntaxException {
+    tlog("Connect to "+url);
     txServer = new FHIRToolingClient(url);
     txServer.setTimeout(30000);
     return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
   }
 
   public String connectToTSServer(FHIRToolingClient client) throws URISyntaxException {
+    tlog("Connect to "+client.getAddress());
     txServer = client;
     return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
   }
@@ -323,18 +328,11 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
 
 
 
-	public int totalCount() {
-		return valueSets.size() +  maps.size() + structures.size() + transforms.size();
-	}
-
-	public void setCache(ValueSetExpansionCache cache) {
-	  this.expansionCache = cache;	
-	}
 
   @Override
   public List<String> getResourceNames() {
     List<String> result = new ArrayList<String>();
-    for (StructureDefinition sd : structures.values()) {
+    for (StructureDefinition sd : listStructures()) {
       if (sd.getKind() == StructureDefinitionKind.RESOURCE && sd.getDerivation() == TypeDerivationRule.SPECIALIZATION)
         result.add(sd.getName());
     }
@@ -345,7 +343,7 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   @Override
   public List<String> getTypeNames() {
     List<String> result = new ArrayList<String>();
-    for (StructureDefinition sd : structures.values()) {
+    for (StructureDefinition sd : listStructures()) {
       if (sd.getKind() != StructureDefinitionKind.LOGICAL && sd.getDerivation() == TypeDerivationRule.SPECIALIZATION)
         result.add(sd.getName());
     }
@@ -409,14 +407,14 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
 
   @Override
   public Set<String> typeTails() {
-    return new HashSet<String>(Arrays.asList("Integer","UnsignedInt","PositiveInt","Decimal","DateTime","Date","Time","Instant","String","Uri","Oid","Uuid","Id","Boolean","Code","Markdown","Base64Binary","Coding","CodeableConcept","Attachment","Identifier","Quantity","SampledData","Range","Period","Ratio","HumanName","Address","ContactPoint","Timing","Reference","Annotation","Signature","Meta"));
+    return new HashSet<String>(Arrays.asList("Integer","UnsignedInt","PositiveInt","Decimal","DateTime","Date","Time","Instant","String","Uri","Url","Canonical","Oid","Uuid","Id","Boolean","Code","Markdown","Base64Binary","Coding","CodeableConcept","Attachment","Identifier","Quantity","SampledData","Range","Period","Ratio","HumanName","Address","ContactPoint","Timing","Reference","Annotation","Signature","Meta"));
   }
 
   @Override
   public List<StructureDefinition> allStructures() {
     List<StructureDefinition> result = new ArrayList<StructureDefinition>();
     Set<StructureDefinition> set = new HashSet<StructureDefinition>();
-    for (StructureDefinition sd : structures.values()) {
+    for (StructureDefinition sd : listStructures()) {
       if (!set.contains(sd)) {
         result.add(sd);
         set.add(sd);
@@ -424,51 +422,6 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
     }
     return result;
   }
-
-	@Override
-  public List<MetadataResource> allConformanceResources() {
-    List<MetadataResource> result = new ArrayList<MetadataResource>();
-    result.addAll(structures.values());
-    result.addAll(codeSystems.values());
-    result.addAll(valueSets.values());
-    result.addAll(maps.values());
-    result.addAll(transforms.values());
-    return result;
-  }
-
-	@Override
-	public String oid2Uri(String oid) {
-		String uri = OIDUtils.getUriForOid(oid);
-		if (uri != null)
-			return uri;
-		for (NamingSystem ns : systems) {
-			if (hasOid(ns, oid)) {
-				uri = getUri(ns);
-				if (uri != null)
-					return null;
-			}
-		}
-		return null;
-  }
-
-	private String getUri(NamingSystem ns) {
-		for (NamingSystemUniqueIdComponent id : ns.getUniqueId()) {
-			if (id.getType() == NamingSystemIdentifierType.URI)
-				return id.getValue();
-		}
-		return null;
-	}
-
-	private boolean hasOid(NamingSystem ns, String oid) {
-		for (NamingSystemUniqueIdComponent id : ns.getUniqueId()) {
-			if (id.getType() == NamingSystemIdentifierType.OID && id.getValue().equals(oid))
-				return true;
-		}
-		return false;
-	}
-
-
-
 
   public void loadFromFolder(String folder) throws FileNotFoundException, Exception {
     for (String n : new File(folder).list()) {
@@ -495,11 +448,6 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
     }
   }
 
-  public void dropResource(Resource r) throws FHIRException {
-   throw new FHIRException("Not done yet");
-    
-  }
-
   public Map<String, byte[]> getBinaries() {
     return binaries;
   }
@@ -519,13 +467,10 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
     return version+"-"+revision;
   }
 
-  public Map<String, StructureMap> getTransforms() {
-    return transforms;
-  }
   
   public List<StructureMap> findTransformsforSource(String url) {
     List<StructureMap> res = new ArrayList<StructureMap>();
-    for (StructureMap map : transforms.values()) {
+    for (StructureMap map : listTransforms()) {
       boolean match = false;
       boolean ok = true;
       for (StructureMapStructureComponent t : map.getStructure()) {
@@ -577,5 +522,16 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
     }
     super.seeMetadataResource(r, map, addId);
   }
+
+  public UcumService getUcumService() {
+    return ucumService;
+  }
+
+  public void setUcumService(UcumService ucumService) {
+    this.ucumService = ucumService;
+  }
+
+
+
 
 }

@@ -20,32 +20,32 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.util.ParametersUtil;
-
 public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSystemProvider<T, MT> {
 
-	@Operation(name=MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent=true, returnParameters= {
-		@OperationParam(name="status")
+
+	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = true, returnParameters = {
+		@OperationParam(name = "status")
 	})
 	public IBaseResource markAllResourcesForReindexing() {
 		Integer count = getDao().markAllResourcesForReindexing();
-		
+
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		
+
 		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked " + count + " resources");
-		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
 	}
 
-	@Operation(name=PERFORM_REINDEXING_PASS, idempotent=true, returnParameters= {
-		@OperationParam(name="status")
+	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = true, returnParameters = {
+		@OperationParam(name = "status")
 	})
 	public IBaseResource performReindexingPass() {
 		Integer count = getDao().performReindexingPass(1000);
@@ -58,7 +58,7 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		} else {
 			string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
 		}
-		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
 	}

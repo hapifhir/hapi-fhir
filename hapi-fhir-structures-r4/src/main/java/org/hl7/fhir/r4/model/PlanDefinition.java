@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * This resource allows for the definition of various types of plans as a sharable, consumable, and executable artifact. The resource is general enough to support the description of a broad range of clinical artifacts such as clinical decision support rules, order sets and protocols.
  */
 @ResourceDef(name="PlanDefinition", profile="http://hl7.org/fhir/Profile/PlanDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "type", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "goal", "action"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "type", "status", "experimental", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "contributor", "relatedArtifact", "library", "goal", "action"})
 public class PlanDefinition extends MetadataResource {
 
     public enum ActionConditionKind {
@@ -1032,7 +1032,7 @@ public class PlanDefinition extends MetadataResource {
          * Indicates a category the goal falls within.
          */
         @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="E.g. Treatment, dietary, behavioral, etc", formalDefinition="Indicates a category the goal falls within." )
+        @Description(shortDefinition="E.g. Treatment, dietary, behavioral", formalDefinition="Indicates a category the goal falls within." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/goal-category")
         protected CodeableConcept category;
 
@@ -1568,18 +1568,18 @@ public class PlanDefinition extends MetadataResource {
     @Block()
     public static class PlanDefinitionGoalTargetComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.
+         * The parameter whose value is to be tracked, e.g. body weight, blood pressure, or hemoglobin A1c level.
          */
         @Child(name = "measure", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The parameter whose value is to be tracked", formalDefinition="The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level." )
+        @Description(shortDefinition="The parameter whose value is to be tracked", formalDefinition="The parameter whose value is to be tracked, e.g. body weight, blood pressure, or hemoglobin A1c level." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-codes")
         protected CodeableConcept measure;
 
         /**
-         * The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.
+         * The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.
          */
         @Child(name = "detail", type = {Quantity.class, Range.class, CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The target value to be achieved", formalDefinition="The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value." )
+        @Description(shortDefinition="The target value to be achieved", formalDefinition="The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value." )
         protected Type detail;
 
         /**
@@ -1599,7 +1599,7 @@ public class PlanDefinition extends MetadataResource {
       }
 
         /**
-         * @return {@link #measure} (The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.)
+         * @return {@link #measure} (The parameter whose value is to be tracked, e.g. body weight, blood pressure, or hemoglobin A1c level.)
          */
         public CodeableConcept getMeasure() { 
           if (this.measure == null)
@@ -1615,7 +1615,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #measure} (The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.)
+         * @param value {@link #measure} (The parameter whose value is to be tracked, e.g. body weight, blood pressure, or hemoglobin A1c level.)
          */
         public PlanDefinitionGoalTargetComponent setMeasure(CodeableConcept value) { 
           this.measure = value;
@@ -1623,49 +1623,55 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
+         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
          */
         public Type getDetail() { 
           return this.detail;
         }
 
         /**
-         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
+         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
          */
         public Quantity getDetailQuantity() throws FHIRException { 
+          if (this.detail == null)
+            return null;
           if (!(this.detail instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (Quantity) this.detail;
         }
 
         public boolean hasDetailQuantity() { 
-          return this.detail instanceof Quantity;
+          return this != null && this.detail instanceof Quantity;
         }
 
         /**
-         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
+         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
          */
         public Range getDetailRange() throws FHIRException { 
+          if (this.detail == null)
+            return null;
           if (!(this.detail instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (Range) this.detail;
         }
 
         public boolean hasDetailRange() { 
-          return this.detail instanceof Range;
+          return this != null && this.detail instanceof Range;
         }
 
         /**
-         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
+         * @return {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
          */
         public CodeableConcept getDetailCodeableConcept() throws FHIRException { 
+          if (this.detail == null)
+            return null;
           if (!(this.detail instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (CodeableConcept) this.detail;
         }
 
         public boolean hasDetailCodeableConcept() { 
-          return this.detail instanceof CodeableConcept;
+          return this != null && this.detail instanceof CodeableConcept;
         }
 
         public boolean hasDetail() { 
@@ -1673,9 +1679,11 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
+         * @param value {@link #detail} (The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.)
          */
         public PlanDefinitionGoalTargetComponent setDetail(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof CodeableConcept))
+            throw new Error("Not the right type for PlanDefinition.goal.target.detail[x]: "+value.fhirType());
           this.detail = value;
           return this;
         }
@@ -1706,20 +1714,20 @@ public class PlanDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("measure", "CodeableConcept", "The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.", 0, 1, measure));
-          children.add(new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail));
+          children.add(new Property("measure", "CodeableConcept", "The parameter whose value is to be tracked, e.g. body weight, blood pressure, or hemoglobin A1c level.", 0, 1, measure));
+          children.add(new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail));
           children.add(new Property("due", "Duration", "Indicates the timeframe after the start of the goal in which the goal should be met.", 0, 1, due));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 938321246: /*measure*/  return new Property("measure", "CodeableConcept", "The parameter whose value is to be tracked, e.g. body weigth, blood pressure, or hemoglobin A1c level.", 0, 1, measure);
-          case -1973084529: /*detail[x]*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
-          case -1335224239: /*detail*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
-          case -1313079300: /*detailQuantity*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
-          case -2062632084: /*detailRange*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
-          case -175586544: /*detailCodeableConcept*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. Whan a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
+          case 938321246: /*measure*/  return new Property("measure", "CodeableConcept", "The parameter whose value is to be tracked, e.g. body weight, blood pressure, or hemoglobin A1c level.", 0, 1, measure);
+          case -1973084529: /*detail[x]*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
+          case -1335224239: /*detail*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
+          case -1313079300: /*detailQuantity*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
+          case -2062632084: /*detailRange*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
+          case -175586544: /*detailCodeableConcept*/  return new Property("detail[x]", "Quantity|Range|CodeableConcept", "The target value of the measure to be achieved to signify fulfillment of the goal, e.g. 150 pounds or 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any value at or above the low value.", 0, 1, detail);
           case 99828: /*due*/  return new Property("due", "Duration", "Indicates the timeframe after the start of the goal in which the goal should be met.", 0, 1, due);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1874,10 +1882,10 @@ public class PlanDefinition extends MetadataResource {
         protected StringType title;
 
         /**
-         * A short description of the action used to provide a summary to display to the user.
+         * A brief description of the action used to provide a summary to display to the user.
          */
         @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Short description of the action", formalDefinition="A short description of the action used to provide a summary to display to the user." )
+        @Description(shortDefinition="Brief description of the action", formalDefinition="A brief description of the action used to provide a summary to display to the user." )
         protected StringType description;
 
         /**
@@ -1888,10 +1896,10 @@ public class PlanDefinition extends MetadataResource {
         protected StringType textEquivalent;
 
         /**
-         * A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.
+         * A code that provides meaning for the action or action group. For example, a section may have a LOINC code for the section of a documentation template.
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Code representing the meaning of the action or sub-actions", formalDefinition="A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template." )
+        @Description(shortDefinition="Code representing the meaning of the action or sub-actions", formalDefinition="A code that provides meaning for the action or action group. For example, a section may have a LOINC code for the section of a documentation template." )
         protected List<CodeableConcept> code;
 
         /**
@@ -1918,15 +1926,15 @@ public class PlanDefinition extends MetadataResource {
         /**
          * A description of when the action should be triggered.
          */
-        @Child(name = "triggerDefinition", type = {TriggerDefinition.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "trigger", type = {TriggerDefinition.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="When the action should be triggered", formalDefinition="A description of when the action should be triggered." )
-        protected List<TriggerDefinition> triggerDefinition;
+        protected List<TriggerDefinition> trigger;
 
         /**
-         * An expression that describes applicability criteria, or start/stop conditions for the action.
+         * An expression that describes applicability criteria or start/stop conditions for the action.
          */
         @Child(name = "condition", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria, or start/stop conditions for the action." )
+        @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria or start/stop conditions for the action." )
         protected List<PlanDefinitionActionConditionComponent> condition;
 
         /**
@@ -1967,10 +1975,10 @@ public class PlanDefinition extends MetadataResource {
         /**
          * The type of action to perform (create, update, remove).
          */
-        @Child(name = "type", type = {Coding.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeableConcept.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-type")
-        protected Coding type;
+        protected CodeableConcept type;
 
         /**
          * Defines the grouping behavior for the action and its children.
@@ -1989,10 +1997,10 @@ public class PlanDefinition extends MetadataResource {
         protected Enumeration<ActionSelectionBehavior> selectionBehavior;
 
         /**
-         * Defines the requiredness behavior for the action.
+         * Defines the required behavior for the action.
          */
         @Child(name = "requiredBehavior", type = {CodeType.class}, order=19, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="must | could | must-unless-documented", formalDefinition="Defines the requiredness behavior for the action." )
+        @Description(shortDefinition="must | could | must-unless-documented", formalDefinition="Defines the required behavior for the action." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-required-behavior")
         protected Enumeration<ActionRequiredBehavior> requiredBehavior;
 
@@ -2015,26 +2023,16 @@ public class PlanDefinition extends MetadataResource {
         /**
          * A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.
          */
-        @Child(name = "definition", type = {ActivityDefinition.class, PlanDefinition.class}, order=22, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "definition", type = {CanonicalType.class}, order=22, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of the activity to be performed", formalDefinition="A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken." )
-        protected Reference definition;
-
-        /**
-         * The actual object that is the target of the reference (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
-         */
-        protected Resource definitionTarget;
+        protected CanonicalType definition;
 
         /**
          * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
          */
-        @Child(name = "transform", type = {StructureMap.class}, order=23, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "transform", type = {CanonicalType.class}, order=23, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
-        protected Reference transform;
-
-        /**
-         * The actual object that is the target of the reference (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
-         */
-        protected StructureMap transformTarget;
+        protected CanonicalType transform;
 
         /**
          * Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.
@@ -2050,7 +2048,7 @@ public class PlanDefinition extends MetadataResource {
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
         protected List<PlanDefinitionActionComponent> action;
 
-        private static final long serialVersionUID = 891308492L;
+        private static final long serialVersionUID = 427693088L;
 
     /**
      * Constructor
@@ -2158,7 +2156,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #description} (A short description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @return {@link #description} (A brief description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public StringType getDescriptionElement() { 
           if (this.description == null)
@@ -2178,7 +2176,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #description} (A short description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         * @param value {@link #description} (A brief description of the action used to provide a summary to display to the user.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
          */
         public PlanDefinitionActionComponent setDescriptionElement(StringType value) { 
           this.description = value;
@@ -2186,14 +2184,14 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return A short description of the action used to provide a summary to display to the user.
+         * @return A brief description of the action used to provide a summary to display to the user.
          */
         public String getDescription() { 
           return this.description == null ? null : this.description.getValue();
         }
 
         /**
-         * @param value A short description of the action used to provide a summary to display to the user.
+         * @param value A brief description of the action used to provide a summary to display to the user.
          */
         public PlanDefinitionActionComponent setDescription(String value) { 
           if (Utilities.noString(value))
@@ -2256,7 +2254,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #code} (A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.)
+         * @return {@link #code} (A code that provides meaning for the action or action group. For example, a section may have a LOINC code for the section of a documentation template.)
          */
         public List<CodeableConcept> getCode() { 
           if (this.code == null)
@@ -2470,66 +2468,66 @@ public class PlanDefinition extends MetadataResource {
           if (this.goalId == null)
             return false;
           for (IdType v : this.goalId)
-            if (v.equals(value)) // id
+            if (v.getValue().equals(value)) // id
               return true;
           return false;
         }
 
         /**
-         * @return {@link #triggerDefinition} (A description of when the action should be triggered.)
+         * @return {@link #trigger} (A description of when the action should be triggered.)
          */
-        public List<TriggerDefinition> getTriggerDefinition() { 
-          if (this.triggerDefinition == null)
-            this.triggerDefinition = new ArrayList<TriggerDefinition>();
-          return this.triggerDefinition;
+        public List<TriggerDefinition> getTrigger() { 
+          if (this.trigger == null)
+            this.trigger = new ArrayList<TriggerDefinition>();
+          return this.trigger;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public PlanDefinitionActionComponent setTriggerDefinition(List<TriggerDefinition> theTriggerDefinition) { 
-          this.triggerDefinition = theTriggerDefinition;
+        public PlanDefinitionActionComponent setTrigger(List<TriggerDefinition> theTrigger) { 
+          this.trigger = theTrigger;
           return this;
         }
 
-        public boolean hasTriggerDefinition() { 
-          if (this.triggerDefinition == null)
+        public boolean hasTrigger() { 
+          if (this.trigger == null)
             return false;
-          for (TriggerDefinition item : this.triggerDefinition)
+          for (TriggerDefinition item : this.trigger)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public TriggerDefinition addTriggerDefinition() { //3
+        public TriggerDefinition addTrigger() { //3
           TriggerDefinition t = new TriggerDefinition();
-          if (this.triggerDefinition == null)
-            this.triggerDefinition = new ArrayList<TriggerDefinition>();
-          this.triggerDefinition.add(t);
+          if (this.trigger == null)
+            this.trigger = new ArrayList<TriggerDefinition>();
+          this.trigger.add(t);
           return t;
         }
 
-        public PlanDefinitionActionComponent addTriggerDefinition(TriggerDefinition t) { //3
+        public PlanDefinitionActionComponent addTrigger(TriggerDefinition t) { //3
           if (t == null)
             return this;
-          if (this.triggerDefinition == null)
-            this.triggerDefinition = new ArrayList<TriggerDefinition>();
-          this.triggerDefinition.add(t);
+          if (this.trigger == null)
+            this.trigger = new ArrayList<TriggerDefinition>();
+          this.trigger.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #triggerDefinition}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #trigger}, creating it if it does not already exist
          */
-        public TriggerDefinition getTriggerDefinitionFirstRep() { 
-          if (getTriggerDefinition().isEmpty()) {
-            addTriggerDefinition();
+        public TriggerDefinition getTriggerFirstRep() { 
+          if (getTrigger().isEmpty()) {
+            addTrigger();
           }
-          return getTriggerDefinition().get(0);
+          return getTrigger().get(0);
         }
 
         /**
-         * @return {@link #condition} (An expression that describes applicability criteria, or start/stop conditions for the action.)
+         * @return {@link #condition} (An expression that describes applicability criteria or start/stop conditions for the action.)
          */
         public List<PlanDefinitionActionConditionComponent> getCondition() { 
           if (this.condition == null)
@@ -2751,78 +2749,90 @@ public class PlanDefinition extends MetadataResource {
          * @return {@link #timing} (An optional value describing when the action should be performed.)
          */
         public DateTimeType getTimingDateTimeType() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (DateTimeType) this.timing;
         }
 
         public boolean hasTimingDateTimeType() { 
-          return this.timing instanceof DateTimeType;
+          return this != null && this.timing instanceof DateTimeType;
         }
 
         /**
          * @return {@link #timing} (An optional value describing when the action should be performed.)
          */
         public Age getTimingAge() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof Age))
             throw new FHIRException("Type mismatch: the type Age was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Age) this.timing;
         }
 
         public boolean hasTimingAge() { 
-          return this.timing instanceof Age;
+          return this != null && this.timing instanceof Age;
         }
 
         /**
          * @return {@link #timing} (An optional value describing when the action should be performed.)
          */
         public Period getTimingPeriod() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Period) this.timing;
         }
 
         public boolean hasTimingPeriod() { 
-          return this.timing instanceof Period;
+          return this != null && this.timing instanceof Period;
         }
 
         /**
          * @return {@link #timing} (An optional value describing when the action should be performed.)
          */
         public Duration getTimingDuration() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Duration) this.timing;
         }
 
         public boolean hasTimingDuration() { 
-          return this.timing instanceof Duration;
+          return this != null && this.timing instanceof Duration;
         }
 
         /**
          * @return {@link #timing} (An optional value describing when the action should be performed.)
          */
         public Range getTimingRange() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Range) this.timing;
         }
 
         public boolean hasTimingRange() { 
-          return this.timing instanceof Range;
+          return this != null && this.timing instanceof Range;
         }
 
         /**
          * @return {@link #timing} (An optional value describing when the action should be performed.)
          */
         public Timing getTimingTiming() throws FHIRException { 
+          if (this.timing == null)
+            return null;
           if (!(this.timing instanceof Timing))
             throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Timing) this.timing;
         }
 
         public boolean hasTimingTiming() { 
-          return this.timing instanceof Timing;
+          return this != null && this.timing instanceof Timing;
         }
 
         public boolean hasTiming() { 
@@ -2833,6 +2843,8 @@ public class PlanDefinition extends MetadataResource {
          * @param value {@link #timing} (An optional value describing when the action should be performed.)
          */
         public PlanDefinitionActionComponent setTiming(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Age || value instanceof Period || value instanceof Duration || value instanceof Range || value instanceof Timing))
+            throw new Error("Not the right type for PlanDefinition.action.timing[x]: "+value.fhirType());
           this.timing = value;
           return this;
         }
@@ -2893,12 +2905,12 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @return {@link #type} (The type of action to perform (create, update, remove).)
          */
-        public Coding getType() { 
+        public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create PlanDefinitionActionComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
+              this.type = new CodeableConcept(); // cc
           return this.type;
         }
 
@@ -2909,7 +2921,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * @param value {@link #type} (The type of action to perform (create, update, remove).)
          */
-        public PlanDefinitionActionComponent setType(Coding value) { 
+        public PlanDefinitionActionComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -3013,7 +3025,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #requiredBehavior} (Defines the requiredness behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
+         * @return {@link #requiredBehavior} (Defines the required behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
          */
         public Enumeration<ActionRequiredBehavior> getRequiredBehaviorElement() { 
           if (this.requiredBehavior == null)
@@ -3033,7 +3045,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #requiredBehavior} (Defines the requiredness behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
+         * @param value {@link #requiredBehavior} (Defines the required behavior for the action.). This is the underlying object with id, value and extensions. The accessor "getRequiredBehavior" gives direct access to the value
          */
         public PlanDefinitionActionComponent setRequiredBehaviorElement(Enumeration<ActionRequiredBehavior> value) { 
           this.requiredBehavior = value;
@@ -3041,14 +3053,14 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return Defines the requiredness behavior for the action.
+         * @return Defines the required behavior for the action.
          */
         public ActionRequiredBehavior getRequiredBehavior() { 
           return this.requiredBehavior == null ? null : this.requiredBehavior.getValue();
         }
 
         /**
-         * @param value Defines the requiredness behavior for the action.
+         * @param value Defines the required behavior for the action.
          */
         public PlanDefinitionActionComponent setRequiredBehavior(ActionRequiredBehavior value) { 
           if (value == null)
@@ -3160,15 +3172,19 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
+         * @return {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
-        public Reference getDefinition() { 
+        public CanonicalType getDefinitionElement() { 
           if (this.definition == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create PlanDefinitionActionComponent.definition");
             else if (Configuration.doAutoCreate())
-              this.definition = new Reference(); // cc
+              this.definition = new CanonicalType(); // bb
           return this.definition;
+        }
+
+        public boolean hasDefinitionElement() { 
+          return this.definition != null && !this.definition.isEmpty();
         }
 
         public boolean hasDefinition() { 
@@ -3176,38 +3192,48 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
+         * @param value {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
-        public PlanDefinitionActionComponent setDefinition(Reference value) { 
+        public PlanDefinitionActionComponent setDefinitionElement(CanonicalType value) { 
           this.definition = value;
           return this;
         }
 
         /**
-         * @return {@link #definition} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
+         * @return A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.
          */
-        public Resource getDefinitionTarget() { 
-          return this.definitionTarget;
+        public String getDefinition() { 
+          return this.definition == null ? null : this.definition.getValue();
         }
 
         /**
-         * @param value {@link #definition} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
+         * @param value A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.
          */
-        public PlanDefinitionActionComponent setDefinitionTarget(Resource value) { 
-          this.definitionTarget = value;
+        public PlanDefinitionActionComponent setDefinition(String value) { 
+          if (Utilities.noString(value))
+            this.definition = null;
+          else {
+            if (this.definition == null)
+              this.definition = new CanonicalType();
+            this.definition.setValue(value);
+          }
           return this;
         }
 
         /**
-         * @return {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         * @return {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.). This is the underlying object with id, value and extensions. The accessor "getTransform" gives direct access to the value
          */
-        public Reference getTransform() { 
+        public CanonicalType getTransformElement() { 
           if (this.transform == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create PlanDefinitionActionComponent.transform");
             else if (Configuration.doAutoCreate())
-              this.transform = new Reference(); // cc
+              this.transform = new CanonicalType(); // bb
           return this.transform;
+        }
+
+        public boolean hasTransformElement() { 
+          return this.transform != null && !this.transform.isEmpty();
         }
 
         public boolean hasTransform() { 
@@ -3215,30 +3241,31 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         * @param value {@link #transform} (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.). This is the underlying object with id, value and extensions. The accessor "getTransform" gives direct access to the value
          */
-        public PlanDefinitionActionComponent setTransform(Reference value) { 
+        public PlanDefinitionActionComponent setTransformElement(CanonicalType value) { 
           this.transform = value;
           return this;
         }
 
         /**
-         * @return {@link #transform} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         * @return A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
          */
-        public StructureMap getTransformTarget() { 
-          if (this.transformTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.transform");
-            else if (Configuration.doAutoCreate())
-              this.transformTarget = new StructureMap(); // aa
-          return this.transformTarget;
+        public String getTransform() { 
+          return this.transform == null ? null : this.transform.getValue();
         }
 
         /**
-         * @param value {@link #transform} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.)
+         * @param value A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
          */
-        public PlanDefinitionActionComponent setTransformTarget(StructureMap value) { 
-          this.transformTarget = value;
+        public PlanDefinitionActionComponent setTransform(String value) { 
+          if (Utilities.noString(value))
+            this.transform = null;
+          else {
+            if (this.transform == null)
+              this.transform = new CanonicalType();
+            this.transform.setValue(value);
+          }
           return this;
         }
 
@@ -3352,27 +3379,27 @@ public class PlanDefinition extends MetadataResource {
           super.listChildren(children);
           children.add(new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix));
           children.add(new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title));
-          children.add(new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description));
+          children.add(new Property("description", "string", "A brief description of the action used to provide a summary to display to the user.", 0, 1, description));
           children.add(new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.", 0, 1, textEquivalent));
-          children.add(new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code));
+          children.add(new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code));
           children.add(new Property("reason", "CodeableConcept", "A description of why this action is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, reason));
           children.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
           children.add(new Property("goalId", "id", "Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.", 0, java.lang.Integer.MAX_VALUE, goalId));
-          children.add(new Property("triggerDefinition", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, triggerDefinition));
-          children.add(new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
+          children.add(new Property("trigger", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, trigger));
+          children.add(new Property("condition", "", "An expression that describes applicability criteria or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
           children.add(new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input));
           children.add(new Property("output", "DataRequirement", "Defines the outputs of the action, if any.", 0, java.lang.Integer.MAX_VALUE, output));
           children.add(new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction));
           children.add(new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing));
           children.add(new Property("participant", "", "Indicates who should participate in performing the action described.", 0, java.lang.Integer.MAX_VALUE, participant));
-          children.add(new Property("type", "Coding", "The type of action to perform (create, update, remove).", 0, 1, type));
+          children.add(new Property("type", "CodeableConcept", "The type of action to perform (create, update, remove).", 0, 1, type));
           children.add(new Property("groupingBehavior", "code", "Defines the grouping behavior for the action and its children.", 0, 1, groupingBehavior));
           children.add(new Property("selectionBehavior", "code", "Defines the selection behavior for the action and its children.", 0, 1, selectionBehavior));
-          children.add(new Property("requiredBehavior", "code", "Defines the requiredness behavior for the action.", 0, 1, requiredBehavior));
+          children.add(new Property("requiredBehavior", "code", "Defines the required behavior for the action.", 0, 1, requiredBehavior));
           children.add(new Property("precheckBehavior", "code", "Defines whether the action should usually be preselected.", 0, 1, precheckBehavior));
           children.add(new Property("cardinalityBehavior", "code", "Defines whether the action can be selected multiple times.", 0, 1, cardinalityBehavior));
-          children.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition));
-          children.add(new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform));
+          children.add(new Property("definition", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition));
+          children.add(new Property("transform", "canonical(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform));
           children.add(new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
           children.add(new Property("action", "@PlanDefinition.action", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, action));
         }
@@ -3382,14 +3409,14 @@ public class PlanDefinition extends MetadataResource {
           switch (_hash) {
           case -980110702: /*prefix*/  return new Property("prefix", "string", "A user-visible prefix for the action.", 0, 1, prefix);
           case 110371416: /*title*/  return new Property("title", "string", "The title of the action displayed to a user.", 0, 1, title);
-          case -1724546052: /*description*/  return new Property("description", "string", "A short description of the action used to provide a summary to display to the user.", 0, 1, description);
+          case -1724546052: /*description*/  return new Property("description", "string", "A brief description of the action used to provide a summary to display to the user.", 0, 1, description);
           case -900391049: /*textEquivalent*/  return new Property("textEquivalent", "string", "A text equivalent of the action to be performed. This provides a human-interpretable description of the action when the definition is consumed by a system that might not be capable of interpreting it dynamically.", 0, 1, textEquivalent);
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for a the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that provides meaning for the action or action group. For example, a section may have a LOINC code for the section of a documentation template.", 0, java.lang.Integer.MAX_VALUE, code);
           case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "A description of why this action is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, reason);
           case 1587405498: /*documentation*/  return new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation);
           case -1240658034: /*goalId*/  return new Property("goalId", "id", "Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.", 0, java.lang.Integer.MAX_VALUE, goalId);
-          case 1126736171: /*triggerDefinition*/  return new Property("triggerDefinition", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, triggerDefinition);
-          case -861311717: /*condition*/  return new Property("condition", "", "An expression that describes applicability criteria, or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition);
+          case -1059891784: /*trigger*/  return new Property("trigger", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, trigger);
+          case -861311717: /*condition*/  return new Property("condition", "", "An expression that describes applicability criteria or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition);
           case 100358090: /*input*/  return new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input);
           case -1005512447: /*output*/  return new Property("output", "DataRequirement", "Defines the outputs of the action, if any.", 0, java.lang.Integer.MAX_VALUE, output);
           case -384107967: /*relatedAction*/  return new Property("relatedAction", "", "A relationship to another action such as \"before\" or \"30-60 minutes after start of\".", 0, java.lang.Integer.MAX_VALUE, relatedAction);
@@ -3402,14 +3429,14 @@ public class PlanDefinition extends MetadataResource {
           case -710871277: /*timingRange*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
           case -497554124: /*timingTiming*/  return new Property("timing[x]", "dateTime|Age|Period|Duration|Range|Timing", "An optional value describing when the action should be performed.", 0, 1, timing);
           case 767422259: /*participant*/  return new Property("participant", "", "Indicates who should participate in performing the action described.", 0, java.lang.Integer.MAX_VALUE, participant);
-          case 3575610: /*type*/  return new Property("type", "Coding", "The type of action to perform (create, update, remove).", 0, 1, type);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of action to perform (create, update, remove).", 0, 1, type);
           case 586678389: /*groupingBehavior*/  return new Property("groupingBehavior", "code", "Defines the grouping behavior for the action and its children.", 0, 1, groupingBehavior);
           case 168639486: /*selectionBehavior*/  return new Property("selectionBehavior", "code", "Defines the selection behavior for the action and its children.", 0, 1, selectionBehavior);
-          case -1163906287: /*requiredBehavior*/  return new Property("requiredBehavior", "code", "Defines the requiredness behavior for the action.", 0, 1, requiredBehavior);
+          case -1163906287: /*requiredBehavior*/  return new Property("requiredBehavior", "code", "Defines the required behavior for the action.", 0, 1, requiredBehavior);
           case -1174249033: /*precheckBehavior*/  return new Property("precheckBehavior", "code", "Defines whether the action should usually be preselected.", 0, 1, precheckBehavior);
           case -922577408: /*cardinalityBehavior*/  return new Property("cardinalityBehavior", "code", "Defines whether the action can be selected multiple times.", 0, 1, cardinalityBehavior);
-          case -1014418093: /*definition*/  return new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
-          case 1052666732: /*transform*/  return new Property("transform", "Reference(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform);
+          case -1014418093: /*definition*/  return new Property("definition", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
+          case 1052666732: /*transform*/  return new Property("transform", "canonical(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform);
           case 572625010: /*dynamicValue*/  return new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue);
           case -1422950858: /*action*/  return new Property("action", "@PlanDefinition.action", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, action);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -3428,21 +3455,21 @@ public class PlanDefinition extends MetadataResource {
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // RelatedArtifact
         case -1240658034: /*goalId*/ return this.goalId == null ? new Base[0] : this.goalId.toArray(new Base[this.goalId.size()]); // IdType
-        case 1126736171: /*triggerDefinition*/ return this.triggerDefinition == null ? new Base[0] : this.triggerDefinition.toArray(new Base[this.triggerDefinition.size()]); // TriggerDefinition
+        case -1059891784: /*trigger*/ return this.trigger == null ? new Base[0] : this.trigger.toArray(new Base[this.trigger.size()]); // TriggerDefinition
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // PlanDefinitionActionConditionComponent
         case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // DataRequirement
         case -1005512447: /*output*/ return this.output == null ? new Base[0] : this.output.toArray(new Base[this.output.size()]); // DataRequirement
         case -384107967: /*relatedAction*/ return this.relatedAction == null ? new Base[0] : this.relatedAction.toArray(new Base[this.relatedAction.size()]); // PlanDefinitionActionRelatedActionComponent
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // PlanDefinitionActionParticipantComponent
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Coding
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 586678389: /*groupingBehavior*/ return this.groupingBehavior == null ? new Base[0] : new Base[] {this.groupingBehavior}; // Enumeration<ActionGroupingBehavior>
         case 168639486: /*selectionBehavior*/ return this.selectionBehavior == null ? new Base[0] : new Base[] {this.selectionBehavior}; // Enumeration<ActionSelectionBehavior>
         case -1163906287: /*requiredBehavior*/ return this.requiredBehavior == null ? new Base[0] : new Base[] {this.requiredBehavior}; // Enumeration<ActionRequiredBehavior>
         case -1174249033: /*precheckBehavior*/ return this.precheckBehavior == null ? new Base[0] : new Base[] {this.precheckBehavior}; // Enumeration<ActionPrecheckBehavior>
         case -922577408: /*cardinalityBehavior*/ return this.cardinalityBehavior == null ? new Base[0] : new Base[] {this.cardinalityBehavior}; // Enumeration<ActionCardinalityBehavior>
-        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Reference
-        case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // Reference
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // CanonicalType
+        case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // CanonicalType
         case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // PlanDefinitionActionDynamicValueComponent
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // PlanDefinitionActionComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -3477,8 +3504,8 @@ public class PlanDefinition extends MetadataResource {
         case -1240658034: // goalId
           this.getGoalId().add(castToId(value)); // IdType
           return value;
-        case 1126736171: // triggerDefinition
-          this.getTriggerDefinition().add(castToTriggerDefinition(value)); // TriggerDefinition
+        case -1059891784: // trigger
+          this.getTrigger().add(castToTriggerDefinition(value)); // TriggerDefinition
           return value;
         case -861311717: // condition
           this.getCondition().add((PlanDefinitionActionConditionComponent) value); // PlanDefinitionActionConditionComponent
@@ -3499,7 +3526,7 @@ public class PlanDefinition extends MetadataResource {
           this.getParticipant().add((PlanDefinitionActionParticipantComponent) value); // PlanDefinitionActionParticipantComponent
           return value;
         case 3575610: // type
-          this.type = castToCoding(value); // Coding
+          this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 586678389: // groupingBehavior
           value = new ActionGroupingBehaviorEnumFactory().fromType(castToCode(value));
@@ -3522,10 +3549,10 @@ public class PlanDefinition extends MetadataResource {
           this.cardinalityBehavior = (Enumeration) value; // Enumeration<ActionCardinalityBehavior>
           return value;
         case -1014418093: // definition
-          this.definition = castToReference(value); // Reference
+          this.definition = castToCanonical(value); // CanonicalType
           return value;
         case 1052666732: // transform
-          this.transform = castToReference(value); // Reference
+          this.transform = castToCanonical(value); // CanonicalType
           return value;
         case 572625010: // dynamicValue
           this.getDynamicValue().add((PlanDefinitionActionDynamicValueComponent) value); // PlanDefinitionActionDynamicValueComponent
@@ -3556,8 +3583,8 @@ public class PlanDefinition extends MetadataResource {
           this.getDocumentation().add(castToRelatedArtifact(value));
         } else if (name.equals("goalId")) {
           this.getGoalId().add(castToId(value));
-        } else if (name.equals("triggerDefinition")) {
-          this.getTriggerDefinition().add(castToTriggerDefinition(value));
+        } else if (name.equals("trigger")) {
+          this.getTrigger().add(castToTriggerDefinition(value));
         } else if (name.equals("condition")) {
           this.getCondition().add((PlanDefinitionActionConditionComponent) value);
         } else if (name.equals("input")) {
@@ -3571,7 +3598,7 @@ public class PlanDefinition extends MetadataResource {
         } else if (name.equals("participant")) {
           this.getParticipant().add((PlanDefinitionActionParticipantComponent) value);
         } else if (name.equals("type")) {
-          this.type = castToCoding(value); // Coding
+          this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("groupingBehavior")) {
           value = new ActionGroupingBehaviorEnumFactory().fromType(castToCode(value));
           this.groupingBehavior = (Enumeration) value; // Enumeration<ActionGroupingBehavior>
@@ -3588,9 +3615,9 @@ public class PlanDefinition extends MetadataResource {
           value = new ActionCardinalityBehaviorEnumFactory().fromType(castToCode(value));
           this.cardinalityBehavior = (Enumeration) value; // Enumeration<ActionCardinalityBehavior>
         } else if (name.equals("definition")) {
-          this.definition = castToReference(value); // Reference
+          this.definition = castToCanonical(value); // CanonicalType
         } else if (name.equals("transform")) {
-          this.transform = castToReference(value); // Reference
+          this.transform = castToCanonical(value); // CanonicalType
         } else if (name.equals("dynamicValue")) {
           this.getDynamicValue().add((PlanDefinitionActionDynamicValueComponent) value);
         } else if (name.equals("action")) {
@@ -3611,7 +3638,7 @@ public class PlanDefinition extends MetadataResource {
         case -934964668:  return addReason(); 
         case 1587405498:  return addDocumentation(); 
         case -1240658034:  return addGoalIdElement();
-        case 1126736171:  return addTriggerDefinition(); 
+        case -1059891784:  return addTrigger(); 
         case -861311717:  return addCondition(); 
         case 100358090:  return addInput(); 
         case -1005512447:  return addOutput(); 
@@ -3625,8 +3652,8 @@ public class PlanDefinition extends MetadataResource {
         case -1163906287:  return getRequiredBehaviorElement();
         case -1174249033:  return getPrecheckBehaviorElement();
         case -922577408:  return getCardinalityBehaviorElement();
-        case -1014418093:  return getDefinition(); 
-        case 1052666732:  return getTransform(); 
+        case -1014418093:  return getDefinitionElement();
+        case 1052666732:  return getTransformElement();
         case 572625010:  return addDynamicValue(); 
         case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
@@ -3645,21 +3672,21 @@ public class PlanDefinition extends MetadataResource {
         case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
         case 1587405498: /*documentation*/ return new String[] {"RelatedArtifact"};
         case -1240658034: /*goalId*/ return new String[] {"id"};
-        case 1126736171: /*triggerDefinition*/ return new String[] {"TriggerDefinition"};
+        case -1059891784: /*trigger*/ return new String[] {"TriggerDefinition"};
         case -861311717: /*condition*/ return new String[] {};
         case 100358090: /*input*/ return new String[] {"DataRequirement"};
         case -1005512447: /*output*/ return new String[] {"DataRequirement"};
         case -384107967: /*relatedAction*/ return new String[] {};
         case -873664438: /*timing*/ return new String[] {"dateTime", "Age", "Period", "Duration", "Range", "Timing"};
         case 767422259: /*participant*/ return new String[] {};
-        case 3575610: /*type*/ return new String[] {"Coding"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case 586678389: /*groupingBehavior*/ return new String[] {"code"};
         case 168639486: /*selectionBehavior*/ return new String[] {"code"};
         case -1163906287: /*requiredBehavior*/ return new String[] {"code"};
         case -1174249033: /*precheckBehavior*/ return new String[] {"code"};
         case -922577408: /*cardinalityBehavior*/ return new String[] {"code"};
-        case -1014418093: /*definition*/ return new String[] {"Reference"};
-        case 1052666732: /*transform*/ return new String[] {"Reference"};
+        case -1014418093: /*definition*/ return new String[] {"canonical"};
+        case 1052666732: /*transform*/ return new String[] {"canonical"};
         case 572625010: /*dynamicValue*/ return new String[] {};
         case -1422950858: /*action*/ return new String[] {"@PlanDefinition.action"};
         default: return super.getTypesForProperty(hash, name);
@@ -3693,8 +3720,8 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("goalId")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.goalId");
         }
-        else if (name.equals("triggerDefinition")) {
-          return addTriggerDefinition();
+        else if (name.equals("trigger")) {
+          return addTrigger();
         }
         else if (name.equals("condition")) {
           return addCondition();
@@ -3736,7 +3763,7 @@ public class PlanDefinition extends MetadataResource {
           return addParticipant();
         }
         else if (name.equals("type")) {
-          this.type = new Coding();
+          this.type = new CodeableConcept();
           return this.type;
         }
         else if (name.equals("groupingBehavior")) {
@@ -3755,12 +3782,10 @@ public class PlanDefinition extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.cardinalityBehavior");
         }
         else if (name.equals("definition")) {
-          this.definition = new Reference();
-          return this.definition;
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.definition");
         }
         else if (name.equals("transform")) {
-          this.transform = new Reference();
-          return this.transform;
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.transform");
         }
         else if (name.equals("dynamicValue")) {
           return addDynamicValue();
@@ -3799,10 +3824,10 @@ public class PlanDefinition extends MetadataResource {
           for (IdType i : goalId)
             dst.goalId.add(i.copy());
         };
-        if (triggerDefinition != null) {
-          dst.triggerDefinition = new ArrayList<TriggerDefinition>();
-          for (TriggerDefinition i : triggerDefinition)
-            dst.triggerDefinition.add(i.copy());
+        if (trigger != null) {
+          dst.trigger = new ArrayList<TriggerDefinition>();
+          for (TriggerDefinition i : trigger)
+            dst.trigger.add(i.copy());
         };
         if (condition != null) {
           dst.condition = new ArrayList<PlanDefinitionActionConditionComponent>();
@@ -3860,7 +3885,7 @@ public class PlanDefinition extends MetadataResource {
         PlanDefinitionActionComponent o = (PlanDefinitionActionComponent) other_;
         return compareDeep(prefix, o.prefix, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(code, o.code, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(documentation, o.documentation, true) && compareDeep(goalId, o.goalId, true) && compareDeep(triggerDefinition, o.triggerDefinition, true)
+           && compareDeep(documentation, o.documentation, true) && compareDeep(goalId, o.goalId, true) && compareDeep(trigger, o.trigger, true)
            && compareDeep(condition, o.condition, true) && compareDeep(input, o.input, true) && compareDeep(output, o.output, true)
            && compareDeep(relatedAction, o.relatedAction, true) && compareDeep(timing, o.timing, true) && compareDeep(participant, o.participant, true)
            && compareDeep(type, o.type, true) && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
@@ -3886,8 +3911,8 @@ public class PlanDefinition extends MetadataResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(prefix, title, description
-          , textEquivalent, code, reason, documentation, goalId, triggerDefinition, condition
-          , input, output, relatedAction, timing, participant, type, groupingBehavior, selectionBehavior
+          , textEquivalent, code, reason, documentation, goalId, trigger, condition, input
+          , output, relatedAction, timing, participant, type, groupingBehavior, selectionBehavior
           , requiredBehavior, precheckBehavior, cardinalityBehavior, definition, transform, dynamicValue
           , action);
       }
@@ -3924,10 +3949,10 @@ public class PlanDefinition extends MetadataResource {
         protected StringType language;
 
         /**
-         * An expression that returns true or false, indicating whether or not the condition is satisfied.
+         * An expression that returns true or false, indicating whether the condition is satisfied.
          */
         @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether or not the condition is satisfied." )
+        @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether the condition is satisfied." )
         protected StringType expression;
 
         private static final long serialVersionUID = 944300105L;
@@ -4091,7 +4116,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #expression} (An expression that returns true or false, indicating whether or not the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @return {@link #expression} (An expression that returns true or false, indicating whether the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public StringType getExpressionElement() { 
           if (this.expression == null)
@@ -4111,7 +4136,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #expression} (An expression that returns true or false, indicating whether or not the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @param value {@link #expression} (An expression that returns true or false, indicating whether the condition is satisfied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public PlanDefinitionActionConditionComponent setExpressionElement(StringType value) { 
           this.expression = value;
@@ -4119,14 +4144,14 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return An expression that returns true or false, indicating whether or not the condition is satisfied.
+         * @return An expression that returns true or false, indicating whether the condition is satisfied.
          */
         public String getExpression() { 
           return this.expression == null ? null : this.expression.getValue();
         }
 
         /**
-         * @param value An expression that returns true or false, indicating whether or not the condition is satisfied.
+         * @param value An expression that returns true or false, indicating whether the condition is satisfied.
          */
         public PlanDefinitionActionConditionComponent setExpression(String value) { 
           if (Utilities.noString(value))
@@ -4144,7 +4169,7 @@ public class PlanDefinition extends MetadataResource {
           children.add(new Property("kind", "code", "The kind of condition.", 0, 1, kind));
           children.add(new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, 1, description));
           children.add(new Property("language", "string", "The media type of the language for the expression.", 0, 1, language));
-          children.add(new Property("expression", "string", "An expression that returns true or false, indicating whether or not the condition is satisfied.", 0, 1, expression));
+          children.add(new Property("expression", "string", "An expression that returns true or false, indicating whether the condition is satisfied.", 0, 1, expression));
         }
 
         @Override
@@ -4153,7 +4178,7 @@ public class PlanDefinition extends MetadataResource {
           case 3292052: /*kind*/  return new Property("kind", "code", "The kind of condition.", 0, 1, kind);
           case -1724546052: /*description*/  return new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, 1, description);
           case -1613589672: /*language*/  return new Property("language", "string", "The media type of the language for the expression.", 0, 1, language);
-          case -1795452264: /*expression*/  return new Property("expression", "string", "An expression that returns true or false, indicating whether or not the condition is satisfied.", 0, 1, expression);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "An expression that returns true or false, indicating whether the condition is satisfied.", 0, 1, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -4437,26 +4462,30 @@ public class PlanDefinition extends MetadataResource {
          * @return {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
          */
         public Duration getOffsetDuration() throws FHIRException { 
+          if (this.offset == null)
+            return null;
           if (!(this.offset instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.offset.getClass().getName()+" was encountered");
           return (Duration) this.offset;
         }
 
         public boolean hasOffsetDuration() { 
-          return this.offset instanceof Duration;
+          return this != null && this.offset instanceof Duration;
         }
 
         /**
          * @return {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
          */
         public Range getOffsetRange() throws FHIRException { 
+          if (this.offset == null)
+            return null;
           if (!(this.offset instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.offset.getClass().getName()+" was encountered");
           return (Range) this.offset;
         }
 
         public boolean hasOffsetRange() { 
-          return this.offset instanceof Range;
+          return this != null && this.offset instanceof Range;
         }
 
         public boolean hasOffset() { 
@@ -4467,6 +4496,8 @@ public class PlanDefinition extends MetadataResource {
          * @param value {@link #offset} (A duration or range of durations to apply to the relationship. For example, 30-60 minutes before.)
          */
         public PlanDefinitionActionRelatedActionComponent setOffset(Type value) { 
+          if (value != null && !(value instanceof Duration || value instanceof Range))
+            throw new Error("Not the right type for PlanDefinition.action.relatedAction.offset[x]: "+value.fhirType());
           this.offset = value;
           return this;
         }
@@ -4635,7 +4666,7 @@ public class PlanDefinition extends MetadataResource {
          * The role the participant should play in performing the described action.
          */
         @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="E.g. Nurse, Surgeon, Parent, etc", formalDefinition="The role the participant should play in performing the described action." )
+        @Description(shortDefinition="E.g. Nurse, Surgeon, Parent", formalDefinition="The role the participant should play in performing the described action." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-participant-role")
         protected CodeableConcept role;
 
@@ -5246,104 +5277,114 @@ public class PlanDefinition extends MetadataResource {
     protected List<Identifier> identifier;
 
     /**
-     * The type of artifact the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.
+     * An explanatory or alternate title for the plan definition giving additional information about its content.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="order-set | protocol | eca-rule", formalDefinition="The type of artifact the plan definition represents, e.g. an order set, protocol, or event-condition-action rule." )
+    @Child(name = "subtitle", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Subordinate title of the plan definition", formalDefinition="An explanatory or alternate title for the plan definition giving additional information about its content." )
+    protected StringType subtitle;
+
+    /**
+     * A high-level category for the plan definition that distinguishes the kinds of systems that would be interested in the plan definition.
+     */
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="order-set | clinical-protocol | eca-rule | workflow-definition", formalDefinition="A high-level category for the plan definition that distinguishes the kinds of systems that would be interested in the plan definition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/plan-definition-type")
     protected CodeableConcept type;
 
     /**
-     * Explaination of why this plan definition is needed and why it has been designed as it has.
+     * A code or group definition that describes the intended subject of the plan definition.
      */
-    @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this plan definition is defined", formalDefinition="Explaination of why this plan definition is needed and why it has been designed as it has." )
+    @Child(name = "subject", type = {CodeableConcept.class, Group.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Type of individual the plan definition is focused on", formalDefinition="A code or group definition that describes the intended subject of the plan definition." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
+    protected Type subject;
+
+    /**
+     * Explanation of why this plan definition is needed and why it has been designed as it has.
+     */
+    @Child(name = "purpose", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this plan definition is defined", formalDefinition="Explanation of why this plan definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
      * A detailed description of how the plan definition is used from a clinical perspective.
      */
-    @Child(name = "usage", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "usage", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Describes the clinical usage of the plan", formalDefinition="A detailed description of how the plan definition is used from a clinical perspective." )
     protected StringType usage;
 
     /**
+     * A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
+     */
+    @Child(name = "copyright", type = {MarkdownType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition." )
+    protected MarkdownType copyright;
+
+    /**
      * The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    @Child(name = "approvalDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "approvalDate", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the plan definition was approved by publisher", formalDefinition="The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
     protected DateType approvalDate;
 
     /**
-     * The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
      */
-    @Child(name = "lastReviewDate", type = {DateType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the plan definition was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
+    @Child(name = "lastReviewDate", type = {DateType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="When the plan definition was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
      * The period during which the plan definition content was or is planned to be in active use.
      */
-    @Child(name = "effectivePeriod", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "effectivePeriod", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the plan definition is expected to be used", formalDefinition="The period during which the plan definition content was or is planned to be in active use." )
     protected Period effectivePeriod;
 
     /**
      * Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching.
      */
-    @Child(name = "topic", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="E.g. Education, Treatment, Assessment, etc", formalDefinition="Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching." )
+    @Child(name = "topic", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="E.g. Education, Treatment, Assessment", formalDefinition="Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/definition-topic")
     protected List<CodeableConcept> topic;
 
     /**
      * A contributor to the content of the plan definition, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {Contributor.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contributor", type = {Contributor.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the plan definition, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
-     * A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
-     */
-    @Child(name = "copyright", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition." )
-    protected MarkdownType copyright;
-
-    /**
      * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional documentation, citations, etc", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Additional documentation, citations", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
      * A reference to a Library resource containing any formal logic used by the plan definition.
      */
-    @Child(name = "library", type = {Library.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "library", type = {CanonicalType.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Logic used by the plan definition", formalDefinition="A reference to a Library resource containing any formal logic used by the plan definition." )
-    protected List<Reference> library;
-    /**
-     * The actual objects that are the target of the reference (A reference to a Library resource containing any formal logic used by the plan definition.)
-     */
-    protected List<Library> libraryTarget;
-
+    protected List<CanonicalType> library;
 
     /**
      * Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.
      */
-    @Child(name = "goal", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "goal", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What the plan is trying to accomplish", formalDefinition="Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc." )
     protected List<PlanDefinitionGoalComponent> goal;
 
     /**
-     * An action to be taken as part of the plan.
+     * An action or group of actions to be taken as part of the plan.
      */
-    @Child(name = "action", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Action defined by the plan", formalDefinition="An action to be taken as part of the plan." )
+    @Child(name = "action", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Action defined by the plan", formalDefinition="An action or group of actions to be taken as part of the plan." )
     protected List<PlanDefinitionActionComponent> action;
 
-    private static final long serialVersionUID = -1191108677L;
+    private static final long serialVersionUID = 98193584L;
 
   /**
    * Constructor
@@ -5361,7 +5402,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this plan definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this plan definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -5381,7 +5422,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this plan definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this plan definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public PlanDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -5389,14 +5430,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this plan definition is (or will be) published.
+     * @return An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this plan definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this plan definition is (or will be) published.
+     * @param value An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this plan definition is (or will be) published.
      */
     public PlanDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -5610,7 +5651,56 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #type} (The type of artifact the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.)
+     * @return {@link #subtitle} (An explanatory or alternate title for the plan definition giving additional information about its content.). This is the underlying object with id, value and extensions. The accessor "getSubtitle" gives direct access to the value
+     */
+    public StringType getSubtitleElement() { 
+      if (this.subtitle == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.subtitle");
+        else if (Configuration.doAutoCreate())
+          this.subtitle = new StringType(); // bb
+      return this.subtitle;
+    }
+
+    public boolean hasSubtitleElement() { 
+      return this.subtitle != null && !this.subtitle.isEmpty();
+    }
+
+    public boolean hasSubtitle() { 
+      return this.subtitle != null && !this.subtitle.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subtitle} (An explanatory or alternate title for the plan definition giving additional information about its content.). This is the underlying object with id, value and extensions. The accessor "getSubtitle" gives direct access to the value
+     */
+    public PlanDefinition setSubtitleElement(StringType value) { 
+      this.subtitle = value;
+      return this;
+    }
+
+    /**
+     * @return An explanatory or alternate title for the plan definition giving additional information about its content.
+     */
+    public String getSubtitle() { 
+      return this.subtitle == null ? null : this.subtitle.getValue();
+    }
+
+    /**
+     * @param value An explanatory or alternate title for the plan definition giving additional information about its content.
+     */
+    public PlanDefinition setSubtitle(String value) { 
+      if (Utilities.noString(value))
+        this.subtitle = null;
+      else {
+        if (this.subtitle == null)
+          this.subtitle = new StringType();
+        this.subtitle.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #type} (A high-level category for the plan definition that distinguishes the kinds of systems that would be interested in the plan definition.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -5626,7 +5716,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #type} (The type of artifact the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.)
+     * @param value {@link #type} (A high-level category for the plan definition that distinguishes the kinds of systems that would be interested in the plan definition.)
      */
     public PlanDefinition setType(CodeableConcept value) { 
       this.type = value;
@@ -5679,7 +5769,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -5699,7 +5789,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public PlanDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -5707,14 +5797,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public PlanDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -5724,7 +5814,58 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #subject} (A code or group definition that describes the intended subject of the plan definition.)
+     */
+    public Type getSubject() { 
+      return this.subject;
+    }
+
+    /**
+     * @return {@link #subject} (A code or group definition that describes the intended subject of the plan definition.)
+     */
+    public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.subject;
+    }
+
+    public boolean hasSubjectCodeableConcept() { 
+      return this != null && this.subject instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #subject} (A code or group definition that describes the intended subject of the plan definition.)
+     */
+    public Reference getSubjectReference() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (Reference) this.subject;
+    }
+
+    public boolean hasSubjectReference() { 
+      return this != null && this.subject instanceof Reference;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (A code or group definition that describes the intended subject of the plan definition.)
+     */
+    public PlanDefinition setSubject(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for PlanDefinition.subject[x]: "+value.fhirType());
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -5744,7 +5885,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the plan definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public PlanDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -5752,14 +5893,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
+     * @return The date  (and optionally time) when the plan definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
+     * @param value The date  (and optionally time) when the plan definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.
      */
     public PlanDefinition setDate(Date value) { 
       if (value == null)
@@ -5773,7 +5914,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the plan definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the plan definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -5793,7 +5934,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the plan definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the plan definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public PlanDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -5801,14 +5942,14 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the plan definition.
+     * @return The name of the organization or individual that published the plan definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the plan definition.
+     * @param value The name of the organization or individual that published the plan definition.
      */
     public PlanDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -5819,6 +5960,59 @@ public class PlanDefinition extends MetadataResource {
         this.publisher.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
+     */
+    public List<ContactDetail> getContact() { 
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      return this.contact;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public PlanDefinition setContact(List<ContactDetail> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
+    public boolean hasContact() { 
+      if (this.contact == null)
+        return false;
+      for (ContactDetail item : this.contact)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      this.contact.add(t);
+      return t;
+    }
+
+    public PlanDefinition addContact(ContactDetail t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      this.contact.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactDetail getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -5867,226 +6061,6 @@ public class PlanDefinition extends MetadataResource {
           this.description = new MarkdownType();
         this.description.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #purpose} (Explaination of why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public MarkdownType getPurposeElement() { 
-      if (this.purpose == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.purpose");
-        else if (Configuration.doAutoCreate())
-          this.purpose = new MarkdownType(); // bb
-      return this.purpose;
-    }
-
-    public boolean hasPurposeElement() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    public boolean hasPurpose() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    /**
-     * @param value {@link #purpose} (Explaination of why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public PlanDefinition setPurposeElement(MarkdownType value) { 
-      this.purpose = value;
-      return this;
-    }
-
-    /**
-     * @return Explaination of why this plan definition is needed and why it has been designed as it has.
-     */
-    public String getPurpose() { 
-      return this.purpose == null ? null : this.purpose.getValue();
-    }
-
-    /**
-     * @param value Explaination of why this plan definition is needed and why it has been designed as it has.
-     */
-    public PlanDefinition setPurpose(String value) { 
-      if (value == null)
-        this.purpose = null;
-      else {
-        if (this.purpose == null)
-          this.purpose = new MarkdownType();
-        this.purpose.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #usage} (A detailed description of how the plan definition is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public StringType getUsageElement() { 
-      if (this.usage == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.usage");
-        else if (Configuration.doAutoCreate())
-          this.usage = new StringType(); // bb
-      return this.usage;
-    }
-
-    public boolean hasUsageElement() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    public boolean hasUsage() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    /**
-     * @param value {@link #usage} (A detailed description of how the plan definition is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public PlanDefinition setUsageElement(StringType value) { 
-      this.usage = value;
-      return this;
-    }
-
-    /**
-     * @return A detailed description of how the plan definition is used from a clinical perspective.
-     */
-    public String getUsage() { 
-      return this.usage == null ? null : this.usage.getValue();
-    }
-
-    /**
-     * @param value A detailed description of how the plan definition is used from a clinical perspective.
-     */
-    public PlanDefinition setUsage(String value) { 
-      if (Utilities.noString(value))
-        this.usage = null;
-      else {
-        if (this.usage == null)
-          this.usage = new StringType();
-        this.usage.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
-     */
-    public DateType getApprovalDateElement() { 
-      if (this.approvalDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.approvalDate");
-        else if (Configuration.doAutoCreate())
-          this.approvalDate = new DateType(); // bb
-      return this.approvalDate;
-    }
-
-    public boolean hasApprovalDateElement() { 
-      return this.approvalDate != null && !this.approvalDate.isEmpty();
-    }
-
-    public boolean hasApprovalDate() { 
-      return this.approvalDate != null && !this.approvalDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
-     */
-    public PlanDefinition setApprovalDateElement(DateType value) { 
-      this.approvalDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
-     */
-    public Date getApprovalDate() { 
-      return this.approvalDate == null ? null : this.approvalDate.getValue();
-    }
-
-    /**
-     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
-     */
-    public PlanDefinition setApprovalDate(Date value) { 
-      if (value == null)
-        this.approvalDate = null;
-      else {
-        if (this.approvalDate == null)
-          this.approvalDate = new DateType();
-        this.approvalDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
-     */
-    public DateType getLastReviewDateElement() { 
-      if (this.lastReviewDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.lastReviewDate");
-        else if (Configuration.doAutoCreate())
-          this.lastReviewDate = new DateType(); // bb
-      return this.lastReviewDate;
-    }
-
-    public boolean hasLastReviewDateElement() { 
-      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
-    }
-
-    public boolean hasLastReviewDate() { 
-      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
-     */
-    public PlanDefinition setLastReviewDateElement(DateType value) { 
-      this.lastReviewDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
-     */
-    public Date getLastReviewDate() { 
-      return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
-    }
-
-    /**
-     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
-     */
-    public PlanDefinition setLastReviewDate(Date value) { 
-      if (value == null)
-        this.lastReviewDate = null;
-      else {
-        if (this.lastReviewDate == null)
-          this.lastReviewDate = new DateType();
-        this.lastReviewDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be in active use.)
-     */
-    public Period getEffectivePeriod() { 
-      if (this.effectivePeriod == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.effectivePeriod");
-        else if (Configuration.doAutoCreate())
-          this.effectivePeriod = new Period(); // cc
-      return this.effectivePeriod;
-    }
-
-    public boolean hasEffectivePeriod() { 
-      return this.effectivePeriod != null && !this.effectivePeriod.isEmpty();
-    }
-
-    /**
-     * @param value {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be in active use.)
-     */
-    public PlanDefinition setEffectivePeriod(Period value) { 
-      this.effectivePeriod = value;
       return this;
     }
 
@@ -6197,6 +6171,275 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
+     * @return {@link #purpose} (Explanation of why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.purpose");
+        else if (Configuration.doAutoCreate())
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
+    }
+
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    /**
+     * @param value {@link #purpose} (Explanation of why this plan definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public PlanDefinition setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
+      return this;
+    }
+
+    /**
+     * @return Explanation of why this plan definition is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explanation of why this plan definition is needed and why it has been designed as it has.
+     */
+    public PlanDefinition setPurpose(String value) { 
+      if (value == null)
+        this.purpose = null;
+      else {
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #usage} (A detailed description of how the plan definition is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public StringType getUsageElement() { 
+      if (this.usage == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.usage");
+        else if (Configuration.doAutoCreate())
+          this.usage = new StringType(); // bb
+      return this.usage;
+    }
+
+    public boolean hasUsageElement() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    public boolean hasUsage() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    /**
+     * @param value {@link #usage} (A detailed description of how the plan definition is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public PlanDefinition setUsageElement(StringType value) { 
+      this.usage = value;
+      return this;
+    }
+
+    /**
+     * @return A detailed description of how the plan definition is used from a clinical perspective.
+     */
+    public String getUsage() { 
+      return this.usage == null ? null : this.usage.getValue();
+    }
+
+    /**
+     * @param value A detailed description of how the plan definition is used from a clinical perspective.
+     */
+    public PlanDefinition setUsage(String value) { 
+      if (Utilities.noString(value))
+        this.usage = null;
+      else {
+        if (this.usage == null)
+          this.usage = new StringType();
+        this.usage.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #copyright} (A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public MarkdownType getCopyrightElement() { 
+      if (this.copyright == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.copyright");
+        else if (Configuration.doAutoCreate())
+          this.copyright = new MarkdownType(); // bb
+      return this.copyright;
+    }
+
+    public boolean hasCopyrightElement() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    public boolean hasCopyright() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    /**
+     * @param value {@link #copyright} (A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public PlanDefinition setCopyrightElement(MarkdownType value) { 
+      this.copyright = value;
+      return this;
+    }
+
+    /**
+     * @return A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
+     */
+    public String getCopyright() { 
+      return this.copyright == null ? null : this.copyright.getValue();
+    }
+
+    /**
+     * @param value A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
+     */
+    public PlanDefinition setCopyright(String value) { 
+      if (value == null)
+        this.copyright = null;
+      else {
+        if (this.copyright == null)
+          this.copyright = new MarkdownType();
+        this.copyright.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     */
+    public DateType getApprovalDateElement() { 
+      if (this.approvalDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.approvalDate");
+        else if (Configuration.doAutoCreate())
+          this.approvalDate = new DateType(); // bb
+      return this.approvalDate;
+    }
+
+    public boolean hasApprovalDateElement() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
+    }
+
+    public boolean hasApprovalDate() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     */
+    public PlanDefinition setApprovalDateElement(DateType value) { 
+      this.approvalDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     */
+    public Date getApprovalDate() { 
+      return this.approvalDate == null ? null : this.approvalDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     */
+    public PlanDefinition setApprovalDate(Date value) { 
+      if (value == null)
+        this.approvalDate = null;
+      else {
+        if (this.approvalDate == null)
+          this.approvalDate = new DateType();
+        this.approvalDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     */
+    public DateType getLastReviewDateElement() { 
+      if (this.lastReviewDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.lastReviewDate");
+        else if (Configuration.doAutoCreate())
+          this.lastReviewDate = new DateType(); // bb
+      return this.lastReviewDate;
+    }
+
+    public boolean hasLastReviewDateElement() { 
+      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
+    }
+
+    public boolean hasLastReviewDate() { 
+      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     */
+    public PlanDefinition setLastReviewDateElement(DateType value) { 
+      this.lastReviewDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
+     */
+    public Date getLastReviewDate() { 
+      return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
+     */
+    public PlanDefinition setLastReviewDate(Date value) { 
+      if (value == null)
+        this.lastReviewDate = null;
+      else {
+        if (this.lastReviewDate == null)
+          this.lastReviewDate = new DateType();
+        this.lastReviewDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be in active use.)
+     */
+    public Period getEffectivePeriod() { 
+      if (this.effectivePeriod == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PlanDefinition.effectivePeriod");
+        else if (Configuration.doAutoCreate())
+          this.effectivePeriod = new Period(); // cc
+      return this.effectivePeriod;
+    }
+
+    public boolean hasEffectivePeriod() { 
+      return this.effectivePeriod != null && !this.effectivePeriod.isEmpty();
+    }
+
+    /**
+     * @param value {@link #effectivePeriod} (The period during which the plan definition content was or is planned to be in active use.)
+     */
+    public PlanDefinition setEffectivePeriod(Period value) { 
+      this.effectivePeriod = value;
+      return this;
+    }
+
+    /**
      * @return {@link #topic} (Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching.)
      */
     public List<CodeableConcept> getTopic() { 
@@ -6303,108 +6546,6 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
-     */
-    public List<ContactDetail> getContact() { 
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      return this.contact;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public PlanDefinition setContact(List<ContactDetail> theContact) { 
-      this.contact = theContact;
-      return this;
-    }
-
-    public boolean hasContact() { 
-      if (this.contact == null)
-        return false;
-      for (ContactDetail item : this.contact)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public ContactDetail addContact() { //3
-      ContactDetail t = new ContactDetail();
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      this.contact.add(t);
-      return t;
-    }
-
-    public PlanDefinition addContact(ContactDetail t) { //3
-      if (t == null)
-        return this;
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      this.contact.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactDetail getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
-     * @return {@link #copyright} (A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
-     */
-    public MarkdownType getCopyrightElement() { 
-      if (this.copyright == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PlanDefinition.copyright");
-        else if (Configuration.doAutoCreate())
-          this.copyright = new MarkdownType(); // bb
-      return this.copyright;
-    }
-
-    public boolean hasCopyrightElement() { 
-      return this.copyright != null && !this.copyright.isEmpty();
-    }
-
-    public boolean hasCopyright() { 
-      return this.copyright != null && !this.copyright.isEmpty();
-    }
-
-    /**
-     * @param value {@link #copyright} (A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
-     */
-    public PlanDefinition setCopyrightElement(MarkdownType value) { 
-      this.copyright = value;
-      return this;
-    }
-
-    /**
-     * @return A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
-     */
-    public String getCopyright() { 
-      return this.copyright == null ? null : this.copyright.getValue();
-    }
-
-    /**
-     * @param value A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.
-     */
-    public PlanDefinition setCopyright(String value) { 
-      if (value == null)
-        this.copyright = null;
-      else {
-        if (this.copyright == null)
-          this.copyright = new MarkdownType();
-        this.copyright.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #relatedArtifact} (Related artifacts such as additional documentation, justification, or bibliographic references.)
      */
     public List<RelatedArtifact> getRelatedArtifact() { 
@@ -6460,16 +6601,16 @@ public class PlanDefinition extends MetadataResource {
     /**
      * @return {@link #library} (A reference to a Library resource containing any formal logic used by the plan definition.)
      */
-    public List<Reference> getLibrary() { 
+    public List<CanonicalType> getLibrary() { 
       if (this.library == null)
-        this.library = new ArrayList<Reference>();
+        this.library = new ArrayList<CanonicalType>();
       return this.library;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public PlanDefinition setLibrary(List<Reference> theLibrary) { 
+    public PlanDefinition setLibrary(List<CanonicalType> theLibrary) { 
       this.library = theLibrary;
       return this;
     }
@@ -6477,59 +6618,45 @@ public class PlanDefinition extends MetadataResource {
     public boolean hasLibrary() { 
       if (this.library == null)
         return false;
-      for (Reference item : this.library)
+      for (CanonicalType item : this.library)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addLibrary() { //3
-      Reference t = new Reference();
+    /**
+     * @return {@link #library} (A reference to a Library resource containing any formal logic used by the plan definition.)
+     */
+    public CanonicalType addLibraryElement() {//2 
+      CanonicalType t = new CanonicalType();
       if (this.library == null)
-        this.library = new ArrayList<Reference>();
+        this.library = new ArrayList<CanonicalType>();
       this.library.add(t);
       return t;
     }
 
-    public PlanDefinition addLibrary(Reference t) { //3
-      if (t == null)
-        return this;
+    /**
+     * @param value {@link #library} (A reference to a Library resource containing any formal logic used by the plan definition.)
+     */
+    public PlanDefinition addLibrary(String value) { //1
+      CanonicalType t = new CanonicalType();
+      t.setValue(value);
       if (this.library == null)
-        this.library = new ArrayList<Reference>();
+        this.library = new ArrayList<CanonicalType>();
       this.library.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
+     * @param value {@link #library} (A reference to a Library resource containing any formal logic used by the plan definition.)
      */
-    public Reference getLibraryFirstRep() { 
-      if (getLibrary().isEmpty()) {
-        addLibrary();
-      }
-      return getLibrary().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Library> getLibraryTarget() { 
-      if (this.libraryTarget == null)
-        this.libraryTarget = new ArrayList<Library>();
-      return this.libraryTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public Library addLibraryTarget() { 
-      Library r = new Library();
-      if (this.libraryTarget == null)
-        this.libraryTarget = new ArrayList<Library>();
-      this.libraryTarget.add(r);
-      return r;
+    public boolean hasLibrary(String value) { 
+      if (this.library == null)
+        return false;
+      for (CanonicalType v : this.library)
+        if (v.getValue().equals(value)) // canonical(Library)
+          return true;
+      return false;
     }
 
     /**
@@ -6586,7 +6713,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #action} (An action to be taken as part of the plan.)
+     * @return {@link #action} (An action or group of actions to be taken as part of the plan.)
      */
     public List<PlanDefinitionActionComponent> getAction() { 
       if (this.action == null)
@@ -6640,63 +6767,70 @@ public class PlanDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this plan definition is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this plan definition is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the plan definition.", 0, 1, title));
-        children.add(new Property("type", "CodeableConcept", "The type of artifact the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.", 0, 1, type));
+        children.add(new Property("subtitle", "string", "An explanatory or alternate title for the plan definition giving additional information about its content.", 0, 1, subtitle));
+        children.add(new Property("type", "CodeableConcept", "A high-level category for the plan definition that distinguishes the kinds of systems that would be interested in the plan definition.", 0, 1, type));
         children.add(new Property("status", "code", "The status of this plan definition. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the plan definition.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the plan definition.", 0, 1, subject));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the plan definition.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the plan definition from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("purpose", "markdown", "Explaination of why this plan definition is needed and why it has been designed as it has.", 0, 1, purpose));
-        children.add(new Property("usage", "string", "A detailed description of how the plan definition is used from a clinical perspective.", 0, 1, usage));
-        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
-        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate));
-        children.add(new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("purpose", "markdown", "Explanation of why this plan definition is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("usage", "string", "A detailed description of how the plan definition is used from a clinical perspective.", 0, 1, usage));
+        children.add(new Property("copyright", "markdown", "A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.", 0, 1, copyright));
+        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
+        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.", 0, 1, lastReviewDate));
+        children.add(new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
         children.add(new Property("contributor", "Contributor", "A contributor to the content of the plan definition, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        children.add(new Property("copyright", "markdown", "A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.", 0, 1, copyright));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
-        children.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the plan definition.", 0, java.lang.Integer.MAX_VALUE, library));
+        children.add(new Property("library", "canonical(Library)", "A reference to a Library resource containing any formal logic used by the plan definition.", 0, java.lang.Integer.MAX_VALUE, library));
         children.add(new Property("goal", "", "Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.", 0, java.lang.Integer.MAX_VALUE, goal));
-        children.add(new Property("action", "", "An action to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, action));
+        children.add(new Property("action", "", "An action or group of actions to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, action));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this plan definition is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this plan definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this plan definition is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this plan definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the plan definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the plan definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the plan definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the plan definition.", 0, 1, title);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of artifact the plan definition represents, e.g. an order set, protocol, or event-condition-action rule.", 0, 1, type);
+        case -2060497896: /*subtitle*/  return new Property("subtitle", "string", "An explanatory or alternate title for the plan definition giving additional information about its content.", 0, 1, subtitle);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A high-level category for the plan definition that distinguishes the kinds of systems that would be interested in the plan definition.", 0, 1, type);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this plan definition. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the plan definition.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this plan definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case -573640748: /*subject[x]*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the plan definition.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the plan definition.", 0, 1, subject);
+        case -1257122603: /*subjectCodeableConcept*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the plan definition.", 0, 1, subject);
+        case 772938623: /*subjectReference*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the plan definition.", 0, 1, subject);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the plan definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the plan definition changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the plan definition.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the plan definition from a consumer's perspective.", 0, 1, description);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this plan definition is needed and why it has been designed as it has.", 0, 1, purpose);
-        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the plan definition is used from a clinical perspective.", 0, 1, usage);
-        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
-        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate);
-        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this plan definition is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the plan definition is used from a clinical perspective.", 0, 1, usage);
+        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.", 0, 1, copyright);
+        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
+        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.", 0, 1, lastReviewDate);
+        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the plan definition content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the plan definition. Topics provide a high-level categorization of the definition that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
         case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the plan definition, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
-        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
-        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the plan definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the plan definition.", 0, 1, copyright);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
-        case 166208699: /*library*/  return new Property("library", "Reference(Library)", "A reference to a Library resource containing any formal logic used by the plan definition.", 0, java.lang.Integer.MAX_VALUE, library);
+        case 166208699: /*library*/  return new Property("library", "canonical(Library)", "A reference to a Library resource containing any formal logic used by the plan definition.", 0, java.lang.Integer.MAX_VALUE, library);
         case 3178259: /*goal*/  return new Property("goal", "", "Goals that describe what the activities within the plan are intended to achieve. For example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.", 0, java.lang.Integer.MAX_VALUE, goal);
-        case -1422950858: /*action*/  return new Property("action", "", "An action to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, action);
+        case -1422950858: /*action*/  return new Property("action", "", "An action or group of actions to be taken as part of the plan.", 0, java.lang.Integer.MAX_VALUE, action);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -6710,25 +6844,27 @@ public class PlanDefinition extends MetadataResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case -2060497896: /*subtitle*/ return this.subtitle == null ? new Base[0] : new Base[] {this.subtitle}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Type
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 223539345: /*approvalDate*/ return this.approvalDate == null ? new Base[0] : new Base[] {this.approvalDate}; // DateType
         case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
-        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
-        case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
+        case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // CanonicalType
         case 3178259: /*goal*/ return this.goal == null ? new Base[0] : this.goal.toArray(new Base[this.goal.size()]); // PlanDefinitionGoalComponent
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // PlanDefinitionActionComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -6754,6 +6890,9 @@ public class PlanDefinition extends MetadataResource {
         case 110371416: // title
           this.title = castToString(value); // StringType
           return value;
+        case -2060497896: // subtitle
+          this.subtitle = castToString(value); // StringType
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
@@ -6764,20 +6903,35 @@ public class PlanDefinition extends MetadataResource {
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
           return value;
+        case -1867885268: // subject
+          this.subject = castToType(value); // Type
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
           return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
           return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
+          return value;
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          return value;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
           return value;
         case 111574433: // usage
           this.usage = castToString(value); // StringType
+          return value;
+        case 1522889671: // copyright
+          this.copyright = castToMarkdown(value); // MarkdownType
           return value;
         case 223539345: // approvalDate
           this.approvalDate = castToDate(value); // DateType
@@ -6788,29 +6942,17 @@ public class PlanDefinition extends MetadataResource {
         case -403934648: // effectivePeriod
           this.effectivePeriod = castToPeriod(value); // Period
           return value;
-        case -669707736: // useContext
-          this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          return value;
-        case -507075711: // jurisdiction
-          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          return value;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1895276325: // contributor
           this.getContributor().add(castToContributor(value)); // Contributor
           return value;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          return value;
-        case 1522889671: // copyright
-          this.copyright = castToMarkdown(value); // MarkdownType
-          return value;
         case 666807069: // relatedArtifact
           this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
           return value;
         case 166208699: // library
-          this.getLibrary().add(castToReference(value)); // Reference
+          this.getLibrary().add(castToCanonical(value)); // CanonicalType
           return value;
         case 3178259: // goal
           this.getGoal().add((PlanDefinitionGoalComponent) value); // PlanDefinitionGoalComponent
@@ -6835,6 +6977,8 @@ public class PlanDefinition extends MetadataResource {
           this.name = castToString(value); // StringType
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
+        } else if (name.equals("subtitle")) {
+          this.subtitle = castToString(value); // StringType
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("status")) {
@@ -6842,38 +6986,40 @@ public class PlanDefinition extends MetadataResource {
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
         } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
+        } else if (name.equals("subject[x]")) {
+          this.subject = castToType(value); // Type
         } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
         } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
         } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
+        } else if (name.equals("useContext")) {
+          this.getUseContext().add(castToUsageContext(value));
+        } else if (name.equals("jurisdiction")) {
+          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
         } else if (name.equals("usage")) {
           this.usage = castToString(value); // StringType
+        } else if (name.equals("copyright")) {
+          this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("approvalDate")) {
           this.approvalDate = castToDate(value); // DateType
         } else if (name.equals("lastReviewDate")) {
           this.lastReviewDate = castToDate(value); // DateType
         } else if (name.equals("effectivePeriod")) {
           this.effectivePeriod = castToPeriod(value); // Period
-        } else if (name.equals("useContext")) {
-          this.getUseContext().add(castToUsageContext(value));
-        } else if (name.equals("jurisdiction")) {
-          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("topic")) {
           this.getTopic().add(castToCodeableConcept(value));
         } else if (name.equals("contributor")) {
           this.getContributor().add(castToContributor(value));
-        } else if (name.equals("contact")) {
-          this.getContact().add(castToContactDetail(value));
-        } else if (name.equals("copyright")) {
-          this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("relatedArtifact")) {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
         } else if (name.equals("library")) {
-          this.getLibrary().add(castToReference(value));
+          this.getLibrary().add(castToCanonical(value));
         } else if (name.equals("goal")) {
           this.getGoal().add((PlanDefinitionGoalComponent) value);
         } else if (name.equals("action")) {
@@ -6891,25 +7037,28 @@ public class PlanDefinition extends MetadataResource {
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
         case 110371416:  return getTitleElement();
+        case -2060497896:  return getSubtitleElement();
         case 3575610:  return getType(); 
         case -892481550:  return getStatusElement();
         case -404562712:  return getExperimentalElement();
+        case -573640748:  return getSubject(); 
+        case -1867885268:  return getSubject(); 
         case 3076014:  return getDateElement();
         case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
         case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
         case -220463842:  return getPurposeElement();
         case 111574433:  return getUsageElement();
+        case 1522889671:  return getCopyrightElement();
         case 223539345:  return getApprovalDateElement();
         case -1687512484:  return getLastReviewDateElement();
         case -403934648:  return getEffectivePeriod(); 
-        case -669707736:  return addUseContext(); 
-        case -507075711:  return addJurisdiction(); 
         case 110546223:  return addTopic(); 
         case -1895276325:  return addContributor(); 
-        case 951526432:  return addContact(); 
-        case 1522889671:  return getCopyrightElement();
         case 666807069:  return addRelatedArtifact(); 
-        case 166208699:  return addLibrary(); 
+        case 166208699:  return addLibraryElement();
         case 3178259:  return addGoal(); 
         case -1422950858:  return addAction(); 
         default: return super.makeProperty(hash, name);
@@ -6925,25 +7074,27 @@ public class PlanDefinition extends MetadataResource {
         case 351608024: /*version*/ return new String[] {"string"};
         case 3373707: /*name*/ return new String[] {"string"};
         case 110371416: /*title*/ return new String[] {"string"};
+        case -2060497896: /*subtitle*/ return new String[] {"string"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case -1867885268: /*subject*/ return new String[] {"CodeableConcept", "Reference"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
         case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 111574433: /*usage*/ return new String[] {"string"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 223539345: /*approvalDate*/ return new String[] {"date"};
         case -1687512484: /*lastReviewDate*/ return new String[] {"date"};
         case -403934648: /*effectivePeriod*/ return new String[] {"Period"};
-        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
-        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case 110546223: /*topic*/ return new String[] {"CodeableConcept"};
         case -1895276325: /*contributor*/ return new String[] {"Contributor"};
-        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
-        case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
-        case 166208699: /*library*/ return new String[] {"Reference"};
+        case 166208699: /*library*/ return new String[] {"canonical"};
         case 3178259: /*goal*/ return new String[] {};
         case -1422950858: /*action*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
@@ -6968,6 +7119,9 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.title");
         }
+        else if (name.equals("subtitle")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.subtitle");
+        }
         else if (name.equals("type")) {
           this.type = new CodeableConcept();
           return this.type;
@@ -6978,20 +7132,40 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.experimental");
         }
+        else if (name.equals("subjectCodeableConcept")) {
+          this.subject = new CodeableConcept();
+          return this.subject;
+        }
+        else if (name.equals("subjectReference")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.date");
         }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.publisher");
         }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.description");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
         }
         else if (name.equals("purpose")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.purpose");
         }
         else if (name.equals("usage")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.usage");
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.copyright");
         }
         else if (name.equals("approvalDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.approvalDate");
@@ -7003,29 +7177,17 @@ public class PlanDefinition extends MetadataResource {
           this.effectivePeriod = new Period();
           return this.effectivePeriod;
         }
-        else if (name.equals("useContext")) {
-          return addUseContext();
-        }
-        else if (name.equals("jurisdiction")) {
-          return addJurisdiction();
-        }
         else if (name.equals("topic")) {
           return addTopic();
         }
         else if (name.equals("contributor")) {
           return addContributor();
         }
-        else if (name.equals("contact")) {
-          return addContact();
-        }
-        else if (name.equals("copyright")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.copyright");
-        }
         else if (name.equals("relatedArtifact")) {
           return addRelatedArtifact();
         }
         else if (name.equals("library")) {
-          return addLibrary();
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.library");
         }
         else if (name.equals("goal")) {
           return addGoal();
@@ -7054,17 +7216,19 @@ public class PlanDefinition extends MetadataResource {
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
+        dst.subtitle = subtitle == null ? null : subtitle.copy();
         dst.type = type == null ? null : type.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.subject = subject == null ? null : subject.copy();
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
+        if (contact != null) {
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
+            dst.contact.add(i.copy());
+        };
         dst.description = description == null ? null : description.copy();
-        dst.purpose = purpose == null ? null : purpose.copy();
-        dst.usage = usage == null ? null : usage.copy();
-        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
-        dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
-        dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
@@ -7075,6 +7239,12 @@ public class PlanDefinition extends MetadataResource {
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
         };
+        dst.purpose = purpose == null ? null : purpose.copy();
+        dst.usage = usage == null ? null : usage.copy();
+        dst.copyright = copyright == null ? null : copyright.copy();
+        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
+        dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
+        dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
@@ -7085,20 +7255,14 @@ public class PlanDefinition extends MetadataResource {
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
         };
-        if (contact != null) {
-          dst.contact = new ArrayList<ContactDetail>();
-          for (ContactDetail i : contact)
-            dst.contact.add(i.copy());
-        };
-        dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
         };
         if (library != null) {
-          dst.library = new ArrayList<Reference>();
-          for (Reference i : library)
+          dst.library = new ArrayList<CanonicalType>();
+          for (CanonicalType i : library)
             dst.library.add(i.copy());
         };
         if (goal != null) {
@@ -7125,10 +7289,11 @@ public class PlanDefinition extends MetadataResource {
         if (!(other_ instanceof PlanDefinition))
           return false;
         PlanDefinition o = (PlanDefinition) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(purpose, o.purpose, true)
-           && compareDeep(usage, o.usage, true) && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
-           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
-           && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(subtitle, o.subtitle, true) && compareDeep(type, o.type, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
+           && compareDeep(copyright, o.copyright, true) && compareDeep(approvalDate, o.approvalDate, true)
+           && compareDeep(lastReviewDate, o.lastReviewDate, true) && compareDeep(effectivePeriod, o.effectivePeriod, true)
+           && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
            && compareDeep(library, o.library, true) && compareDeep(goal, o.goal, true) && compareDeep(action, o.action, true)
           ;
       }
@@ -7140,15 +7305,15 @@ public class PlanDefinition extends MetadataResource {
         if (!(other_ instanceof PlanDefinition))
           return false;
         PlanDefinition o = (PlanDefinition) other_;
-        return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
-           && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
-          ;
+        return compareValues(subtitle, o.subtitle, true) && compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true)
+           && compareValues(copyright, o.copyright, true) && compareValues(approvalDate, o.approvalDate, true)
+           && compareValues(lastReviewDate, o.lastReviewDate, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, purpose
-          , usage, approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright
-          , relatedArtifact, library, goal, action);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subtitle, type
+          , subject, purpose, usage, copyright, approvalDate, lastReviewDate, effectivePeriod
+          , topic, contributor, relatedArtifact, library, goal, action);
       }
 
   @Override
@@ -7448,7 +7613,7 @@ public class PlanDefinition extends MetadataResource {
    * Path: <b>PlanDefinition.relatedArtifact.resource, PlanDefinition.library</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="depends-on", path="PlanDefinition.relatedArtifact.where(type='depends-on').resource | PlanDefinition.library", description="What resource is being referenced", type="reference" )
+  @SearchParamDefinition(name="depends-on", path="PlanDefinition.relatedArtifact.where(type='depends-on').resource | PlanDefinition.library", description="What resource is being referenced", type="reference", target={Library.class } )
   public static final String SP_DEPENDS_ON = "depends-on";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>depends-on</b>
@@ -7534,7 +7699,7 @@ public class PlanDefinition extends MetadataResource {
    * Path: <b>PlanDefinition.action.definition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="definition", path="PlanDefinition.action.definition", description="Activity or plan definitions used by plan definition", type="reference", target={ActivityDefinition.class, PlanDefinition.class } )
+  @SearchParamDefinition(name="definition", path="PlanDefinition.action.definition", description="Activity or plan definitions used by plan definition", type="reference", target={ActivityDefinition.class, PlanDefinition.class, Questionnaire.class } )
   public static final String SP_DEFINITION = "definition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>definition</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
  */
@@ -616,18 +617,31 @@ public class ContactPoint extends Type implements ICompositeType {
     /**
      * @param value {@link #period} (Time period when the contact point was/is in use.)
      */
-    public ContactPoint setPeriod(Period value) { 
+    public ContactPoint setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("system", "code", "Telecommunications form for contact point - what communications system is required to make use of the contact.", 0, java.lang.Integer.MAX_VALUE, system));
-        childrenList.add(new Property("value", "string", "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("use", "code", "Identifies the purpose for the contact point.", 0, java.lang.Integer.MAX_VALUE, use));
-        childrenList.add(new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.", 0, java.lang.Integer.MAX_VALUE, rank));
-        childrenList.add(new Property("period", "Period", "Time period when the contact point was/is in use.", 0, java.lang.Integer.MAX_VALUE, period));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("system", "code", "Telecommunications form for contact point - what communications system is required to make use of the contact.", 0, 1, system));
+        children.add(new Property("value", "string", "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).", 0, 1, value));
+        children.add(new Property("use", "code", "Identifies the purpose for the contact point.", 0, 1, use));
+        children.add(new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.", 0, 1, rank));
+        children.add(new Property("period", "Period", "Time period when the contact point was/is in use.", 0, 1, period));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -887328209: /*system*/  return new Property("system", "code", "Telecommunications form for contact point - what communications system is required to make use of the contact.", 0, 1, system);
+        case 111972721: /*value*/  return new Property("value", "string", "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).", 0, 1, value);
+        case 116103: /*use*/  return new Property("use", "code", "Identifies the purpose for the contact point.", 0, 1, use);
+        case 3492908: /*rank*/  return new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.", 0, 1, rank);
+        case -991726143: /*period*/  return new Property("period", "Period", "Time period when the contact point was/is in use.", 0, 1, period);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -756,23 +770,23 @@ public class ContactPoint extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContactPoint))
+        if (!(other_ instanceof ContactPoint))
           return false;
-        ContactPoint o = (ContactPoint) other;
+        ContactPoint o = (ContactPoint) other_;
         return compareDeep(system, o.system, true) && compareDeep(value, o.value, true) && compareDeep(use, o.use, true)
            && compareDeep(rank, o.rank, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContactPoint))
+        if (!(other_ instanceof ContactPoint))
           return false;
-        ContactPoint o = (ContactPoint) other;
+        ContactPoint o = (ContactPoint) other_;
         return compareValues(system, o.system, true) && compareValues(value, o.value, true) && compareValues(use, o.use, true)
            && compareValues(rank, o.rank, true);
       }

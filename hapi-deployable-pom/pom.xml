@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -32,7 +32,7 @@
 						<configuration>
 							<signature>
 								<groupId>org.codehaus.mojo.signature</groupId>
-								<artifactId>java17</artifactId>
+								<artifactId>java18</artifactId>
 								<version>1.0</version>
 							</signature>
 						</configuration>
@@ -100,8 +100,8 @@
 							<artifactId>javax.mail-api</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>com.phloc</groupId>
-							<artifactId>phloc-commons</artifactId>
+							<groupId>com.helger</groupId>
+							<artifactId>ph-schematron</artifactId>
 						</dependency>
 						<dependency>
 							<groupId>commons-logging</groupId>
@@ -115,10 +115,32 @@
 							<groupId>org.springframework</groupId>
 							<artifactId>spring-jcl</artifactId>
 						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-jcl</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>com.google.code.findbugs</groupId>
+							<artifactId>annotations</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.derby</groupId>
+							<artifactId>derbyclient</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.derby</groupId>
+							<artifactId>derbynet</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.derby</groupId>
+							<artifactId>derbyclient</artifactId>
+						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
 						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
+						<ignoredResource>about.html</ignoredResource>
+						<ignoredResource>changelog.xml</ignoredResource>
 					</ignoredResourcePatterns>
 				</configuration>
 			</plugin>

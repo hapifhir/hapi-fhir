@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.LoggingRule;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -14,9 +17,13 @@ import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.search.jpa.Search;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.jdbc.Work;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -25,31 +32,48 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.Mockito;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaTest {
 
+	protected static final String CM_URL = "http://example.com/my_concept_map";
+	protected static final String CS_URL = "http://example.com/my_code_system";
+	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
+	protected static final String CS_URL_3 = "http://example.com/my_code_system3";
+	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
+	protected static final String VS_URL = "http://example.com/my_value_set";
+	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 
 	@After
-	public final void afterPerformCleanup() {
+	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
 	}
 
@@ -60,9 +84,59 @@ public abstract class BaseJpaTest {
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+	}
+
+	@After
+	public void afterValidateNoTransaction() {
+		PlatformTransactionManager txManager = getTxManager();
+		if (txManager != null) {
+			JpaTransactionManager hibernateTxManager = (JpaTransactionManager) txManager;
+			SessionFactory sessionFactory = (SessionFactory) hibernateTxManager.getEntityManagerFactory();
+			AtomicBoolean isReadOnly = new AtomicBoolean();
+			Session currentSession;
+			try {
+				currentSession = sessionFactory.getCurrentSession();
+			} catch (HibernateException e) {
+				currentSession = null;
+			}
+			if (currentSession != null) {
+				currentSession.doWork(new Work() {
+
+					public void execute(Connection connection) throws SQLException {
+						isReadOnly.set(connection.isReadOnly());
+					}
+				});
+
+				assertFalse(isReadOnly.get());
+			}
+		}
+	}
+
+	@Before
+	public void beforeRandomizeLocale() {
+		randomizeLocale();
 	}
 
 	protected abstract FhirContext getContext();
+
+	protected abstract PlatformTransactionManager getTxManager();
+
+	public TransactionTemplate newTxTemplate() {
+		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
+		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		retVal.afterPropertiesSet();
+		return retVal;
+	}
+
+	public void runInTransaction(Runnable theRunnable) {
+		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				theRunnable.run();
+			}
+		});
+	}
 
 	/**
 	 * Sleep until at least 1 ms has elapsed
@@ -156,25 +230,33 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
+	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theProvider) {
+
 		List<IIdType> retVal = new ArrayList<>();
-		Integer size = theFound.size();
+		Integer size = theProvider.size();
 		StopWatch sw = new StopWatch();
 		while (size == null) {
 			int timeout = 20000;
 			if (sw.getMillis() > timeout) {
-				fail("Waited over "+timeout+"ms for search");
+				String message = "Waited over " + timeout + "ms for search " + theProvider.getUuid();
+				ourLog.info(message);
+				fail(message);
 			}
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException theE) {
 				//ignore
 			}
-			size = theFound.size();
+
+			if (theProvider instanceof PersistedJpaBundleProvider) {
+				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theProvider;
+				provider.clearCachedDataForUnitTest();
+			}
+			size = theProvider.size();
 		}
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
+		List<IBaseResource> resources = theProvider.getResources(0, size);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
@@ -241,73 +323,13 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(final EntityManager entityManager, PlatformTransactionManager theTxManager, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
-
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 
-		TransactionTemplate txTemplate = new TransactionTemplate(theTxManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				entityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null").executeUpdate();
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SearchParam.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ForcedId.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SearchResult.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + TermConcept.class.getSimpleName() + " d").executeUpdate();
-				for (TermCodeSystem next : entityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
-					next.setCurrentVersion(null);
-					entityManager.merge(next);
-				}
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
-		});
-		txTemplate.execute(new TransactionCallback<Void>() {
-			@Override
-			public Void doInTransaction(TransactionStatus theStatus) {
-				entityManager.createQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d").executeUpdate();
-				entityManager.createQuery("DELETE from " + Search.class.getSimpleName() + " d").executeUpdate();
-				return null;
-			}
-		});
+		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
+		theDaoConfig.setExpungeEnabled(true);
+		theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+		theDaoConfig.setExpungeEnabled(expungeEnabled);
 
 		theSearchParamPresenceSvc.flushCachesForUnitTest();
 		theSearchParamRegistry.forceRefresh();

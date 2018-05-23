@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,11 +53,11 @@ public enum MedicationRequestStatus {
          */
         COMPLETED, 
         /**
-         * The prescription was entered in error.
+         * Some of the actions that are implied by the medication request may have occurred.  For example, the medication may have been dispensed and the patient may have taken some of the medication.  Clinical decision support systems should take this status into account
          */
         ENTEREDINERROR, 
         /**
-         * Actions implied by the prescription are to be permanently halted, before all of the administrations occurred.
+         * Actions implied by the prescription are to be permanently halted, before all of the administrations occurred. This should not be used if the original order was entered in error
          */
         STOPPED, 
         /**
@@ -115,8 +115,8 @@ public enum MedicationRequestStatus {
             case ONHOLD: return "Actions implied by the prescription are to be temporarily halted, but are expected to continue later.  May also be called \"suspended\".";
             case CANCELLED: return "The prescription has been withdrawn before any administrations have occurred";
             case COMPLETED: return "All actions that are implied by the prescription have occurred.";
-            case ENTEREDINERROR: return "The prescription was entered in error.";
-            case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of the administrations occurred.";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication request may have occurred.  For example, the medication may have been dispensed and the patient may have taken some of the medication.  Clinical decision support systems should take this status into account";
+            case STOPPED: return "Actions implied by the prescription are to be permanently halted, before all of the administrations occurred. This should not be used if the original order was entered in error";
             case DRAFT: return "The prescription is not yet 'actionable', i.e. it is a work in progress, requires sign-off or verification, and needs to be run through decision support process.";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request";
             default: return "?";

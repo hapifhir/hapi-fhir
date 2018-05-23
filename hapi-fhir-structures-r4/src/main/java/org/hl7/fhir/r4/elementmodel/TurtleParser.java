@@ -43,7 +43,7 @@ public class TurtleParser extends ParserBase {
     super(context);
   }
   @Override
-  public Element parse(InputStream input) throws IOException, FHIRFormatError, DefinitionException {
+  public Element parse(InputStream input) throws IOException, FHIRException {
     Turtle src = new Turtle();
     if (policy == ValidationPolicy.EVERYTHING) {
       try {
@@ -59,7 +59,7 @@ public class TurtleParser extends ParserBase {
     } 
   }
   
-  private Element parse(Turtle src) throws FHIRFormatError, DefinitionException {
+  private Element parse(Turtle src) throws FHIRException {
     // we actually ignore the stated URL here
     for (TTLComplex cmp : src.getObjects().values()) {
       for (String p : cmp.getPredicates().keySet()) {
@@ -78,7 +78,7 @@ public class TurtleParser extends ParserBase {
     } 
   }
   
-  private Element parse(Turtle src, TTLComplex cmp) throws FHIRFormatError, DefinitionException {
+  private Element parse(Turtle src, TTLComplex cmp) throws FHIRException {
     TTLObject type = cmp.getPredicates().get("http://www.w3.org/2000/01/rdf-schema#type");
     if (type == null) {
       logError(cmp.getLine(), cmp.getCol(), "(document)", IssueType.INVALID, "Unknown resource type (missing rdfs:type)", IssueSeverity.FATAL);
@@ -114,7 +114,7 @@ public class TurtleParser extends ParserBase {
     return result;  
   }
   
-  private void parseChildren(Turtle src, String path, TTLComplex object, Element context, boolean primitive) throws FHIRFormatError, DefinitionException {
+  private void parseChildren(Turtle src, String path, TTLComplex object, Element context, boolean primitive) throws FHIRException {
 
     List<Property> properties = context.getProperty().getChildProperties(context.getName(), null);
     Set<String> processed = new HashSet<String>();
@@ -145,7 +145,7 @@ public class TurtleParser extends ParserBase {
     }
   }
   
-  private void parseChild(Turtle src, TTLComplex object, Element context, Set<String> processed, Property property, String path, String name) throws FHIRFormatError, DefinitionException {
+  private void parseChild(Turtle src, TTLComplex object, Element context, Set<String> processed, Property property, String path, String name) throws FHIRException {
     processed.add(name);
     String npath = path+"/"+property.getName();
     TTLObject e = object.getPredicates().get(FHIR_URI_BASE + name);
@@ -161,7 +161,7 @@ public class TurtleParser extends ParserBase {
     }
   }
 
-  private void parseChildInstance(Turtle src, String npath, TTLComplex object, Element context, Property property, String name, TTLObject e) throws FHIRFormatError, DefinitionException {
+  private void parseChildInstance(Turtle src, String npath, TTLComplex object, Element context, Property property, String name, TTLObject e) throws FHIRException {
     if (property.isResource())
       parseResource(src, npath, object, context, property, name, e);
     else  if (e instanceof TTLComplex) {
@@ -192,7 +192,7 @@ public class TurtleParser extends ParserBase {
     return name.substring(name.lastIndexOf(".")+1);
   }
 
-  private void parseResource(Turtle src, String npath, TTLComplex object, Element context, Property property, String name, TTLObject e) throws FHIRFormatError, DefinitionException {
+  private void parseResource(Turtle src, String npath, TTLComplex object, Element context, Property property, String name, TTLObject e) throws FHIRException {
     TTLComplex obj;
     if (e instanceof TTLComplex) 
       obj = (TTLComplex) e;
@@ -322,6 +322,12 @@ public class TurtleParser extends ParserBase {
       t.linkedPredicate("fhir:link", refURI, linkResolver == null ? null : linkResolver.resolvePage("rdf.html#reference"));
   }
   
+  protected void decorateCanonical(Complex t, Element canonical) {
+    String refURI = getReferenceURI(canonical.primitiveValue());
+    if(refURI != null)
+      t.linkedPredicate("fhir:link", refURI, linkResolver == null ? null : linkResolver.resolvePage("rdf.html#reference"));
+  }
+  
   private String genSubjectId(Element e) {
     String id = e.getChildValue("id");
     if (base == null || id == null)
@@ -365,9 +371,20 @@ public class TurtleParser extends ParserBase {
 
 	  if ("Coding".equals(element.getType()))
 	  	decorateCoding(t, element, section);
-    if ("Reference".equals(element.getType()))
+    if (Utilities.existsInList(element.getType(), "Reference"))
       decorateReference(t, element);
+    else if (Utilities.existsInList(element.getType(), "canonical"))
+      decorateCanonical(t, element);
 	  		
+    if("canonical".equals(element.getType())) {
+      String refURI = element.primitiveValue();
+      if (refURI != null) {
+        String uriType = getURIType(refURI);
+        if(uriType != null && !section.hasSubject(refURI))
+          section.triple(refURI, "a", "fhir:" + uriType);
+      }
+    }
+
     if("Reference".equals(element.getType())) {
       String refURI = getReferenceURI(element.getChildValue("reference"));
       if (refURI != null) {

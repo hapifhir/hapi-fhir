@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.
  */
 @ResourceDef(name="StructureDefinition", profile="http://hl7.org/fhir/Profile/StructureDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "keyword", "fhirVersion", "mapping", "kind", "abstract", "contextType", "context", "contextInvariant", "type", "baseDefinition", "derivation", "snapshot", "differential"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "keyword", "fhirVersion", "mapping", "kind", "abstract", "context", "contextInvariant", "type", "baseDefinition", "derivation", "snapshot", "differential"})
 public class StructureDefinition extends MetadataResource {
 
     public enum StructureDefinitionKind {
@@ -174,110 +174,110 @@ public class StructureDefinition extends MetadataResource {
       }
     }
 
-    public enum ExtensionContext {
+    public enum ExtensionContextType {
         /**
-         * The context is all elements matching a particular resource element path.
+         * The context is all elements that match the FHIRPath query found in the expression.
          */
-        RESOURCE, 
+        FHIRPATH, 
         /**
-         * The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).
+         * The context is any element that has an ElementDefinition.id that matches that found in the expression. This includes ElementDefinition Ids that have slicing identifiers. The full path for the element is [url]#[elementid]. If there is no #, the Element id is one defined in the base specification
          */
-        DATATYPE, 
+        ELEMENT, 
         /**
-         * The context is a particular extension from a particular profile, a uri that identifies the extension definition.
+         * The context is a particular extension from a particular profile, and the expression is just a uri that identifies the extension
          */
         EXTENSION, 
         /**
          * added to help the parsers with the generic types
          */
         NULL;
-        public static ExtensionContext fromCode(String codeString) throws FHIRException {
+        public static ExtensionContextType fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("resource".equals(codeString))
-          return RESOURCE;
-        if ("datatype".equals(codeString))
-          return DATATYPE;
+        if ("fhirpath".equals(codeString))
+          return FHIRPATH;
+        if ("element".equals(codeString))
+          return ELEMENT;
         if ("extension".equals(codeString))
           return EXTENSION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
-          throw new FHIRException("Unknown ExtensionContext code '"+codeString+"'");
+          throw new FHIRException("Unknown ExtensionContextType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case RESOURCE: return "resource";
-            case DATATYPE: return "datatype";
+            case FHIRPATH: return "fhirpath";
+            case ELEMENT: return "element";
             case EXTENSION: return "extension";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case RESOURCE: return "http://hl7.org/fhir/extension-context";
-            case DATATYPE: return "http://hl7.org/fhir/extension-context";
-            case EXTENSION: return "http://hl7.org/fhir/extension-context";
+            case FHIRPATH: return "http://hl7.org/fhir/extension-context-type";
+            case ELEMENT: return "http://hl7.org/fhir/extension-context-type";
+            case EXTENSION: return "http://hl7.org/fhir/extension-context-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case RESOURCE: return "The context is all elements matching a particular resource element path.";
-            case DATATYPE: return "The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).";
-            case EXTENSION: return "The context is a particular extension from a particular profile, a uri that identifies the extension definition.";
+            case FHIRPATH: return "The context is all elements that match the FHIRPath query found in the expression.";
+            case ELEMENT: return "The context is any element that has an ElementDefinition.id that matches that found in the expression. This includes ElementDefinition Ids that have slicing identifiers. The full path for the element is [url]#[elementid]. If there is no #, the Element id is one defined in the base specification";
+            case EXTENSION: return "The context is a particular extension from a particular profile, and the expression is just a uri that identifies the extension";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case RESOURCE: return "Resource";
-            case DATATYPE: return "Datatype";
-            case EXTENSION: return "Extension";
+            case FHIRPATH: return "FHIRPath";
+            case ELEMENT: return "Element ID";
+            case EXTENSION: return "Extension URL";
             default: return "?";
           }
         }
     }
 
-  public static class ExtensionContextEnumFactory implements EnumFactory<ExtensionContext> {
-    public ExtensionContext fromCode(String codeString) throws IllegalArgumentException {
+  public static class ExtensionContextTypeEnumFactory implements EnumFactory<ExtensionContextType> {
+    public ExtensionContextType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("resource".equals(codeString))
-          return ExtensionContext.RESOURCE;
-        if ("datatype".equals(codeString))
-          return ExtensionContext.DATATYPE;
+        if ("fhirpath".equals(codeString))
+          return ExtensionContextType.FHIRPATH;
+        if ("element".equals(codeString))
+          return ExtensionContextType.ELEMENT;
         if ("extension".equals(codeString))
-          return ExtensionContext.EXTENSION;
-        throw new IllegalArgumentException("Unknown ExtensionContext code '"+codeString+"'");
+          return ExtensionContextType.EXTENSION;
+        throw new IllegalArgumentException("Unknown ExtensionContextType code '"+codeString+"'");
         }
-        public Enumeration<ExtensionContext> fromType(Base code) throws FHIRException {
+        public Enumeration<ExtensionContextType> fromType(Base code) throws FHIRException {
           if (code == null)
             return null;
           if (code.isEmpty())
-            return new Enumeration<ExtensionContext>(this);
+            return new Enumeration<ExtensionContextType>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("resource".equals(codeString))
-          return new Enumeration<ExtensionContext>(this, ExtensionContext.RESOURCE);
-        if ("datatype".equals(codeString))
-          return new Enumeration<ExtensionContext>(this, ExtensionContext.DATATYPE);
+        if ("fhirpath".equals(codeString))
+          return new Enumeration<ExtensionContextType>(this, ExtensionContextType.FHIRPATH);
+        if ("element".equals(codeString))
+          return new Enumeration<ExtensionContextType>(this, ExtensionContextType.ELEMENT);
         if ("extension".equals(codeString))
-          return new Enumeration<ExtensionContext>(this, ExtensionContext.EXTENSION);
-        throw new FHIRException("Unknown ExtensionContext code '"+codeString+"'");
+          return new Enumeration<ExtensionContextType>(this, ExtensionContextType.EXTENSION);
+        throw new FHIRException("Unknown ExtensionContextType code '"+codeString+"'");
         }
-    public String toCode(ExtensionContext code) {
-      if (code == ExtensionContext.RESOURCE)
-        return "resource";
-      if (code == ExtensionContext.DATATYPE)
-        return "datatype";
-      if (code == ExtensionContext.EXTENSION)
+    public String toCode(ExtensionContextType code) {
+      if (code == ExtensionContextType.FHIRPATH)
+        return "fhirpath";
+      if (code == ExtensionContextType.ELEMENT)
+        return "element";
+      if (code == ExtensionContextType.EXTENSION)
         return "extension";
       return "?";
       }
-    public String toSystem(ExtensionContext code) {
+    public String toSystem(ExtensionContextType code) {
       return code.getSystem();
       }
     }
@@ -767,6 +767,255 @@ public class StructureDefinition extends MetadataResource {
   }
 
     @Block()
+    public static class StructureDefinitionContextComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Defines how to interpret the expression that defines what the context of the extension is.
+         */
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="fhirpath | element | extension", formalDefinition="Defines how to interpret the expression that defines what the context of the extension is." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/extension-context-type")
+        protected Enumeration<ExtensionContextType> type;
+
+        /**
+         * An expression that defines where an extension can be used in resources.
+         */
+        @Child(name = "expression", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Where the extension can be used in instances", formalDefinition="An expression that defines where an extension can be used in resources." )
+        protected StringType expression;
+
+        private static final long serialVersionUID = 1958074856L;
+
+    /**
+     * Constructor
+     */
+      public StructureDefinitionContextComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public StructureDefinitionContextComponent(Enumeration<ExtensionContextType> type, StringType expression) {
+        super();
+        this.type = type;
+        this.expression = expression;
+      }
+
+        /**
+         * @return {@link #type} (Defines how to interpret the expression that defines what the context of the extension is.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         */
+        public Enumeration<ExtensionContextType> getTypeElement() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StructureDefinitionContextComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new Enumeration<ExtensionContextType>(new ExtensionContextTypeEnumFactory()); // bb
+          return this.type;
+        }
+
+        public boolean hasTypeElement() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (Defines how to interpret the expression that defines what the context of the extension is.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         */
+        public StructureDefinitionContextComponent setTypeElement(Enumeration<ExtensionContextType> value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return Defines how to interpret the expression that defines what the context of the extension is.
+         */
+        public ExtensionContextType getType() { 
+          return this.type == null ? null : this.type.getValue();
+        }
+
+        /**
+         * @param value Defines how to interpret the expression that defines what the context of the extension is.
+         */
+        public StructureDefinitionContextComponent setType(ExtensionContextType value) { 
+            if (this.type == null)
+              this.type = new Enumeration<ExtensionContextType>(new ExtensionContextTypeEnumFactory());
+            this.type.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #expression} (An expression that defines where an extension can be used in resources.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public StringType getExpressionElement() { 
+          if (this.expression == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StructureDefinitionContextComponent.expression");
+            else if (Configuration.doAutoCreate())
+              this.expression = new StringType(); // bb
+          return this.expression;
+        }
+
+        public boolean hasExpressionElement() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        public boolean hasExpression() { 
+          return this.expression != null && !this.expression.isEmpty();
+        }
+
+        /**
+         * @param value {@link #expression} (An expression that defines where an extension can be used in resources.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         */
+        public StructureDefinitionContextComponent setExpressionElement(StringType value) { 
+          this.expression = value;
+          return this;
+        }
+
+        /**
+         * @return An expression that defines where an extension can be used in resources.
+         */
+        public String getExpression() { 
+          return this.expression == null ? null : this.expression.getValue();
+        }
+
+        /**
+         * @param value An expression that defines where an extension can be used in resources.
+         */
+        public StructureDefinitionContextComponent setExpression(String value) { 
+            if (this.expression == null)
+              this.expression = new StringType();
+            this.expression.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "Defines how to interpret the expression that defines what the context of the extension is.", 0, 1, type));
+          children.add(new Property("expression", "string", "An expression that defines where an extension can be used in resources.", 0, 1, expression));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "Defines how to interpret the expression that defines what the context of the extension is.", 0, 1, type);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "An expression that defines where an extension can be used in resources.", 0, 1, expression);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<ExtensionContextType>
+        case -1795452264: /*expression*/ return this.expression == null ? new Base[0] : new Base[] {this.expression}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3575610: // type
+          value = new ExtensionContextTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<ExtensionContextType>
+          return value;
+        case -1795452264: // expression
+          this.expression = castToString(value); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("type")) {
+          value = new ExtensionContextTypeEnumFactory().fromType(castToCode(value));
+          this.type = (Enumeration) value; // Enumeration<ExtensionContextType>
+        } else if (name.equals("expression")) {
+          this.expression = castToString(value); // StringType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610:  return getTypeElement();
+        case -1795452264:  return getExpressionElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3575610: /*type*/ return new String[] {"code"};
+        case -1795452264: /*expression*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("type")) {
+          throw new FHIRException("Cannot call addChild on a primitive type StructureDefinition.type");
+        }
+        else if (name.equals("expression")) {
+          throw new FHIRException("Cannot call addChild on a primitive type StructureDefinition.expression");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public StructureDefinitionContextComponent copy() {
+        StructureDefinitionContextComponent dst = new StructureDefinitionContextComponent();
+        copyValues(dst);
+        dst.type = type == null ? null : type.copy();
+        dst.expression = expression == null ? null : expression.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof StructureDefinitionContextComponent))
+          return false;
+        StructureDefinitionContextComponent o = (StructureDefinitionContextComponent) other_;
+        return compareDeep(type, o.type, true) && compareDeep(expression, o.expression, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof StructureDefinitionContextComponent))
+          return false;
+        StructureDefinitionContextComponent o = (StructureDefinitionContextComponent) other_;
+        return compareValues(type, o.type, true) && compareValues(expression, o.expression, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, expression);
+      }
+
+  public String fhirType() {
+    return "StructureDefinition.context";
+
+  }
+
+  }
+
+    @Block()
     public static class StructureDefinitionSnapshotComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Captures constraints on each element within the resource.
@@ -1140,10 +1389,10 @@ public class StructureDefinition extends MetadataResource {
     protected List<Identifier> identifier;
 
     /**
-     * Explaination of why this structure definition is needed and why it has been designed as it has.
+     * Explanation of why this structure definition is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this structure definition is defined", formalDefinition="Explaination of why this structure definition is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this structure definition is defined", formalDefinition="Explanation of why this structure definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -1162,10 +1411,10 @@ public class StructureDefinition extends MetadataResource {
     protected List<Coding> keyword;
 
     /**
-     * The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.
+     * The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.
      */
     @Child(name = "fhirVersion", type = {IdType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version this StructureDefinition targets", formalDefinition="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version." )
+    @Description(shortDefinition="FHIR Version this StructureDefinition targets", formalDefinition="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fhir-versions")
     protected IdType fhirVersion;
 
@@ -1192,65 +1441,57 @@ public class StructureDefinition extends MetadataResource {
     protected BooleanType abstract_;
 
     /**
-     * If this is an extension, Identifies the context within FHIR resources where the extension can be used.
-     */
-    @Child(name = "contextType", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="resource | datatype | extension", formalDefinition="If this is an extension, Identifies the context within FHIR resources where the extension can be used." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/extension-context")
-    protected Enumeration<ExtensionContext> contextType;
-
-    /**
      * Identifies the types of resource or data type elements to which the extension can be applied.
      */
-    @Child(name = "context", type = {StringType.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Where the extension can be used in instances", formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied." )
-    protected List<StringType> context;
+    @Child(name = "context", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="If an extension, where it can be used in instances", formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied." )
+    protected List<StructureDefinitionContextComponent> context;
 
     /**
-     * A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).
+     * A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.
      */
-    @Child(name = "contextInvariant", type = {StringType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="FHIRPath invariants - when the extension can be used", formalDefinition="A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension)." )
+    @Child(name = "contextInvariant", type = {StringType.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="FHIRPath invariants - when the extension can be used", formalDefinition="A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true." )
     protected List<StringType> contextInvariant;
 
     /**
-     * The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).
+     * The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. "string" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.
      */
-    @Child(name = "type", type = {CodeType.class}, order=11, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Type defined or constrained by this structure", formalDefinition="The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type)." )
+    @Child(name = "type", type = {UriType.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Type defined or constrained by this structure", formalDefinition="The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. \"string\" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/defined-types")
-    protected CodeType type;
+    protected UriType type;
 
     /**
      * An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.
      */
-    @Child(name = "baseDefinition", type = {UriType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "baseDefinition", type = {CanonicalType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Definition that this type is constrained/specialized from", formalDefinition="An absolute URI that is the base structure from which this type is derived, either by specialization or constraint." )
-    protected UriType baseDefinition;
+    protected CanonicalType baseDefinition;
 
     /**
      * How the type relates to the baseDefinition.
      */
-    @Child(name = "derivation", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "derivation", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="specialization | constraint - How relates to base definition", formalDefinition="How the type relates to the baseDefinition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/type-derivation-rule")
     protected Enumeration<TypeDerivationRule> derivation;
 
     /**
-     * A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.
+     * A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition.
      */
-    @Child(name = "snapshot", type = {}, order=14, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Snapshot view of the structure", formalDefinition="A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition." )
+    @Child(name = "snapshot", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Snapshot view of the structure", formalDefinition="A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition." )
     protected StructureDefinitionSnapshotComponent snapshot;
 
     /**
      * A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.
      */
-    @Child(name = "differential", type = {}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "differential", type = {}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Differential view of the structure", formalDefinition="A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies." )
     protected StructureDefinitionDifferentialComponent differential;
 
-    private static final long serialVersionUID = -1511739381L;
+    private static final long serialVersionUID = -68406827L;
 
   /**
    * Constructor
@@ -1262,7 +1503,7 @@ public class StructureDefinition extends MetadataResource {
   /**
    * Constructor
    */
-    public StructureDefinition(UriType url, StringType name, Enumeration<PublicationStatus> status, Enumeration<StructureDefinitionKind> kind, BooleanType abstract_, CodeType type) {
+    public StructureDefinition(UriType url, StringType name, Enumeration<PublicationStatus> status, Enumeration<StructureDefinitionKind> kind, BooleanType abstract_, UriType type) {
       super();
       this.url = url;
       this.name = name;
@@ -1273,7 +1514,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this structure definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this structure definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1293,7 +1534,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this structure definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this structure definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public StructureDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1301,14 +1542,14 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this structure definition is (or will be) published.
+     * @return An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this structure definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this structure definition is (or will be) published.
+     * @param value An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this structure definition is (or will be) published.
      */
     public StructureDefinition setUrl(String value) { 
         if (this.url == null)
@@ -1559,7 +1800,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1579,7 +1820,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public StructureDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1587,14 +1828,14 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public StructureDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1604,7 +1845,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the structure definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the structure definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1624,7 +1865,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the structure definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the structure definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public StructureDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1632,14 +1873,14 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the structure definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.
+     * @return The date  (and optionally time) when the structure definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the structure definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.
+     * @param value The date  (and optionally time) when the structure definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.
      */
     public StructureDefinition setDate(Date value) { 
       if (value == null)
@@ -1653,7 +1894,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the structure definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the structure definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -1673,7 +1914,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the structure definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the structure definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StructureDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -1681,14 +1922,14 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the structure definition.
+     * @return The name of the organization or individual that published the structure definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the structure definition.
+     * @param value The name of the organization or individual that published the structure definition.
      */
     public StructureDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -1910,7 +2151,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this structure definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this structure definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -1930,7 +2171,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this structure definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this structure definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public StructureDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -1938,14 +2179,14 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return Explaination of why this structure definition is needed and why it has been designed as it has.
+     * @return Explanation of why this structure definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this structure definition is needed and why it has been designed as it has.
+     * @param value Explanation of why this structure definition is needed and why it has been designed as it has.
      */
     public StructureDefinition setPurpose(String value) { 
       if (value == null)
@@ -2061,7 +2302,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public IdType getFhirVersionElement() { 
       if (this.fhirVersion == null)
@@ -2081,7 +2322,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public StructureDefinition setFhirVersionElement(IdType value) { 
       this.fhirVersion = value;
@@ -2089,14 +2330,14 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.
+     * @return The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.
      */
     public String getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.
+     * @param value The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.
      */
     public StructureDefinition setFhirVersion(String value) { 
       if (Utilities.noString(value))
@@ -2253,67 +2494,18 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #contextType} (If this is an extension, Identifies the context within FHIR resources where the extension can be used.). This is the underlying object with id, value and extensions. The accessor "getContextType" gives direct access to the value
-     */
-    public Enumeration<ExtensionContext> getContextTypeElement() { 
-      if (this.contextType == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureDefinition.contextType");
-        else if (Configuration.doAutoCreate())
-          this.contextType = new Enumeration<ExtensionContext>(new ExtensionContextEnumFactory()); // bb
-      return this.contextType;
-    }
-
-    public boolean hasContextTypeElement() { 
-      return this.contextType != null && !this.contextType.isEmpty();
-    }
-
-    public boolean hasContextType() { 
-      return this.contextType != null && !this.contextType.isEmpty();
-    }
-
-    /**
-     * @param value {@link #contextType} (If this is an extension, Identifies the context within FHIR resources where the extension can be used.). This is the underlying object with id, value and extensions. The accessor "getContextType" gives direct access to the value
-     */
-    public StructureDefinition setContextTypeElement(Enumeration<ExtensionContext> value) { 
-      this.contextType = value;
-      return this;
-    }
-
-    /**
-     * @return If this is an extension, Identifies the context within FHIR resources where the extension can be used.
-     */
-    public ExtensionContext getContextType() { 
-      return this.contextType == null ? null : this.contextType.getValue();
-    }
-
-    /**
-     * @param value If this is an extension, Identifies the context within FHIR resources where the extension can be used.
-     */
-    public StructureDefinition setContextType(ExtensionContext value) { 
-      if (value == null)
-        this.contextType = null;
-      else {
-        if (this.contextType == null)
-          this.contextType = new Enumeration<ExtensionContext>(new ExtensionContextEnumFactory());
-        this.contextType.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #context} (Identifies the types of resource or data type elements to which the extension can be applied.)
      */
-    public List<StringType> getContext() { 
+    public List<StructureDefinitionContextComponent> getContext() { 
       if (this.context == null)
-        this.context = new ArrayList<StringType>();
+        this.context = new ArrayList<StructureDefinitionContextComponent>();
       return this.context;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public StructureDefinition setContext(List<StringType> theContext) { 
+    public StructureDefinition setContext(List<StructureDefinitionContextComponent> theContext) { 
       this.context = theContext;
       return this;
     }
@@ -2321,49 +2513,41 @@ public class StructureDefinition extends MetadataResource {
     public boolean hasContext() { 
       if (this.context == null)
         return false;
-      for (StringType item : this.context)
+      for (StructureDefinitionContextComponent item : this.context)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    /**
-     * @return {@link #context} (Identifies the types of resource or data type elements to which the extension can be applied.)
-     */
-    public StringType addContextElement() {//2 
-      StringType t = new StringType();
+    public StructureDefinitionContextComponent addContext() { //3
+      StructureDefinitionContextComponent t = new StructureDefinitionContextComponent();
       if (this.context == null)
-        this.context = new ArrayList<StringType>();
+        this.context = new ArrayList<StructureDefinitionContextComponent>();
       this.context.add(t);
       return t;
     }
 
-    /**
-     * @param value {@link #context} (Identifies the types of resource or data type elements to which the extension can be applied.)
-     */
-    public StructureDefinition addContext(String value) { //1
-      StringType t = new StringType();
-      t.setValue(value);
+    public StructureDefinition addContext(StructureDefinitionContextComponent t) { //3
+      if (t == null)
+        return this;
       if (this.context == null)
-        this.context = new ArrayList<StringType>();
+        this.context = new ArrayList<StructureDefinitionContextComponent>();
       this.context.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #context} (Identifies the types of resource or data type elements to which the extension can be applied.)
+     * @return The first repetition of repeating field {@link #context}, creating it if it does not already exist
      */
-    public boolean hasContext(String value) { 
-      if (this.context == null)
-        return false;
-      for (StringType v : this.context)
-        if (v.equals(value)) // string
-          return true;
-      return false;
+    public StructureDefinitionContextComponent getContextFirstRep() { 
+      if (getContext().isEmpty()) {
+        addContext();
+      }
+      return getContext().get(0);
     }
 
     /**
-     * @return {@link #contextInvariant} (A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).)
+     * @return {@link #contextInvariant} (A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.)
      */
     public List<StringType> getContextInvariant() { 
       if (this.contextInvariant == null)
@@ -2389,7 +2573,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #contextInvariant} (A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).)
+     * @return {@link #contextInvariant} (A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.)
      */
     public StringType addContextInvariantElement() {//2 
       StringType t = new StringType();
@@ -2400,7 +2584,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #contextInvariant} (A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).)
+     * @param value {@link #contextInvariant} (A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.)
      */
     public StructureDefinition addContextInvariant(String value) { //1
       StringType t = new StringType();
@@ -2412,26 +2596,26 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #contextInvariant} (A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).)
+     * @param value {@link #contextInvariant} (A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.)
      */
     public boolean hasContextInvariant(String value) { 
       if (this.contextInvariant == null)
         return false;
       for (StringType v : this.contextInvariant)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
 
     /**
-     * @return {@link #type} (The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #type} (The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. "string" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public CodeType getTypeElement() { 
+    public UriType getTypeElement() { 
       if (this.type == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create StructureDefinition.type");
         else if (Configuration.doAutoCreate())
-          this.type = new CodeType(); // bb
+          this.type = new UriType(); // bb
       return this.type;
     }
 
@@ -2444,26 +2628,26 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #type} (The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. "string" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public StructureDefinition setTypeElement(CodeType value) { 
+    public StructureDefinition setTypeElement(UriType value) { 
       this.type = value;
       return this;
     }
 
     /**
-     * @return The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).
+     * @return The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. "string" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.
      */
     public String getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).
+     * @param value The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. "string" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.
      */
     public StructureDefinition setType(String value) { 
         if (this.type == null)
-          this.type = new CodeType();
+          this.type = new UriType();
         this.type.setValue(value);
       return this;
     }
@@ -2471,12 +2655,12 @@ public class StructureDefinition extends MetadataResource {
     /**
      * @return {@link #baseDefinition} (An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.). This is the underlying object with id, value and extensions. The accessor "getBaseDefinition" gives direct access to the value
      */
-    public UriType getBaseDefinitionElement() { 
+    public CanonicalType getBaseDefinitionElement() { 
       if (this.baseDefinition == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create StructureDefinition.baseDefinition");
         else if (Configuration.doAutoCreate())
-          this.baseDefinition = new UriType(); // bb
+          this.baseDefinition = new CanonicalType(); // bb
       return this.baseDefinition;
     }
 
@@ -2491,7 +2675,7 @@ public class StructureDefinition extends MetadataResource {
     /**
      * @param value {@link #baseDefinition} (An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.). This is the underlying object with id, value and extensions. The accessor "getBaseDefinition" gives direct access to the value
      */
-    public StructureDefinition setBaseDefinitionElement(UriType value) { 
+    public StructureDefinition setBaseDefinitionElement(CanonicalType value) { 
       this.baseDefinition = value;
       return this;
     }
@@ -2511,7 +2695,7 @@ public class StructureDefinition extends MetadataResource {
         this.baseDefinition = null;
       else {
         if (this.baseDefinition == null)
-          this.baseDefinition = new UriType();
+          this.baseDefinition = new CanonicalType();
         this.baseDefinition.setValue(value);
       }
       return this;
@@ -2567,7 +2751,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #snapshot} (A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.)
+     * @return {@link #snapshot} (A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition.)
      */
     public StructureDefinitionSnapshotComponent getSnapshot() { 
       if (this.snapshot == null)
@@ -2583,7 +2767,7 @@ public class StructureDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #snapshot} (A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.)
+     * @param value {@link #snapshot} (A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition.)
      */
     public StructureDefinition setSnapshot(StructureDefinitionSnapshotComponent value) { 
       this.snapshot = value;
@@ -2616,66 +2800,64 @@ public class StructureDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this structure definition is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this structure definition is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this structure definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the structure definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the structure definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the structure definition.", 0, 1, title));
         children.add(new Property("status", "code", "The status of this structure definition. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the structure definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the structure definition.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the structure definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the structure definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the structure definition from a consumer's perspective.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the structure definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this structure definition is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this structure definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure definition.", 0, 1, copyright));
         children.add(new Property("keyword", "Coding", "A set of key words or terms from external terminologies that may be used to assist with indexing and searching of templates.", 0, java.lang.Integer.MAX_VALUE, keyword));
-        children.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.", 0, 1, fhirVersion));
+        children.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.", 0, 1, fhirVersion));
         children.add(new Property("mapping", "", "An external specification that the content is mapped to.", 0, java.lang.Integer.MAX_VALUE, mapping));
         children.add(new Property("kind", "code", "Defines the kind of structure that this definition is describing.", 0, 1, kind));
         children.add(new Property("abstract", "boolean", "Whether structure this definition describes is abstract or not  - that is, whether the structure is not intended to be instantiated. For Resources and Data types, abstract types will never be exchanged  between systems.", 0, 1, abstract_));
-        children.add(new Property("contextType", "code", "If this is an extension, Identifies the context within FHIR resources where the extension can be used.", 0, 1, contextType));
-        children.add(new Property("context", "string", "Identifies the types of resource or data type elements to which the extension can be applied.", 0, java.lang.Integer.MAX_VALUE, context));
-        children.add(new Property("contextInvariant", "string", "A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).", 0, java.lang.Integer.MAX_VALUE, contextInvariant));
-        children.add(new Property("type", "code", "The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).", 0, 1, type));
-        children.add(new Property("baseDefinition", "uri", "An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.", 0, 1, baseDefinition));
+        children.add(new Property("context", "", "Identifies the types of resource or data type elements to which the extension can be applied.", 0, java.lang.Integer.MAX_VALUE, context));
+        children.add(new Property("contextInvariant", "string", "A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.", 0, java.lang.Integer.MAX_VALUE, contextInvariant));
+        children.add(new Property("type", "uri", "The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. \"string\" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.", 0, 1, type));
+        children.add(new Property("baseDefinition", "canonical(StructureDefinition)", "An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.", 0, 1, baseDefinition));
         children.add(new Property("derivation", "code", "How the type relates to the baseDefinition.", 0, 1, derivation));
-        children.add(new Property("snapshot", "", "A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.", 0, 1, snapshot));
+        children.add(new Property("snapshot", "", "A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition.", 0, 1, snapshot));
         children.add(new Property("differential", "", "A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.", 0, 1, differential));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this structure definition is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this structure definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this structure definition is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this structure definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the structure definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the structure definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the structure definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the structure definition.", 0, 1, title);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this structure definition. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the structure definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the structure definition.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this structure definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the structure definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the structure definition changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the structure definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the structure definition from a consumer's perspective.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the structure definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this structure definition is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this structure definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure definition.", 0, 1, copyright);
         case -814408215: /*keyword*/  return new Property("keyword", "Coding", "A set of key words or terms from external terminologies that may be used to assist with indexing and searching of templates.", 0, java.lang.Integer.MAX_VALUE, keyword);
-        case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.2.0 for this version.", 0, 1, fhirVersion);
+        case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 3.4.0 for this version.", 0, 1, fhirVersion);
         case 837556430: /*mapping*/  return new Property("mapping", "", "An external specification that the content is mapped to.", 0, java.lang.Integer.MAX_VALUE, mapping);
         case 3292052: /*kind*/  return new Property("kind", "code", "Defines the kind of structure that this definition is describing.", 0, 1, kind);
         case 1732898850: /*abstract*/  return new Property("abstract", "boolean", "Whether structure this definition describes is abstract or not  - that is, whether the structure is not intended to be instantiated. For Resources and Data types, abstract types will never be exchanged  between systems.", 0, 1, abstract_);
-        case -102839927: /*contextType*/  return new Property("contextType", "code", "If this is an extension, Identifies the context within FHIR resources where the extension can be used.", 0, 1, contextType);
-        case 951530927: /*context*/  return new Property("context", "string", "Identifies the types of resource or data type elements to which the extension can be applied.", 0, java.lang.Integer.MAX_VALUE, context);
-        case -802505007: /*contextInvariant*/  return new Property("contextInvariant", "string", "A set of rules as Fluent Invariants about when the extension can be used (e.g. co-occurrence variants for the extension).", 0, java.lang.Integer.MAX_VALUE, contextInvariant);
-        case 3575610: /*type*/  return new Property("type", "code", "The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).", 0, 1, type);
-        case 1139771140: /*baseDefinition*/  return new Property("baseDefinition", "uri", "An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.", 0, 1, baseDefinition);
+        case 951530927: /*context*/  return new Property("context", "", "Identifies the types of resource or data type elements to which the extension can be applied.", 0, java.lang.Integer.MAX_VALUE, context);
+        case -802505007: /*contextInvariant*/  return new Property("contextInvariant", "string", "A set of rules as FHIRPath Invariants about when the extension can be used (e.g. co-occurrence variants for the extension). All the rules must be true.", 0, java.lang.Integer.MAX_VALUE, contextInvariant);
+        case 3575610: /*type*/  return new Property("type", "uri", "The type this structure describes. If the derivation kind is 'specialization' then this is the master definition for a type, and there is always one of these (a data type, an extension, a resource, including abstract ones). Otherwise the structure definition is a constraint on the stated type (and in this case, the type cannot be an abstract type).  References are URLs that are relative to http://hl7.org/fhir/StructureDefinition e.g. \"string\" is a reference to http://hl7.org/fhir/StructureDefinition/string. Absolute URLs are only allowed in logical models.", 0, 1, type);
+        case 1139771140: /*baseDefinition*/  return new Property("baseDefinition", "canonical(StructureDefinition)", "An absolute URI that is the base structure from which this type is derived, either by specialization or constraint.", 0, 1, baseDefinition);
         case -1353885513: /*derivation*/  return new Property("derivation", "code", "How the type relates to the baseDefinition.", 0, 1, derivation);
-        case 284874180: /*snapshot*/  return new Property("snapshot", "", "A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.", 0, 1, snapshot);
+        case 284874180: /*snapshot*/  return new Property("snapshot", "", "A snapshot view is expressed in a standalone form that can be used and interpreted without considering the base StructureDefinition.", 0, 1, snapshot);
         case -1196150917: /*differential*/  return new Property("differential", "", "A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.", 0, 1, differential);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2705,11 +2887,10 @@ public class StructureDefinition extends MetadataResource {
         case 837556430: /*mapping*/ return this.mapping == null ? new Base[0] : this.mapping.toArray(new Base[this.mapping.size()]); // StructureDefinitionMappingComponent
         case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<StructureDefinitionKind>
         case 1732898850: /*abstract*/ return this.abstract_ == null ? new Base[0] : new Base[] {this.abstract_}; // BooleanType
-        case -102839927: /*contextType*/ return this.contextType == null ? new Base[0] : new Base[] {this.contextType}; // Enumeration<ExtensionContext>
-        case 951530927: /*context*/ return this.context == null ? new Base[0] : this.context.toArray(new Base[this.context.size()]); // StringType
+        case 951530927: /*context*/ return this.context == null ? new Base[0] : this.context.toArray(new Base[this.context.size()]); // StructureDefinitionContextComponent
         case -802505007: /*contextInvariant*/ return this.contextInvariant == null ? new Base[0] : this.contextInvariant.toArray(new Base[this.contextInvariant.size()]); // StringType
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case 1139771140: /*baseDefinition*/ return this.baseDefinition == null ? new Base[0] : new Base[] {this.baseDefinition}; // UriType
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // UriType
+        case 1139771140: /*baseDefinition*/ return this.baseDefinition == null ? new Base[0] : new Base[] {this.baseDefinition}; // CanonicalType
         case -1353885513: /*derivation*/ return this.derivation == null ? new Base[0] : new Base[] {this.derivation}; // Enumeration<TypeDerivationRule>
         case 284874180: /*snapshot*/ return this.snapshot == null ? new Base[0] : new Base[] {this.snapshot}; // StructureDefinitionSnapshotComponent
         case -1196150917: /*differential*/ return this.differential == null ? new Base[0] : new Base[] {this.differential}; // StructureDefinitionDifferentialComponent
@@ -2783,21 +2964,17 @@ public class StructureDefinition extends MetadataResource {
         case 1732898850: // abstract
           this.abstract_ = castToBoolean(value); // BooleanType
           return value;
-        case -102839927: // contextType
-          value = new ExtensionContextEnumFactory().fromType(castToCode(value));
-          this.contextType = (Enumeration) value; // Enumeration<ExtensionContext>
-          return value;
         case 951530927: // context
-          this.getContext().add(castToString(value)); // StringType
+          this.getContext().add((StructureDefinitionContextComponent) value); // StructureDefinitionContextComponent
           return value;
         case -802505007: // contextInvariant
           this.getContextInvariant().add(castToString(value)); // StringType
           return value;
         case 3575610: // type
-          this.type = castToCode(value); // CodeType
+          this.type = castToUri(value); // UriType
           return value;
         case 1139771140: // baseDefinition
-          this.baseDefinition = castToUri(value); // UriType
+          this.baseDefinition = castToCanonical(value); // CanonicalType
           return value;
         case -1353885513: // derivation
           value = new TypeDerivationRuleEnumFactory().fromType(castToCode(value));
@@ -2858,17 +3035,14 @@ public class StructureDefinition extends MetadataResource {
           this.kind = (Enumeration) value; // Enumeration<StructureDefinitionKind>
         } else if (name.equals("abstract")) {
           this.abstract_ = castToBoolean(value); // BooleanType
-        } else if (name.equals("contextType")) {
-          value = new ExtensionContextEnumFactory().fromType(castToCode(value));
-          this.contextType = (Enumeration) value; // Enumeration<ExtensionContext>
         } else if (name.equals("context")) {
-          this.getContext().add(castToString(value));
+          this.getContext().add((StructureDefinitionContextComponent) value);
         } else if (name.equals("contextInvariant")) {
           this.getContextInvariant().add(castToString(value));
         } else if (name.equals("type")) {
-          this.type = castToCode(value); // CodeType
+          this.type = castToUri(value); // UriType
         } else if (name.equals("baseDefinition")) {
-          this.baseDefinition = castToUri(value); // UriType
+          this.baseDefinition = castToCanonical(value); // CanonicalType
         } else if (name.equals("derivation")) {
           value = new TypeDerivationRuleEnumFactory().fromType(castToCode(value));
           this.derivation = (Enumeration) value; // Enumeration<TypeDerivationRule>
@@ -2904,8 +3078,7 @@ public class StructureDefinition extends MetadataResource {
         case 837556430:  return addMapping(); 
         case 3292052:  return getKindElement();
         case 1732898850:  return getAbstractElement();
-        case -102839927:  return getContextTypeElement();
-        case 951530927:  return addContextElement();
+        case 951530927:  return addContext(); 
         case -802505007:  return addContextInvariantElement();
         case 3575610:  return getTypeElement();
         case 1139771140:  return getBaseDefinitionElement();
@@ -2940,11 +3113,10 @@ public class StructureDefinition extends MetadataResource {
         case 837556430: /*mapping*/ return new String[] {};
         case 3292052: /*kind*/ return new String[] {"code"};
         case 1732898850: /*abstract*/ return new String[] {"boolean"};
-        case -102839927: /*contextType*/ return new String[] {"code"};
-        case 951530927: /*context*/ return new String[] {"string"};
+        case 951530927: /*context*/ return new String[] {};
         case -802505007: /*contextInvariant*/ return new String[] {"string"};
-        case 3575610: /*type*/ return new String[] {"code"};
-        case 1139771140: /*baseDefinition*/ return new String[] {"uri"};
+        case 3575610: /*type*/ return new String[] {"uri"};
+        case 1139771140: /*baseDefinition*/ return new String[] {"canonical"};
         case -1353885513: /*derivation*/ return new String[] {"code"};
         case 284874180: /*snapshot*/ return new String[] {};
         case -1196150917: /*differential*/ return new String[] {};
@@ -3015,11 +3187,8 @@ public class StructureDefinition extends MetadataResource {
         else if (name.equals("abstract")) {
           throw new FHIRException("Cannot call addChild on a primitive type StructureDefinition.abstract");
         }
-        else if (name.equals("contextType")) {
-          throw new FHIRException("Cannot call addChild on a primitive type StructureDefinition.contextType");
-        }
         else if (name.equals("context")) {
-          throw new FHIRException("Cannot call addChild on a primitive type StructureDefinition.context");
+          return addContext();
         }
         else if (name.equals("contextInvariant")) {
           throw new FHIRException("Cannot call addChild on a primitive type StructureDefinition.contextInvariant");
@@ -3097,10 +3266,9 @@ public class StructureDefinition extends MetadataResource {
         };
         dst.kind = kind == null ? null : kind.copy();
         dst.abstract_ = abstract_ == null ? null : abstract_.copy();
-        dst.contextType = contextType == null ? null : contextType.copy();
         if (context != null) {
-          dst.context = new ArrayList<StringType>();
-          for (StringType i : context)
+          dst.context = new ArrayList<StructureDefinitionContextComponent>();
+          for (StructureDefinitionContextComponent i : context)
             dst.context.add(i.copy());
         };
         if (contextInvariant != null) {
@@ -3129,10 +3297,10 @@ public class StructureDefinition extends MetadataResource {
         StructureDefinition o = (StructureDefinition) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(keyword, o.keyword, true) && compareDeep(fhirVersion, o.fhirVersion, true) && compareDeep(mapping, o.mapping, true)
-           && compareDeep(kind, o.kind, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(contextType, o.contextType, true)
-           && compareDeep(context, o.context, true) && compareDeep(contextInvariant, o.contextInvariant, true)
-           && compareDeep(type, o.type, true) && compareDeep(baseDefinition, o.baseDefinition, true) && compareDeep(derivation, o.derivation, true)
-           && compareDeep(snapshot, o.snapshot, true) && compareDeep(differential, o.differential, true);
+           && compareDeep(kind, o.kind, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(context, o.context, true)
+           && compareDeep(contextInvariant, o.contextInvariant, true) && compareDeep(type, o.type, true) && compareDeep(baseDefinition, o.baseDefinition, true)
+           && compareDeep(derivation, o.derivation, true) && compareDeep(snapshot, o.snapshot, true) && compareDeep(differential, o.differential, true)
+          ;
       }
 
       @Override
@@ -3143,16 +3311,14 @@ public class StructureDefinition extends MetadataResource {
           return false;
         StructureDefinition o = (StructureDefinition) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true) && compareValues(fhirVersion, o.fhirVersion, true)
-           && compareValues(kind, o.kind, true) && compareValues(abstract_, o.abstract_, true) && compareValues(contextType, o.contextType, true)
-           && compareValues(context, o.context, true) && compareValues(contextInvariant, o.contextInvariant, true)
-           && compareValues(type, o.type, true) && compareValues(baseDefinition, o.baseDefinition, true) && compareValues(derivation, o.derivation, true)
-          ;
+           && compareValues(kind, o.kind, true) && compareValues(abstract_, o.abstract_, true) && compareValues(contextInvariant, o.contextInvariant, true)
+           && compareValues(type, o.type, true) && compareValues(derivation, o.derivation, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, copyright
-          , keyword, fhirVersion, mapping, kind, abstract_, contextType, context, contextInvariant
-          , type, baseDefinition, derivation, snapshot, differential);
+          , keyword, fhirVersion, mapping, kind, abstract_, context, contextInvariant, type
+          , baseDefinition, derivation, snapshot, differential);
       }
 
   @Override
@@ -3307,26 +3473,6 @@ public class StructureDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam EXPERIMENTAL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EXPERIMENTAL);
 
  /**
-   * Search parameter: <b>context-type</b>
-   * <p>
-   * Description: <b>resource | datatype | extension</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>StructureDefinition.contextType</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | extension", type="token" )
-  public static final String SP_CONTEXT_TYPE = "context-type";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
-   * <p>
-   * Description: <b>resource | datatype | extension</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>StructureDefinition.contextType</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT_TYPE);
-
- /**
    * Search parameter: <b>abstract</b>
    * <p>
    * Description: <b>Whether the structure is abstract</b><br>
@@ -3370,21 +3516,21 @@ public class StructureDefinition extends MetadataResource {
    * Search parameter: <b>type</b>
    * <p>
    * Description: <b>Type defined or constrained by this structure</b><br>
-   * Type: <b>token</b><br>
+   * Type: <b>uri</b><br>
    * Path: <b>StructureDefinition.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="StructureDefinition.type", description="Type defined or constrained by this structure", type="token" )
+  @SearchParamDefinition(name="type", path="StructureDefinition.type", description="Type defined or constrained by this structure", type="uri" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
    * Description: <b>Type defined or constrained by this structure</b><br>
-   * Type: <b>token</b><br>
+   * Type: <b>uri</b><br>
    * Path: <b>StructureDefinition.type</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam TYPE = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_TYPE);
 
  /**
    * Search parameter: <b>version</b>
@@ -3449,22 +3595,22 @@ public class StructureDefinition extends MetadataResource {
  /**
    * Search parameter: <b>ext-context</b>
    * <p>
-   * Description: <b>Where the extension can be used in instances</b><br>
-   * Type: <b>string</b><br>
+   * Description: <b>The system is the URL for the context-type: e.g. http://hl7.org/fhir/extension-context-type#element|CodeableConcept.text</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>StructureDefinition.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string" )
+  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="The system is the URL for the context-type: e.g. http://hl7.org/fhir/extension-context-type#element|CodeableConcept.text", type="token" )
   public static final String SP_EXT_CONTEXT = "ext-context";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ext-context</b>
    * <p>
-   * Description: <b>Where the extension can be used in instances</b><br>
-   * Type: <b>string</b><br>
+   * Description: <b>The system is the URL for the context-type: e.g. http://hl7.org/fhir/extension-context-type#element|CodeableConcept.text</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>StructureDefinition.context</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam EXT_CONTEXT = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_EXT_CONTEXT);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EXT_CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EXT_CONTEXT);
 
  /**
    * Search parameter: <b>name</b>
@@ -3590,21 +3736,27 @@ public class StructureDefinition extends MetadataResource {
    * Search parameter: <b>base</b>
    * <p>
    * Description: <b>Definition that this type is constrained/specialized from</b><br>
-   * Type: <b>uri</b><br>
+   * Type: <b>reference</b><br>
    * Path: <b>StructureDefinition.baseDefinition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="base", path="StructureDefinition.baseDefinition", description="Definition that this type is constrained/specialized from", type="uri" )
+  @SearchParamDefinition(name="base", path="StructureDefinition.baseDefinition", description="Definition that this type is constrained/specialized from", type="reference", target={StructureDefinition.class } )
   public static final String SP_BASE = "base";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>base</b>
    * <p>
    * Description: <b>Definition that this type is constrained/specialized from</b><br>
-   * Type: <b>uri</b><br>
+   * Type: <b>reference</b><br>
    * Path: <b>StructureDefinition.baseDefinition</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam BASE = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_BASE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>StructureDefinition:base</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASE = new ca.uhn.fhir.model.api.Include("StructureDefinition:base").toLocked();
 
 
 }

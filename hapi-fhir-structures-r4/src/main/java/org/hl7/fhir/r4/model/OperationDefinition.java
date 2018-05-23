@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -283,9 +283,9 @@ public class OperationDefinition extends MetadataResource {
         /**
          * If the type is "Reference", then targetProfile lists a one or more profiles that the Reference can refer to.
          */
-        @Child(name = "targetProfile", type = {UriType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "targetProfile", type = {CanonicalType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="If type is Reference, allowed targets", formalDefinition="If the type is \"Reference\", then targetProfile lists a one or more profiles that the Reference can refer to." )
-        protected List<UriType> targetProfile;
+        protected List<CanonicalType> targetProfile;
 
         /**
          * How the parameter is understood as a search parameter. This is only used if the parameter type is 'string'.
@@ -309,7 +309,7 @@ public class OperationDefinition extends MetadataResource {
         @Description(shortDefinition="Parts of a nested Parameter", formalDefinition="The parts of a nested Parameter." )
         protected List<OperationDefinitionParameterComponent> part;
 
-        private static final long serialVersionUID = 1774015115L;
+        private static final long serialVersionUID = 2140320275L;
 
     /**
      * Constructor
@@ -610,16 +610,16 @@ public class OperationDefinition extends MetadataResource {
         /**
          * @return {@link #targetProfile} (If the type is "Reference", then targetProfile lists a one or more profiles that the Reference can refer to.)
          */
-        public List<UriType> getTargetProfile() { 
+        public List<CanonicalType> getTargetProfile() { 
           if (this.targetProfile == null)
-            this.targetProfile = new ArrayList<UriType>();
+            this.targetProfile = new ArrayList<CanonicalType>();
           return this.targetProfile;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public OperationDefinitionParameterComponent setTargetProfile(List<UriType> theTargetProfile) { 
+        public OperationDefinitionParameterComponent setTargetProfile(List<CanonicalType> theTargetProfile) { 
           this.targetProfile = theTargetProfile;
           return this;
         }
@@ -627,7 +627,7 @@ public class OperationDefinition extends MetadataResource {
         public boolean hasTargetProfile() { 
           if (this.targetProfile == null)
             return false;
-          for (UriType item : this.targetProfile)
+          for (CanonicalType item : this.targetProfile)
             if (!item.isEmpty())
               return true;
           return false;
@@ -636,10 +636,10 @@ public class OperationDefinition extends MetadataResource {
         /**
          * @return {@link #targetProfile} (If the type is "Reference", then targetProfile lists a one or more profiles that the Reference can refer to.)
          */
-        public UriType addTargetProfileElement() {//2 
-          UriType t = new UriType();
+        public CanonicalType addTargetProfileElement() {//2 
+          CanonicalType t = new CanonicalType();
           if (this.targetProfile == null)
-            this.targetProfile = new ArrayList<UriType>();
+            this.targetProfile = new ArrayList<CanonicalType>();
           this.targetProfile.add(t);
           return t;
         }
@@ -648,10 +648,10 @@ public class OperationDefinition extends MetadataResource {
          * @param value {@link #targetProfile} (If the type is "Reference", then targetProfile lists a one or more profiles that the Reference can refer to.)
          */
         public OperationDefinitionParameterComponent addTargetProfile(String value) { //1
-          UriType t = new UriType();
+          CanonicalType t = new CanonicalType();
           t.setValue(value);
           if (this.targetProfile == null)
-            this.targetProfile = new ArrayList<UriType>();
+            this.targetProfile = new ArrayList<CanonicalType>();
           this.targetProfile.add(t);
           return this;
         }
@@ -662,8 +662,8 @@ public class OperationDefinition extends MetadataResource {
         public boolean hasTargetProfile(String value) { 
           if (this.targetProfile == null)
             return false;
-          for (UriType v : this.targetProfile)
-            if (v.equals(value)) // uri
+          for (CanonicalType v : this.targetProfile)
+            if (v.getValue().equals(value)) // canonical(StructureDefinition)
               return true;
           return false;
         }
@@ -802,7 +802,7 @@ public class OperationDefinition extends MetadataResource {
           children.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, 1, max));
           children.add(new Property("documentation", "string", "Describes the meaning or use of this parameter.", 0, 1, documentation));
           children.add(new Property("type", "code", "The type for this parameter.", 0, 1, type));
-          children.add(new Property("targetProfile", "uri", "If the type is \"Reference\", then targetProfile lists a one or more profiles that the Reference can refer to.", 0, java.lang.Integer.MAX_VALUE, targetProfile));
+          children.add(new Property("targetProfile", "canonical(StructureDefinition)", "If the type is \"Reference\", then targetProfile lists a one or more profiles that the Reference can refer to.", 0, java.lang.Integer.MAX_VALUE, targetProfile));
           children.add(new Property("searchType", "code", "How the parameter is understood as a search parameter. This is only used if the parameter type is 'string'.", 0, 1, searchType));
           children.add(new Property("binding", "", "Binds to a value set if this parameter is coded (code, Coding, CodeableConcept).", 0, 1, binding));
           children.add(new Property("part", "@OperationDefinition.parameter", "The parts of a nested Parameter.", 0, java.lang.Integer.MAX_VALUE, part));
@@ -817,7 +817,7 @@ public class OperationDefinition extends MetadataResource {
           case 107876: /*max*/  return new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, 1, max);
           case 1587405498: /*documentation*/  return new Property("documentation", "string", "Describes the meaning or use of this parameter.", 0, 1, documentation);
           case 3575610: /*type*/  return new Property("type", "code", "The type for this parameter.", 0, 1, type);
-          case 1994521304: /*targetProfile*/  return new Property("targetProfile", "uri", "If the type is \"Reference\", then targetProfile lists a one or more profiles that the Reference can refer to.", 0, java.lang.Integer.MAX_VALUE, targetProfile);
+          case 1994521304: /*targetProfile*/  return new Property("targetProfile", "canonical(StructureDefinition)", "If the type is \"Reference\", then targetProfile lists a one or more profiles that the Reference can refer to.", 0, java.lang.Integer.MAX_VALUE, targetProfile);
           case -710454014: /*searchType*/  return new Property("searchType", "code", "How the parameter is understood as a search parameter. This is only used if the parameter type is 'string'.", 0, 1, searchType);
           case -108220795: /*binding*/  return new Property("binding", "", "Binds to a value set if this parameter is coded (code, Coding, CodeableConcept).", 0, 1, binding);
           case 3433459: /*part*/  return new Property("part", "@OperationDefinition.parameter", "The parts of a nested Parameter.", 0, java.lang.Integer.MAX_VALUE, part);
@@ -835,7 +835,7 @@ public class OperationDefinition extends MetadataResource {
         case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case 1994521304: /*targetProfile*/ return this.targetProfile == null ? new Base[0] : this.targetProfile.toArray(new Base[this.targetProfile.size()]); // UriType
+        case 1994521304: /*targetProfile*/ return this.targetProfile == null ? new Base[0] : this.targetProfile.toArray(new Base[this.targetProfile.size()]); // CanonicalType
         case -710454014: /*searchType*/ return this.searchType == null ? new Base[0] : new Base[] {this.searchType}; // Enumeration<SearchParamType>
         case -108220795: /*binding*/ return this.binding == null ? new Base[0] : new Base[] {this.binding}; // OperationDefinitionParameterBindingComponent
         case 3433459: /*part*/ return this.part == null ? new Base[0] : this.part.toArray(new Base[this.part.size()]); // OperationDefinitionParameterComponent
@@ -867,7 +867,7 @@ public class OperationDefinition extends MetadataResource {
           this.type = castToCode(value); // CodeType
           return value;
         case 1994521304: // targetProfile
-          this.getTargetProfile().add(castToUri(value)); // UriType
+          this.getTargetProfile().add(castToCanonical(value)); // CanonicalType
           return value;
         case -710454014: // searchType
           value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
@@ -900,7 +900,7 @@ public class OperationDefinition extends MetadataResource {
         } else if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
         } else if (name.equals("targetProfile")) {
-          this.getTargetProfile().add(castToUri(value));
+          this.getTargetProfile().add(castToCanonical(value));
         } else if (name.equals("searchType")) {
           value = new SearchParamTypeEnumFactory().fromType(castToCode(value));
           this.searchType = (Enumeration) value; // Enumeration<SearchParamType>
@@ -940,7 +940,7 @@ public class OperationDefinition extends MetadataResource {
         case 107876: /*max*/ return new String[] {"string"};
         case 1587405498: /*documentation*/ return new String[] {"string"};
         case 3575610: /*type*/ return new String[] {"code"};
-        case 1994521304: /*targetProfile*/ return new String[] {"uri"};
+        case 1994521304: /*targetProfile*/ return new String[] {"canonical"};
         case -710454014: /*searchType*/ return new String[] {"code"};
         case -108220795: /*binding*/ return new String[] {};
         case 3433459: /*part*/ return new String[] {"@OperationDefinition.parameter"};
@@ -996,8 +996,8 @@ public class OperationDefinition extends MetadataResource {
         dst.documentation = documentation == null ? null : documentation.copy();
         dst.type = type == null ? null : type.copy();
         if (targetProfile != null) {
-          dst.targetProfile = new ArrayList<UriType>();
-          for (UriType i : targetProfile)
+          dst.targetProfile = new ArrayList<CanonicalType>();
+          for (CanonicalType i : targetProfile)
             dst.targetProfile.add(i.copy());
         };
         dst.searchType = searchType == null ? null : searchType.copy();
@@ -1032,8 +1032,7 @@ public class OperationDefinition extends MetadataResource {
         OperationDefinitionParameterComponent o = (OperationDefinitionParameterComponent) other_;
         return compareValues(name, o.name, true) && compareValues(use, o.use, true) && compareValues(min, o.min, true)
            && compareValues(max, o.max, true) && compareValues(documentation, o.documentation, true) && compareValues(type, o.type, true)
-           && compareValues(targetProfile, o.targetProfile, true) && compareValues(searchType, o.searchType, true)
-          ;
+           && compareValues(searchType, o.searchType, true);
       }
 
       public boolean isEmpty() {
@@ -1061,7 +1060,7 @@ public class OperationDefinition extends MetadataResource {
         /**
          * Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.
          */
-        @Child(name = "valueSet", type = {UriType.class, ValueSet.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "valueSet", type = {UriType.class, CanonicalType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Source of value set", formalDefinition="Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used." )
         protected Type valueSet;
 
@@ -1139,26 +1138,30 @@ public class OperationDefinition extends MetadataResource {
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
         public UriType getValueSetUriType() throws FHIRException { 
+          if (this.valueSet == null)
+            return null;
           if (!(this.valueSet instanceof UriType))
             throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (UriType) this.valueSet;
         }
 
         public boolean hasValueSetUriType() { 
-          return this.valueSet instanceof UriType;
+          return this != null && this.valueSet instanceof UriType;
         }
 
         /**
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
-        public Reference getValueSetReference() throws FHIRException { 
-          if (!(this.valueSet instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
-          return (Reference) this.valueSet;
+        public CanonicalType getValueSetCanonicalType() throws FHIRException { 
+          if (this.valueSet == null)
+            return null;
+          if (!(this.valueSet instanceof CanonicalType))
+            throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+          return (CanonicalType) this.valueSet;
         }
 
-        public boolean hasValueSetReference() { 
-          return this.valueSet instanceof Reference;
+        public boolean hasValueSetCanonicalType() { 
+          return this != null && this.valueSet instanceof CanonicalType;
         }
 
         public boolean hasValueSet() { 
@@ -1169,6 +1172,8 @@ public class OperationDefinition extends MetadataResource {
          * @param value {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
         public OperationDefinitionParameterBindingComponent setValueSet(Type value) { 
+          if (value != null && !(value instanceof UriType || value instanceof CanonicalType))
+            throw new Error("Not the right type for OperationDefinition.parameter.binding.valueSet[x]: "+value.fhirType());
           this.valueSet = value;
           return this;
         }
@@ -1176,17 +1181,17 @@ public class OperationDefinition extends MetadataResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("strength", "code", "Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.", 0, 1, strength));
-          children.add(new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet));
+          children.add(new Property("valueSet[x]", "uri|canonical(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 1791316033: /*strength*/  return new Property("strength", "code", "Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.", 0, 1, strength);
-          case -1438410321: /*valueSet[x]*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
-          case -1410174671: /*valueSet*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
-          case -1438416261: /*valueSetUri*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
-          case 295220506: /*valueSetReference*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
+          case -1438410321: /*valueSet[x]*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
+          case -1410174671: /*valueSet*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
+          case -1438416261: /*valueSetUri*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
+          case 2048727747: /*valueSetCanonical*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, 1, valueSet);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1244,7 +1249,7 @@ public class OperationDefinition extends MetadataResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 1791316033: /*strength*/ return new String[] {"code"};
-        case -1410174671: /*valueSet*/ return new String[] {"uri", "Reference"};
+        case -1410174671: /*valueSet*/ return new String[] {"uri", "canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1259,8 +1264,8 @@ public class OperationDefinition extends MetadataResource {
           this.valueSet = new UriType();
           return this.valueSet;
         }
-        else if (name.equals("valueSetReference")) {
-          this.valueSet = new Reference();
+        else if (name.equals("valueSetCanonical")) {
+          this.valueSet = new CanonicalType();
           return this.valueSet;
         }
         else
@@ -1387,7 +1392,7 @@ public class OperationDefinition extends MetadataResource {
           if (this.parameterName == null)
             return false;
           for (StringType v : this.parameterName)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -1578,10 +1583,10 @@ public class OperationDefinition extends MetadataResource {
     protected Enumeration<OperationKind> kind;
 
     /**
-     * Explaination of why this operation definition is needed and why it has been designed as it has.
+     * Explanation of why this operation definition is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this operation definition is defined", formalDefinition="Explaination of why this operation definition is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this operation definition is defined", formalDefinition="Explanation of why this operation definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -1608,14 +1613,9 @@ public class OperationDefinition extends MetadataResource {
     /**
      * Indicates that this operation definition is a constraining profile on the base.
      */
-    @Child(name = "base", type = {OperationDefinition.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "base", type = {CanonicalType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Marks this as a profile of the base", formalDefinition="Indicates that this operation definition is a constraining profile on the base." )
-    protected Reference base;
-
-    /**
-     * The actual object that is the target of the reference (Indicates that this operation definition is a constraining profile on the base.)
-     */
-    protected OperationDefinition baseTarget;
+    protected CanonicalType base;
 
     /**
      * The types on which this operation can be executed.
@@ -1649,26 +1649,16 @@ public class OperationDefinition extends MetadataResource {
     /**
      * Additional validation information for the in parameters. The profile is a constraint on the parameters resource.
      */
-    @Child(name = "inputProfile", type = {StructureDefinition.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "inputProfile", type = {CanonicalType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Validation information for in parameters", formalDefinition="Additional validation information for the in parameters. The profile is a constraint on the parameters resource." )
-    protected Reference inputProfile;
-
-    /**
-     * The actual object that is the target of the reference (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.)
-     */
-    protected StructureDefinition inputProfileTarget;
+    protected CanonicalType inputProfile;
 
     /**
      * Additional validation information for the out parameters. The profile is a constraint on the parameters resource.
      */
-    @Child(name = "outputProfile", type = {StructureDefinition.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "outputProfile", type = {CanonicalType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Validation information for out parameters", formalDefinition="Additional validation information for the out parameters. The profile is a constraint on the parameters resource." )
-    protected Reference outputProfile;
-
-    /**
-     * The actual object that is the target of the reference (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.)
-     */
-    protected StructureDefinition outputProfileTarget;
+    protected CanonicalType outputProfile;
 
     /**
      * The parameters for the operation/query.
@@ -1684,7 +1674,7 @@ public class OperationDefinition extends MetadataResource {
     @Description(shortDefinition="Define overloaded variants for when  generating code", formalDefinition="Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation." )
     protected List<OperationDefinitionOverloadComponent> overload;
 
-    private static final long serialVersionUID = -437477765L;
+    private static final long serialVersionUID = 149113671L;
 
   /**
    * Constructor
@@ -1708,7 +1698,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this operation definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this operation definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1728,7 +1718,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this operation definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this operation definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public OperationDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1736,14 +1726,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this operation definition is (or will be) published.
+     * @return An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this operation definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this operation definition is (or will be) published.
+     * @param value An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this operation definition is (or will be) published.
      */
     public OperationDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1941,7 +1931,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1961,7 +1951,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public OperationDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1969,14 +1959,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public OperationDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1986,7 +1976,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -2006,7 +1996,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the operation definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public OperationDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -2014,14 +2004,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
+     * @return The date  (and optionally time) when the operation definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
+     * @param value The date  (and optionally time) when the operation definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.
      */
     public OperationDefinition setDate(Date value) { 
       if (value == null)
@@ -2035,7 +2025,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the operation definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the operation definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -2055,7 +2045,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the operation definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the operation definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public OperationDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -2063,14 +2053,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the operation definition.
+     * @return The name of the organization or individual that published the operation definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the operation definition.
+     * @param value The name of the organization or individual that published the operation definition.
      */
     public OperationDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -2292,7 +2282,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -2312,7 +2302,7 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this operation definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public OperationDefinition setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -2320,14 +2310,14 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return Explaination of why this operation definition is needed and why it has been designed as it has.
+     * @return Explanation of why this operation definition is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this operation definition is needed and why it has been designed as it has.
+     * @param value Explanation of why this operation definition is needed and why it has been designed as it has.
      */
     public OperationDefinition setPurpose(String value) { 
       if (value == null)
@@ -2480,15 +2470,19 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #base} (Indicates that this operation definition is a constraining profile on the base.)
+     * @return {@link #base} (Indicates that this operation definition is a constraining profile on the base.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
      */
-    public Reference getBase() { 
+    public CanonicalType getBaseElement() { 
       if (this.base == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create OperationDefinition.base");
         else if (Configuration.doAutoCreate())
-          this.base = new Reference(); // cc
+          this.base = new CanonicalType(); // bb
       return this.base;
+    }
+
+    public boolean hasBaseElement() { 
+      return this.base != null && !this.base.isEmpty();
     }
 
     public boolean hasBase() { 
@@ -2496,30 +2490,31 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #base} (Indicates that this operation definition is a constraining profile on the base.)
+     * @param value {@link #base} (Indicates that this operation definition is a constraining profile on the base.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
      */
-    public OperationDefinition setBase(Reference value) { 
+    public OperationDefinition setBaseElement(CanonicalType value) { 
       this.base = value;
       return this;
     }
 
     /**
-     * @return {@link #base} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates that this operation definition is a constraining profile on the base.)
+     * @return Indicates that this operation definition is a constraining profile on the base.
      */
-    public OperationDefinition getBaseTarget() { 
-      if (this.baseTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create OperationDefinition.base");
-        else if (Configuration.doAutoCreate())
-          this.baseTarget = new OperationDefinition(); // aa
-      return this.baseTarget;
+    public String getBase() { 
+      return this.base == null ? null : this.base.getValue();
     }
 
     /**
-     * @param value {@link #base} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates that this operation definition is a constraining profile on the base.)
+     * @param value Indicates that this operation definition is a constraining profile on the base.
      */
-    public OperationDefinition setBaseTarget(OperationDefinition value) { 
-      this.baseTarget = value;
+    public OperationDefinition setBase(String value) { 
+      if (Utilities.noString(value))
+        this.base = null;
+      else {
+        if (this.base == null)
+          this.base = new CanonicalType();
+        this.base.setValue(value);
+      }
       return this;
     }
 
@@ -2579,7 +2574,7 @@ public class OperationDefinition extends MetadataResource {
       if (this.resource == null)
         return false;
       for (CodeType v : this.resource)
-        if (v.equals(value)) // code
+        if (v.getValue().equals(value)) // code
           return true;
       return false;
     }
@@ -2720,15 +2715,19 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #inputProfile} (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.)
+     * @return {@link #inputProfile} (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.). This is the underlying object with id, value and extensions. The accessor "getInputProfile" gives direct access to the value
      */
-    public Reference getInputProfile() { 
+    public CanonicalType getInputProfileElement() { 
       if (this.inputProfile == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create OperationDefinition.inputProfile");
         else if (Configuration.doAutoCreate())
-          this.inputProfile = new Reference(); // cc
+          this.inputProfile = new CanonicalType(); // bb
       return this.inputProfile;
+    }
+
+    public boolean hasInputProfileElement() { 
+      return this.inputProfile != null && !this.inputProfile.isEmpty();
     }
 
     public boolean hasInputProfile() { 
@@ -2736,43 +2735,48 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #inputProfile} (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.)
+     * @param value {@link #inputProfile} (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.). This is the underlying object with id, value and extensions. The accessor "getInputProfile" gives direct access to the value
      */
-    public OperationDefinition setInputProfile(Reference value) { 
+    public OperationDefinition setInputProfileElement(CanonicalType value) { 
       this.inputProfile = value;
       return this;
     }
 
     /**
-     * @return {@link #inputProfile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.)
+     * @return Additional validation information for the in parameters. The profile is a constraint on the parameters resource.
      */
-    public StructureDefinition getInputProfileTarget() { 
-      if (this.inputProfileTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create OperationDefinition.inputProfile");
-        else if (Configuration.doAutoCreate())
-          this.inputProfileTarget = new StructureDefinition(); // aa
-      return this.inputProfileTarget;
+    public String getInputProfile() { 
+      return this.inputProfile == null ? null : this.inputProfile.getValue();
     }
 
     /**
-     * @param value {@link #inputProfile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Additional validation information for the in parameters. The profile is a constraint on the parameters resource.)
+     * @param value Additional validation information for the in parameters. The profile is a constraint on the parameters resource.
      */
-    public OperationDefinition setInputProfileTarget(StructureDefinition value) { 
-      this.inputProfileTarget = value;
+    public OperationDefinition setInputProfile(String value) { 
+      if (Utilities.noString(value))
+        this.inputProfile = null;
+      else {
+        if (this.inputProfile == null)
+          this.inputProfile = new CanonicalType();
+        this.inputProfile.setValue(value);
+      }
       return this;
     }
 
     /**
-     * @return {@link #outputProfile} (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.)
+     * @return {@link #outputProfile} (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.). This is the underlying object with id, value and extensions. The accessor "getOutputProfile" gives direct access to the value
      */
-    public Reference getOutputProfile() { 
+    public CanonicalType getOutputProfileElement() { 
       if (this.outputProfile == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create OperationDefinition.outputProfile");
         else if (Configuration.doAutoCreate())
-          this.outputProfile = new Reference(); // cc
+          this.outputProfile = new CanonicalType(); // bb
       return this.outputProfile;
+    }
+
+    public boolean hasOutputProfileElement() { 
+      return this.outputProfile != null && !this.outputProfile.isEmpty();
     }
 
     public boolean hasOutputProfile() { 
@@ -2780,30 +2784,31 @@ public class OperationDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #outputProfile} (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.)
+     * @param value {@link #outputProfile} (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.). This is the underlying object with id, value and extensions. The accessor "getOutputProfile" gives direct access to the value
      */
-    public OperationDefinition setOutputProfile(Reference value) { 
+    public OperationDefinition setOutputProfileElement(CanonicalType value) { 
       this.outputProfile = value;
       return this;
     }
 
     /**
-     * @return {@link #outputProfile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.)
+     * @return Additional validation information for the out parameters. The profile is a constraint on the parameters resource.
      */
-    public StructureDefinition getOutputProfileTarget() { 
-      if (this.outputProfileTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create OperationDefinition.outputProfile");
-        else if (Configuration.doAutoCreate())
-          this.outputProfileTarget = new StructureDefinition(); // aa
-      return this.outputProfileTarget;
+    public String getOutputProfile() { 
+      return this.outputProfile == null ? null : this.outputProfile.getValue();
     }
 
     /**
-     * @param value {@link #outputProfile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Additional validation information for the out parameters. The profile is a constraint on the parameters resource.)
+     * @param value Additional validation information for the out parameters. The profile is a constraint on the parameters resource.
      */
-    public OperationDefinition setOutputProfileTarget(StructureDefinition value) { 
-      this.outputProfileTarget = value;
+    public OperationDefinition setOutputProfile(String value) { 
+      if (Utilities.noString(value))
+        this.outputProfile = null;
+      else {
+        if (this.outputProfile == null)
+          this.outputProfile = new CanonicalType();
+        this.outputProfile.setValue(value);
+      }
       return this;
     }
 
@@ -2915,29 +2920,29 @@ public class OperationDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this operation definition is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this operation definition is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this operation definition. Enables tracking the life-cycle of the content.", 0, 1, status));
         children.add(new Property("kind", "code", "Whether this is an operation or a named query.", 0, 1, kind));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the operation definition.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the operation definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the operation definition from a consumer's perspective.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate operation definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the operation definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this operation definition is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this operation definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("affectsState", "boolean", "Operations that have affects state = false (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.", 0, 1, affectsState));
         children.add(new Property("code", "code", "The name used to invoke the operation.", 0, 1, code));
         children.add(new Property("comment", "markdown", "Additional information about how to use this operation or named query.", 0, 1, comment));
-        children.add(new Property("base", "Reference(OperationDefinition)", "Indicates that this operation definition is a constraining profile on the base.", 0, 1, base));
+        children.add(new Property("base", "canonical(OperationDefinition)", "Indicates that this operation definition is a constraining profile on the base.", 0, 1, base));
         children.add(new Property("resource", "code", "The types on which this operation can be executed.", 0, java.lang.Integer.MAX_VALUE, resource));
         children.add(new Property("system", "boolean", "Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).", 0, 1, system));
         children.add(new Property("type", "boolean", "Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).", 0, 1, type));
         children.add(new Property("instance", "boolean", "Indicates whether this operation can be invoked on a particular instance of one of the given types.", 0, 1, instance));
-        children.add(new Property("inputProfile", "Reference(StructureDefinition)", "Additional validation information for the in parameters. The profile is a constraint on the parameters resource.", 0, 1, inputProfile));
-        children.add(new Property("outputProfile", "Reference(StructureDefinition)", "Additional validation information for the out parameters. The profile is a constraint on the parameters resource.", 0, 1, outputProfile));
+        children.add(new Property("inputProfile", "canonical(StructureDefinition)", "Additional validation information for the in parameters. The profile is a constraint on the parameters resource.", 0, 1, inputProfile));
+        children.add(new Property("outputProfile", "canonical(StructureDefinition)", "Additional validation information for the out parameters. The profile is a constraint on the parameters resource.", 0, 1, outputProfile));
         children.add(new Property("parameter", "", "The parameters for the operation/query.", 0, java.lang.Integer.MAX_VALUE, parameter));
         children.add(new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.", 0, java.lang.Integer.MAX_VALUE, overload));
       }
@@ -2945,29 +2950,29 @@ public class OperationDefinition extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this operation definition is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this operation definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this operation definition is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the operation definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the operation definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the operation definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this operation definition. Enables tracking the life-cycle of the content.", 0, 1, status);
         case 3292052: /*kind*/  return new Property("kind", "code", "Whether this is an operation or a named query.", 0, 1, kind);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the operation definition.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this operation definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the operation definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the operation definition changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the operation definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the operation definition from a consumer's perspective.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate operation definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the operation definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this operation definition is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this operation definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case -14805197: /*affectsState*/  return new Property("affectsState", "boolean", "Operations that have affects state = false (see [HTTP specification definition of idempotent](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html)) may be invoked by performing an HTTP GET operation instead of a POST.", 0, 1, affectsState);
         case 3059181: /*code*/  return new Property("code", "code", "The name used to invoke the operation.", 0, 1, code);
         case 950398559: /*comment*/  return new Property("comment", "markdown", "Additional information about how to use this operation or named query.", 0, 1, comment);
-        case 3016401: /*base*/  return new Property("base", "Reference(OperationDefinition)", "Indicates that this operation definition is a constraining profile on the base.", 0, 1, base);
+        case 3016401: /*base*/  return new Property("base", "canonical(OperationDefinition)", "Indicates that this operation definition is a constraining profile on the base.", 0, 1, base);
         case -341064690: /*resource*/  return new Property("resource", "code", "The types on which this operation can be executed.", 0, java.lang.Integer.MAX_VALUE, resource);
         case -887328209: /*system*/  return new Property("system", "boolean", "Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).", 0, 1, system);
         case 3575610: /*type*/  return new Property("type", "boolean", "Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a specific resource id for the context).", 0, 1, type);
         case 555127957: /*instance*/  return new Property("instance", "boolean", "Indicates whether this operation can be invoked on a particular instance of one of the given types.", 0, 1, instance);
-        case 676942463: /*inputProfile*/  return new Property("inputProfile", "Reference(StructureDefinition)", "Additional validation information for the in parameters. The profile is a constraint on the parameters resource.", 0, 1, inputProfile);
-        case 1826166120: /*outputProfile*/  return new Property("outputProfile", "Reference(StructureDefinition)", "Additional validation information for the out parameters. The profile is a constraint on the parameters resource.", 0, 1, outputProfile);
+        case 676942463: /*inputProfile*/  return new Property("inputProfile", "canonical(StructureDefinition)", "Additional validation information for the in parameters. The profile is a constraint on the parameters resource.", 0, 1, inputProfile);
+        case 1826166120: /*outputProfile*/  return new Property("outputProfile", "canonical(StructureDefinition)", "Additional validation information for the out parameters. The profile is a constraint on the parameters resource.", 0, 1, outputProfile);
         case 1954460585: /*parameter*/  return new Property("parameter", "", "The parameters for the operation/query.", 0, java.lang.Integer.MAX_VALUE, parameter);
         case 529823674: /*overload*/  return new Property("overload", "", "Defines an appropriate combination of parameters to use when invoking this operation, to help code generators when generating overloaded parameter sets for this operation.", 0, java.lang.Integer.MAX_VALUE, overload);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2994,13 +2999,13 @@ public class OperationDefinition extends MetadataResource {
         case -14805197: /*affectsState*/ return this.affectsState == null ? new Base[0] : new Base[] {this.affectsState}; // BooleanType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeType
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // MarkdownType
-        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // Reference
+        case 3016401: /*base*/ return this.base == null ? new Base[0] : new Base[] {this.base}; // CanonicalType
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // CodeType
         case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // BooleanType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // BooleanType
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : new Base[] {this.instance}; // BooleanType
-        case 676942463: /*inputProfile*/ return this.inputProfile == null ? new Base[0] : new Base[] {this.inputProfile}; // Reference
-        case 1826166120: /*outputProfile*/ return this.outputProfile == null ? new Base[0] : new Base[] {this.outputProfile}; // Reference
+        case 676942463: /*inputProfile*/ return this.inputProfile == null ? new Base[0] : new Base[] {this.inputProfile}; // CanonicalType
+        case 1826166120: /*outputProfile*/ return this.outputProfile == null ? new Base[0] : new Base[] {this.outputProfile}; // CanonicalType
         case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // OperationDefinitionParameterComponent
         case 529823674: /*overload*/ return this.overload == null ? new Base[0] : this.overload.toArray(new Base[this.overload.size()]); // OperationDefinitionOverloadComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -3062,7 +3067,7 @@ public class OperationDefinition extends MetadataResource {
           this.comment = castToMarkdown(value); // MarkdownType
           return value;
         case 3016401: // base
-          this.base = castToReference(value); // Reference
+          this.base = castToCanonical(value); // CanonicalType
           return value;
         case -341064690: // resource
           this.getResource().add(castToCode(value)); // CodeType
@@ -3077,10 +3082,10 @@ public class OperationDefinition extends MetadataResource {
           this.instance = castToBoolean(value); // BooleanType
           return value;
         case 676942463: // inputProfile
-          this.inputProfile = castToReference(value); // Reference
+          this.inputProfile = castToCanonical(value); // CanonicalType
           return value;
         case 1826166120: // outputProfile
-          this.outputProfile = castToReference(value); // Reference
+          this.outputProfile = castToCanonical(value); // CanonicalType
           return value;
         case 1954460585: // parameter
           this.getParameter().add((OperationDefinitionParameterComponent) value); // OperationDefinitionParameterComponent
@@ -3130,7 +3135,7 @@ public class OperationDefinition extends MetadataResource {
         } else if (name.equals("comment")) {
           this.comment = castToMarkdown(value); // MarkdownType
         } else if (name.equals("base")) {
-          this.base = castToReference(value); // Reference
+          this.base = castToCanonical(value); // CanonicalType
         } else if (name.equals("resource")) {
           this.getResource().add(castToCode(value));
         } else if (name.equals("system")) {
@@ -3140,9 +3145,9 @@ public class OperationDefinition extends MetadataResource {
         } else if (name.equals("instance")) {
           this.instance = castToBoolean(value); // BooleanType
         } else if (name.equals("inputProfile")) {
-          this.inputProfile = castToReference(value); // Reference
+          this.inputProfile = castToCanonical(value); // CanonicalType
         } else if (name.equals("outputProfile")) {
-          this.outputProfile = castToReference(value); // Reference
+          this.outputProfile = castToCanonical(value); // CanonicalType
         } else if (name.equals("parameter")) {
           this.getParameter().add((OperationDefinitionParameterComponent) value);
         } else if (name.equals("overload")) {
@@ -3171,13 +3176,13 @@ public class OperationDefinition extends MetadataResource {
         case -14805197:  return getAffectsStateElement();
         case 3059181:  return getCodeElement();
         case 950398559:  return getCommentElement();
-        case 3016401:  return getBase(); 
+        case 3016401:  return getBaseElement();
         case -341064690:  return addResourceElement();
         case -887328209:  return getSystemElement();
         case 3575610:  return getTypeElement();
         case 555127957:  return getInstanceElement();
-        case 676942463:  return getInputProfile(); 
-        case 1826166120:  return getOutputProfile(); 
+        case 676942463:  return getInputProfileElement();
+        case 1826166120:  return getOutputProfileElement();
         case 1954460585:  return addParameter(); 
         case 529823674:  return addOverload(); 
         default: return super.makeProperty(hash, name);
@@ -3204,13 +3209,13 @@ public class OperationDefinition extends MetadataResource {
         case -14805197: /*affectsState*/ return new String[] {"boolean"};
         case 3059181: /*code*/ return new String[] {"code"};
         case 950398559: /*comment*/ return new String[] {"markdown"};
-        case 3016401: /*base*/ return new String[] {"Reference"};
+        case 3016401: /*base*/ return new String[] {"canonical"};
         case -341064690: /*resource*/ return new String[] {"code"};
         case -887328209: /*system*/ return new String[] {"boolean"};
         case 3575610: /*type*/ return new String[] {"boolean"};
         case 555127957: /*instance*/ return new String[] {"boolean"};
-        case 676942463: /*inputProfile*/ return new String[] {"Reference"};
-        case 1826166120: /*outputProfile*/ return new String[] {"Reference"};
+        case 676942463: /*inputProfile*/ return new String[] {"canonical"};
+        case 1826166120: /*outputProfile*/ return new String[] {"canonical"};
         case 1954460585: /*parameter*/ return new String[] {};
         case 529823674: /*overload*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
@@ -3269,8 +3274,7 @@ public class OperationDefinition extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.comment");
         }
         else if (name.equals("base")) {
-          this.base = new Reference();
-          return this.base;
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.base");
         }
         else if (name.equals("resource")) {
           throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.resource");
@@ -3285,12 +3289,10 @@ public class OperationDefinition extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.instance");
         }
         else if (name.equals("inputProfile")) {
-          this.inputProfile = new Reference();
-          return this.inputProfile;
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.inputProfile");
         }
         else if (name.equals("outputProfile")) {
-          this.outputProfile = new Reference();
-          return this.outputProfile;
+          throw new FHIRException("Cannot call addChild on a primitive type OperationDefinition.outputProfile");
         }
         else if (name.equals("parameter")) {
           return addParameter();

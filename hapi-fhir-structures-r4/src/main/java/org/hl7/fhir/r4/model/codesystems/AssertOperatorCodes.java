@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -77,7 +77,7 @@ public enum AssertOperatorCodes {
          */
         NOTCONTAINS, 
         /**
-         * Evaluate the fluentpath expression as a boolean condition.
+         * Evaluate the FHIRPath expression as a boolean condition.
          */
         EVAL, 
         /**
@@ -142,7 +142,7 @@ public enum AssertOperatorCodes {
             case NOTEMPTY: return "Compare value is not empty.";
             case CONTAINS: return "Compare value string contains a known value.";
             case NOTCONTAINS: return "Compare value string does not contain a known value.";
-            case EVAL: return "Evaluate the fluentpath expression as a boolean condition.";
+            case EVAL: return "Evaluate the FHIRPath expression as a boolean condition.";
             default: return "?";
           }
         }

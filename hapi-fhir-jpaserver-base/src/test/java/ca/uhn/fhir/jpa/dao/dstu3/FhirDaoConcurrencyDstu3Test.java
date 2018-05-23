@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import com.phloc.commons.compare.ReverseComparator;
+import org.apache.commons.collections4.comparators.ReverseComparator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -909,7 +909,7 @@ public class NamingSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the naming system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the naming system was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -929,7 +929,7 @@ public class NamingSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the naming system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the naming system was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public NamingSystem setDateElement(DateTimeType value) { 
       this.date = value;
@@ -937,14 +937,14 @@ public class NamingSystem extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the naming system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.
+     * @return The date  (and optionally time) when the naming system was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the naming system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.
+     * @param value The date  (and optionally time) when the naming system was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.
      */
     public NamingSystem setDate(Date value) { 
         if (this.date == null)
@@ -954,7 +954,7 @@ public class NamingSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the naming system.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the naming system.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -974,7 +974,7 @@ public class NamingSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the naming system.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the naming system.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public NamingSystem setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -982,14 +982,14 @@ public class NamingSystem extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the naming system.
+     * @return The name of the organization or individual that published the naming system.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the naming system.
+     * @param value The name of the organization or individual that published the naming system.
      */
     public NamingSystem setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -1390,8 +1390,8 @@ public class NamingSystem extends MetadataResource {
         children.add(new Property("name", "string", "A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this naming system. Enables tracking the life-cycle of the content.", 0, 1, status));
         children.add(new Property("kind", "code", "Indicates the purpose for the naming system - what kinds of things does it make unique?", 0, 1, kind));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the naming system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the naming system.", 0, 1, publisher));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the naming system was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the naming system.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("responsible", "string", "The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.", 0, 1, responsible));
         children.add(new Property("type", "CodeableConcept", "Categorizes a naming system for easier search by grouping related naming systems.", 0, 1, type));
@@ -1408,8 +1408,8 @@ public class NamingSystem extends MetadataResource {
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the naming system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this naming system. Enables tracking the life-cycle of the content.", 0, 1, status);
         case 3292052: /*kind*/  return new Property("kind", "code", "Indicates the purpose for the naming system - what kinds of things does it make unique?", 0, 1, kind);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the naming system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the naming system.", 0, 1, publisher);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the naming system was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the naming system changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the naming system.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case 1847674614: /*responsible*/  return new Property("responsible", "string", "The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.", 0, 1, responsible);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Categorizes a naming system for easier search by grouping related naming systems.", 0, 1, type);

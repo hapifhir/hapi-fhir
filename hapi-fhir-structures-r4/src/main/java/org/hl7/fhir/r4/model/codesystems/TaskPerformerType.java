@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,7 +61,7 @@ public enum TaskPerformerType {
          */
         MANAGER, 
         /**
-         * A workflow participant that acquires resources (specimens, images, etc) necessary to perform the task.
+         * A workflow participant that acquires resources (specimens, images, etc.) necessary to perform the task.
          */
         ACQUIRER, 
         /**
@@ -117,7 +117,7 @@ public enum TaskPerformerType {
             case PERFORMER: return "A workflow participant that performs services.";
             case MONITOR: return "A workflow participant that monitors task activity.";
             case MANAGER: return "A workflow participant that manages task activity.";
-            case ACQUIRER: return "A workflow participant that acquires resources (specimens, images, etc) necessary to perform the task.";
+            case ACQUIRER: return "A workflow participant that acquires resources (specimens, images, etc.) necessary to perform the task.";
             case REVIEWER: return "A workflow participant that reviews task inputs or outputs.";
             default: return "?";
           }

@@ -20,23 +20,14 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import com.sun.prism.image.Coords;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.Field;
+
+import javax.persistence.*;
 
 //@formatter:off
 @Embeddable

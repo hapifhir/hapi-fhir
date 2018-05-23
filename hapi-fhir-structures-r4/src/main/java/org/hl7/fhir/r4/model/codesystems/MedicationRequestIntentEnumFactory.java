@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,6 +45,8 @@ public class MedicationRequestIntentEnumFactory implements EnumFactory<Medicatio
       return MedicationRequestIntent.PLAN;
     if ("order".equals(codeString))
       return MedicationRequestIntent.ORDER;
+    if ("original-order".equals(codeString))
+      return MedicationRequestIntent.ORIGINALORDER;
     if ("instance-order".equals(codeString))
       return MedicationRequestIntent.INSTANCEORDER;
     if ("option".equals(codeString))
@@ -59,6 +61,8 @@ public class MedicationRequestIntentEnumFactory implements EnumFactory<Medicatio
       return "plan";
     if (code == MedicationRequestIntent.ORDER)
       return "order";
+    if (code == MedicationRequestIntent.ORIGINALORDER)
+      return "original-order";
     if (code == MedicationRequestIntent.INSTANCEORDER)
       return "instance-order";
     if (code == MedicationRequestIntent.OPTION)

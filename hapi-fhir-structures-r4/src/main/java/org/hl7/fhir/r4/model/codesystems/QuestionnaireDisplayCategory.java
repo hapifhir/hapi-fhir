@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum QuestionnaireDisplayCategory {
 
         /**
-         * The text provides guidances on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).
+         * The text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).
          */
         INSTRUCTIONS, 
         /**
@@ -69,7 +69,7 @@ public enum QuestionnaireDisplayCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case INSTRUCTIONS: return "The text provides guidances on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).";
+            case INSTRUCTIONS: return "The text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).";
             case SECURITY: return "The text provides guidance on how the information should be or will be handled from a security/confidentiality/access control perspective when completed";
             default: return "?";
           }

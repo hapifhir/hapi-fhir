@@ -1,46 +1,66 @@
 package org.hl7.fhir.dstu2016may.utils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.exceptions.FHIRFormatError;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
-
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /*
 Copyright (c) 2011+, HL7, Inc
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification,
+Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
 
- * Redistributions of source code must retain the above copyright notice, this
+ * Redistributions of source code must retain the above copyright notice, this 
    list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
+ * Redistributions in binary form must reproduce the above copyright notice, 
+   this list of conditions and the following disclaimer in the documentation 
    and/or other materials provided with the distribution.
- * Neither the name of HL7 nor the names of its contributors may be used to
-   endorse or promote products derived from this software without specific
+ * Neither the name of HL7 nor the names of its contributors may be used to 
+   endorse or promote products derived from this software without specific 
    prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
  */
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu2016may.model.BooleanType;
+import org.hl7.fhir.dstu2016may.model.CodeSystem;
+import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu2016may.model.CodeType;
+import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Coding;
+import org.hl7.fhir.dstu2016may.model.DataElement;
+import org.hl7.fhir.dstu2016may.model.DomainResource;
+import org.hl7.fhir.dstu2016may.model.Element;
+import org.hl7.fhir.dstu2016may.model.ElementDefinition;
+import org.hl7.fhir.dstu2016may.model.Extension;
+import org.hl7.fhir.dstu2016may.model.ExtensionHelper;
+import org.hl7.fhir.dstu2016may.model.Factory;
+import org.hl7.fhir.dstu2016may.model.Identifier;
+import org.hl7.fhir.dstu2016may.model.IntegerType;
+import org.hl7.fhir.dstu2016may.model.MarkdownType;
+import org.hl7.fhir.dstu2016may.model.PrimitiveType;
+import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu2016may.model.StringType;
+import org.hl7.fhir.dstu2016may.model.Type;
+import org.hl7.fhir.dstu2016may.model.UriType;
+import org.hl7.fhir.dstu2016may.model.ValueSet;
+import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 
 
 public class ToolingExtensions {
@@ -78,11 +98,11 @@ public class ToolingExtensions {
   public static final String EXT_CIMI_REFERENCE = "http://hl7.org/fhir/StructureDefinition/cimi-reference";
   public static final String EXT_UNCLOSED = "http://hl7.org/fhir/StructureDefinition/valueset-unclosed";
   public static final String EXT_FMM_LEVEL = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm";
-
+  
 
   // specific extension helpers
 
-  public static Extension makeIssueSource(ValidationMessage.Source source) {
+  public static Extension makeIssueSource(Source source) {
     Extension ex = new Extension();
     // todo: write this up and get it published with the pack (and handle the redirect?)
     ex.setUrl(ToolingExtensions.EXT_ISSUE_SOURCE);
@@ -468,5 +488,13 @@ public class ToolingExtensions {
     return hasExtension(vs, EXT_OID);
   }
   
+
+  public static void setStringExtension(Element element, String uri, String value) {
+    Extension ext = getExtension(element, uri);
+    if (ext != null)
+      ext.setValue(new StringType(value));
+    else
+      element.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
+  }
   
 }

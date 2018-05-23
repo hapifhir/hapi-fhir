@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -2854,7 +2854,7 @@ public class SubstanceSpecification extends DomainResource {
           if (this.referenceSource == null)
             return false;
           for (StringType v : this.referenceSource)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -3434,7 +3434,7 @@ public class SubstanceSpecification extends DomainResource {
           if (this.referenceSource == null)
             return false;
           for (StringType v : this.referenceSource)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -3947,10 +3947,10 @@ public class SubstanceSpecification extends DomainResource {
     protected Identifier identifier;
 
     /**
-     * High level categorisation, e.g. polymer or nucleic acid.
+     * High level categorization, e.g. polymer or nucleic acid.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="High level categorisation, e.g. polymer or nucleic acid", formalDefinition="High level categorisation, e.g. polymer or nucleic acid." )
+    @Description(shortDefinition="High level categorization, e.g. polymer or nucleic acid", formalDefinition="High level categorization, e.g. polymer or nucleic acid." )
     protected CodeableConcept type;
 
     /**
@@ -4154,7 +4154,7 @@ public class SubstanceSpecification extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (High level categorisation, e.g. polymer or nucleic acid.)
+     * @return {@link #type} (High level categorization, e.g. polymer or nucleic acid.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -4170,7 +4170,7 @@ public class SubstanceSpecification extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (High level categorisation, e.g. polymer or nucleic acid.)
+     * @param value {@link #type} (High level categorization, e.g. polymer or nucleic acid.)
      */
     public SubstanceSpecification setType(CodeableConcept value) { 
       this.type = value;
@@ -4233,7 +4233,7 @@ public class SubstanceSpecification extends DomainResource {
       if (this.referenceSource == null)
         return false;
       for (StringType v : this.referenceSource)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -4620,7 +4620,7 @@ public class SubstanceSpecification extends DomainResource {
         children.add(new Property("comment", "string", "Textual comment.", 0, 1, comment));
         children.add(new Property("stoichiometric", "boolean", "Chemicals may be stoichiometric or non-stoichiometric.", 0, 1, stoichiometric));
         children.add(new Property("identifier", "Identifier", "Identifier by which this substance is known.", 0, 1, identifier));
-        children.add(new Property("type", "CodeableConcept", "High level categorisation, e.g. polymer or nucleic acid.", 0, 1, type));
+        children.add(new Property("type", "CodeableConcept", "High level categorization, e.g. polymer or nucleic acid.", 0, 1, type));
         children.add(new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource));
         children.add(new Property("moiety", "", "Moiety, for structural modifications.", 0, java.lang.Integer.MAX_VALUE, moiety));
         children.add(new Property("property", "", "General specifications for this substance, including how it is related to other substances.", 0, java.lang.Integer.MAX_VALUE, property));
@@ -4638,7 +4638,7 @@ public class SubstanceSpecification extends DomainResource {
         case 950398559: /*comment*/  return new Property("comment", "string", "Textual comment.", 0, 1, comment);
         case -251826186: /*stoichiometric*/  return new Property("stoichiometric", "boolean", "Chemicals may be stoichiometric or non-stoichiometric.", 0, 1, stoichiometric);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier by which this substance is known.", 0, 1, identifier);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "High level categorisation, e.g. polymer or nucleic acid.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "High level categorization, e.g. polymer or nucleic acid.", 0, 1, type);
         case 882421574: /*referenceSource*/  return new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource);
         case -1068650173: /*moiety*/  return new Property("moiety", "", "Moiety, for structural modifications.", 0, java.lang.Integer.MAX_VALUE, moiety);
         case -993141291: /*property*/  return new Property("property", "", "General specifications for this substance, including how it is related to other substances.", 0, java.lang.Integer.MAX_VALUE, property);

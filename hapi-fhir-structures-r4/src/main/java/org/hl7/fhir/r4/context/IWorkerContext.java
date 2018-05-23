@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.ExpansionProfile;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
@@ -22,6 +23,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander.TerminologyServiceErrorCla
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.utils.INarrativeGenerator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.TranslationServices;
@@ -54,6 +56,9 @@ public interface IWorkerContext {
    * @return
    */
   public String getVersion();
+  
+  // get the UCUM service (might not be available)
+  public UcumService getUcumService();
   
   // -- Parsers (read and write instances) ----------------------------------------
 
@@ -222,8 +227,9 @@ public interface IWorkerContext {
    * find concept maps for a source
    * @param url
    * @return
+   * @throws FHIRException 
    */
-  public List<ConceptMap> findMapsForSource(String url);  
+  public List<ConceptMap> findMapsForSource(String url) throws FHIRException;  
 
   /**
    * ValueSet Expansion - see $expand
@@ -389,4 +395,6 @@ public interface IWorkerContext {
   public boolean isNoTerminologyServer();
 
   public TranslationServices translator();
+  public List<StructureMap> listTransforms();
+  public StructureMap getTransform(String url);
 }

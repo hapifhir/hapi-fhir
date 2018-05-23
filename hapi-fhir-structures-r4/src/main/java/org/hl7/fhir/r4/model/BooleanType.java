@@ -100,4 +100,10 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
 		}
 	}
+	
+  @Override
+  public boolean isBooleanPrimitive() {
+    return true;
+  }
+ 
 }

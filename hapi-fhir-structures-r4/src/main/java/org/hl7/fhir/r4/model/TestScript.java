@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -184,7 +184,7 @@ public class TestScript extends MetadataResource {
          */
         NOTCONTAINS, 
         /**
-         * Evaluate the fluentpath expression as a boolean condition.
+         * Evaluate the FHIRPath expression as a boolean condition.
          */
         EVAL, 
         /**
@@ -265,7 +265,7 @@ public class TestScript extends MetadataResource {
             case NOTEMPTY: return "Compare value is not empty.";
             case CONTAINS: return "Compare value string contains a known value.";
             case NOTCONTAINS: return "Compare value string does not contain a known value.";
-            case EVAL: return "Evaluate the fluentpath expression as a boolean condition.";
+            case EVAL: return "Evaluate the FHIRPath expression as a boolean condition.";
             default: return "?";
           }
         }
@@ -1755,14 +1755,14 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not the test execution will require the given capabilities of the server in order for this test script to execute.
          */
-        @Child(name = "required", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "required", type = {BooleanType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Are the capabilities required?", formalDefinition="Whether or not the test execution will require the given capabilities of the server in order for this test script to execute." )
         protected BooleanType required;
 
         /**
          * Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute.
          */
-        @Child(name = "validated", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "validated", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Are the capabilities validated?", formalDefinition="Whether or not the test execution will validate the given capabilities of the server in order for this test script to execute." )
         protected BooleanType validated;
 
@@ -1797,16 +1797,11 @@ public class TestScript extends MetadataResource {
         /**
          * Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.
          */
-        @Child(name = "capabilities", type = {CapabilityStatement.class}, order=7, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "capabilities", type = {CanonicalType.class}, order=7, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Required Capability Statement", formalDefinition="Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped." )
-        protected Reference capabilities;
+        protected CanonicalType capabilities;
 
-        /**
-         * The actual object that is the target of the reference (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.)
-         */
-        protected CapabilityStatement capabilitiesTarget;
-
-        private static final long serialVersionUID = -106110735L;
+        private static final long serialVersionUID = -1368199288L;
 
     /**
      * Constructor
@@ -1818,8 +1813,10 @@ public class TestScript extends MetadataResource {
     /**
      * Constructor
      */
-      public TestScriptMetadataCapabilityComponent(Reference capabilities) {
+      public TestScriptMetadataCapabilityComponent(BooleanType required, BooleanType validated, CanonicalType capabilities) {
         super();
+        this.required = required;
+        this.validated = validated;
         this.capabilities = capabilities;
       }
 
@@ -2018,7 +2015,7 @@ public class TestScript extends MetadataResource {
           if (this.origin == null)
             return false;
           for (IntegerType v : this.origin)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -2124,21 +2121,25 @@ public class TestScript extends MetadataResource {
           if (this.link == null)
             return false;
           for (UriType v : this.link)
-            if (v.equals(value)) // uri
+            if (v.getValue().equals(value)) // uri
               return true;
           return false;
         }
 
         /**
-         * @return {@link #capabilities} (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.)
+         * @return {@link #capabilities} (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.). This is the underlying object with id, value and extensions. The accessor "getCapabilities" gives direct access to the value
          */
-        public Reference getCapabilities() { 
+        public CanonicalType getCapabilitiesElement() { 
           if (this.capabilities == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.capabilities");
             else if (Configuration.doAutoCreate())
-              this.capabilities = new Reference(); // cc
+              this.capabilities = new CanonicalType(); // bb
           return this.capabilities;
+        }
+
+        public boolean hasCapabilitiesElement() { 
+          return this.capabilities != null && !this.capabilities.isEmpty();
         }
 
         public boolean hasCapabilities() { 
@@ -2146,30 +2147,27 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #capabilities} (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.)
+         * @param value {@link #capabilities} (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.). This is the underlying object with id, value and extensions. The accessor "getCapabilities" gives direct access to the value
          */
-        public TestScriptMetadataCapabilityComponent setCapabilities(Reference value) { 
+        public TestScriptMetadataCapabilityComponent setCapabilitiesElement(CanonicalType value) { 
           this.capabilities = value;
           return this;
         }
 
         /**
-         * @return {@link #capabilities} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.)
+         * @return Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.
          */
-        public CapabilityStatement getCapabilitiesTarget() { 
-          if (this.capabilitiesTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptMetadataCapabilityComponent.capabilities");
-            else if (Configuration.doAutoCreate())
-              this.capabilitiesTarget = new CapabilityStatement(); // aa
-          return this.capabilitiesTarget;
+        public String getCapabilities() { 
+          return this.capabilities == null ? null : this.capabilities.getValue();
         }
 
         /**
-         * @param value {@link #capabilities} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.)
+         * @param value Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.
          */
-        public TestScriptMetadataCapabilityComponent setCapabilitiesTarget(CapabilityStatement value) { 
-          this.capabilitiesTarget = value;
+        public TestScriptMetadataCapabilityComponent setCapabilities(String value) { 
+            if (this.capabilities == null)
+              this.capabilities = new CanonicalType();
+            this.capabilities.setValue(value);
           return this;
         }
 
@@ -2181,7 +2179,7 @@ public class TestScript extends MetadataResource {
           children.add(new Property("origin", "integer", "Which origin server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, origin));
           children.add(new Property("destination", "integer", "Which server these requirements apply to.", 0, 1, destination));
           children.add(new Property("link", "uri", "Links to the FHIR specification that describes this interaction and the resources involved in more detail.", 0, java.lang.Integer.MAX_VALUE, link));
-          children.add(new Property("capabilities", "Reference(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, 1, capabilities));
+          children.add(new Property("capabilities", "canonical(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, 1, capabilities));
         }
 
         @Override
@@ -2193,7 +2191,7 @@ public class TestScript extends MetadataResource {
           case -1008619738: /*origin*/  return new Property("origin", "integer", "Which origin server these requirements apply to.", 0, java.lang.Integer.MAX_VALUE, origin);
           case -1429847026: /*destination*/  return new Property("destination", "integer", "Which server these requirements apply to.", 0, 1, destination);
           case 3321850: /*link*/  return new Property("link", "uri", "Links to the FHIR specification that describes this interaction and the resources involved in more detail.", 0, java.lang.Integer.MAX_VALUE, link);
-          case -1487597642: /*capabilities*/  return new Property("capabilities", "Reference(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, 1, capabilities);
+          case -1487597642: /*capabilities*/  return new Property("capabilities", "canonical(CapabilityStatement)", "Minimum capabilities required of server for test script to execute successfully.   If server does not meet at a minimum the referenced capability statement, then all tests in this script are skipped.", 0, 1, capabilities);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2208,7 +2206,7 @@ public class TestScript extends MetadataResource {
         case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : this.origin.toArray(new Base[this.origin.size()]); // IntegerType
         case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // IntegerType
         case 3321850: /*link*/ return this.link == null ? new Base[0] : this.link.toArray(new Base[this.link.size()]); // UriType
-        case -1487597642: /*capabilities*/ return this.capabilities == null ? new Base[0] : new Base[] {this.capabilities}; // Reference
+        case -1487597642: /*capabilities*/ return this.capabilities == null ? new Base[0] : new Base[] {this.capabilities}; // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2236,7 +2234,7 @@ public class TestScript extends MetadataResource {
           this.getLink().add(castToUri(value)); // UriType
           return value;
         case -1487597642: // capabilities
-          this.capabilities = castToReference(value); // Reference
+          this.capabilities = castToCanonical(value); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2258,7 +2256,7 @@ public class TestScript extends MetadataResource {
         } else if (name.equals("link")) {
           this.getLink().add(castToUri(value));
         } else if (name.equals("capabilities")) {
-          this.capabilities = castToReference(value); // Reference
+          this.capabilities = castToCanonical(value); // CanonicalType
         } else
           return super.setProperty(name, value);
         return value;
@@ -2273,7 +2271,7 @@ public class TestScript extends MetadataResource {
         case -1008619738:  return addOriginElement();
         case -1429847026:  return getDestinationElement();
         case 3321850:  return addLinkElement();
-        case -1487597642:  return getCapabilities(); 
+        case -1487597642:  return getCapabilitiesElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -2288,7 +2286,7 @@ public class TestScript extends MetadataResource {
         case -1008619738: /*origin*/ return new String[] {"integer"};
         case -1429847026: /*destination*/ return new String[] {"integer"};
         case 3321850: /*link*/ return new String[] {"uri"};
-        case -1487597642: /*capabilities*/ return new String[] {"Reference"};
+        case -1487597642: /*capabilities*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2315,8 +2313,7 @@ public class TestScript extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.link");
         }
         else if (name.equals("capabilities")) {
-          this.capabilities = new Reference();
-          return this.capabilities;
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.capabilities");
         }
         else
           return super.addChild(name);
@@ -2384,14 +2381,14 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.
          */
-        @Child(name = "autocreate", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "autocreate", type = {BooleanType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to implicitly create the fixture during setup", formalDefinition="Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section." )
         protected BooleanType autocreate;
 
         /**
          * Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
          */
-        @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to implicitly delete the fixture during teardown", formalDefinition="Whether or not to implicitly delete the fixture during teardown. If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section." )
         protected BooleanType autodelete;
 
@@ -2414,6 +2411,15 @@ public class TestScript extends MetadataResource {
      */
       public TestScriptFixtureComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public TestScriptFixtureComponent(BooleanType autocreate, BooleanType autodelete) {
+        super();
+        this.autocreate = autocreate;
+        this.autodelete = autodelete;
       }
 
         /**
@@ -2709,10 +2715,10 @@ public class TestScript extends MetadataResource {
         protected StringType description;
 
         /**
-         * The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.
+         * The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.
          */
         @Child(name = "expression", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The fluentpath expression against the fixture body", formalDefinition="The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified." )
+        @Description(shortDefinition="The FHIRPath expression against the fixture body", formalDefinition="The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified." )
         protected StringType expression;
 
         /**
@@ -2904,7 +2910,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #expression} (The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @return {@link #expression} (The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public StringType getExpressionElement() { 
           if (this.expression == null)
@@ -2924,7 +2930,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #expression} (The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @param value {@link #expression} (The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public TestScriptVariableComponent setExpressionElement(StringType value) { 
           this.expression = value;
@@ -2932,14 +2938,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.
+         * @return The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.
          */
         public String getExpression() { 
           return this.expression == null ? null : this.expression.getValue();
         }
 
         /**
-         * @param value The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.
+         * @param value The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.
          */
         public TestScriptVariableComponent setExpression(String value) { 
           if (Utilities.noString(value))
@@ -3153,7 +3159,7 @@ public class TestScript extends MetadataResource {
           children.add(new Property("name", "string", "Descriptive name for this variable.", 0, 1, name));
           children.add(new Property("defaultValue", "string", "A default, hard-coded, or user-defined value for this variable.", 0, 1, defaultValue));
           children.add(new Property("description", "string", "A free text natural language description of the variable and its purpose.", 0, 1, description));
-          children.add(new Property("expression", "string", "The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, expression));
+          children.add(new Property("expression", "string", "The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, expression));
           children.add(new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, 1, headerField));
           children.add(new Property("hint", "string", "Displayable text string with hint help information to the user when entering a default value.", 0, 1, hint));
           children.add(new Property("path", "string", "XPath or JSONPath to evaluate against the fixture body.  When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, path));
@@ -3166,7 +3172,7 @@ public class TestScript extends MetadataResource {
           case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this variable.", 0, 1, name);
           case -659125328: /*defaultValue*/  return new Property("defaultValue", "string", "A default, hard-coded, or user-defined value for this variable.", 0, 1, defaultValue);
           case -1724546052: /*description*/  return new Property("description", "string", "A free text natural language description of the variable and its purpose.", 0, 1, description);
-          case -1795452264: /*expression*/  return new Property("expression", "string", "The fluentpath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, expression);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "The FHIRPath expression to evaluate against the fixture body. When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, expression);
           case 1160732269: /*headerField*/  return new Property("headerField", "string", "Will be used to grab the HTTP header field value from the headers that sourceId is pointing to.", 0, 1, headerField);
           case 3202695: /*hint*/  return new Property("hint", "string", "Displayable text string with hint help information to the user when entering a default value.", 0, 1, hint);
           case 3433509: /*path*/  return new Property("path", "string", "XPath or JSONPath to evaluate against the fixture body.  When variables are defined, only one of either expression, headerField or path must be specified.", 0, 1, path);
@@ -5066,7 +5072,7 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
          */
-        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to send the request url in encoded format", formalDefinition="Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths." )
         protected BooleanType encodeRequestUrl;
 
@@ -5133,6 +5139,14 @@ public class TestScript extends MetadataResource {
      */
       public SetupActionOperationComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SetupActionOperationComponent(BooleanType encodeRequestUrl) {
+        super();
+        this.encodeRequestUrl = encodeRequestUrl;
       }
 
         /**
@@ -6499,10 +6513,10 @@ public class TestScript extends MetadataResource {
         protected StringType compareToSourceId;
 
         /**
-         * The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.
+         * The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.
          */
         @Child(name = "compareToSourceExpression", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The fluentpath expression to evaluate against the source fixture", formalDefinition="The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both." )
+        @Description(shortDefinition="The FHIRPath expression to evaluate against the source fixture", formalDefinition="The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both." )
         protected StringType compareToSourceExpression;
 
         /**
@@ -6520,10 +6534,10 @@ public class TestScript extends MetadataResource {
         protected CodeType contentType;
 
         /**
-         * The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.
+         * The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.
          */
         @Child(name = "expression", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The fluentpath expression to be evaluated", formalDefinition="The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload." )
+        @Description(shortDefinition="The FHIRPath expression to be evaluated", formalDefinition="The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload." )
         protected StringType expression;
 
         /**
@@ -6638,7 +6652,7 @@ public class TestScript extends MetadataResource {
         /**
          * Whether or not the test execution will produce a warning only on error for this assert.
          */
-        @Child(name = "warningOnly", type = {BooleanType.class}, order=24, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "warningOnly", type = {BooleanType.class}, order=24, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Will this assert produce a warning only on error?", formalDefinition="Whether or not the test execution will produce a warning only on error for this assert." )
         protected BooleanType warningOnly;
 
@@ -6649,6 +6663,14 @@ public class TestScript extends MetadataResource {
      */
       public SetupActionAssertComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SetupActionAssertComponent(BooleanType warningOnly) {
+        super();
+        this.warningOnly = warningOnly;
       }
 
         /**
@@ -6848,7 +6870,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #compareToSourceExpression} (The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.). This is the underlying object with id, value and extensions. The accessor "getCompareToSourceExpression" gives direct access to the value
+         * @return {@link #compareToSourceExpression} (The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.). This is the underlying object with id, value and extensions. The accessor "getCompareToSourceExpression" gives direct access to the value
          */
         public StringType getCompareToSourceExpressionElement() { 
           if (this.compareToSourceExpression == null)
@@ -6868,7 +6890,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #compareToSourceExpression} (The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.). This is the underlying object with id, value and extensions. The accessor "getCompareToSourceExpression" gives direct access to the value
+         * @param value {@link #compareToSourceExpression} (The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.). This is the underlying object with id, value and extensions. The accessor "getCompareToSourceExpression" gives direct access to the value
          */
         public SetupActionAssertComponent setCompareToSourceExpressionElement(StringType value) { 
           this.compareToSourceExpression = value;
@@ -6876,14 +6898,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.
+         * @return The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.
          */
         public String getCompareToSourceExpression() { 
           return this.compareToSourceExpression == null ? null : this.compareToSourceExpression.getValue();
         }
 
         /**
-         * @param value The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.
+         * @param value The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.
          */
         public SetupActionAssertComponent setCompareToSourceExpression(String value) { 
           if (Utilities.noString(value))
@@ -6995,7 +7017,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #expression} (The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @return {@link #expression} (The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public StringType getExpressionElement() { 
           if (this.expression == null)
@@ -7015,7 +7037,7 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @param value {@link #expression} (The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @param value {@link #expression} (The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public SetupActionAssertComponent setExpressionElement(StringType value) { 
           this.expression = value;
@@ -7023,14 +7045,14 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.
+         * @return The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.
          */
         public String getExpression() { 
           return this.expression == null ? null : this.expression.getValue();
         }
 
         /**
-         * @param value The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.
+         * @param value The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.
          */
         public SetupActionAssertComponent setExpression(String value) { 
           if (Utilities.noString(value))
@@ -7775,10 +7797,10 @@ public class TestScript extends MetadataResource {
           children.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description));
           children.add(new Property("direction", "code", "The direction to use for the assertion.", 0, 1, direction));
           children.add(new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, 1, compareToSourceId));
-          children.add(new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression));
+          children.add(new Property("compareToSourceExpression", "string", "The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression));
           children.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourcePath));
           children.add(new Property("contentType", "code", "The mime-type contents to compare against the request or response message 'Content-Type' header.", 0, 1, contentType));
-          children.add(new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression));
+          children.add(new Property("expression", "string", "The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression));
           children.add(new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, 1, headerField));
           children.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, 1, minimumId));
           children.add(new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, 1, navigationLinks));
@@ -7804,10 +7826,10 @@ public class TestScript extends MetadataResource {
           case -1724546052: /*description*/  return new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, 1, description);
           case -962590849: /*direction*/  return new Property("direction", "code", "The direction to use for the assertion.", 0, 1, direction);
           case 2081856758: /*compareToSourceId*/  return new Property("compareToSourceId", "string", "Id of the source fixture used as the contents to be evaluated by either the \"source/expression\" or \"sourceId/path\" definition.", 0, 1, compareToSourceId);
-          case -1415702669: /*compareToSourceExpression*/  return new Property("compareToSourceExpression", "string", "The fluentpath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression);
+          case -1415702669: /*compareToSourceExpression*/  return new Property("compareToSourceExpression", "string", "The FHIRPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourceExpression);
           case -790206144: /*compareToSourcePath*/  return new Property("compareToSourcePath", "string", "XPath or JSONPath expression to evaluate against the source fixture. When compareToSourceId is defined, either compareToSourceExpression or compareToSourcePath must be defined, but not both.", 0, 1, compareToSourcePath);
           case -389131437: /*contentType*/  return new Property("contentType", "code", "The mime-type contents to compare against the request or response message 'Content-Type' header.", 0, 1, contentType);
-          case -1795452264: /*expression*/  return new Property("expression", "string", "The fluentpath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.", 0, 1, expression);
           case 1160732269: /*headerField*/  return new Property("headerField", "string", "The HTTP header field name e.g. 'Location'.", 0, 1, headerField);
           case 818925001: /*minimumId*/  return new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimum the fixture specified by minimumId.", 0, 1, minimumId);
           case 1001488901: /*navigationLinks*/  return new Property("navigationLinks", "boolean", "Whether or not the test execution performs validation on the bundle navigation links.", 0, 1, navigationLinks);
@@ -10365,10 +10387,10 @@ public class TestScript extends MetadataResource {
     protected Identifier identifier;
 
     /**
-     * Explaination of why this test script is needed and why it has been designed as it has.
+     * Explanation of why this test script is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this test script is defined", formalDefinition="Explaination of why this test script is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this test script is defined", formalDefinition="Explanation of why this test script is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -10454,10 +10476,10 @@ public class TestScript extends MetadataResource {
     protected List<TestScriptTestComponent> test;
 
     /**
-     * A series of operations required to clean up after the all the tests are executed (successfully or otherwise).
+     * A series of operations required to clean up after all the tests are executed (successfully or otherwise).
      */
     @Child(name = "teardown", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)." )
+    @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
     private static final long serialVersionUID = 1164952373L;
@@ -10480,7 +10502,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this test script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -10500,7 +10522,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this test script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public TestScript setUrlElement(UriType value) { 
       this.url = value;
@@ -10508,14 +10530,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.
+     * @return An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this test script is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.
+     * @param value An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this test script is (or will be) published.
      */
     public TestScript setUrl(String value) { 
         if (this.url == null)
@@ -10737,7 +10759,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -10757,7 +10779,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public TestScript setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -10765,14 +10787,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public TestScript setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -10782,7 +10804,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the test script was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -10802,7 +10824,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the test script was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public TestScript setDateElement(DateTimeType value) { 
       this.date = value;
@@ -10810,14 +10832,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
+     * @return The date  (and optionally time) when the test script was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
+     * @param value The date  (and optionally time) when the test script was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.
      */
     public TestScript setDate(Date value) { 
       if (value == null)
@@ -10831,7 +10853,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the test script.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the test script.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -10851,7 +10873,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the test script.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the test script.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public TestScript setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -10859,14 +10881,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the test script.
+     * @return The name of the organization or individual that published the test script.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the test script.
+     * @param value The name of the organization or individual that published the test script.
      */
     public TestScript setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -11088,7 +11110,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -11108,7 +11130,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this test script is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public TestScript setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -11116,14 +11138,14 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return Explaination of why this test script is needed and why it has been designed as it has.
+     * @return Explanation of why this test script is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this test script is needed and why it has been designed as it has.
+     * @param value Explanation of why this test script is needed and why it has been designed as it has.
      */
     public TestScript setPurpose(String value) { 
       if (value == null)
@@ -11668,7 +11690,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #teardown} (A series of operations required to clean up after the all the tests are executed (successfully or otherwise).)
+     * @return {@link #teardown} (A series of operations required to clean up after all the tests are executed (successfully or otherwise).)
      */
     public TestScriptTeardownComponent getTeardown() { 
       if (this.teardown == null)
@@ -11684,7 +11706,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @param value {@link #teardown} (A series of operations required to clean up after the all the tests are executed (successfully or otherwise).)
+     * @param value {@link #teardown} (A series of operations required to clean up after all the tests are executed (successfully or otherwise).)
      */
     public TestScript setTeardown(TestScriptTeardownComponent value) { 
       this.teardown = value;
@@ -11693,20 +11715,20 @@ public class TestScript extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this test script is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the test script.", 0, 1, title));
         children.add(new Property("status", "code", "The status of this test script. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the test script.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the test script.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this test script is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this test script is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, 1, copyright));
         children.add(new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin));
         children.add(new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination));
@@ -11718,26 +11740,26 @@ public class TestScript extends MetadataResource {
         children.add(new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         children.add(new Property("setup", "", "A series of required setup operations before tests are executed.", 0, 1, setup));
         children.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));
-        children.add(new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, 1, teardown));
+        children.add(new Property("teardown", "", "A series of operations required to clean up after all the tests are executed (successfully or otherwise).", 0, 1, teardown));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this test script is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this test script when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this test script is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this test script when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the test script when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the test script author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the test script. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the test script.", 0, 1, title);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this test script. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the test script.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this test script is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the test script was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the test script changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the test script.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this test script is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this test script is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, 1, copyright);
         case -1008619738: /*origin*/  return new Property("origin", "", "An abstract server used in operations within this test script in the origin element.", 0, java.lang.Integer.MAX_VALUE, origin);
         case -1429847026: /*destination*/  return new Property("destination", "", "An abstract server used in operations within this test script in the destination element.", 0, java.lang.Integer.MAX_VALUE, destination);
@@ -11749,7 +11771,7 @@ public class TestScript extends MetadataResource {
         case 1548678118: /*ruleset*/  return new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset);
         case 109329021: /*setup*/  return new Property("setup", "", "A series of required setup operations before tests are executed.", 0, 1, setup);
         case 3556498: /*test*/  return new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test);
-        case -1663474172: /*teardown*/  return new Property("teardown", "", "A series of operations required to clean up after the all the tests are executed (successfully or otherwise).", 0, 1, teardown);
+        case -1663474172: /*teardown*/  return new Property("teardown", "", "A series of operations required to clean up after all the tests are executed (successfully or otherwise).", 0, 1, teardown);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

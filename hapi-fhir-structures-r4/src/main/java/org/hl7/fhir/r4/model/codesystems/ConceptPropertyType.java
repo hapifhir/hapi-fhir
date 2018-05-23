@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,6 +61,10 @@ public enum ConceptPropertyType {
          */
         DATETIME, 
         /**
+         * The property value is a decimal number
+         */
+        DECIMAL, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -79,6 +83,8 @@ public enum ConceptPropertyType {
           return BOOLEAN;
         if ("dateTime".equals(codeString))
           return DATETIME;
+        if ("decimal".equals(codeString))
+          return DECIMAL;
         throw new FHIRException("Unknown ConceptPropertyType code '"+codeString+"'");
         }
         public String toCode() {
@@ -89,6 +95,7 @@ public enum ConceptPropertyType {
             case INTEGER: return "integer";
             case BOOLEAN: return "boolean";
             case DATETIME: return "dateTime";
+            case DECIMAL: return "decimal";
             default: return "?";
           }
         }
@@ -103,6 +110,7 @@ public enum ConceptPropertyType {
             case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments)";
             case BOOLEAN: return "The property value is a boolean true | false";
             case DATETIME: return "The property is a date or a date + time";
+            case DECIMAL: return "The property value is a decimal number";
             default: return "?";
           }
         }
@@ -114,6 +122,7 @@ public enum ConceptPropertyType {
             case INTEGER: return "integer";
             case BOOLEAN: return "boolean";
             case DATETIME: return "dateTime";
+            case DECIMAL: return "decimal";
             default: return "?";
           }
     }

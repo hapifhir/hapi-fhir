@@ -33,6 +33,8 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +60,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 	 */
 	@Override
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
+	@Transactional(propagation = Propagation.NEVER)
 	public void performReindexingPass() {
 		if (getConfig().isSchedulingDisabled()) {
 			return;

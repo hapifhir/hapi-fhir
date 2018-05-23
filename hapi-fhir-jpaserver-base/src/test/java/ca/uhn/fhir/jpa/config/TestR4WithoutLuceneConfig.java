@@ -27,11 +27,8 @@ public class TestR4WithoutLuceneConfig extends TestR4Config {
 	@Override
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setDataSource(dataSource());
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
@@ -41,7 +38,7 @@ public class TestR4WithoutLuceneConfig extends TestR4Config {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
+		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
 		extraProperties.put("hibernate.search.autoregister_listeners", "false");
 		return extraProperties;
 	}

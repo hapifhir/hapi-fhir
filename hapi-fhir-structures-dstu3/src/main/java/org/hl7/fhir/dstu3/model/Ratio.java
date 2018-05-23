@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A relationship of two Quantity values - expressed as a numerator and a denominator.
  */
@@ -88,7 +89,7 @@ public class Ratio extends Type implements ICompositeType {
     /**
      * @param value {@link #numerator} (The value of the numerator.)
      */
-    public Ratio setNumerator(Quantity value) { 
+    public Ratio setNumerator(Quantity value)  { 
       this.numerator = value;
       return this;
     }
@@ -112,15 +113,25 @@ public class Ratio extends Type implements ICompositeType {
     /**
      * @param value {@link #denominator} (The value of the denominator.)
      */
-    public Ratio setDenominator(Quantity value) { 
+    public Ratio setDenominator(Quantity value)  { 
       this.denominator = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("numerator", "Quantity", "The value of the numerator.", 0, java.lang.Integer.MAX_VALUE, numerator));
-        childrenList.add(new Property("denominator", "Quantity", "The value of the denominator.", 0, java.lang.Integer.MAX_VALUE, denominator));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("numerator", "Quantity", "The value of the numerator.", 0, 1, numerator));
+        children.add(new Property("denominator", "Quantity", "The value of the denominator.", 0, 1, denominator));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 1747334793: /*numerator*/  return new Property("numerator", "Quantity", "The value of the numerator.", 0, 1, numerator);
+        case -1983274394: /*denominator*/  return new Property("denominator", "Quantity", "The value of the denominator.", 0, 1, denominator);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -210,23 +221,23 @@ public class Ratio extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Ratio))
+        if (!(other_ instanceof Ratio))
           return false;
-        Ratio o = (Ratio) other;
+        Ratio o = (Ratio) other_;
         return compareDeep(numerator, o.numerator, true) && compareDeep(denominator, o.denominator, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Ratio))
+        if (!(other_ instanceof Ratio))
           return false;
-        Ratio o = (Ratio) other;
+        Ratio o = (Ratio) other_;
         return true;
       }
 

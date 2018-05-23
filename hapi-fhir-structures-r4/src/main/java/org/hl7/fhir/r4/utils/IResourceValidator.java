@@ -103,6 +103,9 @@ public interface IResourceValidator {
   public boolean isNoTerminologyChecks();
   public IResourceValidator setNoTerminologyChecks(boolean noTerminologyChecks);
 
+  public boolean isNoExtensibleWarnings();
+  public IResourceValidator setNoExtensibleWarnings(boolean noExtensibleWarnings);
+  
   /**
    * Whether being unable to resolve a profile in found in Resource.meta.profile or ElementDefinition.type.profile or targetProfile is an error or just a warning
    * @return

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,11 +49,11 @@ public enum DiscriminatorType {
          */
         PATTERN, 
         /**
-         * The slices are differentiated by type of the nominated element to a specifed profile
+         * The slices are differentiated by type of the nominated element
          */
         TYPE, 
         /**
-         * The slices are differentiated by conformance of the nominated element to a specifed profile
+         * The slices are differentiated by conformance of the nominated element to a specified profile. Note that if the path specifies .resolve() then the profile is the target profile on the reference. In this case, validation by the possible profiles is required to differentiate the slices
          */
         PROFILE, 
         /**
@@ -93,8 +93,8 @@ public enum DiscriminatorType {
             case VALUE: return "The slices have different values in the nominated element";
             case EXISTS: return "The slices are differentiated by the presence or absence of the nominated element";
             case PATTERN: return "The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x]";
-            case TYPE: return "The slices are differentiated by type of the nominated element to a specifed profile";
-            case PROFILE: return "The slices are differentiated by conformance of the nominated element to a specifed profile";
+            case TYPE: return "The slices are differentiated by type of the nominated element";
+            case PROFILE: return "The slices are differentiated by conformance of the nominated element to a specified profile. Note that if the path specifies .resolve() then the profile is the target profile on the reference. In this case, validation by the possible profiles is required to differentiate the slices";
             default: return "?";
           }
         }

@@ -214,6 +214,30 @@ public class FHIRToolingClient {
 		return result.getPayload();
 	}
 	
+	// GET fhir/ValueSet?url=http://hl7.org/fhir/ValueSet/clinical-findings&version=0.8
+
+  public <T extends Resource> T getCanonical(Class<T> resourceClass, String canonicalURL) {
+    ResourceRequest<T> result = null;
+    try {
+      result = utils.issueGetResourceRequest(resourceAddress.resolveGetUriFromResourceClassAndCanonical(resourceClass, canonicalURL), getPreferredResourceFormat());
+      result.addErrorStatus(410);//gone
+      result.addErrorStatus(404);//unknown
+      result.addErrorStatus(405);//unknown
+      result.addSuccessStatus(200);//Only one for now
+      if(result.isUnsuccessfulRequest()) {
+        throw new EFhirClientException("Server returned error code " + result.getHttpStatus(), (OperationOutcome)result.getPayload());
+      }
+    } catch (Exception e) {
+      handleException("An error has occurred while trying to read this version of the resource", e);
+    }
+    Bundle bnd = (Bundle) result.getPayload();
+    if (bnd.getEntry().size() == 0)
+      throw new EFhirClientException("No matching resource found for canonical URL '"+canonicalURL+"'");
+    if (bnd.getEntry().size() > 1)
+      throw new EFhirClientException("Multiple matching resources found for canonical URL '"+canonicalURL+"'");
+    return (T) bnd.getEntry().get(0).getResource();
+  }
+  
 //	
 //	public <T extends Resource> T update(Class<T> resourceClass, T resource, String id) {
 //		ResourceRequest<T> result = null;

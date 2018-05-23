@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.
  */
@@ -257,7 +258,7 @@ public class CareTeam extends DomainResource {
         /**
          * @param value {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.)
          */
-        public CareTeamParticipantComponent setRole(CodeableConcept value) { 
+        public CareTeamParticipantComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -281,7 +282,7 @@ public class CareTeam extends DomainResource {
         /**
          * @param value {@link #member} (The specific person or organization who is participating/expected to participate in the care team.)
          */
-        public CareTeamParticipantComponent setMember(Reference value) { 
+        public CareTeamParticipantComponent setMember(Reference value)  { 
           this.member = value;
           return this;
         }
@@ -320,7 +321,7 @@ public class CareTeam extends DomainResource {
         /**
          * @param value {@link #onBehalfOf} (The organization of the practitioner.)
          */
-        public CareTeamParticipantComponent setOnBehalfOf(Reference value) { 
+        public CareTeamParticipantComponent setOnBehalfOf(Reference value)  { 
           this.onBehalfOf = value;
           return this;
         }
@@ -364,17 +365,29 @@ public class CareTeam extends DomainResource {
         /**
          * @param value {@link #period} (Indicates when the specific member or organization did (or is intended to) come into effect and end.)
          */
-        public CareTeamParticipantComponent setPeriod(Period value) { 
+        public CareTeamParticipantComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, java.lang.Integer.MAX_VALUE, member));
-          childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization of the practitioner.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
-          childrenList.add(new Property("period", "Period", "Indicates when the specific member or organization did (or is intended to) come into effect and end.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, 1, role));
+          children.add(new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, 1, member));
+          children.add(new Property("onBehalfOf", "Reference(Organization)", "The organization of the practitioner.", 0, 1, onBehalfOf));
+          children.add(new Property("period", "Period", "Indicates when the specific member or organization did (or is intended to) come into effect and end.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, 1, role);
+          case -1077769574: /*member*/  return new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, 1, member);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization)", "The organization of the practitioner.", 0, 1, onBehalfOf);
+          case -991726143: /*period*/  return new Property("period", "Period", "Indicates when the specific member or organization did (or is intended to) come into effect and end.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -481,23 +494,23 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CareTeamParticipantComponent))
+        if (!(other_ instanceof CareTeamParticipantComponent))
           return false;
-        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other;
+        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(member, o.member, true) && compareDeep(onBehalfOf, o.onBehalfOf, true)
            && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CareTeamParticipantComponent))
+        if (!(other_ instanceof CareTeamParticipantComponent))
           return false;
-        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other;
+        CareTeamParticipantComponent o = (CareTeamParticipantComponent) other_;
         return true;
       }
 
@@ -852,7 +865,7 @@ public class CareTeam extends DomainResource {
     /**
      * @param value {@link #subject} (Identifies the patient or group whose intended care is handled by the team.)
      */
-    public CareTeam setSubject(Reference value) { 
+    public CareTeam setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -891,7 +904,7 @@ public class CareTeam extends DomainResource {
     /**
      * @param value {@link #context} (The encounter or episode of care that establishes the context for this care team.)
      */
-    public CareTeam setContext(Reference value) { 
+    public CareTeam setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -930,7 +943,7 @@ public class CareTeam extends DomainResource {
     /**
      * @param value {@link #period} (Indicates when the team did (or is intended to) come into effect and end.)
      */
-    public CareTeam setPeriod(Period value) { 
+    public CareTeam setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -1244,20 +1257,40 @@ public class CareTeam extends DomainResource {
       return getNote().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care team that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Indicates the current state of the care team.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("name", "string", "A label for human use intended to distinguish like teams.  E.g. the \"red\" vs. \"green\" trauma teams.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is handled by the team.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this care team.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("period", "Period", "Indicates when the team did (or is intended to) come into effect and end.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("participant", "", "Identifies all people and organizations who are expected to be involved in the care team.", 0, java.lang.Integer.MAX_VALUE, participant));
-        childrenList.add(new Property("reasonCode", "CodeableConcept", "Describes why the care team exists.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        childrenList.add(new Property("reasonReference", "Reference(Condition)", "Condition(s) that this care team addresses.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
-        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the care team.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
-        childrenList.add(new Property("note", "Annotation", "Comments made about the CareTeam.", 0, java.lang.Integer.MAX_VALUE, note));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "This records identifiers associated with this care team that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "Indicates the current state of the care team.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("name", "string", "A label for human use intended to distinguish like teams.  E.g. the \"red\" vs. \"green\" trauma teams.", 0, 1, name));
+        children.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is handled by the team.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this care team.", 0, 1, context));
+        children.add(new Property("period", "Period", "Indicates when the team did (or is intended to) come into effect and end.", 0, 1, period));
+        children.add(new Property("participant", "", "Identifies all people and organizations who are expected to be involved in the care team.", 0, java.lang.Integer.MAX_VALUE, participant));
+        children.add(new Property("reasonCode", "CodeableConcept", "Describes why the care team exists.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition)", "Condition(s) that this care team addresses.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the care team.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
+        children.add(new Property("note", "Annotation", "Comments made about the CareTeam.", 0, java.lang.Integer.MAX_VALUE, note));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this care team that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates the current state of the care team.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Identifies what kind of team.  This is to support differentiation between multiple co-existing teams, such as care plan team, episode of care team, longitudinal care team.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 3373707: /*name*/  return new Property("name", "string", "A label for human use intended to distinguish like teams.  E.g. the \"red\" vs. \"green\" trauma teams.", 0, 1, name);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is handled by the team.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this care team.", 0, 1, context);
+        case -991726143: /*period*/  return new Property("period", "Period", "Indicates when the team did (or is intended to) come into effect and end.", 0, 1, period);
+        case 767422259: /*participant*/  return new Property("participant", "", "Identifies all people and organizations who are expected to be involved in the care team.", 0, java.lang.Integer.MAX_VALUE, participant);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Describes why the care team exists.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition)", "Condition(s) that this care team addresses.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the care team.", 0, java.lang.Integer.MAX_VALUE, managingOrganization);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the CareTeam.", 0, java.lang.Integer.MAX_VALUE, note);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1498,12 +1531,12 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CareTeam))
+        if (!(other_ instanceof CareTeam))
           return false;
-        CareTeam o = (CareTeam) other;
+        CareTeam o = (CareTeam) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
            && compareDeep(period, o.period, true) && compareDeep(participant, o.participant, true) && compareDeep(reasonCode, o.reasonCode, true)
@@ -1512,12 +1545,12 @@ public class CareTeam extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CareTeam))
+        if (!(other_ instanceof CareTeam))
           return false;
-        CareTeam o = (CareTeam) other;
+        CareTeam o = (CareTeam) other_;
         return compareValues(status, o.status, true) && compareValues(name, o.name, true);
       }
 

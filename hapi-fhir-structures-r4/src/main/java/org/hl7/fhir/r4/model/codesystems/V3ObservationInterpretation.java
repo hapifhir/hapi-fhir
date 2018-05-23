@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -224,6 +224,10 @@ Projects: ISO 20776-1, ISO 20776-2
                            This antimicrobial susceptibility test interpretation concept is recommended by OO to be deprecated as it is no longer recommended for use in susceptibility testing by CLSI (reference CLSI document M100-S22; Vol. 32 No.3; CLSI Performance Standards for Antimicrobial Susceptibility Testing; Twenty-Second Informational Supplement. Jan 2012).
          */
         MS, 
+        /**
+         * Use when not enough clinical trial data published by the Clinical and Laboratory Standards Institutes (CLSI) is available to establish the breakpoints for susceptible / intermediate and resistant.
+         */
+        NCL, 
         /**
          * A category used for isolates for which only a susceptible interpretive criterion has been designated because of the absence or rare occurrence of resistant strains. Isolates that have MICs above or zone diameters below the value indicated for the susceptible breakpoint should be reported as non-susceptible.
 
@@ -456,6 +460,8 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
           return I;
         if ("MS".equals(codeString))
           return MS;
+        if ("NCL".equals(codeString))
+          return NCL;
         if ("NS".equals(codeString))
           return NS;
         if ("R".equals(codeString))
@@ -542,6 +548,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case _OBSERVATIONINTERPRETATIONSUSCEPTIBILITY: return "_ObservationInterpretationSusceptibility";
             case I: return "I";
             case MS: return "MS";
+            case NCL: return "NCL";
             case NS: return "NS";
             case R: return "R";
             case SYNR: return "SYN-R";
@@ -606,6 +613,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case _OBSERVATIONINTERPRETATIONSUSCEPTIBILITY: return "Interpretations of anti-microbial susceptibility testing results (microbiology). At most one allowed.";
             case I: return "Bacterial strain inhibited in vitro by a concentration of an antimicrobial agent that is associated with uncertain therapeutic effect. Reference: CLSI (http://www.clsi.org/Content/NavigationMenu/Resources/HarmonizedTerminologyDatabase/Harmonized_Terminolo.htm)\nProjects: ISO 20776-1, ISO 20776-2\r\n\n                        [Note 1: Bacterial strains are categorized as intermediate by applying the appropriate breakpoints in a defined phenotypic test system.]\r\n\n                        [Note 2: This class of susceptibility implies that an infection due to the isolate can be appropriately treated in body sites where the drugs are physiologically concentrated or when a high dosage of drug can be used.]\r\n\n                        [Note 3: This class also indicates a \"buffer zone,\" to prevent small, uncontrolled, technical factors from causing major discrepancies in interpretations.]\r\n\n                        [Note 4: These breakpoints can be altered due to changes in circumstances (e.g., changes in commonly used drug dosages, emergence of new resistance mechanisms).]";
             case MS: return "The patient is considered as carrier based on the testing results. A carrier is an individual who carries an altered form of a gene which can lead to having a child or offspring in future generations with a genetic disorder.\r\n\n                        \n                           \n                              Deprecation Comment: \n                           This antimicrobial susceptibility test interpretation concept is recommended by OO to be deprecated as it is no longer recommended for use in susceptibility testing by CLSI (reference CLSI document M100-S22; Vol. 32 No.3; CLSI Performance Standards for Antimicrobial Susceptibility Testing; Twenty-Second Informational Supplement. Jan 2012).";
+            case NCL: return "Use when not enough clinical trial data published by the Clinical and Laboratory Standards Institutes (CLSI) is available to establish the breakpoints for susceptible / intermediate and resistant.";
             case NS: return "A category used for isolates for which only a susceptible interpretive criterion has been designated because of the absence or rare occurrence of resistant strains. Isolates that have MICs above or zone diameters below the value indicated for the susceptible breakpoint should be reported as non-susceptible.\r\n\n                        NOTE 1: An isolate that is interpreted as non-susceptible does not necessarily mean that the isolate has a resistance mechanism. It is possible that isolates with MICs above the susceptible breakpoint that lack resistance mechanisms may be encountered within the wild-type distribution subsequent to the time the susceptible-only breakpoint is set. \r\n\n                        NOTE 2: For strains yielding results in the \"nonsusceptible\" category, organism identification and antimicrobial susceptibility test results should be confirmed.\r\n\n                        Synonym: decreased susceptibility.";
             case R: return "Bacterial strain inhibited in vitro by a concentration of an antimicrobial agent that is associated with a high likelihood of therapeutic failure.\nReference: CLSI (http://www.clsi.org/Content/NavigationMenu/Resources/HarmonizedTerminologyDatabase/Harmonized_Terminolo.htm)  \nProjects: ISO 20776-1, ISO 20776-2\r\n\n                        [Note 1: Bacterial strains are categorized as resistant by applying the appropriate breakpoints in a defined phenotypic test system.]\r\n\n                        [Note 2: This breakpoint can be altered due to changes in circumstances (e.g., changes in commonly used drug dosages, emergence of new resistance mechanisms).]";
             case SYNR: return "A category for isolates where the bacteria (e.g. enterococci) are not susceptible in vitro to a combination therapy (e.g., high-level aminoglycoside and cell wall active agent).  This is predictive that this combination therapy will not be effective. \r\n\n                        \n                           Usage Note: Since the use of penicillin or ampicillin alone often results in treatment failure of serious enterococcal or other bacterial infections, combination therapy is usually indicated to enhance bactericidal activity. The synergy between a cell wall active agent (such as penicillin, ampicillin, or vancomycin) and an aminoglycoside (such as gentamicin, kanamycin or streptomycin) is best predicted by screening for high-level bacterial resistance to the aminoglycoside.\r\n\n                        \n                           Open Issue: The print name of the code is very general and the description is very specific to a pair of classes of agents, which may lead to confusion of these concepts in the future should other synergies be found.";
@@ -667,6 +675,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
             case _OBSERVATIONINTERPRETATIONSUSCEPTIBILITY: return "ObservationInterpretationSusceptibility";
             case I: return "Intermediate";
             case MS: return "moderately susceptible";
+            case NCL: return "No CLSI defined breakpoint";
             case NS: return "Non-susceptible";
             case R: return "Resistant";
             case SYNR: return "Synergy - resistant";

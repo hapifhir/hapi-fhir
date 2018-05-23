@@ -492,7 +492,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
@@ -512,7 +511,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM,"SYSTEM NAME" , cs);
 		return codeSystem;
 	}
 

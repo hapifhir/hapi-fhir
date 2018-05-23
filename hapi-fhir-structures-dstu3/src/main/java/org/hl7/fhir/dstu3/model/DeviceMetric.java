@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
  */
@@ -913,11 +914,22 @@ public class DeviceMetric extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "Describes the type of the calibration method.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("state", "code", "Describes the state of the calibration.", 0, java.lang.Integer.MAX_VALUE, state));
-          childrenList.add(new Property("time", "instant", "Describes the time last calibration has been performed.", 0, java.lang.Integer.MAX_VALUE, time));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "Describes the type of the calibration method.", 0, 1, type));
+          children.add(new Property("state", "code", "Describes the state of the calibration.", 0, 1, state));
+          children.add(new Property("time", "instant", "Describes the time last calibration has been performed.", 0, 1, time));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "Describes the type of the calibration method.", 0, 1, type);
+          case 109757585: /*state*/  return new Property("state", "code", "Describes the state of the calibration.", 0, 1, state);
+          case 3560141: /*time*/  return new Property("time", "instant", "Describes the time last calibration has been performed.", 0, 1, time);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1012,23 +1024,23 @@ public class DeviceMetric extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceMetricCalibrationComponent))
+        if (!(other_ instanceof DeviceMetricCalibrationComponent))
           return false;
-        DeviceMetricCalibrationComponent o = (DeviceMetricCalibrationComponent) other;
+        DeviceMetricCalibrationComponent o = (DeviceMetricCalibrationComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(state, o.state, true) && compareDeep(time, o.time, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceMetricCalibrationComponent))
+        if (!(other_ instanceof DeviceMetricCalibrationComponent))
           return false;
-        DeviceMetricCalibrationComponent o = (DeviceMetricCalibrationComponent) other;
+        DeviceMetricCalibrationComponent o = (DeviceMetricCalibrationComponent) other_;
         return compareValues(type, o.type, true) && compareValues(state, o.state, true) && compareValues(time, o.time, true)
           ;
       }
@@ -1167,7 +1179,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * @param value {@link #identifier} (Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID.  It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.)
      */
-    public DeviceMetric setIdentifier(Identifier value) { 
+    public DeviceMetric setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -1191,7 +1203,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * @param value {@link #type} (Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.)
      */
-    public DeviceMetric setType(CodeableConcept value) { 
+    public DeviceMetric setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -1215,7 +1227,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * @param value {@link #unit} (Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.)
      */
-    public DeviceMetric setUnit(CodeableConcept value) { 
+    public DeviceMetric setUnit(CodeableConcept value)  { 
       this.unit = value;
       return this;
     }
@@ -1239,7 +1251,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * @param value {@link #source} (Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacturer, serial number, etc.)
      */
-    public DeviceMetric setSource(Reference value) { 
+    public DeviceMetric setSource(Reference value)  { 
       this.source = value;
       return this;
     }
@@ -1283,7 +1295,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * @param value {@link #parent} (Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device. An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.)
      */
-    public DeviceMetric setParent(Reference value) { 
+    public DeviceMetric setParent(Reference value)  { 
       this.parent = value;
       return this;
     }
@@ -1470,7 +1482,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * @param value {@link #measurementPeriod} (Describes the measurement repetition time. This is not necessarily the same as the update period. The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour. The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.)
      */
-    public DeviceMetric setMeasurementPeriod(Timing value) { 
+    public DeviceMetric setMeasurementPeriod(Timing value)  { 
       this.measurementPeriod = value;
       return this;
     }
@@ -1528,18 +1540,36 @@ public class DeviceMetric extends DomainResource {
       return getCalibration().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID.  It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "CodeableConcept", "Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("unit", "CodeableConcept", "Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.", 0, java.lang.Integer.MAX_VALUE, unit));
-        childrenList.add(new Property("source", "Reference(Device)", "Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacturer, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("parent", "Reference(DeviceComponent)", "Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device. An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.", 0, java.lang.Integer.MAX_VALUE, parent));
-        childrenList.add(new Property("operationalStatus", "code", "Indicates current operational state of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
-        childrenList.add(new Property("color", "code", "Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.", 0, java.lang.Integer.MAX_VALUE, color));
-        childrenList.add(new Property("category", "code", "Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("measurementPeriod", "Timing", "Describes the measurement repetition time. This is not necessarily the same as the update period. The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour. The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.", 0, java.lang.Integer.MAX_VALUE, measurementPeriod));
-        childrenList.add(new Property("calibration", "", "Describes the calibrations that have been performed or that are required to be performed.", 0, java.lang.Integer.MAX_VALUE, calibration));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID.  It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.", 0, 1, identifier));
+        children.add(new Property("type", "CodeableConcept", "Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.", 0, 1, type));
+        children.add(new Property("unit", "CodeableConcept", "Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.", 0, 1, unit));
+        children.add(new Property("source", "Reference(Device)", "Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacturer, serial number, etc.", 0, 1, source));
+        children.add(new Property("parent", "Reference(DeviceComponent)", "Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device. An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.", 0, 1, parent));
+        children.add(new Property("operationalStatus", "code", "Indicates current operational state of the device. For example: On, Off, Standby, etc.", 0, 1, operationalStatus));
+        children.add(new Property("color", "code", "Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.", 0, 1, color));
+        children.add(new Property("category", "code", "Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.", 0, 1, category));
+        children.add(new Property("measurementPeriod", "Timing", "Describes the measurement repetition time. This is not necessarily the same as the update period. The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour. The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.", 0, 1, measurementPeriod));
+        children.add(new Property("calibration", "", "Describes the calibrations that have been performed or that are required to be performed.", 0, java.lang.Integer.MAX_VALUE, calibration));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID.  It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.", 0, 1, identifier);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.", 0, 1, type);
+        case 3594628: /*unit*/  return new Property("unit", "CodeableConcept", "Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.", 0, 1, unit);
+        case -896505829: /*source*/  return new Property("source", "Reference(Device)", "Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacturer, serial number, etc.", 0, 1, source);
+        case -995424086: /*parent*/  return new Property("parent", "Reference(DeviceComponent)", "Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device. An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.", 0, 1, parent);
+        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "code", "Indicates current operational state of the device. For example: On, Off, Standby, etc.", 0, 1, operationalStatus);
+        case 94842723: /*color*/  return new Property("color", "code", "Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.", 0, 1, color);
+        case 50511102: /*category*/  return new Property("category", "code", "Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.", 0, 1, category);
+        case -1300332387: /*measurementPeriod*/  return new Property("measurementPeriod", "Timing", "Describes the measurement repetition time. This is not necessarily the same as the update period. The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour. The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.", 0, 1, measurementPeriod);
+        case 1421318634: /*calibration*/  return new Property("calibration", "", "Describes the calibrations that have been performed or that are required to be performed.", 0, java.lang.Integer.MAX_VALUE, calibration);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1739,12 +1769,12 @@ public class DeviceMetric extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceMetric))
+        if (!(other_ instanceof DeviceMetric))
           return false;
-        DeviceMetric o = (DeviceMetric) other;
+        DeviceMetric o = (DeviceMetric) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(unit, o.unit, true)
            && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalStatus, o.operationalStatus, true)
            && compareDeep(color, o.color, true) && compareDeep(category, o.category, true) && compareDeep(measurementPeriod, o.measurementPeriod, true)
@@ -1752,12 +1782,12 @@ public class DeviceMetric extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceMetric))
+        if (!(other_ instanceof DeviceMetric))
           return false;
-        DeviceMetric o = (DeviceMetric) other;
+        DeviceMetric o = (DeviceMetric) other_;
         return compareValues(operationalStatus, o.operationalStatus, true) && compareValues(color, o.color, true)
            && compareValues(category, o.category, true);
       }

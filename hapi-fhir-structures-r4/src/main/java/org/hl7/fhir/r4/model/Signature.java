@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
+ * A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.
  */
 @DatatypeDef(name="Signature")
 public class Signature extends Type implements ICompositeType {
@@ -225,26 +225,30 @@ public class Signature extends Type implements ICompositeType {
      * @return {@link #who} (A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).)
      */
     public UriType getWhoUriType() throws FHIRException { 
+      if (this.who == null)
+        return null;
       if (!(this.who instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
       return (UriType) this.who;
     }
 
     public boolean hasWhoUriType() { 
-      return this.who instanceof UriType;
+      return this != null && this.who instanceof UriType;
     }
 
     /**
      * @return {@link #who} (A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).)
      */
     public Reference getWhoReference() throws FHIRException { 
+      if (this.who == null)
+        return null;
       if (!(this.who instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
       return (Reference) this.who;
     }
 
     public boolean hasWhoReference() { 
-      return this.who instanceof Reference;
+      return this != null && this.who instanceof Reference;
     }
 
     public boolean hasWho() { 
@@ -255,6 +259,8 @@ public class Signature extends Type implements ICompositeType {
      * @param value {@link #who} (A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).)
      */
     public Signature setWho(Type value) { 
+      if (value != null && !(value instanceof UriType || value instanceof Reference))
+        throw new Error("Not the right type for Signature.who[x]: "+value.fhirType());
       this.who = value;
       return this;
     }
@@ -270,26 +276,30 @@ public class Signature extends Type implements ICompositeType {
      * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
      */
     public UriType getOnBehalfOfUriType() throws FHIRException { 
+      if (this.onBehalfOf == null)
+        return null;
       if (!(this.onBehalfOf instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
       return (UriType) this.onBehalfOf;
     }
 
     public boolean hasOnBehalfOfUriType() { 
-      return this.onBehalfOf instanceof UriType;
+      return this != null && this.onBehalfOf instanceof UriType;
     }
 
     /**
      * @return {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
      */
     public Reference getOnBehalfOfReference() throws FHIRException { 
+      if (this.onBehalfOf == null)
+        return null;
       if (!(this.onBehalfOf instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.onBehalfOf.getClass().getName()+" was encountered");
       return (Reference) this.onBehalfOf;
     }
 
     public boolean hasOnBehalfOfReference() { 
-      return this.onBehalfOf instanceof Reference;
+      return this != null && this.onBehalfOf instanceof Reference;
     }
 
     public boolean hasOnBehalfOf() { 
@@ -300,6 +310,8 @@ public class Signature extends Type implements ICompositeType {
      * @param value {@link #onBehalfOf} (A reference to an application-usable description of the identity that is represented by the signature.)
      */
     public Signature setOnBehalfOf(Type value) { 
+      if (value != null && !(value instanceof UriType || value instanceof Reference))
+        throw new Error("Not the right type for Signature.onBehalfOf[x]: "+value.fhirType());
       this.onBehalfOf = value;
       return this;
     }

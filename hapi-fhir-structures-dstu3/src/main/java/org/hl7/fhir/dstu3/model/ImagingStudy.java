@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
  */
@@ -399,7 +400,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * @param value {@link #modality} (The modality of this series sequence.)
          */
-        public ImagingStudySeriesComponent setModality(Coding value) { 
+        public ImagingStudySeriesComponent setModality(Coding value)  { 
           this.modality = value;
           return this;
         }
@@ -641,7 +642,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * @param value {@link #bodySite} (The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.)
          */
-        public ImagingStudySeriesComponent setBodySite(Coding value) { 
+        public ImagingStudySeriesComponent setBodySite(Coding value)  { 
           this.bodySite = value;
           return this;
         }
@@ -665,7 +666,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * @param value {@link #laterality} (The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.)
          */
-        public ImagingStudySeriesComponent setLaterality(Coding value) { 
+        public ImagingStudySeriesComponent setLaterality(Coding value)  { 
           this.laterality = value;
           return this;
         }
@@ -847,20 +848,40 @@ public class ImagingStudy extends DomainResource {
           return getInstance().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("uid", "oid", "Formal identifier for this series.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("number", "unsignedInt", "The numeric identifier of this series in the study.", 0, java.lang.Integer.MAX_VALUE, number));
-          childrenList.add(new Property("modality", "Coding", "The modality of this series sequence.", 0, java.lang.Integer.MAX_VALUE, modality));
-          childrenList.add(new Property("description", "string", "A description of the series.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
-          childrenList.add(new Property("availability", "code", "Availability of series (online, offline or nearline).", 0, java.lang.Integer.MAX_VALUE, availability));
-          childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-          childrenList.add(new Property("bodySite", "Coding", "The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.", 0, java.lang.Integer.MAX_VALUE, bodySite));
-          childrenList.add(new Property("laterality", "Coding", "The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.", 0, java.lang.Integer.MAX_VALUE, laterality));
-          childrenList.add(new Property("started", "dateTime", "The date and time the series was started.", 0, java.lang.Integer.MAX_VALUE, started));
-          childrenList.add(new Property("performer", "Reference(Practitioner)", "The physician or operator (often the radiology technician)  who performed the series. The performer is recorded at the series level, since each series in a study may be performed by a different practitioner, at different times, and using different devices. A series may be performed by multiple practitioners.", 0, java.lang.Integer.MAX_VALUE, performer));
-          childrenList.add(new Property("instance", "", "A single SOP instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("uid", "oid", "Formal identifier for this series.", 0, 1, uid));
+          children.add(new Property("number", "unsignedInt", "The numeric identifier of this series in the study.", 0, 1, number));
+          children.add(new Property("modality", "Coding", "The modality of this series sequence.", 0, 1, modality));
+          children.add(new Property("description", "string", "A description of the series.", 0, 1, description));
+          children.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances));
+          children.add(new Property("availability", "code", "Availability of series (online, offline or nearline).", 0, 1, availability));
+          children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+          children.add(new Property("bodySite", "Coding", "The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.", 0, 1, bodySite));
+          children.add(new Property("laterality", "Coding", "The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.", 0, 1, laterality));
+          children.add(new Property("started", "dateTime", "The date and time the series was started.", 0, 1, started));
+          children.add(new Property("performer", "Reference(Practitioner)", "The physician or operator (often the radiology technician)  who performed the series. The performer is recorded at the series level, since each series in a study may be performed by a different practitioner, at different times, and using different devices. A series may be performed by multiple practitioners.", 0, java.lang.Integer.MAX_VALUE, performer));
+          children.add(new Property("instance", "", "A single SOP instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 115792: /*uid*/  return new Property("uid", "oid", "Formal identifier for this series.", 0, 1, uid);
+          case -1034364087: /*number*/  return new Property("number", "unsignedInt", "The numeric identifier of this series in the study.", 0, 1, number);
+          case -622722335: /*modality*/  return new Property("modality", "Coding", "The modality of this series sequence.", 0, 1, modality);
+          case -1724546052: /*description*/  return new Property("description", "string", "A description of the series.", 0, 1, description);
+          case -1043544226: /*numberOfInstances*/  return new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances);
+          case 1997542747: /*availability*/  return new Property("availability", "code", "Availability of series (online, offline or nearline).", 0, 1, availability);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+          case 1702620169: /*bodySite*/  return new Property("bodySite", "Coding", "The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.", 0, 1, bodySite);
+          case -170291817: /*laterality*/  return new Property("laterality", "Coding", "The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.", 0, 1, laterality);
+          case -1897185151: /*started*/  return new Property("started", "dateTime", "The date and time the series was started.", 0, 1, started);
+          case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner)", "The physician or operator (often the radiology technician)  who performed the series. The performer is recorded at the series level, since each series in a study may be performed by a different practitioner, at different times, and using different devices. A series may be performed by multiple practitioners.", 0, java.lang.Integer.MAX_VALUE, performer);
+          case 555127957: /*instance*/  return new Property("instance", "", "A single SOP instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1076,12 +1097,12 @@ public class ImagingStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImagingStudySeriesComponent))
+        if (!(other_ instanceof ImagingStudySeriesComponent))
           return false;
-        ImagingStudySeriesComponent o = (ImagingStudySeriesComponent) other;
+        ImagingStudySeriesComponent o = (ImagingStudySeriesComponent) other_;
         return compareDeep(uid, o.uid, true) && compareDeep(number, o.number, true) && compareDeep(modality, o.modality, true)
            && compareDeep(description, o.description, true) && compareDeep(numberOfInstances, o.numberOfInstances, true)
            && compareDeep(availability, o.availability, true) && compareDeep(endpoint, o.endpoint, true) && compareDeep(bodySite, o.bodySite, true)
@@ -1090,12 +1111,12 @@ public class ImagingStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImagingStudySeriesComponent))
+        if (!(other_ instanceof ImagingStudySeriesComponent))
           return false;
-        ImagingStudySeriesComponent o = (ImagingStudySeriesComponent) other;
+        ImagingStudySeriesComponent o = (ImagingStudySeriesComponent) other_;
         return compareValues(uid, o.uid, true) && compareValues(number, o.number, true) && compareValues(description, o.description, true)
            && compareValues(numberOfInstances, o.numberOfInstances, true) && compareValues(availability, o.availability, true)
            && compareValues(started, o.started, true);
@@ -1346,12 +1367,24 @@ public class ImagingStudy extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("uid", "oid", "Formal identifier for this image or other content.", 0, java.lang.Integer.MAX_VALUE, uid));
-          childrenList.add(new Property("number", "unsignedInt", "The number of instance in the series.", 0, java.lang.Integer.MAX_VALUE, number));
-          childrenList.add(new Property("sopClass", "oid", "DICOM instance  type.", 0, java.lang.Integer.MAX_VALUE, sopClass));
-          childrenList.add(new Property("title", "string", "The description of the instance.", 0, java.lang.Integer.MAX_VALUE, title));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("uid", "oid", "Formal identifier for this image or other content.", 0, 1, uid));
+          children.add(new Property("number", "unsignedInt", "The number of instance in the series.", 0, 1, number));
+          children.add(new Property("sopClass", "oid", "DICOM instance  type.", 0, 1, sopClass));
+          children.add(new Property("title", "string", "The description of the instance.", 0, 1, title));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 115792: /*uid*/  return new Property("uid", "oid", "Formal identifier for this image or other content.", 0, 1, uid);
+          case -1034364087: /*number*/  return new Property("number", "unsignedInt", "The number of instance in the series.", 0, 1, number);
+          case 1560041540: /*sopClass*/  return new Property("sopClass", "oid", "DICOM instance  type.", 0, 1, sopClass);
+          case 110371416: /*title*/  return new Property("title", "string", "The description of the instance.", 0, 1, title);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1454,23 +1487,23 @@ public class ImagingStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImagingStudySeriesInstanceComponent))
+        if (!(other_ instanceof ImagingStudySeriesInstanceComponent))
           return false;
-        ImagingStudySeriesInstanceComponent o = (ImagingStudySeriesInstanceComponent) other;
+        ImagingStudySeriesInstanceComponent o = (ImagingStudySeriesInstanceComponent) other_;
         return compareDeep(uid, o.uid, true) && compareDeep(number, o.number, true) && compareDeep(sopClass, o.sopClass, true)
            && compareDeep(title, o.title, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImagingStudySeriesInstanceComponent))
+        if (!(other_ instanceof ImagingStudySeriesInstanceComponent))
           return false;
-        ImagingStudySeriesInstanceComponent o = (ImagingStudySeriesInstanceComponent) other;
+        ImagingStudySeriesInstanceComponent o = (ImagingStudySeriesInstanceComponent) other_;
         return compareValues(uid, o.uid, true) && compareValues(number, o.number, true) && compareValues(sopClass, o.sopClass, true)
            && compareValues(title, o.title, true);
       }
@@ -1741,7 +1774,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * @param value {@link #accession} (Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).)
      */
-    public ImagingStudy setAccession(Identifier value) { 
+    public ImagingStudy setAccession(Identifier value)  { 
       this.accession = value;
       return this;
     }
@@ -1920,7 +1953,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * @param value {@link #patient} (The patient imaged in the study.)
      */
-    public ImagingStudy setPatient(Reference value) { 
+    public ImagingStudy setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1964,7 +1997,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * @param value {@link #context} (The encounter or episode at which the request is initiated.)
      */
-    public ImagingStudy setContext(Reference value) { 
+    public ImagingStudy setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -2115,7 +2148,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * @param value {@link #referrer} (The requesting/referring physician.)
      */
-    public ImagingStudy setReferrer(Reference value) { 
+    public ImagingStudy setReferrer(Reference value)  { 
       this.referrer = value;
       return this;
     }
@@ -2527,7 +2560,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * @param value {@link #reason} (Description of clinical condition indicating why the ImagingStudy was requested.)
      */
-    public ImagingStudy setReason(CodeableConcept value) { 
+    public ImagingStudy setReason(CodeableConcept value)  { 
       this.reason = value;
       return this;
     }
@@ -2634,27 +2667,54 @@ public class ImagingStudy extends DomainResource {
       return getSeries().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("uid", "oid", "Formal identifier for the study.", 0, java.lang.Integer.MAX_VALUE, uid));
-        childrenList.add(new Property("accession", "Identifier", "Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).", 0, java.lang.Integer.MAX_VALUE, accession));
-        childrenList.add(new Property("identifier", "Identifier", "Other identifiers for the study.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("availability", "code", "Availability of study (online, offline, or nearline).", 0, java.lang.Integer.MAX_VALUE, availability));
-        childrenList.add(new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient imaged in the study.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode at which the request is initiated.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("started", "dateTime", "Date and time the study started.", 0, java.lang.Integer.MAX_VALUE, started));
-        childrenList.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, java.lang.Integer.MAX_VALUE, referrer));
-        childrenList.add(new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter));
-        childrenList.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
-        childrenList.add(new Property("numberOfSeries", "unsignedInt", "Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfSeries));
-        childrenList.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, java.lang.Integer.MAX_VALUE, numberOfInstances));
-        childrenList.add(new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, java.lang.Integer.MAX_VALUE, procedureReference));
-        childrenList.add(new Property("procedureCode", "CodeableConcept", "The code for the performed procedure type.", 0, java.lang.Integer.MAX_VALUE, procedureCode));
-        childrenList.add(new Property("reason", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("uid", "oid", "Formal identifier for the study.", 0, 1, uid));
+        children.add(new Property("accession", "Identifier", "Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).", 0, 1, accession));
+        children.add(new Property("identifier", "Identifier", "Other identifiers for the study.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("availability", "code", "Availability of study (online, offline, or nearline).", 0, 1, availability));
+        children.add(new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList));
+        children.add(new Property("patient", "Reference(Patient)", "The patient imaged in the study.", 0, 1, patient));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode at which the request is initiated.", 0, 1, context));
+        children.add(new Property("started", "dateTime", "Date and time the study started.", 0, 1, started));
+        children.add(new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, 1, referrer));
+        children.add(new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter));
+        children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+        children.add(new Property("numberOfSeries", "unsignedInt", "Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.", 0, 1, numberOfSeries));
+        children.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances));
+        children.add(new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, java.lang.Integer.MAX_VALUE, procedureReference));
+        children.add(new Property("procedureCode", "CodeableConcept", "The code for the performed procedure type.", 0, java.lang.Integer.MAX_VALUE, procedureCode));
+        children.add(new Property("reason", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, 1, reason));
+        children.add(new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, 1, description));
+        children.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 115792: /*uid*/  return new Property("uid", "oid", "Formal identifier for the study.", 0, 1, uid);
+        case -2115028956: /*accession*/  return new Property("accession", "Identifier", "Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).", 0, 1, accession);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Other identifiers for the study.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 1997542747: /*availability*/  return new Property("availability", "code", "Availability of study (online, offline, or nearline).", 0, 1, availability);
+        case -1030238433: /*modalityList*/  return new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient imaged in the study.", 0, 1, patient);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode at which the request is initiated.", 0, 1, context);
+        case -1897185151: /*started*/  return new Property("started", "dateTime", "Date and time the study started.", 0, 1, started);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ReferralRequest|CarePlan|ProcedureRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -722568161: /*referrer*/  return new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, 1, referrer);
+        case -2008009094: /*interpreter*/  return new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter);
+        case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+        case 1920000407: /*numberOfSeries*/  return new Property("numberOfSeries", "unsignedInt", "Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.", 0, 1, numberOfSeries);
+        case -1043544226: /*numberOfInstances*/  return new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances);
+        case 881809848: /*procedureReference*/  return new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, java.lang.Integer.MAX_VALUE, procedureReference);
+        case -698023072: /*procedureCode*/  return new Property("procedureCode", "CodeableConcept", "The code for the performed procedure type.", 0, java.lang.Integer.MAX_VALUE, procedureCode);
+        case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, 1, reason);
+        case -1724546052: /*description*/  return new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, 1, description);
+        case -905838985: /*series*/  return new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2985,12 +3045,12 @@ public class ImagingStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImagingStudy))
+        if (!(other_ instanceof ImagingStudy))
           return false;
-        ImagingStudy o = (ImagingStudy) other;
+        ImagingStudy o = (ImagingStudy) other_;
         return compareDeep(uid, o.uid, true) && compareDeep(accession, o.accession, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(availability, o.availability, true) && compareDeep(modalityList, o.modalityList, true)
            && compareDeep(patient, o.patient, true) && compareDeep(context, o.context, true) && compareDeep(started, o.started, true)
@@ -3002,12 +3062,12 @@ public class ImagingStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImagingStudy))
+        if (!(other_ instanceof ImagingStudy))
           return false;
-        ImagingStudy o = (ImagingStudy) other;
+        ImagingStudy o = (ImagingStudy) other_;
         return compareValues(uid, o.uid, true) && compareValues(availability, o.availability, true) && compareValues(started, o.started, true)
            && compareValues(numberOfSeries, o.numberOfSeries, true) && compareValues(numberOfInstances, o.numberOfInstances, true)
            && compareValues(description, o.description, true);

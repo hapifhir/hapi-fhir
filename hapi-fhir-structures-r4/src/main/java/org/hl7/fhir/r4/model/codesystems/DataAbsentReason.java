@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,25 +37,33 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DataAbsentReason {
 
         /**
-         * The value is not known.
+         * The value is expected to exist but is not known.
          */
         UNKNOWN, 
         /**
-         * The source human does not know the value.
+         * The source was asked but does not know the value.
          */
-        ASKED, 
+        ASKEDUNKNOWN, 
         /**
          * There is reason to expect (from the workflow) that the value may become known.
          */
-        TEMP, 
+        TEMPUNKNOWN, 
         /**
          * The workflow didn't lead to this value being known.
          */
         NOTASKED, 
         /**
+         * The source was asked but declined to answer.
+         */
+        ASKEDDECLINED, 
+        /**
          * The information is not available due to security, privacy or related reasons.
          */
         MASKED, 
+        /**
+         * There is no proper value for this element (e.g. last menstrual period for a male)
+         */
+        NOTAPPLICABLE, 
         /**
          * The source system wasn't capable of supporting this element.
          */
@@ -69,13 +77,25 @@ public enum DataAbsentReason {
          */
         ERROR, 
         /**
-         * NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value.
+         * The numeric value is undefined or unrepresentable due to a floating point processing error.
          */
-        NAN, 
+        NOTANUMBER, 
+        /**
+         * The numeric value is excessively low and unrepresentable due to a floating point processing error.
+         */
+        NEGATIVEINFINITY, 
+        /**
+         * The numeric value is excessively high and unrepresentable due to a floating point processing error.
+         */
+        POSITIVEINFINITY, 
         /**
          * The value is not available because the observation procedure (test, etc.) was not performed.
          */
         NOTPERFORMED, 
+        /**
+         * The value is not permitted in this context (e.g. due to profiles, or the base data types)
+         */
+        NOTPERMITTED, 
         /**
          * added to help the parsers
          */
@@ -85,38 +105,53 @@ public enum DataAbsentReason {
                 return null;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        if ("asked".equals(codeString))
-          return ASKED;
-        if ("temp".equals(codeString))
-          return TEMP;
+        if ("asked-unknown".equals(codeString))
+          return ASKEDUNKNOWN;
+        if ("temp-unknown".equals(codeString))
+          return TEMPUNKNOWN;
         if ("not-asked".equals(codeString))
           return NOTASKED;
+        if ("asked-declined".equals(codeString))
+          return ASKEDDECLINED;
         if ("masked".equals(codeString))
           return MASKED;
+        if ("not-applicable".equals(codeString))
+          return NOTAPPLICABLE;
         if ("unsupported".equals(codeString))
           return UNSUPPORTED;
-        if ("astext".equals(codeString))
+        if ("as-text".equals(codeString))
           return ASTEXT;
         if ("error".equals(codeString))
           return ERROR;
-        if ("NaN".equals(codeString))
-          return NAN;
+        if ("not-a-number".equals(codeString))
+          return NOTANUMBER;
+        if ("negative-infinity".equals(codeString))
+          return NEGATIVEINFINITY;
+        if ("positive-infinity".equals(codeString))
+          return POSITIVEINFINITY;
         if ("not-performed".equals(codeString))
           return NOTPERFORMED;
+        if ("not-permitted".equals(codeString))
+          return NOTPERMITTED;
         throw new FHIRException("Unknown DataAbsentReason code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case UNKNOWN: return "unknown";
-            case ASKED: return "asked";
-            case TEMP: return "temp";
+            case ASKEDUNKNOWN: return "asked-unknown";
+            case TEMPUNKNOWN: return "temp-unknown";
             case NOTASKED: return "not-asked";
+            case ASKEDDECLINED: return "asked-declined";
             case MASKED: return "masked";
+            case NOTAPPLICABLE: return "not-applicable";
             case UNSUPPORTED: return "unsupported";
-            case ASTEXT: return "astext";
+            case ASTEXT: return "as-text";
             case ERROR: return "error";
-            case NAN: return "NaN";
+            case NOTANUMBER: return "not-a-number";
+            case NEGATIVEINFINITY: return "negative-infinity";
+            case POSITIVEINFINITY: return "positive-infinity";
             case NOTPERFORMED: return "not-performed";
+            case NOTPERMITTED: return "not-permitted";
             default: return "?";
           }
         }
@@ -125,31 +160,41 @@ public enum DataAbsentReason {
         }
         public String getDefinition() {
           switch (this) {
-            case UNKNOWN: return "The value is not known.";
-            case ASKED: return "The source human does not know the value.";
-            case TEMP: return "There is reason to expect (from the workflow) that the value may become known.";
+            case UNKNOWN: return "The value is expected to exist but is not known.";
+            case ASKEDUNKNOWN: return "The source was asked but does not know the value.";
+            case TEMPUNKNOWN: return "There is reason to expect (from the workflow) that the value may become known.";
             case NOTASKED: return "The workflow didn't lead to this value being known.";
+            case ASKEDDECLINED: return "The source was asked but declined to answer.";
             case MASKED: return "The information is not available due to security, privacy or related reasons.";
+            case NOTAPPLICABLE: return "There is no proper value for this element (e.g. last menstrual period for a male)";
             case UNSUPPORTED: return "The source system wasn't capable of supporting this element.";
             case ASTEXT: return "The content of the data is represented in the resource narrative.";
             case ERROR: return "Some system or workflow process error means that the information is not available.";
-            case NAN: return "NaN, standing for not a number, is a numeric data type value representing an undefined or unrepresentable value.";
+            case NOTANUMBER: return "The numeric value is undefined or unrepresentable due to a floating point processing error.";
+            case NEGATIVEINFINITY: return "The numeric value is excessively low and unrepresentable due to a floating point processing error.";
+            case POSITIVEINFINITY: return "The numeric value is excessively high and unrepresentable due to a floating point processing error.";
             case NOTPERFORMED: return "The value is not available because the observation procedure (test, etc.) was not performed.";
+            case NOTPERMITTED: return "The value is not permitted in this context (e.g. due to profiles, or the base data types)";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case UNKNOWN: return "Unknown";
-            case ASKED: return "Asked";
-            case TEMP: return "Temp";
+            case ASKEDUNKNOWN: return "Asked But Unknown";
+            case TEMPUNKNOWN: return "Temporarily Unknown";
             case NOTASKED: return "Not Asked";
+            case ASKEDDECLINED: return "Asked But Declined";
             case MASKED: return "Masked";
+            case NOTAPPLICABLE: return "Not Applicable";
             case UNSUPPORTED: return "Unsupported";
             case ASTEXT: return "As Text";
             case ERROR: return "Error";
-            case NAN: return "Not a Number";
+            case NOTANUMBER: return "Not a Number (NaN)";
+            case NEGATIVEINFINITY: return "Negative Infinity (NINF)";
+            case POSITIVEINFINITY: return "Positive Infinity (PINF)";
             case NOTPERFORMED: return "Not Performed";
+            case NOTPERMITTED: return "Not Permitted";
             default: return "?";
           }
     }

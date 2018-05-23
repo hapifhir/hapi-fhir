@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -397,39 +397,45 @@ public class Communication extends DomainResource {
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public StringType getContentStringType() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.content.getClass().getName()+" was encountered");
           return (StringType) this.content;
         }
 
         public boolean hasContentStringType() { 
-          return this.content instanceof StringType;
+          return this != null && this.content instanceof StringType;
         }
 
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Attachment getContentAttachment() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
         public boolean hasContentAttachment() { 
-          return this.content instanceof Attachment;
+          return this != null && this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public Reference getContentReference() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
         public boolean hasContentReference() { 
-          return this.content instanceof Reference;
+          return this != null && this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -440,6 +446,8 @@ public class Communication extends DomainResource {
          * @param value {@link #content} (A communicated content (or for multi-part communications, one portion of the communication).)
          */
         public CommunicationPayloadComponent setContent(Type value) { 
+          if (value != null && !(value instanceof StringType || value instanceof Attachment || value instanceof Reference))
+            throw new Error("Not the right type for Communication.payload.content[x]: "+value.fhirType());
           this.content = value;
           return this;
         }
@@ -567,10 +575,10 @@ public class Communication extends DomainResource {
   }
 
     /**
-     * Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
+     * Business identifiers assigned to this communication by the performer or other systems which remain constant as the resource is updated and propagates from server to server.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Unique identifier", formalDefinition="Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
+    @Description(shortDefinition="Unique identifier", formalDefinition="Business identifiers assigned to this communication by the performer or other systems which remain constant as the resource is updated and propagates from server to server." )
     protected List<Identifier> identifier;
 
     /**
@@ -685,6 +693,7 @@ public class Communication extends DomainResource {
      */
     @Child(name = "topic", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Description of the purpose/content", formalDefinition="Description of the purpose/content, similar to a subject line in an email." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/communication-topic")
     protected CodeableConcept topic;
 
     /**
@@ -789,7 +798,7 @@ public class Communication extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (Business identifiers assigned to this communication by the performer or other systems which remain constant as the resource is updated and propagates from server to server.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -897,7 +906,7 @@ public class Communication extends DomainResource {
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1916,7 +1925,7 @@ public class Communication extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this communication by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("instantiates", "uri", "A protocol, guideline, or other definition that was adhered to in whole or in part by this communication event.", 0, java.lang.Integer.MAX_VALUE, instantiates));
         children.add(new Property("basedOn", "Reference(Any)", "An order, proposal or plan fulfilled in whole or in part by this Communication.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("partOf", "Reference(Any)", "Part of this action.", 0, java.lang.Integer.MAX_VALUE, partOf));
@@ -1943,7 +1952,7 @@ public class Communication extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this communication by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "A protocol, guideline, or other definition that was adhered to in whole or in part by this communication event.", 0, java.lang.Integer.MAX_VALUE, instantiates);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(Any)", "An order, proposal or plan fulfilled in whole or in part by this Communication.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Any)", "Part of this action.", 0, java.lang.Integer.MAX_VALUE, partOf);

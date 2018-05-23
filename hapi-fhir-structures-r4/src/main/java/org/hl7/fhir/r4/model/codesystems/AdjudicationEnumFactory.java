@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,14 +39,16 @@ public class AdjudicationEnumFactory implements EnumFactory<Adjudication> {
   public Adjudication fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("total".equals(codeString))
-      return Adjudication.TOTAL;
+    if ("submitted".equals(codeString))
+      return Adjudication.SUBMITTED;
     if ("copay".equals(codeString))
       return Adjudication.COPAY;
     if ("eligible".equals(codeString))
       return Adjudication.ELIGIBLE;
     if ("deductible".equals(codeString))
       return Adjudication.DEDUCTIBLE;
+    if ("unallocdeduct".equals(codeString))
+      return Adjudication.UNALLOCDEDUCT;
     if ("eligpercent".equals(codeString))
       return Adjudication.ELIGPERCENT;
     if ("tax".equals(codeString))
@@ -57,14 +59,16 @@ public class AdjudicationEnumFactory implements EnumFactory<Adjudication> {
   }
 
   public String toCode(Adjudication code) {
-    if (code == Adjudication.TOTAL)
-      return "total";
+    if (code == Adjudication.SUBMITTED)
+      return "submitted";
     if (code == Adjudication.COPAY)
       return "copay";
     if (code == Adjudication.ELIGIBLE)
       return "eligible";
     if (code == Adjudication.DEDUCTIBLE)
       return "deductible";
+    if (code == Adjudication.UNALLOCDEDUCT)
+      return "unallocdeduct";
     if (code == Adjudication.ELIGPERCENT)
       return "eligpercent";
     if (code == Adjudication.TAX)

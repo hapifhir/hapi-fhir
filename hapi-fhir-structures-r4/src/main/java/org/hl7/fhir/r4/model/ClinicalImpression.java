@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -159,17 +159,17 @@ public class ClinicalImpression extends DomainResource {
     @Block()
     public static class ClinicalImpressionInvestigationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.
+         * A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutritional) history may be used.
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="A name/code for the set", formalDefinition="A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used." )
+        @Description(shortDefinition="A name/code for the set", formalDefinition="A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutritional) history may be used." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/investigation-sets")
         protected CodeableConcept code;
 
         /**
          * A record of a specific investigation that was undertaken.
          */
-        @Child(name = "item", type = {Observation.class, QuestionnaireResponse.class, FamilyMemberHistory.class, DiagnosticReport.class, RiskAssessment.class, ImagingStudy.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "item", type = {Observation.class, QuestionnaireResponse.class, FamilyMemberHistory.class, DiagnosticReport.class, RiskAssessment.class, ImagingStudy.class, Media.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Record of a specific investigation", formalDefinition="A record of a specific investigation that was undertaken." )
         protected List<Reference> item;
         /**
@@ -196,7 +196,7 @@ public class ClinicalImpression extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.)
+         * @return {@link #code} (A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutritional) history may be used.)
          */
         public CodeableConcept getCode() { 
           if (this.code == null)
@@ -212,7 +212,7 @@ public class ClinicalImpression extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.)
+         * @param value {@link #code} (A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutritional) history may be used.)
          */
         public ClinicalImpressionInvestigationComponent setCode(CodeableConcept value) { 
           this.code = value;
@@ -284,15 +284,15 @@ public class ClinicalImpression extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("code", "CodeableConcept", "A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.", 0, 1, code));
-          children.add(new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport|RiskAssessment|ImagingStudy)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item));
+          children.add(new Property("code", "CodeableConcept", "A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutritional) history may be used.", 0, 1, code));
+          children.add(new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport|RiskAssessment|ImagingStudy|Media)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.", 0, 1, code);
-          case 3242771: /*item*/  return new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport|RiskAssessment|ImagingStudy)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A name/code for the group (\"set\") of investigations. Typically, this will be something like \"signs\", \"symptoms\", \"clinical\", \"diagnostic\", but the list is not constrained, and others such groups such as (exposure|family|travel|nutritional) history may be used.", 0, 1, code);
+          case 3242771: /*item*/  return new Property("item", "Reference(Observation|QuestionnaireResponse|FamilyMemberHistory|DiagnosticReport|RiskAssessment|ImagingStudy|Media)", "A record of a specific investigation that was undertaken.", 0, java.lang.Integer.MAX_VALUE, item);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -412,21 +412,33 @@ public class ClinicalImpression extends DomainResource {
     @Block()
     public static class ClinicalImpressionFindingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.
+         * Specific text or code for finding or diagnosis, which may include ruled-out or resolved conditions.
          */
-        @Child(name = "item", type = {CodeableConcept.class, Condition.class, Observation.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="What was found", formalDefinition="Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions." )
+        @Child(name = "itemCodeableConcept", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="What was found", formalDefinition="Specific text or code for finding or diagnosis, which may include ruled-out or resolved conditions." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
-        protected Type item;
+        protected CodeableConcept itemCodeableConcept;
+
+        /**
+         * Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.
+         */
+        @Child(name = "itemReference", type = {Condition.class, Observation.class, Media.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="What was found", formalDefinition="Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions." )
+        protected Reference itemReference;
+
+        /**
+         * The actual object that is the target of the reference (Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         */
+        protected Resource itemReferenceTarget;
 
         /**
          * Which investigations support finding or diagnosis.
          */
-        @Child(name = "basis", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "basis", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Which investigations support finding", formalDefinition="Which investigations support finding or diagnosis." )
         protected StringType basis;
 
-        private static final long serialVersionUID = 1690728236L;
+        private static final long serialVersionUID = -1578446448L;
 
     /**
      * Constructor
@@ -435,56 +447,66 @@ public class ClinicalImpression extends DomainResource {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public ClinicalImpressionFindingComponent(Type item) {
-        super();
-        this.item = item;
-      }
-
         /**
-         * @return {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         * @return {@link #itemCodeableConcept} (Specific text or code for finding or diagnosis, which may include ruled-out or resolved conditions.)
          */
-        public Type getItem() { 
-          return this.item;
-        }
-
-        /**
-         * @return {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
-         */
-        public CodeableConcept getItemCodeableConcept() throws FHIRException { 
-          if (!(this.item instanceof CodeableConcept))
-            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.item;
+        public CodeableConcept getItemCodeableConcept() { 
+          if (this.itemCodeableConcept == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ClinicalImpressionFindingComponent.itemCodeableConcept");
+            else if (Configuration.doAutoCreate())
+              this.itemCodeableConcept = new CodeableConcept(); // cc
+          return this.itemCodeableConcept;
         }
 
         public boolean hasItemCodeableConcept() { 
-          return this.item instanceof CodeableConcept;
+          return this.itemCodeableConcept != null && !this.itemCodeableConcept.isEmpty();
         }
 
         /**
-         * @return {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         * @param value {@link #itemCodeableConcept} (Specific text or code for finding or diagnosis, which may include ruled-out or resolved conditions.)
          */
-        public Reference getItemReference() throws FHIRException { 
-          if (!(this.item instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
-          return (Reference) this.item;
+        public ClinicalImpressionFindingComponent setItemCodeableConcept(CodeableConcept value) { 
+          this.itemCodeableConcept = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #itemReference} (Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         */
+        public Reference getItemReference() { 
+          if (this.itemReference == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ClinicalImpressionFindingComponent.itemReference");
+            else if (Configuration.doAutoCreate())
+              this.itemReference = new Reference(); // cc
+          return this.itemReference;
         }
 
         public boolean hasItemReference() { 
-          return this.item instanceof Reference;
-        }
-
-        public boolean hasItem() { 
-          return this.item != null && !this.item.isEmpty();
+          return this.itemReference != null && !this.itemReference.isEmpty();
         }
 
         /**
-         * @param value {@link #item} (Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         * @param value {@link #itemReference} (Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
          */
-        public ClinicalImpressionFindingComponent setItem(Type value) { 
-          this.item = value;
+        public ClinicalImpressionFindingComponent setItemReference(Reference value) { 
+          this.itemReference = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #itemReference} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         */
+        public Resource getItemReferenceTarget() { 
+          return this.itemReferenceTarget;
+        }
+
+        /**
+         * @param value {@link #itemReference} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.)
+         */
+        public ClinicalImpressionFindingComponent setItemReferenceTarget(Resource value) { 
+          this.itemReferenceTarget = value;
           return this;
         }
 
@@ -539,17 +561,16 @@ public class ClinicalImpression extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("item[x]", "CodeableConcept|Reference(Condition|Observation)", "Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, item));
+          children.add(new Property("itemCodeableConcept", "CodeableConcept", "Specific text or code for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, itemCodeableConcept));
+          children.add(new Property("itemReference", "Reference(Condition|Observation|Media)", "Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, itemReference));
           children.add(new Property("basis", "string", "Which investigations support finding or diagnosis.", 0, 1, basis));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 2116201613: /*item[x]*/  return new Property("item[x]", "CodeableConcept|Reference(Condition|Observation)", "Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, item);
-          case 3242771: /*item*/  return new Property("item[x]", "CodeableConcept|Reference(Condition|Observation)", "Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, item);
-          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "CodeableConcept|Reference(Condition|Observation)", "Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, item);
-          case 1376364920: /*itemReference*/  return new Property("item[x]", "CodeableConcept|Reference(Condition|Observation)", "Specific text, code or reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, item);
+          case 106644494: /*itemCodeableConcept*/  return new Property("itemCodeableConcept", "CodeableConcept", "Specific text or code for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, itemCodeableConcept);
+          case 1376364920: /*itemReference*/  return new Property("itemReference", "Reference(Condition|Observation|Media)", "Specific reference for finding or diagnosis, which may include ruled-out or resolved conditions.", 0, 1, itemReference);
           case 93508670: /*basis*/  return new Property("basis", "string", "Which investigations support finding or diagnosis.", 0, 1, basis);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -559,7 +580,8 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // Type
+        case 106644494: /*itemCodeableConcept*/ return this.itemCodeableConcept == null ? new Base[0] : new Base[] {this.itemCodeableConcept}; // CodeableConcept
+        case 1376364920: /*itemReference*/ return this.itemReference == null ? new Base[0] : new Base[] {this.itemReference}; // Reference
         case 93508670: /*basis*/ return this.basis == null ? new Base[0] : new Base[] {this.basis}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -569,8 +591,11 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3242771: // item
-          this.item = castToType(value); // Type
+        case 106644494: // itemCodeableConcept
+          this.itemCodeableConcept = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 1376364920: // itemReference
+          this.itemReference = castToReference(value); // Reference
           return value;
         case 93508670: // basis
           this.basis = castToString(value); // StringType
@@ -582,8 +607,10 @@ public class ClinicalImpression extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("item[x]")) {
-          this.item = castToType(value); // Type
+        if (name.equals("itemCodeableConcept")) {
+          this.itemCodeableConcept = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("itemReference")) {
+          this.itemReference = castToReference(value); // Reference
         } else if (name.equals("basis")) {
           this.basis = castToString(value); // StringType
         } else
@@ -594,8 +621,8 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 2116201613:  return getItem(); 
-        case 3242771:  return getItem(); 
+        case 106644494:  return getItemCodeableConcept(); 
+        case 1376364920:  return getItemReference(); 
         case 93508670:  return getBasisElement();
         default: return super.makeProperty(hash, name);
         }
@@ -605,7 +632,8 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3242771: /*item*/ return new String[] {"CodeableConcept", "Reference"};
+        case 106644494: /*itemCodeableConcept*/ return new String[] {"CodeableConcept"};
+        case 1376364920: /*itemReference*/ return new String[] {"Reference"};
         case 93508670: /*basis*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -615,12 +643,12 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("itemCodeableConcept")) {
-          this.item = new CodeableConcept();
-          return this.item;
+          this.itemCodeableConcept = new CodeableConcept();
+          return this.itemCodeableConcept;
         }
         else if (name.equals("itemReference")) {
-          this.item = new Reference();
-          return this.item;
+          this.itemReference = new Reference();
+          return this.itemReference;
         }
         else if (name.equals("basis")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClinicalImpression.basis");
@@ -632,7 +660,8 @@ public class ClinicalImpression extends DomainResource {
       public ClinicalImpressionFindingComponent copy() {
         ClinicalImpressionFindingComponent dst = new ClinicalImpressionFindingComponent();
         copyValues(dst);
-        dst.item = item == null ? null : item.copy();
+        dst.itemCodeableConcept = itemCodeableConcept == null ? null : itemCodeableConcept.copy();
+        dst.itemReference = itemReference == null ? null : itemReference.copy();
         dst.basis = basis == null ? null : basis.copy();
         return dst;
       }
@@ -644,7 +673,8 @@ public class ClinicalImpression extends DomainResource {
         if (!(other_ instanceof ClinicalImpressionFindingComponent))
           return false;
         ClinicalImpressionFindingComponent o = (ClinicalImpressionFindingComponent) other_;
-        return compareDeep(item, o.item, true) && compareDeep(basis, o.basis, true);
+        return compareDeep(itemCodeableConcept, o.itemCodeableConcept, true) && compareDeep(itemReference, o.itemReference, true)
+           && compareDeep(basis, o.basis, true);
       }
 
       @Override
@@ -658,7 +688,8 @@ public class ClinicalImpression extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item, basis);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(itemCodeableConcept, itemReference
+          , basis);
       }
 
   public String fhirType() {
@@ -669,10 +700,10 @@ public class ClinicalImpression extends DomainResource {
   }
 
     /**
-     * A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.
+     * Business identifiers assigned to this clinical impression by the performer or other systems which remain constant as the resource is updated and propagates from server to server.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Business identifier", formalDefinition="A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on." )
+    @Description(shortDefinition="Business identifier", formalDefinition="Business identifiers assigned to this clinical impression by the performer or other systems which remain constant as the resource is updated and propagates from server to server." )
     protected List<Identifier> identifier;
 
     /**
@@ -748,14 +779,14 @@ public class ClinicalImpression extends DomainResource {
     protected Practitioner assessorTarget;
 
     /**
-     * A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.
+     * A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.
      */
     @Child(name = "previous", type = {ClinicalImpression.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Reference to last assessment", formalDefinition="A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes." )
+    @Description(shortDefinition="Reference to last assessment", formalDefinition="A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes." )
     protected Reference previous;
 
     /**
-     * The actual object that is the target of the reference (A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
+     * The actual object that is the target of the reference (A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
      */
     protected ClinicalImpression previousTarget;
 
@@ -772,10 +803,10 @@ public class ClinicalImpression extends DomainResource {
 
 
     /**
-     * One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.
+     * One or more sets of investigations (signs, symptoms, etc.). The actual grouping of investigations varies greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.
      */
     @Child(name = "investigation", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="One or more sets of investigations (signs, symptions, etc.)", formalDefinition="One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes." )
+    @Description(shortDefinition="One or more sets of investigations (signs, symptoms, etc.)", formalDefinition="One or more sets of investigations (signs, symptoms, etc.). The actual grouping of investigations varies greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes." )
     protected List<ClinicalImpressionInvestigationComponent> investigation;
 
     /**
@@ -857,7 +888,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.)
+     * @return {@link #identifier} (Business identifiers assigned to this clinical impression by the performer or other systems which remain constant as the resource is updated and propagates from server to server.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1116,26 +1147,30 @@ public class ClinicalImpression extends DomainResource {
      * @return {@link #effective} (The point in time or period over which the subject was assessed.)
      */
     public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
     public boolean hasEffectiveDateTimeType() { 
-      return this.effective instanceof DateTimeType;
+      return this != null && this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (The point in time or period over which the subject was assessed.)
      */
     public Period getEffectivePeriod() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
     public boolean hasEffectivePeriod() { 
-      return this.effective instanceof Period;
+      return this != null && this.effective instanceof Period;
     }
 
     public boolean hasEffective() { 
@@ -1146,6 +1181,8 @@ public class ClinicalImpression extends DomainResource {
      * @param value {@link #effective} (The point in time or period over which the subject was assessed.)
      */
     public ClinicalImpression setEffective(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new Error("Not the right type for ClinicalImpression.effective[x]: "+value.fhirType());
       this.effective = value;
       return this;
     }
@@ -1244,7 +1281,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #previous} (A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
+     * @return {@link #previous} (A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
      */
     public Reference getPrevious() { 
       if (this.previous == null)
@@ -1260,7 +1297,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @param value {@link #previous} (A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
+     * @param value {@link #previous} (A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
      */
     public ClinicalImpression setPrevious(Reference value) { 
       this.previous = value;
@@ -1268,7 +1305,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #previous} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
+     * @return {@link #previous} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
      */
     public ClinicalImpression getPreviousTarget() { 
       if (this.previousTarget == null)
@@ -1280,7 +1317,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @param value {@link #previous} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
+     * @param value {@link #previous} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.)
      */
     public ClinicalImpression setPreviousTarget(ClinicalImpression value) { 
       this.previousTarget = value;
@@ -1351,7 +1388,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #investigation} (One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.)
+     * @return {@link #investigation} (One or more sets of investigations (signs, symptoms, etc.). The actual grouping of investigations varies greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.)
      */
     public List<ClinicalImpressionInvestigationComponent> getInvestigation() { 
       if (this.investigation == null)
@@ -1459,7 +1496,7 @@ public class ClinicalImpression extends DomainResource {
       if (this.protocol == null)
         return false;
       for (UriType v : this.protocol)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1812,7 +1849,7 @@ public class ClinicalImpression extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this clinical impression by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "Identifies the workflow status of the assessment.", 0, 1, status));
         children.add(new Property("code", "CodeableConcept", "Categorizes the type of clinical assessment performed.", 0, 1, code));
         children.add(new Property("description", "string", "A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.", 0, 1, description));
@@ -1821,9 +1858,9 @@ public class ClinicalImpression extends DomainResource {
         children.add(new Property("effective[x]", "dateTime|Period", "The point in time or period over which the subject was assessed.", 0, 1, effective));
         children.add(new Property("date", "dateTime", "Indicates when the documentation of the assessment was complete.", 0, 1, date));
         children.add(new Property("assessor", "Reference(Practitioner)", "The clinician performing the assessment.", 0, 1, assessor));
-        children.add(new Property("previous", "Reference(ClinicalImpression)", "A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.", 0, 1, previous));
+        children.add(new Property("previous", "Reference(ClinicalImpression)", "A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.", 0, 1, previous));
         children.add(new Property("problem", "Reference(Condition|AllergyIntolerance)", "This a list of the relevant problems/conditions for a patient.", 0, java.lang.Integer.MAX_VALUE, problem));
-        children.add(new Property("investigation", "", "One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.", 0, java.lang.Integer.MAX_VALUE, investigation));
+        children.add(new Property("investigation", "", "One or more sets of investigations (signs, symptoms, etc.). The actual grouping of investigations varies greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.", 0, java.lang.Integer.MAX_VALUE, investigation));
         children.add(new Property("protocol", "uri", "Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.", 0, java.lang.Integer.MAX_VALUE, protocol));
         children.add(new Property("summary", "string", "A text summary of the investigations and the diagnosis.", 0, 1, summary));
         children.add(new Property("finding", "", "Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.", 0, java.lang.Integer.MAX_VALUE, finding));
@@ -1836,7 +1873,7 @@ public class ClinicalImpression extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to the clinical impression that remains consistent regardless of what server the impression is stored on.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this clinical impression by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "Identifies the workflow status of the assessment.", 0, 1, status);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Categorizes the type of clinical assessment performed.", 0, 1, code);
         case -1724546052: /*description*/  return new Property("description", "string", "A summary of the context and/or cause of the assessment - why / where was it performed, and what patient events/status prompted it.", 0, 1, description);
@@ -1848,9 +1885,9 @@ public class ClinicalImpression extends DomainResource {
         case -403934648: /*effectivePeriod*/  return new Property("effective[x]", "dateTime|Period", "The point in time or period over which the subject was assessed.", 0, 1, effective);
         case 3076014: /*date*/  return new Property("date", "dateTime", "Indicates when the documentation of the assessment was complete.", 0, 1, date);
         case -373213113: /*assessor*/  return new Property("assessor", "Reference(Practitioner)", "The clinician performing the assessment.", 0, 1, assessor);
-        case -1273775369: /*previous*/  return new Property("previous", "Reference(ClinicalImpression)", "A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.", 0, 1, previous);
+        case -1273775369: /*previous*/  return new Property("previous", "Reference(ClinicalImpression)", "A reference to the last assessment that was conducted on this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.", 0, 1, previous);
         case -309542241: /*problem*/  return new Property("problem", "Reference(Condition|AllergyIntolerance)", "This a list of the relevant problems/conditions for a patient.", 0, java.lang.Integer.MAX_VALUE, problem);
-        case 956015362: /*investigation*/  return new Property("investigation", "", "One or more sets of investigations (signs, symptions, etc.). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.", 0, java.lang.Integer.MAX_VALUE, investigation);
+        case 956015362: /*investigation*/  return new Property("investigation", "", "One or more sets of investigations (signs, symptoms, etc.). The actual grouping of investigations varies greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.", 0, java.lang.Integer.MAX_VALUE, investigation);
         case -989163880: /*protocol*/  return new Property("protocol", "uri", "Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.", 0, java.lang.Integer.MAX_VALUE, protocol);
         case -1857640538: /*summary*/  return new Property("summary", "string", "A text summary of the investigations and the diagnosis.", 0, 1, summary);
         case -853173367: /*finding*/  return new Property("finding", "", "Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.", 0, java.lang.Integer.MAX_VALUE, finding);
@@ -2310,17 +2347,17 @@ public class ClinicalImpression extends DomainResource {
    * <p>
    * Description: <b>What was found</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
+   * Path: <b>ClinicalImpression.finding.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="finding-code", path="ClinicalImpression.finding.item.as(CodeableConcept)", description="What was found", type="token" )
+  @SearchParamDefinition(name="finding-code", path="ClinicalImpression.finding.itemCodeableConcept", description="What was found", type="token" )
   public static final String SP_FINDING_CODE = "finding-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>finding-code</b>
    * <p>
    * Description: <b>What was found</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
+   * Path: <b>ClinicalImpression.finding.itemCodeableConcept</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam FINDING_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FINDING_CODE);
@@ -2382,17 +2419,17 @@ public class ClinicalImpression extends DomainResource {
    * <p>
    * Description: <b>What was found</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
+   * Path: <b>ClinicalImpression.finding.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="finding-ref", path="ClinicalImpression.finding.item.as(Reference)", description="What was found", type="reference", target={Condition.class, Observation.class } )
+  @SearchParamDefinition(name="finding-ref", path="ClinicalImpression.finding.itemReference", description="What was found", type="reference", target={Condition.class, Media.class, Observation.class } )
   public static final String SP_FINDING_REF = "finding-ref";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>finding-ref</b>
    * <p>
    * Description: <b>What was found</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ClinicalImpression.finding.item[x]</b><br>
+   * Path: <b>ClinicalImpression.finding.itemReference</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam FINDING_REF = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_FINDING_REF);
@@ -2489,7 +2526,7 @@ public class ClinicalImpression extends DomainResource {
    * Path: <b>ClinicalImpression.investigation.item</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigation.item", description="Record of a specific investigation", type="reference", target={DiagnosticReport.class, FamilyMemberHistory.class, ImagingStudy.class, Observation.class, QuestionnaireResponse.class, RiskAssessment.class } )
+  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigation.item", description="Record of a specific investigation", type="reference", target={DiagnosticReport.class, FamilyMemberHistory.class, ImagingStudy.class, Media.class, Observation.class, QuestionnaireResponse.class, RiskAssessment.class } )
   public static final String SP_INVESTIGATION = "investigation";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>investigation</b>

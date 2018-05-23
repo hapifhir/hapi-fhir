@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -212,23 +212,18 @@ public class GuidanceResponse extends DomainResource {
     protected IdType requestId;
 
     /**
-     * Allows a service to provide a unique, business identifier for the response.
+     * Allows a service to provide  unique, business identifiers for the response.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide a unique, business identifier for the response." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Business identifier", formalDefinition="Allows a service to provide  unique, business identifiers for the response." )
+    protected List<Identifier> identifier;
 
     /**
-     * A reference to the knowledge module that was invoked.
+     * An identifier, CodeableConcept or canonical reference to the guidance that was requested.
      */
-    @Child(name = "module", type = {ServiceDefinition.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A reference to a knowledge module", formalDefinition="A reference to the knowledge module that was invoked." )
-    protected Reference module;
-
-    /**
-     * The actual object that is the target of the reference (A reference to the knowledge module that was invoked.)
-     */
-    protected ServiceDefinition moduleTarget;
+    @Child(name = "module", type = {UriType.class, CanonicalType.class, CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="What guidance was requested", formalDefinition="An identifier, CodeableConcept or canonical reference to the guidance that was requested." )
+    protected Type module;
 
     /**
      * The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.
@@ -282,23 +277,35 @@ public class GuidanceResponse extends DomainResource {
     protected Device performerTarget;
 
     /**
+     * Describes the reason for the guidance response in coded or textual form.
+     */
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why guidance is needed", formalDefinition="Describes the reason for the guidance response in coded or textual form." )
+    protected List<CodeableConcept> reasonCode;
+
+    /**
      * Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Reason for the response", formalDefinition="Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response." )
-    protected Type reason;
+    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why guidance is needed", formalDefinition="Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response." )
+    protected List<Reference> reasonReference;
+    /**
+     * The actual objects that are the target of the reference (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     */
+    protected List<Resource> reasonReferenceTarget;
+
 
     /**
      * Provides a mechanism to communicate additional information about the response.
      */
-    @Child(name = "note", type = {Annotation.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional notes about the response", formalDefinition="Provides a mechanism to communicate additional information about the response." )
     protected List<Annotation> note;
 
     /**
      * Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.
      */
-    @Child(name = "evaluationMessage", type = {OperationOutcome.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "evaluationMessage", type = {OperationOutcome.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Messages resulting from the evaluation of the artifact or artifacts", formalDefinition="Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element." )
     protected List<Reference> evaluationMessage;
     /**
@@ -310,7 +317,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.
      */
-    @Child(name = "outputParameters", type = {Parameters.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "outputParameters", type = {Parameters.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The output parameters of the evaluation, if any", formalDefinition="The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element." )
     protected Reference outputParameters;
 
@@ -322,7 +329,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * The actions, if any, produced by the evaluation of the artifact.
      */
-    @Child(name = "result", type = {CarePlan.class, RequestGroup.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "result", type = {CarePlan.class, RequestGroup.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Proposed actions, if any", formalDefinition="The actions, if any, produced by the evaluation of the artifact." )
     protected Reference result;
 
@@ -334,11 +341,11 @@ public class GuidanceResponse extends DomainResource {
     /**
      * If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.
      */
-    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional required data", formalDefinition="If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data." )
     protected List<DataRequirement> dataRequirement;
 
-    private static final long serialVersionUID = -2107029772L;
+    private static final long serialVersionUID = -1809604960L;
 
   /**
    * Constructor
@@ -350,7 +357,7 @@ public class GuidanceResponse extends DomainResource {
   /**
    * Constructor
    */
-    public GuidanceResponse(Reference module, Enumeration<GuidanceResponseStatus> status) {
+    public GuidanceResponse(Type module, Enumeration<GuidanceResponseStatus> status) {
       super();
       this.module = module;
       this.status = status;
@@ -406,39 +413,108 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
+     * @return {@link #identifier} (Allows a service to provide  unique, business identifiers for the response.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create GuidanceResponse.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
-    public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public GuidanceResponse setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
     }
 
-    /**
-     * @param value {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
-     */
-    public GuidanceResponse setIdentifier(Identifier value) { 
-      this.identifier = value;
+    public boolean hasIdentifier() { 
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public GuidanceResponse addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
       return this;
     }
 
     /**
-     * @return {@link #module} (A reference to the knowledge module that was invoked.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public Reference getModule() { 
-      if (this.module == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create GuidanceResponse.module");
-        else if (Configuration.doAutoCreate())
-          this.module = new Reference(); // cc
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #module} (An identifier, CodeableConcept or canonical reference to the guidance that was requested.)
+     */
+    public Type getModule() { 
       return this.module;
+    }
+
+    /**
+     * @return {@link #module} (An identifier, CodeableConcept or canonical reference to the guidance that was requested.)
+     */
+    public UriType getModuleUriType() throws FHIRException { 
+      if (this.module == null)
+        return null;
+      if (!(this.module instanceof UriType))
+        throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.module.getClass().getName()+" was encountered");
+      return (UriType) this.module;
+    }
+
+    public boolean hasModuleUriType() { 
+      return this != null && this.module instanceof UriType;
+    }
+
+    /**
+     * @return {@link #module} (An identifier, CodeableConcept or canonical reference to the guidance that was requested.)
+     */
+    public CanonicalType getModuleCanonicalType() throws FHIRException { 
+      if (this.module == null)
+        return null;
+      if (!(this.module instanceof CanonicalType))
+        throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.module.getClass().getName()+" was encountered");
+      return (CanonicalType) this.module;
+    }
+
+    public boolean hasModuleCanonicalType() { 
+      return this != null && this.module instanceof CanonicalType;
+    }
+
+    /**
+     * @return {@link #module} (An identifier, CodeableConcept or canonical reference to the guidance that was requested.)
+     */
+    public CodeableConcept getModuleCodeableConcept() throws FHIRException { 
+      if (this.module == null)
+        return null;
+      if (!(this.module instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.module.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.module;
+    }
+
+    public boolean hasModuleCodeableConcept() { 
+      return this != null && this.module instanceof CodeableConcept;
     }
 
     public boolean hasModule() { 
@@ -446,30 +522,12 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #module} (A reference to the knowledge module that was invoked.)
+     * @param value {@link #module} (An identifier, CodeableConcept or canonical reference to the guidance that was requested.)
      */
-    public GuidanceResponse setModule(Reference value) { 
+    public GuidanceResponse setModule(Type value) { 
+      if (value != null && !(value instanceof UriType || value instanceof CanonicalType || value instanceof CodeableConcept))
+        throw new Error("Not the right type for GuidanceResponse.module[x]: "+value.fhirType());
       this.module = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #module} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the knowledge module that was invoked.)
-     */
-    public ServiceDefinition getModuleTarget() { 
-      if (this.moduleTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create GuidanceResponse.module");
-        else if (Configuration.doAutoCreate())
-          this.moduleTarget = new ServiceDefinition(); // aa
-      return this.moduleTarget;
-    }
-
-    /**
-     * @param value {@link #module} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the knowledge module that was invoked.)
-     */
-    public GuidanceResponse setModuleTarget(ServiceDefinition value) { 
-      this.moduleTarget = value;
       return this;
     }
 
@@ -690,48 +748,119 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return {@link #reasonCode} (Describes the reason for the guidance response in coded or textual form.)
      */
-    public Type getReason() { 
-      return this.reason;
+    public List<CodeableConcept> getReasonCode() { 
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      return this.reasonCode;
     }
 
     /**
-     * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
-      if (!(this.reason instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.reason;
+    public GuidanceResponse setReasonCode(List<CodeableConcept> theReasonCode) { 
+      this.reasonCode = theReasonCode;
+      return this;
     }
 
-    public boolean hasReasonCodeableConcept() { 
-      return this.reason instanceof CodeableConcept;
+    public boolean hasReasonCode() { 
+      if (this.reasonCode == null)
+        return false;
+      for (CodeableConcept item : this.reasonCode)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addReasonCode() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return t;
+    }
+
+    public GuidanceResponse addReasonCode(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return this;
     }
 
     /**
-     * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return The first repetition of repeating field {@link #reasonCode}, creating it if it does not already exist
      */
-    public Reference getReasonReference() throws FHIRException { 
-      if (!(this.reason instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
-      return (Reference) this.reason;
+    public CodeableConcept getReasonCodeFirstRep() { 
+      if (getReasonCode().isEmpty()) {
+        addReasonCode();
+      }
+      return getReasonCode().get(0);
+    }
+
+    /**
+     * @return {@link #reasonReference} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     */
+    public List<Reference> getReasonReference() { 
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      return this.reasonReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public GuidanceResponse setReasonReference(List<Reference> theReasonReference) { 
+      this.reasonReference = theReasonReference;
+      return this;
     }
 
     public boolean hasReasonReference() { 
-      return this.reason instanceof Reference;
+      if (this.reasonReference == null)
+        return false;
+      for (Reference item : this.reasonReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    public boolean hasReason() { 
-      return this.reason != null && !this.reason.isEmpty();
+    public Reference addReasonReference() { //3
+      Reference t = new Reference();
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return t;
+    }
+
+    public GuidanceResponse addReasonReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
+     * @return The first repetition of repeating field {@link #reasonReference}, creating it if it does not already exist
      */
-    public GuidanceResponse setReason(Type value) { 
-      this.reason = value;
-      return this;
+    public Reference getReasonReferenceFirstRep() { 
+      if (getReasonReference().isEmpty()) {
+        addReasonReference();
+      }
+      return getReasonReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReasonReferenceTarget() { 
+      if (this.reasonReferenceTarget == null)
+        this.reasonReferenceTarget = new ArrayList<Resource>();
+      return this.reasonReferenceTarget;
     }
 
     /**
@@ -1001,14 +1130,15 @@ public class GuidanceResponse extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestId));
-        children.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, 1, identifier));
-        children.add(new Property("module", "Reference(ServiceDefinition)", "A reference to the knowledge module that was invoked.", 0, 1, module));
+        children.add(new Property("identifier", "Identifier", "Allows a service to provide  unique, business identifiers for the response.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module));
         children.add(new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, 1, status));
         children.add(new Property("subject", "Reference(Patient|Group)", "The patient for which the request was processed.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.", 0, 1, context));
         children.add(new Property("occurrenceDateTime", "dateTime", "Indicates when the guidance response was processed.", 0, 1, occurrenceDateTime));
         children.add(new Property("performer", "Reference(Device)", "Provides a reference to the device that performed the guidance.", 0, 1, performer));
-        children.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason));
+        children.add(new Property("reasonCode", "CodeableConcept", "Describes the reason for the guidance response in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage));
         children.add(new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, 1, outputParameters));
@@ -1020,17 +1150,19 @@ public class GuidanceResponse extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case 693933066: /*requestId*/  return new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestId);
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, 1, identifier);
-        case -1068784020: /*module*/  return new Property("module", "Reference(ServiceDefinition)", "A reference to the knowledge module that was invoked.", 0, 1, module);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Allows a service to provide  unique, business identifiers for the response.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1552083308: /*module[x]*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
+        case -1068784020: /*module*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
+        case -1552089248: /*moduleUri*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
+        case -1153656856: /*moduleCanonical*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
+        case -1157899371: /*moduleCodeableConcept*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, 1, status);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient for which the request was processed.", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.", 0, 1, context);
         case -298443636: /*occurrenceDateTime*/  return new Property("occurrenceDateTime", "dateTime", "Indicates when the guidance response was processed.", 0, 1, occurrenceDateTime);
         case 481140686: /*performer*/  return new Property("performer", "Reference(Device)", "Provides a reference to the device that performed the guidance.", 0, 1, performer);
-        case -669418564: /*reason[x]*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
-        case -934964668: /*reason*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
-        case -610155331: /*reasonCodeableConcept*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
-        case -1146218137: /*reasonReference*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Describes the reason for the guidance response in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note);
         case 1081619755: /*evaluationMessage*/  return new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage);
         case 525609419: /*outputParameters*/  return new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, 1, outputParameters);
@@ -1045,14 +1177,15 @@ public class GuidanceResponse extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 693933066: /*requestId*/ return this.requestId == null ? new Base[0] : new Base[] {this.requestId}; // IdType
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
-        case -1068784020: /*module*/ return this.module == null ? new Base[0] : new Base[] {this.module}; // Reference
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1068784020: /*module*/ return this.module == null ? new Base[0] : new Base[] {this.module}; // Type
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<GuidanceResponseStatus>
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -298443636: /*occurrenceDateTime*/ return this.occurrenceDateTime == null ? new Base[0] : new Base[] {this.occurrenceDateTime}; // DateTimeType
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
+        case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
+        case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case 1081619755: /*evaluationMessage*/ return this.evaluationMessage == null ? new Base[0] : this.evaluationMessage.toArray(new Base[this.evaluationMessage.size()]); // Reference
         case 525609419: /*outputParameters*/ return this.outputParameters == null ? new Base[0] : new Base[] {this.outputParameters}; // Reference
@@ -1070,10 +1203,10 @@ public class GuidanceResponse extends DomainResource {
           this.requestId = castToId(value); // IdType
           return value;
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case -1068784020: // module
-          this.module = castToReference(value); // Reference
+          this.module = castToType(value); // Type
           return value;
         case -892481550: // status
           value = new GuidanceResponseStatusEnumFactory().fromType(castToCode(value));
@@ -1091,8 +1224,11 @@ public class GuidanceResponse extends DomainResource {
         case 481140686: // performer
           this.performer = castToReference(value); // Reference
           return value;
-        case -934964668: // reason
-          this.reason = castToType(value); // Type
+        case 722137681: // reasonCode
+          this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1146218137: // reasonReference
+          this.getReasonReference().add(castToReference(value)); // Reference
           return value;
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
@@ -1119,9 +1255,9 @@ public class GuidanceResponse extends DomainResource {
         if (name.equals("requestId")) {
           this.requestId = castToId(value); // IdType
         } else if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
-        } else if (name.equals("module")) {
-          this.module = castToReference(value); // Reference
+          this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("module[x]")) {
+          this.module = castToType(value); // Type
         } else if (name.equals("status")) {
           value = new GuidanceResponseStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<GuidanceResponseStatus>
@@ -1133,8 +1269,10 @@ public class GuidanceResponse extends DomainResource {
           this.occurrenceDateTime = castToDateTime(value); // DateTimeType
         } else if (name.equals("performer")) {
           this.performer = castToReference(value); // Reference
-        } else if (name.equals("reason[x]")) {
-          this.reason = castToType(value); // Type
+        } else if (name.equals("reasonCode")) {
+          this.getReasonCode().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonReference")) {
+          this.getReasonReference().add(castToReference(value));
         } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
         } else if (name.equals("evaluationMessage")) {
@@ -1154,15 +1292,16 @@ public class GuidanceResponse extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 693933066:  return getRequestIdElement();
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
+        case -1552083308:  return getModule(); 
         case -1068784020:  return getModule(); 
         case -892481550:  return getStatusElement();
         case -1867885268:  return getSubject(); 
         case 951530927:  return getContext(); 
         case -298443636:  return getOccurrenceDateTimeElement();
         case 481140686:  return getPerformer(); 
-        case -669418564:  return getReason(); 
-        case -934964668:  return getReason(); 
+        case 722137681:  return addReasonCode(); 
+        case -1146218137:  return addReasonReference(); 
         case 3387378:  return addNote(); 
         case 1081619755:  return addEvaluationMessage(); 
         case 525609419:  return getOutputParameters(); 
@@ -1178,13 +1317,14 @@ public class GuidanceResponse extends DomainResource {
         switch (hash) {
         case 693933066: /*requestId*/ return new String[] {"id"};
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
-        case -1068784020: /*module*/ return new String[] {"Reference"};
+        case -1068784020: /*module*/ return new String[] {"uri", "canonical", "CodeableConcept"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
         case -298443636: /*occurrenceDateTime*/ return new String[] {"dateTime"};
         case 481140686: /*performer*/ return new String[] {"Reference"};
-        case -934964668: /*reason*/ return new String[] {"CodeableConcept", "Reference"};
+        case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
+        case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
         case 1081619755: /*evaluationMessage*/ return new String[] {"Reference"};
         case 525609419: /*outputParameters*/ return new String[] {"Reference"};
@@ -1201,11 +1341,18 @@ public class GuidanceResponse extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.requestId");
         }
         else if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
-        else if (name.equals("module")) {
-          this.module = new Reference();
+        else if (name.equals("moduleUri")) {
+          this.module = new UriType();
+          return this.module;
+        }
+        else if (name.equals("moduleCanonical")) {
+          this.module = new CanonicalType();
+          return this.module;
+        }
+        else if (name.equals("moduleCodeableConcept")) {
+          this.module = new CodeableConcept();
           return this.module;
         }
         else if (name.equals("status")) {
@@ -1226,13 +1373,11 @@ public class GuidanceResponse extends DomainResource {
           this.performer = new Reference();
           return this.performer;
         }
-        else if (name.equals("reasonCodeableConcept")) {
-          this.reason = new CodeableConcept();
-          return this.reason;
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
         }
         else if (name.equals("reasonReference")) {
-          this.reason = new Reference();
-          return this.reason;
+          return addReasonReference();
         }
         else if (name.equals("note")) {
           return addNote();
@@ -1264,14 +1409,27 @@ public class GuidanceResponse extends DomainResource {
         GuidanceResponse dst = new GuidanceResponse();
         copyValues(dst);
         dst.requestId = requestId == null ? null : requestId.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.module = module == null ? null : module.copy();
         dst.status = status == null ? null : status.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.occurrenceDateTime = occurrenceDateTime == null ? null : occurrenceDateTime.copy();
         dst.performer = performer == null ? null : performer.copy();
-        dst.reason = reason == null ? null : reason.copy();
+        if (reasonCode != null) {
+          dst.reasonCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonCode)
+            dst.reasonCode.add(i.copy());
+        };
+        if (reasonReference != null) {
+          dst.reasonReference = new ArrayList<Reference>();
+          for (Reference i : reasonReference)
+            dst.reasonReference.add(i.copy());
+        };
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
@@ -1306,10 +1464,10 @@ public class GuidanceResponse extends DomainResource {
         return compareDeep(requestId, o.requestId, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(module, o.module, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true)
-           && compareDeep(performer, o.performer, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
-           && compareDeep(evaluationMessage, o.evaluationMessage, true) && compareDeep(outputParameters, o.outputParameters, true)
-           && compareDeep(result, o.result, true) && compareDeep(dataRequirement, o.dataRequirement, true)
-          ;
+           && compareDeep(performer, o.performer, true) && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
+           && compareDeep(note, o.note, true) && compareDeep(evaluationMessage, o.evaluationMessage, true)
+           && compareDeep(outputParameters, o.outputParameters, true) && compareDeep(result, o.result, true)
+           && compareDeep(dataRequirement, o.dataRequirement, true);
       }
 
       @Override
@@ -1325,8 +1483,8 @@ public class GuidanceResponse extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestId, identifier, module
-          , status, subject, context, occurrenceDateTime, performer, reason, note, evaluationMessage
-          , outputParameters, result, dataRequirement);
+          , status, subject, context, occurrenceDateTime, performer, reasonCode, reasonReference
+          , note, evaluationMessage, outputParameters, result, dataRequirement);
       }
 
   @Override

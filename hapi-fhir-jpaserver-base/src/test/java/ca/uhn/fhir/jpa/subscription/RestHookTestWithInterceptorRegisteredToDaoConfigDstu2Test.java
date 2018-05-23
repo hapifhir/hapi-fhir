@@ -1,23 +1,6 @@
 
 package ca.uhn.fhir.jpa.subscription;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.common.collect.Lists;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
@@ -37,6 +20,14 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
+import com.google.common.collect.Lists;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.*;
+
+import java.util.List;
 
 /**
  * Test the rest-hook subscriptions

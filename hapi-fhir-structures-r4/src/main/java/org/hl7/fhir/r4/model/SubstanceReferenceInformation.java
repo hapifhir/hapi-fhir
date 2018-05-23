@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1120,26 +1120,30 @@ public class SubstanceReferenceInformation extends DomainResource {
          * @return {@link #substance} (Todo.)
          */
         public Reference getSubstanceReference() throws FHIRException { 
+          if (this.substance == null)
+            return null;
           if (!(this.substance instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (Reference) this.substance;
         }
 
         public boolean hasSubstanceReference() { 
-          return this.substance instanceof Reference;
+          return this != null && this.substance instanceof Reference;
         }
 
         /**
          * @return {@link #substance} (Todo.)
          */
         public CodeableConcept getSubstanceCodeableConcept() throws FHIRException { 
+          if (this.substance == null)
+            return null;
           if (!(this.substance instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (CodeableConcept) this.substance;
         }
 
         public boolean hasSubstanceCodeableConcept() { 
-          return this.substance instanceof CodeableConcept;
+          return this != null && this.substance instanceof CodeableConcept;
         }
 
         public boolean hasSubstance() { 
@@ -1150,6 +1154,8 @@ public class SubstanceReferenceInformation extends DomainResource {
          * @param value {@link #substance} (Todo.)
          */
         public SubstanceReferenceInformationRelationshipComponent setSubstance(Type value) { 
+          if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+            throw new Error("Not the right type for SubstanceReferenceInformation.relationship.substance[x]: "+value.fhirType());
           this.substance = value;
           return this;
         }
@@ -1258,39 +1264,45 @@ public class SubstanceReferenceInformation extends DomainResource {
          * @return {@link #amount} (Todo.)
          */
         public Quantity getAmountQuantity() throws FHIRException { 
+          if (this.amount == null)
+            return null;
           if (!(this.amount instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
           return (Quantity) this.amount;
         }
 
         public boolean hasAmountQuantity() { 
-          return this.amount instanceof Quantity;
+          return this != null && this.amount instanceof Quantity;
         }
 
         /**
          * @return {@link #amount} (Todo.)
          */
         public Range getAmountRange() throws FHIRException { 
+          if (this.amount == null)
+            return null;
           if (!(this.amount instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
           return (Range) this.amount;
         }
 
         public boolean hasAmountRange() { 
-          return this.amount instanceof Range;
+          return this != null && this.amount instanceof Range;
         }
 
         /**
          * @return {@link #amount} (Todo.)
          */
         public StringType getAmountStringType() throws FHIRException { 
+          if (this.amount == null)
+            return null;
           if (!(this.amount instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
           return (StringType) this.amount;
         }
 
         public boolean hasAmountStringType() { 
-          return this.amount instanceof StringType;
+          return this != null && this.amount instanceof StringType;
         }
 
         public boolean hasAmount() { 
@@ -1301,6 +1313,8 @@ public class SubstanceReferenceInformation extends DomainResource {
          * @param value {@link #amount} (Todo.)
          */
         public SubstanceReferenceInformationRelationshipComponent setAmount(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof StringType))
+            throw new Error("Not the right type for SubstanceReferenceInformation.relationship.amount[x]: "+value.fhirType());
           this.amount = value;
           return this;
         }
@@ -1972,39 +1986,45 @@ public class SubstanceReferenceInformation extends DomainResource {
          * @return {@link #amount} (Todo.)
          */
         public Quantity getAmountQuantity() throws FHIRException { 
+          if (this.amount == null)
+            return null;
           if (!(this.amount instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
           return (Quantity) this.amount;
         }
 
         public boolean hasAmountQuantity() { 
-          return this.amount instanceof Quantity;
+          return this != null && this.amount instanceof Quantity;
         }
 
         /**
          * @return {@link #amount} (Todo.)
          */
         public Range getAmountRange() throws FHIRException { 
+          if (this.amount == null)
+            return null;
           if (!(this.amount instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
           return (Range) this.amount;
         }
 
         public boolean hasAmountRange() { 
-          return this.amount instanceof Range;
+          return this != null && this.amount instanceof Range;
         }
 
         /**
          * @return {@link #amount} (Todo.)
          */
         public StringType getAmountStringType() throws FHIRException { 
+          if (this.amount == null)
+            return null;
           if (!(this.amount instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
           return (StringType) this.amount;
         }
 
         public boolean hasAmountStringType() { 
-          return this.amount instanceof StringType;
+          return this != null && this.amount instanceof StringType;
         }
 
         public boolean hasAmount() { 
@@ -2015,6 +2035,8 @@ public class SubstanceReferenceInformation extends DomainResource {
          * @param value {@link #amount} (Todo.)
          */
         public SubstanceReferenceInformationTargetComponent setAmount(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof StringType))
+            throw new Error("Not the right type for SubstanceReferenceInformation.target.amount[x]: "+value.fhirType());
           this.amount = value;
           return this;
         }

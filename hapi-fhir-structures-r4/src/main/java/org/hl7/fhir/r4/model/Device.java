@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -50,7 +50,7 @@ public class Device extends DomainResource {
 
     public enum UDIEntryType {
         /**
-         * A Barcode scanner captured the data from the device label
+         * a barcodescanner captured the data from the device label
          */
         BARCODE, 
         /**
@@ -62,11 +62,11 @@ public class Device extends DomainResource {
          */
         MANUAL, 
         /**
-         * The data originated from a patient's implant card and read by an operator.
+         * The data originated from a patient's implant card and was read by an operator.
          */
         CARD, 
         /**
-         * The data originated from a patient source and not directly scanned or read from a label or card.
+         * The data originated from a patient source and was not directly scanned or read from a label or card.
          */
         SELFREPORTED, 
         /**
@@ -121,18 +121,18 @@ public class Device extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case BARCODE: return "A Barcode scanner captured the data from the device label";
+            case BARCODE: return "a barcodescanner captured the data from the device label";
             case RFID: return "An RFID chip reader captured the data from the device label";
             case MANUAL: return "The data was read from the label by a person and manually entered. (e.g.  via a keyboard)";
-            case CARD: return "The data originated from a patient's implant card and read by an operator.";
-            case SELFREPORTED: return "The data originated from a patient source and not directly scanned or read from a label or card.";
+            case CARD: return "The data originated from a patient's implant card and was read by an operator.";
+            case SELFREPORTED: return "The data originated from a patient source and was not directly scanned or read from a label or card.";
             case UNKNOWN: return "The method of data capture has not been determined";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case BARCODE: return "BarCode";
+            case BARCODE: return "Barcode";
             case RFID: return "RFID";
             case MANUAL: return "Manual";
             case CARD: return "Card";
@@ -206,15 +206,15 @@ public class Device extends DomainResource {
 
     public enum FHIRDeviceStatus {
         /**
-         * The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.
+         * The device is available for use.  Note: For *implanted devices*  this means that the device is implanted in the patient.
          */
         ACTIVE, 
         /**
-         * The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.
+         * The device is no longer available for use (e.g. lost, expired, damaged).  Note: For *implanted devices*  this means that the device has been removed from the patient.
          */
         INACTIVE, 
         /**
-         * The Device was entered in error and voided.
+         * The device was entered in error and voided.
          */
         ENTEREDINERROR, 
         /**
@@ -261,9 +261,9 @@ public class Device extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.";
-            case INACTIVE: return "The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.";
-            case ENTEREDINERROR: return "The Device was entered in error and voided.";
+            case ACTIVE: return "The device is available for use.  Note: For *implanted devices*  this means that the device is implanted in the patient.";
+            case INACTIVE: return "The device is no longer available for use (e.g. lost, expired, damaged).  Note: For *implanted devices*  this means that the device has been removed from the patient.";
+            case ENTEREDINERROR: return "The device was entered in error and voided.";
             case UNKNOWN: return "The status of the device has not been determined.";
             default: return "?";
           }
@@ -345,10 +345,10 @@ public class Device extends DomainResource {
         protected StringType name;
 
         /**
-         * The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
+         * The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
          */
         @Child(name = "jurisdiction", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Regional UDI authority", formalDefinition="The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi." )
+        @Description(shortDefinition="Regional UDI authority", formalDefinition="The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi." )
         protected UriType jurisdiction;
 
         /**
@@ -359,10 +359,10 @@ public class Device extends DomainResource {
         protected StringType carrierHRF;
 
         /**
-         * The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
+         * The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
          */
         @Child(name = "carrierAIDC", type = {Base64BinaryType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="UDI Machine Readable Barcode String", formalDefinition="The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded." )
+        @Description(shortDefinition="UDI Machine Readable Barcode String", formalDefinition="The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded." )
         protected Base64BinaryType carrierAIDC;
 
         /**
@@ -496,7 +496,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
         }
 
         /**
-         * @return {@link #jurisdiction} (The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.). This is the underlying object with id, value and extensions. The accessor "getJurisdiction" gives direct access to the value
+         * @return {@link #jurisdiction} (The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.). This is the underlying object with id, value and extensions. The accessor "getJurisdiction" gives direct access to the value
          */
         public UriType getJurisdictionElement() { 
           if (this.jurisdiction == null)
@@ -516,7 +516,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
         }
 
         /**
-         * @param value {@link #jurisdiction} (The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.). This is the underlying object with id, value and extensions. The accessor "getJurisdiction" gives direct access to the value
+         * @param value {@link #jurisdiction} (The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.). This is the underlying object with id, value and extensions. The accessor "getJurisdiction" gives direct access to the value
          */
         public DeviceUdiComponent setJurisdictionElement(UriType value) { 
           this.jurisdiction = value;
@@ -524,14 +524,14 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
         }
 
         /**
-         * @return The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
+         * @return The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
          */
         public String getJurisdiction() { 
           return this.jurisdiction == null ? null : this.jurisdiction.getValue();
         }
 
         /**
-         * @param value The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
+         * @param value The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.
          */
         public DeviceUdiComponent setJurisdiction(String value) { 
           if (Utilities.noString(value))
@@ -594,7 +594,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
         }
 
         /**
-         * @return {@link #carrierAIDC} (The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getCarrierAIDC" gives direct access to the value
+         * @return {@link #carrierAIDC} (The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getCarrierAIDC" gives direct access to the value
          */
         public Base64BinaryType getCarrierAIDCElement() { 
           if (this.carrierAIDC == null)
@@ -614,7 +614,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
         }
 
         /**
-         * @param value {@link #carrierAIDC} (The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getCarrierAIDC" gives direct access to the value
+         * @param value {@link #carrierAIDC} (The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getCarrierAIDC" gives direct access to the value
          */
         public DeviceUdiComponent setCarrierAIDCElement(Base64BinaryType value) { 
           this.carrierAIDC = value;
@@ -622,14 +622,14 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
         }
 
         /**
-         * @return The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
+         * @return The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
          */
         public byte[] getCarrierAIDC() { 
           return this.carrierAIDC == null ? null : this.carrierAIDC.getValue();
         }
 
         /**
-         * @param value The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
+         * @param value The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.
          */
         public DeviceUdiComponent setCarrierAIDC(byte[] value) { 
           if (value == null)
@@ -776,9 +776,9 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
           super.listChildren(children);
           children.add(new Property("deviceIdentifier", "string", "The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.", 0, 1, deviceIdentifier));
           children.add(new Property("name", "string", "Name of device as used in labeling or catalog.", 0, 1, name));
-          children.add(new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, 1, jurisdiction));
+          children.add(new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, 1, jurisdiction));
           children.add(new Property("carrierHRF", "string", "The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.", 0, 1, carrierHRF));
-          children.add(new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, 1, carrierAIDC));
+          children.add(new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, 1, carrierAIDC));
           children.add(new Property("issuer", "uri", "Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di.", 0, 1, issuer));
           children.add(new Property("entryType", "code", "A coded entry to indicate how the data was entered.", 0, 1, entryType));
         }
@@ -788,9 +788,9 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
           switch (_hash) {
           case 1322005407: /*deviceIdentifier*/  return new Property("deviceIdentifier", "string", "The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.", 0, 1, deviceIdentifier);
           case 3373707: /*name*/  return new Property("name", "string", "Name of device as used in labeling or catalog.", 0, 1, name);
-          case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, 1, jurisdiction);
+          case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, 1, jurisdiction);
           case 806499972: /*carrierHRF*/  return new Property("carrierHRF", "string", "The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.", 0, 1, carrierHRF);
-          case -768521825: /*carrierAIDC*/  return new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, 1, carrierAIDC);
+          case -768521825: /*carrierAIDC*/  return new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - e.g., a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, 1, carrierAIDC);
           case -1179159879: /*issuer*/  return new Property("issuer", "uri", "Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di.", 0, 1, issuer);
           case -479362356: /*entryType*/  return new Property("entryType", "code", "A coded entry to indicate how the data was entered.", 0, 1, entryType);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -981,10 +981,10 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     protected List<Identifier> identifier;
 
     /**
-     * [Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.
+     * [Unique device identifier (UDI)](device.html#udi) assigned to device label or package.
      */
     @Child(name = "udi", type = {}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Unique Device Identifier (UDI) Barcode string", formalDefinition="[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package." )
+    @Description(shortDefinition="Unique Device Identifier (UDI) Barcode string", formalDefinition="[Unique device identifier (UDI)](device.html#udi) assigned to device label or package." )
     protected DeviceUdiComponent udi;
 
     /**
@@ -1173,7 +1173,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     }
 
     /**
-     * @return {@link #udi} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.)
+     * @return {@link #udi} ([Unique device identifier (UDI)](device.html#udi) assigned to device label or package.)
      */
     public DeviceUdiComponent getUdi() { 
       if (this.udi == null)
@@ -1189,7 +1189,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     }
 
     /**
-     * @param value {@link #udi} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.)
+     * @param value {@link #udi} ([Unique device identifier (UDI)](device.html#udi) assigned to device label or package.)
      */
     public Device setUdi(DeviceUdiComponent value) { 
       this.udi = value;
@@ -1906,7 +1906,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("udi", "", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.", 0, 1, udi));
+        children.add(new Property("udi", "", "[Unique device identifier (UDI)](device.html#udi) assigned to device label or package.", 0, 1, udi));
         children.add(new Property("status", "code", "Status of the Device availability.", 0, 1, status));
         children.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, 1, type));
         children.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, 1, lotNumber));
@@ -1928,7 +1928,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case 115642: /*udi*/  return new Property("udi", "", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.", 0, 1, udi);
+        case 115642: /*udi*/  return new Property("udi", "", "[Unique device identifier (UDI)](device.html#udi) assigned to device label or package.", 0, 1, udi);
         case -892481550: /*status*/  return new Property("status", "code", "Status of the Device availability.", 0, 1, status);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, 1, type);
         case 462547450: /*lotNumber*/  return new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, 1, lotNumber);

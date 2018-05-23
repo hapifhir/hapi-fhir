@@ -2,7 +2,7 @@ package org.hl7.fhir.r4.model;
 
 import org.hl7.fhir.exceptions.FHIRException;
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 public enum ResourceType {
     Account,
@@ -67,8 +67,6 @@ public enum ResourceType {
     ImmunizationEvaluation,
     ImmunizationRecommendation,
     ImplementationGuide,
-    ImplementationGuideInput,
-    ImplementationGuideOutput,
     Invoice,
     ItemInstance,
     Library,
@@ -81,6 +79,7 @@ public enum ResourceType {
     Medication,
     MedicationAdministration,
     MedicationDispense,
+    MedicationKnowledge,
     MedicationRequest,
     MedicationStatement,
     MedicinalProduct,
@@ -124,7 +123,6 @@ public enum ResourceType {
     Schedule,
     SearchParameter,
     Sequence,
-    ServiceDefinition,
     ServiceRequest,
     Slot,
     Specimen,
@@ -274,10 +272,6 @@ public enum ResourceType {
       return "immunizationrecommendation";
     case ImplementationGuide:
       return "implementationguide";
-    case ImplementationGuideInput:
-      return "implementationguideinput";
-    case ImplementationGuideOutput:
-      return "implementationguideoutput";
     case Invoice:
       return "invoice";
     case ItemInstance:
@@ -302,6 +296,8 @@ public enum ResourceType {
       return "medicationadministration";
     case MedicationDispense:
       return "medicationdispense";
+    case MedicationKnowledge:
+      return "medicationknowledge";
     case MedicationRequest:
       return "medicationrequest";
     case MedicationStatement:
@@ -388,8 +384,6 @@ public enum ResourceType {
       return "searchparameter";
     case Sequence:
       return "sequence";
-    case ServiceDefinition:
-      return "servicedefinition";
     case ServiceRequest:
       return "servicerequest";
     case Slot:
@@ -562,10 +556,6 @@ public enum ResourceType {
       return ImmunizationRecommendation;
     if ("ImplementationGuide".equals(code))
       return ImplementationGuide;
-    if ("ImplementationGuideInput".equals(code))
-      return ImplementationGuideInput;
-    if ("ImplementationGuideOutput".equals(code))
-      return ImplementationGuideOutput;
     if ("Invoice".equals(code))
       return Invoice;
     if ("ItemInstance".equals(code))
@@ -590,6 +580,8 @@ public enum ResourceType {
       return MedicationAdministration;
     if ("MedicationDispense".equals(code))
       return MedicationDispense;
+    if ("MedicationKnowledge".equals(code))
+      return MedicationKnowledge;
     if ("MedicationRequest".equals(code))
       return MedicationRequest;
     if ("MedicationStatement".equals(code))
@@ -676,8 +668,6 @@ public enum ResourceType {
       return SearchParameter;
     if ("Sequence".equals(code))
       return Sequence;
-    if ("ServiceDefinition".equals(code))
-      return ServiceDefinition;
     if ("ServiceRequest".equals(code))
       return ServiceRequest;
     if ("Slot".equals(code))

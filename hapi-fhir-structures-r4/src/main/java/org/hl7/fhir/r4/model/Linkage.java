@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class Linkage extends DomainResource {
          */
         ALTERNATE, 
         /**
-         * The record represents an obsolete record of the underlyng event/condition/etc.  It is not expected to be actively maintained.
+         * The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.
          */
         HISTORICAL, 
         /**
@@ -99,7 +99,7 @@ public class Linkage extends DomainResource {
           switch (this) {
             case SOURCE: return "The record represents the \"source of truth\" (from the perspective of this Linkage resource) for the underlying event/condition/etc.";
             case ALTERNATE: return "The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.";
-            case HISTORICAL: return "The record represents an obsolete record of the underlyng event/condition/etc.  It is not expected to be actively maintained.";
+            case HISTORICAL: return "The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.";
             default: return "?";
           }
         }
@@ -425,10 +425,10 @@ public class Linkage extends DomainResource {
     protected Resource authorTarget;
 
     /**
-     * Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.
+     * Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.
      */
     @Child(name = "item", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Item to be linked", formalDefinition="Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items." )
+    @Description(shortDefinition="Item to be linked", formalDefinition="Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items." )
     protected List<LinkageItemComponent> item;
 
     private static final long serialVersionUID = 25900306L;
@@ -525,7 +525,7 @@ public class Linkage extends DomainResource {
     }
 
     /**
-     * @return {@link #item} (Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.)
+     * @return {@link #item} (Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.)
      */
     public List<LinkageItemComponent> getItem() { 
       if (this.item == null)
@@ -581,7 +581,7 @@ public class Linkage extends DomainResource {
         super.listChildren(children);
         children.add(new Property("active", "boolean", "Indicates whether the asserted set of linkages are considered to be \"in effect\".", 0, 1, active));
         children.add(new Property("author", "Reference(Practitioner|Organization)", "Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.", 0, 1, author));
-        children.add(new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item));
+        children.add(new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item));
       }
 
       @Override
@@ -589,7 +589,7 @@ public class Linkage extends DomainResource {
         switch (_hash) {
         case -1422950650: /*active*/  return new Property("active", "boolean", "Indicates whether the asserted set of linkages are considered to be \"in effect\".", 0, 1, active);
         case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Organization)", "Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.", 0, 1, author);
-        case 3242771: /*item*/  return new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items hould be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item);
+        case 3242771: /*item*/  return new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

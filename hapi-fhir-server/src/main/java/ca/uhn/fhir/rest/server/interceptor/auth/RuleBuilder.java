@@ -89,11 +89,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		return new RuleBuilderFinished(rule);
 	}
 
+	public interface ITenantApplicabilityChecker {
+		boolean applies(RequestDetails theRequest);
+	}
+
 	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished, IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId {
 
 		private final RuleImplOp myOpRule;
 		private final OperationRule myOperationRule;
 		protected ITenantApplicabilityChecker myTenantApplicabilityChecker;
+		private List<IAuthRuleTester> myTesters;
 
 		RuleBuilderFinished(RuleImplOp theRule) {
 			myOpRule = theRule;
@@ -140,14 +145,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return this;
 		}
 
-		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
-			if (myOpRule != null) {
-				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
+		public List<IAuthRuleTester> getTesters() {
+			if (myTesters == null) {
+				return Collections.emptyList();
 			}
-			if (myOperationRule != null) {
-				myOperationRule.setTenentApplicabilityChecker(myTenantApplicabilityChecker);
-			}
+			return myTesters;
 		}
 
 		@Override
@@ -165,11 +167,32 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			});
 			return this;
 		}
-	}
 
-	public interface ITenantApplicabilityChecker
-	{
-		boolean applies(RequestDetails theRequest);
+		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
+			if (myOpRule != null) {
+				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
+			}
+			if (myOperationRule != null) {
+				myOperationRule.setTenentApplicabilityChecker(myTenantApplicabilityChecker);
+			}
+		}
+
+		@Override
+		public IAuthRuleFinished withTester(IAuthRuleTester theTester) {
+			if (myTesters == null) {
+				myTesters = new ArrayList<>();
+			}
+			myTesters.add(theTester);
+			if (myOperationRule != null) {
+				myOperationRule.addTester(theTester);
+			}
+			if (myOpRule != null) {
+				myOpRule.addTester(theTester);
+			}
+
+			return this;
+		}
 	}
 
 	private class RuleBuilderRule implements IAuthRuleBuilderRule {
@@ -275,6 +298,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					rule.setAppliesTo(myAppliesTo);
 					rule.setAppliesToTypes(myAppliesToTypes);
 					rule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
+					rule.addTesters(getTesters());
 					myRules.add(rule);
 
 				}
@@ -362,6 +386,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					for (IIdType next : theOwners) {
 						validateOwner(next);
 					}
+					myInCompartmentName = theCompartmentName;
+					myInCompartmentOwners = theOwners;
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					return finished();
 				}
@@ -425,7 +451,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleFinished onAnyInstance() {
+				public IAuthRuleBuilderRuleOpClassifierFinished onAnyInstance() {
 					OperationRule rule = createRule();
 					rule.appliesToAnyInstance();
 					myRules.add(rule);
@@ -433,7 +459,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleFinished onAnyType() {
+				public IAuthRuleBuilderRuleOpClassifierFinished atAnyLevel() {
+					OperationRule rule = createRule();
+					rule.appliesAtAnyLevel(true);
+					myRules.add(rule);
+					return new RuleBuilderFinished(rule);
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished onAnyType() {
 					OperationRule rule = createRule();
 					rule.appliesToAnyType();
 					myRules.add(rule);
@@ -447,7 +481,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
 
 					OperationRule rule = createRule();
-					ArrayList<IIdType> ids = new ArrayList<IIdType>();
+					ArrayList<IIdType> ids = new ArrayList<>();
 					ids.add(theInstanceId);
 					rule.appliesToInstances(ids);
 					myRules.add(rule);
@@ -483,7 +517,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				private HashSet<Class<? extends IBaseResource>> toTypeSet(Class<? extends IBaseResource> theType) {
-					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<Class<? extends IBaseResource>>();
+					HashSet<Class<? extends IBaseResource>> appliesToTypes = new HashSet<>();
 					appliesToTypes.add(theType);
 					return appliesToTypes;
 				}

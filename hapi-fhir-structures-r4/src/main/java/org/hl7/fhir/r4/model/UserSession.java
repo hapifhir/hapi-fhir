@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -621,26 +621,30 @@ public class UserSession extends DomainResource {
          * @return {@link #value} (Provides the context value.)
          */
         public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
         public boolean hasValueCodeableConcept() { 
-          return this.value instanceof CodeableConcept;
+          return this != null && this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (Provides the context value.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         public boolean hasValue() { 
@@ -651,6 +655,8 @@ public class UserSession extends DomainResource {
          * @param value {@link #value} (Provides the context value.)
          */
         public UserSessionContextComponent setValue(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Quantity))
+            throw new Error("Not the right type for UserSession.context.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }

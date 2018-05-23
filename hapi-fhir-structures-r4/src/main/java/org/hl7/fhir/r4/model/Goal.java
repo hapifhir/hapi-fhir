@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -384,39 +384,45 @@ public class Goal extends DomainResource {
          * @return {@link #detail} (The target value of the focus to be achieved to signify the fulfillment of the goal, e.g. 150 pounds, 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any focus value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any focus value at or above the low value.)
          */
         public Quantity getDetailQuantity() throws FHIRException { 
+          if (this.detail == null)
+            return null;
           if (!(this.detail instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (Quantity) this.detail;
         }
 
         public boolean hasDetailQuantity() { 
-          return this.detail instanceof Quantity;
+          return this != null && this.detail instanceof Quantity;
         }
 
         /**
          * @return {@link #detail} (The target value of the focus to be achieved to signify the fulfillment of the goal, e.g. 150 pounds, 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any focus value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any focus value at or above the low value.)
          */
         public Range getDetailRange() throws FHIRException { 
+          if (this.detail == null)
+            return null;
           if (!(this.detail instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (Range) this.detail;
         }
 
         public boolean hasDetailRange() { 
-          return this.detail instanceof Range;
+          return this != null && this.detail instanceof Range;
         }
 
         /**
          * @return {@link #detail} (The target value of the focus to be achieved to signify the fulfillment of the goal, e.g. 150 pounds, 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any focus value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any focus value at or above the low value.)
          */
         public CodeableConcept getDetailCodeableConcept() throws FHIRException { 
+          if (this.detail == null)
+            return null;
           if (!(this.detail instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (CodeableConcept) this.detail;
         }
 
         public boolean hasDetailCodeableConcept() { 
-          return this.detail instanceof CodeableConcept;
+          return this != null && this.detail instanceof CodeableConcept;
         }
 
         public boolean hasDetail() { 
@@ -427,6 +433,8 @@ public class Goal extends DomainResource {
          * @param value {@link #detail} (The target value of the focus to be achieved to signify the fulfillment of the goal, e.g. 150 pounds, 7.0%. Either the high or low or both values of the range can be specified. When a low value is missing, it indicates that the goal is achieved at any focus value at or below the high value. Similarly, if the high value is missing, it indicates that the goal is achieved at any focus value at or above the low value.)
          */
         public GoalTargetComponent setDetail(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof CodeableConcept))
+            throw new Error("Not the right type for Goal.target.detail[x]: "+value.fhirType());
           this.detail = value;
           return this;
         }
@@ -442,26 +450,30 @@ public class Goal extends DomainResource {
          * @return {@link #due} (Indicates either the date or the duration after start by which the goal should be met.)
          */
         public DateType getDueDateType() throws FHIRException { 
+          if (this.due == null)
+            return null;
           if (!(this.due instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.due.getClass().getName()+" was encountered");
           return (DateType) this.due;
         }
 
         public boolean hasDueDateType() { 
-          return this.due instanceof DateType;
+          return this != null && this.due instanceof DateType;
         }
 
         /**
          * @return {@link #due} (Indicates either the date or the duration after start by which the goal should be met.)
          */
         public Duration getDueDuration() throws FHIRException { 
+          if (this.due == null)
+            return null;
           if (!(this.due instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.due.getClass().getName()+" was encountered");
           return (Duration) this.due;
         }
 
         public boolean hasDueDuration() { 
-          return this.due instanceof Duration;
+          return this != null && this.due instanceof Duration;
         }
 
         public boolean hasDue() { 
@@ -472,6 +484,8 @@ public class Goal extends DomainResource {
          * @param value {@link #due} (Indicates either the date or the duration after start by which the goal should be met.)
          */
         public GoalTargetComponent setDue(Type value) { 
+          if (value != null && !(value instanceof DateType || value instanceof Duration))
+            throw new Error("Not the right type for Goal.target.due[x]: "+value.fhirType());
           this.due = value;
           return this;
         }
@@ -638,10 +652,10 @@ public class Goal extends DomainResource {
   }
 
     /**
-     * This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
+     * Business identifiers assigned to this goal by the performer or other systems which remain constant as the resource is updated and propagates from server to server.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="External Ids for this goal", formalDefinition="This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
+    @Description(shortDefinition="External Ids for this goal", formalDefinition="Business identifiers assigned to this goal by the performer or other systems which remain constant as the resource is updated and propagates from server to server." )
     protected List<Identifier> identifier;
 
     /**
@@ -788,7 +802,7 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).)
+     * @return {@link #identifier} (Business identifiers assigned to this goal by the performer or other systems which remain constant as the resource is updated and propagates from server to server.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1036,26 +1050,30 @@ public class Goal extends DomainResource {
      * @return {@link #start} (The date or event after which the goal should begin being pursued.)
      */
     public DateType getStartDateType() throws FHIRException { 
+      if (this.start == null)
+        return null;
       if (!(this.start instanceof DateType))
         throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.start.getClass().getName()+" was encountered");
       return (DateType) this.start;
     }
 
     public boolean hasStartDateType() { 
-      return this.start instanceof DateType;
+      return this != null && this.start instanceof DateType;
     }
 
     /**
      * @return {@link #start} (The date or event after which the goal should begin being pursued.)
      */
     public CodeableConcept getStartCodeableConcept() throws FHIRException { 
+      if (this.start == null)
+        return null;
       if (!(this.start instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.start.getClass().getName()+" was encountered");
       return (CodeableConcept) this.start;
     }
 
     public boolean hasStartCodeableConcept() { 
-      return this.start instanceof CodeableConcept;
+      return this != null && this.start instanceof CodeableConcept;
     }
 
     public boolean hasStart() { 
@@ -1066,6 +1084,8 @@ public class Goal extends DomainResource {
      * @param value {@link #start} (The date or event after which the goal should begin being pursued.)
      */
     public Goal setStart(Type value) { 
+      if (value != null && !(value instanceof DateType || value instanceof CodeableConcept))
+        throw new Error("Not the right type for Goal.start[x]: "+value.fhirType());
       this.start = value;
       return this;
     }
@@ -1477,7 +1497,7 @@ public class Goal extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this goal by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "Indicates whether the goal has been reached and is still considered relevant.", 0, 1, status));
         children.add(new Property("category", "CodeableConcept", "Indicates a category the goal falls within.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("priority", "CodeableConcept", "Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.", 0, 1, priority));
@@ -1497,7 +1517,7 @@ public class Goal extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this goal by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "Indicates whether the goal has been reached and is still considered relevant.", 0, 1, status);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates a category the goal falls within.", 0, java.lang.Integer.MAX_VALUE, category);
         case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Identifies the mutually agreed level of importance associated with reaching/sustaining the goal.", 0, 1, priority);

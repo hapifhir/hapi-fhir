@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
  */
@@ -322,7 +323,7 @@ public class ClaimResponse extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -433,12 +434,24 @@ public class ClaimResponse extends DomainResource {
           return getDetail().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          childrenList.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          childrenList.add(new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
-          childrenList.add(new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -1335224239: /*detail*/  return new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -553,23 +566,23 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ItemComponent))
+        if (!(other_ instanceof ItemComponent))
           return false;
-        ItemComponent o = (ItemComponent) other;
+        ItemComponent o = (ItemComponent) other_;
         return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true) && compareDeep(detail, o.detail, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ItemComponent))
+        if (!(other_ instanceof ItemComponent))
           return false;
-        ItemComponent o = (ItemComponent) other;
+        ItemComponent o = (ItemComponent) other_;
         return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
@@ -654,7 +667,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #category} (Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
-        public AdjudicationComponent setCategory(CodeableConcept value) { 
+        public AdjudicationComponent setCategory(CodeableConcept value)  { 
           this.category = value;
           return this;
         }
@@ -678,7 +691,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #reason} (Adjudication reason such as limit reached.)
          */
-        public AdjudicationComponent setReason(CodeableConcept value) { 
+        public AdjudicationComponent setReason(CodeableConcept value)  { 
           this.reason = value;
           return this;
         }
@@ -702,7 +715,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #amount} (Monetary amount associated with the code.)
          */
-        public AdjudicationComponent setAmount(Money value) { 
+        public AdjudicationComponent setAmount(Money value)  { 
           this.amount = value;
           return this;
         }
@@ -774,12 +787,24 @@ public class ClaimResponse extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("category", "CodeableConcept", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, java.lang.Integer.MAX_VALUE, category));
-          childrenList.add(new Property("reason", "CodeableConcept", "Adjudication reason such as limit reached.", 0, java.lang.Integer.MAX_VALUE, reason));
-          childrenList.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, java.lang.Integer.MAX_VALUE, amount));
-          childrenList.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("category", "CodeableConcept", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, 1, category));
+          children.add(new Property("reason", "CodeableConcept", "Adjudication reason such as limit reached.", 0, 1, reason));
+          children.add(new Property("amount", "Money", "Monetary amount associated with the code.", 0, 1, amount));
+          children.add(new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Code indicating: Co-Pay, deductible, eligible, benefit, tax, etc.", 0, 1, category);
+          case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Adjudication reason such as limit reached.", 0, 1, reason);
+          case -1413853096: /*amount*/  return new Property("amount", "Money", "Monetary amount associated with the code.", 0, 1, amount);
+          case 111972721: /*value*/  return new Property("value", "decimal", "A non-monetary value for example a percentage. Mutually exclusive to the amount element above.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -885,23 +910,23 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AdjudicationComponent))
+        if (!(other_ instanceof AdjudicationComponent))
           return false;
-        AdjudicationComponent o = (AdjudicationComponent) other;
+        AdjudicationComponent o = (AdjudicationComponent) other_;
         return compareDeep(category, o.category, true) && compareDeep(reason, o.reason, true) && compareDeep(amount, o.amount, true)
            && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AdjudicationComponent))
+        if (!(other_ instanceof AdjudicationComponent))
           return false;
-        AdjudicationComponent o = (AdjudicationComponent) other;
+        AdjudicationComponent o = (AdjudicationComponent) other_;
         return compareValues(value, o.value, true);
       }
 
@@ -1065,7 +1090,7 @@ public class ClaimResponse extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -1176,12 +1201,24 @@ public class ClaimResponse extends DomainResource {
           return getSubDetail().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          childrenList.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          childrenList.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
-          childrenList.add(new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -828829007: /*subDetail*/  return new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1296,24 +1333,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ItemDetailComponent))
+        if (!(other_ instanceof ItemDetailComponent))
           return false;
-        ItemDetailComponent o = (ItemDetailComponent) other;
+        ItemDetailComponent o = (ItemDetailComponent) other_;
         return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true) && compareDeep(subDetail, o.subDetail, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ItemDetailComponent))
+        if (!(other_ instanceof ItemDetailComponent))
           return false;
-        ItemDetailComponent o = (ItemDetailComponent) other;
+        ItemDetailComponent o = (ItemDetailComponent) other_;
         return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
@@ -1471,7 +1508,7 @@ public class ClaimResponse extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -1529,11 +1566,22 @@ public class ClaimResponse extends DomainResource {
           return getAdjudication().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          childrenList.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          childrenList.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "A service line number.", 0, 1, sequenceLinkId);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1632,23 +1680,23 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SubDetailComponent))
+        if (!(other_ instanceof SubDetailComponent))
           return false;
-        SubDetailComponent o = (SubDetailComponent) other;
+        SubDetailComponent o = (SubDetailComponent) other_;
         return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SubDetailComponent))
+        if (!(other_ instanceof SubDetailComponent))
           return false;
-        SubDetailComponent o = (SubDetailComponent) other;
+        SubDetailComponent o = (SubDetailComponent) other_;
         return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
@@ -1799,7 +1847,7 @@ public class ClaimResponse extends DomainResource {
           if (this.sequenceLinkId == null)
             return false;
           for (PositiveIntType v : this.sequenceLinkId)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -1823,7 +1871,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #revenue} (The type of reveneu or cost center providing the product and/or service.)
          */
-        public AddedItemComponent setRevenue(CodeableConcept value) { 
+        public AddedItemComponent setRevenue(CodeableConcept value)  { 
           this.revenue = value;
           return this;
         }
@@ -1847,7 +1895,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #category} (Health Care Service Type Codes  to identify the classification of service or benefits.)
          */
-        public AddedItemComponent setCategory(CodeableConcept value) { 
+        public AddedItemComponent setCategory(CodeableConcept value)  { 
           this.category = value;
           return this;
         }
@@ -1871,7 +1919,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #service} (A code to indicate the Professional Service or Product supplied.)
          */
-        public AddedItemComponent setService(CodeableConcept value) { 
+        public AddedItemComponent setService(CodeableConcept value)  { 
           this.service = value;
           return this;
         }
@@ -1948,7 +1996,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #fee} (The fee charged for the professional service or product..)
          */
-        public AddedItemComponent setFee(Money value) { 
+        public AddedItemComponent setFee(Money value)  { 
           this.fee = value;
           return this;
         }
@@ -2009,7 +2057,7 @@ public class ClaimResponse extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -2120,17 +2168,34 @@ public class ClaimResponse extends DomainResource {
           return getDetail().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sequenceLinkId", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          childrenList.add(new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, java.lang.Integer.MAX_VALUE, revenue));
-          childrenList.add(new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, java.lang.Integer.MAX_VALUE, category));
-          childrenList.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, java.lang.Integer.MAX_VALUE, service));
-          childrenList.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
-          childrenList.add(new Property("fee", "Money", "The fee charged for the professional service or product..", 0, java.lang.Integer.MAX_VALUE, fee));
-          childrenList.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          childrenList.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
-          childrenList.add(new Property("detail", "", "The second tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequenceLinkId", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
+          children.add(new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, 1, revenue));
+          children.add(new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, 1, category));
+          children.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service));
+          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          children.add(new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("detail", "", "The second tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId);
+          case 1099842588: /*revenue*/  return new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, 1, revenue);
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, 1, category);
+          case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service);
+          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
+          case 101254: /*fee*/  return new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -1335224239: /*detail*/  return new Property("detail", "", "The second tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2317,12 +2382,12 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AddedItemComponent))
+        if (!(other_ instanceof AddedItemComponent))
           return false;
-        AddedItemComponent o = (AddedItemComponent) other;
+        AddedItemComponent o = (AddedItemComponent) other_;
         return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(revenue, o.revenue, true)
            && compareDeep(category, o.category, true) && compareDeep(service, o.service, true) && compareDeep(modifier, o.modifier, true)
            && compareDeep(fee, o.fee, true) && compareDeep(noteNumber, o.noteNumber, true) && compareDeep(adjudication, o.adjudication, true)
@@ -2330,12 +2395,12 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AddedItemComponent))
+        if (!(other_ instanceof AddedItemComponent))
           return false;
-        AddedItemComponent o = (AddedItemComponent) other;
+        AddedItemComponent o = (AddedItemComponent) other_;
         return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(noteNumber, o.noteNumber, true)
           ;
       }
@@ -2435,7 +2500,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #revenue} (The type of reveneu or cost center providing the product and/or service.)
          */
-        public AddedItemsDetailComponent setRevenue(CodeableConcept value) { 
+        public AddedItemsDetailComponent setRevenue(CodeableConcept value)  { 
           this.revenue = value;
           return this;
         }
@@ -2459,7 +2524,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #category} (Health Care Service Type Codes  to identify the classification of service or benefits.)
          */
-        public AddedItemsDetailComponent setCategory(CodeableConcept value) { 
+        public AddedItemsDetailComponent setCategory(CodeableConcept value)  { 
           this.category = value;
           return this;
         }
@@ -2483,7 +2548,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #service} (A code to indicate the Professional Service or Product supplied.)
          */
-        public AddedItemsDetailComponent setService(CodeableConcept value) { 
+        public AddedItemsDetailComponent setService(CodeableConcept value)  { 
           this.service = value;
           return this;
         }
@@ -2560,7 +2625,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #fee} (The fee charged for the professional service or product..)
          */
-        public AddedItemsDetailComponent setFee(Money value) { 
+        public AddedItemsDetailComponent setFee(Money value)  { 
           this.fee = value;
           return this;
         }
@@ -2621,7 +2686,7 @@ public class ClaimResponse extends DomainResource {
           if (this.noteNumber == null)
             return false;
           for (PositiveIntType v : this.noteNumber)
-            if (v.equals(value)) // positiveInt
+            if (v.getValue().equals(value)) // positiveInt
               return true;
           return false;
         }
@@ -2679,15 +2744,30 @@ public class ClaimResponse extends DomainResource {
           return getAdjudication().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, java.lang.Integer.MAX_VALUE, revenue));
-          childrenList.add(new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, java.lang.Integer.MAX_VALUE, category));
-          childrenList.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, java.lang.Integer.MAX_VALUE, service));
-          childrenList.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
-          childrenList.add(new Property("fee", "Money", "The fee charged for the professional service or product..", 0, java.lang.Integer.MAX_VALUE, fee));
-          childrenList.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          childrenList.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, 1, revenue));
+          children.add(new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, 1, category));
+          children.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service));
+          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          children.add(new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1099842588: /*revenue*/  return new Property("revenue", "CodeableConcept", "The type of reveneu or cost center providing the product and/or service.", 0, 1, revenue);
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Health Care Service Type Codes  to identify the classification of service or benefits.", 0, 1, category);
+          case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service);
+          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
+          case 101254: /*fee*/  return new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2842,24 +2922,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AddedItemsDetailComponent))
+        if (!(other_ instanceof AddedItemsDetailComponent))
           return false;
-        AddedItemsDetailComponent o = (AddedItemsDetailComponent) other;
+        AddedItemsDetailComponent o = (AddedItemsDetailComponent) other_;
         return compareDeep(revenue, o.revenue, true) && compareDeep(category, o.category, true) && compareDeep(service, o.service, true)
            && compareDeep(modifier, o.modifier, true) && compareDeep(fee, o.fee, true) && compareDeep(noteNumber, o.noteNumber, true)
            && compareDeep(adjudication, o.adjudication, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AddedItemsDetailComponent))
+        if (!(other_ instanceof AddedItemsDetailComponent))
           return false;
-        AddedItemsDetailComponent o = (AddedItemsDetailComponent) other;
+        AddedItemsDetailComponent o = (AddedItemsDetailComponent) other_;
         return compareValues(noteNumber, o.noteNumber, true);
       }
 
@@ -3077,17 +3157,29 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #code} (An error code,from a specified code system, which details why the claim could not be adjudicated.)
          */
-        public ErrorComponent setCode(CodeableConcept value) { 
+        public ErrorComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, java.lang.Integer.MAX_VALUE, sequenceLinkId));
-          childrenList.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequenceLinkId));
-          childrenList.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequenceLinkId));
-          childrenList.add(new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, java.lang.Integer.MAX_VALUE, code));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, sequenceLinkId));
+          children.add(new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequenceLinkId));
+          children.add(new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subdetailSequenceLinkId));
+          children.add(new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422298666: /*sequenceLinkId*/  return new Property("sequenceLinkId", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, sequenceLinkId);
+          case 516748423: /*detailSequenceLinkId*/  return new Property("detailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequenceLinkId);
+          case -1061088569: /*subdetailSequenceLinkId*/  return new Property("subdetailSequenceLinkId", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subdetailSequenceLinkId);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3191,24 +3283,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ErrorComponent))
+        if (!(other_ instanceof ErrorComponent))
           return false;
-        ErrorComponent o = (ErrorComponent) other;
+        ErrorComponent o = (ErrorComponent) other_;
         return compareDeep(sequenceLinkId, o.sequenceLinkId, true) && compareDeep(detailSequenceLinkId, o.detailSequenceLinkId, true)
            && compareDeep(subdetailSequenceLinkId, o.subdetailSequenceLinkId, true) && compareDeep(code, o.code, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ErrorComponent))
+        if (!(other_ instanceof ErrorComponent))
           return false;
-        ErrorComponent o = (ErrorComponent) other;
+        ErrorComponent o = (ErrorComponent) other_;
         return compareValues(sequenceLinkId, o.sequenceLinkId, true) && compareValues(detailSequenceLinkId, o.detailSequenceLinkId, true)
            && compareValues(subdetailSequenceLinkId, o.subdetailSequenceLinkId, true);
       }
@@ -3299,7 +3391,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #type} (Whether this represents partial or complete payment of the claim.)
          */
-        public PaymentComponent setType(CodeableConcept value) { 
+        public PaymentComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -3323,7 +3415,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #adjustment} (Adjustment to the payment of this transaction which is not related to adjudication of this transaction.)
          */
-        public PaymentComponent setAdjustment(Money value) { 
+        public PaymentComponent setAdjustment(Money value)  { 
           this.adjustment = value;
           return this;
         }
@@ -3347,7 +3439,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #adjustmentReason} (Reason for the payment adjustment.)
          */
-        public PaymentComponent setAdjustmentReason(CodeableConcept value) { 
+        public PaymentComponent setAdjustmentReason(CodeableConcept value)  { 
           this.adjustmentReason = value;
           return this;
         }
@@ -3420,7 +3512,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #amount} (Payable less any payment adjustment.)
          */
-        public PaymentComponent setAmount(Money value) { 
+        public PaymentComponent setAmount(Money value)  { 
           this.amount = value;
           return this;
         }
@@ -3444,19 +3536,33 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #identifier} (Payment identifier.)
          */
-        public PaymentComponent setIdentifier(Identifier value) { 
+        public PaymentComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "Whether this represents partial or complete payment of the claim.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("adjustment", "Money", "Adjustment to the payment of this transaction which is not related to adjudication of this transaction.", 0, java.lang.Integer.MAX_VALUE, adjustment));
-          childrenList.add(new Property("adjustmentReason", "CodeableConcept", "Reason for the payment adjustment.", 0, java.lang.Integer.MAX_VALUE, adjustmentReason));
-          childrenList.add(new Property("date", "date", "Estimated payment data.", 0, java.lang.Integer.MAX_VALUE, date));
-          childrenList.add(new Property("amount", "Money", "Payable less any payment adjustment.", 0, java.lang.Integer.MAX_VALUE, amount));
-          childrenList.add(new Property("identifier", "Identifier", "Payment identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "Whether this represents partial or complete payment of the claim.", 0, 1, type));
+          children.add(new Property("adjustment", "Money", "Adjustment to the payment of this transaction which is not related to adjudication of this transaction.", 0, 1, adjustment));
+          children.add(new Property("adjustmentReason", "CodeableConcept", "Reason for the payment adjustment.", 0, 1, adjustmentReason));
+          children.add(new Property("date", "date", "Estimated payment data.", 0, 1, date));
+          children.add(new Property("amount", "Money", "Payable less any payment adjustment.", 0, 1, amount));
+          children.add(new Property("identifier", "Identifier", "Payment identifier.", 0, 1, identifier));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Whether this represents partial or complete payment of the claim.", 0, 1, type);
+          case 1977085293: /*adjustment*/  return new Property("adjustment", "Money", "Adjustment to the payment of this transaction which is not related to adjudication of this transaction.", 0, 1, adjustment);
+          case -1255938543: /*adjustmentReason*/  return new Property("adjustmentReason", "CodeableConcept", "Reason for the payment adjustment.", 0, 1, adjustmentReason);
+          case 3076014: /*date*/  return new Property("date", "date", "Estimated payment data.", 0, 1, date);
+          case -1413853096: /*amount*/  return new Property("amount", "Money", "Payable less any payment adjustment.", 0, 1, amount);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Payment identifier.", 0, 1, identifier);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3588,24 +3694,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PaymentComponent))
+        if (!(other_ instanceof PaymentComponent))
           return false;
-        PaymentComponent o = (PaymentComponent) other;
+        PaymentComponent o = (PaymentComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(adjustment, o.adjustment, true) && compareDeep(adjustmentReason, o.adjustmentReason, true)
            && compareDeep(date, o.date, true) && compareDeep(amount, o.amount, true) && compareDeep(identifier, o.identifier, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PaymentComponent))
+        if (!(other_ instanceof PaymentComponent))
           return false;
-        PaymentComponent o = (PaymentComponent) other;
+        PaymentComponent o = (PaymentComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -3726,7 +3832,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #type} (The note purpose: Print/Display.)
          */
-        public NoteComponent setType(CodeableConcept value) { 
+        public NoteComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -3799,17 +3905,29 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #language} (The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. "en" for English, or "en-US" for American English versus "en-EN" for England English.)
          */
-        public NoteComponent setLanguage(CodeableConcept value) { 
+        public NoteComponent setLanguage(CodeableConcept value)  { 
           this.language = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("number", "positiveInt", "An integer associated with each note which may be referred to from each service line item.", 0, java.lang.Integer.MAX_VALUE, number));
-          childrenList.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("text", "string", "The note text.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, java.lang.Integer.MAX_VALUE, language));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("number", "positiveInt", "An integer associated with each note which may be referred to from each service line item.", 0, 1, number));
+          children.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type));
+          children.add(new Property("text", "string", "The note text.", 0, 1, text));
+          children.add(new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, 1, language));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1034364087: /*number*/  return new Property("number", "positiveInt", "An integer associated with each note which may be referred to from each service line item.", 0, 1, number);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type);
+          case 3556653: /*text*/  return new Property("text", "string", "The note text.", 0, 1, text);
+          case -1613589672: /*language*/  return new Property("language", "CodeableConcept", "The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. \"en\" for English, or \"en-US\" for American English versus \"en-EN\" for England English.", 0, 1, language);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3914,23 +4032,23 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof NoteComponent))
+        if (!(other_ instanceof NoteComponent))
           return false;
-        NoteComponent o = (NoteComponent) other;
+        NoteComponent o = (NoteComponent) other_;
         return compareDeep(number, o.number, true) && compareDeep(type, o.type, true) && compareDeep(text, o.text, true)
            && compareDeep(language, o.language, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof NoteComponent))
+        if (!(other_ instanceof NoteComponent))
           return false;
-        NoteComponent o = (NoteComponent) other;
+        NoteComponent o = (NoteComponent) other_;
         return compareValues(number, o.number, true) && compareValues(text, o.text, true);
       }
 
@@ -4128,7 +4246,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #coverage} (Reference to the program or plan identification, underwriter or payor.)
          */
-        public InsuranceComponent setCoverage(Reference value) { 
+        public InsuranceComponent setCoverage(Reference value)  { 
           this.coverage = value;
           return this;
         }
@@ -4258,7 +4376,7 @@ public class ClaimResponse extends DomainResource {
           if (this.preAuthRef == null)
             return false;
           for (StringType v : this.preAuthRef)
-            if (v.equals(value)) // string
+            if (v.getValue().equals(value)) // string
               return true;
           return false;
         }
@@ -4282,7 +4400,7 @@ public class ClaimResponse extends DomainResource {
         /**
          * @param value {@link #claimResponse} (The Coverages adjudication details.)
          */
-        public InsuranceComponent setClaimResponse(Reference value) { 
+        public InsuranceComponent setClaimResponse(Reference value)  { 
           this.claimResponse = value;
           return this;
         }
@@ -4307,14 +4425,28 @@ public class ClaimResponse extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("sequence", "positiveInt", "A service line item.", 0, java.lang.Integer.MAX_VALUE, sequence));
-          childrenList.add(new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, java.lang.Integer.MAX_VALUE, focal));
-          childrenList.add(new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, java.lang.Integer.MAX_VALUE, coverage));
-          childrenList.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, java.lang.Integer.MAX_VALUE, businessArrangement));
-          childrenList.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef));
-          childrenList.add(new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, java.lang.Integer.MAX_VALUE, claimResponse));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("sequence", "positiveInt", "A service line item.", 0, 1, sequence));
+          children.add(new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, 1, focal));
+          children.add(new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, 1, coverage));
+          children.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement));
+          children.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef));
+          children.add(new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, 1, claimResponse));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1349547969: /*sequence*/  return new Property("sequence", "positiveInt", "A service line item.", 0, 1, sequence);
+          case 97604197: /*focal*/  return new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, 1, focal);
+          case -351767064: /*coverage*/  return new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, 1, coverage);
+          case 259920682: /*businessArrangement*/  return new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement);
+          case 522246568: /*preAuthRef*/  return new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef);
+          case 689513629: /*claimResponse*/  return new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, 1, claimResponse);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -4447,24 +4579,24 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(focal, o.focal, true) && compareDeep(coverage, o.coverage, true)
            && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(preAuthRef, o.preAuthRef, true)
            && compareDeep(claimResponse, o.claimResponse, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof InsuranceComponent))
+        if (!(other_ instanceof InsuranceComponent))
           return false;
-        InsuranceComponent o = (InsuranceComponent) other;
+        InsuranceComponent o = (InsuranceComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(focal, o.focal, true) && compareValues(businessArrangement, o.businessArrangement, true)
            && compareValues(preAuthRef, o.preAuthRef, true);
       }
@@ -4807,7 +4939,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #patient} (Patient Resource.)
      */
-    public ClaimResponse setPatient(Reference value) { 
+    public ClaimResponse setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -4900,7 +5032,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #insurer} (The Insurer who produced this adjudicated response.)
      */
-    public ClaimResponse setInsurer(Reference value) { 
+    public ClaimResponse setInsurer(Reference value)  { 
       this.insurer = value;
       return this;
     }
@@ -4944,7 +5076,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public ClaimResponse setRequestProvider(Reference value) { 
+    public ClaimResponse setRequestProvider(Reference value)  { 
       this.requestProvider = value;
       return this;
     }
@@ -4988,7 +5120,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public ClaimResponse setRequestOrganization(Reference value) { 
+    public ClaimResponse setRequestOrganization(Reference value)  { 
       this.requestOrganization = value;
       return this;
     }
@@ -5032,7 +5164,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #request} (Original request resource referrence.)
      */
-    public ClaimResponse setRequest(Reference value) { 
+    public ClaimResponse setRequest(Reference value)  { 
       this.request = value;
       return this;
     }
@@ -5076,7 +5208,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #outcome} (Processing outcome errror, partial or complete processing.)
      */
-    public ClaimResponse setOutcome(CodeableConcept value) { 
+    public ClaimResponse setOutcome(CodeableConcept value)  { 
       this.outcome = value;
       return this;
     }
@@ -5149,7 +5281,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #payeeType} (Party to be reimbursed: Subscriber, provider, other.)
      */
-    public ClaimResponse setPayeeType(CodeableConcept value) { 
+    public ClaimResponse setPayeeType(CodeableConcept value)  { 
       this.payeeType = value;
       return this;
     }
@@ -5332,7 +5464,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #totalCost} (The total cost of the services reported.)
      */
-    public ClaimResponse setTotalCost(Money value) { 
+    public ClaimResponse setTotalCost(Money value)  { 
       this.totalCost = value;
       return this;
     }
@@ -5356,7 +5488,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #unallocDeductable} (The amount of deductible applied which was not allocated to any particular service line.)
      */
-    public ClaimResponse setUnallocDeductable(Money value) { 
+    public ClaimResponse setUnallocDeductable(Money value)  { 
       this.unallocDeductable = value;
       return this;
     }
@@ -5380,7 +5512,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #totalBenefit} (Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).)
      */
-    public ClaimResponse setTotalBenefit(Money value) { 
+    public ClaimResponse setTotalBenefit(Money value)  { 
       this.totalBenefit = value;
       return this;
     }
@@ -5404,7 +5536,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #payment} (Payment details for the claim if the claim has been paid.)
      */
-    public ClaimResponse setPayment(PaymentComponent value) { 
+    public ClaimResponse setPayment(PaymentComponent value)  { 
       this.payment = value;
       return this;
     }
@@ -5428,7 +5560,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #reserved} (Status of funds reservation (For provider, for Patient, None).)
      */
-    public ClaimResponse setReserved(Coding value) { 
+    public ClaimResponse setReserved(Coding value)  { 
       this.reserved = value;
       return this;
     }
@@ -5452,7 +5584,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #form} (The form to be used for printing the content.)
      */
-    public ClaimResponse setForm(CodeableConcept value) { 
+    public ClaimResponse setForm(CodeableConcept value)  { 
       this.form = value;
       return this;
     }
@@ -5638,31 +5770,62 @@ public class ClaimResponse extends DomainResource {
       return getInsurance().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, insurer));
-        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
-        childrenList.add(new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("outcome", "CodeableConcept", "Processing outcome errror, partial or complete processing.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
-        childrenList.add(new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, java.lang.Integer.MAX_VALUE, payeeType));
-        childrenList.add(new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item));
-        childrenList.add(new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem));
-        childrenList.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
-        childrenList.add(new Property("totalCost", "Money", "The total cost of the services reported.", 0, java.lang.Integer.MAX_VALUE, totalCost));
-        childrenList.add(new Property("unallocDeductable", "Money", "The amount of deductible applied which was not allocated to any particular service line.", 0, java.lang.Integer.MAX_VALUE, unallocDeductable));
-        childrenList.add(new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).", 0, java.lang.Integer.MAX_VALUE, totalBenefit));
-        childrenList.add(new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, java.lang.Integer.MAX_VALUE, payment));
-        childrenList.add(new Property("reserved", "Coding", "Status of funds reservation (For provider, for Patient, None).", 0, java.lang.Integer.MAX_VALUE, reserved));
-        childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
-        childrenList.add(new Property("processNote", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, processNote));
-        childrenList.add(new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest));
-        childrenList.add(new Property("insurance", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, insurance));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient));
+        children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
+        children.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer));
+        children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
+        children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
+        children.add(new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, 1, request));
+        children.add(new Property("outcome", "CodeableConcept", "Processing outcome errror, partial or complete processing.", 0, 1, outcome));
+        children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
+        children.add(new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, payeeType));
+        children.add(new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item));
+        children.add(new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem));
+        children.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
+        children.add(new Property("totalCost", "Money", "The total cost of the services reported.", 0, 1, totalCost));
+        children.add(new Property("unallocDeductable", "Money", "The amount of deductible applied which was not allocated to any particular service line.", 0, 1, unallocDeductable));
+        children.add(new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).", 0, 1, totalBenefit));
+        children.add(new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, 1, payment));
+        children.add(new Property("reserved", "Coding", "Status of funds reservation (For provider, for Patient, None).", 0, 1, reserved));
+        children.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form));
+        children.add(new Property("processNote", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, processNote));
+        children.add(new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest));
+        children.add(new Property("insurance", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, insurance));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
+        case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer);
+        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
+        case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
+        case 1095692943: /*request*/  return new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, 1, request);
+        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Processing outcome errror, partial or complete processing.", 0, 1, outcome);
+        case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
+        case -316321118: /*payeeType*/  return new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, payeeType);
+        case 3242771: /*item*/  return new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item);
+        case -1148899500: /*addItem*/  return new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem);
+        case 96784904: /*error*/  return new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error);
+        case -577782479: /*totalCost*/  return new Property("totalCost", "Money", "The total cost of the services reported.", 0, 1, totalCost);
+        case 2096309753: /*unallocDeductable*/  return new Property("unallocDeductable", "Money", "The amount of deductible applied which was not allocated to any particular service line.", 0, 1, unallocDeductable);
+        case 332332211: /*totalBenefit*/  return new Property("totalBenefit", "Money", "Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductible).", 0, 1, totalBenefit);
+        case -786681338: /*payment*/  return new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, 1, payment);
+        case -350385368: /*reserved*/  return new Property("reserved", "Coding", "Status of funds reservation (For provider, for Patient, None).", 0, 1, reserved);
+        case 3148996: /*form*/  return new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form);
+        case 202339073: /*processNote*/  return new Property("processNote", "", "Note text.", 0, java.lang.Integer.MAX_VALUE, processNote);
+        case -2071896615: /*communicationRequest*/  return new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest);
+        case 73049818: /*insurance*/  return new Property("insurance", "", "Financial instrument by which payment information for health care.", 0, java.lang.Integer.MAX_VALUE, insurance);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -6045,12 +6208,12 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClaimResponse))
+        if (!(other_ instanceof ClaimResponse))
           return false;
-        ClaimResponse o = (ClaimResponse) other;
+        ClaimResponse o = (ClaimResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true)
            && compareDeep(created, o.created, true) && compareDeep(insurer, o.insurer, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(requestOrganization, o.requestOrganization, true) && compareDeep(request, o.request, true)
@@ -6063,12 +6226,12 @@ public class ClaimResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClaimResponse))
+        if (!(other_ instanceof ClaimResponse))
           return false;
-        ClaimResponse o = (ClaimResponse) other;
+        ClaimResponse o = (ClaimResponse) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
           ;
       }

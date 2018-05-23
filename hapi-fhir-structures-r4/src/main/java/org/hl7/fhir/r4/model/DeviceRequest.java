@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -74,7 +74,7 @@ public class DeviceRequest extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.
          */
         UNKNOWN, 
         /**
@@ -135,7 +135,7 @@ public class DeviceRequest extends DomainResource {
             case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
             case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
             case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
             default: return "?";
           }
         }
@@ -404,52 +404,60 @@ public class DeviceRequest extends DomainResource {
          * @return {@link #value} (The value of the device detail.)
          */
         public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
         public boolean hasValueCodeableConcept() { 
-          return this.value instanceof CodeableConcept;
+          return this != null && this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (The value of the device detail.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The value of the device detail.)
          */
         public Range getValueRange() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
         }
 
         public boolean hasValueRange() { 
-          return this.value instanceof Range;
+          return this != null && this.value instanceof Range;
         }
 
         /**
          * @return {@link #value} (The value of the device detail.)
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
         public boolean hasValueBooleanType() { 
-          return this.value instanceof BooleanType;
+          return this != null && this.value instanceof BooleanType;
         }
 
         public boolean hasValue() { 
@@ -460,6 +468,8 @@ public class DeviceRequest extends DomainResource {
          * @param value {@link #value} (The value of the device detail.)
          */
         public DeviceRequestParameterComponent setValue(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Quantity || value instanceof Range || value instanceof BooleanType))
+            throw new Error("Not the right type for DeviceRequest.parameter.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -743,19 +753,19 @@ public class DeviceRequest extends DomainResource {
      * Desired type of performer for doing the diagnostic testing.
      */
     @Child(name = "performerType", type = {CodeableConcept.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Fille role", formalDefinition="Desired type of performer for doing the diagnostic testing." )
+    @Description(shortDefinition="Filler role", formalDefinition="Desired type of performer for doing the diagnostic testing." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participant-role")
     protected CodeableConcept performerType;
 
     /**
-     * The desired perfomer for doing the diagnostic testing.
+     * The desired performer for doing the diagnostic testing.
      */
     @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class, RelatedPerson.class}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Requested Filler", formalDefinition="The desired perfomer for doing the diagnostic testing." )
+    @Description(shortDefinition="Requested Filler", formalDefinition="The desired performer for doing the diagnostic testing." )
     protected Reference performer;
 
     /**
-     * The actual object that is the target of the reference (The desired perfomer for doing the diagnostic testing.)
+     * The actual object that is the target of the reference (The desired performer for doing the diagnostic testing.)
      */
     protected Resource performerTarget;
 
@@ -792,13 +802,13 @@ public class DeviceRequest extends DomainResource {
 
 
     /**
-     * Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).
+     * Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).
      */
     @Child(name = "supportingInfo", type = {Reference.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional clinical information", formalDefinition="Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site)." )
+    @Description(shortDefinition="Additional clinical information", formalDefinition="Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site)." )
     protected List<Reference> supportingInfo;
     /**
-     * The actual objects that are the target of the reference (Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).)
+     * The actual objects that are the target of the reference (Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).)
      */
     protected List<Resource> supportingInfoTarget;
 
@@ -950,7 +960,7 @@ public class DeviceRequest extends DomainResource {
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1238,26 +1248,30 @@ public class DeviceRequest extends DomainResource {
      * @return {@link #code} (The details of the device to be used.)
      */
     public Reference getCodeReference() throws FHIRException { 
+      if (this.code == null)
+        return null;
       if (!(this.code instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.code.getClass().getName()+" was encountered");
       return (Reference) this.code;
     }
 
     public boolean hasCodeReference() { 
-      return this.code instanceof Reference;
+      return this != null && this.code instanceof Reference;
     }
 
     /**
      * @return {@link #code} (The details of the device to be used.)
      */
     public CodeableConcept getCodeCodeableConcept() throws FHIRException { 
+      if (this.code == null)
+        return null;
       if (!(this.code instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.code.getClass().getName()+" was encountered");
       return (CodeableConcept) this.code;
     }
 
     public boolean hasCodeCodeableConcept() { 
-      return this.code instanceof CodeableConcept;
+      return this != null && this.code instanceof CodeableConcept;
     }
 
     public boolean hasCode() { 
@@ -1268,6 +1282,8 @@ public class DeviceRequest extends DomainResource {
      * @param value {@link #code} (The details of the device to be used.)
      */
     public DeviceRequest setCode(Type value) { 
+      if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+        throw new Error("Not the right type for DeviceRequest.code[x]: "+value.fhirType());
       this.code = value;
       return this;
     }
@@ -1414,39 +1430,45 @@ public class DeviceRequest extends DomainResource {
      * @return {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -1457,6 +1479,8 @@ public class DeviceRequest extends DomainResource {
      * @param value {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public DeviceRequest setOccurrence(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new Error("Not the right type for DeviceRequest.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1574,7 +1598,7 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #performer} (The desired perfomer for doing the diagnostic testing.)
+     * @return {@link #performer} (The desired performer for doing the diagnostic testing.)
      */
     public Reference getPerformer() { 
       if (this.performer == null)
@@ -1590,7 +1614,7 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #performer} (The desired perfomer for doing the diagnostic testing.)
+     * @param value {@link #performer} (The desired performer for doing the diagnostic testing.)
      */
     public DeviceRequest setPerformer(Reference value) { 
       this.performer = value;
@@ -1598,14 +1622,14 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #performer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The desired perfomer for doing the diagnostic testing.)
+     * @return {@link #performer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The desired performer for doing the diagnostic testing.)
      */
     public Resource getPerformerTarget() { 
       return this.performerTarget;
     }
 
     /**
-     * @param value {@link #performer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The desired perfomer for doing the diagnostic testing.)
+     * @param value {@link #performer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The desired performer for doing the diagnostic testing.)
      */
     public DeviceRequest setPerformerTarget(Resource value) { 
       this.performerTarget = value;
@@ -1792,7 +1816,7 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #supportingInfo} (Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).)
+     * @return {@link #supportingInfo} (Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).)
      */
     public List<Reference> getSupportingInfo() { 
       if (this.supportingInfo == null)
@@ -2000,11 +2024,11 @@ public class DeviceRequest extends DomainResource {
         children.add(new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn));
         children.add(new Property("requester", "Reference(Device|Practitioner|PractitionerRole|Organization)", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester));
         children.add(new Property("performerType", "CodeableConcept", "Desired type of performer for doing the diagnostic testing.", 0, 1, performerType));
-        children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired perfomer for doing the diagnostic testing.", 0, 1, performer));
+        children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the diagnostic testing.", 0, 1, performer));
         children.add(new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be required for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance));
-        children.add(new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
+        children.add(new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
         children.add(new Property("note", "Annotation", "Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("relevantHistory", "Reference(Provenance)", "Key events in the history of the request.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
       }
@@ -2035,11 +2059,11 @@ public class DeviceRequest extends DomainResource {
         case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn);
         case 693933948: /*requester*/  return new Property("requester", "Reference(Device|Practitioner|PractitionerRole|Organization)", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester);
         case -901444568: /*performerType*/  return new Property("performerType", "CodeableConcept", "Desired type of performer for doing the diagnostic testing.", 0, 1, performerType);
-        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired perfomer for doing the diagnostic testing.", 0, 1, performer);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the diagnostic testing.", 0, 1, performer);
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 73049818: /*insurance*/  return new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be required for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance);
-        case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
+        case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note);
         case 1538891575: /*relevantHistory*/  return new Property("relevantHistory", "Reference(Provenance)", "Key events in the history of the request.", 0, java.lang.Integer.MAX_VALUE, relevantHistory);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2498,17 +2522,17 @@ public class DeviceRequest extends DomainResource {
  /**
    * Search parameter: <b>requester</b>
    * <p>
-   * Description: <b>Who/what is requesting service </b><br>
+   * Description: <b>Who/what is requesting service</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>DeviceRequest.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="DeviceRequest.requester", description="Who/what is requesting service ", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Practitioner.class, PractitionerRole.class } )
+  @SearchParamDefinition(name="requester", path="DeviceRequest.requester", description="Who/what is requesting service", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
    * <p>
-   * Description: <b>Who/what is requesting service </b><br>
+   * Description: <b>Who/what is requesting service</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>DeviceRequest.requester</b><br>
    * </p>
@@ -2872,17 +2896,17 @@ public class DeviceRequest extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>entered-in-error | draft | active |suspended | completed </b><br>
+   * Description: <b>entered-in-error | draft | active |suspended | completed</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DeviceRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="DeviceRequest.status", description="entered-in-error | draft | active |suspended | completed ", type="token" )
+  @SearchParamDefinition(name="status", path="DeviceRequest.status", description="entered-in-error | draft | active |suspended | completed", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>entered-in-error | draft | active |suspended | completed </b><br>
+   * Description: <b>entered-in-error | draft | active |suspended | completed</b><br>
    * Type: <b>token</b><br>
    * Path: <b>DeviceRequest.status</b><br>
    * </p>

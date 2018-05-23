@@ -258,9 +258,9 @@ public abstract class BaseMethodBinding<T> {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
 			}
-			throw new InternalErrorException("Failed to call access method", e);
+			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		} catch (Exception e) {
-			throw new InternalErrorException("Failed to call access method", e);
+			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		}
 	}
 

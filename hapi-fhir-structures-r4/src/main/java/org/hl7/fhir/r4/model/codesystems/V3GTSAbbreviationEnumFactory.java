@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,6 +41,8 @@ public class V3GTSAbbreviationEnumFactory implements EnumFactory<V3GTSAbbreviati
       return null;
     if ("AM".equals(codeString))
       return V3GTSAbbreviation.AM;
+    if ("BED".equals(codeString))
+      return V3GTSAbbreviation.BED;
     if ("BID".equals(codeString))
       return V3GTSAbbreviation.BID;
     if ("JB".equals(codeString))
@@ -99,12 +101,22 @@ public class V3GTSAbbreviationEnumFactory implements EnumFactory<V3GTSAbbreviati
       return V3GTSAbbreviation.JHNUSTKS5;
     if ("JHNUSVET".equals(codeString))
       return V3GTSAbbreviation.JHNUSVET;
+    if ("MO".equals(codeString))
+      return V3GTSAbbreviation.MO;
     if ("PM".equals(codeString))
       return V3GTSAbbreviation.PM;
+    if ("Q1H".equals(codeString))
+      return V3GTSAbbreviation.Q1H;
+    if ("Q2H".equals(codeString))
+      return V3GTSAbbreviation.Q2H;
+    if ("Q3H".equals(codeString))
+      return V3GTSAbbreviation.Q3H;
     if ("Q4H".equals(codeString))
       return V3GTSAbbreviation.Q4H;
     if ("Q6H".equals(codeString))
       return V3GTSAbbreviation.Q6H;
+    if ("Q8H".equals(codeString))
+      return V3GTSAbbreviation.Q8H;
     if ("QD".equals(codeString))
       return V3GTSAbbreviation.QD;
     if ("QID".equals(codeString))
@@ -113,12 +125,16 @@ public class V3GTSAbbreviationEnumFactory implements EnumFactory<V3GTSAbbreviati
       return V3GTSAbbreviation.QOD;
     if ("TID".equals(codeString))
       return V3GTSAbbreviation.TID;
+    if ("WK".equals(codeString))
+      return V3GTSAbbreviation.WK;
     throw new IllegalArgumentException("Unknown V3GTSAbbreviation code '"+codeString+"'");
   }
 
   public String toCode(V3GTSAbbreviation code) {
     if (code == V3GTSAbbreviation.AM)
       return "AM";
+    if (code == V3GTSAbbreviation.BED)
+      return "BED";
     if (code == V3GTSAbbreviation.BID)
       return "BID";
     if (code == V3GTSAbbreviation.JB)
@@ -177,12 +193,22 @@ public class V3GTSAbbreviationEnumFactory implements EnumFactory<V3GTSAbbreviati
       return "JHNUSTKS5";
     if (code == V3GTSAbbreviation.JHNUSVET)
       return "JHNUSVET";
+    if (code == V3GTSAbbreviation.MO)
+      return "MO";
     if (code == V3GTSAbbreviation.PM)
       return "PM";
+    if (code == V3GTSAbbreviation.Q1H)
+      return "Q1H";
+    if (code == V3GTSAbbreviation.Q2H)
+      return "Q2H";
+    if (code == V3GTSAbbreviation.Q3H)
+      return "Q3H";
     if (code == V3GTSAbbreviation.Q4H)
       return "Q4H";
     if (code == V3GTSAbbreviation.Q6H)
       return "Q6H";
+    if (code == V3GTSAbbreviation.Q8H)
+      return "Q8H";
     if (code == V3GTSAbbreviation.QD)
       return "QD";
     if (code == V3GTSAbbreviation.QID)
@@ -191,6 +217,8 @@ public class V3GTSAbbreviationEnumFactory implements EnumFactory<V3GTSAbbreviati
       return "QOD";
     if (code == V3GTSAbbreviation.TID)
       return "TID";
+    if (code == V3GTSAbbreviation.WK)
+      return "WK";
     return "?";
   }
 

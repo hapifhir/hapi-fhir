@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -63,8 +63,8 @@ public class ReferencerangeMeaningEnumFactory implements EnumFactory<Referencera
       return ReferencerangeMeaning.MIDCYCLE;
     if ("luteal".equals(codeString))
       return ReferencerangeMeaning.LUTEAL;
-    if ("postmeopausal".equals(codeString))
-      return ReferencerangeMeaning.POSTMEOPAUSAL;
+    if ("postmenopausal".equals(codeString))
+      return ReferencerangeMeaning.POSTMENOPAUSAL;
     throw new IllegalArgumentException("Unknown ReferencerangeMeaning code '"+codeString+"'");
   }
 
@@ -93,8 +93,8 @@ public class ReferencerangeMeaningEnumFactory implements EnumFactory<Referencera
       return "midcycle";
     if (code == ReferencerangeMeaning.LUTEAL)
       return "luteal";
-    if (code == ReferencerangeMeaning.POSTMEOPAUSAL)
-      return "postmeopausal";
+    if (code == ReferencerangeMeaning.POSTMENOPAUSAL)
+      return "postmenopausal";
     return "?";
   }
 

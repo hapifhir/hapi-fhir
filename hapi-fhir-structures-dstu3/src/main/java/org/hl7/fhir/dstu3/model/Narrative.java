@@ -29,11 +29,9 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 08:38+1000 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
-
-import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import org.hl7.fhir.utilities.Utilities;
@@ -44,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A human-readable formatted text, including images.
  */
@@ -271,21 +270,30 @@ public class Narrative extends BaseNarrative implements INarrative {
     /**
      * @param value {@link #div} (The actual narrative content, a stripped down version of XHTML.)
      */
-    public Narrative setDiv(XhtmlNode value) { 
+    public Narrative setDiv(XhtmlNode value)  { 
       this.div = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("status", "code", "The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.", 0, java.lang.Integer.MAX_VALUE, status));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("status", "code", "The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.", 0, 1, status));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.", 0, 1, status);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<NarrativeStatus>
-        case 99473: /*div*/ return this.div == null ? new Base[0] : new Base[] {new StringType(new org.hl7.fhir.utilities.xhtml.XhtmlComposer(XhtmlComposer.XML).composeEx(this.div))}; // XhtmlNode
+        case 99473: /*div*/ return this.div == null ? new Base[0] : new Base[] {new StringType(new org.hl7.fhir.utilities.xhtml.XhtmlComposer(true).composeEx(this.div))}; // XhtmlNode
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -364,22 +372,22 @@ public class Narrative extends BaseNarrative implements INarrative {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Narrative))
+        if (!(other_ instanceof Narrative))
           return false;
-        Narrative o = (Narrative) other;
+        Narrative o = (Narrative) other_;
         return compareDeep(status, o.status, true) && compareDeep(div, o.div, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Narrative))
+        if (!(other_ instanceof Narrative))
           return false;
-        Narrative o = (Narrative) other;
+        Narrative o = (Narrative) other_;
         return compareValues(status, o.status, true);
       }
 

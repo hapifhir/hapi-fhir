@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -187,16 +187,11 @@ public class ParameterDefinition extends Type implements ICompositeType {
     /**
      * If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.
      */
-    @Child(name = "profile", type = {StructureDefinition.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "profile", type = {CanonicalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What profile the value is expected to be", formalDefinition="If specified, this indicates a profile that the input data must conform to, or that the output data will conform to." )
-    protected Reference profile;
+    protected CanonicalType profile;
 
-    /**
-     * The actual object that is the target of the reference (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
-     */
-    protected StructureDefinition profileTarget;
-
-    private static final long serialVersionUID = 660888127L;
+    private static final long serialVersionUID = -1891730734L;
 
   /**
    * Constructor
@@ -497,15 +492,19 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
+     * @return {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
      */
-    public Reference getProfile() { 
+    public CanonicalType getProfileElement() { 
       if (this.profile == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ParameterDefinition.profile");
         else if (Configuration.doAutoCreate())
-          this.profile = new Reference(); // cc
+          this.profile = new CanonicalType(); // bb
       return this.profile;
+    }
+
+    public boolean hasProfileElement() { 
+      return this.profile != null && !this.profile.isEmpty();
     }
 
     public boolean hasProfile() { 
@@ -513,30 +512,31 @@ public class ParameterDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
+     * @param value {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
      */
-    public ParameterDefinition setProfile(Reference value) { 
+    public ParameterDefinition setProfileElement(CanonicalType value) { 
       this.profile = value;
       return this;
     }
 
     /**
-     * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
+     * @return If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.
      */
-    public StructureDefinition getProfileTarget() { 
-      if (this.profileTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ParameterDefinition.profile");
-        else if (Configuration.doAutoCreate())
-          this.profileTarget = new StructureDefinition(); // aa
-      return this.profileTarget;
+    public String getProfile() { 
+      return this.profile == null ? null : this.profile.getValue();
     }
 
     /**
-     * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
+     * @param value If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.
      */
-    public ParameterDefinition setProfileTarget(StructureDefinition value) { 
-      this.profileTarget = value;
+    public ParameterDefinition setProfile(String value) { 
+      if (Utilities.noString(value))
+        this.profile = null;
+      else {
+        if (this.profile == null)
+          this.profile = new CanonicalType();
+        this.profile.setValue(value);
+      }
       return this;
     }
 
@@ -548,7 +548,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         children.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, 1, max));
         children.add(new Property("documentation", "string", "A brief discussion of what the parameter is for and how it is used by the module.", 0, 1, documentation));
         children.add(new Property("type", "code", "The type of the parameter.", 0, 1, type));
-        children.add(new Property("profile", "Reference(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, 1, profile));
+        children.add(new Property("profile", "canonical(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, 1, profile));
       }
 
       @Override
@@ -560,7 +560,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         case 107876: /*max*/  return new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, 1, max);
         case 1587405498: /*documentation*/  return new Property("documentation", "string", "A brief discussion of what the parameter is for and how it is used by the module.", 0, 1, documentation);
         case 3575610: /*type*/  return new Property("type", "code", "The type of the parameter.", 0, 1, type);
-        case -309425751: /*profile*/  return new Property("profile", "Reference(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, 1, profile);
+        case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, 1, profile);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -575,7 +575,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         case 107876: /*max*/ return this.max == null ? new Base[0] : new Base[] {this.max}; // StringType
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : new Base[] {this.documentation}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // Reference
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : new Base[] {this.profile}; // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -604,7 +604,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
           this.type = castToCode(value); // CodeType
           return value;
         case -309425751: // profile
-          this.profile = castToReference(value); // Reference
+          this.profile = castToCanonical(value); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -627,7 +627,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         } else if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
         } else if (name.equals("profile")) {
-          this.profile = castToReference(value); // Reference
+          this.profile = castToCanonical(value); // CanonicalType
         } else
           return super.setProperty(name, value);
         return value;
@@ -642,7 +642,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         case 107876:  return getMaxElement();
         case 1587405498:  return getDocumentationElement();
         case 3575610:  return getTypeElement();
-        case -309425751:  return getProfile(); 
+        case -309425751:  return getProfileElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -657,7 +657,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
         case 107876: /*max*/ return new String[] {"string"};
         case 1587405498: /*documentation*/ return new String[] {"string"};
         case 3575610: /*type*/ return new String[] {"code"};
-        case -309425751: /*profile*/ return new String[] {"Reference"};
+        case -309425751: /*profile*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -684,8 +684,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
           throw new FHIRException("Cannot call addChild on a primitive type ParameterDefinition.type");
         }
         else if (name.equals("profile")) {
-          this.profile = new Reference();
-          return this.profile;
+          throw new FHIRException("Cannot call addChild on a primitive type ParameterDefinition.profile");
         }
         else
           return super.addChild(name);

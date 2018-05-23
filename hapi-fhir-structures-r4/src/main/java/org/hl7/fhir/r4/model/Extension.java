@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -169,47 +169,42 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
         case 116079: /*url*/  return new Property("url", "uri", "Source of the definition for the extension code - a logical name or a URL.", 0, 1, url);
         case -1410166417: /*value[x]*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case 111972721: /*value*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1424603934: /*valueString*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case 733421943: /*valueBoolean*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -786218365: /*valueCanonical*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -766209282: /*valueCode*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -766192449: /*valueDate*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case 1047929900: /*valueDateTime*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -765708322: /*valueTime*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -766209282: /*valueCode*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -2083993440: /*valueDecimal*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case 231604844: /*valueId*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1668687056: /*valueInstant*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1668204915: /*valueInteger*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -497880704: /*valueMarkdown*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1410178407: /*valueOid*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1249932027: /*valuePositiveInt*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1424603934: /*valueString*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -765708322: /*valueTime*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case 26529417: /*valueUnsignedInt*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1410172357: /*valueUri*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1410172354: /*valueUrl*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -765667124: /*valueUuid*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -67108992: /*valueAnnotation*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -475566732: /*valueAttachment*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -1887705029: /*valueCoding*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -130498310: /*valueIdentifier*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -2029823716: /*valueQuantity*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case 2030761548: /*valueRange*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1524344174: /*valuePeriod*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case 2030767386: /*valueRatio*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
+        case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -962229101: /*valueSampledData*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -540985785: /*valueSignature*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -2026205465: /*valueHumanName*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -478981821: /*valueAddress*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 944904545: /*valueContactPoint*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -1406282469: /*valueTiming*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 1755241690: /*valueReference*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -765920490: /*valueMeta*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         case -1858636920: /*valueDosage*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case -1125200224: /*valueContactDetail*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 1281021610: /*valueContributor*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 1710554248: /*valueDataRequirement*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 1387478187: /*valueParameterDefinition*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 1748214124: /*valueRelatedArtifact*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 976830394: /*valueTriggerDefinition*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
-        case 588000479: /*valueUsageContext*/  return new Property("value[x]", "*", "Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).", 0, 1, value);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -276,32 +271,20 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
         if (name.equals("url")) {
           throw new FHIRException("Cannot call addChild on a primitive type Extension.url");
         }
-        else if (name.equals("valueBoolean")) {
-          this.value = new BooleanType();
-          return this.value;
-        }
-        else if (name.equals("valueInteger")) {
-          this.value = new IntegerType();
-          return this.value;
-        }
-        else if (name.equals("valueDecimal")) {
-          this.value = new DecimalType();
-          return this.value;
-        }
         else if (name.equals("valueBase64Binary")) {
           this.value = new Base64BinaryType();
           return this.value;
         }
-        else if (name.equals("valueInstant")) {
-          this.value = new InstantType();
+        else if (name.equals("valueBoolean")) {
+          this.value = new BooleanType();
           return this.value;
         }
-        else if (name.equals("valueString")) {
-          this.value = new StringType();
+        else if (name.equals("valueCanonical")) {
+          this.value = new CanonicalType();
           return this.value;
         }
-        else if (name.equals("valueUri")) {
-          this.value = new UriType();
+        else if (name.equals("valueCode")) {
+          this.value = new CodeType();
           return this.value;
         }
         else if (name.equals("valueDate")) {
@@ -312,32 +295,64 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.value = new DateTimeType();
           return this.value;
         }
-        else if (name.equals("valueTime")) {
-          this.value = new TimeType();
-          return this.value;
-        }
-        else if (name.equals("valueCode")) {
-          this.value = new CodeType();
-          return this.value;
-        }
-        else if (name.equals("valueOid")) {
-          this.value = new OidType();
+        else if (name.equals("valueDecimal")) {
+          this.value = new DecimalType();
           return this.value;
         }
         else if (name.equals("valueId")) {
           this.value = new IdType();
           return this.value;
         }
-        else if (name.equals("valueUnsignedInt")) {
-          this.value = new UnsignedIntType();
+        else if (name.equals("valueInstant")) {
+          this.value = new InstantType();
+          return this.value;
+        }
+        else if (name.equals("valueInteger")) {
+          this.value = new IntegerType();
+          return this.value;
+        }
+        else if (name.equals("valueMarkdown")) {
+          this.value = new MarkdownType();
+          return this.value;
+        }
+        else if (name.equals("valueOid")) {
+          this.value = new OidType();
           return this.value;
         }
         else if (name.equals("valuePositiveInt")) {
           this.value = new PositiveIntType();
           return this.value;
         }
-        else if (name.equals("valueMarkdown")) {
-          this.value = new MarkdownType();
+        else if (name.equals("valueString")) {
+          this.value = new StringType();
+          return this.value;
+        }
+        else if (name.equals("valueTime")) {
+          this.value = new TimeType();
+          return this.value;
+        }
+        else if (name.equals("valueUnsignedInt")) {
+          this.value = new UnsignedIntType();
+          return this.value;
+        }
+        else if (name.equals("valueUri")) {
+          this.value = new UriType();
+          return this.value;
+        }
+        else if (name.equals("valueUrl")) {
+          this.value = new UrlType();
+          return this.value;
+        }
+        else if (name.equals("valueUuid")) {
+          this.value = new UuidType();
+          return this.value;
+        }
+        else if (name.equals("valueAddress")) {
+          this.value = new Address();
+          return this.value;
+        }
+        else if (name.equals("valueAge")) {
+          this.value = new Age();
           return this.value;
         }
         else if (name.equals("valueAnnotation")) {
@@ -348,16 +363,44 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.value = new Attachment();
           return this.value;
         }
-        else if (name.equals("valueIdentifier")) {
-          this.value = new Identifier();
-          return this.value;
-        }
         else if (name.equals("valueCodeableConcept")) {
           this.value = new CodeableConcept();
           return this.value;
         }
         else if (name.equals("valueCoding")) {
           this.value = new Coding();
+          return this.value;
+        }
+        else if (name.equals("valueContactPoint")) {
+          this.value = new ContactPoint();
+          return this.value;
+        }
+        else if (name.equals("valueCount")) {
+          this.value = new Count();
+          return this.value;
+        }
+        else if (name.equals("valueDistance")) {
+          this.value = new Distance();
+          return this.value;
+        }
+        else if (name.equals("valueDuration")) {
+          this.value = new Duration();
+          return this.value;
+        }
+        else if (name.equals("valueHumanName")) {
+          this.value = new HumanName();
+          return this.value;
+        }
+        else if (name.equals("valueIdentifier")) {
+          this.value = new Identifier();
+          return this.value;
+        }
+        else if (name.equals("valueMoney")) {
+          this.value = new Money();
+          return this.value;
+        }
+        else if (name.equals("valuePeriod")) {
+          this.value = new Period();
           return this.value;
         }
         else if (name.equals("valueQuantity")) {
@@ -368,12 +411,12 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.value = new Range();
           return this.value;
         }
-        else if (name.equals("valuePeriod")) {
-          this.value = new Period();
-          return this.value;
-        }
         else if (name.equals("valueRatio")) {
           this.value = new Ratio();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
           return this.value;
         }
         else if (name.equals("valueSampledData")) {
@@ -384,32 +427,20 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.value = new Signature();
           return this.value;
         }
-        else if (name.equals("valueHumanName")) {
-          this.value = new HumanName();
-          return this.value;
-        }
-        else if (name.equals("valueAddress")) {
-          this.value = new Address();
-          return this.value;
-        }
-        else if (name.equals("valueContactPoint")) {
-          this.value = new ContactPoint();
-          return this.value;
-        }
         else if (name.equals("valueTiming")) {
           this.value = new Timing();
           return this.value;
         }
-        else if (name.equals("valueReference")) {
-          this.value = new Reference();
+        else if (name.equals("valueParameterDefinition")) {
+          this.value = new ParameterDefinition();
           return this.value;
         }
-        else if (name.equals("valueMeta")) {
-          this.value = new Meta();
+        else if (name.equals("valueDataRequirement")) {
+          this.value = new DataRequirement();
           return this.value;
         }
-        else if (name.equals("valueDosage")) {
-          this.value = new Dosage();
+        else if (name.equals("valueRelatedArtifact")) {
+          this.value = new RelatedArtifact();
           return this.value;
         }
         else if (name.equals("valueContactDetail")) {
@@ -420,24 +451,16 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
           this.value = new Contributor();
           return this.value;
         }
-        else if (name.equals("valueDataRequirement")) {
-          this.value = new DataRequirement();
-          return this.value;
-        }
-        else if (name.equals("valueParameterDefinition")) {
-          this.value = new ParameterDefinition();
-          return this.value;
-        }
-        else if (name.equals("valueRelatedArtifact")) {
-          this.value = new RelatedArtifact();
-          return this.value;
-        }
         else if (name.equals("valueTriggerDefinition")) {
           this.value = new TriggerDefinition();
           return this.value;
         }
         else if (name.equals("valueUsageContext")) {
           this.value = new UsageContext();
+          return this.value;
+        }
+        else if (name.equals("valueDosage")) {
+          this.value = new Dosage();
           return this.value;
         }
         else

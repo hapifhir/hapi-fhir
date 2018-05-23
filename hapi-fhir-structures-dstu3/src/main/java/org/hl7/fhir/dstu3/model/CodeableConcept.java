@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.
  */
@@ -172,10 +173,20 @@ public class CodeableConcept extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("coding", "Coding", "A reference to a code defined by a terminology system.", 0, java.lang.Integer.MAX_VALUE, coding));
-        childrenList.add(new Property("text", "string", "A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.", 0, java.lang.Integer.MAX_VALUE, text));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("coding", "Coding", "A reference to a code defined by a terminology system.", 0, java.lang.Integer.MAX_VALUE, coding));
+        children.add(new Property("text", "string", "A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.", 0, 1, text));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1355086998: /*coding*/  return new Property("coding", "Coding", "A reference to a code defined by a terminology system.", 0, java.lang.Integer.MAX_VALUE, coding);
+        case 3556653: /*text*/  return new Property("text", "string", "A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.", 0, 1, text);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -267,22 +278,22 @@ public class CodeableConcept extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CodeableConcept))
+        if (!(other_ instanceof CodeableConcept))
           return false;
-        CodeableConcept o = (CodeableConcept) other;
+        CodeableConcept o = (CodeableConcept) other_;
         return compareDeep(coding, o.coding, true) && compareDeep(text, o.text, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CodeableConcept))
+        if (!(other_ instanceof CodeableConcept))
           return false;
-        CodeableConcept o = (CodeableConcept) other;
+        CodeableConcept o = (CodeableConcept) other_;
         return compareValues(text, o.text, true);
       }
 

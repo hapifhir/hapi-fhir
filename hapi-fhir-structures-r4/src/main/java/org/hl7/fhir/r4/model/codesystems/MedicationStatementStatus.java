@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum MedicationStatementStatus {
          */
         COMPLETED, 
         /**
-         * The statement was recorded incorrectly.
+         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account
          */
         ENTEREDINERROR, 
         /**
@@ -53,7 +53,7 @@ public enum MedicationStatementStatus {
          */
         INTENDED, 
         /**
-         * Actions implied by the statement have been permanently halted, before all of them occurred.
+         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error
          */
         STOPPED, 
         /**
@@ -113,9 +113,9 @@ public enum MedicationStatementStatus {
           switch (this) {
             case ACTIVE: return "The medication is still being taken.";
             case COMPLETED: return "The medication is no longer being taken.";
-            case ENTEREDINERROR: return "The statement was recorded incorrectly.";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account";
             case INTENDED: return "The medication may be taken at some time in the future.";
-            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred.";
+            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error";
             case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case UNKNOWN: return "The state of the medication use is not currently known.";
             case NOTTAKEN: return "The medication was not consumed by the patient";

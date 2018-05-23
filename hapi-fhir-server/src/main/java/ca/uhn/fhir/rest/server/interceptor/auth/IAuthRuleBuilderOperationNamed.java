@@ -38,7 +38,7 @@ public interface IAuthRuleBuilderOperationNamed {
 	/**
 	 * Rule applies to invocations of this operation at the <code>type</code> level on any type
 	 */
-	IAuthRuleFinished onAnyType();
+	IAuthRuleBuilderRuleOpClassifierFinished onAnyType();
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level
@@ -53,6 +53,11 @@ public interface IAuthRuleBuilderOperationNamed {
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance
 	 */
-	IAuthRuleFinished onAnyInstance();
+	IAuthRuleBuilderRuleOpClassifierFinished onAnyInstance();
+
+	/**
+	 * Rule applies to invocations of this operation at any level (server, type or instance)
+	 */
+	IAuthRuleBuilderRuleOpClassifierFinished atAnyLevel();
 
 }

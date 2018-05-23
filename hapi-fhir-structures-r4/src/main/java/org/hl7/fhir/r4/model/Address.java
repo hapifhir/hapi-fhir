@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -61,11 +61,11 @@ public class Address extends Type implements ICompositeType {
          */
         TEMP, 
         /**
-         * This address is no longer in use (or was never correct, but retained for records).
+         * This address is no longer in use (or was never correct but retained for records).
          */
         OLD, 
         /**
-         * An address to be used to send bills, invoices, receipts etc
+         * An address to be used to send bills, invoices, receipts etc.
          */
         BILLING, 
         /**
@@ -115,8 +115,8 @@ public class Address extends Type implements ICompositeType {
             case HOME: return "A communication address at a home.";
             case WORK: return "An office address. First choice for business related contacts during business hours.";
             case TEMP: return "A temporary address. The period can provide more detailed information.";
-            case OLD: return "This address is no longer in use (or was never correct, but retained for records).";
-            case BILLING: return "An address to be used to send bills, invoices, receipts etc";
+            case OLD: return "This address is no longer in use (or was never correct but retained for records).";
+            case BILLING: return "An address to be used to send bills, invoices, receipts etc.";
             default: return "?";
           }
         }
@@ -312,10 +312,10 @@ public class Address extends Type implements ICompositeType {
     protected Enumeration<AddressType> type;
 
     /**
-     * A full text representation of the address.
+     * Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.
      */
     @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Text representation of the address", formalDefinition="A full text representation of the address." )
+    @Description(shortDefinition="Text representation of the address", formalDefinition="Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts." )
     protected StringType text;
 
     /**
@@ -475,7 +475,7 @@ public class Address extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #text} (A full text representation of the address.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+     * @return {@link #text} (Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
      */
     public StringType getTextElement() { 
       if (this.text == null)
@@ -495,7 +495,7 @@ public class Address extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #text} (A full text representation of the address.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+     * @param value {@link #text} (Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
      */
     public Address setTextElement(StringType value) { 
       this.text = value;
@@ -503,14 +503,14 @@ public class Address extends Type implements ICompositeType {
     }
 
     /**
-     * @return A full text representation of the address.
+     * @return Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.
      */
     public String getText() { 
       return this.text == null ? null : this.text.getValue();
     }
 
     /**
-     * @param value A full text representation of the address.
+     * @param value Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.
      */
     public Address setText(String value) { 
       if (Utilities.noString(value))
@@ -579,7 +579,7 @@ public class Address extends Type implements ICompositeType {
       if (this.line == null)
         return false;
       for (StringType v : this.line)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -857,7 +857,7 @@ public class Address extends Type implements ICompositeType {
         super.listChildren(children);
         children.add(new Property("use", "code", "The purpose of this address.", 0, 1, use));
         children.add(new Property("type", "code", "Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.", 0, 1, type));
-        children.add(new Property("text", "string", "A full text representation of the address.", 0, 1, text));
+        children.add(new Property("text", "string", "Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.", 0, 1, text));
         children.add(new Property("line", "string", "This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.", 0, java.lang.Integer.MAX_VALUE, line));
         children.add(new Property("city", "string", "The name of the city, town, village or other community or delivery center.", 0, 1, city));
         children.add(new Property("district", "string", "The name of the administrative area (county).", 0, 1, district));
@@ -872,7 +872,7 @@ public class Address extends Type implements ICompositeType {
         switch (_hash) {
         case 116103: /*use*/  return new Property("use", "code", "The purpose of this address.", 0, 1, use);
         case 3575610: /*type*/  return new Property("type", "code", "Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.", 0, 1, type);
-        case 3556653: /*text*/  return new Property("text", "string", "A full text representation of the address.", 0, 1, text);
+        case 3556653: /*text*/  return new Property("text", "string", "Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.", 0, 1, text);
         case 3321844: /*line*/  return new Property("line", "string", "This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.", 0, java.lang.Integer.MAX_VALUE, line);
         case 3053931: /*city*/  return new Property("city", "string", "The name of the city, town, village or other community or delivery center.", 0, 1, city);
         case 288961422: /*district*/  return new Property("district", "string", "The name of the administrative area (county).", 0, 1, district);

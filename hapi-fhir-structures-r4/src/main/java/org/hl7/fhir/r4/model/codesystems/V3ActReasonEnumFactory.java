@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -107,6 +107,8 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return V3ActReason.HMARKT;
     if ("HOPERAT".equals(codeString))
       return V3ActReason.HOPERAT;
+    if ("CAREMGT".equals(codeString))
+      return V3ActReason.CAREMGT;
     if ("DONAT".equals(codeString))
       return V3ActReason.DONAT;
     if ("FRAUD".equals(codeString))
@@ -121,6 +123,8 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return V3ActReason.HDECD;
     if ("HDIRECT".equals(codeString))
       return V3ActReason.HDIRECT;
+    if ("HDM".equals(codeString))
+      return V3ActReason.HDM;
     if ("HLEGAL".equals(codeString))
       return V3ActReason.HLEGAL;
     if ("HOUTCOMS".equals(codeString))
@@ -205,12 +209,16 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return V3ActReason.THREAT;
     if ("TREAT".equals(codeString))
       return V3ActReason.TREAT;
-    if ("CAREMGT".equals(codeString))
-      return V3ActReason.CAREMGT;
     if ("CLINTRL".equals(codeString))
       return V3ActReason.CLINTRL;
+    if ("COC".equals(codeString))
+      return V3ActReason.COC;
     if ("ETREAT".equals(codeString))
       return V3ActReason.ETREAT;
+    if ("BTG".equals(codeString))
+      return V3ActReason.BTG;
+    if ("ERTREAT".equals(codeString))
+      return V3ActReason.ERTREAT;
     if ("POPHLTH".equals(codeString))
       return V3ActReason.POPHLTH;
     if ("_ActInformationPrivacyReason".equals(codeString))
@@ -663,6 +671,8 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return "HMARKT";
     if (code == V3ActReason.HOPERAT)
       return "HOPERAT";
+    if (code == V3ActReason.CAREMGT)
+      return "CAREMGT";
     if (code == V3ActReason.DONAT)
       return "DONAT";
     if (code == V3ActReason.FRAUD)
@@ -677,6 +687,8 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return "HDECD";
     if (code == V3ActReason.HDIRECT)
       return "HDIRECT";
+    if (code == V3ActReason.HDM)
+      return "HDM";
     if (code == V3ActReason.HLEGAL)
       return "HLEGAL";
     if (code == V3ActReason.HOUTCOMS)
@@ -761,12 +773,16 @@ public class V3ActReasonEnumFactory implements EnumFactory<V3ActReason> {
       return "THREAT";
     if (code == V3ActReason.TREAT)
       return "TREAT";
-    if (code == V3ActReason.CAREMGT)
-      return "CAREMGT";
     if (code == V3ActReason.CLINTRL)
       return "CLINTRL";
+    if (code == V3ActReason.COC)
+      return "COC";
     if (code == V3ActReason.ETREAT)
       return "ETREAT";
+    if (code == V3ActReason.BTG)
+      return "BTG";
+    if (code == V3ActReason.ERTREAT)
+      return "ERTREAT";
     if (code == V3ActReason.POPHLTH)
       return "POPHLTH";
     if (code == V3ActReason._ACTINFORMATIONPRIVACYREASON)

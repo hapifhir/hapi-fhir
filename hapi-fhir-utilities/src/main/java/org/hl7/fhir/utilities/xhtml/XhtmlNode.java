@@ -217,16 +217,14 @@ public class XhtmlNode implements IBaseXhtml {
     return res;
   }
 
-  public XhtmlNode getElement(String name)
-  {
+  public XhtmlNode getElement(String name) {
     for (XhtmlNode n : childNodes)
       if (n.getNodeType() == NodeType.Element && name.equals(n.getName())) 
         return n;
     return null;
   }
 
-  public XhtmlNode getFirstElement()
-  {
+  public XhtmlNode getFirstElement() {
     for (XhtmlNode n : childNodes)
       if (n.getNodeType() == NodeType.Element) 
         return n;
@@ -234,6 +232,9 @@ public class XhtmlNode implements IBaseXhtml {
   }
 
   public String allText() {
+    if (childNodes == null || childNodes.isEmpty())
+      return getContent();
+    
     StringBuilder b = new StringBuilder();
     for (XhtmlNode n : childNodes)
       if (n.getNodeType() == NodeType.Text)
@@ -559,6 +560,18 @@ public class XhtmlNode implements IBaseXhtml {
       return "<? "+this.content+" />";
     }
     return super.toString();
+  }
+
+
+  public XhtmlNode getNextElement(XhtmlNode c) {
+    boolean f = false;
+    for (XhtmlNode n : childNodes) {
+      if (n == c)
+        f = true;
+      else if (f && n.getNodeType() == NodeType.Element) 
+        return n;
+    }
+    return null;
   }
 
 }

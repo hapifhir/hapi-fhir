@@ -1,0 +1,1864 @@
+<Bundle xmlns="http://hl7.org/fhir">
+  <meta>
+    <lastUpdated value="2013-07-18T16:17:54-04:00"/>
+  </meta>
+  <identifier>
+    <system value="urn:sys"/>
+    <value value="foo"/>
+  </identifier>
+  <type value="document"/>
+  <entry>
+    <fullUrl value="urn:oid:1.3.6.1.4.1.22812.4.111.2.1.2.1"/>
+    <resource>
+      <Composition>
+        <meta>
+          <lastUpdated value="2013-07-18T16:17:54-04:00"/>
+        </meta>
+        <identifier>
+          <system value="urn:oid:1.3.6.1.4.1.22812.4.111.2.1.2"/>
+          <value value="1"/>
+        </identifier>
+        <status value="final"/>
+        <type>
+          <coding>
+            <system value="http://loinc.org"/>
+            <code value="34133-9"/>
+            <display value="SUMMARIZATION OF EPISODE NOTE"/>
+          </coding>
+        </type>
+        <subject>
+          <reference value="urn:oid:1.3.6.1.4.1.22812.4.111.1.1703142"/>
+          <display value="Dr. Jones, Isabella"/>
+        </subject>
+        <date value="2013-07-18T16:17:54-04:00"/>
+        <author>
+          <reference value="urn:oid:2.16.840.1.113883.4.6.1569874562"/>
+          <display value="Dr. Seven, Henry Levin"/>
+        </author>
+        <author>
+          <reference value="urn:oid:1.3.6.1.4.1.22812.4.111.0.123.100"/>
+          <display value="Mr. Owens, Stanley David"/>
+        </author>
+        <title value="Visit Summary"/>
+        <confidentiality value="N"/>
+        <section>
+          <title value="Reason for Visit"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="29299-5"/>
+              <display value="Reason for Visit"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <span>Fever and chills - The fever and chills have been occurring for 2 days. There has been associated cough (green sputum).</span>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+          <emptyReason>
+            <coding>
+              <system value="http://hl7.fhir.org/fhir/list-empty-reason"/>
+              <code value="unavailable"/>
+            </coding>
+          </emptyReason>
+        </section>
+        <section>
+          <title value="Plan of Care"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="18776-5"/>
+              <display value="Plan of Care"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <p>
+                <b>Instructions: </b>
+              </p>
+              <ul>
+                <li>
+                  <span class="Bold">
+                    <span>No Known Planned Instructions</span>
+                  </span>
+                </li>
+              </ul>
+              <p>
+                <b>Planned Observations: </b>
+              </p>
+              <ul>
+                <li>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Dates</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold">
+                              <span>HGB (85018)</span>
+                            </span>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">Reason: </span>
+                            <span>
+                              <span>Community acquired pneumonia</span>
+                            </span>
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xdiv">
+                            <span class="xlabel">On </span>
+                            <span class="Bold">13-Aug-2012</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">4:21 PM</span>
+                          </span>
+                        </td>
+                        <td class="xdetails">
+                          <span class="xdiv">
+                            <span class="xlabel">Request</span>
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold">
+                              <span>CULTURE, SPUTUM (87070)</span>
+                            </span>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">Reason: </span>
+                            <span>
+                              <span>Community acquired pneumonia</span>
+                            </span>
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xdiv">
+                            <span class="xlabel">On </span>
+                            <span class="Bold">6-Aug-2012</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">3:46 PM</span>
+                          </span>
+                        </td>
+                        <td class="xdetails">
+                          <span class="xdiv">
+                            <span class="xlabel">Request</span>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+              </ul>
+              <p>
+                <b>Planned Encounters: </b>
+              </p>
+              <ul>
+                <li>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold"/>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">Clinic One</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xproviderName">
+                            <span class="xproviderLastName"> Seven</span>
+                            , Henry
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xdiv">
+                            <span class="xlabel">On </span>
+                            <span class="Bold">8-Aug-2013</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">9:00 AM</span>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+                <li>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold"/>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">Clinic One</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xproviderName">
+                            <span class="xproviderLastName"> Seven</span>
+                            , Henry
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xdiv">
+                            <span class="xlabel">On </span>
+                            <span class="Bold">7-Aug-2013</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">9:00 AM</span>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+                <li>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold"/>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">Clinic One</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xproviderName">
+                            <span class="xproviderLastName"> Seven</span>
+                            , Henry
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xdiv">
+                            <span class="xlabel">On </span>
+                            <span class="Bold">6-Aug-2013</span>
+                          </span>
+                          <span class="xasIgnore">
+                            <br/>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">9:00 AM</span>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+              </ul>
+              <p>
+                <b>Planned Procedures: </b>
+              </p>
+              <ul>
+                <li>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Dates</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold">
+                              <span>DIAGNOSTIC COLONOSCOPY (45378)</span>
+                            </span>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">By: </span>
+                            <span class="xproviderName">
+                              <span class="xproviderLastName"> Seven</span>
+                              , Henry
+                            </span>
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xlabel">On </span>
+                          <span class="Bold">22-Sep-2012</span>
+                        </td>
+                        <td class="xdetails">
+                          <span class="xdiv">
+                            <span class="xlabel">Intent</span>
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="xmain">
+                          <span class="xdiv">
+                            <span class="Bold">
+                              <span>CHEST XRAY, PA &amp; LATERAL (71020)</span>
+                            </span>
+                          </span>
+                          <span class="xdiv">
+                            <span class="xlabel">By: </span>
+                            <span class="xproviderName">
+                              <span class="xproviderLastName"> Seven</span>
+                              , Henry
+                            </span>
+                          </span>
+                        </td>
+                        <td class="xdates">
+                          <span class="xlabel">On </span>
+                          <span class="Bold">13-Aug-2012</span>
+                        </td>
+                        <td class="xdetails">
+                          <span class="xdiv">
+                            <span class="xlabel">Intent</span>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+              </ul>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Instructions"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="69730-0"/>
+              <display value="Instructions"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <ul>
+                <li>
+                  <span>Community acquired ... : Breathing Exercises: breathing exercises</span>
+                </li>
+                <li>
+                  <span>Community acquired ... : Pneumococcal Pneumonia Shot *: immunization</span>
+                </li>
+                <li>
+                  <span>Community acquired ... : Pneumonia *: coughing</span>
+                </li>
+                <li>
+                  <span>Community acquired ... : DISCONTINUED - HGB (HEMOGLOBIN) (85018)</span>
+                </li>
+                <li>
+                  <span>Community acquired ... : Return to clinic if symptoms worsen</span>
+                </li>
+              </ul>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Vital Signs"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="8716-3"/>
+              <display value="Vital Signs"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Test</th>
+                    <th>Result</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xdateTime"/>
+                    <td class="xtest"/>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td class="xdateTime" rowspan="7">
+                      <span class="xdiv">6-Aug-2012 3:15 PM</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xtest">
+                      <span class="Bold">BP Systolic</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">135</span>
+                      mm[Hg]
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Patient Position: Sitting; Cuff Location: Left Arm; Cuff Size: Standard</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xtest">
+                      <span class="Bold">BP Diastolic</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">92</span>
+                      mm[Hg]
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Patient Position: Sitting; Cuff Location: Left Arm; Cuff Size: Standard</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xtest">
+                      <span class="Bold">Weight</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">88</span>
+                      kg
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td class="xtest">
+                      <span class="Bold">Height</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">177</span>
+                      cm
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td class="xtest">
+                      <span class="Bold">Body Mass Index Calculated</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">28.09</span>
+                      kg/m2
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td class="xtest">
+                      <span class="Bold">Body Surface Area Calculated</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">2.05</span>
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Medications"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="10160-0"/>
+              <display value="History of medication use"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">CLARITHROMYCIN, 500MG (Oral Tablet)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary">
+                          <span> 1 (one) Tablet two times daily for 7 days</span>
+                        </span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Quantity: </span>
+                                  <span>
+                                    <span class="xlabel">14</span>
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="xlabel"> Refills: </span>
+                                  <span>
+                                    <span class="xlabel">0</span>
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Ordered
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xproviderName">
+                        <span class="xproviderLastName"> Seven</span>
+                        , Henry
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Started </span>
+                                  6-Aug-2012
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xstatus">
+                        <span class="xlabel"/>
+                        <span class="xvalue">Active</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">METOPROLOL TARTRATE, 25MG (Oral Tablet)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary">
+                          <span> 1 (one) Tablet daily for 30 days</span>
+                        </span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Quantity: </span>
+                                  <span>
+                                    <span class="xlabel">30</span>
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="xlabel"> Refills: </span>
+                                  <span>
+                                    <span class="xlabel">0</span>
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Ordered
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xproviderName">
+                        <span class="xproviderLastName"> Seven</span>
+                        , Henry
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Started </span>
+                                  6-Aug-2012
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xstatus">
+                        <span class="xlabel"/>
+                        <span class="xvalue">Active</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">PROVENTIL HFA, 108 (90 Base)MCG/ACT (Inhalation Aerosol Solution)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary">
+                          <span> 2 (two) Puff every six hours, as needed for wheezing for 30 days</span>
+                        </span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Quantity: </span>
+                                  <span>
+                                    <span class="xlabel">1</span>
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="xlabel"> Refills: </span>
+                                  <span>
+                                    <span class="xlabel">0</span>
+                                  </span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Ordered
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xproviderName">
+                        <span class="xproviderLastName"> Seven</span>
+                        , Henry
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Started </span>
+                                  6-Aug-2012
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xstatus">
+                        <span class="xlabel"/>
+                        <span class="xvalue">Active</span>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Medication taken as needed. </span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Medications Administered"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="29549-3"/>
+              <display value="Medications Administered"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">PROVENTIL HFA, 108 (90 Base)MCG/ACT (Inhalation Aerosol Solution)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary">
+                          <span> 2 (two) Puff</span>
+                        </span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Ordered
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xproviderName">
+                        <span class="xproviderLastName"> Seven</span>
+                        , Henry
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <ul>
+                        <li>
+                          <table class="xtableWithinTable">
+                            <tbody class="xtableWithinTable">
+                              <tr>
+                                <td>
+                                  <span class="xlabel"> Started </span>
+                                  6-Aug-2012
+                                </td>
+                                <td>
+                                  <span class="xlabel"> Ended </span>
+                                  6-Aug-2012
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </li>
+                      </ul>
+                      <span class="xstatus">
+                        <span class="xlabel"/>
+                        <span class="xvalue">Administered</span>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Site: Nose and Mouth</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Problems"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="11450-4"/>
+              <display value="Problem List"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Asthma, moderate persistent</span>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xstatus">
+                          <span class="xlabel">Status: </span>
+                          <span class="xvalue">Active</span>
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Community acquired pneumonia</span>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Patient may continue to experience low grade fever and chills</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xstatus">
+                          <span class="xlabel">Status: </span>
+                          <span class="xvalue">Active</span>
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Hypoxemia</span>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xstatus">
+                          <span class="xlabel">Status: </span>
+                          <span class="xvalue">Active</span>
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Allergies and Adverse Reactions"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="48765-2"/>
+              <display value="Allergies, adverse reactions, alerts"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Aspirin *ANALGESICS - NonNarcotic*</span>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xdiv">
+                          <span class="xlabel">
+                            Onset
+                            <span class="xasIgnore">:</span>
+                          </span>
+                          <span class="Bold">2011</span>
+                        </span>
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xstatus">
+                        <span class="xlabel">Status: </span>
+                        <span class="xvalue">Active</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Codeine Sulfate *ANALGESICS - OPIOID*</span>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xdiv">
+                          <span class="xlabel">
+                            Onset
+                            <span class="xasIgnore">:</span>
+                          </span>
+                          <span class="Bold">2010</span>
+                        </span>
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xstatus">
+                        <span class="xlabel">Status: </span>
+                        <span class="xvalue">Active</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Penicillin G Benzathine *PENICILLINS*</span>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xdiv">
+                          <span class="xlabel">
+                            Onset
+                            <span class="xasIgnore">:</span>
+                          </span>
+                          <span class="Bold">1-June-2012</span>
+                        </span>
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xstatus">
+                        <span class="xlabel">Status: </span>
+                        <span class="xvalue">Active</span>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Results"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="30954-2"/>
+              <display value="Relevant diagnostic tests and/or laboratory data"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Value</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody class="xorganizer">
+                  <tr>
+                    <td class="xdateTime">
+                      <span class="xdiv">
+                        <span class="xlabel">Resulted on:</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">6-Aug-2012 4:06 PM</span>
+                    </td>
+                    <td class="xorderName">
+                      <span class="Bold">PNEUMOCOCCAL VACCINE (90732)</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold"/>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">Normal</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td/>
+                    <td class="xresultName"/>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                </tbody>
+                <tbody class="xorganizer">
+                  <tr>
+                    <td class="xdateTime">
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">3:30 PM</span>
+                    </td>
+                    <td class="xorderName">
+                      <span class="Bold">CHEST XRAY, PA &amp; LATERAL (71020)</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">Comments: consistent with pneumonia </span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">Normal</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td/>
+                    <td class="xresultName"/>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                </tbody>
+                <tbody class="xorganizer">
+                  <tr>
+                    <td class="xdateTime">
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">18-July-2013 3:21 PM</span>
+                    </td>
+                    <td colspan="2" class="xorderName">
+                      <span class="Bold">HCT (85014)</span>
+                    </td>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td/>
+                    <td class="xresultName">
+                      <span class="Bold">HCT</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">45 %</span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">Range: 42.9 - 49.1 = Normal</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody class="xorganizer">
+                  <tr>
+                    <td class="xdateTime">
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">3:21 PM</span>
+                    </td>
+                    <td colspan="2" class="xorderName">
+                      <span class="Bold">HGB (85018)</span>
+                    </td>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td/>
+                    <td class="xresultName">
+                      <span class="Bold">HGB</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">14.2 g/dL</span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">Range: 14.4 - 16.6 = Abnormal</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody class="xorganizer">
+                  <tr>
+                    <td class="xdateTime">
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">3:21 PM</span>
+                    </td>
+                    <td colspan="2" class="xorderName">
+                      <span class="Bold">PLT (85049)</span>
+                    </td>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td/>
+                    <td class="xresultName">
+                      <span class="Bold">PLT</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">220 10^3/ul</span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">Normal</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody class="xorganizer">
+                  <tr>
+                    <td class="xdateTime">
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">3:21 PM</span>
+                    </td>
+                    <td colspan="2" class="xorderName">
+                      <span class="Bold">WBC (85048)</span>
+                    </td>
+                    <td class="xresults"/>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td/>
+                    <td class="xresultName">
+                      <span class="Bold">WBC</span>
+                    </td>
+                    <td class="xresults">
+                      <span class="Bold">7.6 10^3/ul</span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">Range: 4.5 - 11.0 = Normal</span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Procedures"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="47519-4"/>
+              <display value="History of Procedures"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Procedure</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">PNEUMOCOCCAL VACCINE (90732)</span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Completed
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">CHEST XRAY, PA &amp; LATERAL (71020)</span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Completed
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">ALBUTEROL, INHALATION SOLUTION, COMPOUNDED PRODUCT, ADMINISTERED THROUGH DME, UNIT DOSE, 1 MG (J7609)</span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Completed
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Immunization"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="11369-6"/>
+              <display value="Immunizations"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">Influenza (3 years and up)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Administered on
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">1-Nov-2010</span>
+                      </span>
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">Influenza (3 years and up)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Administered on
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">10-Sep-2011</span>
+                      </span>
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">Pneumococcal (2 years and up)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xlabel">Lot #: </span>
+                      <span class="xlabel">MK456987</span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Administered on
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                    </td>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Site: Deltoid (Left)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">Td (7 years and up)</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">
+                          Administered on
+                          <span class="xasIgnore">:</span>
+                        </span>
+                        <span class="Bold">4-Jan-2007</span>
+                      </span>
+                    </td>
+                    <td class="xdetails"/>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Social History"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="29762-2"/>
+              <display value="Social History"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Dates</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="Bold">
+                        <span>Tobacco use</span>
+                      </span>
+                      <span class="Bold"> Current every day smoker. </span>
+                      <span class="xdiv">
+                        <span class="xsecondary"/>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates"/>
+                    <td class="xdetails">
+                      <span class="xdiv">
+                        <span class="xcommentlabel"> Comments: </span>
+                        <span>Current every day smoker. Start: 1992</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p>
+                <b>Smoking Status: </b>
+              </p>
+              <ul>
+                <li>
+                  <span class="xlabel">Current every day smoker</span>
+                </li>
+              </ul>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Encounters"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="46240-8"/>
+              <display value="Encounters"/>
+            </coding>
+          </code>
+          <text>
+            <status value="additional"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">
+              <table>
+                <tbody>
+                  <tr>
+                    <td class="xmain">
+                      <span class="xdiv">
+                        <span class="Bold">Office Visit</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xlabel">Encounter Reason: </span>
+                        <span>Fever and chills - The fever and chills have been occurring for 2 days. There has been associated cough (green sputum).</span>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xlabel">Encounter Diagnosis: </span>
+                        <span>Community acquired pneumonia</span>
+                        <span>, </span>
+                        <span>Asthma, moderate persistent</span>
+                        <span>, </span>
+                        <span>Hypoxemia</span>
+                      </span>
+                      <span class="xasIgnore"/>
+                      <span class="xdiv">
+                        <span class="xlabel">Clinic One</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                    </td>
+                    <td class="xdates">
+                      <span class="xdiv">
+                        <span class="xlabel">On </span>
+                        <span class="Bold">6-Aug-2012</span>
+                      </span>
+                      <span class="xasIgnore">
+                        <br/>
+                      </span>
+                      <span class="xdiv">
+                        <span class="xlabel">3:03 PM</span>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </text>
+          <mode value="snapshot"/>
+        </section>
+        <section>
+          <title value="Advance Directives"/>
+          <code>
+            <coding>
+              <system value="http://loinc.org"/>
+              <code value="42348-3"/>
+              <display value="Advance Directives"/>
+            </coding>
+          </code>
+          <text>
+            <status value="generated"/>
+            <div xmlns="http://www.w3.org/1999/xhtml">No Information
+            </div>
+          </text>
+          <mode value="snapshot"/>
+          <emptyReason>
+            <coding>
+              <system value="http://hl7.fhir.org/fhir/list-empty-reason"/>
+              <code value="nilknown"/>
+            </coding>
+          </emptyReason>
+        </section>
+      </Composition>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="urn:oid:1.3.6.1.4.1.22812.4.111.1.1703142"/>
+    <resource>
+      <Patient>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Dr. Jones, Isabella
+          </div>
+        </text>
+        <identifier>
+          <use value="usual"/>
+          <type>
+            <coding>
+              <system value="http://hl7.org/fhir/v2/0203"/>
+              <code value="MR"/>
+            </coding>
+          </type>
+          <system value="urn:oid:1.3.6.1.4.1.22812.4.111.1"/>
+          <value value="1703142"/>
+        </identifier>
+        <name>
+          <use value="official"/>
+          <text value="Dr. Jones, Isabella"/>
+          <family value="Jones"/>
+          <given value="Isabella"/>
+          <prefix value="Dr."/>
+        </name>
+        <name>
+          <use value="nickname"/>
+          <text value="Ms. Isla2, Isabella Marie"/>
+          <family value="Isla2"/>
+          <given value="Isabella"/>
+          <given value="Marie"/>
+          <prefix value="Ms."/>
+        </name>
+        <telecom>
+          <system value="phone"/>
+          <value value="+1-(919)888-9658"/>
+          <use value="mobile"/>
+        </telecom>
+        <telecom>
+          <system value="fax"/>
+          <value value="+1-(919)888-2222"/>
+        </telecom>
+        <telecom>
+          <system value="phone"/>
+          <value value="+1-(919)888-3333"/>
+          <use value="temp"/>
+        </telecom>
+        <telecom>
+          <system value="email"/>
+          <value value="someone@somewhere.com"/>
+          <use value="work"/>
+        </telecom>
+        <gender value="female"/>
+        <birthDate value="1947-05-01"/>
+        <address>
+          <line value="1234 DGI Blvd"/>
+          <city value="Raleigh"/>
+          <state value="NC"/>
+          <postalCode value="27615"/>
+          <country value="US"/>
+        </address>
+        <address>
+          <line value="C/O: Receiving Dept."/>
+          <line value="a1234 DGI Blvd"/>
+          <city value="Raleigh"/>
+          <state value="NC"/>
+          <postalCode value="27615"/>
+          <country value="US"/>
+        </address>
+        <maritalStatus>
+          <coding>
+            <system value="http://hl7.org/fhir/v3/MaritalStatus"/>
+            <code value="M"/>
+          </coding>
+        </maritalStatus>
+        <contact>
+          <relationship>
+            <coding>
+              <system value="http://hl7.org/fhir/ValueSet/patient-contact-relationship"/>
+              <code value="guardian"/>
+            </coding>
+          </relationship>
+          <relationship>
+            <coding>
+              <system value="http://hl7.org/fhir/v3/RoleCode"/>
+              <code value="GPARNT"/>
+              <display value="Grandfather"/>
+            </coding>
+          </relationship>
+          <name>
+            <use value="official"/>
+            <text value="Jones, Ralph"/>
+            <family value="Jones"/>
+            <given value="Ralph"/>
+          </name>
+          <telecom>
+            <system value="phone"/>
+            <value value="(816)276-6909"/>
+            <use value="home"/>
+          </telecom>
+          <address>
+            <line value="1357 Amber Drive"/>
+            <line value="2222 Amber Drive"/>
+            <city value="Beaverton"/>
+            <state value="OR"/>
+            <postalCode value="97006"/>
+            <country value="US"/>
+          </address>
+        </contact>
+        <contact>
+          <relationship>
+            <coding>
+              <system value="http://hl7.org/fhir/ValueSet/patient-contact-relationship"/>
+              <code value="guardian"/>
+            </coding>
+          </relationship>
+          <relationship>
+            <coding>
+              <system value="http://hl7.org/fhir/v3/RoleCode"/>
+              <code value="PRN"/>
+              <display value="Parent"/>
+            </coding>
+          </relationship>
+          <name>
+            <text value="Wilkinson, Jackson"/>
+            <family value="Wilkinson"/>
+            <given value="Jackson"/>
+          </name>
+          <telecom>
+            <system value="other"/>
+            <value value="207-841-9103"/>
+            <use value="work"/>
+          </telecom>
+          <telecom>
+            <system value="other"/>
+            <value value="703-373-1575"/>
+            <use value="home"/>
+          </telecom>
+          <telecom>
+            <system value="phone"/>
+            <value value="207-841-9103"/>
+            <use value="home"/>
+          </telecom>
+          <address>
+            <line value="119 Grattan St"/>
+            <city value="San Francisco"/>
+            <state value="CA"/>
+            <postalCode value="94117"/>
+            <country value="US"/>
+          </address>
+        </contact>
+      </Patient>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="urn:oid:2.16.840.1.113883.4.6.1569874562"/>
+    <resource>
+      <Practitioner>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Dr. Seven, Henry Levin
+          </div>
+        </text>
+        <identifier>
+          <system value="urn:oid:2.16.840.1.113883.4.6"/>
+          <value value="1569874562"/>
+        </identifier>
+        <identifier>
+          <system value="urn:oid:1.3.6.1.4.1.22812.4.111.0"/>
+          <value value="10077"/>
+        </identifier>
+        <name>
+          <text value="Dr. Seven, Henry Levin"/>
+          <family value="Seven"/>
+          <given value="Henry"/>
+          <given value="Levin"/>
+          <prefix value="Dr."/>
+        </name>
+        <telecom>
+          <system value="phone"/>
+          <value value="+1-(555)555-1002"/>
+        </telecom>
+        <address>
+          <line value="1002 Healthcare Dr."/>
+          <city value="Portland"/>
+          <state value="OR"/>
+          <postalCode value="97005"/>
+          <country value="US"/>
+        </address>
+      </Practitioner>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="urn:oid:1.3.6.1.4.1.22812.4.111.0.123.100"/>
+    <resource>
+      <RelatedPerson>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Mr. Owens, Stanley David
+          </div>
+        </text>
+        <identifier>
+          <system value="urn:oid:1.3.6.1.4.1.22812.4.111.0.123"/>
+          <value value="100"/>
+        </identifier>
+        <patient>
+          <reference value="Patient/1.3.6.1.4.1.22812.4.111.1.1703142"/>
+          <display value="Dr. Jones, Isabella"/>
+        </patient>
+        <name>
+          <text value="Mr. Owens, Stanley David"/>
+          <family value="Owens"/>
+          <given value="Stanley"/>
+          <given value="David"/>
+          <prefix value="Mr."/>
+        </name>
+        <telecom>
+          <system value="phone"/>
+          <value value="+1-(555)555-1002"/>
+        </telecom>
+        <address>
+          <line value="1002 Homecare Dr."/>
+          <city value="Portland"/>
+          <state value="OR"/>
+          <postalCode value="97005"/>
+          <country value="US"/>
+        </address>
+      </RelatedPerson>
+    </resource>
+  </entry>
+</Bundle>

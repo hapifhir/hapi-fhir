@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -632,39 +632,45 @@ public class DeviceUseStatement extends DomainResource {
      * @return {@link #timing} (How often the device was used.)
      */
     public Timing getTimingTiming() throws FHIRException { 
+      if (this.timing == null)
+        return null;
       if (!(this.timing instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Timing) this.timing;
     }
 
     public boolean hasTimingTiming() { 
-      return this.timing instanceof Timing;
+      return this != null && this.timing instanceof Timing;
     }
 
     /**
      * @return {@link #timing} (How often the device was used.)
      */
     public Period getTimingPeriod() throws FHIRException { 
+      if (this.timing == null)
+        return null;
       if (!(this.timing instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Period) this.timing;
     }
 
     public boolean hasTimingPeriod() { 
-      return this.timing instanceof Period;
+      return this != null && this.timing instanceof Period;
     }
 
     /**
      * @return {@link #timing} (How often the device was used.)
      */
     public DateTimeType getTimingDateTimeType() throws FHIRException { 
+      if (this.timing == null)
+        return null;
       if (!(this.timing instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateTimeType) this.timing;
     }
 
     public boolean hasTimingDateTimeType() { 
-      return this.timing instanceof DateTimeType;
+      return this != null && this.timing instanceof DateTimeType;
     }
 
     public boolean hasTiming() { 
@@ -675,6 +681,8 @@ public class DeviceUseStatement extends DomainResource {
      * @param value {@link #timing} (How often the device was used.)
      */
     public DeviceUseStatement setTiming(Type value) { 
+      if (value != null && !(value instanceof Timing || value instanceof Period || value instanceof DateTimeType))
+        throw new Error("Not the right type for DeviceUseStatement.timing[x]: "+value.fhirType());
       this.timing = value;
       return this;
     }

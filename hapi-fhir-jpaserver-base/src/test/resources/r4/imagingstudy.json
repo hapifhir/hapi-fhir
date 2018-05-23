@@ -1,0 +1,17 @@
+{
+	"resourceType": "ImagingStudy",
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Image 1 from Series 3: CT Images on Patient MINT (MINT1234) taken at 1-Jan 2011 01:20 AM</div>"
+	},
+	"numberOfSeries": 1,
+	"numberOfInstances": 1,
+	"series": [{
+		"number": 3,
+		"description": "CT Surview 180",
+		"numberOfInstances": 1,
+		"instance": [{
+			"number": 1
+		}]
+	}]
+}

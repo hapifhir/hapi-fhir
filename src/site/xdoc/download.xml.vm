@@ -43,7 +43,7 @@
 				<tbody>
 					<tr>
 						<td>HAPI FHIR 1.1</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #EEB;">0.5.0-5843</td>
 						<td style="background: #DDD;"></td>
@@ -52,7 +52,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.2</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #EEB;">0.5.0-5843</td>
 						<td style="background: #DDD;"></td>
@@ -61,7 +61,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.3</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
@@ -70,7 +70,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.4</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
@@ -79,7 +79,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.5</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
@@ -88,7 +88,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.6</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
@@ -97,7 +97,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.0</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
@@ -106,7 +106,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.1</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
@@ -115,7 +115,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.2</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
@@ -124,7 +124,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.3</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
@@ -133,7 +133,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.4</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
@@ -142,7 +142,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.5</td>
-						<td>JDK6+</td>
+						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
@@ -151,7 +151,7 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.0.0</td>
-						<td>JDK7+</td>
+						<td>JDK7</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
@@ -160,7 +160,7 @@
 						</tr>
 					<tr>
 						<td>HAPI FHIR 3.1.0</td>
-						<td>JDK7+</td>
+						<td>JDK7</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
@@ -169,14 +169,31 @@
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.2.0</td>
-						<td>JDK7+</td>
+						<td>JDK7</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.2.0-12917</td>
 					</tr>
-
+					<tr>
+						<td>HAPI FHIR 3.3.0</td>
+						<td>JDK7</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.2.0-13271</td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 3.4.0</td>
+						<td>JDK8</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #EEB;">3.4.0-13732</td>
+					</tr>
 				</tbody>
 			</table>
 
@@ -265,7 +282,7 @@
 					</tr>
 					<tr><td style="text-align: center; font-size: 1.2em; background: #DDE; padding: 3px;" colspan="2">Validation</td></tr>
 					<tr>
-						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validator</td>
+						<td style="font-weight: bold; white-space: nowrap;">hapi-fhir-validation</td>
 						<td>
 							This module contains the FHIR Profile Validator, which is used to 
 							validate resource instances against FHIR Profiles (StructureDefinitions,
@@ -524,13 +541,14 @@ System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEv
 
 			</subsection>
 
-			<subsection name="Phloc-Schematron">
+			<subsection name="Ph-Schematron">
 
 				<p>
 					If you are using the
 					<a href="./doc_validation.html">Schematron Validatioon</a>
-					module, you will also need to include the Phloc library on your
-					classpath.
+					module, you will also need to include the Ph-Schematron library on your
+					classpath. (Note that prior to HAPI FHIR 3.4.0 we used Phloc-Schamtron
+					instead, but that lirary has been discontinued)
 				</p>
 				<p>
 					If you are using Maven, this library is not added by default (it is
@@ -539,16 +557,15 @@ System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEv
 					dependencies to your project POM.xml
 				</p>
 				<source><![CDATA[<dependency>
-    <groupId>com.phloc</groupId>
-    <artifactId>phloc-schematron</artifactId>
-    <version>${phloc_schematron_version}</version>
+	<groupId>com.helger</groupId>
+	<artifactId>ph-schematron</artifactId>
+	<version>${ph_schematron_version}</version>
 </dependency>
 <dependency>
-    <groupId>com.phloc</groupId>
-    <artifactId>phloc-commons</artifactId>
-    <version>${phloc_commons_version}</version>
+	<groupId>com.helger</groupId>
+	<artifactId>ph-commons</artifactId>
+	<version>${ph_commons_version}</version>
 </dependency>]]></source>
-
 			</subsection>
 
 

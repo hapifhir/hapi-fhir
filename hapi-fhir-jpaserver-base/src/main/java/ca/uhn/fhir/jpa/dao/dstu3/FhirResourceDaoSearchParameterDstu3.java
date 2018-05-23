@@ -14,6 +14,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,6 +65,7 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 	 */
 	@Override
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
+	@Transactional(propagation = Propagation.NEVER)
 	public void performReindexingPass() {
 		if (getConfig().isSchedulingDisabled()) {
 			return;

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -73,7 +73,7 @@ public enum EndpointConnectionType {
          */
         DICOMWADOURI, 
         /**
-         * Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the the value in Endpoint.address and retrieve the FHIR CapabilityStatement.
+         * Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the value in Endpoint.address and retrieve the FHIR CapabilityStatement.
          */
         HL7FHIRREST, 
         /**
@@ -162,7 +162,7 @@ public enum EndpointConnectionType {
             case DICOMQIDORS: return "DICOMweb RESTful Image query - http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.7.html";
             case DICOMSTOWRS: return "DICOMweb RESTful image sending and storage - http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.6.html";
             case DICOMWADOURI: return "DICOMweb Image Retrieve - http://dicom.nema.org/dicom/2013/output/chtml/part18/sect_6.3.html";
-            case HL7FHIRREST: return "Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the the value in Endpoint.address and retrieve the FHIR CapabilityStatement.";
+            case HL7FHIRREST: return "Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the value in Endpoint.address and retrieve the FHIR CapabilityStatement.";
             case HL7FHIRMSG: return "Use the servers FHIR Messaging interface. Details can be found on the messaging.html page in the FHIR Specification. The FHIR server's base address is specified in the Endpoint.address property.";
             case HL7V2MLLP: return "HL7v2 messages over an LLP TCP connection";
             case SECUREEMAIL: return "Email delivery using a digital certificate to encrypt the content using the public key, receiver must have the private key to decrypt the content";

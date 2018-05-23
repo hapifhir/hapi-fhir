@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CodesystemAltcodeKind {
 
         /**
-         * The code is an alternative code that can be used in in any of the circumstances that the primary code can be used
+         * The code is an alternative code that can be used in any of the circumstances that the primary code can be used
          */
         ALTERNATE, 
         /**
@@ -90,7 +90,7 @@ public enum CodesystemAltcodeKind {
         }
         public String getDefinition() {
           switch (this) {
-            case ALTERNATE: return "The code is an alternative code that can be used in in any of the circumstances that the primary code can be used";
+            case ALTERNATE: return "The code is an alternative code that can be used in any of the circumstances that the primary code can be used";
             case DEPRECATED: return "The code should no longer be used, but was used in the past";
             case CASEINSENSITIVE: return "The code is an alternative to be used when a case insensitive code is required (when the primary codes are case sensitive)";
             case CASESENSITIVE: return "The code is an alternative to be used when a case sensitive code is required (when the primary codes are case insensitive)";

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -392,6 +392,22 @@ public enum V3ObservationValue {
          * Unable to assess the worst case result of a future exposure.
          */
         CRITU, 
+        /**
+         * Concepts representing whether a person does or does not currently have a job or is not currently in the labor pool seeking employment.
+         */
+        _EMPLOYMENTSTATUS, 
+        /**
+         * Individuals who, during the last week: a) did any work for at least 1 hour as paid or unpaid employees of a business or government organization; worked in their own businesses, professions, or on their own farms; or b) were not working, but who have a job or business from which the individual was temporarily absent because of vacation, illness, bad weather, childcare problems, maternity or paternity leave, labor-management dispute, job training, or other family or personal reasons, regardless of whether or not they were paid for the time off or were seeking other jobs.
+         */
+        EMPLOYED, 
+        /**
+         * Persons not classified as employed or unemployed, meaning those who have no job and are not looking for one.
+         */
+        NOTINLABORFORCE, 
+        /**
+         * Persons who currently have no employment, but are available for work and have made specific efforts to find employment.
+         */
+        UNEMPLOYED, 
         /**
          * Description: The domain contains genetic analysis specific observation values, e.g. Homozygote, Heterozygote, etc.
          */
@@ -1087,6 +1103,46 @@ Long-term shared authentication secrets, if used, are never revealed to any part
          */
         NELG, 
         /**
+         * Concepts that describe an individual's typical arrangement of working hours for an occupation.
+         */
+        _WORKSCHEDULE, 
+        /**
+         * A person who is scheduled for work during daytime hours (for example between 6am and 6pm) on a regular basis.
+         */
+        DS, 
+        /**
+         * Consistent Early morning schedule of 13 hours or less per shift (between 2 am and 2 pm)
+         */
+        EMS, 
+        /**
+         * A person who is scheduled for work during evening hours (for example between 2pm and midnight) on a regular basis.
+         */
+        ES, 
+        /**
+         * Scheduled for work during nighttime hours (for example between 9pm and 8am) on a regular basis.
+         */
+        NS, 
+        /**
+         * Scheduled for work times that change periodically between days, and/or evenings, and includes some night shifts.
+         */
+        RSWN, 
+        /**
+         * Scheduled for work days/times that change periodically between days, but does not include night or evening work.
+         */
+        RSWON, 
+        /**
+         * Shift consisting of two distinct work periods each day that are separated by a break of a few hours (for example 2 to 4 hours)
+         */
+        SS, 
+        /**
+         * Shifts of 17 or more hours.
+         */
+        VLS, 
+        /**
+         * Irregular, unpredictable hours scheduled on a short notice (for example, less than 2 day notice): inconsistent schedule, on-call, as needed, as available.
+         */
+        VS, 
+        /**
          * AnnotationValue
          */
         _ANNOTATIONVALUE, 
@@ -1287,6 +1343,14 @@ Long-term shared authentication secrets, if used, are never revealed to any part
           return CRITL;
         if ("CRITU".equals(codeString))
           return CRITU;
+        if ("_EmploymentStatus".equals(codeString))
+          return _EMPLOYMENTSTATUS;
+        if ("Employed".equals(codeString))
+          return EMPLOYED;
+        if ("NotInLaborForce".equals(codeString))
+          return NOTINLABORFORCE;
+        if ("Unemployed".equals(codeString))
+          return UNEMPLOYED;
         if ("_GeneticObservationValue".equals(codeString))
           return _GENETICOBSERVATIONVALUE;
         if ("Homozygote".equals(codeString))
@@ -1573,6 +1637,26 @@ Long-term shared authentication secrets, if used, are never revealed to any part
           return INPNDUPD;
         if ("NELG".equals(codeString))
           return NELG;
+        if ("_WorkSchedule".equals(codeString))
+          return _WORKSCHEDULE;
+        if ("DS".equals(codeString))
+          return DS;
+        if ("EMS".equals(codeString))
+          return EMS;
+        if ("ES".equals(codeString))
+          return ES;
+        if ("NS".equals(codeString))
+          return NS;
+        if ("RSWN".equals(codeString))
+          return RSWN;
+        if ("RSWON".equals(codeString))
+          return RSWON;
+        if ("SS".equals(codeString))
+          return SS;
+        if ("VLS".equals(codeString))
+          return VLS;
+        if ("VS".equals(codeString))
+          return VS;
         if ("_AnnotationValue".equals(codeString))
           return _ANNOTATIONVALUE;
         if ("_CommonClinicalObservationValue".equals(codeString))
@@ -1674,6 +1758,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case CRITH: return "CRITH";
             case CRITL: return "CRITL";
             case CRITU: return "CRITU";
+            case _EMPLOYMENTSTATUS: return "_EmploymentStatus";
+            case EMPLOYED: return "Employed";
+            case NOTINLABORFORCE: return "NotInLaborForce";
+            case UNEMPLOYED: return "Unemployed";
             case _GENETICOBSERVATIONVALUE: return "_GeneticObservationValue";
             case HOMOZYGOTE: return "Homozygote";
             case _OBSERVATIONMEASURESCORING: return "_ObservationMeasureScoring";
@@ -1817,6 +1905,16 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case INPNDINV: return "INPNDINV";
             case INPNDUPD: return "INPNDUPD";
             case NELG: return "NELG";
+            case _WORKSCHEDULE: return "_WorkSchedule";
+            case DS: return "DS";
+            case EMS: return "EMS";
+            case ES: return "ES";
+            case NS: return "NS";
+            case RSWN: return "RSWN";
+            case RSWON: return "RSWON";
+            case SS: return "SS";
+            case VLS: return "VLS";
+            case VS: return "VS";
             case _ANNOTATIONVALUE: return "_AnnotationValue";
             case _COMMONCLINICALOBSERVATIONVALUE: return "_CommonClinicalObservationValue";
             case _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS: return "_IndividualCaseSafetyReportValueDomains";
@@ -1918,6 +2016,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case CRITH: return "Worst case result of a future exposure is assessed to be life-threatening or having high potential for organ system failure.";
             case CRITL: return "Worst case result of a future exposure is not assessed to be life-threatening or having high potential for organ system failure.";
             case CRITU: return "Unable to assess the worst case result of a future exposure.";
+            case _EMPLOYMENTSTATUS: return "Concepts representing whether a person does or does not currently have a job or is not currently in the labor pool seeking employment.";
+            case EMPLOYED: return "Individuals who, during the last week: a) did any work for at least 1 hour as paid or unpaid employees of a business or government organization; worked in their own businesses, professions, or on their own farms; or b) were not working, but who have a job or business from which the individual was temporarily absent because of vacation, illness, bad weather, childcare problems, maternity or paternity leave, labor-management dispute, job training, or other family or personal reasons, regardless of whether or not they were paid for the time off or were seeking other jobs.";
+            case NOTINLABORFORCE: return "Persons not classified as employed or unemployed, meaning those who have no job and are not looking for one.";
+            case UNEMPLOYED: return "Persons who currently have no employment, but are available for work and have made specific efforts to find employment.";
             case _GENETICOBSERVATIONVALUE: return "Description: The domain contains genetic analysis specific observation values, e.g. Homozygote, Heterozygote, etc.";
             case HOMOZYGOTE: return "Description: An individual having different alleles at one or more loci regarding a specific character";
             case _OBSERVATIONMEASURESCORING: return "Observation values used to indicate the type of scoring (e.g. proportion, ratio) used by a health quality measure.";
@@ -2061,6 +2163,16 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case INPNDINV: return "Definition: Coverage is not in effect for healthcare service(s) and/or product(s) - Pending Investigation.";
             case INPNDUPD: return "Definition: Coverage is not in effect for healthcare service(s) and/or product(s) - Pending Eligibility Update.";
             case NELG: return "Definition: Coverage is not in effect for healthcare service(s) and/or product(s). May optionally include reasons for the ineligibility.";
+            case _WORKSCHEDULE: return "Concepts that describe an individual's typical arrangement of working hours for an occupation.";
+            case DS: return "A person who is scheduled for work during daytime hours (for example between 6am and 6pm) on a regular basis.";
+            case EMS: return "Consistent Early morning schedule of 13 hours or less per shift (between 2 am and 2 pm)";
+            case ES: return "A person who is scheduled for work during evening hours (for example between 2pm and midnight) on a regular basis.";
+            case NS: return "Scheduled for work during nighttime hours (for example between 9pm and 8am) on a regular basis.";
+            case RSWN: return "Scheduled for work times that change periodically between days, and/or evenings, and includes some night shifts.";
+            case RSWON: return "Scheduled for work days/times that change periodically between days, but does not include night or evening work.";
+            case SS: return "Shift consisting of two distinct work periods each day that are separated by a break of a few hours (for example 2 to 4 hours)";
+            case VLS: return "Shifts of 17 or more hours.";
+            case VS: return "Irregular, unpredictable hours scheduled on a short notice (for example, less than 2 day notice): inconsistent schedule, on-call, as needed, as available.";
             case _ANNOTATIONVALUE: return "AnnotationValue";
             case _COMMONCLINICALOBSERVATIONVALUE: return "Description:Used in a patient care message to value simple clinical (non-lab) observations.";
             case _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS: return "This domain is established as a parent to a variety of value domains being defined to support the communication of Individual Case Safety Reports to regulatory bodies. Arguably, this aggregation is not taxonomically pure, but the grouping will facilitate the management of these domains.";
@@ -2159,6 +2271,10 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case CRITH: return "high criticality";
             case CRITL: return "low criticality";
             case CRITU: return "unable to assess criticality";
+            case _EMPLOYMENTSTATUS: return "_EmploymentStatus";
+            case EMPLOYED: return "Employed";
+            case NOTINLABORFORCE: return "Not In Labor Force";
+            case UNEMPLOYED: return "Unemployed";
             case _GENETICOBSERVATIONVALUE: return "GeneticObservationValue";
             case HOMOZYGOTE: return "HOMO";
             case _OBSERVATIONMEASURESCORING: return "ObservationMeasureScoring";
@@ -2302,6 +2418,16 @@ Long-term shared authentication secrets, if used, are never revealed to any part
             case INPNDINV: return "inactive - pending investigation";
             case INPNDUPD: return "inactive - pending eligibility update";
             case NELG: return "not eligible";
+            case _WORKSCHEDULE: return "_WorkSchedule";
+            case DS: return "daytime shift";
+            case EMS: return "early morning shift";
+            case ES: return "evening shift";
+            case NS: return "night shift";
+            case RSWN: return "rotating shift with nights";
+            case RSWON: return "rotating shift without nights";
+            case SS: return "split shift";
+            case VLS: return "very long shift";
+            case VS: return "variable shift";
             case _ANNOTATIONVALUE: return "AnnotationValue";
             case _COMMONCLINICALOBSERVATIONVALUE: return "common clinical observation";
             case _INDIVIDUALCASESAFETYREPORTVALUEDOMAINS: return "Individual Case Safety Report Value Domains";

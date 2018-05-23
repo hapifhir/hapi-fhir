@@ -2,12 +2,11 @@ package org.hl7.fhir.r4.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hl7.fhir.utilities.Utilities;
 
 public class ExpressionNode {
 
-	public enum Kind {
+  public enum Kind {
 		Name, Function, Constant, Group
 	}
 	public static class SourceLocation {
@@ -38,9 +37,10 @@ public class ExpressionNode {
   public enum Function {
     Custom, 
     
-    Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Item /*implicit from name[]*/, As, Is, Single,
-    First, Last, Tail, Skip, Take, Iif, ToInteger, ToDecimal, ToString, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
-    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue, AliasAs, Alias;
+    Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Aggregate, Item /*implicit from name[]*/, As, Is, Single,
+    First, Last, Tail, Skip, Take, Union, Combine, Intersect, Exclude, Iif, Upper, Lower, ToChars, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
+    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue, AliasAs, Alias, HtmlChecks, OfType, Type,
+    IsBoolean, IsInteger, IsString, IsDecimal, IsQuantity, IsDateTime, IsTime, ToBoolean, ToInteger, ToString, ToDecimal, ToQuantity, ToDateTime, ToTime;
 
     public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
@@ -55,6 +55,7 @@ public class ExpressionNode {
       if (name.equals("select")) return Function.Select;
       if (name.equals("all")) return Function.All;
       if (name.equals("repeat")) return Function.Repeat;
+      if (name.equals("aggregate")) return Function.Aggregate;      
       if (name.equals("item")) return Function.Item;
       if (name.equals("as")) return Function.As;
       if (name.equals("is")) return Function.Is;
@@ -64,10 +65,14 @@ public class ExpressionNode {
       if (name.equals("tail")) return Function.Tail;
       if (name.equals("skip")) return Function.Skip;
       if (name.equals("take")) return Function.Take;
+      if (name.equals("union")) return Function.Union;
+      if (name.equals("combine")) return Function.Combine;
+      if (name.equals("intersect")) return Function.Intersect;
+      if (name.equals("exclude")) return Function.Exclude;
       if (name.equals("iif")) return Function.Iif;
-      if (name.equals("toInteger")) return Function.ToInteger;
-      if (name.equals("toDecimal")) return Function.ToDecimal;
-      if (name.equals("toString")) return Function.ToString;
+      if (name.equals("lower")) return Function.Lower;
+      if (name.equals("upper")) return Function.Upper;
+      if (name.equals("toChars")) return Function.ToChars;
       if (name.equals("substring")) return Function.Substring;
       if (name.equals("startsWith")) return Function.StartsWith;
       if (name.equals("endsWith")) return Function.EndsWith;
@@ -87,6 +92,23 @@ public class ExpressionNode {
       if (name.equals("hasValue")) return Function.HasValue;
       if (name.equals("alias")) return Function.Alias;
       if (name.equals("aliasAs")) return Function.AliasAs;
+      if (name.equals("htmlchecks")) return Function.HtmlChecks;
+      if (name.equals("ofType")) return Function.OfType;      
+      if (name.equals("type")) return Function.Type;      
+      if (name.equals("toInteger")) return Function.ToInteger;
+      if (name.equals("toDecimal")) return Function.ToDecimal;
+      if (name.equals("toString")) return Function.ToString;
+      if (name.equals("toQuantity")) return Function.ToQuantity;
+      if (name.equals("toBoolean")) return Function.ToBoolean;
+      if (name.equals("toDateTime")) return Function.ToDateTime;
+      if (name.equals("toTime")) return Function.ToTime;
+      if (name.equals("isInteger")) return Function.IsInteger;
+      if (name.equals("isDecimal")) return Function.IsDecimal;
+      if (name.equals("isString")) return Function.IsString;
+      if (name.equals("isQuantity")) return Function.IsQuantity;
+      if (name.equals("isBoolean")) return Function.IsBoolean;
+      if (name.equals("isDateTime")) return Function.IsDateTime;
+      if (name.equals("isTime")) return Function.IsTime;
       return null;
     }
     public String toCode() {
@@ -103,6 +125,7 @@ public class ExpressionNode {
       case Select : return "select";
       case All : return "all";
       case Repeat : return "repeat";
+      case Aggregate : return "aggregate";
       case Item : return "item";
       case As : return "as";
       case Is : return "is";
@@ -112,10 +135,14 @@ public class ExpressionNode {
       case Tail : return "tail";
       case Skip : return "skip";
       case Take : return "take";
+      case Union : return "union";
+      case Combine : return "combine";
+      case Intersect : return "intersect";
+      case Exclude : return "exclude";
       case Iif : return "iif";
-      case ToInteger : return "toInteger";
-      case ToDecimal : return "toDecimal";
-      case ToString : return "toString";
+      case ToChars : return "toChars";
+      case Lower : return "lower";
+      case Upper : return "upper";
       case Substring : return "substring";
       case StartsWith : return "startsWith";
       case EndsWith : return "endsWith";
@@ -135,6 +162,23 @@ public class ExpressionNode {
       case HasValue : return "hasValue";
       case Alias : return "alias";
       case AliasAs : return "aliasAs";
+      case HtmlChecks : return "htmlchecks";
+      case OfType : return "ofType";
+      case Type : return "type";
+      case ToInteger : return "toInteger";
+      case ToDecimal : return "toDecimal";
+      case ToString : return "toString";
+      case ToBoolean : return "toBoolean";
+      case ToQuantity : return "toQuantity";
+      case ToDateTime : return "toDateTime";
+      case ToTime : return "toTime";
+      case IsInteger : return "isInteger";
+      case IsDecimal : return "isDecimal";
+      case IsString : return "isString";
+      case IsBoolean : return "isBoolean";
+      case IsQuantity : return "isQuantity";
+      case IsDateTime : return "isDateTime";
+      case IsTime : return "isTime";
       default: return "??";
       }
     }
@@ -240,7 +284,7 @@ public class ExpressionNode {
 	private String uniqueId;
 	private Kind kind;
 	private String name;
-	private String constant;
+	private Base constant;
 	private Function function;
 	private List<ExpressionNode> parameters; // will be created if there is a function
 	private ExpressionNode inner;
@@ -289,10 +333,16 @@ public class ExpressionNode {
 			}
 			break;
 		case Constant:
-		  if (Utilities.isInteger(constant) || Utilities.existsInList(constant, "true", "false"))
-	      b.append(Utilities.escapeJava(constant));
-		  else 
-		    b.append(Utilities.escapeJava(constant));
+		  if (constant instanceof StringType)
+	      b.append("'"+Utilities.escapeJson(constant.primitiveValue())+"'");
+		  else if (constant instanceof Quantity) {
+		    Quantity q = (Quantity) constant;
+        b.append(Utilities.escapeJson(q.getValue().toPlainString()));
+        b.append(" '");
+        b.append(Utilities.escapeJson(q.getUnit()));
+        b.append("'");
+		  } else
+		    b.append(Utilities.escapeJson(constant.primitiveValue()));
 			break;
 		case Group:
 			b.append("(");
@@ -319,12 +369,13 @@ public class ExpressionNode {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getConstant() {
+	public Base getConstant() {
 		return constant;
 	}
-	public void setConstant(String constant) {
+	public void setConstant(Base constant) {
 		this.constant = constant;
 	}
+	
 	public Function getFunction() {
 		return function;
 	}
@@ -365,7 +416,7 @@ public class ExpressionNode {
 		if (!name.startsWith("$"))
 			return true;
 		else
-			return name.equals("$this");  
+			return Utilities.existsInList(name, "$this", "$total");  
 	}
 
 	public Kind getKind() {
@@ -505,7 +556,7 @@ public class ExpressionNode {
 			break;
 
 		case Constant:
-			if (Utilities.noString(constant)) 
+			if (constant == null) 
 				return "No Constant provided @ "+location();
 			break;
 

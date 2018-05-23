@@ -29,13 +29,17 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum RemittanceOutcome {
 
+        /**
+         * The Claim/Pre-authorization/Pre-determination has been received but processing has not begun.
+         */
+        QUEUED, 
         /**
          * The processing has completed without errors
          */
@@ -55,6 +59,8 @@ public enum RemittanceOutcome {
         public static RemittanceOutcome fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("queued".equals(codeString))
+          return QUEUED;
         if ("complete".equals(codeString))
           return COMPLETE;
         if ("error".equals(codeString))
@@ -65,6 +71,7 @@ public enum RemittanceOutcome {
         }
         public String toCode() {
           switch (this) {
+            case QUEUED: return "queued";
             case COMPLETE: return "complete";
             case ERROR: return "error";
             case PARTIAL: return "partial";
@@ -76,6 +83,7 @@ public enum RemittanceOutcome {
         }
         public String getDefinition() {
           switch (this) {
+            case QUEUED: return "The Claim/Pre-authorization/Pre-determination has been received but processing has not begun.";
             case COMPLETE: return "The processing has completed without errors";
             case ERROR: return "One or more errors have been detected in the Claim";
             case PARTIAL: return "No errors have been detected in the Claim and some of the adjudication has been performed.";
@@ -84,6 +92,7 @@ public enum RemittanceOutcome {
         }
         public String getDisplay() {
           switch (this) {
+            case QUEUED: return "Queued";
             case COMPLETE: return "Processing Complete";
             case ERROR: return "Error";
             case PARTIAL: return "Partial Processing";

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.3.0-SNAPSHOT</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -55,8 +55,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<exclusions>
 				<exclusion>
 					<artifactId>Saxon-HE</artifactId>
@@ -65,8 +65,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 		</dependency>
 
 		<dependency>
@@ -158,7 +158,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>3.3.0-SNAPSHOT</version>
+			<version>3.4.0-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

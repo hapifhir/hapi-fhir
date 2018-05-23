@@ -27,10 +27,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
@@ -61,7 +63,9 @@ public class ApacheHttpRequest implements IHttpRequest {
 
 	@Override
 	public IHttpResponse execute() throws IOException {
-		return new ApacheHttpResponse(myClient.execute(myRequest));
+		StopWatch responseStopWatch = new StopWatch();
+		HttpResponse httpResponse = myClient.execute(myRequest);
+		return new ApacheHttpResponse(httpResponse, responseStopWatch);
 	}
 
 	@Override

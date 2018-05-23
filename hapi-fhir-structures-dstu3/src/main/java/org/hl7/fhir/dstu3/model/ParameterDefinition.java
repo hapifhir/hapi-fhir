@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.
  */
@@ -515,7 +516,7 @@ public class ParameterDefinition extends Type implements ICompositeType {
     /**
      * @param value {@link #profile} (If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.)
      */
-    public ParameterDefinition setProfile(Reference value) { 
+    public ParameterDefinition setProfile(Reference value)  { 
       this.profile = value;
       return this;
     }
@@ -540,15 +541,30 @@ public class ParameterDefinition extends Type implements ICompositeType {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("name", "code", "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("use", "code", "Whether the parameter is input or output for the module.", 0, java.lang.Integer.MAX_VALUE, use));
-        childrenList.add(new Property("min", "integer", "The minimum number of times this parameter SHALL appear in the request or response.", 0, java.lang.Integer.MAX_VALUE, min));
-        childrenList.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, java.lang.Integer.MAX_VALUE, max));
-        childrenList.add(new Property("documentation", "string", "A brief discussion of what the parameter is for and how it is used by the module.", 0, java.lang.Integer.MAX_VALUE, documentation));
-        childrenList.add(new Property("type", "code", "The type of the parameter.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("profile", "Reference(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, java.lang.Integer.MAX_VALUE, profile));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("name", "code", "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.", 0, 1, name));
+        children.add(new Property("use", "code", "Whether the parameter is input or output for the module.", 0, 1, use));
+        children.add(new Property("min", "integer", "The minimum number of times this parameter SHALL appear in the request or response.", 0, 1, min));
+        children.add(new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, 1, max));
+        children.add(new Property("documentation", "string", "A brief discussion of what the parameter is for and how it is used by the module.", 0, 1, documentation));
+        children.add(new Property("type", "code", "The type of the parameter.", 0, 1, type));
+        children.add(new Property("profile", "Reference(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, 1, profile));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3373707: /*name*/  return new Property("name", "code", "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.", 0, 1, name);
+        case 116103: /*use*/  return new Property("use", "code", "Whether the parameter is input or output for the module.", 0, 1, use);
+        case 108114: /*min*/  return new Property("min", "integer", "The minimum number of times this parameter SHALL appear in the request or response.", 0, 1, min);
+        case 107876: /*max*/  return new Property("max", "string", "The maximum number of times this element is permitted to appear in the request or response.", 0, 1, max);
+        case 1587405498: /*documentation*/  return new Property("documentation", "string", "A brief discussion of what the parameter is for and how it is used by the module.", 0, 1, documentation);
+        case 3575610: /*type*/  return new Property("type", "code", "The type of the parameter.", 0, 1, type);
+        case -309425751: /*profile*/  return new Property("profile", "Reference(StructureDefinition)", "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.", 0, 1, profile);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -699,24 +715,24 @@ public class ParameterDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ParameterDefinition))
+        if (!(other_ instanceof ParameterDefinition))
           return false;
-        ParameterDefinition o = (ParameterDefinition) other;
+        ParameterDefinition o = (ParameterDefinition) other_;
         return compareDeep(name, o.name, true) && compareDeep(use, o.use, true) && compareDeep(min, o.min, true)
            && compareDeep(max, o.max, true) && compareDeep(documentation, o.documentation, true) && compareDeep(type, o.type, true)
            && compareDeep(profile, o.profile, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ParameterDefinition))
+        if (!(other_ instanceof ParameterDefinition))
           return false;
-        ParameterDefinition o = (ParameterDefinition) other;
+        ParameterDefinition o = (ParameterDefinition) other_;
         return compareValues(name, o.name, true) && compareValues(use, o.use, true) && compareValues(min, o.min, true)
            && compareValues(max, o.max, true) && compareValues(documentation, o.documentation, true) && compareValues(type, o.type, true)
           ;

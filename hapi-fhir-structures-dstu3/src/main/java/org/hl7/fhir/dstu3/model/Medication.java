@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
  */
@@ -207,26 +208,30 @@ public class Medication extends DomainResource {
          * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
         public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
           return (CodeableConcept) this.item;
         }
 
         public boolean hasItemCodeableConcept() { 
-          return this.item instanceof CodeableConcept;
+          return this != null && this.item instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
         public Reference getItemReference() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
           return (Reference) this.item;
         }
 
         public boolean hasItemReference() { 
-          return this.item instanceof Reference;
+          return this != null && this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -236,7 +241,9 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
-        public MedicationIngredientComponent setItem(Type value) { 
+        public MedicationIngredientComponent setItem(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Medication.ingredient.item[x]: "+value.fhirType());
           this.item = value;
           return this;
         }
@@ -305,16 +312,30 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #amount} (Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.  This is expressed as a ratio where the numerator is 250mg and the denominator is 1 tablet.)
          */
-        public MedicationIngredientComponent setAmount(Ratio value) { 
+        public MedicationIngredientComponent setAmount(Ratio value)  { 
           this.amount = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, java.lang.Integer.MAX_VALUE, item));
-          childrenList.add(new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, java.lang.Integer.MAX_VALUE, isActive));
-          childrenList.add(new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.  This is expressed as a ratio where the numerator is 250mg and the denominator is 1 tablet.", 0, java.lang.Integer.MAX_VALUE, amount));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item));
+          children.add(new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, 1, isActive));
+          children.add(new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.  This is expressed as a ratio where the numerator is 250mg and the denominator is 1 tablet.", 0, 1, amount));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 2116201613: /*item[x]*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
+          case 3242771: /*item*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
+          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
+          case 1376364920: /*itemReference*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
+          case -748916528: /*isActive*/  return new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, 1, isActive);
+          case -1413853096: /*amount*/  return new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.  This is expressed as a ratio where the numerator is 250mg and the denominator is 1 tablet.", 0, 1, amount);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -412,23 +433,23 @@ public class Medication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationIngredientComponent))
+        if (!(other_ instanceof MedicationIngredientComponent))
           return false;
-        MedicationIngredientComponent o = (MedicationIngredientComponent) other;
+        MedicationIngredientComponent o = (MedicationIngredientComponent) other_;
         return compareDeep(item, o.item, true) && compareDeep(isActive, o.isActive, true) && compareDeep(amount, o.amount, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationIngredientComponent))
+        if (!(other_ instanceof MedicationIngredientComponent))
           return false;
-        MedicationIngredientComponent o = (MedicationIngredientComponent) other;
+        MedicationIngredientComponent o = (MedicationIngredientComponent) other_;
         return compareValues(isActive, o.isActive, true);
       }
 
@@ -495,7 +516,7 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #container} (The kind of container that this package comes as.)
          */
-        public MedicationPackageComponent setContainer(CodeableConcept value) { 
+        public MedicationPackageComponent setContainer(CodeableConcept value)  { 
           this.container = value;
           return this;
         }
@@ -606,11 +627,22 @@ public class Medication extends DomainResource {
           return getBatch().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("container", "CodeableConcept", "The kind of container that this package comes as.", 0, java.lang.Integer.MAX_VALUE, container));
-          childrenList.add(new Property("content", "", "A set of components that go to make up the described item.", 0, java.lang.Integer.MAX_VALUE, content));
-          childrenList.add(new Property("batch", "", "Information about a group of medication produced or packaged from one production run.", 0, java.lang.Integer.MAX_VALUE, batch));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("container", "CodeableConcept", "The kind of container that this package comes as.", 0, 1, container));
+          children.add(new Property("content", "", "A set of components that go to make up the described item.", 0, java.lang.Integer.MAX_VALUE, content));
+          children.add(new Property("batch", "", "Information about a group of medication produced or packaged from one production run.", 0, java.lang.Integer.MAX_VALUE, batch));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -410956671: /*container*/  return new Property("container", "CodeableConcept", "The kind of container that this package comes as.", 0, 1, container);
+          case 951530617: /*content*/  return new Property("content", "", "A set of components that go to make up the described item.", 0, java.lang.Integer.MAX_VALUE, content);
+          case 93509434: /*batch*/  return new Property("batch", "", "Information about a group of medication produced or packaged from one production run.", 0, java.lang.Integer.MAX_VALUE, batch);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -710,23 +742,23 @@ public class Medication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationPackageComponent))
+        if (!(other_ instanceof MedicationPackageComponent))
           return false;
-        MedicationPackageComponent o = (MedicationPackageComponent) other;
+        MedicationPackageComponent o = (MedicationPackageComponent) other_;
         return compareDeep(container, o.container, true) && compareDeep(content, o.content, true) && compareDeep(batch, o.batch, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationPackageComponent))
+        if (!(other_ instanceof MedicationPackageComponent))
           return false;
-        MedicationPackageComponent o = (MedicationPackageComponent) other;
+        MedicationPackageComponent o = (MedicationPackageComponent) other_;
         return true;
       }
 
@@ -786,26 +818,30 @@ public class Medication extends DomainResource {
          * @return {@link #item} (Identifies one of the items in the package.)
          */
         public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
           return (CodeableConcept) this.item;
         }
 
         public boolean hasItemCodeableConcept() { 
-          return this.item instanceof CodeableConcept;
+          return this != null && this.item instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #item} (Identifies one of the items in the package.)
          */
         public Reference getItemReference() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
           return (Reference) this.item;
         }
 
         public boolean hasItemReference() { 
-          return this.item instanceof Reference;
+          return this != null && this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -815,7 +851,9 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #item} (Identifies one of the items in the package.)
          */
-        public MedicationPackageContentComponent setItem(Type value) { 
+        public MedicationPackageContentComponent setItem(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Medication.package.content.item[x]: "+value.fhirType());
           this.item = value;
           return this;
         }
@@ -839,15 +877,28 @@ public class Medication extends DomainResource {
         /**
          * @param value {@link #amount} (The amount of the product that is in the package.)
          */
-        public MedicationPackageContentComponent setAmount(SimpleQuantity value) { 
+        public MedicationPackageContentComponent setAmount(SimpleQuantity value)  { 
           this.amount = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, java.lang.Integer.MAX_VALUE, item));
-          childrenList.add(new Property("amount", "SimpleQuantity", "The amount of the product that is in the package.", 0, java.lang.Integer.MAX_VALUE, amount));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, 1, item));
+          children.add(new Property("amount", "SimpleQuantity", "The amount of the product that is in the package.", 0, 1, amount));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 2116201613: /*item[x]*/  return new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, 1, item);
+          case 3242771: /*item*/  return new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, 1, item);
+          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, 1, item);
+          case 1376364920: /*itemReference*/  return new Property("item[x]", "CodeableConcept|Reference(Medication)", "Identifies one of the items in the package.", 0, 1, item);
+          case -1413853096: /*amount*/  return new Property("amount", "SimpleQuantity", "The amount of the product that is in the package.", 0, 1, amount);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -933,22 +984,22 @@ public class Medication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationPackageContentComponent))
+        if (!(other_ instanceof MedicationPackageContentComponent))
           return false;
-        MedicationPackageContentComponent o = (MedicationPackageContentComponent) other;
+        MedicationPackageContentComponent o = (MedicationPackageContentComponent) other_;
         return compareDeep(item, o.item, true) && compareDeep(amount, o.amount, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationPackageContentComponent))
+        if (!(other_ instanceof MedicationPackageContentComponent))
           return false;
-        MedicationPackageContentComponent o = (MedicationPackageContentComponent) other;
+        MedicationPackageContentComponent o = (MedicationPackageContentComponent) other_;
         return true;
       }
 
@@ -1086,10 +1137,20 @@ public class Medication extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
-          childrenList.add(new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, java.lang.Integer.MAX_VALUE, expirationDate));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, 1, lotNumber));
+          children.add(new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, 1, expirationDate));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 462547450: /*lotNumber*/  return new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, 1, lotNumber);
+          case -668811523: /*expirationDate*/  return new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, 1, expirationDate);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1168,23 +1229,23 @@ public class Medication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationPackageBatchComponent))
+        if (!(other_ instanceof MedicationPackageBatchComponent))
           return false;
-        MedicationPackageBatchComponent o = (MedicationPackageBatchComponent) other;
+        MedicationPackageBatchComponent o = (MedicationPackageBatchComponent) other_;
         return compareDeep(lotNumber, o.lotNumber, true) && compareDeep(expirationDate, o.expirationDate, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationPackageBatchComponent))
+        if (!(other_ instanceof MedicationPackageBatchComponent))
           return false;
-        MedicationPackageBatchComponent o = (MedicationPackageBatchComponent) other;
+        MedicationPackageBatchComponent o = (MedicationPackageBatchComponent) other_;
         return compareValues(lotNumber, o.lotNumber, true) && compareValues(expirationDate, o.expirationDate, true)
           ;
       }
@@ -1300,7 +1361,7 @@ public class Medication extends DomainResource {
     /**
      * @param value {@link #code} (A code (or set of codes) that specify this medication, or a textual description if no code is available. Usage note: This could be a standard medication code such as a code from RxNorm, SNOMED CT, IDMP etc. It could also be a national or local formulary code, optionally with translations to other code systems.)
      */
-    public Medication setCode(CodeableConcept value) { 
+    public Medication setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -1463,7 +1524,7 @@ public class Medication extends DomainResource {
     /**
      * @param value {@link #manufacturer} (Describes the details of the manufacturer of the medication product.  This is not intended to represent the distributor of a medication product.)
      */
-    public Medication setManufacturer(Reference value) { 
+    public Medication setManufacturer(Reference value)  { 
       this.manufacturer = value;
       return this;
     }
@@ -1507,7 +1568,7 @@ public class Medication extends DomainResource {
     /**
      * @param value {@link #form} (Describes the form of the item.  Powder; tablets; capsule.)
      */
-    public Medication setForm(CodeableConcept value) { 
+    public Medication setForm(CodeableConcept value)  { 
       this.form = value;
       return this;
     }
@@ -1584,7 +1645,7 @@ public class Medication extends DomainResource {
     /**
      * @param value {@link #package_} (Information that only applies to packages (not products).)
      */
-    public Medication setPackage(MedicationPackageComponent value) { 
+    public Medication setPackage(MedicationPackageComponent value)  { 
       this.package_ = value;
       return this;
     }
@@ -1642,17 +1703,34 @@ public class Medication extends DomainResource {
       return getImage().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("code", "CodeableConcept", "A code (or set of codes) that specify this medication, or a textual description if no code is available. Usage note: This could be a standard medication code such as a code from RxNorm, SNOMED CT, IDMP etc. It could also be a national or local formulary code, optionally with translations to other code systems.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("status", "code", "A code to indicate if the medication is in active use.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("isBrand", "boolean", "Set to true if the item is attributable to a specific manufacturer.", 0, java.lang.Integer.MAX_VALUE, isBrand));
-        childrenList.add(new Property("isOverTheCounter", "boolean", "Set to true if the medication can be obtained without an order from a prescriber.", 0, java.lang.Integer.MAX_VALUE, isOverTheCounter));
-        childrenList.add(new Property("manufacturer", "Reference(Organization)", "Describes the details of the manufacturer of the medication product.  This is not intended to represent the distributor of a medication product.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
-        childrenList.add(new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; capsule.", 0, java.lang.Integer.MAX_VALUE, form));
-        childrenList.add(new Property("ingredient", "", "Identifies a particular constituent of interest in the product.", 0, java.lang.Integer.MAX_VALUE, ingredient));
-        childrenList.add(new Property("package", "", "Information that only applies to packages (not products).", 0, java.lang.Integer.MAX_VALUE, package_));
-        childrenList.add(new Property("image", "Attachment", "Photo(s) or graphic representation(s) of the medication.", 0, java.lang.Integer.MAX_VALUE, image));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("code", "CodeableConcept", "A code (or set of codes) that specify this medication, or a textual description if no code is available. Usage note: This could be a standard medication code such as a code from RxNorm, SNOMED CT, IDMP etc. It could also be a national or local formulary code, optionally with translations to other code systems.", 0, 1, code));
+        children.add(new Property("status", "code", "A code to indicate if the medication is in active use.", 0, 1, status));
+        children.add(new Property("isBrand", "boolean", "Set to true if the item is attributable to a specific manufacturer.", 0, 1, isBrand));
+        children.add(new Property("isOverTheCounter", "boolean", "Set to true if the medication can be obtained without an order from a prescriber.", 0, 1, isOverTheCounter));
+        children.add(new Property("manufacturer", "Reference(Organization)", "Describes the details of the manufacturer of the medication product.  This is not intended to represent the distributor of a medication product.", 0, 1, manufacturer));
+        children.add(new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; capsule.", 0, 1, form));
+        children.add(new Property("ingredient", "", "Identifies a particular constituent of interest in the product.", 0, java.lang.Integer.MAX_VALUE, ingredient));
+        children.add(new Property("package", "", "Information that only applies to packages (not products).", 0, 1, package_));
+        children.add(new Property("image", "Attachment", "Photo(s) or graphic representation(s) of the medication.", 0, java.lang.Integer.MAX_VALUE, image));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code (or set of codes) that specify this medication, or a textual description if no code is available. Usage note: This could be a standard medication code such as a code from RxNorm, SNOMED CT, IDMP etc. It could also be a national or local formulary code, optionally with translations to other code systems.", 0, 1, code);
+        case -892481550: /*status*/  return new Property("status", "code", "A code to indicate if the medication is in active use.", 0, 1, status);
+        case 2055403645: /*isBrand*/  return new Property("isBrand", "boolean", "Set to true if the item is attributable to a specific manufacturer.", 0, 1, isBrand);
+        case -650796023: /*isOverTheCounter*/  return new Property("isOverTheCounter", "boolean", "Set to true if the medication can be obtained without an order from a prescriber.", 0, 1, isOverTheCounter);
+        case -1969347631: /*manufacturer*/  return new Property("manufacturer", "Reference(Organization)", "Describes the details of the manufacturer of the medication product.  This is not intended to represent the distributor of a medication product.", 0, 1, manufacturer);
+        case 3148996: /*form*/  return new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; capsule.", 0, 1, form);
+        case -206409263: /*ingredient*/  return new Property("ingredient", "", "Identifies a particular constituent of interest in the product.", 0, java.lang.Integer.MAX_VALUE, ingredient);
+        case -807062458: /*package*/  return new Property("package", "", "Information that only applies to packages (not products).", 0, 1, package_);
+        case 100313435: /*image*/  return new Property("image", "Attachment", "Photo(s) or graphic representation(s) of the medication.", 0, java.lang.Integer.MAX_VALUE, image);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1838,12 +1916,12 @@ public class Medication extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Medication))
+        if (!(other_ instanceof Medication))
           return false;
-        Medication o = (Medication) other;
+        Medication o = (Medication) other_;
         return compareDeep(code, o.code, true) && compareDeep(status, o.status, true) && compareDeep(isBrand, o.isBrand, true)
            && compareDeep(isOverTheCounter, o.isOverTheCounter, true) && compareDeep(manufacturer, o.manufacturer, true)
            && compareDeep(form, o.form, true) && compareDeep(ingredient, o.ingredient, true) && compareDeep(package_, o.package_, true)
@@ -1851,12 +1929,12 @@ public class Medication extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Medication))
+        if (!(other_ instanceof Medication))
           return false;
-        Medication o = (Medication) other;
+        Medication o = (Medication) other_;
         return compareValues(status, o.status, true) && compareValues(isBrand, o.isBrand, true) && compareValues(isOverTheCounter, o.isOverTheCounter, true)
           ;
       }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -233,26 +233,30 @@ public class SupplyDelivery extends DomainResource {
          * @return {@link #item} (Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
          */
         public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
           return (CodeableConcept) this.item;
         }
 
         public boolean hasItemCodeableConcept() { 
-          return this.item instanceof CodeableConcept;
+          return this != null && this.item instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #item} (Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
          */
         public Reference getItemReference() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
           return (Reference) this.item;
         }
 
         public boolean hasItemReference() { 
-          return this.item instanceof Reference;
+          return this != null && this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -263,6 +267,8 @@ public class SupplyDelivery extends DomainResource {
          * @param value {@link #item} (Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
          */
         public SupplyDeliverySuppliedItemComponent setItem(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for SupplyDelivery.suppliedItem.item[x]: "+value.fhirType());
           this.item = value;
           return this;
         }
@@ -400,11 +406,11 @@ public class SupplyDelivery extends DomainResource {
   }
 
     /**
-     * Identifier assigned by the dispensing facility when the item(s) is dispensed.
+     * Identifier for the supply delivery event that is used to identify it across multiple disparate systems.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="External identifier", formalDefinition="Identifier assigned by the dispensing facility when the item(s) is dispensed." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="External identifier", formalDefinition="Identifier for the supply delivery event that is used to identify it across multiple disparate systems." )
+    protected List<Identifier> identifier;
 
     /**
      * A plan, proposal or order that is fulfilled in whole or in part by this event.
@@ -508,7 +514,7 @@ public class SupplyDelivery extends DomainResource {
     protected List<Practitioner> receiverTarget;
 
 
-    private static final long serialVersionUID = 2033462996L;
+    private static final long serialVersionUID = 630023750L;
 
   /**
    * Constructor
@@ -518,27 +524,56 @@ public class SupplyDelivery extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifier assigned by the dispensing facility when the item(s) is dispensed.)
+     * @return {@link #identifier} (Identifier for the supply delivery event that is used to identify it across multiple disparate systems.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SupplyDelivery.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SupplyDelivery setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public SupplyDelivery addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Identifier assigned by the dispensing facility when the item(s) is dispensed.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public SupplyDelivery setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -831,39 +866,45 @@ public class SupplyDelivery extends DomainResource {
      * @return {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -874,6 +915,8 @@ public class SupplyDelivery extends DomainResource {
      * @param value {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public SupplyDelivery setOccurrence(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new Error("Not the right type for SupplyDelivery.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1038,7 +1081,7 @@ public class SupplyDelivery extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility when the item(s) is dispensed.", 0, 1, identifier));
+        children.add(new Property("identifier", "Identifier", "Identifier for the supply delivery event that is used to identify it across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("basedOn", "Reference(SupplyRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("partOf", "Reference(SupplyDelivery|Contract)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "A code specifying the state of the dispense event.", 0, 1, status));
@@ -1054,7 +1097,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility when the item(s) is dispensed.", 0, 1, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for the supply delivery event that is used to identify it across multiple disparate systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(SupplyRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(SupplyDelivery|Contract)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "A code specifying the state of the dispense event.", 0, 1, status);
@@ -1077,7 +1120,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : this.partOf.toArray(new Base[this.partOf.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<SupplyDeliveryStatus>
@@ -1097,7 +1140,7 @@ public class SupplyDelivery extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case -332612366: // basedOn
           this.getBasedOn().add(castToReference(value)); // Reference
@@ -1138,7 +1181,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("basedOn")) {
           this.getBasedOn().add(castToReference(value));
         } else if (name.equals("partOf")) {
@@ -1168,7 +1211,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case -332612366:  return addBasedOn(); 
         case -995410646:  return addPartOf(); 
         case -892481550:  return getStatusElement();
@@ -1207,8 +1250,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("basedOn")) {
           return addBasedOn();
@@ -1266,7 +1308,11 @@ public class SupplyDelivery extends DomainResource {
       public SupplyDelivery copy() {
         SupplyDelivery dst = new SupplyDelivery();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)

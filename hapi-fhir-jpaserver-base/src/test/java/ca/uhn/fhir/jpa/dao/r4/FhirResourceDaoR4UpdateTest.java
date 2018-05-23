@@ -36,7 +36,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateAndUpdateWithoutRequest() throws Exception {
+	public void testCreateAndUpdateWithoutRequest() {
 		String methodName = "testUpdateByUrl";
 
 		Patient p = new Patient();
@@ -85,10 +85,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			Patient patient = new Patient();
 			patient.addName().setFamily(name);
 
-			List<IdType> tl = new ArrayList<IdType>();
-			tl.add(new IdType("http://foo/bar"));
-			tl.add(new IdType("http://foo/bar"));
-			tl.add(new IdType("http://foo/bar"));
+			List<CanonicalType> tl = new ArrayList<>();
+			tl.add(new CanonicalType("http://foo/bar"));
+			tl.add(new CanonicalType("http://foo/bar"));
+			tl.add(new CanonicalType("http://foo/bar"));
 			patient.getMeta().getProfile().addAll(tl);
 
 			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
@@ -97,7 +97,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
-			List<UriType> tl = patient.getMeta().getProfile();
+			List<CanonicalType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
 		}
@@ -584,7 +584,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
 			assertThat(secListValues, containsInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2"));
-			List<UriType> profileList = p1.getMeta().getProfile();
+			List<CanonicalType> profileList = p1.getMeta().getProfile();
 			assertEquals(1, profileList.size());
 			assertEquals("http://foo2", profileList.get(0).getValueAsString()); // no foo1
 		}
@@ -598,8 +598,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			Patient patient = new Patient();
 			patient.addName().setFamily(name);
 
-			List<IdType> tl = new ArrayList<IdType>();
-			tl.add(new IdType("http://foo/bar"));
+			List<CanonicalType> tl = new ArrayList<>();
+			tl.add(new CanonicalType("http://foo/bar"));
 			patient.getMeta().getProfile().addAll(tl);
 
 			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
@@ -608,7 +608,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
-			List<UriType> tl = patient.getMeta().getProfile();
+			List<CanonicalType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
 		}
@@ -619,8 +619,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			patient.setId(id);
 			patient.addName().setFamily(name);
 
-			List<IdType> tl = new ArrayList<IdType>();
-			tl.add(new IdType("http://foo/baz"));
+			List<CanonicalType> tl = new ArrayList<>();
+			tl.add(new CanonicalType("http://foo/baz"));
 			patient.getMeta().getProfile().clear();
 			patient.getMeta().getProfile().addAll(tl);
 
@@ -630,7 +630,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		// Do a read
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
-			List<UriType> tl = patient.getMeta().getProfile();
+			List<CanonicalType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/baz", tl.get(0).getValue());
 		}

@@ -551,7 +551,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
@@ -571,7 +570,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
 		return codeSystem;
 	}
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -721,262 +721,6 @@ public class Patient extends DomainResource {
   }
 
     @Block()
-    public static class AnimalComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Identifies the high level taxonomic categorization of the kind of animal.
-         */
-        @Child(name = "species", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="E.g. Dog, Cow", formalDefinition="Identifies the high level taxonomic categorization of the kind of animal." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/animal-species")
-        protected CodeableConcept species;
-
-        /**
-         * Identifies the detailed categorization of the kind of animal.
-         */
-        @Child(name = "breed", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="E.g. Poodle, Angus", formalDefinition="Identifies the detailed categorization of the kind of animal." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/animal-breeds")
-        protected CodeableConcept breed;
-
-        /**
-         * Indicates the current state of the animal's reproductive organs.
-         */
-        @Child(name = "genderStatus", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="E.g. Neutered, Intact", formalDefinition="Indicates the current state of the animal's reproductive organs." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/animal-genderstatus")
-        protected CodeableConcept genderStatus;
-
-        private static final long serialVersionUID = -549738382L;
-
-    /**
-     * Constructor
-     */
-      public AnimalComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public AnimalComponent(CodeableConcept species) {
-        super();
-        this.species = species;
-      }
-
-        /**
-         * @return {@link #species} (Identifies the high level taxonomic categorization of the kind of animal.)
-         */
-        public CodeableConcept getSpecies() { 
-          if (this.species == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create AnimalComponent.species");
-            else if (Configuration.doAutoCreate())
-              this.species = new CodeableConcept(); // cc
-          return this.species;
-        }
-
-        public boolean hasSpecies() { 
-          return this.species != null && !this.species.isEmpty();
-        }
-
-        /**
-         * @param value {@link #species} (Identifies the high level taxonomic categorization of the kind of animal.)
-         */
-        public AnimalComponent setSpecies(CodeableConcept value) { 
-          this.species = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #breed} (Identifies the detailed categorization of the kind of animal.)
-         */
-        public CodeableConcept getBreed() { 
-          if (this.breed == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create AnimalComponent.breed");
-            else if (Configuration.doAutoCreate())
-              this.breed = new CodeableConcept(); // cc
-          return this.breed;
-        }
-
-        public boolean hasBreed() { 
-          return this.breed != null && !this.breed.isEmpty();
-        }
-
-        /**
-         * @param value {@link #breed} (Identifies the detailed categorization of the kind of animal.)
-         */
-        public AnimalComponent setBreed(CodeableConcept value) { 
-          this.breed = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #genderStatus} (Indicates the current state of the animal's reproductive organs.)
-         */
-        public CodeableConcept getGenderStatus() { 
-          if (this.genderStatus == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create AnimalComponent.genderStatus");
-            else if (Configuration.doAutoCreate())
-              this.genderStatus = new CodeableConcept(); // cc
-          return this.genderStatus;
-        }
-
-        public boolean hasGenderStatus() { 
-          return this.genderStatus != null && !this.genderStatus.isEmpty();
-        }
-
-        /**
-         * @param value {@link #genderStatus} (Indicates the current state of the animal's reproductive organs.)
-         */
-        public AnimalComponent setGenderStatus(CodeableConcept value) { 
-          this.genderStatus = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("species", "CodeableConcept", "Identifies the high level taxonomic categorization of the kind of animal.", 0, 1, species));
-          children.add(new Property("breed", "CodeableConcept", "Identifies the detailed categorization of the kind of animal.", 0, 1, breed));
-          children.add(new Property("genderStatus", "CodeableConcept", "Indicates the current state of the animal's reproductive organs.", 0, 1, genderStatus));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -2008465092: /*species*/  return new Property("species", "CodeableConcept", "Identifies the high level taxonomic categorization of the kind of animal.", 0, 1, species);
-          case 94001524: /*breed*/  return new Property("breed", "CodeableConcept", "Identifies the detailed categorization of the kind of animal.", 0, 1, breed);
-          case -678569453: /*genderStatus*/  return new Property("genderStatus", "CodeableConcept", "Indicates the current state of the animal's reproductive organs.", 0, 1, genderStatus);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -2008465092: /*species*/ return this.species == null ? new Base[0] : new Base[] {this.species}; // CodeableConcept
-        case 94001524: /*breed*/ return this.breed == null ? new Base[0] : new Base[] {this.breed}; // CodeableConcept
-        case -678569453: /*genderStatus*/ return this.genderStatus == null ? new Base[0] : new Base[] {this.genderStatus}; // CodeableConcept
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -2008465092: // species
-          this.species = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 94001524: // breed
-          this.breed = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -678569453: // genderStatus
-          this.genderStatus = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("species")) {
-          this.species = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("breed")) {
-          this.breed = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("genderStatus")) {
-          this.genderStatus = castToCodeableConcept(value); // CodeableConcept
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -2008465092:  return getSpecies(); 
-        case 94001524:  return getBreed(); 
-        case -678569453:  return getGenderStatus(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -2008465092: /*species*/ return new String[] {"CodeableConcept"};
-        case 94001524: /*breed*/ return new String[] {"CodeableConcept"};
-        case -678569453: /*genderStatus*/ return new String[] {"CodeableConcept"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("species")) {
-          this.species = new CodeableConcept();
-          return this.species;
-        }
-        else if (name.equals("breed")) {
-          this.breed = new CodeableConcept();
-          return this.breed;
-        }
-        else if (name.equals("genderStatus")) {
-          this.genderStatus = new CodeableConcept();
-          return this.genderStatus;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public AnimalComponent copy() {
-        AnimalComponent dst = new AnimalComponent();
-        copyValues(dst);
-        dst.species = species == null ? null : species.copy();
-        dst.breed = breed == null ? null : breed.copy();
-        dst.genderStatus = genderStatus == null ? null : genderStatus.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof AnimalComponent))
-          return false;
-        AnimalComponent o = (AnimalComponent) other_;
-        return compareDeep(species, o.species, true) && compareDeep(breed, o.breed, true) && compareDeep(genderStatus, o.genderStatus, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof AnimalComponent))
-          return false;
-        AnimalComponent o = (AnimalComponent) other_;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(species, breed, genderStatus
-          );
-      }
-
-  public String fhirType() {
-    return "Patient.animal";
-
-  }
-
-  }
-
-    @Block()
     public static class PatientCommunicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case; e.g. "en" for English, or "en-US" for American English versus "en-EN" for England English.
@@ -1538,23 +1282,16 @@ public class Patient extends DomainResource {
     protected List<ContactComponent> contact;
 
     /**
-     * This patient is known to be an animal.
-     */
-    @Child(name = "animal", type = {}, order=12, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="This patient is known to be an animal (non-human)", formalDefinition="This patient is known to be an animal." )
-    protected AnimalComponent animal;
-
-    /**
      * A language which may be used to communicate with the patient about his or her health.
      */
-    @Child(name = "communication", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "communication", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A language which may be used to communicate with the patient about his or her health", formalDefinition="A language which may be used to communicate with the patient about his or her health." )
     protected List<PatientCommunicationComponent> communication;
 
     /**
      * Patient's nominated care provider.
      */
-    @Child(name = "generalPractitioner", type = {Organization.class, Practitioner.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "generalPractitioner", type = {Organization.class, Practitioner.class, PractitionerRole.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Patient's nominated primary care provider", formalDefinition="Patient's nominated care provider." )
     protected List<Reference> generalPractitioner;
     /**
@@ -1566,7 +1303,7 @@ public class Patient extends DomainResource {
     /**
      * Organization that is the custodian of the patient record.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Organization that is the custodian of the patient record", formalDefinition="Organization that is the custodian of the patient record." )
     protected Reference managingOrganization;
 
@@ -1578,11 +1315,11 @@ public class Patient extends DomainResource {
     /**
      * Link to another patient resource that concerns the same actual patient.
      */
-    @Child(name = "link", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
+    @Child(name = "link", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=true, summary=true)
     @Description(shortDefinition="Link to another patient resource that concerns the same actual person", formalDefinition="Link to another patient resource that concerns the same actual patient." )
     protected List<PatientLinkComponent> link;
 
-    private static final long serialVersionUID = -1985061666L;
+    private static final long serialVersionUID = 2138656939L;
 
   /**
    * Constructor
@@ -1904,26 +1641,30 @@ public class Patient extends DomainResource {
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
     public BooleanType getDeceasedBooleanType() throws FHIRException { 
+      if (this.deceased == null)
+        return null;
       if (!(this.deceased instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (BooleanType) this.deceased;
     }
 
     public boolean hasDeceasedBooleanType() { 
-      return this.deceased instanceof BooleanType;
+      return this != null && this.deceased instanceof BooleanType;
     }
 
     /**
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
     public DateTimeType getDeceasedDateTimeType() throws FHIRException { 
+      if (this.deceased == null)
+        return null;
       if (!(this.deceased instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateTimeType) this.deceased;
     }
 
     public boolean hasDeceasedDateTimeType() { 
-      return this.deceased instanceof DateTimeType;
+      return this != null && this.deceased instanceof DateTimeType;
     }
 
     public boolean hasDeceased() { 
@@ -1934,6 +1675,8 @@ public class Patient extends DomainResource {
      * @param value {@link #deceased} (Indicates if the individual is deceased or not.)
      */
     public Patient setDeceased(Type value) { 
+      if (value != null && !(value instanceof BooleanType || value instanceof DateTimeType))
+        throw new Error("Not the right type for Patient.deceased[x]: "+value.fhirType());
       this.deceased = value;
       return this;
     }
@@ -2026,26 +1769,30 @@ public class Patient extends DomainResource {
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public BooleanType getMultipleBirthBooleanType() throws FHIRException { 
+      if (this.multipleBirth == null)
+        return null;
       if (!(this.multipleBirth instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (BooleanType) this.multipleBirth;
     }
 
     public boolean hasMultipleBirthBooleanType() { 
-      return this.multipleBirth instanceof BooleanType;
+      return this != null && this.multipleBirth instanceof BooleanType;
     }
 
     /**
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public IntegerType getMultipleBirthIntegerType() throws FHIRException { 
+      if (this.multipleBirth == null)
+        return null;
       if (!(this.multipleBirth instanceof IntegerType))
         throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (IntegerType) this.multipleBirth;
     }
 
     public boolean hasMultipleBirthIntegerType() { 
-      return this.multipleBirth instanceof IntegerType;
+      return this != null && this.multipleBirth instanceof IntegerType;
     }
 
     public boolean hasMultipleBirth() { 
@@ -2056,6 +1803,8 @@ public class Patient extends DomainResource {
      * @param value {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
      */
     public Patient setMultipleBirth(Type value) { 
+      if (value != null && !(value instanceof BooleanType || value instanceof IntegerType))
+        throw new Error("Not the right type for Patient.multipleBirth[x]: "+value.fhirType());
       this.multipleBirth = value;
       return this;
     }
@@ -2164,30 +1913,6 @@ public class Patient extends DomainResource {
         addContact();
       }
       return getContact().get(0);
-    }
-
-    /**
-     * @return {@link #animal} (This patient is known to be an animal.)
-     */
-    public AnimalComponent getAnimal() { 
-      if (this.animal == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Patient.animal");
-        else if (Configuration.doAutoCreate())
-          this.animal = new AnimalComponent(); // cc
-      return this.animal;
-    }
-
-    public boolean hasAnimal() { 
-      return this.animal != null && !this.animal.isEmpty();
-    }
-
-    /**
-     * @param value {@link #animal} (This patient is known to be an animal.)
-     */
-    public Patient setAnimal(AnimalComponent value) { 
-      this.animal = value;
-      return this;
     }
 
     /**
@@ -2417,9 +2142,8 @@ public class Patient extends DomainResource {
         children.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth));
         children.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
         children.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
-        children.add(new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal));
         children.add(new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
-        children.add(new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
+        children.add(new Property("generalPractitioner", "Reference(Organization|Practitioner|PractitionerRole)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner));
         children.add(new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization));
         children.add(new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link));
       }
@@ -2445,9 +2169,8 @@ public class Patient extends DomainResource {
         case 1645805999: /*multipleBirthInteger*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
         case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo);
         case 951526432: /*contact*/  return new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact);
-        case -1413116420: /*animal*/  return new Property("animal", "", "This patient is known to be an animal.", 0, 1, animal);
         case -1035284522: /*communication*/  return new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication);
-        case 1488292898: /*generalPractitioner*/  return new Property("generalPractitioner", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner);
+        case 1488292898: /*generalPractitioner*/  return new Property("generalPractitioner", "Reference(Organization|Practitioner|PractitionerRole)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, generalPractitioner);
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, 1, managingOrganization);
         case 3321850: /*link*/  return new Property("link", "", "Link to another patient resource that concerns the same actual patient.", 0, java.lang.Integer.MAX_VALUE, link);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2470,7 +2193,6 @@ public class Patient extends DomainResource {
         case -677369713: /*multipleBirth*/ return this.multipleBirth == null ? new Base[0] : new Base[] {this.multipleBirth}; // Type
         case 106642994: /*photo*/ return this.photo == null ? new Base[0] : this.photo.toArray(new Base[this.photo.size()]); // Attachment
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactComponent
-        case -1413116420: /*animal*/ return this.animal == null ? new Base[0] : new Base[] {this.animal}; // AnimalComponent
         case -1035284522: /*communication*/ return this.communication == null ? new Base[0] : this.communication.toArray(new Base[this.communication.size()]); // PatientCommunicationComponent
         case 1488292898: /*generalPractitioner*/ return this.generalPractitioner == null ? new Base[0] : this.generalPractitioner.toArray(new Base[this.generalPractitioner.size()]); // Reference
         case -2058947787: /*managingOrganization*/ return this.managingOrganization == null ? new Base[0] : new Base[] {this.managingOrganization}; // Reference
@@ -2520,9 +2242,6 @@ public class Patient extends DomainResource {
         case 951526432: // contact
           this.getContact().add((ContactComponent) value); // ContactComponent
           return value;
-        case -1413116420: // animal
-          this.animal = (AnimalComponent) value; // AnimalComponent
-          return value;
         case -1035284522: // communication
           this.getCommunication().add((PatientCommunicationComponent) value); // PatientCommunicationComponent
           return value;
@@ -2567,8 +2286,6 @@ public class Patient extends DomainResource {
           this.getPhoto().add(castToAttachment(value));
         } else if (name.equals("contact")) {
           this.getContact().add((ContactComponent) value);
-        } else if (name.equals("animal")) {
-          this.animal = (AnimalComponent) value; // AnimalComponent
         } else if (name.equals("communication")) {
           this.getCommunication().add((PatientCommunicationComponent) value);
         } else if (name.equals("generalPractitioner")) {
@@ -2599,7 +2316,6 @@ public class Patient extends DomainResource {
         case -677369713:  return getMultipleBirth(); 
         case 106642994:  return addPhoto(); 
         case 951526432:  return addContact(); 
-        case -1413116420:  return getAnimal(); 
         case -1035284522:  return addCommunication(); 
         case 1488292898:  return addGeneralPractitioner(); 
         case -2058947787:  return getManagingOrganization(); 
@@ -2624,7 +2340,6 @@ public class Patient extends DomainResource {
         case -677369713: /*multipleBirth*/ return new String[] {"boolean", "integer"};
         case 106642994: /*photo*/ return new String[] {"Attachment"};
         case 951526432: /*contact*/ return new String[] {};
-        case -1413116420: /*animal*/ return new String[] {};
         case -1035284522: /*communication*/ return new String[] {};
         case 1488292898: /*generalPractitioner*/ return new String[] {"Reference"};
         case -2058947787: /*managingOrganization*/ return new String[] {"Reference"};
@@ -2682,10 +2397,6 @@ public class Patient extends DomainResource {
         }
         else if (name.equals("contact")) {
           return addContact();
-        }
-        else if (name.equals("animal")) {
-          this.animal = new AnimalComponent();
-          return this.animal;
         }
         else if (name.equals("communication")) {
           return addCommunication();
@@ -2748,7 +2459,6 @@ public class Patient extends DomainResource {
           for (ContactComponent i : contact)
             dst.contact.add(i.copy());
         };
-        dst.animal = animal == null ? null : animal.copy();
         if (communication != null) {
           dst.communication = new ArrayList<PatientCommunicationComponent>();
           for (PatientCommunicationComponent i : communication)
@@ -2783,7 +2493,7 @@ public class Patient extends DomainResource {
            && compareDeep(telecom, o.telecom, true) && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true)
            && compareDeep(deceased, o.deceased, true) && compareDeep(address, o.address, true) && compareDeep(maritalStatus, o.maritalStatus, true)
            && compareDeep(multipleBirth, o.multipleBirth, true) && compareDeep(photo, o.photo, true) && compareDeep(contact, o.contact, true)
-           && compareDeep(animal, o.animal, true) && compareDeep(communication, o.communication, true) && compareDeep(generalPractitioner, o.generalPractitioner, true)
+           && compareDeep(communication, o.communication, true) && compareDeep(generalPractitioner, o.generalPractitioner, true)
            && compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(link, o.link, true)
           ;
       }
@@ -2802,14 +2512,74 @@ public class Patient extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, name
           , telecom, gender, birthDate, deceased, address, maritalStatus, multipleBirth
-          , photo, contact, animal, communication, generalPractitioner, managingOrganization
-          , link);
+          , photo, contact, communication, generalPractitioner, managingOrganization, link
+          );
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.Patient;
    }
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>A patient identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>A patient identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>given</b>
+   * <p>
+   * Description: <b>A portion of the given name of the patient</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.name.given</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string" )
+  public static final String SP_GIVEN = "given";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>given</b>
+   * <p>
+   * Description: <b>A portion of the given name of the patient</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.name.given</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam GIVEN = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_GIVEN);
+
+ /**
+   * Search parameter: <b>address</b>
+   * <p>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.address</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="address", path="Patient.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
+  public static final String SP_ADDRESS = "address";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address</b>
+   * <p>
+   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.address</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS);
 
  /**
    * Search parameter: <b>birthdate</b>
@@ -2892,24 +2662,30 @@ public class Patient extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam GENDER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_GENDER);
 
  /**
-   * Search parameter: <b>animal-species</b>
+   * Search parameter: <b>general-practitioner</b>
    * <p>
-   * Description: <b>The species for animal patients</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.animal.species</b><br>
+   * Description: <b>Patient's nominated general practitioner, not the organization that manages the record</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Patient.generalPractitioner</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token" )
-  public static final String SP_ANIMAL_SPECIES = "animal-species";
+  @SearchParamDefinition(name="general-practitioner", path="Patient.generalPractitioner", description="Patient's nominated general practitioner, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
+  public static final String SP_GENERAL_PRACTITIONER = "general-practitioner";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>animal-species</b>
+   * <b>Fluent Client</b> search parameter constant for <b>general-practitioner</b>
    * <p>
-   * Description: <b>The species for animal patients</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.animal.species</b><br>
+   * Description: <b>Patient's nominated general practitioner, not the organization that manages the record</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Patient.generalPractitioner</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ANIMAL_SPECIES = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ANIMAL_SPECIES);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam GENERAL_PRACTITIONER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_GENERAL_PRACTITIONER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Patient:general-practitioner</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_GENERAL_PRACTITIONER = new ca.uhn.fhir.model.api.Include("Patient:general-practitioner").toLocked();
 
  /**
    * Search parameter: <b>link</b>
@@ -2938,6 +2714,26 @@ public class Patient extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LINK = new ca.uhn.fhir.model.api.Include("Patient:link").toLocked();
 
  /**
+   * Search parameter: <b>active</b>
+   * <p>
+   * Description: <b>Whether the patient record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.active</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
+  public static final String SP_ACTIVE = "active";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>active</b>
+   * <p>
+   * Description: <b>Whether the patient record is active</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.active</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
+
+ /**
    * Search parameter: <b>language</b>
    * <p>
    * Description: <b>Language code (irrespective of use value)</b><br>
@@ -2958,24 +2754,24 @@ public class Patient extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam LANGUAGE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_LANGUAGE);
 
  /**
-   * Search parameter: <b>animal-breed</b>
+   * Search parameter: <b>address-postalcode</b>
    * <p>
-   * Description: <b>The breed for animal patients</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.animal.breed</b><br>
+   * Description: <b>A postalCode specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.address.postalCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
-  public static final String SP_ANIMAL_BREED = "animal-breed";
+  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
+  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>animal-breed</b>
+   * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
    * <p>
-   * Description: <b>The breed for animal patients</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.animal.breed</b><br>
+   * Description: <b>A postalCode specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.address.postalCode</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ANIMAL_BREED = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ANIMAL_BREED);
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_POSTALCODE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_POSTALCODE);
 
  /**
    * Search parameter: <b>address-country</b>
@@ -3036,192 +2832,6 @@ public class Patient extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PHONETIC = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PHONETIC);
-
- /**
-   * Search parameter: <b>telecom</b>
-   * <p>
-   * Description: <b>The value in any kind of telecom details of the patient</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.telecom</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
-  public static final String SP_TELECOM = "telecom";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
-   * <p>
-   * Description: <b>The value in any kind of telecom details of the patient</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.telecom</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TELECOM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TELECOM);
-
- /**
-   * Search parameter: <b>address-city</b>
-   * <p>
-   * Description: <b>A city specified in an address</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.address.city</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
-  public static final String SP_ADDRESS_CITY = "address-city";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
-   * <p>
-   * Description: <b>A city specified in an address</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.address.city</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_CITY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_CITY);
-
- /**
-   * Search parameter: <b>email</b>
-   * <p>
-   * Description: <b>A value in an email contact</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.telecom(system=email)</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
-  public static final String SP_EMAIL = "email";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>email</b>
-   * <p>
-   * Description: <b>A value in an email contact</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.telecom(system=email)</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EMAIL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EMAIL);
-
- /**
-   * Search parameter: <b>identifier</b>
-   * <p>
-   * Description: <b>A patient identifier</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.identifier</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
-   * <p>
-   * Description: <b>A patient identifier</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.identifier</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
-
- /**
-   * Search parameter: <b>given</b>
-   * <p>
-   * Description: <b>A portion of the given name of the patient</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.name.given</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="given", path="Patient.name.given", description="A portion of the given name of the patient", type="string" )
-  public static final String SP_GIVEN = "given";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>given</b>
-   * <p>
-   * Description: <b>A portion of the given name of the patient</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.name.given</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam GIVEN = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_GIVEN);
-
- /**
-   * Search parameter: <b>address</b>
-   * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.address</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="address", path="Patient.address", description="A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text", type="string" )
-  public static final String SP_ADDRESS = "address";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>address</b>
-   * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.address</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS);
-
- /**
-   * Search parameter: <b>general-practitioner</b>
-   * <p>
-   * Description: <b>Patient's nominated general practitioner, not the organization that manages the record</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Patient.generalPractitioner</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="general-practitioner", path="Patient.generalPractitioner", description="Patient's nominated general practitioner, not the organization that manages the record", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
-  public static final String SP_GENERAL_PRACTITIONER = "general-practitioner";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>general-practitioner</b>
-   * <p>
-   * Description: <b>Patient's nominated general practitioner, not the organization that manages the record</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Patient.generalPractitioner</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam GENERAL_PRACTITIONER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_GENERAL_PRACTITIONER);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Patient:general-practitioner</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_GENERAL_PRACTITIONER = new ca.uhn.fhir.model.api.Include("Patient:general-practitioner").toLocked();
-
- /**
-   * Search parameter: <b>active</b>
-   * <p>
-   * Description: <b>Whether the patient record is active</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.active</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
-  public static final String SP_ACTIVE = "active";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>active</b>
-   * <p>
-   * Description: <b>Whether the patient record is active</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Patient.active</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
-
- /**
-   * Search parameter: <b>address-postalcode</b>
-   * <p>
-   * Description: <b>A postalCode specified in an address</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.address.postalCode</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
-  public static final String SP_ADDRESS_POSTALCODE = "address-postalcode";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>address-postalcode</b>
-   * <p>
-   * Description: <b>A postalCode specified in an address</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>Patient.address.postalCode</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_POSTALCODE = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_POSTALCODE);
 
  /**
    * Search parameter: <b>phone</b>
@@ -3310,6 +2920,26 @@ public class Patient extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ADDRESS_USE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ADDRESS_USE);
 
  /**
+   * Search parameter: <b>telecom</b>
+   * <p>
+   * Description: <b>The value in any kind of telecom details of the patient</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.telecom</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
+  public static final String SP_TELECOM = "telecom";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
+   * <p>
+   * Description: <b>The value in any kind of telecom details of the patient</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.telecom</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TELECOM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TELECOM);
+
+ /**
    * Search parameter: <b>family</b>
    * <p>
    * Description: <b>A portion of the family name of the patient</b><br>
@@ -3328,6 +2958,46 @@ public class Patient extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam FAMILY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_FAMILY);
+
+ /**
+   * Search parameter: <b>address-city</b>
+   * <p>
+   * Description: <b>A city specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.address.city</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
+  public static final String SP_ADDRESS_CITY = "address-city";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>address-city</b>
+   * <p>
+   * Description: <b>A city specified in an address</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>Patient.address.city</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam ADDRESS_CITY = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_ADDRESS_CITY);
+
+ /**
+   * Search parameter: <b>email</b>
+   * <p>
+   * Description: <b>A value in an email contact</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.telecom(system=email)</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="email", path="Patient.telecom.where(system='email')", description="A value in an email contact", type="token" )
+  public static final String SP_EMAIL = "email";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>email</b>
+   * <p>
+   * Description: <b>A value in an email contact</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Patient.telecom(system=email)</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam EMAIL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_EMAIL);
 
 
 }

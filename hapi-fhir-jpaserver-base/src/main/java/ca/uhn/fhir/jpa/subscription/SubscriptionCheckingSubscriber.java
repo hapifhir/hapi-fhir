@@ -102,13 +102,13 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			IBundleProvider results = performSearch(criteria);
 
-			ourLog.info("Subscription check found {} results for query: {}", results.size(), criteria);
+			ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
 			if (results.size() == 0) {
 				continue;
 			}
 
-			ourLog.info("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
+			ourLog.debug("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 			deliveryMsg.setPayload(getContext(), msg.getNewPayload(getContext()));
@@ -140,7 +140,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		RequestDetails req = new ServletSubRequestDetails();
 		req.setSubRequest(true);
 
-		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionDao().getDao(responseResourceDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionInterceptor().getDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
 		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -81,7 +81,7 @@ public enum MapTransform {
          */
         POINTER, 
         /**
-         * Execute the supplied fluentpath expression and use the value returned by that
+         * Execute the supplied FHIRPath expression and use the value returned by that
          */
         EVALUATE, 
         /**
@@ -185,7 +185,7 @@ public enum MapTransform {
             case DATEOP: return "Perform a date operation. *Parameters to be documented*";
             case UUID: return "Generate a random UUID (in lowercase). No Parameters";
             case POINTER: return "Return the appropriate string to put in a reference that refers to the resource provided as a parameter";
-            case EVALUATE: return "Execute the supplied fluentpath expression and use the value returned by that";
+            case EVALUATE: return "Execute the supplied FHIRPath expression and use the value returned by that";
             case CC: return "Create a CodeableConcept. Parameters = (text) or (system. Code[, display])";
             case C: return "Create a Coding. Parameters = (system. Code[, display])";
             case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit";

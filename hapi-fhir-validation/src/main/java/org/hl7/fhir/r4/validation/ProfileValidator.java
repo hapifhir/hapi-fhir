@@ -1,13 +1,17 @@
 package org.hl7.fhir.r4.validation;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r4.validation.InstanceValidator.NodeStack;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
@@ -15,9 +19,27 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 public class ProfileValidator extends BaseValidator {
 
   IWorkerContext context;
+  private boolean checkAggregation = false;
+  private boolean checkMustSupport = false;
 
   public void setContext(IWorkerContext context) {
     this.context = context;    
+  }
+
+  public boolean isCheckAggregation() {
+    return checkAggregation;
+  }
+
+  public boolean isCheckMustSupport() {
+    return checkMustSupport;
+  }
+
+  public void setCheckAggregation(boolean checkAggregation) {
+    this.checkAggregation = checkAggregation;
+  }
+
+  public void setCheckMustSupport(boolean checkMustSupport) {
+    this.checkMustSupport = checkMustSupport;
   }
 
   protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg) {
@@ -36,7 +58,9 @@ public class ProfileValidator extends BaseValidator {
       checkExtensions(profile, errors, "snapshot", ec);
 
     if (rule(errors, IssueType.STRUCTURE, profile.getId(), profile.hasSnapshot(), "A snapshot is required")) {
+      Hashtable<String, ElementDefinition> snapshotElements = new Hashtable<String, ElementDefinition>();
       for (ElementDefinition ed : profile.getSnapshot().getElement()) {
+        snapshotElements.put(ed.getId(), ed);
         checkExtensions(profile, errors, "snapshot", ed);
         for (ElementDefinitionConstraintComponent inv : ed.getConstraint()) {
           if (forBuild) {
@@ -52,6 +76,19 @@ public class ProfileValidator extends BaseValidator {
           }
         }
       }
+      for (ElementDefinition diffElement : profile.getDifferential().getElement()) {
+        ElementDefinition snapElement = snapshotElements.get(diffElement.getId());
+        if (snapElement!=null) { // Happens with profiles in the main build - should be able to fix once snapshot generation is fixed - Lloyd
+          warning(errors, IssueType.BUSINESSRULE, diffElement.getId(), !checkMustSupport || snapElement.hasMustSupport(), "Elements included in the differential should declare mustSupport");
+          if (checkAggregation) {
+            for (TypeRefComponent type : snapElement.getType()) {
+              if (type.getCode().equals("http://hl7.org/fhir/Reference") || type.getCode().equals("http://hl7.org/fhir/canonical")) {
+                warning(errors, IssueType.BUSINESSRULE, diffElement.getId(), type.hasAggregation(), "Elements with type Reference or canonical should declare aggregation");
+              }
+            }
+          }
+        }
+      }
     }
     return errors;
   }
@@ -63,10 +100,9 @@ public class ProfileValidator extends BaseValidator {
 
   private void checkExtensions(StructureDefinition profile, List<ValidationMessage> errors, String kind, ElementDefinition ec) {
     if (!ec.getType().isEmpty() && "Extension".equals(ec.getType().get(0).getCode()) && ec.getType().get(0).hasProfile()) {
-      String url = ec.getType().get(0).getProfile();
+      String url = ec.getType().get(0).getProfile().get(0).getValue();
       StructureDefinition defn = context.fetchResource(StructureDefinition.class, url);
       rule(errors, IssueType.BUSINESSRULE, profile.getId(), defn != null, "Unable to find Extension '"+url+"' referenced at "+profile.getUrl()+" "+kind+" "+ec.getPath()+" ("+ec.getSliceName()+")");
     }
   }
-  
 }

@@ -33,6 +33,8 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -366,6 +368,15 @@ public interface IServerInterceptor {
 		 */
 		public String getResourceType() {
 			return myResourceType;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("id", myId)
+				.append("resourceType", myResourceType)
+				.append("resource", myResource)
+				.toString();
 		}
 
 		/**

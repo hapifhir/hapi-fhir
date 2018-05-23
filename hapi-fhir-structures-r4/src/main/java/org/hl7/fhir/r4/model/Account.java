@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -62,6 +62,14 @@ public class Account extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
+         * This account is on hold
+         */
+        ONHOLD, 
+        /**
+         * The ccount status is unknown
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -74,6 +82,10 @@ public class Account extends DomainResource {
           return INACTIVE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -84,6 +96,8 @@ public class Account extends DomainResource {
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
             case ENTEREDINERROR: return "entered-in-error";
+            case ONHOLD: return "on-hold";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -92,6 +106,8 @@ public class Account extends DomainResource {
             case ACTIVE: return "http://hl7.org/fhir/account-status";
             case INACTIVE: return "http://hl7.org/fhir/account-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/account-status";
+            case ONHOLD: return "http://hl7.org/fhir/account-status";
+            case UNKNOWN: return "http://hl7.org/fhir/account-status";
             default: return "?";
           }
         }
@@ -100,6 +116,8 @@ public class Account extends DomainResource {
             case ACTIVE: return "This account is active and may be used.";
             case INACTIVE: return "This account is inactive and should not be used to track financial information.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
+            case ONHOLD: return "This account is on hold";
+            case UNKNOWN: return "The ccount status is unknown";
             default: return "?";
           }
         }
@@ -108,6 +126,8 @@ public class Account extends DomainResource {
             case ACTIVE: return "Active";
             case INACTIVE: return "Inactive";
             case ENTEREDINERROR: return "Entered in error";
+            case ONHOLD: return "On Hold";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -124,6 +144,10 @@ public class Account extends DomainResource {
           return AccountStatus.INACTIVE;
         if ("entered-in-error".equals(codeString))
           return AccountStatus.ENTEREDINERROR;
+        if ("on-hold".equals(codeString))
+          return AccountStatus.ONHOLD;
+        if ("unknown".equals(codeString))
+          return AccountStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
         }
         public Enumeration<AccountStatus> fromType(Base code) throws FHIRException {
@@ -140,6 +164,10 @@ public class Account extends DomainResource {
           return new Enumeration<AccountStatus>(this, AccountStatus.INACTIVE);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<AccountStatus>(this, AccountStatus.ENTEREDINERROR);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.ONHOLD);
+        if ("unknown".equals(codeString))
+          return new Enumeration<AccountStatus>(this, AccountStatus.UNKNOWN);
         throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
     public String toCode(AccountStatus code) {
@@ -149,6 +177,10 @@ public class Account extends DomainResource {
         return "inactive";
       if (code == AccountStatus.ENTEREDINERROR)
         return "entered-in-error";
+      if (code == AccountStatus.ONHOLD)
+        return "on-hold";
+      if (code == AccountStatus.UNKNOWN)
+        return "unknown";
       return "?";
       }
     public String toSystem(AccountStatus code) {
@@ -720,8 +752,8 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     /**
      * Indicates whether the account is presently used/usable or not.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Indicates whether the account is presently used/usable or not." )
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="active | inactive | entered-in-error | on-hold | unknown", formalDefinition="Indicates whether the account is presently used/usable or not." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/account-status")
     protected Enumeration<AccountStatus> status;
 
@@ -753,31 +785,23 @@ A coverage may only be resposible for specific types of charges, and the sequenc
     protected Resource subjectTarget;
 
     /**
-     * Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.
+     * The date range of services associated with this account.
      */
-    @Child(name = "period", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Transaction window", formalDefinition="Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc." )
-    protected Period period;
-
-    /**
-     * Indicates the period of time over which the account is allowed to have transactions posted to it.
-This period may be different to the coveragePeriod which is the duration of time that services may occur.
-     */
-    @Child(name = "active", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Time window that transactions may be posted to this account", formalDefinition="Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur." )
-    protected Period active;
+    @Child(name = "servicePeriod", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Transaction window", formalDefinition="The date range of services associated with this account." )
+    protected Period servicePeriod;
 
     /**
      * The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.
      */
-    @Child(name = "coverage", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "coverage", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account", formalDefinition="The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account." )
     protected List<CoverageComponent> coverage;
 
     /**
      * Indicates the organization, department, etc. with responsibility for the account.
      */
-    @Child(name = "owner", type = {Organization.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "owner", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who is responsible?", formalDefinition="Indicates the organization, department, etc. with responsibility for the account." )
     protected Reference owner;
 
@@ -789,21 +813,21 @@ This period may be different to the coveragePeriod which is the duration of time
     /**
      * Provides additional information about what the account tracks and how it is used.
      */
-    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Explanation of purpose/use", formalDefinition="Provides additional information about what the account tracks and how it is used." )
     protected StringType description;
 
     /**
      * Parties financially responsible for the account.
      */
-    @Child(name = "guarantor", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "guarantor", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Responsible for the account", formalDefinition="Parties financially responsible for the account." )
     protected List<GuarantorComponent> guarantor;
 
     /**
      * Reference to a parent Account.
      */
-    @Child(name = "partOf", type = {Account.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "partOf", type = {Account.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Reference to a parent Account", formalDefinition="Reference to a parent Account." )
     protected Reference partOf;
 
@@ -812,13 +836,21 @@ This period may be different to the coveragePeriod which is the duration of time
      */
     protected Account partOfTarget;
 
-    private static final long serialVersionUID = -1380598431L;
+    private static final long serialVersionUID = 516897815L;
 
   /**
    * Constructor
    */
     public Account() {
       super();
+    }
+
+  /**
+   * Constructor
+   */
+    public Account(Enumeration<AccountStatus> status) {
+      super();
+      this.status = status;
     }
 
     /**
@@ -913,13 +945,9 @@ This period may be different to the coveragePeriod which is the duration of time
      * @param value Indicates whether the account is presently used/usable or not.
      */
     public Account setStatus(AccountStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
         if (this.status == null)
           this.status = new Enumeration<AccountStatus>(new AccountStatusEnumFactory());
         this.status.setValue(value);
-      }
       return this;
     }
 
@@ -1036,52 +1064,26 @@ This period may be different to the coveragePeriod which is the duration of time
     }
 
     /**
-     * @return {@link #period} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
+     * @return {@link #servicePeriod} (The date range of services associated with this account.)
      */
-    public Period getPeriod() { 
-      if (this.period == null)
+    public Period getServicePeriod() { 
+      if (this.servicePeriod == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.period");
+          throw new Error("Attempt to auto-create Account.servicePeriod");
         else if (Configuration.doAutoCreate())
-          this.period = new Period(); // cc
-      return this.period;
+          this.servicePeriod = new Period(); // cc
+      return this.servicePeriod;
     }
 
-    public boolean hasPeriod() { 
-      return this.period != null && !this.period.isEmpty();
-    }
-
-    /**
-     * @param value {@link #period} (Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.)
-     */
-    public Account setPeriod(Period value) { 
-      this.period = value;
-      return this;
+    public boolean hasServicePeriod() { 
+      return this.servicePeriod != null && !this.servicePeriod.isEmpty();
     }
 
     /**
-     * @return {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
-This period may be different to the coveragePeriod which is the duration of time that services may occur.)
+     * @param value {@link #servicePeriod} (The date range of services associated with this account.)
      */
-    public Period getActive() { 
-      if (this.active == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Account.active");
-        else if (Configuration.doAutoCreate())
-          this.active = new Period(); // cc
-      return this.active;
-    }
-
-    public boolean hasActive() { 
-      return this.active != null && !this.active.isEmpty();
-    }
-
-    /**
-     * @param value {@link #active} (Indicates the period of time over which the account is allowed to have transactions posted to it.
-This period may be different to the coveragePeriod which is the duration of time that services may occur.)
-     */
-    public Account setActive(Period value) { 
-      this.active = value;
+    public Account setServicePeriod(Period value) { 
+      this.servicePeriod = value;
       return this;
     }
 
@@ -1335,8 +1337,7 @@ This period may be different to the coveragePeriod which is the duration of time
         children.add(new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, 1, type));
         children.add(new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, 1, name));
         children.add(new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, 1, subject));
-        children.add(new Property("period", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, 1, period));
-        children.add(new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, 1, active));
+        children.add(new Property("servicePeriod", "Period", "The date range of services associated with this account.", 0, 1, servicePeriod));
         children.add(new Property("coverage", "", "The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.", 0, java.lang.Integer.MAX_VALUE, coverage));
         children.add(new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, 1, owner));
         children.add(new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, 1, description));
@@ -1352,8 +1353,7 @@ This period may be different to the coveragePeriod which is the duration of time
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Categorizes the account for reporting and searching purposes.", 0, 1, type);
         case 3373707: /*name*/  return new Property("name", "string", "Name used for the account when displaying it to humans in reports, etc.", 0, 1, name);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Device|Practitioner|Location|HealthcareService|Organization)", "Identifies the patient, device, practitioner, location or other object the account is associated with.", 0, 1, subject);
-        case -991726143: /*period*/  return new Property("period", "Period", "Identifies the period of time the account applies to; e.g. accounts created per fiscal year, quarter, etc.", 0, 1, period);
-        case -1422950650: /*active*/  return new Property("active", "Period", "Indicates the period of time over which the account is allowed to have transactions posted to it.\nThis period may be different to the coveragePeriod which is the duration of time that services may occur.", 0, 1, active);
+        case 2129104086: /*servicePeriod*/  return new Property("servicePeriod", "Period", "The date range of services associated with this account.", 0, 1, servicePeriod);
         case -351767064: /*coverage*/  return new Property("coverage", "", "The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account.", 0, java.lang.Integer.MAX_VALUE, coverage);
         case 106164915: /*owner*/  return new Property("owner", "Reference(Organization)", "Indicates the organization, department, etc. with responsibility for the account.", 0, 1, owner);
         case -1724546052: /*description*/  return new Property("description", "string", "Provides additional information about what the account tracks and how it is used.", 0, 1, description);
@@ -1372,8 +1372,7 @@ This period may be different to the coveragePeriod which is the duration of time
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
-        case -1422950650: /*active*/ return this.active == null ? new Base[0] : new Base[] {this.active}; // Period
+        case 2129104086: /*servicePeriod*/ return this.servicePeriod == null ? new Base[0] : new Base[] {this.servicePeriod}; // Period
         case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : this.coverage.toArray(new Base[this.coverage.size()]); // CoverageComponent
         case 106164915: /*owner*/ return this.owner == null ? new Base[0] : new Base[] {this.owner}; // Reference
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
@@ -1403,11 +1402,8 @@ This period may be different to the coveragePeriod which is the duration of time
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
-        case -991726143: // period
-          this.period = castToPeriod(value); // Period
-          return value;
-        case -1422950650: // active
-          this.active = castToPeriod(value); // Period
+        case 2129104086: // servicePeriod
+          this.servicePeriod = castToPeriod(value); // Period
           return value;
         case -351767064: // coverage
           this.getCoverage().add((CoverageComponent) value); // CoverageComponent
@@ -1442,10 +1438,8 @@ This period may be different to the coveragePeriod which is the duration of time
           this.name = castToString(value); // StringType
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        } else if (name.equals("period")) {
-          this.period = castToPeriod(value); // Period
-        } else if (name.equals("active")) {
-          this.active = castToPeriod(value); // Period
+        } else if (name.equals("servicePeriod")) {
+          this.servicePeriod = castToPeriod(value); // Period
         } else if (name.equals("coverage")) {
           this.getCoverage().add((CoverageComponent) value);
         } else if (name.equals("owner")) {
@@ -1469,8 +1463,7 @@ This period may be different to the coveragePeriod which is the duration of time
         case 3575610:  return getType(); 
         case 3373707:  return getNameElement();
         case -1867885268:  return getSubject(); 
-        case -991726143:  return getPeriod(); 
-        case -1422950650:  return getActive(); 
+        case 2129104086:  return getServicePeriod(); 
         case -351767064:  return addCoverage(); 
         case 106164915:  return getOwner(); 
         case -1724546052:  return getDescriptionElement();
@@ -1489,8 +1482,7 @@ This period may be different to the coveragePeriod which is the duration of time
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case 3373707: /*name*/ return new String[] {"string"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case -991726143: /*period*/ return new String[] {"Period"};
-        case -1422950650: /*active*/ return new String[] {"Period"};
+        case 2129104086: /*servicePeriod*/ return new String[] {"Period"};
         case -351767064: /*coverage*/ return new String[] {};
         case 106164915: /*owner*/ return new String[] {"Reference"};
         case -1724546052: /*description*/ return new String[] {"string"};
@@ -1520,13 +1512,9 @@ This period may be different to the coveragePeriod which is the duration of time
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("period")) {
-          this.period = new Period();
-          return this.period;
-        }
-        else if (name.equals("active")) {
-          this.active = new Period();
-          return this.active;
+        else if (name.equals("servicePeriod")) {
+          this.servicePeriod = new Period();
+          return this.servicePeriod;
         }
         else if (name.equals("coverage")) {
           return addCoverage();
@@ -1566,8 +1554,7 @@ This period may be different to the coveragePeriod which is the duration of time
         dst.type = type == null ? null : type.copy();
         dst.name = name == null ? null : name.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.period = period == null ? null : period.copy();
-        dst.active = active == null ? null : active.copy();
+        dst.servicePeriod = servicePeriod == null ? null : servicePeriod.copy();
         if (coverage != null) {
           dst.coverage = new ArrayList<CoverageComponent>();
           for (CoverageComponent i : coverage)
@@ -1596,10 +1583,9 @@ This period may be different to the coveragePeriod which is the duration of time
           return false;
         Account o = (Account) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
-           && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(period, o.period, true)
-           && compareDeep(active, o.active, true) && compareDeep(coverage, o.coverage, true) && compareDeep(owner, o.owner, true)
-           && compareDeep(description, o.description, true) && compareDeep(guarantor, o.guarantor, true) && compareDeep(partOf, o.partOf, true)
-          ;
+           && compareDeep(name, o.name, true) && compareDeep(subject, o.subject, true) && compareDeep(servicePeriod, o.servicePeriod, true)
+           && compareDeep(coverage, o.coverage, true) && compareDeep(owner, o.owner, true) && compareDeep(description, o.description, true)
+           && compareDeep(guarantor, o.guarantor, true) && compareDeep(partOf, o.partOf, true);
       }
 
       @Override
@@ -1615,7 +1601,7 @@ This period may be different to the coveragePeriod which is the duration of time
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
-          , name, subject, period, active, coverage, owner, description, guarantor, partOf
+          , name, subject, servicePeriod, coverage, owner, description, guarantor, partOf
           );
       }
 
@@ -1675,17 +1661,17 @@ This period may be different to the coveragePeriod which is the duration of time
    * <p>
    * Description: <b>Transaction window</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>Account.period</b><br>
+   * Path: <b>Account.servicePeriod</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="period", path="Account.period", description="Transaction window", type="date" )
+  @SearchParamDefinition(name="period", path="Account.servicePeriod", description="Transaction window", type="date" )
   public static final String SP_PERIOD = "period";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>period</b>
    * <p>
    * Description: <b>Transaction window</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>Account.period</b><br>
+   * Path: <b>Account.servicePeriod</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam PERIOD = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PERIOD);
@@ -1785,17 +1771,17 @@ This period may be different to the coveragePeriod which is the duration of time
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>active | inactive | entered-in-error</b><br>
+   * Description: <b>active | inactive | entered-in-error | on-hold | unknown</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Account.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="Account.status", description="active | inactive | entered-in-error | on-hold | unknown", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>active | inactive | entered-in-error</b><br>
+   * Description: <b>active | inactive | entered-in-error | on-hold | unknown</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Account.status</b><br>
    * </p>

@@ -14,9 +14,11 @@ import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
@@ -53,6 +55,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfig {
 
+	@Override
+	public FhirContext fhirContext() {
+		return fhirContextR4();
+	}
+
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {
@@ -63,6 +70,18 @@ public class BaseR4Config extends BaseConfig {
 		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 
 		return retVal;
+	}
+
+	@Bean(name = "myGraphQLProvider")
+	@Lazy
+	public GraphQLProvider graphQLProvider() {
+		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
+	}
+
+	@Bean
+	@Lazy
+	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
+		return new JpaStorageServices();
 	}
 
 	@Bean(name = "myInstanceValidatorR4")
@@ -80,16 +99,17 @@ public class BaseR4Config extends BaseConfig {
 		return retVal;
 	}
 
+	@Bean(name = "myResourceCountsCache")
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
+		return retVal;
+	}
+
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IFulltextSearchSvc searchDaoR4() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
 		return searchDao;
-	}
-
-	@Bean(name = "myGraphQLProvider")
-	@Lazy
-	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -118,7 +138,7 @@ public class BaseR4Config extends BaseConfig {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvc();
+		return new TerminologyLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -137,12 +157,6 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IValidationSupport validationSupportChainR4() {
 		return new JpaValidationSupportChainR4();
-	}
-
-	@Bean
-	@Lazy
-	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
 	}
 
 }

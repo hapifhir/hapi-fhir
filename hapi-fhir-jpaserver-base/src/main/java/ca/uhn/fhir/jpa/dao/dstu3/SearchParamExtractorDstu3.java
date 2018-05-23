@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -104,7 +105,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<ResourceIndexedSearchParamDate>();
+		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<>();
+		String resourceType = theEntity.getResourceType();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -162,6 +164,9 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last(), firstValue);
 				} else if (nextObject instanceof StringType) {
 					// CarePlan.activitydate can be a string
+					continue;
+				} else if (resourceType.equals("Consent") && nextPath.equals("Consent.source")) {
+					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					continue;
 				} else {
 					if (!multiType) {
@@ -478,8 +483,8 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 				multiType = true;
 			}
 
-			List<String> systems = new ArrayList<String>();
-			List<String> codes = new ArrayList<String>();
+			List<String> systems = new ArrayList<>();
+			List<String> codes = new ArrayList<>();
 
 			// String needContactPointSystem = null;
 			// if (nextPath.contains(".where(system='phone')")) {
@@ -693,11 +698,11 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
 		FHIRPathEngine fp = new FHIRPathEngine(worker);
 
-		List<Object> values = new ArrayList<Object>();
+		List<Object> values = new ArrayList<>();
 		try {
 			String[] nextPathsSplit = SPLIT.split(thePaths);
 			for (String nextPath : nextPathsSplit) {
-				List<Base> allValues = fp.evaluate((Base) theResource, nextPath);
+				List<Base> allValues = fp.evaluate((Base) theResource, trim(nextPath));
 				if (allValues.isEmpty() == false) {
 					values.addAll(allValues);
 				}

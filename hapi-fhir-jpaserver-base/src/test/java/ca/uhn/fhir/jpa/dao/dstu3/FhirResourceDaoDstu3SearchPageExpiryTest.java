@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchPageExpiryTest;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
-import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.Validate;

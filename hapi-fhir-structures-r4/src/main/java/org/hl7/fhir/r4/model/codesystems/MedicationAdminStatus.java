@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum MedicationAdminStatus {
          */
         INPROGRESS, 
         /**
-         * The administration was terminated prior to any impact on the subject (though prepartory actions may have been taken)
+         * The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)
          */
         NOTDONE, 
         /**
@@ -105,7 +105,7 @@ public enum MedicationAdminStatus {
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The administration has started but has not yet completed.";
-            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though prepartory actions may have been taken)";
+            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
             case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case COMPLETED: return "All actions that are implied by the administration have occurred.";
             case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";

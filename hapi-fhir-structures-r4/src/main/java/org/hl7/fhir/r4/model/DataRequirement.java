@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -48,6 +48,98 @@ import org.hl7.fhir.exceptions.FHIRException;
 @DatatypeDef(name="DataRequirement")
 public class DataRequirement extends Type implements ICompositeType {
 
+    public enum SortDirection {
+        /**
+         * Sort by the value ascending, so that lower values appear first
+         */
+        ASCENDING, 
+        /**
+         * Sort by the value descending, so that lower values appear last
+         */
+        DESCENDING, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static SortDirection fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("ascending".equals(codeString))
+          return ASCENDING;
+        if ("descending".equals(codeString))
+          return DESCENDING;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown SortDirection code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case ASCENDING: return "ascending";
+            case DESCENDING: return "descending";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case ASCENDING: return "http://hl7.org/fhir/sort-direction";
+            case DESCENDING: return "http://hl7.org/fhir/sort-direction";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case ASCENDING: return "Sort by the value ascending, so that lower values appear first";
+            case DESCENDING: return "Sort by the value descending, so that lower values appear last";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case ASCENDING: return "Ascending";
+            case DESCENDING: return "Descending";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class SortDirectionEnumFactory implements EnumFactory<SortDirection> {
+    public SortDirection fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("ascending".equals(codeString))
+          return SortDirection.ASCENDING;
+        if ("descending".equals(codeString))
+          return SortDirection.DESCENDING;
+        throw new IllegalArgumentException("Unknown SortDirection code '"+codeString+"'");
+        }
+        public Enumeration<SortDirection> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<SortDirection>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("ascending".equals(codeString))
+          return new Enumeration<SortDirection>(this, SortDirection.ASCENDING);
+        if ("descending".equals(codeString))
+          return new Enumeration<SortDirection>(this, SortDirection.DESCENDING);
+        throw new FHIRException("Unknown SortDirection code '"+codeString+"'");
+        }
+    public String toCode(SortDirection code) {
+      if (code == SortDirection.ASCENDING)
+        return "ascending";
+      if (code == SortDirection.DESCENDING)
+        return "descending";
+      return "?";
+      }
+    public String toSystem(SortDirection code) {
+      return code.getSystem();
+      }
+    }
+
     @Block()
     public static class DataRequirementCodeFilterComponent extends Element implements IBaseDatatypeElement {
         /**
@@ -60,7 +152,7 @@ public class DataRequirement extends Type implements ICompositeType {
         /**
          * The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.
          */
-        @Child(name = "valueSet", type = {UriType.class, ValueSet.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "valueSet", type = {UriType.class, CanonicalType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Valueset for the filter", formalDefinition="The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset." )
         protected Type valueSet;
 
@@ -144,26 +236,30 @@ public class DataRequirement extends Type implements ICompositeType {
          * @return {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
         public UriType getValueSetUriType() throws FHIRException { 
+          if (this.valueSet == null)
+            return null;
           if (!(this.valueSet instanceof UriType))
             throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (UriType) this.valueSet;
         }
 
         public boolean hasValueSetUriType() { 
-          return this.valueSet instanceof UriType;
+          return this != null && this.valueSet instanceof UriType;
         }
 
         /**
          * @return {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
-        public Reference getValueSetReference() throws FHIRException { 
-          if (!(this.valueSet instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
-          return (Reference) this.valueSet;
+        public CanonicalType getValueSetCanonicalType() throws FHIRException { 
+          if (this.valueSet == null)
+            return null;
+          if (!(this.valueSet instanceof CanonicalType))
+            throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
+          return (CanonicalType) this.valueSet;
         }
 
-        public boolean hasValueSetReference() { 
-          return this.valueSet instanceof Reference;
+        public boolean hasValueSetCanonicalType() { 
+          return this != null && this.valueSet instanceof CanonicalType;
         }
 
         public boolean hasValueSet() { 
@@ -174,6 +270,8 @@ public class DataRequirement extends Type implements ICompositeType {
          * @param value {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
          */
         public DataRequirementCodeFilterComponent setValueSet(Type value) { 
+          if (value != null && !(value instanceof UriType || value instanceof CanonicalType))
+            throw new Error("Not the right type for DataRequirement.codeFilter.valueSet[x]: "+value.fhirType());
           this.valueSet = value;
           return this;
         }
@@ -234,7 +332,7 @@ public class DataRequirement extends Type implements ICompositeType {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path));
-          children.add(new Property("valueSet[x]", "uri|Reference(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet));
+          children.add(new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet));
           children.add(new Property("code", "Coding", "The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, code));
         }
 
@@ -242,10 +340,10 @@ public class DataRequirement extends Type implements ICompositeType {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3433509: /*path*/  return new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path);
-          case -1438410321: /*valueSet[x]*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
-          case -1410174671: /*valueSet*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
-          case -1438416261: /*valueSetUri*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
-          case 295220506: /*valueSetReference*/  return new Property("valueSet[x]", "uri|Reference(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case -1438410321: /*valueSet[x]*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case -1410174671: /*valueSet*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case -1438416261: /*valueSetUri*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case 2048727747: /*valueSetCanonical*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
           case 3059181: /*code*/  return new Property("code", "Coding", "The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, code);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -309,7 +407,7 @@ public class DataRequirement extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return new String[] {"string"};
-        case -1410174671: /*valueSet*/ return new String[] {"uri", "Reference"};
+        case -1410174671: /*valueSet*/ return new String[] {"uri", "canonical"};
         case 3059181: /*code*/ return new String[] {"Coding"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -325,8 +423,8 @@ public class DataRequirement extends Type implements ICompositeType {
           this.valueSet = new UriType();
           return this.valueSet;
         }
-        else if (name.equals("valueSetReference")) {
-          this.valueSet = new Reference();
+        else if (name.equals("valueSetCanonical")) {
+          this.valueSet = new CanonicalType();
           return this.valueSet;
         }
         else if (name.equals("code")) {
@@ -470,39 +568,45 @@ public class DataRequirement extends Type implements ICompositeType {
          * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
         public boolean hasValueDateTimeType() { 
-          return this.value instanceof DateTimeType;
+          return this != null && this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.)
          */
         public Period getValuePeriod() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Period) this.value;
         }
 
         public boolean hasValuePeriod() { 
-          return this.value instanceof Period;
+          return this != null && this.value instanceof Period;
         }
 
         /**
          * @return {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.)
          */
         public Duration getValueDuration() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Duration) this.value;
         }
 
         public boolean hasValueDuration() { 
-          return this.value instanceof Duration;
+          return this != null && this.value instanceof Duration;
         }
 
         public boolean hasValue() { 
@@ -513,6 +617,8 @@ public class DataRequirement extends Type implements ICompositeType {
          * @param value {@link #value} (The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.)
          */
         public DataRequirementDateFilterComponent setValue(Type value) { 
+          if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Duration))
+            throw new Error("Not the right type for DataRequirement.dateFilter.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -653,6 +759,255 @@ public class DataRequirement extends Type implements ICompositeType {
 
   }
 
+    @Block()
+    public static class DataRequirementSortComponent extends Element implements IBaseDatatypeElement {
+        /**
+         * The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.
+         */
+        @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The name of the attribute to perform the sort", formalDefinition="The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant." )
+        protected StringType path;
+
+        /**
+         * The direction of the sort, ascending or descending.
+         */
+        @Child(name = "direction", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="ascending | descending", formalDefinition="The direction of the sort, ascending or descending." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/sort-direction")
+        protected Enumeration<SortDirection> direction;
+
+        private static final long serialVersionUID = -694498683L;
+
+    /**
+     * Constructor
+     */
+      public DataRequirementSortComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public DataRequirementSortComponent(StringType path, Enumeration<SortDirection> direction) {
+        super();
+        this.path = path;
+        this.direction = direction;
+      }
+
+        /**
+         * @return {@link #path} (The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         */
+        public StringType getPathElement() { 
+          if (this.path == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DataRequirementSortComponent.path");
+            else if (Configuration.doAutoCreate())
+              this.path = new StringType(); // bb
+          return this.path;
+        }
+
+        public boolean hasPathElement() { 
+          return this.path != null && !this.path.isEmpty();
+        }
+
+        public boolean hasPath() { 
+          return this.path != null && !this.path.isEmpty();
+        }
+
+        /**
+         * @param value {@link #path} (The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         */
+        public DataRequirementSortComponent setPathElement(StringType value) { 
+          this.path = value;
+          return this;
+        }
+
+        /**
+         * @return The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.
+         */
+        public String getPath() { 
+          return this.path == null ? null : this.path.getValue();
+        }
+
+        /**
+         * @param value The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.
+         */
+        public DataRequirementSortComponent setPath(String value) { 
+            if (this.path == null)
+              this.path = new StringType();
+            this.path.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #direction} (The direction of the sort, ascending or descending.). This is the underlying object with id, value and extensions. The accessor "getDirection" gives direct access to the value
+         */
+        public Enumeration<SortDirection> getDirectionElement() { 
+          if (this.direction == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DataRequirementSortComponent.direction");
+            else if (Configuration.doAutoCreate())
+              this.direction = new Enumeration<SortDirection>(new SortDirectionEnumFactory()); // bb
+          return this.direction;
+        }
+
+        public boolean hasDirectionElement() { 
+          return this.direction != null && !this.direction.isEmpty();
+        }
+
+        public boolean hasDirection() { 
+          return this.direction != null && !this.direction.isEmpty();
+        }
+
+        /**
+         * @param value {@link #direction} (The direction of the sort, ascending or descending.). This is the underlying object with id, value and extensions. The accessor "getDirection" gives direct access to the value
+         */
+        public DataRequirementSortComponent setDirectionElement(Enumeration<SortDirection> value) { 
+          this.direction = value;
+          return this;
+        }
+
+        /**
+         * @return The direction of the sort, ascending or descending.
+         */
+        public SortDirection getDirection() { 
+          return this.direction == null ? null : this.direction.getValue();
+        }
+
+        /**
+         * @param value The direction of the sort, ascending or descending.
+         */
+        public DataRequirementSortComponent setDirection(SortDirection value) { 
+            if (this.direction == null)
+              this.direction = new Enumeration<SortDirection>(new SortDirectionEnumFactory());
+            this.direction.setValue(value);
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("path", "string", "The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.", 0, 1, path));
+          children.add(new Property("direction", "code", "The direction of the sort, ascending or descending.", 0, 1, direction));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3433509: /*path*/  return new Property("path", "string", "The attribute of the sort. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant.", 0, 1, path);
+          case -962590849: /*direction*/  return new Property("direction", "code", "The direction of the sort, ascending or descending.", 0, 1, direction);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case -962590849: /*direction*/ return this.direction == null ? new Base[0] : new Base[] {this.direction}; // Enumeration<SortDirection>
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3433509: // path
+          this.path = castToString(value); // StringType
+          return value;
+        case -962590849: // direction
+          value = new SortDirectionEnumFactory().fromType(castToCode(value));
+          this.direction = (Enumeration) value; // Enumeration<SortDirection>
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("path")) {
+          this.path = castToString(value); // StringType
+        } else if (name.equals("direction")) {
+          value = new SortDirectionEnumFactory().fromType(castToCode(value));
+          this.direction = (Enumeration) value; // Enumeration<SortDirection>
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509:  return getPathElement();
+        case -962590849:  return getDirectionElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3433509: /*path*/ return new String[] {"string"};
+        case -962590849: /*direction*/ return new String[] {"code"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("path")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.path");
+        }
+        else if (name.equals("direction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.direction");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public DataRequirementSortComponent copy() {
+        DataRequirementSortComponent dst = new DataRequirementSortComponent();
+        copyValues(dst);
+        dst.path = path == null ? null : path.copy();
+        dst.direction = direction == null ? null : direction.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof DataRequirementSortComponent))
+          return false;
+        DataRequirementSortComponent o = (DataRequirementSortComponent) other_;
+        return compareDeep(path, o.path, true) && compareDeep(direction, o.direction, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof DataRequirementSortComponent))
+          return false;
+        DataRequirementSortComponent o = (DataRequirementSortComponent) other_;
+        return compareValues(path, o.path, true) && compareValues(direction, o.direction, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, direction);
+      }
+
+  public String fhirType() {
+    return "DataRequirement.sort";
+
+  }
+
+  }
+
     /**
      * The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.
      */
@@ -664,32 +1019,54 @@ public class DataRequirement extends Type implements ICompositeType {
     /**
      * The profile of the required data, specified as the uri of the profile definition.
      */
-    @Child(name = "profile", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "profile", type = {CanonicalType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The profile of the required data", formalDefinition="The profile of the required data, specified as the uri of the profile definition." )
-    protected List<UriType> profile;
+    protected List<CanonicalType> profile;
+
+    /**
+     * The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.
+     */
+    @Child(name = "subject", type = {CodeableConcept.class, Group.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="E.g. Patient, Practitioner, RelatedPerson, Organization, Location, Device", formalDefinition="The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
+    protected Type subject;
 
     /**
      * Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.
      */
-    @Child(name = "mustSupport", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "mustSupport", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Indicates that specific structure elements are referenced by the knowledge module", formalDefinition="Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported." )
     protected List<StringType> mustSupport;
 
     /**
      * Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed.
      */
-    @Child(name = "codeFilter", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "codeFilter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What codes are expected", formalDefinition="Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed." )
     protected List<DataRequirementCodeFilterComponent> codeFilter;
 
     /**
      * Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed.
      */
-    @Child(name = "dateFilter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "dateFilter", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What dates/date ranges are expected", formalDefinition="Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed." )
     protected List<DataRequirementDateFilterComponent> dateFilter;
 
-    private static final long serialVersionUID = 274786645L;
+    /**
+     * Specifies a maximum number of results that are required.
+     */
+    @Child(name = "limit", type = {PositiveIntType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Number of results", formalDefinition="Specifies a maximum number of results that are required." )
+    protected PositiveIntType limit;
+
+    /**
+     * Specifies the order of the results to be returned.
+     */
+    @Child(name = "sort", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Order of the results", formalDefinition="Specifies the order of the results to be returned." )
+    protected List<DataRequirementSortComponent> sort;
+
+    private static final long serialVersionUID = 74042278L;
 
   /**
    * Constructor
@@ -754,16 +1131,16 @@ public class DataRequirement extends Type implements ICompositeType {
     /**
      * @return {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
      */
-    public List<UriType> getProfile() { 
+    public List<CanonicalType> getProfile() { 
       if (this.profile == null)
-        this.profile = new ArrayList<UriType>();
+        this.profile = new ArrayList<CanonicalType>();
       return this.profile;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public DataRequirement setProfile(List<UriType> theProfile) { 
+    public DataRequirement setProfile(List<CanonicalType> theProfile) { 
       this.profile = theProfile;
       return this;
     }
@@ -771,7 +1148,7 @@ public class DataRequirement extends Type implements ICompositeType {
     public boolean hasProfile() { 
       if (this.profile == null)
         return false;
-      for (UriType item : this.profile)
+      for (CanonicalType item : this.profile)
         if (!item.isEmpty())
           return true;
       return false;
@@ -780,10 +1157,10 @@ public class DataRequirement extends Type implements ICompositeType {
     /**
      * @return {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
      */
-    public UriType addProfileElement() {//2 
-      UriType t = new UriType();
+    public CanonicalType addProfileElement() {//2 
+      CanonicalType t = new CanonicalType();
       if (this.profile == null)
-        this.profile = new ArrayList<UriType>();
+        this.profile = new ArrayList<CanonicalType>();
       this.profile.add(t);
       return t;
     }
@@ -792,10 +1169,10 @@ public class DataRequirement extends Type implements ICompositeType {
      * @param value {@link #profile} (The profile of the required data, specified as the uri of the profile definition.)
      */
     public DataRequirement addProfile(String value) { //1
-      UriType t = new UriType();
+      CanonicalType t = new CanonicalType();
       t.setValue(value);
       if (this.profile == null)
-        this.profile = new ArrayList<UriType>();
+        this.profile = new ArrayList<CanonicalType>();
       this.profile.add(t);
       return this;
     }
@@ -806,10 +1183,61 @@ public class DataRequirement extends Type implements ICompositeType {
     public boolean hasProfile(String value) { 
       if (this.profile == null)
         return false;
-      for (UriType v : this.profile)
-        if (v.equals(value)) // uri
+      for (CanonicalType v : this.profile)
+        if (v.getValue().equals(value)) // canonical(StructureDefinition)
           return true;
       return false;
+    }
+
+    /**
+     * @return {@link #subject} (The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.)
+     */
+    public Type getSubject() { 
+      return this.subject;
+    }
+
+    /**
+     * @return {@link #subject} (The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.)
+     */
+    public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.subject;
+    }
+
+    public boolean hasSubjectCodeableConcept() { 
+      return this != null && this.subject instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #subject} (The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.)
+     */
+    public Reference getSubjectReference() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (Reference) this.subject;
+    }
+
+    public boolean hasSubjectReference() { 
+      return this != null && this.subject instanceof Reference;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.)
+     */
+    public DataRequirement setSubject(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for DataRequirement.subject[x]: "+value.fhirType());
+      this.subject = value;
+      return this;
     }
 
     /**
@@ -868,7 +1296,7 @@ public class DataRequirement extends Type implements ICompositeType {
       if (this.mustSupport == null)
         return false;
       for (StringType v : this.mustSupport)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -979,23 +1407,130 @@ public class DataRequirement extends Type implements ICompositeType {
       return getDateFilter().get(0);
     }
 
+    /**
+     * @return {@link #limit} (Specifies a maximum number of results that are required.). This is the underlying object with id, value and extensions. The accessor "getLimit" gives direct access to the value
+     */
+    public PositiveIntType getLimitElement() { 
+      if (this.limit == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DataRequirement.limit");
+        else if (Configuration.doAutoCreate())
+          this.limit = new PositiveIntType(); // bb
+      return this.limit;
+    }
+
+    public boolean hasLimitElement() { 
+      return this.limit != null && !this.limit.isEmpty();
+    }
+
+    public boolean hasLimit() { 
+      return this.limit != null && !this.limit.isEmpty();
+    }
+
+    /**
+     * @param value {@link #limit} (Specifies a maximum number of results that are required.). This is the underlying object with id, value and extensions. The accessor "getLimit" gives direct access to the value
+     */
+    public DataRequirement setLimitElement(PositiveIntType value) { 
+      this.limit = value;
+      return this;
+    }
+
+    /**
+     * @return Specifies a maximum number of results that are required.
+     */
+    public int getLimit() { 
+      return this.limit == null || this.limit.isEmpty() ? 0 : this.limit.getValue();
+    }
+
+    /**
+     * @param value Specifies a maximum number of results that are required.
+     */
+    public DataRequirement setLimit(int value) { 
+        if (this.limit == null)
+          this.limit = new PositiveIntType();
+        this.limit.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #sort} (Specifies the order of the results to be returned.)
+     */
+    public List<DataRequirementSortComponent> getSort() { 
+      if (this.sort == null)
+        this.sort = new ArrayList<DataRequirementSortComponent>();
+      return this.sort;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DataRequirement setSort(List<DataRequirementSortComponent> theSort) { 
+      this.sort = theSort;
+      return this;
+    }
+
+    public boolean hasSort() { 
+      if (this.sort == null)
+        return false;
+      for (DataRequirementSortComponent item : this.sort)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public DataRequirementSortComponent addSort() { //3
+      DataRequirementSortComponent t = new DataRequirementSortComponent();
+      if (this.sort == null)
+        this.sort = new ArrayList<DataRequirementSortComponent>();
+      this.sort.add(t);
+      return t;
+    }
+
+    public DataRequirement addSort(DataRequirementSortComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.sort == null)
+        this.sort = new ArrayList<DataRequirementSortComponent>();
+      this.sort.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #sort}, creating it if it does not already exist
+     */
+    public DataRequirementSortComponent getSortFirstRep() { 
+      if (getSort().isEmpty()) {
+        addSort();
+      }
+      return getSort().get(0);
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, 1, type));
-        children.add(new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
+        children.add(new Property("profile", "canonical(StructureDefinition)", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
+        children.add(new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject));
         children.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
         children.add(new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
         children.add(new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
+        children.add(new Property("limit", "positiveInt", "Specifies a maximum number of results that are required.", 0, 1, limit));
+        children.add(new Property("sort", "", "Specifies the order of the results to be returned.", 0, java.lang.Integer.MAX_VALUE, sort));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case 3575610: /*type*/  return new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, 1, type);
-        case -309425751: /*profile*/  return new Property("profile", "uri", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile);
+        case -309425751: /*profile*/  return new Property("profile", "canonical(StructureDefinition)", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile);
+        case -573640748: /*subject[x]*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
+        case -1257122603: /*subjectCodeableConcept*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
+        case 772938623: /*subjectReference*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
         case -1402857082: /*mustSupport*/  return new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport);
         case -1303674939: /*codeFilter*/  return new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, codeFilter);
         case 149531846: /*dateFilter*/  return new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, dateFilter);
+        case 102976443: /*limit*/  return new Property("limit", "positiveInt", "Specifies a maximum number of results that are required.", 0, 1, limit);
+        case 3536286: /*sort*/  return new Property("sort", "", "Specifies the order of the results to be returned.", 0, java.lang.Integer.MAX_VALUE, sort);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1005,10 +1540,13 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeType
-        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // UriType
+        case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // CanonicalType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Type
         case -1402857082: /*mustSupport*/ return this.mustSupport == null ? new Base[0] : this.mustSupport.toArray(new Base[this.mustSupport.size()]); // StringType
         case -1303674939: /*codeFilter*/ return this.codeFilter == null ? new Base[0] : this.codeFilter.toArray(new Base[this.codeFilter.size()]); // DataRequirementCodeFilterComponent
         case 149531846: /*dateFilter*/ return this.dateFilter == null ? new Base[0] : this.dateFilter.toArray(new Base[this.dateFilter.size()]); // DataRequirementDateFilterComponent
+        case 102976443: /*limit*/ return this.limit == null ? new Base[0] : new Base[] {this.limit}; // PositiveIntType
+        case 3536286: /*sort*/ return this.sort == null ? new Base[0] : this.sort.toArray(new Base[this.sort.size()]); // DataRequirementSortComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1021,7 +1559,10 @@ public class DataRequirement extends Type implements ICompositeType {
           this.type = castToCode(value); // CodeType
           return value;
         case -309425751: // profile
-          this.getProfile().add(castToUri(value)); // UriType
+          this.getProfile().add(castToCanonical(value)); // CanonicalType
+          return value;
+        case -1867885268: // subject
+          this.subject = castToType(value); // Type
           return value;
         case -1402857082: // mustSupport
           this.getMustSupport().add(castToString(value)); // StringType
@@ -1031,6 +1572,12 @@ public class DataRequirement extends Type implements ICompositeType {
           return value;
         case 149531846: // dateFilter
           this.getDateFilter().add((DataRequirementDateFilterComponent) value); // DataRequirementDateFilterComponent
+          return value;
+        case 102976443: // limit
+          this.limit = castToPositiveInt(value); // PositiveIntType
+          return value;
+        case 3536286: // sort
+          this.getSort().add((DataRequirementSortComponent) value); // DataRequirementSortComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1042,13 +1589,19 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("type")) {
           this.type = castToCode(value); // CodeType
         } else if (name.equals("profile")) {
-          this.getProfile().add(castToUri(value));
+          this.getProfile().add(castToCanonical(value));
+        } else if (name.equals("subject[x]")) {
+          this.subject = castToType(value); // Type
         } else if (name.equals("mustSupport")) {
           this.getMustSupport().add(castToString(value));
         } else if (name.equals("codeFilter")) {
           this.getCodeFilter().add((DataRequirementCodeFilterComponent) value);
         } else if (name.equals("dateFilter")) {
           this.getDateFilter().add((DataRequirementDateFilterComponent) value);
+        } else if (name.equals("limit")) {
+          this.limit = castToPositiveInt(value); // PositiveIntType
+        } else if (name.equals("sort")) {
+          this.getSort().add((DataRequirementSortComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1059,9 +1612,13 @@ public class DataRequirement extends Type implements ICompositeType {
         switch (hash) {
         case 3575610:  return getTypeElement();
         case -309425751:  return addProfileElement();
+        case -573640748:  return getSubject(); 
+        case -1867885268:  return getSubject(); 
         case -1402857082:  return addMustSupportElement();
         case -1303674939:  return addCodeFilter(); 
         case 149531846:  return addDateFilter(); 
+        case 102976443:  return getLimitElement();
+        case 3536286:  return addSort(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1071,10 +1628,13 @@ public class DataRequirement extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
-        case -309425751: /*profile*/ return new String[] {"uri"};
+        case -309425751: /*profile*/ return new String[] {"canonical"};
+        case -1867885268: /*subject*/ return new String[] {"CodeableConcept", "Reference"};
         case -1402857082: /*mustSupport*/ return new String[] {"string"};
         case -1303674939: /*codeFilter*/ return new String[] {};
         case 149531846: /*dateFilter*/ return new String[] {};
+        case 102976443: /*limit*/ return new String[] {"positiveInt"};
+        case 3536286: /*sort*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1088,6 +1648,14 @@ public class DataRequirement extends Type implements ICompositeType {
         else if (name.equals("profile")) {
           throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.profile");
         }
+        else if (name.equals("subjectCodeableConcept")) {
+          this.subject = new CodeableConcept();
+          return this.subject;
+        }
+        else if (name.equals("subjectReference")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
         else if (name.equals("mustSupport")) {
           throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.mustSupport");
         }
@@ -1096,6 +1664,12 @@ public class DataRequirement extends Type implements ICompositeType {
         }
         else if (name.equals("dateFilter")) {
           return addDateFilter();
+        }
+        else if (name.equals("limit")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.limit");
+        }
+        else if (name.equals("sort")) {
+          return addSort();
         }
         else
           return super.addChild(name);
@@ -1111,10 +1685,11 @@ public class DataRequirement extends Type implements ICompositeType {
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         if (profile != null) {
-          dst.profile = new ArrayList<UriType>();
-          for (UriType i : profile)
+          dst.profile = new ArrayList<CanonicalType>();
+          for (CanonicalType i : profile)
             dst.profile.add(i.copy());
         };
+        dst.subject = subject == null ? null : subject.copy();
         if (mustSupport != null) {
           dst.mustSupport = new ArrayList<StringType>();
           for (StringType i : mustSupport)
@@ -1130,6 +1705,12 @@ public class DataRequirement extends Type implements ICompositeType {
           for (DataRequirementDateFilterComponent i : dateFilter)
             dst.dateFilter.add(i.copy());
         };
+        dst.limit = limit == null ? null : limit.copy();
+        if (sort != null) {
+          dst.sort = new ArrayList<DataRequirementSortComponent>();
+          for (DataRequirementSortComponent i : sort)
+            dst.sort.add(i.copy());
+        };
         return dst;
       }
 
@@ -1144,8 +1725,10 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other_ instanceof DataRequirement))
           return false;
         DataRequirement o = (DataRequirement) other_;
-        return compareDeep(type, o.type, true) && compareDeep(profile, o.profile, true) && compareDeep(mustSupport, o.mustSupport, true)
-           && compareDeep(codeFilter, o.codeFilter, true) && compareDeep(dateFilter, o.dateFilter, true);
+        return compareDeep(type, o.type, true) && compareDeep(profile, o.profile, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(mustSupport, o.mustSupport, true) && compareDeep(codeFilter, o.codeFilter, true)
+           && compareDeep(dateFilter, o.dateFilter, true) && compareDeep(limit, o.limit, true) && compareDeep(sort, o.sort, true)
+          ;
       }
 
       @Override
@@ -1155,13 +1738,13 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other_ instanceof DataRequirement))
           return false;
         DataRequirement o = (DataRequirement) other_;
-        return compareValues(type, o.type, true) && compareValues(profile, o.profile, true) && compareValues(mustSupport, o.mustSupport, true)
+        return compareValues(type, o.type, true) && compareValues(mustSupport, o.mustSupport, true) && compareValues(limit, o.limit, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, profile, mustSupport
-          , codeFilter, dateFilter);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, profile, subject, mustSupport
+          , codeFilter, dateFilter, limit, sort);
       }
 
 

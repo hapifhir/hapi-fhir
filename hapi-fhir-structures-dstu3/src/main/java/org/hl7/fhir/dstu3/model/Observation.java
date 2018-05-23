@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
@@ -466,7 +467,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #low} (The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).)
          */
-        public ObservationReferenceRangeComponent setLow(SimpleQuantity value) { 
+        public ObservationReferenceRangeComponent setLow(SimpleQuantity value)  { 
           this.low = value;
           return this;
         }
@@ -490,7 +491,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #high} (The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).)
          */
-        public ObservationReferenceRangeComponent setHigh(SimpleQuantity value) { 
+        public ObservationReferenceRangeComponent setHigh(SimpleQuantity value)  { 
           this.high = value;
           return this;
         }
@@ -514,7 +515,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #type} (Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.)
          */
-        public ObservationReferenceRangeComponent setType(CodeableConcept value) { 
+        public ObservationReferenceRangeComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -591,7 +592,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #age} (The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.)
          */
-        public ObservationReferenceRangeComponent setAge(Range value) { 
+        public ObservationReferenceRangeComponent setAge(Range value)  { 
           this.age = value;
           return this;
         }
@@ -645,14 +646,28 @@ public class Observation extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).", 0, java.lang.Integer.MAX_VALUE, low));
-          childrenList.add(new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).", 0, java.lang.Integer.MAX_VALUE, high));
-          childrenList.add(new Property("type", "CodeableConcept", "Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.", 0, java.lang.Integer.MAX_VALUE, appliesTo));
-          childrenList.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, java.lang.Integer.MAX_VALUE, age));
-          childrenList.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of 'normals'.", 0, java.lang.Integer.MAX_VALUE, text));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).", 0, 1, low));
+          children.add(new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).", 0, 1, high));
+          children.add(new Property("type", "CodeableConcept", "Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, 1, type));
+          children.add(new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.", 0, java.lang.Integer.MAX_VALUE, appliesTo));
+          children.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, 1, age));
+          children.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of 'normals'.", 0, 1, text));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 107348: /*low*/  return new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).", 0, 1, low);
+          case 3202466: /*high*/  return new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9).   If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).", 0, 1, high);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, 1, type);
+          case -2089924569: /*appliesTo*/  return new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.", 0, java.lang.Integer.MAX_VALUE, appliesTo);
+          case 96511: /*age*/  return new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, 1, age);
+          case 3556653: /*text*/  return new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of 'normals'.", 0, 1, text);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -787,24 +802,24 @@ public class Observation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ObservationReferenceRangeComponent))
+        if (!(other_ instanceof ObservationReferenceRangeComponent))
           return false;
-        ObservationReferenceRangeComponent o = (ObservationReferenceRangeComponent) other;
+        ObservationReferenceRangeComponent o = (ObservationReferenceRangeComponent) other_;
         return compareDeep(low, o.low, true) && compareDeep(high, o.high, true) && compareDeep(type, o.type, true)
            && compareDeep(appliesTo, o.appliesTo, true) && compareDeep(age, o.age, true) && compareDeep(text, o.text, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ObservationReferenceRangeComponent))
+        if (!(other_ instanceof ObservationReferenceRangeComponent))
           return false;
-        ObservationReferenceRangeComponent o = (ObservationReferenceRangeComponent) other;
+        ObservationReferenceRangeComponent o = (ObservationReferenceRangeComponent) other_;
         return compareValues(text, o.text, true);
       }
 
@@ -927,7 +942,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #target} (A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.)
          */
-        public ObservationRelatedComponent setTarget(Reference value) { 
+        public ObservationRelatedComponent setTarget(Reference value)  { 
           this.target = value;
           return this;
         }
@@ -947,10 +962,20 @@ public class Observation extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "A code specifying the kind of relationship that exists with the target resource.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("target", "Reference(Observation|QuestionnaireResponse|Sequence)", "A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.", 0, java.lang.Integer.MAX_VALUE, target));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "A code specifying the kind of relationship that exists with the target resource.", 0, 1, type));
+          children.add(new Property("target", "Reference(Observation|QuestionnaireResponse|Sequence)", "A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.", 0, 1, target));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "A code specifying the kind of relationship that exists with the target resource.", 0, 1, type);
+          case -880905839: /*target*/  return new Property("target", "Reference(Observation|QuestionnaireResponse|Sequence)", "A reference to the observation or [[[QuestionnaireResponse]]] resource that is related to this observation.", 0, 1, target);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1032,22 +1057,22 @@ public class Observation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ObservationRelatedComponent))
+        if (!(other_ instanceof ObservationRelatedComponent))
           return false;
-        ObservationRelatedComponent o = (ObservationRelatedComponent) other;
+        ObservationRelatedComponent o = (ObservationRelatedComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(target, o.target, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ObservationRelatedComponent))
+        if (!(other_ instanceof ObservationRelatedComponent))
           return false;
-        ObservationRelatedComponent o = (ObservationRelatedComponent) other;
+        ObservationRelatedComponent o = (ObservationRelatedComponent) other_;
         return compareValues(type, o.type, true);
       }
 
@@ -1138,7 +1163,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #code} (Describes what was observed. Sometimes this is called the observation "code".)
          */
-        public ObservationComponentComponent setCode(CodeableConcept value) { 
+        public ObservationComponentComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -1154,130 +1179,150 @@ public class Observation extends DomainResource {
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
         public boolean hasValueCodeableConcept() { 
-          return this.value instanceof CodeableConcept;
+          return this != null && this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public StringType getValueStringType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
         public boolean hasValueStringType() { 
-          return this.value instanceof StringType;
+          return this != null && this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public Range getValueRange() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
         }
 
         public boolean hasValueRange() { 
-          return this.value instanceof Range;
+          return this != null && this.value instanceof Range;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public Ratio getValueRatio() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Ratio))
             throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Ratio) this.value;
         }
 
         public boolean hasValueRatio() { 
-          return this.value instanceof Ratio;
+          return this != null && this.value instanceof Ratio;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public SampledData getValueSampledData() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof SampledData))
             throw new FHIRException("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
           return (SampledData) this.value;
         }
 
         public boolean hasValueSampledData() { 
-          return this.value instanceof SampledData;
+          return this != null && this.value instanceof SampledData;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public Attachment getValueAttachment() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
         public boolean hasValueAttachment() { 
-          return this.value instanceof Attachment;
+          return this != null && this.value instanceof Attachment;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public TimeType getValueTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
         }
 
         public boolean hasValueTimeType() { 
-          return this.value instanceof TimeType;
+          return this != null && this.value instanceof TimeType;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
         public boolean hasValueDateTimeType() { 
-          return this.value instanceof DateTimeType;
+          return this != null && this.value instanceof DateTimeType;
         }
 
         /**
          * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
         public Period getValuePeriod() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Period) this.value;
         }
 
         public boolean hasValuePeriod() { 
-          return this.value instanceof Period;
+          return this != null && this.value instanceof Period;
         }
 
         public boolean hasValue() { 
@@ -1287,7 +1332,9 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
          */
-        public ObservationComponentComponent setValue(Type value) { 
+        public ObservationComponentComponent setValue(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof Quantity || value instanceof CodeableConcept || value instanceof StringType || value instanceof Range || value instanceof Ratio || value instanceof SampledData || value instanceof Attachment || value instanceof TimeType || value instanceof DateTimeType || value instanceof Period))
+            throw new FHIRFormatError("Not the right type for Observation.component.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -1311,7 +1358,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #dataAbsentReason} (Provides a reason why the expected value in the element Observation.value[x] is missing.)
          */
-        public ObservationComponentComponent setDataAbsentReason(CodeableConcept value) { 
+        public ObservationComponentComponent setDataAbsentReason(CodeableConcept value)  { 
           this.dataAbsentReason = value;
           return this;
         }
@@ -1335,7 +1382,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #interpretation} (The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.)
          */
-        public ObservationComponentComponent setInterpretation(CodeableConcept value) { 
+        public ObservationComponentComponent setInterpretation(CodeableConcept value)  { 
           this.interpretation = value;
           return this;
         }
@@ -1393,13 +1440,37 @@ public class Observation extends DomainResource {
           return getReferenceRange().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"code\".", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
-          childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, java.lang.Integer.MAX_VALUE, interpretation));
-          childrenList.add(new Property("referenceRange", "@Observation.referenceRange", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"code\".", 0, 1, code));
+          children.add(new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value));
+          children.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, 1, dataAbsentReason));
+          children.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, 1, interpretation));
+          children.add(new Property("referenceRange", "@Observation.referenceRange", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"code\".", 0, 1, code);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case -2029823716: /*valueQuantity*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case 2030761548: /*valueRange*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case 2030767386: /*valueRatio*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case -962229101: /*valueSampledData*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case -475566732: /*valueAttachment*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case -765708322: /*valueTime*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case -1524344174: /*valuePeriod*/  return new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+          case 1034315687: /*dataAbsentReason*/  return new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, 1, dataAbsentReason);
+          case -297950712: /*interpretation*/  return new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, 1, interpretation);
+          case -1912545102: /*referenceRange*/  return new Property("referenceRange", "@Observation.referenceRange", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1559,24 +1630,24 @@ public class Observation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ObservationComponentComponent))
+        if (!(other_ instanceof ObservationComponentComponent))
           return false;
-        ObservationComponentComponent o = (ObservationComponentComponent) other;
+        ObservationComponentComponent o = (ObservationComponentComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
            && compareDeep(interpretation, o.interpretation, true) && compareDeep(referenceRange, o.referenceRange, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ObservationComponentComponent))
+        if (!(other_ instanceof ObservationComponentComponent))
           return false;
-        ObservationComponentComponent o = (ObservationComponentComponent) other;
+        ObservationComponentComponent o = (ObservationComponentComponent) other_;
         return true;
       }
 
@@ -2027,7 +2098,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #code} (Describes what was observed. Sometimes this is called the observation "name".)
      */
-    public Observation setCode(CodeableConcept value) { 
+    public Observation setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -2051,7 +2122,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #subject} (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor,  other observer (for example a relative or EMT), or any observation made about the subject.)
      */
-    public Observation setSubject(Reference value) { 
+    public Observation setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -2090,7 +2161,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.)
      */
-    public Observation setContext(Reference value) { 
+    public Observation setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -2121,26 +2192,30 @@ public class Observation extends DomainResource {
      * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
     public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
     }
 
     public boolean hasEffectiveDateTimeType() { 
-      return this.effective instanceof DateTimeType;
+      return this != null && this.effective instanceof DateTimeType;
     }
 
     /**
      * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
     public Period getEffectivePeriod() throws FHIRException { 
+      if (this.effective == null)
+        return null;
       if (!(this.effective instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
     }
 
     public boolean hasEffectivePeriod() { 
-      return this.effective instanceof Period;
+      return this != null && this.effective instanceof Period;
     }
 
     public boolean hasEffective() { 
@@ -2150,7 +2225,9 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Observation setEffective(Type value) { 
+    public Observation setEffective(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new FHIRFormatError("Not the right type for Observation.effective[x]: "+value.fhirType());
       this.effective = value;
       return this;
     }
@@ -2278,143 +2355,165 @@ public class Observation extends DomainResource {
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public Quantity getValueQuantity() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Quantity))
         throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Quantity) this.value;
     }
 
     public boolean hasValueQuantity() { 
-      return this.value instanceof Quantity;
+      return this != null && this.value instanceof Quantity;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
       return (CodeableConcept) this.value;
     }
 
     public boolean hasValueCodeableConcept() { 
-      return this.value instanceof CodeableConcept;
+      return this != null && this.value instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public StringType getValueStringType() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (StringType) this.value;
     }
 
     public boolean hasValueStringType() { 
-      return this.value instanceof StringType;
+      return this != null && this.value instanceof StringType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public BooleanType getValueBooleanType() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (BooleanType) this.value;
     }
 
     public boolean hasValueBooleanType() { 
-      return this.value instanceof BooleanType;
+      return this != null && this.value instanceof BooleanType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public Range getValueRange() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Range) this.value;
     }
 
     public boolean hasValueRange() { 
-      return this.value instanceof Range;
+      return this != null && this.value instanceof Range;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public Ratio getValueRatio() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Ratio))
         throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Ratio) this.value;
     }
 
     public boolean hasValueRatio() { 
-      return this.value instanceof Ratio;
+      return this != null && this.value instanceof Ratio;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public SampledData getValueSampledData() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof SampledData))
         throw new FHIRException("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
       return (SampledData) this.value;
     }
 
     public boolean hasValueSampledData() { 
-      return this.value instanceof SampledData;
+      return this != null && this.value instanceof SampledData;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public Attachment getValueAttachment() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Attachment))
         throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Attachment) this.value;
     }
 
     public boolean hasValueAttachment() { 
-      return this.value instanceof Attachment;
+      return this != null && this.value instanceof Attachment;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public TimeType getValueTimeType() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof TimeType))
         throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (TimeType) this.value;
     }
 
     public boolean hasValueTimeType() { 
-      return this.value instanceof TimeType;
+      return this != null && this.value instanceof TimeType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public DateTimeType getValueDateTimeType() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (DateTimeType) this.value;
     }
 
     public boolean hasValueDateTimeType() { 
-      return this.value instanceof DateTimeType;
+      return this != null && this.value instanceof DateTimeType;
     }
 
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
     public Period getValuePeriod() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Period) this.value;
     }
 
     public boolean hasValuePeriod() { 
-      return this.value instanceof Period;
+      return this != null && this.value instanceof Period;
     }
 
     public boolean hasValue() { 
@@ -2424,7 +2523,9 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Observation setValue(Type value) { 
+    public Observation setValue(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Quantity || value instanceof CodeableConcept || value instanceof StringType || value instanceof BooleanType || value instanceof Range || value instanceof Ratio || value instanceof SampledData || value instanceof Attachment || value instanceof TimeType || value instanceof DateTimeType || value instanceof Period))
+        throw new FHIRFormatError("Not the right type for Observation.value[x]: "+value.fhirType());
       this.value = value;
       return this;
     }
@@ -2448,7 +2549,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #dataAbsentReason} (Provides a reason why the expected value in the element Observation.value[x] is missing.)
      */
-    public Observation setDataAbsentReason(CodeableConcept value) { 
+    public Observation setDataAbsentReason(CodeableConcept value)  { 
       this.dataAbsentReason = value;
       return this;
     }
@@ -2472,7 +2573,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #interpretation} (The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.)
      */
-    public Observation setInterpretation(CodeableConcept value) { 
+    public Observation setInterpretation(CodeableConcept value)  { 
       this.interpretation = value;
       return this;
     }
@@ -2545,7 +2646,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #bodySite} (Indicates the site on the subject's body where the observation was made (i.e. the target site).)
      */
-    public Observation setBodySite(CodeableConcept value) { 
+    public Observation setBodySite(CodeableConcept value)  { 
       this.bodySite = value;
       return this;
     }
@@ -2569,7 +2670,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #method} (Indicates the mechanism used to perform the observation.)
      */
-    public Observation setMethod(CodeableConcept value) { 
+    public Observation setMethod(CodeableConcept value)  { 
       this.method = value;
       return this;
     }
@@ -2593,7 +2694,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #specimen} (The specimen that was used when this observation was made.)
      */
-    public Observation setSpecimen(Reference value) { 
+    public Observation setSpecimen(Reference value)  { 
       this.specimen = value;
       return this;
     }
@@ -2637,7 +2738,7 @@ public class Observation extends DomainResource {
     /**
      * @param value {@link #device} (The device used to generate the observation data.)
      */
-    public Observation setDevice(Reference value) { 
+    public Observation setDevice(Reference value)  { 
       this.device = value;
       return this;
     }
@@ -2816,29 +2917,73 @@ public class Observation extends DomainResource {
       return getComponent().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "A unique identifier assigned to this observation.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(CarePlan|DeviceRequest|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("status", "code", "The status of the result value.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the general type of observation being made.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"name\".", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor,  other observer (for example a relative or EMT), or any observation made about the subject.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, effective));
-        childrenList.add(new Property("issued", "instant", "The date and time this observation was made available to providers, typically after the results have been reviewed and verified.", 0, java.lang.Integer.MAX_VALUE, issued));
-        childrenList.add(new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Who was responsible for asserting the observed value as \"true\".", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
-        childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, java.lang.Integer.MAX_VALUE, interpretation));
-        childrenList.add(new Property("comment", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, java.lang.Integer.MAX_VALUE, comment));
-        childrenList.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
-        childrenList.add(new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, java.lang.Integer.MAX_VALUE, method));
-        childrenList.add(new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, java.lang.Integer.MAX_VALUE, specimen));
-        childrenList.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, java.lang.Integer.MAX_VALUE, device));
-        childrenList.add(new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
-        childrenList.add(new Property("related", "", "A  reference to another resource (usually another Observation) whose relationship is defined by the relationship type code.", 0, java.lang.Integer.MAX_VALUE, related));
-        childrenList.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "A unique identifier assigned to this observation.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("basedOn", "Reference(CarePlan|DeviceRequest|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("status", "code", "The status of the result value.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "A code that classifies the general type of observation being made.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"name\".", 0, 1, code));
+        children.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor,  other observer (for example a relative or EMT), or any observation made about the subject.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.", 0, 1, context));
+        children.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective));
+        children.add(new Property("issued", "instant", "The date and time this observation was made available to providers, typically after the results have been reviewed and verified.", 0, 1, issued));
+        children.add(new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Who was responsible for asserting the observed value as \"true\".", 0, java.lang.Integer.MAX_VALUE, performer));
+        children.add(new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value));
+        children.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, 1, dataAbsentReason));
+        children.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, 1, interpretation));
+        children.add(new Property("comment", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, 1, comment));
+        children.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, 1, bodySite));
+        children.add(new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, 1, method));
+        children.add(new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, 1, specimen));
+        children.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, 1, device));
+        children.add(new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
+        children.add(new Property("related", "", "A  reference to another resource (usually another Observation) whose relationship is defined by the relationship type code.", 0, java.lang.Integer.MAX_VALUE, related));
+        children.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to this observation.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|DeviceRequest|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ProcedureRequest|ReferralRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the result value.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the general type of observation being made.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation \"name\".", 0, 1, code);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Location)", "The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor,  other observer (for example a relative or EMT), or any observation made about the subject.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) during which this observation is made.", 0, 1, context);
+        case 247104889: /*effective[x]*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -1468651097: /*effective*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -275306910: /*effectiveDateTime*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -403934648: /*effectivePeriod*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
+        case -1179159893: /*issued*/  return new Property("issued", "instant", "The date and time this observation was made available to providers, typically after the results have been reviewed and verified.", 0, 1, issued);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Who was responsible for asserting the observed value as \"true\".", 0, java.lang.Integer.MAX_VALUE, performer);
+        case -1410166417: /*value[x]*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 111972721: /*value*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case -2029823716: /*valueQuantity*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case -1424603934: /*valueString*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 733421943: /*valueBoolean*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 2030761548: /*valueRange*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 2030767386: /*valueRatio*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case -962229101: /*valueSampledData*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case -475566732: /*valueAttachment*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case -765708322: /*valueTime*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 1047929900: /*valueDateTime*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case -1524344174: /*valuePeriod*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
+        case 1034315687: /*dataAbsentReason*/  return new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, 1, dataAbsentReason);
+        case -297950712: /*interpretation*/  return new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.  Intended as a simple compact code often placed adjacent to the result value in reports and flow sheets to signal the meaning/normalcy status of the result. Otherwise known as abnormal flag.", 0, 1, interpretation);
+        case 950398559: /*comment*/  return new Property("comment", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, 1, comment);
+        case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, 1, bodySite);
+        case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, 1, method);
+        case -2132868344: /*specimen*/  return new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, 1, specimen);
+        case -1335157162: /*device*/  return new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, 1, device);
+        case -1912545102: /*referenceRange*/  return new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange);
+        case 1090493483: /*related*/  return new Property("related", "", "A  reference to another resource (usually another Observation) whose relationship is defined by the relationship type code.", 0, java.lang.Integer.MAX_VALUE, related);
+        case -1399907075: /*component*/  return new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3241,12 +3386,12 @@ public class Observation extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Observation))
+        if (!(other_ instanceof Observation))
           return false;
-        Observation o = (Observation) other;
+        Observation o = (Observation) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(status, o.status, true)
            && compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true)
@@ -3258,12 +3403,12 @@ public class Observation extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Observation))
+        if (!(other_ instanceof Observation))
           return false;
-        Observation o = (Observation) other;
+        Observation o = (Observation) other_;
         return compareValues(status, o.status, true) && compareValues(issued, o.issued, true) && compareValues(comment, o.comment, true)
           ;
       }

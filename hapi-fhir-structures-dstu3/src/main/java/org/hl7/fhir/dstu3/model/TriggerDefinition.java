@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A description of a triggering event.
  */
@@ -370,52 +371,60 @@ public class TriggerDefinition extends Type implements ICompositeType {
      * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
      */
     public Timing getEventTimingTiming() throws FHIRException { 
+      if (this.eventTiming == null)
+        return null;
       if (!(this.eventTiming instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
       return (Timing) this.eventTiming;
     }
 
     public boolean hasEventTimingTiming() { 
-      return this.eventTiming instanceof Timing;
+      return this != null && this.eventTiming instanceof Timing;
     }
 
     /**
      * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
      */
     public Reference getEventTimingReference() throws FHIRException { 
+      if (this.eventTiming == null)
+        return null;
       if (!(this.eventTiming instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
       return (Reference) this.eventTiming;
     }
 
     public boolean hasEventTimingReference() { 
-      return this.eventTiming instanceof Reference;
+      return this != null && this.eventTiming instanceof Reference;
     }
 
     /**
      * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
      */
     public DateType getEventTimingDateType() throws FHIRException { 
+      if (this.eventTiming == null)
+        return null;
       if (!(this.eventTiming instanceof DateType))
         throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
       return (DateType) this.eventTiming;
     }
 
     public boolean hasEventTimingDateType() { 
-      return this.eventTiming instanceof DateType;
+      return this != null && this.eventTiming instanceof DateType;
     }
 
     /**
      * @return {@link #eventTiming} (The timing of the event (if this is a period trigger).)
      */
     public DateTimeType getEventTimingDateTimeType() throws FHIRException { 
+      if (this.eventTiming == null)
+        return null;
       if (!(this.eventTiming instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.eventTiming.getClass().getName()+" was encountered");
       return (DateTimeType) this.eventTiming;
     }
 
     public boolean hasEventTimingDateTimeType() { 
-      return this.eventTiming instanceof DateTimeType;
+      return this != null && this.eventTiming instanceof DateTimeType;
     }
 
     public boolean hasEventTiming() { 
@@ -425,7 +434,9 @@ public class TriggerDefinition extends Type implements ICompositeType {
     /**
      * @param value {@link #eventTiming} (The timing of the event (if this is a period trigger).)
      */
-    public TriggerDefinition setEventTiming(Type value) { 
+    public TriggerDefinition setEventTiming(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Timing || value instanceof Reference || value instanceof DateType || value instanceof DateTimeType))
+        throw new FHIRFormatError("Not the right type for TriggerDefinition.eventTiming[x]: "+value.fhirType());
       this.eventTiming = value;
       return this;
     }
@@ -449,17 +460,34 @@ public class TriggerDefinition extends Type implements ICompositeType {
     /**
      * @param value {@link #eventData} (The triggering data of the event (if this is a data trigger).)
      */
-    public TriggerDefinition setEventData(DataRequirement value) { 
+    public TriggerDefinition setEventData(DataRequirement value)  { 
       this.eventData = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("type", "code", "The type of triggering event.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("eventName", "string", "The name of the event (if this is a named-event trigger).", 0, java.lang.Integer.MAX_VALUE, eventName));
-        childrenList.add(new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, java.lang.Integer.MAX_VALUE, eventTiming));
-        childrenList.add(new Property("eventData", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, java.lang.Integer.MAX_VALUE, eventData));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("type", "code", "The type of triggering event.", 0, 1, type));
+        children.add(new Property("eventName", "string", "The name of the event (if this is a named-event trigger).", 0, 1, eventName));
+        children.add(new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming));
+        children.add(new Property("eventData", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, eventData));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3575610: /*type*/  return new Property("type", "code", "The type of triggering event.", 0, 1, type);
+        case 31228997: /*eventName*/  return new Property("eventName", "string", "The name of the event (if this is a named-event trigger).", 0, 1, eventName);
+        case 1120539260: /*eventTiming[x]*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
+        case 125465476: /*eventTiming*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
+        case 1285594350: /*eventTimingTiming*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
+        case -171794393: /*eventTimingReference*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
+        case 376272210: /*eventTimingDate*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
+        case -1923726529: /*eventTimingDateTime*/  return new Property("eventTiming[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a period trigger).", 0, 1, eventTiming);
+        case 30931300: /*eventData*/  return new Property("eventData", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, eventData);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -588,23 +616,23 @@ public class TriggerDefinition extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TriggerDefinition))
+        if (!(other_ instanceof TriggerDefinition))
           return false;
-        TriggerDefinition o = (TriggerDefinition) other;
+        TriggerDefinition o = (TriggerDefinition) other_;
         return compareDeep(type, o.type, true) && compareDeep(eventName, o.eventName, true) && compareDeep(eventTiming, o.eventTiming, true)
            && compareDeep(eventData, o.eventData, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TriggerDefinition))
+        if (!(other_ instanceof TriggerDefinition))
           return false;
-        TriggerDefinition o = (TriggerDefinition) other;
+        TriggerDefinition o = (TriggerDefinition) other_;
         return compareValues(type, o.type, true) && compareValues(eventName, o.eventName, true);
       }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class Slot extends DomainResource {
          */
         FREE, 
         /**
-         * Indicates that the time interval is busy and that the interval can not be scheduled.
+         * Indicates that the time interval is busy and that the interval cannot be scheduled.
          */
         BUSYUNAVAILABLE, 
         /**
@@ -115,7 +115,7 @@ public class Slot extends DomainResource {
           switch (this) {
             case BUSY: return "Indicates that the time interval is busy because one  or more events have been scheduled for that interval.";
             case FREE: return "Indicates that the time interval is free for scheduling.";
-            case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval can not be scheduled.";
+            case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval cannot be scheduled.";
             case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
@@ -196,12 +196,12 @@ public class Slot extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * A broad categorisation of the service that is to be performed during this appointment.
+     * A broad categorization of the service that is to be performed during this appointment.
      */
-    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="A broad categorization of the service that is to be performed during this appointment", formalDefinition="A broad categorization of the service that is to be performed during this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
-    protected CodeableConcept serviceCategory;
+    protected List<CodeableConcept> serviceCategory;
 
     /**
      * The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.
@@ -275,7 +275,7 @@ public class Slot extends DomainResource {
     @Description(shortDefinition="Comments on the slot to describe any extended information. Such as custom constraints on the slot", formalDefinition="Comments on the slot to describe any extended information. Such as custom constraints on the slot." )
     protected StringType comment;
 
-    private static final long serialVersionUID = 2085594970L;
+    private static final long serialVersionUID = 683481856L;
 
   /**
    * Constructor
@@ -349,27 +349,56 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
+     * @return {@link #serviceCategory} (A broad categorization of the service that is to be performed during this appointment.)
      */
-    public CodeableConcept getServiceCategory() { 
+    public List<CodeableConcept> getServiceCategory() { 
       if (this.serviceCategory == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Slot.serviceCategory");
-        else if (Configuration.doAutoCreate())
-          this.serviceCategory = new CodeableConcept(); // cc
+        this.serviceCategory = new ArrayList<CodeableConcept>();
       return this.serviceCategory;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Slot setServiceCategory(List<CodeableConcept> theServiceCategory) { 
+      this.serviceCategory = theServiceCategory;
+      return this;
+    }
+
     public boolean hasServiceCategory() { 
-      return this.serviceCategory != null && !this.serviceCategory.isEmpty();
+      if (this.serviceCategory == null)
+        return false;
+      for (CodeableConcept item : this.serviceCategory)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addServiceCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.serviceCategory == null)
+        this.serviceCategory = new ArrayList<CodeableConcept>();
+      this.serviceCategory.add(t);
+      return t;
+    }
+
+    public Slot addServiceCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.serviceCategory == null)
+        this.serviceCategory = new ArrayList<CodeableConcept>();
+      this.serviceCategory.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
+     * @return The first repetition of repeating field {@link #serviceCategory}, creating it if it does not already exist
      */
-    public Slot setServiceCategory(CodeableConcept value) { 
-      this.serviceCategory = value;
-      return this;
+    public CodeableConcept getServiceCategoryFirstRep() { 
+      if (getServiceCategory().isEmpty()) {
+        addServiceCategory();
+      }
+      return getServiceCategory().get(0);
     }
 
     /**
@@ -778,7 +807,7 @@ public class Slot extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, 1, serviceCategory));
+        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         children.add(new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
         children.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, 1, appointmentType));
@@ -794,7 +823,7 @@ public class Slot extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, 1, serviceCategory);
+        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
         case -1596426375: /*appointmentType*/  return new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, 1, appointmentType);
@@ -813,7 +842,7 @@ public class Slot extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : new Base[] {this.serviceCategory}; // CodeableConcept
+        case 1281188563: /*serviceCategory*/ return this.serviceCategory == null ? new Base[0] : this.serviceCategory.toArray(new Base[this.serviceCategory.size()]); // CodeableConcept
         case -1928370289: /*serviceType*/ return this.serviceType == null ? new Base[0] : this.serviceType.toArray(new Base[this.serviceType.size()]); // CodeableConcept
         case -1694759682: /*specialty*/ return this.specialty == null ? new Base[0] : this.specialty.toArray(new Base[this.specialty.size()]); // CodeableConcept
         case -1596426375: /*appointmentType*/ return this.appointmentType == null ? new Base[0] : new Base[] {this.appointmentType}; // CodeableConcept
@@ -835,7 +864,7 @@ public class Slot extends DomainResource {
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case 1281188563: // serviceCategory
-          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          this.getServiceCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1928370289: // serviceType
           this.getServiceType().add(castToCodeableConcept(value)); // CodeableConcept
@@ -875,7 +904,7 @@ public class Slot extends DomainResource {
         if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("serviceCategory")) {
-          this.serviceCategory = castToCodeableConcept(value); // CodeableConcept
+          this.getServiceCategory().add(castToCodeableConcept(value));
         } else if (name.equals("serviceType")) {
           this.getServiceType().add(castToCodeableConcept(value));
         } else if (name.equals("specialty")) {
@@ -904,7 +933,7 @@ public class Slot extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
-        case 1281188563:  return getServiceCategory(); 
+        case 1281188563:  return addServiceCategory(); 
         case -1928370289:  return addServiceType(); 
         case -1694759682:  return addSpecialty(); 
         case -1596426375:  return getAppointmentType(); 
@@ -944,8 +973,7 @@ public class Slot extends DomainResource {
           return addIdentifier();
         }
         else if (name.equals("serviceCategory")) {
-          this.serviceCategory = new CodeableConcept();
-          return this.serviceCategory;
+          return addServiceCategory();
         }
         else if (name.equals("serviceType")) {
           return addServiceType();
@@ -993,7 +1021,11 @@ public class Slot extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
+        if (serviceCategory != null) {
+          dst.serviceCategory = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : serviceCategory)
+            dst.serviceCategory.add(i.copy());
+        };
         if (serviceType != null) {
           dst.serviceType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceType)

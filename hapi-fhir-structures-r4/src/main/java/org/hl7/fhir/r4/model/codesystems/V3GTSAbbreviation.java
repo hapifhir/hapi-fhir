@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -40,6 +40,10 @@ public enum V3GTSAbbreviation {
          * Every morning at institution specified times.
          */
         AM, 
+        /**
+         * At bedtime (institution specified time).
+         */
+        BED, 
         /**
          * Two times a day at institution specified time
          */
@@ -157,9 +161,25 @@ public enum V3GTSAbbreviation {
          */
         JHNUSVET, 
         /**
+         * Monthly at institution specified time.
+         */
+        MO, 
+        /**
          * Every afternoon at institution specified times.
          */
         PM, 
+        /**
+         * Every hour at institution specified times.
+         */
+        Q1H, 
+        /**
+         * Every 2 hours at institution specified times.
+         */
+        Q2H, 
+        /**
+         * Every 3 hours at institution specified times.
+         */
+        Q3H, 
         /**
          * Every 4 hours at institution specified time
          */
@@ -168,6 +188,10 @@ public enum V3GTSAbbreviation {
          * Every 6 hours at institution specified time
          */
         Q6H, 
+        /**
+         * Every 8 hours at institution specified times.
+         */
+        Q8H, 
         /**
          * Every day at institution specified times.
          */
@@ -185,6 +209,10 @@ public enum V3GTSAbbreviation {
          */
         TID, 
         /**
+         * Weekly at institution specified time.
+         */
+        WK, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -193,6 +221,8 @@ public enum V3GTSAbbreviation {
                 return null;
         if ("AM".equals(codeString))
           return AM;
+        if ("BED".equals(codeString))
+          return BED;
         if ("BID".equals(codeString))
           return BID;
         if ("JB".equals(codeString))
@@ -251,12 +281,22 @@ public enum V3GTSAbbreviation {
           return JHNUSTKS5;
         if ("JHNUSVET".equals(codeString))
           return JHNUSVET;
+        if ("MO".equals(codeString))
+          return MO;
         if ("PM".equals(codeString))
           return PM;
+        if ("Q1H".equals(codeString))
+          return Q1H;
+        if ("Q2H".equals(codeString))
+          return Q2H;
+        if ("Q3H".equals(codeString))
+          return Q3H;
         if ("Q4H".equals(codeString))
           return Q4H;
         if ("Q6H".equals(codeString))
           return Q6H;
+        if ("Q8H".equals(codeString))
+          return Q8H;
         if ("QD".equals(codeString))
           return QD;
         if ("QID".equals(codeString))
@@ -265,11 +305,14 @@ public enum V3GTSAbbreviation {
           return QOD;
         if ("TID".equals(codeString))
           return TID;
+        if ("WK".equals(codeString))
+          return WK;
         throw new FHIRException("Unknown V3GTSAbbreviation code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case AM: return "AM";
+            case BED: return "BED";
             case BID: return "BID";
             case JB: return "JB";
             case JE: return "JE";
@@ -299,13 +342,19 @@ public enum V3GTSAbbreviation {
             case JHNUSTKS: return "JHNUSTKS";
             case JHNUSTKS5: return "JHNUSTKS5";
             case JHNUSVET: return "JHNUSVET";
+            case MO: return "MO";
             case PM: return "PM";
+            case Q1H: return "Q1H";
+            case Q2H: return "Q2H";
+            case Q3H: return "Q3H";
             case Q4H: return "Q4H";
             case Q6H: return "Q6H";
+            case Q8H: return "Q8H";
             case QD: return "QD";
             case QID: return "QID";
             case QOD: return "QOD";
             case TID: return "TID";
+            case WK: return "WK";
             default: return "?";
           }
         }
@@ -315,6 +364,7 @@ public enum V3GTSAbbreviation {
         public String getDefinition() {
           switch (this) {
             case AM: return "Every morning at institution specified times.";
+            case BED: return "At bedtime (institution specified time).";
             case BID: return "Two times a day at institution specified time";
             case JB: return "Regular business days (Monday to Friday excluding holidays)";
             case JE: return "Regular weekends (Saturday and Sunday excluding holidays)";
@@ -344,19 +394,26 @@ public enum V3GTSAbbreviation {
             case JHNUSTKS: return "Thanksgiving Day, the fourth Thursday in November.";
             case JHNUSTKS5: return "Friday after Thanksgiving.";
             case JHNUSVET: return "Veteran's Day, November 11.";
+            case MO: return "Monthly at institution specified time.";
             case PM: return "Every afternoon at institution specified times.";
+            case Q1H: return "Every hour at institution specified times.";
+            case Q2H: return "Every 2 hours at institution specified times.";
+            case Q3H: return "Every 3 hours at institution specified times.";
             case Q4H: return "Every 4 hours at institution specified time";
             case Q6H: return "Every 6 hours at institution specified time";
+            case Q8H: return "Every 8 hours at institution specified times.";
             case QD: return "Every day at institution specified times.";
             case QID: return "Four times a day at institution specified time";
             case QOD: return "Every other day at institution specified times.";
             case TID: return "Three times a day at institution specified time";
+            case WK: return "Weekly at institution specified time.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case AM: return "AM";
+            case BED: return "at bedtime";
             case BID: return "BID";
             case JB: return "JB";
             case JE: return "JE";
@@ -386,13 +443,19 @@ public enum V3GTSAbbreviation {
             case JHNUSTKS: return "JHNUSTKS";
             case JHNUSTKS5: return "JHNUSTKS5";
             case JHNUSVET: return "JHNUSVET";
+            case MO: return "monthly";
             case PM: return "PM";
+            case Q1H: return "every hour";
+            case Q2H: return "every 2 hours";
+            case Q3H: return "every 3 hours";
             case Q4H: return "Q4H";
             case Q6H: return "Q6H";
+            case Q8H: return "every 8 hours";
             case QD: return "QD";
             case QID: return "QID";
             case QOD: return "QOD";
             case TID: return "TID";
+            case WK: return "weekly";
             default: return "?";
           }
     }

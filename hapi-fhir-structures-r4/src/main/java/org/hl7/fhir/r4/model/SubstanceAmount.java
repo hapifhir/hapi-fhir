@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.
  */
 @DatatypeDef(name="SubstanceAmount")
-public class SubstanceAmount extends Type implements ICompositeType {
+public class SubstanceAmount extends BackboneElement implements ICompositeType {
 
     @Block()
     public static class SubstanceAmountReferenceRangeComponent extends Element implements IBaseDatatypeElement {
@@ -292,39 +292,45 @@ public class SubstanceAmount extends Type implements ICompositeType {
      * @return {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.)
      */
     public Quantity getAmountQuantity() throws FHIRException { 
+      if (this.amount == null)
+        return null;
       if (!(this.amount instanceof Quantity))
         throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
       return (Quantity) this.amount;
     }
 
     public boolean hasAmountQuantity() { 
-      return this.amount instanceof Quantity;
+      return this != null && this.amount instanceof Quantity;
     }
 
     /**
      * @return {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.)
      */
     public Range getAmountRange() throws FHIRException { 
+      if (this.amount == null)
+        return null;
       if (!(this.amount instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
       return (Range) this.amount;
     }
 
     public boolean hasAmountRange() { 
-      return this.amount instanceof Range;
+      return this != null && this.amount instanceof Range;
     }
 
     /**
      * @return {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.)
      */
     public StringType getAmountStringType() throws FHIRException { 
+      if (this.amount == null)
+        return null;
       if (!(this.amount instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
       return (StringType) this.amount;
     }
 
     public boolean hasAmountStringType() { 
-      return this.amount instanceof StringType;
+      return this != null && this.amount instanceof StringType;
     }
 
     public boolean hasAmount() { 
@@ -335,6 +341,8 @@ public class SubstanceAmount extends Type implements ICompositeType {
      * @param value {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.)
      */
     public SubstanceAmount setAmount(Type value) { 
+      if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof StringType))
+        throw new Error("Not the right type for SubstanceAmount.amount[x]: "+value.fhirType());
       this.amount = value;
       return this;
     }

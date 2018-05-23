@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -2071,10 +2071,10 @@ public class Bundle extends Resource implements IBaseBundle {
         protected UriType location;
 
         /**
-         * The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
+         * The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         @Child(name = "etag", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The etag for the resource (if relevant)", formalDefinition="The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency))." )
+        @Description(shortDefinition="The Etag for the resource (if relevant)", formalDefinition="The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency))." )
         protected StringType etag;
 
         /**
@@ -2203,7 +2203,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
+         * @return {@link #etag} (The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
         public StringType getEtagElement() { 
           if (this.etag == null)
@@ -2223,7 +2223,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
+         * @param value {@link #etag} (The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
         public BundleEntryResponseComponent setEtagElement(StringType value) { 
           this.etag = value;
@@ -2231,14 +2231,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
+         * @return The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         public String getEtag() { 
           return this.etag == null ? null : this.etag.getValue();
         }
 
         /**
-         * @param value The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
+         * @param value The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         public BundleEntryResponseComponent setEtag(String value) { 
           if (Utilities.noString(value))
@@ -2323,7 +2323,7 @@ public class Bundle extends Resource implements IBaseBundle {
           super.listChildren(children);
           children.add(new Property("status", "string", "The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.", 0, 1, status));
           children.add(new Property("location", "uri", "The location header created by processing this operation.", 0, 1, location));
-          children.add(new Property("etag", "string", "The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag));
+          children.add(new Property("etag", "string", "The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag));
           children.add(new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, 1, lastModified));
           children.add(new Property("outcome", "Resource", "An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.", 0, 1, outcome));
         }
@@ -2333,7 +2333,7 @@ public class Bundle extends Resource implements IBaseBundle {
           switch (_hash) {
           case -892481550: /*status*/  return new Property("status", "string", "The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.", 0, 1, status);
           case 1901043637: /*location*/  return new Property("location", "uri", "The location header created by processing this operation.", 0, 1, location);
-          case 3123477: /*etag*/  return new Property("etag", "string", "The etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag);
+          case 3123477: /*etag*/  return new Property("etag", "string", "The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag);
           case 1959003007: /*lastModified*/  return new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, 1, lastModified);
           case -1106507950: /*outcome*/  return new Property("outcome", "Resource", "An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.", 0, 1, outcome);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2530,10 +2530,10 @@ public class Bundle extends Resource implements IBaseBundle {
     protected List<BundleEntryComponent> entry;
 
     /**
-     * Digital Signature - base64 encoded. XML-DSIg or a JWT.
+     * Digital Signature - base64 encoded. XML-DSig or a JWT.
      */
     @Child(name = "signature", type = {Signature.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Digital Signature", formalDefinition="Digital Signature - base64 encoded. XML-DSIg or a JWT." )
+    @Description(shortDefinition="Digital Signature", formalDefinition="Digital Signature - base64 encoded. XML-DSig or a JWT." )
     protected Signature signature;
 
     private static final long serialVersionUID = 1740470158L;
@@ -2823,7 +2823,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #signature} (Digital Signature - base64 encoded. XML-DSIg or a JWT.)
+     * @return {@link #signature} (Digital Signature - base64 encoded. XML-DSig or a JWT.)
      */
     public Signature getSignature() { 
       if (this.signature == null)
@@ -2839,7 +2839,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @param value {@link #signature} (Digital Signature - base64 encoded. XML-DSIg or a JWT.)
+     * @param value {@link #signature} (Digital Signature - base64 encoded. XML-DSig or a JWT.)
      */
     public Bundle setSignature(Signature value) { 
       this.signature = value;
@@ -2901,7 +2901,7 @@ public class Bundle extends Resource implements IBaseBundle {
         children.add(new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, 1, total));
         children.add(new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link));
         children.add(new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry));
-        children.add(new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSIg or a JWT.", 0, 1, signature));
+        children.add(new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSig or a JWT.", 0, 1, signature));
       }
 
       @Override
@@ -2913,7 +2913,7 @@ public class Bundle extends Resource implements IBaseBundle {
         case 110549828: /*total*/  return new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, 1, total);
         case 3321850: /*link*/  return new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link);
         case 96667762: /*entry*/  return new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry);
-        case 1073584312: /*signature*/  return new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSIg or a JWT.", 0, 1, signature);
+        case 1073584312: /*signature*/  return new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSig or a JWT.", 0, 1, signature);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,11 +41,11 @@ public enum ResourceValidationMode {
          */
         CREATE, 
         /**
-         * The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate).
+         * The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change and checking version integrity if appropriate).
          */
         UPDATE, 
         /**
-         * The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules).
+         * The server ignores the content and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules).
          */
         DELETE, 
         /**
@@ -77,8 +77,8 @@ public enum ResourceValidationMode {
         public String getDefinition() {
           switch (this) {
             case CREATE: return "The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints).";
-            case UPDATE: return "The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate).";
-            case DELETE: return "The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules).";
+            case UPDATE: return "The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change and checking version integrity if appropriate).";
+            case DELETE: return "The server ignores the content and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules).";
             default: return "?";
           }
         }

@@ -13,8 +13,10 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
+import org.hl7.fhir.utilities.Utilities;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRException;
 
 public class Property {
 
@@ -189,7 +191,7 @@ public class Property {
   		return false;
   	StructureDefinition sd = context.fetchResource(StructureDefinition.class, structure.getUrl().substring(0, structure.getUrl().lastIndexOf("/")+1)+getType(name));
   	if (sd == null)
-  	  sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+getType(name));
+  	  sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(getType(name)));
     if (sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE)
       return true;
   	if (sd == null || sd.getKind() != StructureDefinitionKind.LOGICAL)
@@ -214,10 +216,11 @@ public class Property {
   }
 
 
-  protected List<Property> getChildProperties(String elementName, String statedType) throws DefinitionException {
+  protected List<Property> getChildProperties(String elementName, String statedType) throws FHIRException {
     ElementDefinition ed = definition;
     StructureDefinition sd = structure;
     List<ElementDefinition> children = ProfileUtilities.getChildMap(sd, ed);
+    String url = null;
     if (children.isEmpty() || isElementWithOnlyExtension(ed, children)) {
       // ok, find the right definitions
       String t = null;
@@ -241,9 +244,19 @@ public class Property {
             if (t == null && ToolingExtensions.hasExtension(ed, "http://hl7.org/fhir/StructureDefinition/elementdefinition-defaulttype"))
               t = ToolingExtensions.readStringExtension(ed, "http://hl7.org/fhir/StructureDefinition/elementdefinition-defaulttype");
             boolean ok = false;
-            for (TypeRefComponent tr : ed.getType()) 
+            for (TypeRefComponent tr : ed.getType()) { 
               if (tr.getCode().equals(t)) 
                 ok = true;
+              if (Utilities.isAbsoluteUrl(tr.getCode())) {
+                StructureDefinition sdt = context.fetchResource(StructureDefinition.class, tr.getCode());
+                if (sdt != null && sdt.getType().equals(t)) {
+                  url = tr.getCode();
+                  ok = true;
+                }
+              }
+              if (ok)
+                break;
+            }
              if (!ok)
                throw new DefinitionException("Type '"+t+"' is not an acceptable type for '"+elementName+"' on property "+definition.getPath());
             
@@ -255,19 +268,19 @@ public class Property {
         }
       }
       if (!"xhtml".equals(t)) {
-        String url = null;
         for (TypeRefComponent aType: ed.getType()) {
           if (aType.getCode().equals(t)) {
-            if (StringUtils.isNotBlank(aType.getProfile())) {
-              url = aType.getProfile();
+            if (aType.hasProfile()) {
+              assert aType.getProfile().size() == 1; 
+              url = aType.getProfile().get(0).getValue();
             } else {
-              url = "http://hl7.org/fhir/StructureDefinition/" + t;
+              url = ProfileUtilities.sdNs(t);
             }
             break;
           }
         }
         if (url==null)
-          throw new Error("Unable to find type " + t + " for element " + elementName + " with path " + ed.getPath());
+          throw new FHIRException("Unable to find type " + t + " for element " + elementName + " with path " + ed.getPath());
         sd = context.fetchResource(StructureDefinition.class, url);        
         if (sd == null)
           throw new DefinitionException("Unable to find type '"+t+"' for name '"+elementName+"' on property "+definition.getPath());
@@ -324,7 +337,7 @@ public class Property {
     return path.contains(".") ? path.substring(path.lastIndexOf(".")+1) : path;
   }
 
-  public Property getChild(String elementName, String childName) throws DefinitionException {
+  public Property getChild(String elementName, String childName) throws FHIRException {
     List<Property> children = getChildProperties(elementName, null);
     for (Property p : children) {
       if (p.getName().equals(childName)) {
@@ -344,7 +357,7 @@ public class Property {
     return null;
   }
 
-  public Property getChild(String name) throws DefinitionException {
+  public Property getChild(String name) throws FHIRException {
     List<Property> children = getChildProperties(name, null);
     for (Property p : children) {
       if (p.getName().equals(name)) {
@@ -354,7 +367,7 @@ public class Property {
     return null;
   }
 
-  public Property getChildSimpleName(String elementName, String name) throws DefinitionException {
+  public Property getChildSimpleName(String elementName, String name) throws FHIRException {
     List<Property> children = getChildProperties(elementName, null);
     for (Property p : children) {
       if (p.getName().equals(name) || p.getName().equals(name+"[x]")) {
@@ -366,6 +379,11 @@ public class Property {
 
   public IWorkerContext getContext() {
     return context;
+  }
+
+  @Override
+  public String toString() {
+    return definition.getPath();
   }
 
 

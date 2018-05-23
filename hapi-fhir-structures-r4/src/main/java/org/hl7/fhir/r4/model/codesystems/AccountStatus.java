@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,6 +49,14 @@ public enum AccountStatus {
          */
         ENTEREDINERROR, 
         /**
+         * This account is on hold
+         */
+        ONHOLD, 
+        /**
+         * The ccount status is unknown
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -61,6 +69,10 @@ public enum AccountStatus {
           return INACTIVE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new FHIRException("Unknown AccountStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +80,8 @@ public enum AccountStatus {
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
             case ENTEREDINERROR: return "entered-in-error";
+            case ONHOLD: return "on-hold";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -79,6 +93,8 @@ public enum AccountStatus {
             case ACTIVE: return "This account is active and may be used.";
             case INACTIVE: return "This account is inactive and should not be used to track financial information.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
+            case ONHOLD: return "This account is on hold";
+            case UNKNOWN: return "The ccount status is unknown";
             default: return "?";
           }
         }
@@ -87,6 +103,8 @@ public enum AccountStatus {
             case ACTIVE: return "Active";
             case INACTIVE: return "Inactive";
             case ENTEREDINERROR: return "Entered in error";
+            case ONHOLD: return "On Hold";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
     }

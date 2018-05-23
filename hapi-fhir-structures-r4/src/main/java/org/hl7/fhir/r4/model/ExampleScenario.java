@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -221,7 +221,7 @@ into another (possibly the same) biological entity.
          */
         CLINICALIMPRESSION, 
         /**
-         * A code system resource specifies a set of codes drawn from one or more code systems.
+         * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
          */
         CODESYSTEM, 
         /**
@@ -237,7 +237,7 @@ into another (possibly the same) biological entity.
          */
         COMPARTMENTDEFINITION, 
         /**
-         * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
+         * A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).
          */
         COMPOSITION, 
         /**
@@ -397,14 +397,6 @@ into another (possibly the same) biological entity.
          */
         IMPLEMENTATIONGUIDE, 
         /**
-         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
-         */
-        IMPLEMENTATIONGUIDEINPUT, 
-        /**
-         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
-         */
-        IMPLEMENTATIONGUIDEOUTPUT, 
-        /**
          * Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.
          */
         INVOICE, 
@@ -425,7 +417,7 @@ into another (possibly the same) biological entity.
          */
         LIST, 
         /**
-         * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
+         * Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.
          */
         LOCATION, 
         /**
@@ -433,7 +425,7 @@ into another (possibly the same) biological entity.
          */
         MEASURE, 
         /**
-         * The MeasureReport resource contains the results of evaluating a measure.
+         * The MeasureReport resource contains the results of the calculation of a measure; and optionally a reference to the resources involved in that calculation.
          */
         MEASUREREPORT, 
         /**
@@ -453,6 +445,10 @@ into another (possibly the same) biological entity.
          */
         MEDICATIONDISPENSE, 
         /**
+         * Information about a medication that is used to support knowledge.
+         */
+        MEDICATIONKNOWLEDGE, 
+        /**
          * An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.
          */
         MEDICATIONREQUEST, 
@@ -469,7 +465,7 @@ into another (possibly the same) biological entity.
          */
         MEDICINALPRODUCTAUTHORIZATION, 
         /**
-         * The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.
+         * The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.
          */
         MEDICINALPRODUCTCLINICALS, 
         /**
@@ -513,7 +509,7 @@ into another (possibly the same) biological entity.
          */
         OBSERVATIONDEFINITION, 
         /**
-         * Patient’s or family member's work information.
+         * A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.
          */
         OCCUPATIONALDATA, 
         /**
@@ -629,10 +625,6 @@ into another (possibly the same) biological entity.
          */
         SEQUENCE, 
         /**
-         * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
-         */
-        SERVICEDEFINITION, 
-        /**
          * A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.
          */
         SERVICEREQUEST, 
@@ -657,7 +649,7 @@ into another (possibly the same) biological entity.
          */
         STRUCTUREMAP, 
         /**
-         * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
+         * The subscription resource is used to define a push-based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system can take an appropriate action.
          */
         SUBSCRIPTION, 
         /**
@@ -705,7 +697,7 @@ into another (possibly the same) biological entity.
          */
         USERSESSION, 
         /**
-         * A value set specifies a set of codes drawn from one or more code systems.
+         * A ValueSet resource specifies a set of codes drawn from one or more code systems, intended for use in a particular context. Value sets link between [[[CodeSystem]]] definitions and their use in [coded elements](terminologies.html).
          */
         VALUESET, 
         /**
@@ -849,10 +841,6 @@ into another (possibly the same) biological entity.
           return IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return IMPLEMENTATIONGUIDE;
-        if ("ImplementationGuideInput".equals(codeString))
-          return IMPLEMENTATIONGUIDEINPUT;
-        if ("ImplementationGuideOutput".equals(codeString))
-          return IMPLEMENTATIONGUIDEOUTPUT;
         if ("Invoice".equals(codeString))
           return INVOICE;
         if ("ItemInstance".equals(codeString))
@@ -877,6 +865,8 @@ into another (possibly the same) biological entity.
           return MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return MEDICATIONDISPENSE;
+        if ("MedicationKnowledge".equals(codeString))
+          return MEDICATIONKNOWLEDGE;
         if ("MedicationRequest".equals(codeString))
           return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
@@ -965,8 +955,6 @@ into another (possibly the same) biological entity.
           return SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return SEQUENCE;
-        if ("ServiceDefinition".equals(codeString))
-          return SERVICEDEFINITION;
         if ("ServiceRequest".equals(codeString))
           return SERVICEREQUEST;
         if ("Slot".equals(codeString))
@@ -1079,8 +1067,6 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
-            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
             case INVOICE: return "Invoice";
             case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
@@ -1093,6 +1079,7 @@ into another (possibly the same) biological entity.
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
+            case MEDICATIONKNOWLEDGE: return "MedicationKnowledge";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
             case MEDICINALPRODUCT: return "MedicinalProduct";
@@ -1137,7 +1124,6 @@ into another (possibly the same) biological entity.
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
-            case SERVICEDEFINITION: return "ServiceDefinition";
             case SERVICEREQUEST: return "ServiceRequest";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
@@ -1227,8 +1213,6 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "http://hl7.org/fhir/resource-types";
             case IMMUNIZATIONRECOMMENDATION: return "http://hl7.org/fhir/resource-types";
             case IMPLEMENTATIONGUIDE: return "http://hl7.org/fhir/resource-types";
-            case IMPLEMENTATIONGUIDEINPUT: return "http://hl7.org/fhir/resource-types";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "http://hl7.org/fhir/resource-types";
             case INVOICE: return "http://hl7.org/fhir/resource-types";
             case ITEMINSTANCE: return "http://hl7.org/fhir/resource-types";
             case LIBRARY: return "http://hl7.org/fhir/resource-types";
@@ -1241,6 +1225,7 @@ into another (possibly the same) biological entity.
             case MEDICATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONADMINISTRATION: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONDISPENSE: return "http://hl7.org/fhir/resource-types";
+            case MEDICATIONKNOWLEDGE: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONREQUEST: return "http://hl7.org/fhir/resource-types";
             case MEDICATIONSTATEMENT: return "http://hl7.org/fhir/resource-types";
             case MEDICINALPRODUCT: return "http://hl7.org/fhir/resource-types";
@@ -1285,7 +1270,6 @@ into another (possibly the same) biological entity.
             case SCHEDULE: return "http://hl7.org/fhir/resource-types";
             case SEARCHPARAMETER: return "http://hl7.org/fhir/resource-types";
             case SEQUENCE: return "http://hl7.org/fhir/resource-types";
-            case SERVICEDEFINITION: return "http://hl7.org/fhir/resource-types";
             case SERVICEREQUEST: return "http://hl7.org/fhir/resource-types";
             case SLOT: return "http://hl7.org/fhir/resource-types";
             case SPECIMEN: return "http://hl7.org/fhir/resource-types";
@@ -1331,11 +1315,11 @@ into another (possibly the same) biological entity.
             case CLAIM: return "A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.";
             case CLAIMRESPONSE: return "This resource provides the adjudication details from the processing of a Claim resource.";
             case CLINICALIMPRESSION: return "A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called \"ClinicalImpression\" rather than \"ClinicalAssessment\" to avoid confusion with the recording of assessment tools such as Apgar score.";
-            case CODESYSTEM: return "A code system resource specifies a set of codes drawn from one or more code systems.";
+            case CODESYSTEM: return "The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.";
             case COMMUNICATION: return "An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.";
             case COMMUNICATIONREQUEST: return "A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.";
             case COMPARTMENTDEFINITION: return "A compartment definition that defines how resources are accessed on a server.";
-            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.";
+            case COMPOSITION: return "A set of healthcare-related information that is assembled together into a single logical package that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. A Composition defines the structure and narrative content necessary for a document. However, a Composition alone does not constitute a document. Rather, the Composition must be the first entry in a Bundle where Bundle.type=document, and any other resources referenced from Composition must be included as subsequent entries in the Bundle (for example Patient, Practitioner, Encounter, etc.).";
             case CONCEPTMAP: return "A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.";
             case CONDITION: return "A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.";
             case CONSENT: return "A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.";
@@ -1375,25 +1359,24 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "Describes a comparison of an immunization event against published recommendations to determine if the administration is \"valid\" in relation to those  recommendations.";
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
-            case IMPLEMENTATIONGUIDEINPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
             case INVOICE: return "Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.";
             case ITEMINSTANCE: return "A physical, countable instance of an item, for example one box or one unit.";
             case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
-            case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
+            case LOCATION: return "Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.";
             case MEASURE: return "The Measure resource provides the definition of a quality measure.";
-            case MEASUREREPORT: return "The MeasureReport resource contains the results of evaluating a measure.";
+            case MEASUREREPORT: return "The MeasureReport resource contains the results of the calculation of a measure; and optionally a reference to the resources involved in that calculation.";
             case MEDIA: return "A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.";
             case MEDICATION: return "This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
+            case MEDICATIONKNOWLEDGE: return "Information about a medication that is used to support knowledge.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
             case MEDICINALPRODUCT: return "Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).";
             case MEDICINALPRODUCTAUTHORIZATION: return "The regulatory authorization of a medicinal product.";
-            case MEDICINALPRODUCTCLINICALS: return "The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.";
+            case MEDICINALPRODUCTCLINICALS: return "The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.";
             case MEDICINALPRODUCTDEVICESPEC: return "A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.";
             case MEDICINALPRODUCTINGREDIENT: return "An ingredient of a manufactured item or pharmaceutical product.";
             case MEDICINALPRODUCTPACKAGED: return "A medicinal product in a container or package.";
@@ -1404,7 +1387,7 @@ into another (possibly the same) biological entity.
             case NUTRITIONORDER: return "A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.";
             case OBSERVATION: return "Measurements and simple assertions made about a patient, device or other subject.";
             case OBSERVATIONDEFINITION: return "Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.";
-            case OCCUPATIONALDATA: return "Patient’s or family member's work information.";
+            case OCCUPATIONALDATA: return "A person's work information, structured to facilitate individual, population, and public health use; not intended to support billing.";
             case OPERATIONDEFINITION: return "A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).";
             case OPERATIONOUTCOME: return "A collection of error, warning or information messages that result from a system action.";
             case ORGANIZATION: return "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.";
@@ -1433,14 +1416,13 @@ into another (possibly the same) biological entity.
             case SCHEDULE: return "A container for slots of time that may be available for booking appointments.";
             case SEARCHPARAMETER: return "A search parameter that defines a named search item that can be used to search/filter on a resource.";
             case SEQUENCE: return "Raw data describing a biological sequence.";
-            case SERVICEDEFINITION: return "The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.";
             case SERVICEREQUEST: return "A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.";
             case SLOT: return "A slot of time on a schedule that may be available for booking appointments.";
             case SPECIMEN: return "A sample to be used for analysis.";
             case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.";
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
-            case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
+            case SUBSCRIPTION: return "The subscription resource is used to define a push-based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system can take an appropriate action.";
             case SUBSTANCE: return "A homogeneous material with a definite composition.";
             case SUBSTANCEPOLYMER: return "Todo.";
             case SUBSTANCEREFERENCEINFORMATION: return "Todo.";
@@ -1452,7 +1434,7 @@ into another (possibly the same) biological entity.
             case TESTREPORT: return "A summary of information based on the results of executing a TestScript.";
             case TESTSCRIPT: return "A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.";
             case USERSESSION: return "Information about a user's current session.";
-            case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
+            case VALUESET: return "A ValueSet resource specifies a set of codes drawn from one or more code systems, intended for use in a particular context. Value sets link between [[[CodeSystem]]] definitions and their use in [coded elements](terminologies.html).";
             case VERIFICATIONRESULT: return "Describes validation requirements, source(s), status and dates for one or more elements.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
             default: return "?";
@@ -1523,8 +1505,6 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
-            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
             case INVOICE: return "Invoice";
             case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
@@ -1537,6 +1517,7 @@ into another (possibly the same) biological entity.
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
+            case MEDICATIONKNOWLEDGE: return "MedicationKnowledge";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
             case MEDICINALPRODUCT: return "MedicinalProduct";
@@ -1581,7 +1562,6 @@ into another (possibly the same) biological entity.
             case SCHEDULE: return "Schedule";
             case SEARCHPARAMETER: return "SearchParameter";
             case SEQUENCE: return "Sequence";
-            case SERVICEDEFINITION: return "ServiceDefinition";
             case SERVICEREQUEST: return "ServiceRequest";
             case SLOT: return "Slot";
             case SPECIMEN: return "Specimen";
@@ -1739,10 +1719,6 @@ into another (possibly the same) biological entity.
           return FHIRResourceType.IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return FHIRResourceType.IMPLEMENTATIONGUIDE;
-        if ("ImplementationGuideInput".equals(codeString))
-          return FHIRResourceType.IMPLEMENTATIONGUIDEINPUT;
-        if ("ImplementationGuideOutput".equals(codeString))
-          return FHIRResourceType.IMPLEMENTATIONGUIDEOUTPUT;
         if ("Invoice".equals(codeString))
           return FHIRResourceType.INVOICE;
         if ("ItemInstance".equals(codeString))
@@ -1767,6 +1743,8 @@ into another (possibly the same) biological entity.
           return FHIRResourceType.MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return FHIRResourceType.MEDICATIONDISPENSE;
+        if ("MedicationKnowledge".equals(codeString))
+          return FHIRResourceType.MEDICATIONKNOWLEDGE;
         if ("MedicationRequest".equals(codeString))
           return FHIRResourceType.MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
@@ -1855,8 +1833,6 @@ into another (possibly the same) biological entity.
           return FHIRResourceType.SEARCHPARAMETER;
         if ("Sequence".equals(codeString))
           return FHIRResourceType.SEQUENCE;
-        if ("ServiceDefinition".equals(codeString))
-          return FHIRResourceType.SERVICEDEFINITION;
         if ("ServiceRequest".equals(codeString))
           return FHIRResourceType.SERVICEREQUEST;
         if ("Slot".equals(codeString))
@@ -2035,10 +2011,6 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMMUNIZATIONRECOMMENDATION);
         if ("ImplementationGuide".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMPLEMENTATIONGUIDE);
-        if ("ImplementationGuideInput".equals(codeString))
-          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMPLEMENTATIONGUIDEINPUT);
-        if ("ImplementationGuideOutput".equals(codeString))
-          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.IMPLEMENTATIONGUIDEOUTPUT);
         if ("Invoice".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.INVOICE);
         if ("ItemInstance".equals(codeString))
@@ -2063,6 +2035,8 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICATIONADMINISTRATION);
         if ("MedicationDispense".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICATIONDISPENSE);
+        if ("MedicationKnowledge".equals(codeString))
+          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICATIONKNOWLEDGE);
         if ("MedicationRequest".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.MEDICATIONREQUEST);
         if ("MedicationStatement".equals(codeString))
@@ -2151,8 +2125,6 @@ into another (possibly the same) biological entity.
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SEARCHPARAMETER);
         if ("Sequence".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SEQUENCE);
-        if ("ServiceDefinition".equals(codeString))
-          return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SERVICEDEFINITION);
         if ("ServiceRequest".equals(codeString))
           return new Enumeration<FHIRResourceType>(this, FHIRResourceType.SERVICEREQUEST);
         if ("Slot".equals(codeString))
@@ -2324,10 +2296,6 @@ into another (possibly the same) biological entity.
         return "ImmunizationRecommendation";
       if (code == FHIRResourceType.IMPLEMENTATIONGUIDE)
         return "ImplementationGuide";
-      if (code == FHIRResourceType.IMPLEMENTATIONGUIDEINPUT)
-        return "ImplementationGuideInput";
-      if (code == FHIRResourceType.IMPLEMENTATIONGUIDEOUTPUT)
-        return "ImplementationGuideOutput";
       if (code == FHIRResourceType.INVOICE)
         return "Invoice";
       if (code == FHIRResourceType.ITEMINSTANCE)
@@ -2352,6 +2320,8 @@ into another (possibly the same) biological entity.
         return "MedicationAdministration";
       if (code == FHIRResourceType.MEDICATIONDISPENSE)
         return "MedicationDispense";
+      if (code == FHIRResourceType.MEDICATIONKNOWLEDGE)
+        return "MedicationKnowledge";
       if (code == FHIRResourceType.MEDICATIONREQUEST)
         return "MedicationRequest";
       if (code == FHIRResourceType.MEDICATIONSTATEMENT)
@@ -2440,8 +2410,6 @@ into another (possibly the same) biological entity.
         return "SearchParameter";
       if (code == FHIRResourceType.SEQUENCE)
         return "Sequence";
-      if (code == FHIRResourceType.SERVICEDEFINITION)
-        return "ServiceDefinition";
       if (code == FHIRResourceType.SERVICEREQUEST)
         return "ServiceRequest";
       if (code == FHIRResourceType.SLOT)
@@ -5951,7 +5919,7 @@ into another (possibly the same) biological entity.
           if (this.pause == null)
             return false;
           for (BooleanType v : this.pause)
-            if (v.equals(value)) // boolean
+            if (v.getValue().equals(value)) // boolean
               return true;
           return false;
         }
@@ -6117,10 +6085,10 @@ into another (possibly the same) biological entity.
     protected MarkdownType copyright;
 
     /**
-     * What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
+     * What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The purpose of the example, e.g. to illustrate a scenario", formalDefinition="What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario." )
+    @Description(shortDefinition="The purpose of the example, e.g. to illustrate a scenario", formalDefinition="What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario." )
     protected MarkdownType purpose;
 
     /**
@@ -6147,16 +6115,11 @@ into another (possibly the same) biological entity.
     /**
      * Another nested workflow.
      */
-    @Child(name = "workflow", type = {ExampleScenario.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "workflow", type = {CanonicalType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Another nested workflow", formalDefinition="Another nested workflow." )
-    protected List<Reference> workflow;
-    /**
-     * The actual objects that are the target of the reference (Another nested workflow.)
-     */
-    protected List<ExampleScenario> workflowTarget;
+    protected List<CanonicalType> workflow;
 
-
-    private static final long serialVersionUID = 1418844010L;
+    private static final long serialVersionUID = 758248907L;
 
   /**
    * Constructor
@@ -6174,7 +6137,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this example scenario is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -6194,7 +6157,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this example scenario is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ExampleScenario setUrlElement(UriType value) { 
       this.url = value;
@@ -6202,14 +6165,14 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.
+     * @return An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this example scenario is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.
+     * @param value An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this example scenario is (or will be) published.
      */
     public ExampleScenario setUrl(String value) { 
       if (Utilities.noString(value))
@@ -6419,7 +6382,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -6439,7 +6402,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public ExampleScenario setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -6447,14 +6410,14 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public ExampleScenario setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -6464,7 +6427,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the example scenario was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -6484,7 +6447,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the example scenario was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public ExampleScenario setDateElement(DateTimeType value) { 
       this.date = value;
@@ -6492,14 +6455,14 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').
+     * @return The date  (and optionally time) when the example scenario was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').
+     * @param value The date  (and optionally time) when the example scenario was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').
      */
     public ExampleScenario setDate(Date value) { 
       if (value == null)
@@ -6513,7 +6476,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the example scenario.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the example scenario.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -6533,7 +6496,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the example scenario.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the example scenario.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public ExampleScenario setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -6541,14 +6504,14 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return The name of the individual or organization that published the example scenario.
+     * @return The name of the organization or individual that published the example scenario.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the example scenario.
+     * @param value The name of the organization or individual that published the example scenario.
      */
     public ExampleScenario setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -6770,7 +6733,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return {@link #purpose} (What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -6790,7 +6753,7 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @param value {@link #purpose} (What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public ExampleScenario setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -6798,14 +6761,14 @@ into another (possibly the same) biological entity.
     }
 
     /**
-     * @return What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
+     * @return What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
+     * @param value What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.
      */
     public ExampleScenario setPurpose(String value) { 
       if (value == null)
@@ -6980,16 +6943,16 @@ into another (possibly the same) biological entity.
     /**
      * @return {@link #workflow} (Another nested workflow.)
      */
-    public List<Reference> getWorkflow() { 
+    public List<CanonicalType> getWorkflow() { 
       if (this.workflow == null)
-        this.workflow = new ArrayList<Reference>();
+        this.workflow = new ArrayList<CanonicalType>();
       return this.workflow;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ExampleScenario setWorkflow(List<Reference> theWorkflow) { 
+    public ExampleScenario setWorkflow(List<CanonicalType> theWorkflow) { 
       this.workflow = theWorkflow;
       return this;
     }
@@ -6997,102 +6960,88 @@ into another (possibly the same) biological entity.
     public boolean hasWorkflow() { 
       if (this.workflow == null)
         return false;
-      for (Reference item : this.workflow)
+      for (CanonicalType item : this.workflow)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addWorkflow() { //3
-      Reference t = new Reference();
+    /**
+     * @return {@link #workflow} (Another nested workflow.)
+     */
+    public CanonicalType addWorkflowElement() {//2 
+      CanonicalType t = new CanonicalType();
       if (this.workflow == null)
-        this.workflow = new ArrayList<Reference>();
+        this.workflow = new ArrayList<CanonicalType>();
       this.workflow.add(t);
       return t;
     }
 
-    public ExampleScenario addWorkflow(Reference t) { //3
-      if (t == null)
-        return this;
+    /**
+     * @param value {@link #workflow} (Another nested workflow.)
+     */
+    public ExampleScenario addWorkflow(String value) { //1
+      CanonicalType t = new CanonicalType();
+      t.setValue(value);
       if (this.workflow == null)
-        this.workflow = new ArrayList<Reference>();
+        this.workflow = new ArrayList<CanonicalType>();
       this.workflow.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #workflow}, creating it if it does not already exist
+     * @param value {@link #workflow} (Another nested workflow.)
      */
-    public Reference getWorkflowFirstRep() { 
-      if (getWorkflow().isEmpty()) {
-        addWorkflow();
-      }
-      return getWorkflow().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<ExampleScenario> getWorkflowTarget() { 
-      if (this.workflowTarget == null)
-        this.workflowTarget = new ArrayList<ExampleScenario>();
-      return this.workflowTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public ExampleScenario addWorkflowTarget() { 
-      ExampleScenario r = new ExampleScenario();
-      if (this.workflowTarget == null)
-        this.workflowTarget = new ArrayList<ExampleScenario>();
-      this.workflowTarget.add(r);
-      return r;
+    public boolean hasWorkflow(String value) { 
+      if (this.workflow == null)
+        return false;
+      for (CanonicalType v : this.workflow)
+        if (v.getValue().equals(value)) // canonical(ExampleScenario)
+          return true;
+      return false;
     }
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this example scenario is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this example scenario when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the example scenario when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the example scenario author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the example scenario. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this example scenario. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the example scenario.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the example scenario was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the example scenario.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate example scenario instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the example scenario is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the example scenario and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the example scenario.", 0, 1, copyright));
-        children.add(new Property("purpose", "markdown", "What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.", 0, 1, purpose));
         children.add(new Property("actor", "", "Actor participating in the resource.", 0, java.lang.Integer.MAX_VALUE, actor));
         children.add(new Property("instance", "", "Each resource and each version that is present in the workflow.", 0, java.lang.Integer.MAX_VALUE, instance));
         children.add(new Property("process", "", "Each major process - a group of operations.", 0, java.lang.Integer.MAX_VALUE, process));
-        children.add(new Property("workflow", "Reference(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow));
+        children.add(new Property("workflow", "canonical(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this example scenario is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this example scenario when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this example scenario is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this example scenario when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the example scenario when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the example scenario author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the example scenario. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this example scenario. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the example scenario was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the example scenario.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this example scenario is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the example scenario was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the example scenario changes. (e.g. the 'content logical definition').", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the example scenario.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate example scenario instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the example scenario is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the example scenario and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the example scenario.", 0, 1, copyright);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "What is the example scenario resource created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "What the example scenario resource is created for. This should not be used to show the business purpose of the scenario itself, but the purpose of documenting a scenario.", 0, 1, purpose);
         case 92645877: /*actor*/  return new Property("actor", "", "Actor participating in the resource.", 0, java.lang.Integer.MAX_VALUE, actor);
         case 555127957: /*instance*/  return new Property("instance", "", "Each resource and each version that is present in the workflow.", 0, java.lang.Integer.MAX_VALUE, instance);
         case -309518737: /*process*/  return new Property("process", "", "Each major process - a group of operations.", 0, java.lang.Integer.MAX_VALUE, process);
-        case 35379135: /*workflow*/  return new Property("workflow", "Reference(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow);
+        case 35379135: /*workflow*/  return new Property("workflow", "canonical(ExampleScenario)", "Another nested workflow.", 0, java.lang.Integer.MAX_VALUE, workflow);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -7117,7 +7066,7 @@ into another (possibly the same) biological entity.
         case 92645877: /*actor*/ return this.actor == null ? new Base[0] : this.actor.toArray(new Base[this.actor.size()]); // ExampleScenarioActorComponent
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // ExampleScenarioInstanceComponent
         case -309518737: /*process*/ return this.process == null ? new Base[0] : this.process.toArray(new Base[this.process.size()]); // ExampleScenarioProcessComponent
-        case 35379135: /*workflow*/ return this.workflow == null ? new Base[0] : this.workflow.toArray(new Base[this.workflow.size()]); // Reference
+        case 35379135: /*workflow*/ return this.workflow == null ? new Base[0] : this.workflow.toArray(new Base[this.workflow.size()]); // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -7176,7 +7125,7 @@ into another (possibly the same) biological entity.
           this.getProcess().add((ExampleScenarioProcessComponent) value); // ExampleScenarioProcessComponent
           return value;
         case 35379135: // workflow
-          this.getWorkflow().add(castToReference(value)); // Reference
+          this.getWorkflow().add(castToCanonical(value)); // CanonicalType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -7219,7 +7168,7 @@ into another (possibly the same) biological entity.
         } else if (name.equals("process")) {
           this.getProcess().add((ExampleScenarioProcessComponent) value);
         } else if (name.equals("workflow")) {
-          this.getWorkflow().add(castToReference(value));
+          this.getWorkflow().add(castToCanonical(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -7244,7 +7193,7 @@ into another (possibly the same) biological entity.
         case 92645877:  return addActor(); 
         case 555127957:  return addInstance(); 
         case -309518737:  return addProcess(); 
-        case 35379135:  return addWorkflow(); 
+        case 35379135:  return addWorkflowElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -7269,7 +7218,7 @@ into another (possibly the same) biological entity.
         case 92645877: /*actor*/ return new String[] {};
         case 555127957: /*instance*/ return new String[] {};
         case -309518737: /*process*/ return new String[] {};
-        case 35379135: /*workflow*/ return new String[] {"Reference"};
+        case 35379135: /*workflow*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -7326,7 +7275,7 @@ into another (possibly the same) biological entity.
           return addProcess();
         }
         else if (name.equals("workflow")) {
-          return addWorkflow();
+          throw new FHIRException("Cannot call addChild on a primitive type ExampleScenario.workflow");
         }
         else
           return super.addChild(name);
@@ -7385,8 +7334,8 @@ into another (possibly the same) biological entity.
             dst.process.add(i.copy());
         };
         if (workflow != null) {
-          dst.workflow = new ArrayList<Reference>();
-          for (Reference i : workflow)
+          dst.workflow = new ArrayList<CanonicalType>();
+          for (CanonicalType i : workflow)
             dst.workflow.add(i.copy());
         };
         return dst;

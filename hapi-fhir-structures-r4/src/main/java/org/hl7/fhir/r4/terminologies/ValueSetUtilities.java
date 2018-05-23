@@ -1,11 +1,16 @@
 package org.hl7.fhir.r4.terminologies;
 
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
 import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
@@ -18,7 +23,7 @@ public class ValueSetUtilities {
     for (UriType t : vs.getMeta().getProfile()) 
       if (t.getValue().equals("http://hl7.org/fhir/StructureDefinition/shareablevalueset"))
         return vs;
-    vs.getMeta().getProfile().add(new UriType("http://hl7.org/fhir/StructureDefinition/shareablevalueset"));
+    vs.getMeta().getProfile().add(new CanonicalType("http://hl7.org/fhir/StructureDefinition/shareablevalueset"));
     return vs;
   }
 
@@ -56,7 +61,10 @@ public class ValueSetUtilities {
     vs.addIdentifier().setSystem("urn:ietf:rfc:3986").setValue(oid);
   }
 
-  public static void markStatus(ValueSet vs, String wg, StandardsStatus status, String pckage, String fmm) throws FHIRException {
+  public static void markStatus(ValueSet vs, String wg, StandardsStatus status, String pckage, String fmm, IWorkerContext context) throws FHIRException {
+    if (vs.hasUserData("external.url"))
+      return;
+    
     if (wg != null) {
       if (!ToolingExtensions.hasExtension(vs, ToolingExtensions.EXT_WORKGROUP) || 
           (Utilities.existsInList(ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_WORKGROUP), "fhir", "vocab") && !Utilities.existsInList(wg, "fhir", "vocab"))) {
@@ -81,6 +89,16 @@ public class ValueSetUtilities {
     }
     if (vs.hasUserData("cs"))
       CodeSystemUtilities.markStatus((CodeSystem) vs.getUserData("cs"), wg, status, pckage, fmm);
+    else if (status == StandardsStatus.NORMATIVE && context != null) {
+      for (ConceptSetComponent csc : vs.getCompose().getInclude()) {
+        if (csc.hasSystem()) {
+          CodeSystem cs = context.fetchCodeSystem(csc.getSystem());
+          if (cs != null) {
+            CodeSystemUtilities.markStatus(cs, wg, status, pckage, fmm);
+          }
+        }
+      }
+    }
   }
 
   private static int ssval(String status) {

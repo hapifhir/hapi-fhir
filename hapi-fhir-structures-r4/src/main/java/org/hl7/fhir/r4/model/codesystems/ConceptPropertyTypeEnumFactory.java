@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -51,6 +51,8 @@ public class ConceptPropertyTypeEnumFactory implements EnumFactory<ConceptProper
       return ConceptPropertyType.BOOLEAN;
     if ("dateTime".equals(codeString))
       return ConceptPropertyType.DATETIME;
+    if ("decimal".equals(codeString))
+      return ConceptPropertyType.DECIMAL;
     throw new IllegalArgumentException("Unknown ConceptPropertyType code '"+codeString+"'");
   }
 
@@ -67,6 +69,8 @@ public class ConceptPropertyTypeEnumFactory implements EnumFactory<ConceptProper
       return "boolean";
     if (code == ConceptPropertyType.DATETIME)
       return "dateTime";
+    if (code == ConceptPropertyType.DECIMAL)
+      return "decimal";
     return "?";
   }
 

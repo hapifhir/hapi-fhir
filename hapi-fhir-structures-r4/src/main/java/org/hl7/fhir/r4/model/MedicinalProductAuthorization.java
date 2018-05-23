@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -695,10 +695,10 @@ public class MedicinalProductAuthorization extends DomainResource {
         protected CodeableConcept type;
 
         /**
-         * Date that that application was made.
+         * Date that the application was made.
          */
         @Child(name = "date", type = {DateTimeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Date that that application was made", formalDefinition="Date that that application was made." )
+        @Description(shortDefinition="Date that the application was made", formalDefinition="Date that the application was made." )
         protected DateTimeType date;
 
         private static final long serialVersionUID = -1806825708L;
@@ -769,7 +769,7 @@ public class MedicinalProductAuthorization extends DomainResource {
         }
 
         /**
-         * @return {@link #date} (Date that that application was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+         * @return {@link #date} (Date that the application was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
          */
         public DateTimeType getDateElement() { 
           if (this.date == null)
@@ -789,7 +789,7 @@ public class MedicinalProductAuthorization extends DomainResource {
         }
 
         /**
-         * @param value {@link #date} (Date that that application was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+         * @param value {@link #date} (Date that the application was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
          */
         public MedicinalProductAuthorizationProcedureApplicationComponent setDateElement(DateTimeType value) { 
           this.date = value;
@@ -797,14 +797,14 @@ public class MedicinalProductAuthorization extends DomainResource {
         }
 
         /**
-         * @return Date that that application was made.
+         * @return Date that the application was made.
          */
         public Date getDate() { 
           return this.date == null ? null : this.date.getValue();
         }
 
         /**
-         * @param value Date that that application was made.
+         * @param value Date that the application was made.
          */
         public MedicinalProductAuthorizationProcedureApplicationComponent setDate(Date value) { 
             if (this.date == null)
@@ -817,7 +817,7 @@ public class MedicinalProductAuthorization extends DomainResource {
           super.listChildren(children);
           children.add(new Property("number", "Identifier", "A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.", 0, 1, number));
           children.add(new Property("type", "CodeableConcept", "The type of the application.", 0, 1, type));
-          children.add(new Property("date", "dateTime", "Date that that application was made.", 0, 1, date));
+          children.add(new Property("date", "dateTime", "Date that the application was made.", 0, 1, date));
         }
 
         @Override
@@ -825,7 +825,7 @@ public class MedicinalProductAuthorization extends DomainResource {
           switch (_hash) {
           case -1034364087: /*number*/  return new Property("number", "Identifier", "A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.", 0, 1, number);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of the application.", 0, 1, type);
-          case 3076014: /*date*/  return new Property("date", "dateTime", "Date that that application was made.", 0, 1, date);
+          case 3076014: /*date*/  return new Property("date", "dateTime", "Date that the application was made.", 0, 1, date);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 

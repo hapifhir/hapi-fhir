@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -57,9 +58,24 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
+	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 *
+	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 */
+	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
+	/**
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowExternalReferences = false;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private boolean myAllowContainsSearches = true;
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -110,6 +126,7 @@ public class DaoConfig {
 	private Integer myCountSearchResultsUpTo = null;
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
+	private boolean myExpungeEnabled;
 
 	/**
 	 * Constructor
@@ -134,6 +151,7 @@ public class DaoConfig {
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
+
 
 	/**
 	 * Specifies the highest number that a client is permitted to use in a
@@ -374,9 +392,9 @@ public class DaoConfig {
 	 * of higher importance than raw write performance
 	 * </p>
 	 * <p>
-	 *    Note that this setting also has an impact on sorting (i.e. using the
-	 *    <code>_sort</code> parameter on searches): If the server is configured
-	 *    to not index missing field.
+	 * Note that this setting also has an impact on sorting (i.e. using the
+	 * <code>_sort</code> parameter on searches): If the server is configured
+	 * to not index missing field.
 	 * </p>
 	 */
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
@@ -399,8 +417,11 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**
@@ -547,6 +568,22 @@ public class DaoConfig {
 	}
 
 	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public Long getTranslationCachesExpireAfterWriteInMinutes() {
+		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
+		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
 	 * This setting may be used to advise the server that any references found in
 	 * resources that have any of the base URLs given here will be replaced with
 	 * simple local references.
@@ -646,6 +683,26 @@ public class DaoConfig {
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 * <p>
+	 * Default is <code>true</code>
+	 */
+	public boolean isAllowContainsSearches() {
+		return myAllowContainsSearches;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 * <p>
+	 * Default is <code>true</code>
+	 */
+	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
+		this.myAllowContainsSearches = theAllowContainsSearches;
 	}
 
 	/**
@@ -899,6 +956,36 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the $expunge operation
+	 * will be enabled on this server. This operation is potentially dangerous since it allows
+	 * a client to physically delete data in a way that can not be recovered (without resorting
+	 * to backups).
+	 * <p>
+	 * It is recommended to not enable this setting without appropriate security
+	 * in place on your server to prevent non-administrators from using this
+	 * operation.
+	 * </p>
+	 */
+	public boolean isExpungeEnabled() {
+		return myExpungeEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the $expunge operation
+	 * will be enabled on this server. This operation is potentially dangerous since it allows
+	 * a client to physically delete data in a way that can not be recovered (without resorting
+	 * to backups).
+	 * <p>
+	 * It is recommended to not enable this setting without appropriate security
+	 * in place on your server to prevent non-administrators from using this
+	 * operation.
+	 * </p>
+	 */
+	public void setExpungeEnabled(boolean theExpungeEnabled) {
+		myExpungeEnabled = theExpungeEnabled;
+	}
+
+	/**
 	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
 	 * <code>true</code>)
 	 */
@@ -999,7 +1086,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1010,7 +1097,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1047,11 +1134,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**

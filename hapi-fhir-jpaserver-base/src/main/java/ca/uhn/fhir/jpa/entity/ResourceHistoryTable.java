@@ -32,7 +32,7 @@ import java.util.Collection;
 //@formatter:off
 @Entity
 @Table(name = "HFJ_RES_VER", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESVER_ID_VER", columnNames = {"RES_ID", "RES_VER"})
+	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
 }, indexes = {
 	@Index(name = "IDX_RESVER_TYPE_DATE", columnList = "RES_TYPE,RES_UPDATED"),
 	@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
@@ -42,6 +42,7 @@ import java.util.Collection;
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -137,6 +138,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		myResource = theResource;
 	}
 
+	@Override
 	public Long getResourceId() {
 		return myResourceId;
 	}

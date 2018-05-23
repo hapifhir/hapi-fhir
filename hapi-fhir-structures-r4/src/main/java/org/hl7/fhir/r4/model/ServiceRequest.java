@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -74,7 +74,7 @@ public class ServiceRequest extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.
          */
         UNKNOWN, 
         /**
@@ -135,7 +135,7 @@ public class ServiceRequest extends DomainResource {
             case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
             case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
             case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request doesn't know.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
             default: return "?";
           }
         }
@@ -222,11 +222,11 @@ public class ServiceRequest extends DomainResource {
 
     public enum ServiceRequestIntent {
         /**
-         * The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act
+         * The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act
          */
         PROPOSAL, 
         /**
-         * The request represents an intension to ensure something occurs without providing an authorization for others to act
+         * The request represents an intention to ensure something occurs without providing an authorization for others to act
          */
         PLAN, 
         /**
@@ -250,9 +250,7 @@ public class ServiceRequest extends DomainResource {
          */
         INSTANCEORDER, 
         /**
-         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.
-
-Refer to [[[RequestGroup]]] for additional information on how this status is used
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used
          */
         OPTION, 
         /**
@@ -311,14 +309,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSAL: return "The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act";
-            case PLAN: return "The request represents an intension to ensure something occurs without providing an authorization for others to act";
+            case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act";
+            case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act";
             case ORDER: return "The request represents a request/demand and authorization for action";
             case ORIGINALORDER: return "The request represents an original authorization for action";
             case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization";
             case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order";
             case INSTANCEORDER: return "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.";
-            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.\n\nRefer to [[[RequestGroup]]] for additional information on how this status is used";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used";
             default: return "?";
           }
         }
@@ -596,9 +594,17 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected Enumeration<ServiceRequestIntent> intent;
 
     /**
+     * A code that classifies the service for searching, sorting and display purposes (e.g. "Surgical Procedure").
+     */
+    @Child(name = "category", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Classification of service", formalDefinition="A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\")." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/servicerequest-category")
+    protected List<CodeableConcept> category;
+
+    /**
      * Indicates how quickly the ServiceRequest should be addressed with respect to other requests.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "priority", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | asap | stat", formalDefinition="Indicates how quickly the ServiceRequest should be addressed with respect to other requests." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-priority")
     protected Enumeration<ServiceRequestPriority> priority;
@@ -606,17 +612,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Set this to true if the record is saying that the service/procedure should NOT be performed.
      */
-    @Child(name = "doNotPerform", type = {BooleanType.class}, order=8, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "doNotPerform", type = {BooleanType.class}, order=9, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="True if service/procedure should not be performed", formalDefinition="Set this to true if the record is saying that the service/procedure should NOT be performed." )
     protected BooleanType doNotPerform;
-
-    /**
-     * A code that classifies the service for searching, sorting and display purposes (e.g. "Surgical Procedure").
-     */
-    @Child(name = "category", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Classification of service", formalDefinition="A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\")." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/servicerequest-category")
-    protected List<CodeableConcept> category;
 
     /**
      * A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.
@@ -627,10 +625,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected CodeableConcept code;
 
     /**
-     * Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have a order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.
+     * Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.
      */
     @Child(name = "orderDetail", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Additional order information", formalDefinition="Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have a order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied." )
+    @Description(shortDefinition="Additional order information", formalDefinition="Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/servicerequest-orderdetail")
     protected List<CodeableConcept> orderDetail;
 
@@ -701,16 +699,16 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected CodeableConcept performerType;
 
     /**
-     * The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.
+     * The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.
      */
-    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, Patient.class, Device.class, RelatedPerson.class, HealthcareService.class, CareTeam.class}, order=19, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Requested perfomer", formalDefinition="The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc." )
-    protected Reference performer;
-
+    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class, RelatedPerson.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Requested performer", formalDefinition="The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc." )
+    protected List<Reference> performer;
     /**
-     * The actual object that is the target of the reference (The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
+     * The actual objects that are the target of the reference (The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
      */
-    protected Resource performerTarget;
+    protected List<Resource> performerTarget;
+
 
     /**
      * An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.
@@ -787,7 +785,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * Instructions in terms that are understood by the patient or consumer.
      */
     @Child(name = "patientInstruction", type = {StringType.class}, order=27, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Patient or consumer oriented instructions", formalDefinition="Instructions in terms that are understood by the patient or consumer." )
+    @Description(shortDefinition="Patient or consumer-oriented instructions", formalDefinition="Instructions in terms that are understood by the patient or consumer." )
     protected StringType patientInstruction;
 
     /**
@@ -802,7 +800,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected List<Provenance> relevantHistoryTarget;
 
 
-    private static final long serialVersionUID = 1305142790L;
+    private static final long serialVersionUID = 1742384872L;
 
   /**
    * Constructor
@@ -930,7 +928,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       if (this.instantiates == null)
         return false;
       for (UriType v : this.instantiates)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -1188,6 +1186,59 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
+     * @return {@link #category} (A code that classifies the service for searching, sorting and display purposes (e.g. "Surgical Procedure").)
+     */
+    public List<CodeableConcept> getCategory() { 
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      return this.category;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ServiceRequest setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
+    }
+
+    public boolean hasCategory() { 
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    public ServiceRequest addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
+     */
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
+    }
+
+    /**
      * @return {@link #priority} (Indicates how quickly the ServiceRequest should be addressed with respect to other requests.). This is the underlying object with id, value and extensions. The accessor "getPriority" gives direct access to the value
      */
     public Enumeration<ServiceRequestPriority> getPriorityElement() { 
@@ -1282,59 +1333,6 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #category} (A code that classifies the service for searching, sorting and display purposes (e.g. "Surgical Procedure").)
-     */
-    public List<CodeableConcept> getCategory() { 
-      if (this.category == null)
-        this.category = new ArrayList<CodeableConcept>();
-      return this.category;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ServiceRequest setCategory(List<CodeableConcept> theCategory) { 
-      this.category = theCategory;
-      return this;
-    }
-
-    public boolean hasCategory() { 
-      if (this.category == null)
-        return false;
-      for (CodeableConcept item : this.category)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public CodeableConcept addCategory() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.category == null)
-        this.category = new ArrayList<CodeableConcept>();
-      this.category.add(t);
-      return t;
-    }
-
-    public ServiceRequest addCategory(CodeableConcept t) { //3
-      if (t == null)
-        return this;
-      if (this.category == null)
-        this.category = new ArrayList<CodeableConcept>();
-      this.category.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
-     */
-    public CodeableConcept getCategoryFirstRep() { 
-      if (getCategory().isEmpty()) {
-        addCategory();
-      }
-      return getCategory().get(0);
-    }
-
-    /**
      * @return {@link #code} (A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.)
      */
     public CodeableConcept getCode() { 
@@ -1359,7 +1357,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #orderDetail} (Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have a order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.)
+     * @return {@link #orderDetail} (Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.)
      */
     public List<CodeableConcept> getOrderDetail() { 
       if (this.orderDetail == null)
@@ -1500,39 +1498,45 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * @return {@link #occurrence} (The date/time at which the requested service should occur.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The date/time at which the requested service should occur.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (The date/time at which the requested service should occur.)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -1543,6 +1547,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * @param value {@link #occurrence} (The date/time at which the requested service should occur.)
      */
     public ServiceRequest setOccurrence(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new Error("Not the right type for ServiceRequest.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1558,26 +1564,30 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * @return {@link #asNeeded} (If a CodeableConcept is present, it indicates the pre-condition for performing the service.  For example "pain", "on flare-up", etc.)
      */
     public BooleanType getAsNeededBooleanType() throws FHIRException { 
+      if (this.asNeeded == null)
+        return null;
       if (!(this.asNeeded instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (BooleanType) this.asNeeded;
     }
 
     public boolean hasAsNeededBooleanType() { 
-      return this.asNeeded instanceof BooleanType;
+      return this != null && this.asNeeded instanceof BooleanType;
     }
 
     /**
      * @return {@link #asNeeded} (If a CodeableConcept is present, it indicates the pre-condition for performing the service.  For example "pain", "on flare-up", etc.)
      */
     public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
+      if (this.asNeeded == null)
+        return null;
       if (!(this.asNeeded instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;
     }
 
     public boolean hasAsNeededCodeableConcept() { 
-      return this.asNeeded instanceof CodeableConcept;
+      return this != null && this.asNeeded instanceof CodeableConcept;
     }
 
     public boolean hasAsNeeded() { 
@@ -1588,6 +1598,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
      * @param value {@link #asNeeded} (If a CodeableConcept is present, it indicates the pre-condition for performing the service.  For example "pain", "on flare-up", etc.)
      */
     public ServiceRequest setAsNeeded(Type value) { 
+      if (value != null && !(value instanceof BooleanType || value instanceof CodeableConcept))
+        throw new Error("Not the right type for ServiceRequest.asNeeded[x]: "+value.fhirType());
       this.asNeeded = value;
       return this;
     }
@@ -1705,42 +1717,66 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #performer} (The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
+     * @return {@link #performer} (The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
      */
-    public Reference getPerformer() { 
+    public List<Reference> getPerformer() { 
       if (this.performer == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ServiceRequest.performer");
-        else if (Configuration.doAutoCreate())
-          this.performer = new Reference(); // cc
+        this.performer = new ArrayList<Reference>();
       return this.performer;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ServiceRequest setPerformer(List<Reference> thePerformer) { 
+      this.performer = thePerformer;
+      return this;
+    }
+
     public boolean hasPerformer() { 
-      return this.performer != null && !this.performer.isEmpty();
+      if (this.performer == null)
+        return false;
+      for (Reference item : this.performer)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    /**
-     * @param value {@link #performer} (The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
-     */
-    public ServiceRequest setPerformer(Reference value) { 
-      this.performer = value;
+    public Reference addPerformer() { //3
+      Reference t = new Reference();
+      if (this.performer == null)
+        this.performer = new ArrayList<Reference>();
+      this.performer.add(t);
+      return t;
+    }
+
+    public ServiceRequest addPerformer(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.performer == null)
+        this.performer = new ArrayList<Reference>();
+      this.performer.add(t);
       return this;
     }
 
     /**
-     * @return {@link #performer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
+     * @return The first repetition of repeating field {@link #performer}, creating it if it does not already exist
      */
-    public Resource getPerformerTarget() { 
+    public Reference getPerformerFirstRep() { 
+      if (getPerformer().isEmpty()) {
+        addPerformer();
+      }
+      return getPerformer().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getPerformerTarget() { 
+      if (this.performerTarget == null)
+        this.performerTarget = new ArrayList<Resource>();
       return this.performerTarget;
-    }
-
-    /**
-     * @param value {@link #performer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.)
-     */
-    public ServiceRequest setPerformerTarget(Resource value) { 
-      this.performerTarget = value;
-      return this;
     }
 
     /**
@@ -2299,11 +2335,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         children.add(new Property("requisition", "Identifier", "A shared identifier common to all service requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier.", 0, 1, requisition));
         children.add(new Property("status", "code", "The status of the order.", 0, 1, status));
         children.add(new Property("intent", "code", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent));
+        children.add(new Property("category", "CodeableConcept", "A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\").", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("priority", "code", "Indicates how quickly the ServiceRequest should be addressed with respect to other requests.", 0, 1, priority));
         children.add(new Property("doNotPerform", "boolean", "Set this to true if the record is saying that the service/procedure should NOT be performed.", 0, 1, doNotPerform));
-        children.add(new Property("category", "CodeableConcept", "A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\").", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("code", "CodeableConcept", "A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.", 0, 1, code));
-        children.add(new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have a order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail));
+        children.add(new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail));
         children.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter or episode of care that provides additional information about the healthcare context in which this request is made.", 0, 1, context));
         children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence));
@@ -2311,7 +2347,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         children.add(new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn));
         children.add(new Property("requester", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson|Device)", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester));
         children.add(new Property("performerType", "CodeableConcept", "Desired type of performer for doing the requested service.", 0, 1, performerType));
-        children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|Patient|Device|RelatedPerson|HealthcareService|CareTeam)", "The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, 1, performer));
+        children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer));
         children.add(new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance));
@@ -2333,11 +2369,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case 395923612: /*requisition*/  return new Property("requisition", "Identifier", "A shared identifier common to all service requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier.", 0, 1, requisition);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the order.", 0, 1, status);
         case -1183762788: /*intent*/  return new Property("intent", "code", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\").", 0, java.lang.Integer.MAX_VALUE, category);
         case -1165461084: /*priority*/  return new Property("priority", "code", "Indicates how quickly the ServiceRequest should be addressed with respect to other requests.", 0, 1, priority);
         case -1788508167: /*doNotPerform*/  return new Property("doNotPerform", "boolean", "Set this to true if the record is saying that the service/procedure should NOT be performed.", 0, 1, doNotPerform);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\").", 0, java.lang.Integer.MAX_VALUE, category);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.", 0, 1, code);
-        case 1187338559: /*orderDetail*/  return new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have a order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail);
+        case 1187338559: /*orderDetail*/  return new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter or episode of care that provides additional information about the healthcare context in which this request is made.", 0, 1, context);
         case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence);
@@ -2352,7 +2388,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn);
         case 693933948: /*requester*/  return new Property("requester", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson|Device)", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester);
         case -901444568: /*performerType*/  return new Property("performerType", "CodeableConcept", "Desired type of performer for doing the requested service.", 0, 1, performerType);
-        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|Patient|Device|RelatedPerson|HealthcareService|CareTeam)", "The desired perfomer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, 1, performer);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer);
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 73049818: /*insurance*/  return new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance);
@@ -2377,9 +2413,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case 395923612: /*requisition*/ return this.requisition == null ? new Base[0] : new Base[] {this.requisition}; // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ServiceRequestStatus>
         case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<ServiceRequestIntent>
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<ServiceRequestPriority>
         case -1788508167: /*doNotPerform*/ return this.doNotPerform == null ? new Base[0] : new Base[] {this.doNotPerform}; // BooleanType
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 1187338559: /*orderDetail*/ return this.orderDetail == null ? new Base[0] : this.orderDetail.toArray(new Base[this.orderDetail.size()]); // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
@@ -2389,7 +2425,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1500852503: /*authoredOn*/ return this.authoredOn == null ? new Base[0] : new Base[] {this.authoredOn}; // DateTimeType
         case 693933948: /*requester*/ return this.requester == null ? new Base[0] : new Base[] {this.requester}; // Reference
         case -901444568: /*performerType*/ return this.performerType == null ? new Base[0] : new Base[] {this.performerType}; // CodeableConcept
-        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // Reference
         case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
         case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 73049818: /*insurance*/ return this.insurance == null ? new Base[0] : this.insurance.toArray(new Base[this.insurance.size()]); // Reference
@@ -2430,15 +2466,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           value = new ServiceRequestIntentEnumFactory().fromType(castToCode(value));
           this.intent = (Enumeration) value; // Enumeration<ServiceRequestIntent>
           return value;
+        case 50511102: // category
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
         case -1165461084: // priority
           value = new ServiceRequestPriorityEnumFactory().fromType(castToCode(value));
           this.priority = (Enumeration) value; // Enumeration<ServiceRequestPriority>
           return value;
         case -1788508167: // doNotPerform
           this.doNotPerform = castToBoolean(value); // BooleanType
-          return value;
-        case 50511102: // category
-          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -2468,7 +2504,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.performerType = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 481140686: // performer
-          this.performer = castToReference(value); // Reference
+          this.getPerformer().add(castToReference(value)); // Reference
           return value;
         case 722137681: // reasonCode
           this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
@@ -2520,13 +2556,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         } else if (name.equals("intent")) {
           value = new ServiceRequestIntentEnumFactory().fromType(castToCode(value));
           this.intent = (Enumeration) value; // Enumeration<ServiceRequestIntent>
+        } else if (name.equals("category")) {
+          this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("priority")) {
           value = new ServiceRequestPriorityEnumFactory().fromType(castToCode(value));
           this.priority = (Enumeration) value; // Enumeration<ServiceRequestPriority>
         } else if (name.equals("doNotPerform")) {
           this.doNotPerform = castToBoolean(value); // BooleanType
-        } else if (name.equals("category")) {
-          this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("orderDetail")) {
@@ -2546,7 +2582,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         } else if (name.equals("performerType")) {
           this.performerType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("performer")) {
-          this.performer = castToReference(value); // Reference
+          this.getPerformer().add(castToReference(value));
         } else if (name.equals("reasonCode")) {
           this.getReasonCode().add(castToCodeableConcept(value));
         } else if (name.equals("reasonReference")) {
@@ -2580,9 +2616,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case 395923612:  return getRequisition(); 
         case -892481550:  return getStatusElement();
         case -1183762788:  return getIntentElement();
+        case 50511102:  return addCategory(); 
         case -1165461084:  return getPriorityElement();
         case -1788508167:  return getDoNotPerformElement();
-        case 50511102:  return addCategory(); 
         case 3059181:  return getCode(); 
         case 1187338559:  return addOrderDetail(); 
         case -1867885268:  return getSubject(); 
@@ -2594,7 +2630,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1500852503:  return getAuthoredOnElement();
         case 693933948:  return getRequester(); 
         case -901444568:  return getPerformerType(); 
-        case 481140686:  return getPerformer(); 
+        case 481140686:  return addPerformer(); 
         case 722137681:  return addReasonCode(); 
         case -1146218137:  return addReasonReference(); 
         case 73049818:  return addInsurance(); 
@@ -2619,9 +2655,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case 395923612: /*requisition*/ return new String[] {"Identifier"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -1183762788: /*intent*/ return new String[] {"code"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case -1165461084: /*priority*/ return new String[] {"code"};
         case -1788508167: /*doNotPerform*/ return new String[] {"boolean"};
-        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 1187338559: /*orderDetail*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
@@ -2670,14 +2706,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         else if (name.equals("intent")) {
           throw new FHIRException("Cannot call addChild on a primitive type ServiceRequest.intent");
         }
+        else if (name.equals("category")) {
+          return addCategory();
+        }
         else if (name.equals("priority")) {
           throw new FHIRException("Cannot call addChild on a primitive type ServiceRequest.priority");
         }
         else if (name.equals("doNotPerform")) {
           throw new FHIRException("Cannot call addChild on a primitive type ServiceRequest.doNotPerform");
-        }
-        else if (name.equals("category")) {
-          return addCategory();
         }
         else if (name.equals("code")) {
           this.code = new CodeableConcept();
@@ -2726,8 +2762,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return this.performerType;
         }
         else if (name.equals("performer")) {
-          this.performer = new Reference();
-          return this.performer;
+          return addPerformer();
         }
         else if (name.equals("reasonCode")) {
           return addReasonCode();
@@ -2791,13 +2826,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         dst.requisition = requisition == null ? null : requisition.copy();
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
-        dst.priority = priority == null ? null : priority.copy();
-        dst.doNotPerform = doNotPerform == null ? null : doNotPerform.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
         };
+        dst.priority = priority == null ? null : priority.copy();
+        dst.doNotPerform = doNotPerform == null ? null : doNotPerform.copy();
         dst.code = code == null ? null : code.copy();
         if (orderDetail != null) {
           dst.orderDetail = new ArrayList<CodeableConcept>();
@@ -2811,7 +2846,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
         dst.requester = requester == null ? null : requester.copy();
         dst.performerType = performerType == null ? null : performerType.copy();
-        dst.performer = performer == null ? null : performer.copy();
+        if (performer != null) {
+          dst.performer = new ArrayList<Reference>();
+          for (Reference i : performer)
+            dst.performer.add(i.copy());
+        };
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
@@ -2869,8 +2908,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         ServiceRequest o = (ServiceRequest) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(instantiates, o.instantiates, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(requisition, o.requisition, true)
-           && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
-           && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(category, o.category, true) && compareDeep(code, o.code, true)
+           && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true)
+           && compareDeep(priority, o.priority, true) && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(code, o.code, true)
            && compareDeep(orderDetail, o.orderDetail, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
            && compareDeep(occurrence, o.occurrence, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(authoredOn, o.authoredOn, true)
            && compareDeep(requester, o.requester, true) && compareDeep(performerType, o.performerType, true)
@@ -2895,7 +2934,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiates, basedOn
-          , replaces, requisition, status, intent, priority, doNotPerform, category, code
+          , replaces, requisition, status, intent, category, priority, doNotPerform, code
           , orderDetail, subject, context, occurrence, asNeeded, authoredOn, requester, performerType
           , performer, reasonCode, reasonReference, insurance, supportingInfo, specimen, bodySite
           , note, patientInstruction, relevantHistory);
@@ -3015,17 +3054,17 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
  /**
    * Search parameter: <b>performer</b>
    * <p>
-   * Description: <b>Requested perfomer</b><br>
+   * Description: <b>Requested performer</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ServiceRequest.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="ServiceRequest.performer", description="Requested perfomer", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={CareTeam.class, Device.class, HealthcareService.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="performer", path="ServiceRequest.performer", description="Requested performer", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={CareTeam.class, Device.class, HealthcareService.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
    * <p>
-   * Description: <b>Requested perfomer</b><br>
+   * Description: <b>Requested performer</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ServiceRequest.performer</b><br>
    * </p>

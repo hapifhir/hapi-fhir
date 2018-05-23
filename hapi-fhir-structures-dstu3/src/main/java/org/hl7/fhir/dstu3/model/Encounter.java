@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
  */
@@ -476,15 +477,25 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #period} (The time that the episode was in the specified status.)
          */
-        public StatusHistoryComponent setPeriod(Period value) { 
+        public StatusHistoryComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, java.lang.Integer.MAX_VALUE, status));
-          childrenList.add(new Property("period", "Period", "The time that the episode was in the specified status.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status));
+          children.add(new Property("period", "Period", "The time that the episode was in the specified status.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -892481550: /*status*/  return new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status);
+          case -991726143: /*period*/  return new Property("period", "Period", "The time that the episode was in the specified status.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -566,22 +577,22 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof StatusHistoryComponent))
+        if (!(other_ instanceof StatusHistoryComponent))
           return false;
-        StatusHistoryComponent o = (StatusHistoryComponent) other;
+        StatusHistoryComponent o = (StatusHistoryComponent) other_;
         return compareDeep(status, o.status, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof StatusHistoryComponent))
+        if (!(other_ instanceof StatusHistoryComponent))
           return false;
-        StatusHistoryComponent o = (StatusHistoryComponent) other;
+        StatusHistoryComponent o = (StatusHistoryComponent) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -650,7 +661,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #class_} (inpatient | outpatient | ambulatory | emergency +.)
          */
-        public ClassHistoryComponent setClass_(Coding value) { 
+        public ClassHistoryComponent setClass_(Coding value)  { 
           this.class_ = value;
           return this;
         }
@@ -674,15 +685,25 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #period} (The time that the episode was in the specified class.)
          */
-        public ClassHistoryComponent setPeriod(Period value) { 
+        public ClassHistoryComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, java.lang.Integer.MAX_VALUE, class_));
-          childrenList.add(new Property("period", "Period", "The time that the episode was in the specified class.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_));
+          children.add(new Property("period", "Period", "The time that the episode was in the specified class.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 94742904: /*class*/  return new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_);
+          case -991726143: /*period*/  return new Property("period", "Period", "The time that the episode was in the specified class.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -763,22 +784,22 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ClassHistoryComponent))
+        if (!(other_ instanceof ClassHistoryComponent))
           return false;
-        ClassHistoryComponent o = (ClassHistoryComponent) other;
+        ClassHistoryComponent o = (ClassHistoryComponent) other_;
         return compareDeep(class_, o.class_, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ClassHistoryComponent))
+        if (!(other_ instanceof ClassHistoryComponent))
           return false;
-        ClassHistoryComponent o = (ClassHistoryComponent) other;
+        ClassHistoryComponent o = (ClassHistoryComponent) other_;
         return true;
       }
 
@@ -903,7 +924,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #period} (The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.)
          */
-        public EncounterParticipantComponent setPeriod(Period value) { 
+        public EncounterParticipantComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
@@ -927,7 +948,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #individual} (Persons involved in the encounter other than the patient.)
          */
-        public EncounterParticipantComponent setIndividual(Reference value) { 
+        public EncounterParticipantComponent setIndividual(Reference value)  { 
           this.individual = value;
           return this;
         }
@@ -947,11 +968,22 @@ public class Encounter extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "Role of participant in encounter.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("period", "Period", "The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("individual", "Reference(Practitioner|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, java.lang.Integer.MAX_VALUE, individual));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "Role of participant in encounter.", 0, java.lang.Integer.MAX_VALUE, type));
+          children.add(new Property("period", "Period", "The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.", 0, 1, period));
+          children.add(new Property("individual", "Reference(Practitioner|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, 1, individual));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Role of participant in encounter.", 0, java.lang.Integer.MAX_VALUE, type);
+          case -991726143: /*period*/  return new Property("period", "Period", "The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.", 0, 1, period);
+          case -46292327: /*individual*/  return new Property("individual", "Reference(Practitioner|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, 1, individual);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1048,23 +1080,23 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EncounterParticipantComponent))
+        if (!(other_ instanceof EncounterParticipantComponent))
           return false;
-        EncounterParticipantComponent o = (EncounterParticipantComponent) other;
+        EncounterParticipantComponent o = (EncounterParticipantComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(period, o.period, true) && compareDeep(individual, o.individual, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EncounterParticipantComponent))
+        if (!(other_ instanceof EncounterParticipantComponent))
           return false;
-        EncounterParticipantComponent o = (EncounterParticipantComponent) other;
+        EncounterParticipantComponent o = (EncounterParticipantComponent) other_;
         return true;
       }
 
@@ -1145,7 +1177,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #condition} (Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.)
          */
-        public DiagnosisComponent setCondition(Reference value) { 
+        public DiagnosisComponent setCondition(Reference value)  { 
           this.condition = value;
           return this;
         }
@@ -1184,7 +1216,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #role} (Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).)
          */
-        public DiagnosisComponent setRole(CodeableConcept value) { 
+        public DiagnosisComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -1234,11 +1266,22 @@ public class Encounter extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("condition", "Reference(Condition|Procedure)", "Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.", 0, java.lang.Integer.MAX_VALUE, condition));
-          childrenList.add(new Property("role", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, java.lang.Integer.MAX_VALUE, rank));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("condition", "Reference(Condition|Procedure)", "Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.", 0, 1, condition));
+          children.add(new Property("role", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, 1, role));
+          children.add(new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, 1, rank));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -861311717: /*condition*/  return new Property("condition", "Reference(Condition|Procedure)", "Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.", 0, 1, condition);
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, 1, role);
+          case 3492908: /*rank*/  return new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, 1, rank);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1331,23 +1374,23 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareDeep(condition, o.condition, true) && compareDeep(role, o.role, true) && compareDeep(rank, o.rank, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareValues(rank, o.rank, true);
       }
 
@@ -1471,7 +1514,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #preAdmissionIdentifier} (Pre-admission identifier.)
          */
-        public EncounterHospitalizationComponent setPreAdmissionIdentifier(Identifier value) { 
+        public EncounterHospitalizationComponent setPreAdmissionIdentifier(Identifier value)  { 
           this.preAdmissionIdentifier = value;
           return this;
         }
@@ -1495,7 +1538,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #origin} (The location from which the patient came before admission.)
          */
-        public EncounterHospitalizationComponent setOrigin(Reference value) { 
+        public EncounterHospitalizationComponent setOrigin(Reference value)  { 
           this.origin = value;
           return this;
         }
@@ -1539,7 +1582,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #admitSource} (From where patient was admitted (physician referral, transfer).)
          */
-        public EncounterHospitalizationComponent setAdmitSource(CodeableConcept value) { 
+        public EncounterHospitalizationComponent setAdmitSource(CodeableConcept value)  { 
           this.admitSource = value;
           return this;
         }
@@ -1563,7 +1606,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #reAdmission} (Whether this hospitalization is a readmission and why if known.)
          */
-        public EncounterHospitalizationComponent setReAdmission(CodeableConcept value) { 
+        public EncounterHospitalizationComponent setReAdmission(CodeableConcept value)  { 
           this.reAdmission = value;
           return this;
         }
@@ -1746,7 +1789,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #destination} (Location to which the patient is discharged.)
          */
-        public EncounterHospitalizationComponent setDestination(Reference value) { 
+        public EncounterHospitalizationComponent setDestination(Reference value)  { 
           this.destination = value;
           return this;
         }
@@ -1790,22 +1833,39 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #dischargeDisposition} (Category or kind of location after discharge.)
          */
-        public EncounterHospitalizationComponent setDischargeDisposition(CodeableConcept value) { 
+        public EncounterHospitalizationComponent setDischargeDisposition(CodeableConcept value)  { 
           this.dischargeDisposition = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("preAdmissionIdentifier", "Identifier", "Pre-admission identifier.", 0, java.lang.Integer.MAX_VALUE, preAdmissionIdentifier));
-          childrenList.add(new Property("origin", "Reference(Location)", "The location from which the patient came before admission.", 0, java.lang.Integer.MAX_VALUE, origin));
-          childrenList.add(new Property("admitSource", "CodeableConcept", "From where patient was admitted (physician referral, transfer).", 0, java.lang.Integer.MAX_VALUE, admitSource));
-          childrenList.add(new Property("reAdmission", "CodeableConcept", "Whether this hospitalization is a readmission and why if known.", 0, java.lang.Integer.MAX_VALUE, reAdmission));
-          childrenList.add(new Property("dietPreference", "CodeableConcept", "Diet preferences reported by the patient.", 0, java.lang.Integer.MAX_VALUE, dietPreference));
-          childrenList.add(new Property("specialCourtesy", "CodeableConcept", "Special courtesies (VIP, board member).", 0, java.lang.Integer.MAX_VALUE, specialCourtesy));
-          childrenList.add(new Property("specialArrangement", "CodeableConcept", "Any special requests that have been made for this hospitalization encounter, such as the provision of specific equipment or other things.", 0, java.lang.Integer.MAX_VALUE, specialArrangement));
-          childrenList.add(new Property("destination", "Reference(Location)", "Location to which the patient is discharged.", 0, java.lang.Integer.MAX_VALUE, destination));
-          childrenList.add(new Property("dischargeDisposition", "CodeableConcept", "Category or kind of location after discharge.", 0, java.lang.Integer.MAX_VALUE, dischargeDisposition));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("preAdmissionIdentifier", "Identifier", "Pre-admission identifier.", 0, 1, preAdmissionIdentifier));
+          children.add(new Property("origin", "Reference(Location)", "The location from which the patient came before admission.", 0, 1, origin));
+          children.add(new Property("admitSource", "CodeableConcept", "From where patient was admitted (physician referral, transfer).", 0, 1, admitSource));
+          children.add(new Property("reAdmission", "CodeableConcept", "Whether this hospitalization is a readmission and why if known.", 0, 1, reAdmission));
+          children.add(new Property("dietPreference", "CodeableConcept", "Diet preferences reported by the patient.", 0, java.lang.Integer.MAX_VALUE, dietPreference));
+          children.add(new Property("specialCourtesy", "CodeableConcept", "Special courtesies (VIP, board member).", 0, java.lang.Integer.MAX_VALUE, specialCourtesy));
+          children.add(new Property("specialArrangement", "CodeableConcept", "Any special requests that have been made for this hospitalization encounter, such as the provision of specific equipment or other things.", 0, java.lang.Integer.MAX_VALUE, specialArrangement));
+          children.add(new Property("destination", "Reference(Location)", "Location to which the patient is discharged.", 0, 1, destination));
+          children.add(new Property("dischargeDisposition", "CodeableConcept", "Category or kind of location after discharge.", 0, 1, dischargeDisposition));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -965394961: /*preAdmissionIdentifier*/  return new Property("preAdmissionIdentifier", "Identifier", "Pre-admission identifier.", 0, 1, preAdmissionIdentifier);
+          case -1008619738: /*origin*/  return new Property("origin", "Reference(Location)", "The location from which the patient came before admission.", 0, 1, origin);
+          case 538887120: /*admitSource*/  return new Property("admitSource", "CodeableConcept", "From where patient was admitted (physician referral, transfer).", 0, 1, admitSource);
+          case 669348630: /*reAdmission*/  return new Property("reAdmission", "CodeableConcept", "Whether this hospitalization is a readmission and why if known.", 0, 1, reAdmission);
+          case -1360641041: /*dietPreference*/  return new Property("dietPreference", "CodeableConcept", "Diet preferences reported by the patient.", 0, java.lang.Integer.MAX_VALUE, dietPreference);
+          case 1583588345: /*specialCourtesy*/  return new Property("specialCourtesy", "CodeableConcept", "Special courtesies (VIP, board member).", 0, java.lang.Integer.MAX_VALUE, specialCourtesy);
+          case 47410321: /*specialArrangement*/  return new Property("specialArrangement", "CodeableConcept", "Any special requests that have been made for this hospitalization encounter, such as the provision of specific equipment or other things.", 0, java.lang.Integer.MAX_VALUE, specialArrangement);
+          case -1429847026: /*destination*/  return new Property("destination", "Reference(Location)", "Location to which the patient is discharged.", 0, 1, destination);
+          case 528065941: /*dischargeDisposition*/  return new Property("dischargeDisposition", "CodeableConcept", "Category or kind of location after discharge.", 0, 1, dischargeDisposition);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1986,12 +2046,12 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EncounterHospitalizationComponent))
+        if (!(other_ instanceof EncounterHospitalizationComponent))
           return false;
-        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other;
+        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other_;
         return compareDeep(preAdmissionIdentifier, o.preAdmissionIdentifier, true) && compareDeep(origin, o.origin, true)
            && compareDeep(admitSource, o.admitSource, true) && compareDeep(reAdmission, o.reAdmission, true)
            && compareDeep(dietPreference, o.dietPreference, true) && compareDeep(specialCourtesy, o.specialCourtesy, true)
@@ -2000,12 +2060,12 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EncounterHospitalizationComponent))
+        if (!(other_ instanceof EncounterHospitalizationComponent))
           return false;
-        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other;
+        EncounterHospitalizationComponent o = (EncounterHospitalizationComponent) other_;
         return true;
       }
 
@@ -2087,7 +2147,7 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #location} (The location where the encounter takes place.)
          */
-        public EncounterLocationComponent setLocation(Reference value) { 
+        public EncounterLocationComponent setLocation(Reference value)  { 
           this.location = value;
           return this;
         }
@@ -2180,16 +2240,27 @@ public class Encounter extends DomainResource {
         /**
          * @param value {@link #period} (Time period during which the patient was present at the location.)
          */
-        public EncounterLocationComponent setPeriod(Period value) { 
+        public EncounterLocationComponent setPeriod(Period value)  { 
           this.period = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("location", "Reference(Location)", "The location where the encounter takes place.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, java.lang.Integer.MAX_VALUE, status));
-          childrenList.add(new Property("period", "Period", "Time period during which the patient was present at the location.", 0, java.lang.Integer.MAX_VALUE, period));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("location", "Reference(Location)", "The location where the encounter takes place.", 0, 1, location));
+          children.add(new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, 1, status));
+          children.add(new Property("period", "Period", "Time period during which the patient was present at the location.", 0, 1, period));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The location where the encounter takes place.", 0, 1, location);
+          case -892481550: /*status*/  return new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, 1, status);
+          case -991726143: /*period*/  return new Property("period", "Period", "Time period during which the patient was present at the location.", 0, 1, period);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2284,23 +2355,23 @@ public class Encounter extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EncounterLocationComponent))
+        if (!(other_ instanceof EncounterLocationComponent))
           return false;
-        EncounterLocationComponent o = (EncounterLocationComponent) other;
+        EncounterLocationComponent o = (EncounterLocationComponent) other_;
         return compareDeep(location, o.location, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EncounterLocationComponent))
+        if (!(other_ instanceof EncounterLocationComponent))
           return false;
-        EncounterLocationComponent o = (EncounterLocationComponent) other;
+        EncounterLocationComponent o = (EncounterLocationComponent) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -2692,7 +2763,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #class_} (inpatient | outpatient | ambulatory | emergency +.)
      */
-    public Encounter setClass_(Coding value) { 
+    public Encounter setClass_(Coding value)  { 
       this.class_ = value;
       return this;
     }
@@ -2824,7 +2895,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #priority} (Indicates the urgency of the encounter.)
      */
-    public Encounter setPriority(CodeableConcept value) { 
+    public Encounter setPriority(CodeableConcept value)  { 
       this.priority = value;
       return this;
     }
@@ -2848,7 +2919,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #subject} (The patient ro group present at the encounter.)
      */
-    public Encounter setSubject(Reference value) { 
+    public Encounter setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -3090,7 +3161,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #appointment} (The appointment that scheduled this encounter.)
      */
-    public Encounter setAppointment(Reference value) { 
+    public Encounter setAppointment(Reference value)  { 
       this.appointment = value;
       return this;
     }
@@ -3134,7 +3205,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #period} (The start and end time of the encounter.)
      */
-    public Encounter setPeriod(Period value) { 
+    public Encounter setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -3158,7 +3229,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #length} (Quantity of time the encounter lasted. This excludes the time during leaves of absence.)
      */
-    public Encounter setLength(Duration value) { 
+    public Encounter setLength(Duration value)  { 
       this.length = value;
       return this;
     }
@@ -3363,7 +3434,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #hospitalization} (Details about the admission to a healthcare service.)
      */
-    public Encounter setHospitalization(EncounterHospitalizationComponent value) { 
+    public Encounter setHospitalization(EncounterHospitalizationComponent value)  { 
       this.hospitalization = value;
       return this;
     }
@@ -3440,7 +3511,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #serviceProvider} (An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.)
      */
-    public Encounter setServiceProvider(Reference value) { 
+    public Encounter setServiceProvider(Reference value)  { 
       this.serviceProvider = value;
       return this;
     }
@@ -3484,7 +3555,7 @@ This would be used for a case where an admission starts of as an emergency encou
     /**
      * @param value {@link #partOf} (Another Encounter of which this encounter is a part of (administratively or in time).)
      */
-    public Encounter setPartOf(Reference value) { 
+    public Encounter setPartOf(Reference value)  { 
       this.partOf = value;
       return this;
     }
@@ -3509,29 +3580,58 @@ This would be used for a case where an admission starts of as an emergency encou
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier(s) by which this encounter is known.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
-        childrenList.add(new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, java.lang.Integer.MAX_VALUE, class_));
-        childrenList.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
-        childrenList.add(new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient ro group present at the encounter.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
-        childrenList.add(new Property("incomingReferral", "Reference(ReferralRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
-        childrenList.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
-        childrenList.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, java.lang.Integer.MAX_VALUE, appointment));
-        childrenList.add(new Property("period", "Period", "The start and end time of the encounter.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, java.lang.Integer.MAX_VALUE, length));
-        childrenList.add(new Property("reason", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("diagnosis", "", "The list of diagnosis relevant to this encounter.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
-        childrenList.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account));
-        childrenList.add(new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, java.lang.Integer.MAX_VALUE, hospitalization));
-        childrenList.add(new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, java.lang.Integer.MAX_VALUE, serviceProvider));
-        childrenList.add(new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, java.lang.Integer.MAX_VALUE, partOf));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier(s) by which this encounter is known.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status));
+        children.add(new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
+        children.add(new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_));
+        children.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
+        children.add(new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type));
+        children.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority));
+        children.add(new Property("subject", "Reference(Patient|Group)", "The patient ro group present at the encounter.", 0, 1, subject));
+        children.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
+        children.add(new Property("incomingReferral", "Reference(ReferralRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
+        children.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
+        children.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment));
+        children.add(new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period));
+        children.add(new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, 1, length));
+        children.add(new Property("reason", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reason));
+        children.add(new Property("diagnosis", "", "The list of diagnosis relevant to this encounter.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
+        children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account));
+        children.add(new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization));
+        children.add(new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location));
+        children.add(new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, 1, serviceProvider));
+        children.add(new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, 1, partOf));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier(s) by which this encounter is known.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status);
+        case -986695614: /*statusHistory*/  return new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory);
+        case 94742904: /*class*/  return new Property("class", "Coding", "inpatient | outpatient | ambulatory | emergency +.", 0, 1, class_);
+        case 962575356: /*classHistory*/  return new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.\n\nThis would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type);
+        case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient ro group present at the encounter.", 0, 1, subject);
+        case -1892140189: /*episodeOfCare*/  return new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare);
+        case -1258204701: /*incomingReferral*/  return new Property("incomingReferral", "Reference(ReferralRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral);
+        case 767422259: /*participant*/  return new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant);
+        case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment);
+        case -991726143: /*period*/  return new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period);
+        case -1106363674: /*length*/  return new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, 1, length);
+        case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reason);
+        case 1196993265: /*diagnosis*/  return new Property("diagnosis", "", "The list of diagnosis relevant to this encounter.", 0, java.lang.Integer.MAX_VALUE, diagnosis);
+        case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account);
+        case 1057894634: /*hospitalization*/  return new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization);
+        case 1901043637: /*location*/  return new Property("location", "", "List of locations where  the patient has been during this encounter.", 0, java.lang.Integer.MAX_VALUE, location);
+        case 243182534: /*serviceProvider*/  return new Property("serviceProvider", "Reference(Organization)", "An organization that is in charge of maintaining the information of this Encounter (e.g. who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location's Organization.", 0, 1, serviceProvider);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Encounter)", "Another Encounter of which this encounter is a part of (administratively or in time).", 0, 1, partOf);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3902,12 +4002,12 @@ This would be used for a case where an admission starts of as an emergency encou
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Encounter))
+        if (!(other_ instanceof Encounter))
           return false;
-        Encounter o = (Encounter) other;
+        Encounter o = (Encounter) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
            && compareDeep(class_, o.class_, true) && compareDeep(classHistory, o.classHistory, true) && compareDeep(type, o.type, true)
            && compareDeep(priority, o.priority, true) && compareDeep(subject, o.subject, true) && compareDeep(episodeOfCare, o.episodeOfCare, true)
@@ -3920,12 +4020,12 @@ This would be used for a case where an admission starts of as an emergency encou
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Encounter))
+        if (!(other_ instanceof Encounter))
           return false;
-        Encounter o = (Encounter) other;
+        Encounter o = (Encounter) other_;
         return compareValues(status, o.status, true);
       }
 

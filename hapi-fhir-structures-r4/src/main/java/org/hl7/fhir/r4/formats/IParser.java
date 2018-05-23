@@ -140,6 +140,8 @@ public interface IParser {
  * @throws IOException 
    */
   public Type parseType(InputStream input, String knownType) throws IOException, FHIRFormatError;
+  public Type parseAnyType(InputStream input, String knownType) throws IOException, FHIRFormatError;
+  
   /**
    * This is used to parse a type - a fragment of a resource. 
    * There's no reason to use this in production - it's used 

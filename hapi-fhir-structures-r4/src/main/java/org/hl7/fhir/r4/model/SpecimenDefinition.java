@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1209,26 +1209,30 @@ public class SpecimenDefinition extends DomainResource {
          * @return {@link #additive} (Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public CodeableConcept getAdditiveCodeableConcept() throws FHIRException { 
+          if (this.additive == null)
+            return null;
           if (!(this.additive instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (CodeableConcept) this.additive;
         }
 
         public boolean hasAdditiveCodeableConcept() { 
-          return this.additive instanceof CodeableConcept;
+          return this != null && this.additive instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #additive} (Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public Reference getAdditiveReference() throws FHIRException { 
+          if (this.additive == null)
+            return null;
           if (!(this.additive instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (Reference) this.additive;
         }
 
         public boolean hasAdditiveReference() { 
-          return this.additive instanceof Reference;
+          return this != null && this.additive instanceof Reference;
         }
 
         public boolean hasAdditive() { 
@@ -1239,6 +1243,8 @@ public class SpecimenDefinition extends DomainResource {
          * @param value {@link #additive} (Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
         public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent setAdditive(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for SpecimenDefinition.specimenToLab.containerAdditive.additive[x]: "+value.fhirType());
           this.additive = value;
           return this;
         }

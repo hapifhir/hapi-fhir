@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
  */
 @ResourceDef(name="Library", profile="http://hl7.org/fhir/Profile/Library")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "type", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "parameter", "dataRequirement", "content"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "status", "experimental", "type", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "contributor", "relatedArtifact", "parameter", "dataRequirement", "content"})
 public class Library extends MetadataResource {
 
     /**
@@ -58,99 +58,114 @@ public class Library extends MetadataResource {
     protected List<Identifier> identifier;
 
     /**
+     * An explanatory or alternate title for the library giving additional information about its content.
+     */
+    @Child(name = "subtitle", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Subordinate title of the library", formalDefinition="An explanatory or alternate title for the library giving additional information about its content." )
+    protected StringType subtitle;
+
+    /**
      * Identifies the type of library such as a Logic Library, Model Definition, Asset Collection, or Module Definition.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="logic-library | model-definition | asset-collection | module-definition", formalDefinition="Identifies the type of library such as a Logic Library, Model Definition, Asset Collection, or Module Definition." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/library-type")
     protected CodeableConcept type;
 
     /**
-     * Explaination of why this library is needed and why it has been designed as it has.
+     * A code or group definition that describes the intended subject of the contents of the library.
      */
-    @Child(name = "purpose", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this library is defined", formalDefinition="Explaination of why this library is needed and why it has been designed as it has." )
+    @Child(name = "subject", type = {CodeableConcept.class, Group.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Type of individual the library content is focused on", formalDefinition="A code or group definition that describes the intended subject of the contents of the library." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
+    protected Type subject;
+
+    /**
+     * Explanation of why this library is needed and why it has been designed as it has.
+     */
+    @Child(name = "purpose", type = {MarkdownType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this library is defined", formalDefinition="Explanation of why this library is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
      * A detailed description of how the library is used from a clinical perspective.
      */
-    @Child(name = "usage", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "usage", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Describes the clinical usage of the library", formalDefinition="A detailed description of how the library is used from a clinical perspective." )
     protected StringType usage;
 
     /**
+     * A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.
+     */
+    @Child(name = "copyright", type = {MarkdownType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library." )
+    protected MarkdownType copyright;
+
+    /**
      * The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    @Child(name = "approvalDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "approvalDate", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the library was approved by publisher", formalDefinition="The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
     protected DateType approvalDate;
 
     /**
-     * The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
      */
-    @Child(name = "lastReviewDate", type = {DateType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the library was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
+    @Child(name = "lastReviewDate", type = {DateType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="When the library was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
      * The period during which the library content was or is planned to be in active use.
      */
-    @Child(name = "effectivePeriod", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "effectivePeriod", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the library is expected to be used", formalDefinition="The period during which the library content was or is planned to be in active use." )
     protected Period effectivePeriod;
 
     /**
      * Descriptive topics related to the content of the library. Topics provide a high-level categorization of the library that can be useful for filtering and searching.
      */
-    @Child(name = "topic", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="E.g. Education, Treatment, Assessment, etc", formalDefinition="Descriptive topics related to the content of the library. Topics provide a high-level categorization of the library that can be useful for filtering and searching." )
+    @Child(name = "topic", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="E.g. Education, Treatment, Assessment, etc.", formalDefinition="Descriptive topics related to the content of the library. Topics provide a high-level categorization of the library that can be useful for filtering and searching." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/definition-topic")
     protected List<CodeableConcept> topic;
 
     /**
      * A contributor to the content of the library, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {Contributor.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contributor", type = {Contributor.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the library, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
-     * A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.
-     */
-    @Child(name = "copyright", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library." )
-    protected MarkdownType copyright;
-
-    /**
      * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional documentation, citations, etc.", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
      * The parameter element defines parameters used by the library.
      */
-    @Child(name = "parameter", type = {ParameterDefinition.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "parameter", type = {ParameterDefinition.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Parameters defined by the library", formalDefinition="The parameter element defines parameters used by the library." )
     protected List<ParameterDefinition> parameter;
 
     /**
      * Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library.
      */
-    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What data is referenced by this library", formalDefinition="Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library." )
     protected List<DataRequirement> dataRequirement;
 
     /**
      * The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.
      */
-    @Child(name = "content", type = {Attachment.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "content", type = {Attachment.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contents of the library, either embedded or referenced", formalDefinition="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
     protected List<Attachment> content;
 
-    private static final long serialVersionUID = -39463327L;
+    private static final long serialVersionUID = -608518478L;
 
   /**
    * Constructor
@@ -169,7 +184,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this library is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this library is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -189,7 +204,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this library is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this library is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public Library setUrlElement(UriType value) { 
       this.url = value;
@@ -197,14 +212,14 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this library is (or will be) published.
+     * @return An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this library is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this library is (or will be) published.
+     * @param value An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this library is (or will be) published.
      */
     public Library setUrl(String value) { 
       if (Utilities.noString(value))
@@ -418,6 +433,55 @@ public class Library extends MetadataResource {
     }
 
     /**
+     * @return {@link #subtitle} (An explanatory or alternate title for the library giving additional information about its content.). This is the underlying object with id, value and extensions. The accessor "getSubtitle" gives direct access to the value
+     */
+    public StringType getSubtitleElement() { 
+      if (this.subtitle == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.subtitle");
+        else if (Configuration.doAutoCreate())
+          this.subtitle = new StringType(); // bb
+      return this.subtitle;
+    }
+
+    public boolean hasSubtitleElement() { 
+      return this.subtitle != null && !this.subtitle.isEmpty();
+    }
+
+    public boolean hasSubtitle() { 
+      return this.subtitle != null && !this.subtitle.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subtitle} (An explanatory or alternate title for the library giving additional information about its content.). This is the underlying object with id, value and extensions. The accessor "getSubtitle" gives direct access to the value
+     */
+    public Library setSubtitleElement(StringType value) { 
+      this.subtitle = value;
+      return this;
+    }
+
+    /**
+     * @return An explanatory or alternate title for the library giving additional information about its content.
+     */
+    public String getSubtitle() { 
+      return this.subtitle == null ? null : this.subtitle.getValue();
+    }
+
+    /**
+     * @param value An explanatory or alternate title for the library giving additional information about its content.
+     */
+    public Library setSubtitle(String value) { 
+      if (Utilities.noString(value))
+        this.subtitle = null;
+      else {
+        if (this.subtitle == null)
+          this.subtitle = new StringType();
+        this.subtitle.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #status} (The status of this library. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<PublicationStatus> getStatusElement() { 
@@ -463,7 +527,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -483,7 +547,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public Library setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -491,14 +555,14 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public Library setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -532,7 +596,58 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the library was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #subject} (A code or group definition that describes the intended subject of the contents of the library.)
+     */
+    public Type getSubject() { 
+      return this.subject;
+    }
+
+    /**
+     * @return {@link #subject} (A code or group definition that describes the intended subject of the contents of the library.)
+     */
+    public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.subject;
+    }
+
+    public boolean hasSubjectCodeableConcept() { 
+      return this != null && this.subject instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #subject} (A code or group definition that describes the intended subject of the contents of the library.)
+     */
+    public Reference getSubjectReference() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (Reference) this.subject;
+    }
+
+    public boolean hasSubjectReference() { 
+      return this != null && this.subject instanceof Reference;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (A code or group definition that describes the intended subject of the contents of the library.)
+     */
+    public Library setSubject(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for Library.subject[x]: "+value.fhirType());
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date  (and optionally time) when the library was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -552,7 +667,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the library was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the library was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public Library setDateElement(DateTimeType value) { 
       this.date = value;
@@ -560,14 +675,14 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the library was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.
+     * @return The date  (and optionally time) when the library was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the library was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.
+     * @param value The date  (and optionally time) when the library was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.
      */
     public Library setDate(Date value) { 
       if (value == null)
@@ -581,7 +696,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the library.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the library.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -601,7 +716,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the library.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the library.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public Library setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -609,14 +724,14 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the library.
+     * @return The name of the organization or individual that published the library.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the library.
+     * @param value The name of the organization or individual that published the library.
      */
     public Library setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -627,6 +742,59 @@ public class Library extends MetadataResource {
         this.publisher.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
+     */
+    public List<ContactDetail> getContact() { 
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      return this.contact;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Library setContact(List<ContactDetail> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
+    public boolean hasContact() { 
+      if (this.contact == null)
+        return false;
+      for (ContactDetail item : this.contact)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      this.contact.add(t);
+      return t;
+    }
+
+    public Library addContact(ContactDetail t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      this.contact.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactDetail getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -675,226 +843,6 @@ public class Library extends MetadataResource {
           this.description = new MarkdownType();
         this.description.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #purpose} (Explaination of why this library is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public MarkdownType getPurposeElement() { 
-      if (this.purpose == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.purpose");
-        else if (Configuration.doAutoCreate())
-          this.purpose = new MarkdownType(); // bb
-      return this.purpose;
-    }
-
-    public boolean hasPurposeElement() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    public boolean hasPurpose() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    /**
-     * @param value {@link #purpose} (Explaination of why this library is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public Library setPurposeElement(MarkdownType value) { 
-      this.purpose = value;
-      return this;
-    }
-
-    /**
-     * @return Explaination of why this library is needed and why it has been designed as it has.
-     */
-    public String getPurpose() { 
-      return this.purpose == null ? null : this.purpose.getValue();
-    }
-
-    /**
-     * @param value Explaination of why this library is needed and why it has been designed as it has.
-     */
-    public Library setPurpose(String value) { 
-      if (value == null)
-        this.purpose = null;
-      else {
-        if (this.purpose == null)
-          this.purpose = new MarkdownType();
-        this.purpose.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #usage} (A detailed description of how the library is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public StringType getUsageElement() { 
-      if (this.usage == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.usage");
-        else if (Configuration.doAutoCreate())
-          this.usage = new StringType(); // bb
-      return this.usage;
-    }
-
-    public boolean hasUsageElement() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    public boolean hasUsage() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    /**
-     * @param value {@link #usage} (A detailed description of how the library is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public Library setUsageElement(StringType value) { 
-      this.usage = value;
-      return this;
-    }
-
-    /**
-     * @return A detailed description of how the library is used from a clinical perspective.
-     */
-    public String getUsage() { 
-      return this.usage == null ? null : this.usage.getValue();
-    }
-
-    /**
-     * @param value A detailed description of how the library is used from a clinical perspective.
-     */
-    public Library setUsage(String value) { 
-      if (Utilities.noString(value))
-        this.usage = null;
-      else {
-        if (this.usage == null)
-          this.usage = new StringType();
-        this.usage.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
-     */
-    public DateType getApprovalDateElement() { 
-      if (this.approvalDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.approvalDate");
-        else if (Configuration.doAutoCreate())
-          this.approvalDate = new DateType(); // bb
-      return this.approvalDate;
-    }
-
-    public boolean hasApprovalDateElement() { 
-      return this.approvalDate != null && !this.approvalDate.isEmpty();
-    }
-
-    public boolean hasApprovalDate() { 
-      return this.approvalDate != null && !this.approvalDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
-     */
-    public Library setApprovalDateElement(DateType value) { 
-      this.approvalDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
-     */
-    public Date getApprovalDate() { 
-      return this.approvalDate == null ? null : this.approvalDate.getValue();
-    }
-
-    /**
-     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
-     */
-    public Library setApprovalDate(Date value) { 
-      if (value == null)
-        this.approvalDate = null;
-      else {
-        if (this.approvalDate == null)
-          this.approvalDate = new DateType();
-        this.approvalDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
-     */
-    public DateType getLastReviewDateElement() { 
-      if (this.lastReviewDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.lastReviewDate");
-        else if (Configuration.doAutoCreate())
-          this.lastReviewDate = new DateType(); // bb
-      return this.lastReviewDate;
-    }
-
-    public boolean hasLastReviewDateElement() { 
-      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
-    }
-
-    public boolean hasLastReviewDate() { 
-      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
-     */
-    public Library setLastReviewDateElement(DateType value) { 
-      this.lastReviewDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
-     */
-    public Date getLastReviewDate() { 
-      return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
-    }
-
-    /**
-     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
-     */
-    public Library setLastReviewDate(Date value) { 
-      if (value == null)
-        this.lastReviewDate = null;
-      else {
-        if (this.lastReviewDate == null)
-          this.lastReviewDate = new DateType();
-        this.lastReviewDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #effectivePeriod} (The period during which the library content was or is planned to be in active use.)
-     */
-    public Period getEffectivePeriod() { 
-      if (this.effectivePeriod == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.effectivePeriod");
-        else if (Configuration.doAutoCreate())
-          this.effectivePeriod = new Period(); // cc
-      return this.effectivePeriod;
-    }
-
-    public boolean hasEffectivePeriod() { 
-      return this.effectivePeriod != null && !this.effectivePeriod.isEmpty();
-    }
-
-    /**
-     * @param value {@link #effectivePeriod} (The period during which the library content was or is planned to be in active use.)
-     */
-    public Library setEffectivePeriod(Period value) { 
-      this.effectivePeriod = value;
       return this;
     }
 
@@ -1005,6 +953,275 @@ public class Library extends MetadataResource {
     }
 
     /**
+     * @return {@link #purpose} (Explanation of why this library is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.purpose");
+        else if (Configuration.doAutoCreate())
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
+    }
+
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    /**
+     * @param value {@link #purpose} (Explanation of why this library is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public Library setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
+      return this;
+    }
+
+    /**
+     * @return Explanation of why this library is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explanation of why this library is needed and why it has been designed as it has.
+     */
+    public Library setPurpose(String value) { 
+      if (value == null)
+        this.purpose = null;
+      else {
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #usage} (A detailed description of how the library is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public StringType getUsageElement() { 
+      if (this.usage == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.usage");
+        else if (Configuration.doAutoCreate())
+          this.usage = new StringType(); // bb
+      return this.usage;
+    }
+
+    public boolean hasUsageElement() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    public boolean hasUsage() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    /**
+     * @param value {@link #usage} (A detailed description of how the library is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public Library setUsageElement(StringType value) { 
+      this.usage = value;
+      return this;
+    }
+
+    /**
+     * @return A detailed description of how the library is used from a clinical perspective.
+     */
+    public String getUsage() { 
+      return this.usage == null ? null : this.usage.getValue();
+    }
+
+    /**
+     * @param value A detailed description of how the library is used from a clinical perspective.
+     */
+    public Library setUsage(String value) { 
+      if (Utilities.noString(value))
+        this.usage = null;
+      else {
+        if (this.usage == null)
+          this.usage = new StringType();
+        this.usage.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #copyright} (A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public MarkdownType getCopyrightElement() { 
+      if (this.copyright == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.copyright");
+        else if (Configuration.doAutoCreate())
+          this.copyright = new MarkdownType(); // bb
+      return this.copyright;
+    }
+
+    public boolean hasCopyrightElement() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    public boolean hasCopyright() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    /**
+     * @param value {@link #copyright} (A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public Library setCopyrightElement(MarkdownType value) { 
+      this.copyright = value;
+      return this;
+    }
+
+    /**
+     * @return A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.
+     */
+    public String getCopyright() { 
+      return this.copyright == null ? null : this.copyright.getValue();
+    }
+
+    /**
+     * @param value A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.
+     */
+    public Library setCopyright(String value) { 
+      if (value == null)
+        this.copyright = null;
+      else {
+        if (this.copyright == null)
+          this.copyright = new MarkdownType();
+        this.copyright.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     */
+    public DateType getApprovalDateElement() { 
+      if (this.approvalDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.approvalDate");
+        else if (Configuration.doAutoCreate())
+          this.approvalDate = new DateType(); // bb
+      return this.approvalDate;
+    }
+
+    public boolean hasApprovalDateElement() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
+    }
+
+    public boolean hasApprovalDate() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     */
+    public Library setApprovalDateElement(DateType value) { 
+      this.approvalDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     */
+    public Date getApprovalDate() { 
+      return this.approvalDate == null ? null : this.approvalDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     */
+    public Library setApprovalDate(Date value) { 
+      if (value == null)
+        this.approvalDate = null;
+      else {
+        if (this.approvalDate == null)
+          this.approvalDate = new DateType();
+        this.approvalDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     */
+    public DateType getLastReviewDateElement() { 
+      if (this.lastReviewDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.lastReviewDate");
+        else if (Configuration.doAutoCreate())
+          this.lastReviewDate = new DateType(); // bb
+      return this.lastReviewDate;
+    }
+
+    public boolean hasLastReviewDateElement() { 
+      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
+    }
+
+    public boolean hasLastReviewDate() { 
+      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     */
+    public Library setLastReviewDateElement(DateType value) { 
+      this.lastReviewDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
+     */
+    public Date getLastReviewDate() { 
+      return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
+     */
+    public Library setLastReviewDate(Date value) { 
+      if (value == null)
+        this.lastReviewDate = null;
+      else {
+        if (this.lastReviewDate == null)
+          this.lastReviewDate = new DateType();
+        this.lastReviewDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #effectivePeriod} (The period during which the library content was or is planned to be in active use.)
+     */
+    public Period getEffectivePeriod() { 
+      if (this.effectivePeriod == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Library.effectivePeriod");
+        else if (Configuration.doAutoCreate())
+          this.effectivePeriod = new Period(); // cc
+      return this.effectivePeriod;
+    }
+
+    public boolean hasEffectivePeriod() { 
+      return this.effectivePeriod != null && !this.effectivePeriod.isEmpty();
+    }
+
+    /**
+     * @param value {@link #effectivePeriod} (The period during which the library content was or is planned to be in active use.)
+     */
+    public Library setEffectivePeriod(Period value) { 
+      this.effectivePeriod = value;
+      return this;
+    }
+
+    /**
      * @return {@link #topic} (Descriptive topics related to the content of the library. Topics provide a high-level categorization of the library that can be useful for filtering and searching.)
      */
     public List<CodeableConcept> getTopic() { 
@@ -1108,108 +1325,6 @@ public class Library extends MetadataResource {
         addContributor();
       }
       return getContributor().get(0);
-    }
-
-    /**
-     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
-     */
-    public List<ContactDetail> getContact() { 
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      return this.contact;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Library setContact(List<ContactDetail> theContact) { 
-      this.contact = theContact;
-      return this;
-    }
-
-    public boolean hasContact() { 
-      if (this.contact == null)
-        return false;
-      for (ContactDetail item : this.contact)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public ContactDetail addContact() { //3
-      ContactDetail t = new ContactDetail();
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      this.contact.add(t);
-      return t;
-    }
-
-    public Library addContact(ContactDetail t) { //3
-      if (t == null)
-        return this;
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      this.contact.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactDetail getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
-     * @return {@link #copyright} (A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
-     */
-    public MarkdownType getCopyrightElement() { 
-      if (this.copyright == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Library.copyright");
-        else if (Configuration.doAutoCreate())
-          this.copyright = new MarkdownType(); // bb
-      return this.copyright;
-    }
-
-    public boolean hasCopyrightElement() { 
-      return this.copyright != null && !this.copyright.isEmpty();
-    }
-
-    public boolean hasCopyright() { 
-      return this.copyright != null && !this.copyright.isEmpty();
-    }
-
-    /**
-     * @param value {@link #copyright} (A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
-     */
-    public Library setCopyrightElement(MarkdownType value) { 
-      this.copyright = value;
-      return this;
-    }
-
-    /**
-     * @return A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.
-     */
-    public String getCopyright() { 
-      return this.copyright == null ? null : this.copyright.getValue();
-    }
-
-    /**
-     * @param value A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.
-     */
-    public Library setCopyright(String value) { 
-      if (value == null)
-        this.copyright = null;
-      else {
-        if (this.copyright == null)
-          this.copyright = new MarkdownType();
-        this.copyright.setValue(value);
-      }
-      return this;
     }
 
     /**
@@ -1426,28 +1541,30 @@ public class Library extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this library is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this library is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this library when it is represented in other formats, or referenced in a specification, model, design or an instance. e.g. CMS or NQF identifiers for a measure artifact. Note that at least one identifier is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the library when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the library author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the library. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the library.", 0, 1, title));
+        children.add(new Property("subtitle", "string", "An explanatory or alternate title for the library giving additional information about its content.", 0, 1, subtitle));
         children.add(new Property("status", "code", "The status of this library. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
         children.add(new Property("type", "CodeableConcept", "Identifies the type of library such as a Logic Library, Model Definition, Asset Collection, or Module Definition.", 0, 1, type));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the library was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the library.", 0, 1, publisher));
+        children.add(new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the contents of the library.", 0, 1, subject));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the library was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the library.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the library from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("purpose", "markdown", "Explaination of why this library is needed and why it has been designed as it has.", 0, 1, purpose));
-        children.add(new Property("usage", "string", "A detailed description of how the library is used from a clinical perspective.", 0, 1, usage));
-        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
-        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate));
-        children.add(new Property("effectivePeriod", "Period", "The period during which the library content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate library instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the library is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("purpose", "markdown", "Explanation of why this library is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("usage", "string", "A detailed description of how the library is used from a clinical perspective.", 0, 1, usage));
+        children.add(new Property("copyright", "markdown", "A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.", 0, 1, copyright));
+        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
+        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.", 0, 1, lastReviewDate));
+        children.add(new Property("effectivePeriod", "Period", "The period during which the library content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the library. Topics provide a high-level categorization of the library that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
         children.add(new Property("contributor", "Contributor", "A contributor to the content of the library, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        children.add(new Property("copyright", "markdown", "A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.", 0, 1, copyright));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
         children.add(new Property("parameter", "ParameterDefinition", "The parameter element defines parameters used by the library.", 0, java.lang.Integer.MAX_VALUE, parameter));
         children.add(new Property("dataRequirement", "DataRequirement", "Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library.", 0, java.lang.Integer.MAX_VALUE, dataRequirement));
@@ -1457,28 +1574,33 @@ public class Library extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this library is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this library when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this library is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this library when it is represented in other formats, or referenced in a specification, model, design or an instance. e.g. CMS or NQF identifiers for a measure artifact. Note that at least one identifier is required for non-experimental active artifacts.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the library when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the library author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the library. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the library.", 0, 1, title);
+        case -2060497896: /*subtitle*/  return new Property("subtitle", "string", "An explanatory or alternate title for the library giving additional information about its content.", 0, 1, subtitle);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this library. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this library is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Identifies the type of library such as a Logic Library, Model Definition, Asset Collection, or Module Definition.", 0, 1, type);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the library was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the library.", 0, 1, publisher);
+        case -573640748: /*subject[x]*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the contents of the library.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the contents of the library.", 0, 1, subject);
+        case -1257122603: /*subjectCodeableConcept*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the contents of the library.", 0, 1, subject);
+        case 772938623: /*subjectReference*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the contents of the library.", 0, 1, subject);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the library was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the library changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the library.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the library from a consumer's perspective.", 0, 1, description);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this library is needed and why it has been designed as it has.", 0, 1, purpose);
-        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the library is used from a clinical perspective.", 0, 1, usage);
-        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
-        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate);
-        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the library content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate library instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the library is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this library is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the library is used from a clinical perspective.", 0, 1, usage);
+        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.", 0, 1, copyright);
+        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
+        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.", 0, 1, lastReviewDate);
+        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the library content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the library. Topics provide a high-level categorization of the library that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
         case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the library, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
-        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
-        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the library and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the library.", 0, 1, copyright);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
         case 1954460585: /*parameter*/  return new Property("parameter", "ParameterDefinition", "The parameter element defines parameters used by the library.", 0, java.lang.Integer.MAX_VALUE, parameter);
         case 629147193: /*dataRequirement*/  return new Property("dataRequirement", "DataRequirement", "Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library.", 0, java.lang.Integer.MAX_VALUE, dataRequirement);
@@ -1496,23 +1618,25 @@ public class Library extends MetadataResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case -2060497896: /*subtitle*/ return this.subtitle == null ? new Base[0] : new Base[] {this.subtitle}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Type
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 223539345: /*approvalDate*/ return this.approvalDate == null ? new Base[0] : new Base[] {this.approvalDate}; // DateType
         case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
-        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // ParameterDefinition
         case 629147193: /*dataRequirement*/ return this.dataRequirement == null ? new Base[0] : this.dataRequirement.toArray(new Base[this.dataRequirement.size()]); // DataRequirement
@@ -1540,6 +1664,9 @@ public class Library extends MetadataResource {
         case 110371416: // title
           this.title = castToString(value); // StringType
           return value;
+        case -2060497896: // subtitle
+          this.subtitle = castToString(value); // StringType
+          return value;
         case -892481550: // status
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -1550,20 +1677,35 @@ public class Library extends MetadataResource {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
+        case -1867885268: // subject
+          this.subject = castToType(value); // Type
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
           return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
           return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
+          return value;
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          return value;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
           return value;
         case 111574433: // usage
           this.usage = castToString(value); // StringType
+          return value;
+        case 1522889671: // copyright
+          this.copyright = castToMarkdown(value); // MarkdownType
           return value;
         case 223539345: // approvalDate
           this.approvalDate = castToDate(value); // DateType
@@ -1574,23 +1716,11 @@ public class Library extends MetadataResource {
         case -403934648: // effectivePeriod
           this.effectivePeriod = castToPeriod(value); // Period
           return value;
-        case -669707736: // useContext
-          this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          return value;
-        case -507075711: // jurisdiction
-          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          return value;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1895276325: // contributor
           this.getContributor().add(castToContributor(value)); // Contributor
-          return value;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          return value;
-        case 1522889671: // copyright
-          this.copyright = castToMarkdown(value); // MarkdownType
           return value;
         case 666807069: // relatedArtifact
           this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
@@ -1621,6 +1751,8 @@ public class Library extends MetadataResource {
           this.name = castToString(value); // StringType
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
+        } else if (name.equals("subtitle")) {
+          this.subtitle = castToString(value); // StringType
         } else if (name.equals("status")) {
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -1628,34 +1760,36 @@ public class Library extends MetadataResource {
           this.experimental = castToBoolean(value); // BooleanType
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("subject[x]")) {
+          this.subject = castToType(value); // Type
         } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
         } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
         } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
+        } else if (name.equals("useContext")) {
+          this.getUseContext().add(castToUsageContext(value));
+        } else if (name.equals("jurisdiction")) {
+          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
         } else if (name.equals("usage")) {
           this.usage = castToString(value); // StringType
+        } else if (name.equals("copyright")) {
+          this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("approvalDate")) {
           this.approvalDate = castToDate(value); // DateType
         } else if (name.equals("lastReviewDate")) {
           this.lastReviewDate = castToDate(value); // DateType
         } else if (name.equals("effectivePeriod")) {
           this.effectivePeriod = castToPeriod(value); // Period
-        } else if (name.equals("useContext")) {
-          this.getUseContext().add(castToUsageContext(value));
-        } else if (name.equals("jurisdiction")) {
-          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("topic")) {
           this.getTopic().add(castToCodeableConcept(value));
         } else if (name.equals("contributor")) {
           this.getContributor().add(castToContributor(value));
-        } else if (name.equals("contact")) {
-          this.getContact().add(castToContactDetail(value));
-        } else if (name.equals("copyright")) {
-          this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("relatedArtifact")) {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
         } else if (name.equals("parameter")) {
@@ -1677,23 +1811,26 @@ public class Library extends MetadataResource {
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
         case 110371416:  return getTitleElement();
+        case -2060497896:  return getSubtitleElement();
         case -892481550:  return getStatusElement();
         case -404562712:  return getExperimentalElement();
         case 3575610:  return getType(); 
+        case -573640748:  return getSubject(); 
+        case -1867885268:  return getSubject(); 
         case 3076014:  return getDateElement();
         case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
         case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
         case -220463842:  return getPurposeElement();
         case 111574433:  return getUsageElement();
+        case 1522889671:  return getCopyrightElement();
         case 223539345:  return getApprovalDateElement();
         case -1687512484:  return getLastReviewDateElement();
         case -403934648:  return getEffectivePeriod(); 
-        case -669707736:  return addUseContext(); 
-        case -507075711:  return addJurisdiction(); 
         case 110546223:  return addTopic(); 
         case -1895276325:  return addContributor(); 
-        case 951526432:  return addContact(); 
-        case 1522889671:  return getCopyrightElement();
         case 666807069:  return addRelatedArtifact(); 
         case 1954460585:  return addParameter(); 
         case 629147193:  return addDataRequirement(); 
@@ -1711,23 +1848,25 @@ public class Library extends MetadataResource {
         case 351608024: /*version*/ return new String[] {"string"};
         case 3373707: /*name*/ return new String[] {"string"};
         case 110371416: /*title*/ return new String[] {"string"};
+        case -2060497896: /*subtitle*/ return new String[] {"string"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -404562712: /*experimental*/ return new String[] {"boolean"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -1867885268: /*subject*/ return new String[] {"CodeableConcept", "Reference"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
         case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 111574433: /*usage*/ return new String[] {"string"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 223539345: /*approvalDate*/ return new String[] {"date"};
         case -1687512484: /*lastReviewDate*/ return new String[] {"date"};
         case -403934648: /*effectivePeriod*/ return new String[] {"Period"};
-        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
-        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case 110546223: /*topic*/ return new String[] {"CodeableConcept"};
         case -1895276325: /*contributor*/ return new String[] {"Contributor"};
-        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
-        case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
         case 1954460585: /*parameter*/ return new String[] {"ParameterDefinition"};
         case 629147193: /*dataRequirement*/ return new String[] {"DataRequirement"};
@@ -1754,6 +1893,9 @@ public class Library extends MetadataResource {
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.title");
         }
+        else if (name.equals("subtitle")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Library.subtitle");
+        }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.status");
         }
@@ -1764,20 +1906,40 @@ public class Library extends MetadataResource {
           this.type = new CodeableConcept();
           return this.type;
         }
+        else if (name.equals("subjectCodeableConcept")) {
+          this.subject = new CodeableConcept();
+          return this.subject;
+        }
+        else if (name.equals("subjectReference")) {
+          this.subject = new Reference();
+          return this.subject;
+        }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.date");
         }
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.publisher");
         }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.description");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
         }
         else if (name.equals("purpose")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.purpose");
         }
         else if (name.equals("usage")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.usage");
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Library.copyright");
         }
         else if (name.equals("approvalDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type Library.approvalDate");
@@ -1789,23 +1951,11 @@ public class Library extends MetadataResource {
           this.effectivePeriod = new Period();
           return this.effectivePeriod;
         }
-        else if (name.equals("useContext")) {
-          return addUseContext();
-        }
-        else if (name.equals("jurisdiction")) {
-          return addJurisdiction();
-        }
         else if (name.equals("topic")) {
           return addTopic();
         }
         else if (name.equals("contributor")) {
           return addContributor();
-        }
-        else if (name.equals("contact")) {
-          return addContact();
-        }
-        else if (name.equals("copyright")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Library.copyright");
         }
         else if (name.equals("relatedArtifact")) {
           return addRelatedArtifact();
@@ -1840,17 +1990,19 @@ public class Library extends MetadataResource {
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
+        dst.subtitle = subtitle == null ? null : subtitle.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.type = type == null ? null : type.copy();
+        dst.subject = subject == null ? null : subject.copy();
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
+        if (contact != null) {
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
+            dst.contact.add(i.copy());
+        };
         dst.description = description == null ? null : description.copy();
-        dst.purpose = purpose == null ? null : purpose.copy();
-        dst.usage = usage == null ? null : usage.copy();
-        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
-        dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
-        dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
@@ -1861,6 +2013,12 @@ public class Library extends MetadataResource {
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
         };
+        dst.purpose = purpose == null ? null : purpose.copy();
+        dst.usage = usage == null ? null : usage.copy();
+        dst.copyright = copyright == null ? null : copyright.copy();
+        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
+        dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
+        dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
@@ -1871,12 +2029,6 @@ public class Library extends MetadataResource {
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
         };
-        if (contact != null) {
-          dst.contact = new ArrayList<ContactDetail>();
-          for (ContactDetail i : contact)
-            dst.contact.add(i.copy());
-        };
-        dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
@@ -1911,10 +2063,11 @@ public class Library extends MetadataResource {
         if (!(other_ instanceof Library))
           return false;
         Library o = (Library) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(purpose, o.purpose, true)
-           && compareDeep(usage, o.usage, true) && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
-           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
-           && compareDeep(copyright, o.copyright, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(subtitle, o.subtitle, true) && compareDeep(type, o.type, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
+           && compareDeep(copyright, o.copyright, true) && compareDeep(approvalDate, o.approvalDate, true)
+           && compareDeep(lastReviewDate, o.lastReviewDate, true) && compareDeep(effectivePeriod, o.effectivePeriod, true)
+           && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
            && compareDeep(parameter, o.parameter, true) && compareDeep(dataRequirement, o.dataRequirement, true)
            && compareDeep(content, o.content, true);
       }
@@ -1926,15 +2079,15 @@ public class Library extends MetadataResource {
         if (!(other_ instanceof Library))
           return false;
         Library o = (Library) other_;
-        return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
-           && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
-          ;
+        return compareValues(subtitle, o.subtitle, true) && compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true)
+           && compareValues(copyright, o.copyright, true) && compareValues(approvalDate, o.approvalDate, true)
+           && compareValues(lastReviewDate, o.lastReviewDate, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, purpose
-          , usage, approvalDate, lastReviewDate, effectivePeriod, topic, contributor, copyright
-          , relatedArtifact, parameter, dataRequirement, content);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subtitle, type
+          , subject, purpose, usage, copyright, approvalDate, lastReviewDate, effectivePeriod
+          , topic, contributor, relatedArtifact, parameter, dataRequirement, content);
       }
 
   @Override

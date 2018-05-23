@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum CoverageCopayType {
          */
         INPTHOSP, 
         /**
+         * A visit held where the patient is remote relative to the practitioner, eg. by phone, computer or video conference.
+         */
+        TELEVISIT, 
+        /**
          * A visit to an urgent care facility - typically a community care clinic.
          */
         URGENTCARE, 
@@ -75,6 +79,8 @@ public enum CoverageCopayType {
           return EMERGENCY;
         if ("inpthosp".equals(codeString))
           return INPTHOSP;
+        if ("televisit".equals(codeString))
+          return TELEVISIT;
         if ("urgentcare".equals(codeString))
           return URGENTCARE;
         if ("copaypct".equals(codeString))
@@ -87,6 +93,7 @@ public enum CoverageCopayType {
             case SPVISIT: return "spvisit";
             case EMERGENCY: return "emergency";
             case INPTHOSP: return "inpthosp";
+            case TELEVISIT: return "televisit";
             case URGENTCARE: return "urgentcare";
             case COPAYPCT: return "copaypct";
             default: return "?";
@@ -101,6 +108,7 @@ public enum CoverageCopayType {
             case SPVISIT: return "An office visit for a specialist practitioner of a discipline";
             case EMERGENCY: return "An episode in an emergency department.";
             case INPTHOSP: return "An episode of an Inpatient hospital stay.";
+            case TELEVISIT: return "A visit held where the patient is remote relative to the practitioner, eg. by phone, computer or video conference.";
             case URGENTCARE: return "A visit to an urgent care facility - typically a community care clinic.";
             case COPAYPCT: return "A standard amount, percentage or fixed currency amount, applied to all classes or service or product not otherwise specified.";
             default: return "?";
@@ -112,6 +120,7 @@ public enum CoverageCopayType {
             case SPVISIT: return "Specialist Office Visit";
             case EMERGENCY: return "Emergency";
             case INPTHOSP: return "InPatient Hospital";
+            case TELEVISIT: return "Tele-visit";
             case URGENTCARE: return "Urgent Care";
             case COPAYPCT: return "Copay Percentage";
             default: return "?";

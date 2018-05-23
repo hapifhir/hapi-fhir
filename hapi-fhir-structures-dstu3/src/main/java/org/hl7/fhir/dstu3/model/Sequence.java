@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Raw data describing a biological sequence.
  */
@@ -507,7 +508,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #chromosome} (Structural unit composed of a nucleic acid molecule which controls its own replication through the interaction of specific proteins at one or more origins of replication ([SO:0000340](http://www.sequenceontology.org/browser/current_svn/term/SO:0000340)).)
          */
-        public SequenceReferenceSeqComponent setChromosome(CodeableConcept value) { 
+        public SequenceReferenceSeqComponent setChromosome(CodeableConcept value)  { 
           this.chromosome = value;
           return this;
         }
@@ -580,7 +581,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #referenceSeqId} (Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.)
          */
-        public SequenceReferenceSeqComponent setReferenceSeqId(CodeableConcept value) { 
+        public SequenceReferenceSeqComponent setReferenceSeqId(CodeableConcept value)  { 
           this.referenceSeqId = value;
           return this;
         }
@@ -604,7 +605,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #referenceSeqPointer} (A Pointer to another Sequence entity as reference sequence.)
          */
-        public SequenceReferenceSeqComponent setReferenceSeqPointer(Reference value) { 
+        public SequenceReferenceSeqComponent setReferenceSeqPointer(Reference value)  { 
           this.referenceSeqPointer = value;
           return this;
         }
@@ -813,16 +814,32 @@ public class Sequence extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("chromosome", "CodeableConcept", "Structural unit composed of a nucleic acid molecule which controls its own replication through the interaction of specific proteins at one or more origins of replication ([SO:0000340](http://www.sequenceontology.org/browser/current_svn/term/SO:0000340)).", 0, java.lang.Integer.MAX_VALUE, chromosome));
-          childrenList.add(new Property("genomeBuild", "string", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, java.lang.Integer.MAX_VALUE, genomeBuild));
-          childrenList.add(new Property("referenceSeqId", "CodeableConcept", "Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.", 0, java.lang.Integer.MAX_VALUE, referenceSeqId));
-          childrenList.add(new Property("referenceSeqPointer", "Reference(Sequence)", "A Pointer to another Sequence entity as reference sequence.", 0, java.lang.Integer.MAX_VALUE, referenceSeqPointer));
-          childrenList.add(new Property("referenceSeqString", "string", "A string like \"ACGT\".", 0, java.lang.Integer.MAX_VALUE, referenceSeqString));
-          childrenList.add(new Property("strand", "integer", "Directionality of DNA sequence. Available values are \"1\" for the plus strand (5' to 3')/Watson/Sense/positive  and \"-1\" for the minus strand(3' to 5')/Crick/Antisense/negative.", 0, java.lang.Integer.MAX_VALUE, strand));
-          childrenList.add(new Property("windowStart", "integer", "Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, java.lang.Integer.MAX_VALUE, windowStart));
-          childrenList.add(new Property("windowEnd", "integer", "End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, java.lang.Integer.MAX_VALUE, windowEnd));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("chromosome", "CodeableConcept", "Structural unit composed of a nucleic acid molecule which controls its own replication through the interaction of specific proteins at one or more origins of replication ([SO:0000340](http://www.sequenceontology.org/browser/current_svn/term/SO:0000340)).", 0, 1, chromosome));
+          children.add(new Property("genomeBuild", "string", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, 1, genomeBuild));
+          children.add(new Property("referenceSeqId", "CodeableConcept", "Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.", 0, 1, referenceSeqId));
+          children.add(new Property("referenceSeqPointer", "Reference(Sequence)", "A Pointer to another Sequence entity as reference sequence.", 0, 1, referenceSeqPointer));
+          children.add(new Property("referenceSeqString", "string", "A string like \"ACGT\".", 0, 1, referenceSeqString));
+          children.add(new Property("strand", "integer", "Directionality of DNA sequence. Available values are \"1\" for the plus strand (5' to 3')/Watson/Sense/positive  and \"-1\" for the minus strand(3' to 5')/Crick/Antisense/negative.", 0, 1, strand));
+          children.add(new Property("windowStart", "integer", "Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, windowStart));
+          children.add(new Property("windowEnd", "integer", "End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, windowEnd));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1499470472: /*chromosome*/  return new Property("chromosome", "CodeableConcept", "Structural unit composed of a nucleic acid molecule which controls its own replication through the interaction of specific proteins at one or more origins of replication ([SO:0000340](http://www.sequenceontology.org/browser/current_svn/term/SO:0000340)).", 0, 1, chromosome);
+          case 1061239735: /*genomeBuild*/  return new Property("genomeBuild", "string", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, 1, genomeBuild);
+          case -1911500465: /*referenceSeqId*/  return new Property("referenceSeqId", "CodeableConcept", "Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.", 0, 1, referenceSeqId);
+          case 1923414665: /*referenceSeqPointer*/  return new Property("referenceSeqPointer", "Reference(Sequence)", "A Pointer to another Sequence entity as reference sequence.", 0, 1, referenceSeqPointer);
+          case -1648301499: /*referenceSeqString*/  return new Property("referenceSeqString", "string", "A string like \"ACGT\".", 0, 1, referenceSeqString);
+          case -891993594: /*strand*/  return new Property("strand", "integer", "Directionality of DNA sequence. Available values are \"1\" for the plus strand (5' to 3')/Watson/Sense/positive  and \"-1\" for the minus strand(3' to 5')/Crick/Antisense/negative.", 0, 1, strand);
+          case 1903685202: /*windowStart*/  return new Property("windowStart", "integer", "Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, windowStart);
+          case -217026869: /*windowEnd*/  return new Property("windowEnd", "integer", "End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, windowEnd);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -976,12 +993,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceReferenceSeqComponent))
+        if (!(other_ instanceof SequenceReferenceSeqComponent))
           return false;
-        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other;
+        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other_;
         return compareDeep(chromosome, o.chromosome, true) && compareDeep(genomeBuild, o.genomeBuild, true)
            && compareDeep(referenceSeqId, o.referenceSeqId, true) && compareDeep(referenceSeqPointer, o.referenceSeqPointer, true)
            && compareDeep(referenceSeqString, o.referenceSeqString, true) && compareDeep(strand, o.strand, true)
@@ -989,12 +1006,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceReferenceSeqComponent))
+        if (!(other_ instanceof SequenceReferenceSeqComponent))
           return false;
-        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other;
+        SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other_;
         return compareValues(genomeBuild, o.genomeBuild, true) && compareValues(referenceSeqString, o.referenceSeqString, true)
            && compareValues(strand, o.strand, true) && compareValues(windowStart, o.windowStart, true) && compareValues(windowEnd, o.windowEnd, true)
           ;
@@ -1326,7 +1343,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #variantPointer} (A pointer to an Observation containing variant information.)
          */
-        public SequenceVariantComponent setVariantPointer(Reference value) { 
+        public SequenceVariantComponent setVariantPointer(Reference value)  { 
           this.variantPointer = value;
           return this;
         }
@@ -1351,14 +1368,28 @@ public class Sequence extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("start", "integer", "Start position of the variant on the  reference sequence.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, java.lang.Integer.MAX_VALUE, start));
-          childrenList.add(new Property("end", "integer", "End position of the variant on the reference sequence.If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, java.lang.Integer.MAX_VALUE, end));
-          childrenList.add(new Property("observedAllele", "string", "An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)).  Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed  sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand. This will lay in the range between variant.start and variant.end.", 0, java.lang.Integer.MAX_VALUE, observedAllele));
-          childrenList.add(new Property("referenceAllele", "string", "An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)). Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand. This will lay in the range between variant.start and variant.end.", 0, java.lang.Integer.MAX_VALUE, referenceAllele));
-          childrenList.add(new Property("cigar", "string", "Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm).", 0, java.lang.Integer.MAX_VALUE, cigar));
-          childrenList.add(new Property("variantPointer", "Reference(Observation)", "A pointer to an Observation containing variant information.", 0, java.lang.Integer.MAX_VALUE, variantPointer));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("start", "integer", "Start position of the variant on the  reference sequence.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start));
+          children.add(new Property("end", "integer", "End position of the variant on the reference sequence.If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end));
+          children.add(new Property("observedAllele", "string", "An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)).  Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed  sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand. This will lay in the range between variant.start and variant.end.", 0, 1, observedAllele));
+          children.add(new Property("referenceAllele", "string", "An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)). Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand. This will lay in the range between variant.start and variant.end.", 0, 1, referenceAllele));
+          children.add(new Property("cigar", "string", "Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm).", 0, 1, cigar));
+          children.add(new Property("variantPointer", "Reference(Observation)", "A pointer to an Observation containing variant information.", 0, 1, variantPointer));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 109757538: /*start*/  return new Property("start", "integer", "Start position of the variant on the  reference sequence.If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start);
+          case 100571: /*end*/  return new Property("end", "integer", "End position of the variant on the reference sequence.If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end);
+          case -1418745787: /*observedAllele*/  return new Property("observedAllele", "string", "An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)).  Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the observed  sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand. This will lay in the range between variant.start and variant.end.", 0, 1, observedAllele);
+          case 364045960: /*referenceAllele*/  return new Property("referenceAllele", "string", "An allele is one of a set of coexisting sequence variants of a gene ([SO:0001023](http://www.sequenceontology.org/browser/current_svn/term/SO:0001023)). Nucleotide(s)/amino acids from start position of sequence to stop position of sequence on the positive (+) strand of the reference sequence. When the sequence  type is DNA, it should be the sequence on the positive (+) strand. This will lay in the range between variant.start and variant.end.", 0, 1, referenceAllele);
+          case 94658738: /*cigar*/  return new Property("cigar", "string", "Extended CIGAR string for aligning the sequence with reference bases. See detailed documentation [here](http://support.illumina.com/help/SequencingAnalysisWorkflow/Content/Vault/Informatics/Sequencing_Analysis/CASAVA/swSEQ_mCA_ExtendedCIGARFormat.htm).", 0, 1, cigar);
+          case -1654319624: /*variantPointer*/  return new Property("variantPointer", "Reference(Observation)", "A pointer to an Observation containing variant information.", 0, 1, variantPointer);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1486,24 +1517,24 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceVariantComponent))
+        if (!(other_ instanceof SequenceVariantComponent))
           return false;
-        SequenceVariantComponent o = (SequenceVariantComponent) other;
+        SequenceVariantComponent o = (SequenceVariantComponent) other_;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(observedAllele, o.observedAllele, true)
            && compareDeep(referenceAllele, o.referenceAllele, true) && compareDeep(cigar, o.cigar, true) && compareDeep(variantPointer, o.variantPointer, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceVariantComponent))
+        if (!(other_ instanceof SequenceVariantComponent))
           return false;
-        SequenceVariantComponent o = (SequenceVariantComponent) other;
+        SequenceVariantComponent o = (SequenceVariantComponent) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true) && compareValues(observedAllele, o.observedAllele, true)
            && compareValues(referenceAllele, o.referenceAllele, true) && compareValues(cigar, o.cigar, true);
       }
@@ -1704,7 +1735,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #standardSequence} (Gold standard sequence used for comparing against.)
          */
-        public SequenceQualityComponent setStandardSequence(CodeableConcept value) { 
+        public SequenceQualityComponent setStandardSequence(CodeableConcept value)  { 
           this.standardSequence = value;
           return this;
         }
@@ -1818,7 +1849,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #score} (The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685)).)
          */
-        public SequenceQualityComponent setScore(Quantity value) { 
+        public SequenceQualityComponent setScore(Quantity value)  { 
           this.score = value;
           return this;
         }
@@ -1842,7 +1873,7 @@ public class Sequence extends DomainResource {
         /**
          * @param value {@link #method} (Which method is used to get sequence quality.)
          */
-        public SequenceQualityComponent setMethod(CodeableConcept value) { 
+        public SequenceQualityComponent setMethod(CodeableConcept value)  { 
           this.method = value;
           return this;
         }
@@ -2383,22 +2414,44 @@ public class Sequence extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "INDEL / SNP / Undefined variant.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("standardSequence", "CodeableConcept", "Gold standard sequence used for comparing against.", 0, java.lang.Integer.MAX_VALUE, standardSequence));
-          childrenList.add(new Property("start", "integer", "Start position of the sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, java.lang.Integer.MAX_VALUE, start));
-          childrenList.add(new Property("end", "integer", "End position of the sequence.If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, java.lang.Integer.MAX_VALUE, end));
-          childrenList.add(new Property("score", "Quantity", "The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685)).", 0, java.lang.Integer.MAX_VALUE, score));
-          childrenList.add(new Property("method", "CodeableConcept", "Which method is used to get sequence quality.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("truthTP", "decimal", "True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, java.lang.Integer.MAX_VALUE, truthTP));
-          childrenList.add(new Property("queryTP", "decimal", "True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, java.lang.Integer.MAX_VALUE, queryTP));
-          childrenList.add(new Property("truthFN", "decimal", "False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.", 0, java.lang.Integer.MAX_VALUE, truthFN));
-          childrenList.add(new Property("queryFP", "decimal", "False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.", 0, java.lang.Integer.MAX_VALUE, queryFP));
-          childrenList.add(new Property("gtFP", "decimal", "The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).", 0, java.lang.Integer.MAX_VALUE, gtFP));
-          childrenList.add(new Property("precision", "decimal", "QUERY.TP / (QUERY.TP + QUERY.FP).", 0, java.lang.Integer.MAX_VALUE, precision));
-          childrenList.add(new Property("recall", "decimal", "TRUTH.TP / (TRUTH.TP + TRUTH.FN).", 0, java.lang.Integer.MAX_VALUE, recall));
-          childrenList.add(new Property("fScore", "decimal", "Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).", 0, java.lang.Integer.MAX_VALUE, fScore));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "INDEL / SNP / Undefined variant.", 0, 1, type));
+          children.add(new Property("standardSequence", "CodeableConcept", "Gold standard sequence used for comparing against.", 0, 1, standardSequence));
+          children.add(new Property("start", "integer", "Start position of the sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start));
+          children.add(new Property("end", "integer", "End position of the sequence.If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end));
+          children.add(new Property("score", "Quantity", "The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685)).", 0, 1, score));
+          children.add(new Property("method", "CodeableConcept", "Which method is used to get sequence quality.", 0, 1, method));
+          children.add(new Property("truthTP", "decimal", "True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, 1, truthTP));
+          children.add(new Property("queryTP", "decimal", "True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, 1, queryTP));
+          children.add(new Property("truthFN", "decimal", "False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.", 0, 1, truthFN));
+          children.add(new Property("queryFP", "decimal", "False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.", 0, 1, queryFP));
+          children.add(new Property("gtFP", "decimal", "The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).", 0, 1, gtFP));
+          children.add(new Property("precision", "decimal", "QUERY.TP / (QUERY.TP + QUERY.FP).", 0, 1, precision));
+          children.add(new Property("recall", "decimal", "TRUTH.TP / (TRUTH.TP + TRUTH.FN).", 0, 1, recall));
+          children.add(new Property("fScore", "decimal", "Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).", 0, 1, fScore));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "INDEL / SNP / Undefined variant.", 0, 1, type);
+          case -1861227106: /*standardSequence*/  return new Property("standardSequence", "CodeableConcept", "Gold standard sequence used for comparing against.", 0, 1, standardSequence);
+          case 109757538: /*start*/  return new Property("start", "integer", "Start position of the sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, start);
+          case 100571: /*end*/  return new Property("end", "integer", "End position of the sequence.If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, end);
+          case 109264530: /*score*/  return new Property("score", "Quantity", "The score of an experimentally derived feature such as a p-value ([SO:0001685](http://www.sequenceontology.org/browser/current_svn/term/SO:0001685)).", 0, 1, score);
+          case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "Which method is used to get sequence quality.", 0, 1, method);
+          case -1048421849: /*truthTP*/  return new Property("truthTP", "decimal", "True positives, from the perspective of the truth data, i.e. the number of sites in the Truth Call Set for which there are paths through the Query Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, 1, truthTP);
+          case 655102276: /*queryTP*/  return new Property("queryTP", "decimal", "True positives, from the perspective of the query data, i.e. the number of sites in the Query Call Set for which there are paths through the Truth Call Set that are consistent with all of the alleles at this site, and for which there is an accurate genotype call for the event.", 0, 1, queryTP);
+          case -1048422285: /*truthFN*/  return new Property("truthFN", "decimal", "False negatives, i.e. the number of sites in the Truth Call Set for which there is no path through the Query Call Set that is consistent with all of the alleles at this site, or sites for which there is an inaccurate genotype call for the event. Sites with correct variant but incorrect genotype are counted here.", 0, 1, truthFN);
+          case 655101842: /*queryFP*/  return new Property("queryFP", "decimal", "False positives, i.e. the number of sites in the Query Call Set for which there is no path through the Truth Call Set that is consistent with this site. Sites with correct variant but incorrect genotype are counted here.", 0, 1, queryFP);
+          case 3182199: /*gtFP*/  return new Property("gtFP", "decimal", "The number of false positives where the non-REF alleles in the Truth and Query Call Sets match (i.e. cases where the truth is 1/1 and the query is 0/1 or similar).", 0, 1, gtFP);
+          case -1376177026: /*precision*/  return new Property("precision", "decimal", "QUERY.TP / (QUERY.TP + QUERY.FP).", 0, 1, precision);
+          case -934922479: /*recall*/  return new Property("recall", "decimal", "TRUTH.TP / (TRUTH.TP + TRUTH.FN).", 0, 1, recall);
+          case -1295082036: /*fScore*/  return new Property("fScore", "decimal", "Harmonic mean of Recall and Precision, computed as: 2 * precision * recall / (precision + recall).", 0, 1, fScore);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2626,12 +2679,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceQualityComponent))
+        if (!(other_ instanceof SequenceQualityComponent))
           return false;
-        SequenceQualityComponent o = (SequenceQualityComponent) other;
+        SequenceQualityComponent o = (SequenceQualityComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(standardSequence, o.standardSequence, true)
            && compareDeep(start, o.start, true) && compareDeep(end, o.end, true) && compareDeep(score, o.score, true)
            && compareDeep(method, o.method, true) && compareDeep(truthTP, o.truthTP, true) && compareDeep(queryTP, o.queryTP, true)
@@ -2641,12 +2694,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceQualityComponent))
+        if (!(other_ instanceof SequenceQualityComponent))
           return false;
-        SequenceQualityComponent o = (SequenceQualityComponent) other;
+        SequenceQualityComponent o = (SequenceQualityComponent) other_;
         return compareValues(type, o.type, true) && compareValues(start, o.start, true) && compareValues(end, o.end, true)
            && compareValues(truthTP, o.truthTP, true) && compareValues(queryTP, o.queryTP, true) && compareValues(truthFN, o.truthFN, true)
            && compareValues(queryFP, o.queryFP, true) && compareValues(gtFP, o.gtFP, true) && compareValues(precision, o.precision, true)
@@ -3018,14 +3071,28 @@ public class Sequence extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "Click and see / RESTful API / Need login to see / RESTful API with authentication / Other ways to see resource.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("url", "uri", "URI of an external repository which contains further details about the genetics data.", 0, java.lang.Integer.MAX_VALUE, url));
-          childrenList.add(new Property("name", "string", "URI of an external repository which contains further details about the genetics data.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("datasetId", "string", "Id of the variant in this external repository. The server will understand how to use this id to call for more info about datasets in external repository.", 0, java.lang.Integer.MAX_VALUE, datasetId));
-          childrenList.add(new Property("variantsetId", "string", "Id of the variantset in this external repository. The server will understand how to use this id to call for more info about variantsets in external repository.", 0, java.lang.Integer.MAX_VALUE, variantsetId));
-          childrenList.add(new Property("readsetId", "string", "Id of the read in this external repository.", 0, java.lang.Integer.MAX_VALUE, readsetId));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "code", "Click and see / RESTful API / Need login to see / RESTful API with authentication / Other ways to see resource.", 0, 1, type));
+          children.add(new Property("url", "uri", "URI of an external repository which contains further details about the genetics data.", 0, 1, url));
+          children.add(new Property("name", "string", "URI of an external repository which contains further details about the genetics data.", 0, 1, name));
+          children.add(new Property("datasetId", "string", "Id of the variant in this external repository. The server will understand how to use this id to call for more info about datasets in external repository.", 0, 1, datasetId));
+          children.add(new Property("variantsetId", "string", "Id of the variantset in this external repository. The server will understand how to use this id to call for more info about variantsets in external repository.", 0, 1, variantsetId));
+          children.add(new Property("readsetId", "string", "Id of the read in this external repository.", 0, 1, readsetId));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "code", "Click and see / RESTful API / Need login to see / RESTful API with authentication / Other ways to see resource.", 0, 1, type);
+          case 116079: /*url*/  return new Property("url", "uri", "URI of an external repository which contains further details about the genetics data.", 0, 1, url);
+          case 3373707: /*name*/  return new Property("name", "string", "URI of an external repository which contains further details about the genetics data.", 0, 1, name);
+          case -345342029: /*datasetId*/  return new Property("datasetId", "string", "Id of the variant in this external repository. The server will understand how to use this id to call for more info about datasets in external repository.", 0, 1, datasetId);
+          case 1929752504: /*variantsetId*/  return new Property("variantsetId", "string", "Id of the variantset in this external repository. The server will understand how to use this id to call for more info about variantsets in external repository.", 0, 1, variantsetId);
+          case -1095407289: /*readsetId*/  return new Property("readsetId", "string", "Id of the read in this external repository.", 0, 1, readsetId);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3154,24 +3221,24 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SequenceRepositoryComponent))
+        if (!(other_ instanceof SequenceRepositoryComponent))
           return false;
-        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other;
+        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(url, o.url, true) && compareDeep(name, o.name, true)
            && compareDeep(datasetId, o.datasetId, true) && compareDeep(variantsetId, o.variantsetId, true)
            && compareDeep(readsetId, o.readsetId, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SequenceRepositoryComponent))
+        if (!(other_ instanceof SequenceRepositoryComponent))
           return false;
-        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other;
+        SequenceRepositoryComponent o = (SequenceRepositoryComponent) other_;
         return compareValues(type, o.type, true) && compareValues(url, o.url, true) && compareValues(name, o.name, true)
            && compareValues(datasetId, o.datasetId, true) && compareValues(variantsetId, o.variantsetId, true)
            && compareValues(readsetId, o.readsetId, true);
@@ -3503,7 +3570,7 @@ public class Sequence extends DomainResource {
     /**
      * @param value {@link #patient} (The patient whose sequencing results are described by this resource.)
      */
-    public Sequence setPatient(Reference value) { 
+    public Sequence setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -3547,7 +3614,7 @@ public class Sequence extends DomainResource {
     /**
      * @param value {@link #specimen} (Specimen used for sequencing.)
      */
-    public Sequence setSpecimen(Reference value) { 
+    public Sequence setSpecimen(Reference value)  { 
       this.specimen = value;
       return this;
     }
@@ -3591,7 +3658,7 @@ public class Sequence extends DomainResource {
     /**
      * @param value {@link #device} (The method for sequencing, for example, chip information.)
      */
-    public Sequence setDevice(Reference value) { 
+    public Sequence setDevice(Reference value)  { 
       this.device = value;
       return this;
     }
@@ -3635,7 +3702,7 @@ public class Sequence extends DomainResource {
     /**
      * @param value {@link #performer} (The organization or lab that should be responsible for this result.)
      */
-    public Sequence setPerformer(Reference value) { 
+    public Sequence setPerformer(Reference value)  { 
       this.performer = value;
       return this;
     }
@@ -3679,7 +3746,7 @@ public class Sequence extends DomainResource {
     /**
      * @param value {@link #quantity} (The number of copies of the seqeunce of interest. (RNASeq).)
      */
-    public Sequence setQuantity(Quantity value) { 
+    public Sequence setQuantity(Quantity value)  { 
       this.quantity = value;
       return this;
     }
@@ -3703,7 +3770,7 @@ public class Sequence extends DomainResource {
     /**
      * @param value {@link #referenceSeq} (A sequence that is used as a reference to describe variants that are present in a sequence analyzed.)
      */
-    public Sequence setReferenceSeq(SequenceReferenceSeqComponent value) { 
+    public Sequence setReferenceSeq(SequenceReferenceSeqComponent value)  { 
       this.referenceSeq = value;
       return this;
     }
@@ -4036,23 +4103,46 @@ public class Sequence extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "A unique identifier for this particular sequence instance. This is a FHIR-defined id.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "code", "Amino Acid Sequence/ DNA Sequence / RNA Sequence.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("coordinateSystem", "integer", "Whether the sequence is numbered starting at 0 (0-based numbering or coordinates, inclusive start, exclusive end) or starting at 1 (1-based numbering, inclusive start and inclusive end).", 0, java.lang.Integer.MAX_VALUE, coordinateSystem));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient whose sequencing results are described by this resource.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("specimen", "Reference(Specimen)", "Specimen used for sequencing.", 0, java.lang.Integer.MAX_VALUE, specimen));
-        childrenList.add(new Property("device", "Reference(Device)", "The method for sequencing, for example, chip information.", 0, java.lang.Integer.MAX_VALUE, device));
-        childrenList.add(new Property("performer", "Reference(Organization)", "The organization or lab that should be responsible for this result.", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("quantity", "Quantity", "The number of copies of the seqeunce of interest. (RNASeq).", 0, java.lang.Integer.MAX_VALUE, quantity));
-        childrenList.add(new Property("referenceSeq", "", "A sequence that is used as a reference to describe variants that are present in a sequence analyzed.", 0, java.lang.Integer.MAX_VALUE, referenceSeq));
-        childrenList.add(new Property("variant", "", "The definition of variant here originates from Sequence ontology ([variant_of](http://www.sequenceontology.org/browser/current_svn/term/variant_of)). This element can represent amino acid or nucleic sequence change(including insertion,deletion,SNP,etc.)  It can represent some complex mutation or segment variation with the assist of CIGAR string.", 0, java.lang.Integer.MAX_VALUE, variant));
-        childrenList.add(new Property("observedSeq", "string", "Sequence that was observed. It is the result marked by referenceSeq along with variant records on referenceSeq. This shall starts from referenceSeq.windowStart and end by referenceSeq.windowEnd.", 0, java.lang.Integer.MAX_VALUE, observedSeq));
-        childrenList.add(new Property("quality", "", "An experimental feature attribute that defines the quality of the feature in a quantitative way, such as a phred quality score ([SO:0001686](http://www.sequenceontology.org/browser/current_svn/term/SO:0001686)).", 0, java.lang.Integer.MAX_VALUE, quality));
-        childrenList.add(new Property("readCoverage", "integer", "Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.", 0, java.lang.Integer.MAX_VALUE, readCoverage));
-        childrenList.add(new Property("repository", "", "Configurations of the external repository. The repository shall store target's observedSeq or records related with target's observedSeq.", 0, java.lang.Integer.MAX_VALUE, repository));
-        childrenList.add(new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variant.", 0, java.lang.Integer.MAX_VALUE, pointer));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "A unique identifier for this particular sequence instance. This is a FHIR-defined id.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("type", "code", "Amino Acid Sequence/ DNA Sequence / RNA Sequence.", 0, 1, type));
+        children.add(new Property("coordinateSystem", "integer", "Whether the sequence is numbered starting at 0 (0-based numbering or coordinates, inclusive start, exclusive end) or starting at 1 (1-based numbering, inclusive start and inclusive end).", 0, 1, coordinateSystem));
+        children.add(new Property("patient", "Reference(Patient)", "The patient whose sequencing results are described by this resource.", 0, 1, patient));
+        children.add(new Property("specimen", "Reference(Specimen)", "Specimen used for sequencing.", 0, 1, specimen));
+        children.add(new Property("device", "Reference(Device)", "The method for sequencing, for example, chip information.", 0, 1, device));
+        children.add(new Property("performer", "Reference(Organization)", "The organization or lab that should be responsible for this result.", 0, 1, performer));
+        children.add(new Property("quantity", "Quantity", "The number of copies of the seqeunce of interest. (RNASeq).", 0, 1, quantity));
+        children.add(new Property("referenceSeq", "", "A sequence that is used as a reference to describe variants that are present in a sequence analyzed.", 0, 1, referenceSeq));
+        children.add(new Property("variant", "", "The definition of variant here originates from Sequence ontology ([variant_of](http://www.sequenceontology.org/browser/current_svn/term/variant_of)). This element can represent amino acid or nucleic sequence change(including insertion,deletion,SNP,etc.)  It can represent some complex mutation or segment variation with the assist of CIGAR string.", 0, java.lang.Integer.MAX_VALUE, variant));
+        children.add(new Property("observedSeq", "string", "Sequence that was observed. It is the result marked by referenceSeq along with variant records on referenceSeq. This shall starts from referenceSeq.windowStart and end by referenceSeq.windowEnd.", 0, 1, observedSeq));
+        children.add(new Property("quality", "", "An experimental feature attribute that defines the quality of the feature in a quantitative way, such as a phred quality score ([SO:0001686](http://www.sequenceontology.org/browser/current_svn/term/SO:0001686)).", 0, java.lang.Integer.MAX_VALUE, quality));
+        children.add(new Property("readCoverage", "integer", "Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.", 0, 1, readCoverage));
+        children.add(new Property("repository", "", "Configurations of the external repository. The repository shall store target's observedSeq or records related with target's observedSeq.", 0, java.lang.Integer.MAX_VALUE, repository));
+        children.add(new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variant.", 0, java.lang.Integer.MAX_VALUE, pointer));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier for this particular sequence instance. This is a FHIR-defined id.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 3575610: /*type*/  return new Property("type", "code", "Amino Acid Sequence/ DNA Sequence / RNA Sequence.", 0, 1, type);
+        case 354212295: /*coordinateSystem*/  return new Property("coordinateSystem", "integer", "Whether the sequence is numbered starting at 0 (0-based numbering or coordinates, inclusive start, exclusive end) or starting at 1 (1-based numbering, inclusive start and inclusive end).", 0, 1, coordinateSystem);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient whose sequencing results are described by this resource.", 0, 1, patient);
+        case -2132868344: /*specimen*/  return new Property("specimen", "Reference(Specimen)", "Specimen used for sequencing.", 0, 1, specimen);
+        case -1335157162: /*device*/  return new Property("device", "Reference(Device)", "The method for sequencing, for example, chip information.", 0, 1, device);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Organization)", "The organization or lab that should be responsible for this result.", 0, 1, performer);
+        case -1285004149: /*quantity*/  return new Property("quantity", "Quantity", "The number of copies of the seqeunce of interest. (RNASeq).", 0, 1, quantity);
+        case -502547180: /*referenceSeq*/  return new Property("referenceSeq", "", "A sequence that is used as a reference to describe variants that are present in a sequence analyzed.", 0, 1, referenceSeq);
+        case 236785797: /*variant*/  return new Property("variant", "", "The definition of variant here originates from Sequence ontology ([variant_of](http://www.sequenceontology.org/browser/current_svn/term/variant_of)). This element can represent amino acid or nucleic sequence change(including insertion,deletion,SNP,etc.)  It can represent some complex mutation or segment variation with the assist of CIGAR string.", 0, java.lang.Integer.MAX_VALUE, variant);
+        case 125541495: /*observedSeq*/  return new Property("observedSeq", "string", "Sequence that was observed. It is the result marked by referenceSeq along with variant records on referenceSeq. This shall starts from referenceSeq.windowStart and end by referenceSeq.windowEnd.", 0, 1, observedSeq);
+        case 651215103: /*quality*/  return new Property("quality", "", "An experimental feature attribute that defines the quality of the feature in a quantitative way, such as a phred quality score ([SO:0001686](http://www.sequenceontology.org/browser/current_svn/term/SO:0001686)).", 0, java.lang.Integer.MAX_VALUE, quality);
+        case -1798816354: /*readCoverage*/  return new Property("readCoverage", "integer", "Coverage (read depth or depth) is the average number of reads representing a given nucleotide in the reconstructed sequence.", 0, 1, readCoverage);
+        case 1950800714: /*repository*/  return new Property("repository", "", "Configurations of the external repository. The repository shall store target's observedSeq or records related with target's observedSeq.", 0, java.lang.Integer.MAX_VALUE, repository);
+        case -400605635: /*pointer*/  return new Property("pointer", "Reference(Sequence)", "Pointer to next atomic sequence which at most contains one variant.", 0, java.lang.Integer.MAX_VALUE, pointer);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -4324,12 +4414,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Sequence))
+        if (!(other_ instanceof Sequence))
           return false;
-        Sequence o = (Sequence) other;
+        Sequence o = (Sequence) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(coordinateSystem, o.coordinateSystem, true)
            && compareDeep(patient, o.patient, true) && compareDeep(specimen, o.specimen, true) && compareDeep(device, o.device, true)
            && compareDeep(performer, o.performer, true) && compareDeep(quantity, o.quantity, true) && compareDeep(referenceSeq, o.referenceSeq, true)
@@ -4339,12 +4429,12 @@ public class Sequence extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Sequence))
+        if (!(other_ instanceof Sequence))
           return false;
-        Sequence o = (Sequence) other;
+        Sequence o = (Sequence) other_;
         return compareValues(type, o.type, true) && compareValues(coordinateSystem, o.coordinateSystem, true)
            && compareValues(observedSeq, o.observedSeq, true) && compareValues(readCoverage, o.readCoverage, true)
           ;

@@ -1,0 +1,60 @@
+{
+  "resourceType": "Patient",
+  "id": "dicom",
+  "text": {
+    "status": "generated",
+    "div": "<div> Patient MINT_TEST, ID = MINT1234. Age = 56y, Size =\n      1.83m, Weight = 72.58kg </div>"
+  },
+  "http://nema.org/fhir/extensions#0010:1010": [
+    {
+      "valueQuantity": {
+        "value": 56,
+        "units": "Y"
+      }
+    }
+  ],
+  "http://nema.org/fhir/extensions#0010:1020": [
+    {
+      "valueQuantity": {
+        "value": 1.83,
+        "units": "m"
+      }
+    }
+  ],
+  "http://nema.org/fhir/extensions#0010:1030": [
+    {
+      "valueQuantity": {
+        "value": 72.58,
+        "units": "kg"
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://nema.org/examples/patients",
+      "value": "MINT1234"
+    }
+  ],
+  "name": [
+    {
+      "family": [
+        "MINT_TEST"
+      ]
+    }
+  ],
+  "gender": "male",
+  "_gender": {
+    "http://nema.org/examples/extensions#gender": [
+      {
+        "valueCoding": {
+          "system": "http://nema.org/examples/gender",
+          "code": "M"
+        }
+      }
+    ]
+  },
+  "managingOrganization": {
+    "reference": "Organization/1"
+  },
+  "active": true
+}

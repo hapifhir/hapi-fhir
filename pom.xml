@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>9</version>
-	</parent>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.3.0-SNAPSHOT</version>
+	<version>3.4.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<url>https://hapifhir.io</url>
 
@@ -28,6 +23,10 @@
 	</issueManagement>
 
 	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
 		<site>
 			<id>git.server</id>
 			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
@@ -52,7 +51,20 @@
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
+		<!--
+		Snapshots should generally not be needed
+		<repository>
+			<id>oss-snapshot</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		-->
 	</repositories>
 
 	<description>
@@ -324,9 +336,6 @@
 			<name>Joel Schneider</name>
 		</developer>
 		<developer>
-			<id>elnin0815</id>
-		</developer>
-		<developer>
 			<id>dangerousben</id>
 			<name>Ben Spencer</name>
 		</developer>
@@ -386,7 +395,50 @@
 			<id>darktyko</id>
 			<name>Kyle Meadows</name>
 		</developer>
-		
+		<developer>
+			<id>Tastelezz</id>
+			<name>Gaetano Gallo</name>
+		</developer>
+		<developer>
+			<id>sjanic</id>
+			<name>sjanic</name>
+		</developer>
+		<developer>
+			<id>c-schuler</id>
+			<name>Chris Schuler</name>
+		</developer>
+		<developer>
+			<id>javajeff</id>
+			<name>Jeff Chung</name>
+		</developer>
+		<developer>
+			<id>anoush-bch</id>
+			<name>Anoush Mouradian</name>
+		</developer>
+		<developer>
+			<id>splatch</id>
+			<name>Łukasz Dywicki</name>
+		</developer>
+		<developer>
+			<id>anthonys123</id>
+			<name>Anthony Sute</name>
+		</developer>
+		<developer>
+			<id>johnpoth</id>
+			<name>John Poth</name>
+			<organization>Red Hat</organization>
+		</developer>
+		<developer>
+			<id>t4deon</id>
+			<name>Andreas Keil</name>
+		</developer>
+		<developer>
+			<id>dgileadi</id>
+			<name>David Gileadi</name>
+		</developer>
+		<developer>
+			<id>RuthAlk</id>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -407,24 +459,41 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Dependency Versions -->
-		<derby_version>10.14.1.0</derby_version>
+		<apache_karaf_version>4.1.4</apache_karaf_version>
+		<aries_spifly_version>1.0.10</aries_spifly_version>
+		<caffeine_version>2.6.2</caffeine_version>
+		<commons_codec_version>1.10</commons_codec_version>
+		<commons_io_version>2.5</commons_io_version>
+		<commons_lang3_version>3.6</commons_lang3_version>
+		<derby_version>10.14.2.0</derby_version>
+		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
+		<guava_version>23.0</guava_version>
+		<gson_version>2.8.1</gson_version>
 		<jaxb_api_version>2.3.0</jaxb_api_version>
-		<jaxb_core_version>2.3.0</jaxb_core_version>
+		<jaxb_runtime_version>2.3.0</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
 		<jetty_version>9.4.8.v20171121</jetty_version>
+		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.2.12.Final</hibernate_version>
+		<hibernate_version>5.2.16.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
+		<httpcore_version>4.4.6</httpcore_version>
+		<httpclient_version>4.5.3</httpclient_version>
+		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<phloc_schematron_version>2.7.1</phloc_schematron_version>
-		<phloc_commons_version>4.4.11</phloc_commons_version>
+		<ph_schematron_version>5.0.4</ph_schematron_version>
+		<ph_commons_version>9.1.1</ph_commons_version>
+		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
+		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<spring_version>5.0.3.RELEASE</spring_version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
+		<stax2_api_version>3.1.4</stax2_api_version>
 		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
+		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
 		<slf4j_target_version>1.6.0</slf4j_target_version>
@@ -481,6 +550,11 @@
 				<version>2.9.2</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.ben-manes.caffeine</groupId>
+				<artifactId>caffeine</artifactId>
+				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
 				<version>1.5.6</version>
@@ -508,17 +582,22 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
+				<version>${guava_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava-testlib</artifactId>
 				<version>23.0</version>
 			</dependency>
 			<dependency>
-				<groupId>com.phloc</groupId>
-				<artifactId>phloc-schematron</artifactId>
-				<version>${phloc_schematron_version}</version>
+				<groupId>com.helger</groupId>
+				<artifactId>ph-schematron</artifactId>
+				<version>${ph_schematron_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.phloc</groupId>
-				<artifactId>phloc-commons</artifactId>
-				<version>${phloc_commons_version}</version>
+				<groupId>com.helger</groupId>
+				<artifactId>ph-commons</artifactId>
+				<version>${ph_commons_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
@@ -538,12 +617,22 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.10</version>
+				<version>${commons_codec_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>4.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.5</version>
+				<version>${commons_io_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>directory-naming</groupId>
@@ -561,7 +650,7 @@
 				<groupId>es.nitaur.markdown</groupId>
 				<artifactId>txtmark</artifactId>
 				<version>0.16</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>javax.ejb</groupId>
 				<artifactId>ejb-api</artifactId>
@@ -590,17 +679,7 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.8.1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>${jaxb_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>${jaxb_core_version}</version>
+				<version>${gson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.mail</groupId>
@@ -628,9 +707,9 @@
 				<version>2.0.1</version>
 			</dependency>
 			<dependency>
-	         <groupId>junit</groupId>
-	         <artifactId>junit</artifactId>
-	         <version>4.12</version>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
 			</dependency>
 			<dependency>
 				<groupId>lt.velykis.maven.skins</groupId>
@@ -684,7 +763,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.6</version>
+				<version>${commons_lang3_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.derby</groupId>
@@ -704,7 +783,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.3</version>
+				<version>${httpclient_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -714,7 +793,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.6</version>
+				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
@@ -799,7 +878,7 @@
 			<dependency>
 				<groupId>org.codehaus.woodstox</groupId>
 				<artifactId>woodstox-core-asl</artifactId>
-				<version>4.4.1</version>
+				<version>${woodstox_core_asl_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ebaysf.web</groupId>
@@ -887,6 +966,11 @@
 				<version>1.0.4</version>
 			</dependency>
 			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>${jaxb_runtime_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
 				<version>${jersey_version}</version>
@@ -942,9 +1026,14 @@
 				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-search-elasticsearch</artifactId>
+				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
-				<version>3.20.0-GA</version>
+				<version>3.22.0-GA</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -1065,6 +1154,17 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.6.8</version>
+					<extensions>true</extensions>
+					<configuration>
+						<serverId>ossrh</serverId>
+						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>com.gemnasium</groupId>
 					<artifactId>gemnasium-maven-plugin</artifactId>
 					<version>0.2.0</version>
@@ -1093,7 +1193,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>3.3.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1102,24 +1202,21 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.7.0</version>
 					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-						<!-- 
-						We compile the unit tests at Java 8. Might as well since they
-						need Java 8 in order to run (Jetty needs 8) so this way we can
-						use nice java 8 features in tests at least
-						-->
-						<testSource>1.8</testSource>
-						<testTarget>1.8</testTarget>
+						<source>1.8</source>
+						<target>1.8</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
-
 						<fork>true</fork>
-						<meminitial>128m</meminitial>
-						<maxmem>1600m</maxmem>
+						<meminitial>500m</meminitial>
+						<maxmem>2000m</maxmem>
 					</configuration>
 					<dependencies>
 						<dependency>
@@ -1177,7 +1274,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>2.20</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1204,7 +1301,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.20.1</version>
+					<version>2.21.0</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
@@ -1238,7 +1335,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.14</version>
+					<version>1.16</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
@@ -1267,7 +1364,8 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>
-						jacoco-maven-plugin</artifactId>
+						jacoco-maven-plugin
+					</artifactId>
 					<version>0.7.9</version>
 				</plugin>
 				<plugin>
@@ -1434,24 +1532,29 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4.1</version>
 				<executions>
 					<execution>
 						<id>enforce-java</id>
 						<goals>
 							<goal>enforce</goal>
 						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>[1.8,)</version>
-									<message>
-										The hapi-fhir Maven build requires JDK version 1.8 or higher.
-									</message>
-								</requireJavaVersion>
-							</rules>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<rules>
+						<requireMavenVersion>
+							<version>3.3</version>
+						</requireMavenVersion>
+						<requireJavaVersion>
+							<!--<version>[1.8,)</version>-->
+							<version>1.8</version>
+							<message>
+								The hapi-fhir Maven build requires JDK version 1.8.x.
+							</message>
+						</requireJavaVersion>
+					</rules>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -1515,7 +1618,9 @@
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken>http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css</replacetoken>
+									<replacetoken>
+										http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css
+									</replacetoken>
 									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
@@ -1525,8 +1630,10 @@
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css</replacetoken>
-									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css</replacevalue>
+									<replacetoken>http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css
+									</replacetoken>
+									<replacevalue>https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css
+									</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
@@ -1570,28 +1677,35 @@
 								<echo>Adding Fontawesome</echo>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken><![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
-									<replacevalue><![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
+									<replacetoken>
+										<![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
+									<replacevalue>
+										<![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
-									<replacetoken><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
-									<replacevalue><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
+									<replacetoken>
+										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
+									<replacevalue>
+										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Test Servers <]]></replacetoken>
-									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
+									<replacevalue>
+										<![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Documentation <]]></replacetoken>
-									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
+									<replacevalue>
+										<![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Get Help <]]></replacetoken>
-									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
+									<replacevalue>
+										<![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
 								</replace>
 								<echo>Changing Breadcrumbs</echo>
 								<replace dir="target/site" summary="true">
@@ -1807,9 +1921,12 @@
 				<configuration>
 					<reportsDirectories>
 						<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/</reportDirectory>
-						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/
+						</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/
+						</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/
+						</reportDirectory>
 					</reportsDirectories>
 				</configuration>
 			</plugin>
@@ -1921,8 +2038,6 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-utilities</module>
-				<module>hapi-fhir-base-test-mindeps-client</module>
-				<module>hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
@@ -1938,9 +2053,11 @@
 				<module>hapi-fhir-validation-resources-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
+				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-jpaserver-elasticsearch</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
@@ -1952,12 +2069,22 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
+				<module>osgi/hapi-fhir-karaf-features</module>
+				<module>osgi/hapi-fhir-karaf-integration-tests</module>
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
-				<module>hapi-fhir-jacoco</module>
-				<module>hapi-fhir-igpacks</module>
+				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
+				<module>example-projects/hapi-fhir-jpaserver-dynamic</module>
+				<module>tests/hapi-fhir-base-test-mindeps-client</module>
+				<module>tests/hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-fhir-spring-boot</module>
 				<!--<module>hapi-fhir-osgi-core</module>-->
+			</modules>
+		</profile>
+		<profile>
+			<id>JACOCO</id>
+			<modules>
+				<module>hapi-fhir-jacoco</module>
 			</modules>
 		</profile>
 		<profile>
@@ -2019,6 +2146,28 @@
 								<version>2.2.0</version>
 							</dependency>
 						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>OWASP</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.owasp</groupId>
+						<artifactId>dependency-check-maven</artifactId>
+						<version>3.1.1</version>
+						<configuration>
+							<failBuildOnCVSS>8</failBuildOnCVSS>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

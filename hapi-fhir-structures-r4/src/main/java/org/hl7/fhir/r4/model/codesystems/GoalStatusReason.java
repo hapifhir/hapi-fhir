@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,23 +53,23 @@ public enum GoalStatusReason {
          */
         PATIENTREQUEST, 
         /**
-         * Goal can not be reached temporarily.
+         * Goal cannot be reached temporarily.
          */
         TEMPNOTATTAINABLE, 
         /**
-         * Goal can not be reached permanently.
+         * Goal cannot be reached permanently.
          */
         PERMANENTNOTATTAINABLE, 
         /**
-         * Goal can not be reached due to financial barrier or reason.
+         * Goal cannot be reached due to financial barrier or reason.
          */
         FINANCIALBARRIER, 
         /**
-         * Goal can not be reached due to a lack of transportation.
+         * Goal cannot be reached due to a lack of transportation.
          */
         LACKOFTRANSPORTATION, 
         /**
-         * Goal can not be reached due to a lack of social support.
+         * Goal cannot be reached due to a lack of social support.
          */
         LACKOFSOCIALSUPPORT, 
         /**
@@ -122,11 +122,11 @@ public enum GoalStatusReason {
             case LIFEEVENT: return "Goal suspended or ended because of a significant life event (marital change, bereavement, etc.).";
             case REPLACED: return "Goal has been superseded by a new goal.";
             case PATIENTREQUEST: return "Patient wishes the goal to be set aside, at least temporarily.";
-            case TEMPNOTATTAINABLE: return "Goal can not be reached temporarily.";
-            case PERMANENTNOTATTAINABLE: return "Goal can not be reached permanently.";
-            case FINANCIALBARRIER: return "Goal can not be reached due to financial barrier or reason.";
-            case LACKOFTRANSPORTATION: return "Goal can not be reached due to a lack of transportation.";
-            case LACKOFSOCIALSUPPORT: return "Goal can not be reached due to a lack of social support.";
+            case TEMPNOTATTAINABLE: return "Goal cannot be reached temporarily.";
+            case PERMANENTNOTATTAINABLE: return "Goal cannot be reached permanently.";
+            case FINANCIALBARRIER: return "Goal cannot be reached due to financial barrier or reason.";
+            case LACKOFTRANSPORTATION: return "Goal cannot be reached due to a lack of transportation.";
+            case LACKOFSOCIALSUPPORT: return "Goal cannot be reached due to a lack of social support.";
             default: return "?";
           }
         }

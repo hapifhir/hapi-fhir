@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
+ * Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.
  */
 @ResourceDef(name="Location", profile="http://hl7.org/fhir/Profile/Location")
 public class Location extends DomainResource {
@@ -1213,10 +1213,10 @@ public class Location extends DomainResource {
     protected Enumeration<LocationStatus> status;
 
     /**
-     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
+     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
      */
     @Child(name = "operationalStatus", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
+    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0116")
     protected Coding operationalStatus;
 
@@ -1228,10 +1228,10 @@ public class Location extends DomainResource {
     protected StringType name;
 
     /**
-     * A list of alternate names that the location is known as, or was known as in the past.
+     * A list of alternate names that the location is known as or was known as in the past.
      */
     @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of alternate names that the location is known as, or was known as in the past", formalDefinition="A list of alternate names that the location is known as, or was known as in the past." )
+    @Description(shortDefinition="A list of alternate names that the location is known as or was known as in the past", formalDefinition="A list of alternate names that the location is known as or was known as in the past." )
     protected List<StringType> alias;
 
     /**
@@ -1252,10 +1252,10 @@ public class Location extends DomainResource {
     /**
      * Indicates the type of function performed at the location.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of function performed", formalDefinition="Indicates the type of function performed at the location." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ServiceDeliveryLocationRoleType")
-    protected CodeableConcept type;
+    protected List<CodeableConcept> type;
 
     /**
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.
@@ -1336,7 +1336,7 @@ public class Location extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = -999560379L;
+    private static final long serialVersionUID = -2126621333L;
 
   /**
    * Constructor
@@ -1448,7 +1448,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
      */
     public Coding getOperationalStatus() { 
       if (this.operationalStatus == null)
@@ -1464,7 +1464,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
      */
     public Location setOperationalStatus(Coding value) { 
       this.operationalStatus = value;
@@ -1521,7 +1521,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public List<StringType> getAlias() { 
       if (this.alias == null)
@@ -1547,7 +1547,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public StringType addAliasElement() {//2 
       StringType t = new StringType();
@@ -1558,7 +1558,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public Location addAlias(String value) { //1
       StringType t = new StringType();
@@ -1570,13 +1570,13 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public boolean hasAlias(String value) { 
       if (this.alias == null)
         return false;
       for (StringType v : this.alias)
-        if (v.equals(value)) // string
+        if (v.getValue().equals(value)) // string
           return true;
       return false;
     }
@@ -1682,25 +1682,54 @@ public class Location extends DomainResource {
     /**
      * @return {@link #type} (Indicates the type of function performed at the location.)
      */
-    public CodeableConcept getType() { 
+    public List<CodeableConcept> getType() { 
       if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Location.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
+        this.type = new ArrayList<CodeableConcept>();
       return this.type;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Location setType(List<CodeableConcept> theType) { 
+      this.type = theType;
+      return this;
+    }
+
     public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
+      if (this.type == null)
+        return false;
+      for (CodeableConcept item : this.type)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addType() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.type == null)
+        this.type = new ArrayList<CodeableConcept>();
+      this.type.add(t);
+      return t;
+    }
+
+    public Location addType(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.type == null)
+        this.type = new ArrayList<CodeableConcept>();
+      this.type.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #type} (Indicates the type of function performed at the location.)
+     * @return The first repetition of repeating field {@link #type}, creating it if it does not already exist
      */
-    public Location setType(CodeableConcept value) { 
-      this.type = value;
-      return this;
+    public CodeableConcept getTypeFirstRep() { 
+      if (getType().isEmpty()) {
+        addType();
+      }
+      return getType().get(0);
     }
 
     /**
@@ -2097,12 +2126,12 @@ public class Location extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status));
-        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
+        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
         children.add(new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name));
-        children.add(new Property("alias", "string", "A list of alternate names that the location is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         children.add(new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description));
         children.add(new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode));
-        children.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, 1, type));
+        children.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("telecom", "ContactPoint", "The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.", 0, java.lang.Integer.MAX_VALUE, telecom));
         children.add(new Property("address", "Address", "Physical location.", 0, 1, address));
         children.add(new Property("physicalType", "CodeableConcept", "Physical form of the location, e.g. building, room, vehicle, road.", 0, 1, physicalType));
@@ -2119,12 +2148,12 @@ public class Location extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status);
-        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc such as an isolation unit/dialisys chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
+        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
         case 3373707: /*name*/  return new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name);
-        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
         case -1724546052: /*description*/  return new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description);
         case 3357091: /*mode*/  return new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type);
         case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.", 0, java.lang.Integer.MAX_VALUE, telecom);
         case -1147692044: /*address*/  return new Property("address", "Address", "Physical location.", 0, 1, address);
         case -1474715471: /*physicalType*/  return new Property("physicalType", "CodeableConcept", "Physical form of the location, e.g. building, room, vehicle, road.", 0, 1, physicalType);
@@ -2149,7 +2178,7 @@ public class Location extends DomainResource {
         case 92902992: /*alias*/ return this.alias == null ? new Base[0] : this.alias.toArray(new Base[this.alias.size()]); // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<LocationMode>
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
         case -1147692044: /*address*/ return this.address == null ? new Base[0] : new Base[] {this.address}; // Address
         case -1474715471: /*physicalType*/ return this.physicalType == null ? new Base[0] : new Base[] {this.physicalType}; // CodeableConcept
@@ -2191,7 +2220,7 @@ public class Location extends DomainResource {
           this.mode = (Enumeration) value; // Enumeration<LocationMode>
           return value;
         case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
+          this.getType().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1429363305: // telecom
           this.getTelecom().add(castToContactPoint(value)); // ContactPoint
@@ -2244,7 +2273,7 @@ public class Location extends DomainResource {
           value = new LocationModeEnumFactory().fromType(castToCode(value));
           this.mode = (Enumeration) value; // Enumeration<LocationMode>
         } else if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
+          this.getType().add(castToCodeableConcept(value));
         } else if (name.equals("telecom")) {
           this.getTelecom().add(castToContactPoint(value));
         } else if (name.equals("address")) {
@@ -2278,7 +2307,7 @@ public class Location extends DomainResource {
         case 92902992:  return addAliasElement();
         case -1724546052:  return getDescriptionElement();
         case 3357091:  return getModeElement();
-        case 3575610:  return getType(); 
+        case 3575610:  return addType(); 
         case -1429363305:  return addTelecom(); 
         case -1147692044:  return getAddress(); 
         case -1474715471:  return getPhysicalType(); 
@@ -2343,8 +2372,7 @@ public class Location extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type Location.mode");
         }
         else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+          return addType();
         }
         else if (name.equals("telecom")) {
           return addTelecom();
@@ -2405,7 +2433,11 @@ public class Location extends DomainResource {
         };
         dst.description = description == null ? null : description.copy();
         dst.mode = mode == null ? null : mode.copy();
-        dst.type = type == null ? null : type.copy();
+        if (type != null) {
+          dst.type = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : type)
+            dst.type.add(i.copy());
+        };
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)

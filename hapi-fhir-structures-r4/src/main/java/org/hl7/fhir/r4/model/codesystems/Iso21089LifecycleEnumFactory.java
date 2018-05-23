@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,110 +39,118 @@ public class Iso21089LifecycleEnumFactory implements EnumFactory<Iso21089Lifecyc
   public Iso21089Lifecycle fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("2".equals(codeString))
-      return Iso21089Lifecycle._2;
-    if ("14".equals(codeString))
-      return Iso21089Lifecycle._14;
-    if ("4".equals(codeString))
-      return Iso21089Lifecycle._4;
-    if ("27".equals(codeString))
-      return Iso21089Lifecycle._27;
-    if ("10".equals(codeString))
-      return Iso21089Lifecycle._10;
-    if ("17".equals(codeString))
-      return Iso21089Lifecycle._17;
-    if ("16".equals(codeString))
-      return Iso21089Lifecycle._16;
-    if ("7".equals(codeString))
-      return Iso21089Lifecycle._7;
-    if ("26".equals(codeString))
-      return Iso21089Lifecycle._26;
-    if ("13".equals(codeString))
-      return Iso21089Lifecycle._13;
-    if ("21".equals(codeString))
-      return Iso21089Lifecycle._21;
-    if ("19".equals(codeString))
-      return Iso21089Lifecycle._19;
-    if ("1".equals(codeString))
-      return Iso21089Lifecycle._1;
-    if ("11".equals(codeString))
-      return Iso21089Lifecycle._11;
-    if ("18".equals(codeString))
-      return Iso21089Lifecycle._18;
-    if ("9".equals(codeString))
-      return Iso21089Lifecycle._9;
-    if ("6".equals(codeString))
-      return Iso21089Lifecycle._6;
-    if ("12".equals(codeString))
-      return Iso21089Lifecycle._12;
-    if ("24".equals(codeString))
-      return Iso21089Lifecycle._24;
-    if ("15".equals(codeString))
-      return Iso21089Lifecycle._15;
-    if ("3".equals(codeString))
-      return Iso21089Lifecycle._3;
-    if ("8".equals(codeString))
-      return Iso21089Lifecycle._8;
-    if ("22".equals(codeString))
-      return Iso21089Lifecycle._22;
-    if ("20".equals(codeString))
-      return Iso21089Lifecycle._20;
-    if ("25".equals(codeString))
-      return Iso21089Lifecycle._25;
+    if ("access".equals(codeString))
+      return Iso21089Lifecycle.ACCESS;
+    if ("hold".equals(codeString))
+      return Iso21089Lifecycle.HOLD;
+    if ("amend".equals(codeString))
+      return Iso21089Lifecycle.AMEND;
+    if ("archive".equals(codeString))
+      return Iso21089Lifecycle.ARCHIVE;
+    if ("attest".equals(codeString))
+      return Iso21089Lifecycle.ATTEST;
+    if ("decrypt".equals(codeString))
+      return Iso21089Lifecycle.DECRYPT;
+    if ("deidentify".equals(codeString))
+      return Iso21089Lifecycle.DEIDENTIFY;
+    if ("deprecate".equals(codeString))
+      return Iso21089Lifecycle.DEPRECATE;
+    if ("destroy".equals(codeString))
+      return Iso21089Lifecycle.DESTROY;
+    if ("disclose".equals(codeString))
+      return Iso21089Lifecycle.DISCLOSE;
+    if ("encrypt".equals(codeString))
+      return Iso21089Lifecycle.ENCRYPT;
+    if ("extract".equals(codeString))
+      return Iso21089Lifecycle.EXTRACT;
+    if ("link".equals(codeString))
+      return Iso21089Lifecycle.LINK;
+    if ("merge".equals(codeString))
+      return Iso21089Lifecycle.MERGE;
+    if ("originate".equals(codeString))
+      return Iso21089Lifecycle.ORIGINATE;
+    if ("pseudonymize".equals(codeString))
+      return Iso21089Lifecycle.PSEUDONYMIZE;
+    if ("reactivate".equals(codeString))
+      return Iso21089Lifecycle.REACTIVATE;
+    if ("receive".equals(codeString))
+      return Iso21089Lifecycle.RECEIVE;
+    if ("reidentify".equals(codeString))
+      return Iso21089Lifecycle.REIDENTIFY;
+    if ("unhold".equals(codeString))
+      return Iso21089Lifecycle.UNHOLD;
+    if ("report".equals(codeString))
+      return Iso21089Lifecycle.REPORT;
+    if ("restore".equals(codeString))
+      return Iso21089Lifecycle.RESTORE;
+    if ("transform".equals(codeString))
+      return Iso21089Lifecycle.TRANSFORM;
+    if ("transmit".equals(codeString))
+      return Iso21089Lifecycle.TRANSMIT;
+    if ("unlink".equals(codeString))
+      return Iso21089Lifecycle.UNLINK;
+    if ("unmerge".equals(codeString))
+      return Iso21089Lifecycle.UNMERGE;
+    if ("verify".equals(codeString))
+      return Iso21089Lifecycle.VERIFY;
     throw new IllegalArgumentException("Unknown Iso21089Lifecycle code '"+codeString+"'");
   }
 
   public String toCode(Iso21089Lifecycle code) {
-    if (code == Iso21089Lifecycle._2)
-      return "2";
-    if (code == Iso21089Lifecycle._14)
-      return "14";
-    if (code == Iso21089Lifecycle._4)
-      return "4";
-    if (code == Iso21089Lifecycle._27)
-      return "27";
-    if (code == Iso21089Lifecycle._10)
-      return "10";
-    if (code == Iso21089Lifecycle._17)
-      return "17";
-    if (code == Iso21089Lifecycle._16)
-      return "16";
-    if (code == Iso21089Lifecycle._7)
-      return "7";
-    if (code == Iso21089Lifecycle._26)
-      return "26";
-    if (code == Iso21089Lifecycle._13)
-      return "13";
-    if (code == Iso21089Lifecycle._21)
-      return "21";
-    if (code == Iso21089Lifecycle._19)
-      return "19";
-    if (code == Iso21089Lifecycle._1)
-      return "1";
-    if (code == Iso21089Lifecycle._11)
-      return "11";
-    if (code == Iso21089Lifecycle._18)
-      return "18";
-    if (code == Iso21089Lifecycle._9)
-      return "9";
-    if (code == Iso21089Lifecycle._6)
-      return "6";
-    if (code == Iso21089Lifecycle._12)
-      return "12";
-    if (code == Iso21089Lifecycle._24)
-      return "24";
-    if (code == Iso21089Lifecycle._15)
-      return "15";
-    if (code == Iso21089Lifecycle._3)
-      return "3";
-    if (code == Iso21089Lifecycle._8)
-      return "8";
-    if (code == Iso21089Lifecycle._22)
-      return "22";
-    if (code == Iso21089Lifecycle._20)
-      return "20";
-    if (code == Iso21089Lifecycle._25)
-      return "25";
+    if (code == Iso21089Lifecycle.ACCESS)
+      return "access";
+    if (code == Iso21089Lifecycle.HOLD)
+      return "hold";
+    if (code == Iso21089Lifecycle.AMEND)
+      return "amend";
+    if (code == Iso21089Lifecycle.ARCHIVE)
+      return "archive";
+    if (code == Iso21089Lifecycle.ATTEST)
+      return "attest";
+    if (code == Iso21089Lifecycle.DECRYPT)
+      return "decrypt";
+    if (code == Iso21089Lifecycle.DEIDENTIFY)
+      return "deidentify";
+    if (code == Iso21089Lifecycle.DEPRECATE)
+      return "deprecate";
+    if (code == Iso21089Lifecycle.DESTROY)
+      return "destroy";
+    if (code == Iso21089Lifecycle.DISCLOSE)
+      return "disclose";
+    if (code == Iso21089Lifecycle.ENCRYPT)
+      return "encrypt";
+    if (code == Iso21089Lifecycle.EXTRACT)
+      return "extract";
+    if (code == Iso21089Lifecycle.LINK)
+      return "link";
+    if (code == Iso21089Lifecycle.MERGE)
+      return "merge";
+    if (code == Iso21089Lifecycle.ORIGINATE)
+      return "originate";
+    if (code == Iso21089Lifecycle.PSEUDONYMIZE)
+      return "pseudonymize";
+    if (code == Iso21089Lifecycle.REACTIVATE)
+      return "reactivate";
+    if (code == Iso21089Lifecycle.RECEIVE)
+      return "receive";
+    if (code == Iso21089Lifecycle.REIDENTIFY)
+      return "reidentify";
+    if (code == Iso21089Lifecycle.UNHOLD)
+      return "unhold";
+    if (code == Iso21089Lifecycle.REPORT)
+      return "report";
+    if (code == Iso21089Lifecycle.RESTORE)
+      return "restore";
+    if (code == Iso21089Lifecycle.TRANSFORM)
+      return "transform";
+    if (code == Iso21089Lifecycle.TRANSMIT)
+      return "transmit";
+    if (code == Iso21089Lifecycle.UNLINK)
+      return "unlink";
+    if (code == Iso21089Lifecycle.UNMERGE)
+      return "unmerge";
+    if (code == Iso21089Lifecycle.VERIFY)
+      return "verify";
     return "?";
   }
 

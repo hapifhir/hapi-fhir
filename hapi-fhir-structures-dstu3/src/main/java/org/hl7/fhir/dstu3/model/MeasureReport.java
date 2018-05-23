@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The MeasureReport resource contains the results of evaluating a measure.
  */
@@ -331,7 +332,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #identifier} (The identifier of the population group as defined in the measure definition.)
          */
-        public MeasureReportGroupComponent setIdentifier(Identifier value) { 
+        public MeasureReportGroupComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -509,12 +510,24 @@ public class MeasureReport extends DomainResource {
           return getStratifier().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "The identifier of the population group as defined in the measure definition.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("population", "", "The populations that make up the population group, one for each type of population appropriate for the measure.", 0, java.lang.Integer.MAX_VALUE, population));
-          childrenList.add(new Property("measureScore", "decimal", "The measure score for this population group, calculated as appropriate for the measure type and scoring method, and based on the contents of the populations defined in the group.", 0, java.lang.Integer.MAX_VALUE, measureScore));
-          childrenList.add(new Property("stratifier", "", "When a measure includes multiple stratifiers, there will be a stratifier group for each stratifier defined by the measure.", 0, java.lang.Integer.MAX_VALUE, stratifier));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "The identifier of the population group as defined in the measure definition.", 0, 1, identifier));
+          children.add(new Property("population", "", "The populations that make up the population group, one for each type of population appropriate for the measure.", 0, java.lang.Integer.MAX_VALUE, population));
+          children.add(new Property("measureScore", "decimal", "The measure score for this population group, calculated as appropriate for the measure type and scoring method, and based on the contents of the populations defined in the group.", 0, 1, measureScore));
+          children.add(new Property("stratifier", "", "When a measure includes multiple stratifiers, there will be a stratifier group for each stratifier defined by the measure.", 0, java.lang.Integer.MAX_VALUE, stratifier));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier of the population group as defined in the measure definition.", 0, 1, identifier);
+          case -2023558323: /*population*/  return new Property("population", "", "The populations that make up the population group, one for each type of population appropriate for the measure.", 0, java.lang.Integer.MAX_VALUE, population);
+          case -386313260: /*measureScore*/  return new Property("measureScore", "decimal", "The measure score for this population group, calculated as appropriate for the measure type and scoring method, and based on the contents of the populations defined in the group.", 0, 1, measureScore);
+          case 90983669: /*stratifier*/  return new Property("stratifier", "", "When a measure includes multiple stratifiers, there will be a stratifier group for each stratifier defined by the measure.", 0, java.lang.Integer.MAX_VALUE, stratifier);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -626,24 +639,24 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureReportGroupComponent))
+        if (!(other_ instanceof MeasureReportGroupComponent))
           return false;
-        MeasureReportGroupComponent o = (MeasureReportGroupComponent) other;
+        MeasureReportGroupComponent o = (MeasureReportGroupComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(population, o.population, true)
            && compareDeep(measureScore, o.measureScore, true) && compareDeep(stratifier, o.stratifier, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureReportGroupComponent))
+        if (!(other_ instanceof MeasureReportGroupComponent))
           return false;
-        MeasureReportGroupComponent o = (MeasureReportGroupComponent) other;
+        MeasureReportGroupComponent o = (MeasureReportGroupComponent) other_;
         return compareValues(measureScore, o.measureScore, true);
       }
 
@@ -723,7 +736,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #identifier} (The identifier of the population being reported, as defined by the population element of the measure.)
          */
-        public MeasureReportGroupPopulationComponent setIdentifier(Identifier value) { 
+        public MeasureReportGroupPopulationComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -747,7 +760,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #code} (The type of the population.)
          */
-        public MeasureReportGroupPopulationComponent setCode(CodeableConcept value) { 
+        public MeasureReportGroupPopulationComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -816,7 +829,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #patients} (This element refers to a List of patient level MeasureReport resources, one for each patient in this population.)
          */
-        public MeasureReportGroupPopulationComponent setPatients(Reference value) { 
+        public MeasureReportGroupPopulationComponent setPatients(Reference value)  { 
           this.patients = value;
           return this;
         }
@@ -841,12 +854,24 @@ public class MeasureReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "The identifier of the population being reported, as defined by the population element of the measure.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("code", "CodeableConcept", "The type of the population.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("count", "integer", "The number of members of the population.", 0, java.lang.Integer.MAX_VALUE, count));
-          childrenList.add(new Property("patients", "Reference(List)", "This element refers to a List of patient level MeasureReport resources, one for each patient in this population.", 0, java.lang.Integer.MAX_VALUE, patients));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "The identifier of the population being reported, as defined by the population element of the measure.", 0, 1, identifier));
+          children.add(new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code));
+          children.add(new Property("count", "integer", "The number of members of the population.", 0, 1, count));
+          children.add(new Property("patients", "Reference(List)", "This element refers to a List of patient level MeasureReport resources, one for each patient in this population.", 0, 1, patients));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier of the population being reported, as defined by the population element of the measure.", 0, 1, identifier);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code);
+          case 94851343: /*count*/  return new Property("count", "integer", "The number of members of the population.", 0, 1, count);
+          case 1235842574: /*patients*/  return new Property("patients", "Reference(List)", "This element refers to a List of patient level MeasureReport resources, one for each patient in this population.", 0, 1, patients);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -952,23 +977,23 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureReportGroupPopulationComponent))
+        if (!(other_ instanceof MeasureReportGroupPopulationComponent))
           return false;
-        MeasureReportGroupPopulationComponent o = (MeasureReportGroupPopulationComponent) other;
+        MeasureReportGroupPopulationComponent o = (MeasureReportGroupPopulationComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(count, o.count, true)
            && compareDeep(patients, o.patients, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureReportGroupPopulationComponent))
+        if (!(other_ instanceof MeasureReportGroupPopulationComponent))
           return false;
-        MeasureReportGroupPopulationComponent o = (MeasureReportGroupPopulationComponent) other;
+        MeasureReportGroupPopulationComponent o = (MeasureReportGroupPopulationComponent) other_;
         return compareValues(count, o.count, true);
       }
 
@@ -1028,7 +1053,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #identifier} (The identifier of this stratifier, as defined in the measure definition.)
          */
-        public MeasureReportGroupStratifierComponent setIdentifier(Identifier value) { 
+        public MeasureReportGroupStratifierComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1086,10 +1111,20 @@ public class MeasureReport extends DomainResource {
           return getStratum().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "The identifier of this stratifier, as defined in the measure definition.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("stratum", "", "This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.", 0, java.lang.Integer.MAX_VALUE, stratum));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "The identifier of this stratifier, as defined in the measure definition.", 0, 1, identifier));
+          children.add(new Property("stratum", "", "This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.", 0, java.lang.Integer.MAX_VALUE, stratum));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier of this stratifier, as defined in the measure definition.", 0, 1, identifier);
+          case -1881991236: /*stratum*/  return new Property("stratum", "", "This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.", 0, java.lang.Integer.MAX_VALUE, stratum);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1173,22 +1208,22 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureReportGroupStratifierComponent))
+        if (!(other_ instanceof MeasureReportGroupStratifierComponent))
           return false;
-        MeasureReportGroupStratifierComponent o = (MeasureReportGroupStratifierComponent) other;
+        MeasureReportGroupStratifierComponent o = (MeasureReportGroupStratifierComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(stratum, o.stratum, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureReportGroupStratifierComponent))
+        if (!(other_ instanceof MeasureReportGroupStratifierComponent))
           return false;
-        MeasureReportGroupStratifierComponent o = (MeasureReportGroupStratifierComponent) other;
+        MeasureReportGroupStratifierComponent o = (MeasureReportGroupStratifierComponent) other_;
         return true;
       }
 
@@ -1408,11 +1443,22 @@ public class MeasureReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("value", "string", "The value for this stratum, expressed as a string. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("population", "", "The populations that make up the stratum, one for each type of population appropriate to the measure.", 0, java.lang.Integer.MAX_VALUE, population));
-          childrenList.add(new Property("measureScore", "decimal", "The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum.", 0, java.lang.Integer.MAX_VALUE, measureScore));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("value", "string", "The value for this stratum, expressed as a string. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.", 0, 1, value));
+          children.add(new Property("population", "", "The populations that make up the stratum, one for each type of population appropriate to the measure.", 0, java.lang.Integer.MAX_VALUE, population));
+          children.add(new Property("measureScore", "decimal", "The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum.", 0, 1, measureScore));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 111972721: /*value*/  return new Property("value", "string", "The value for this stratum, expressed as a string. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.", 0, 1, value);
+          case -2023558323: /*population*/  return new Property("population", "", "The populations that make up the stratum, one for each type of population appropriate to the measure.", 0, java.lang.Integer.MAX_VALUE, population);
+          case -386313260: /*measureScore*/  return new Property("measureScore", "decimal", "The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum.", 0, 1, measureScore);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1507,23 +1553,23 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof StratifierGroupComponent))
+        if (!(other_ instanceof StratifierGroupComponent))
           return false;
-        StratifierGroupComponent o = (StratifierGroupComponent) other;
+        StratifierGroupComponent o = (StratifierGroupComponent) other_;
         return compareDeep(value, o.value, true) && compareDeep(population, o.population, true) && compareDeep(measureScore, o.measureScore, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof StratifierGroupComponent))
+        if (!(other_ instanceof StratifierGroupComponent))
           return false;
-        StratifierGroupComponent o = (StratifierGroupComponent) other;
+        StratifierGroupComponent o = (StratifierGroupComponent) other_;
         return compareValues(value, o.value, true) && compareValues(measureScore, o.measureScore, true);
       }
 
@@ -1603,7 +1649,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #identifier} (The identifier of the population being reported, as defined by the population element of the measure.)
          */
-        public StratifierGroupPopulationComponent setIdentifier(Identifier value) { 
+        public StratifierGroupPopulationComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1627,7 +1673,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #code} (The type of the population.)
          */
-        public StratifierGroupPopulationComponent setCode(CodeableConcept value) { 
+        public StratifierGroupPopulationComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -1696,7 +1742,7 @@ public class MeasureReport extends DomainResource {
         /**
          * @param value {@link #patients} (This element refers to a List of patient level MeasureReport resources, one for each patient in this population in this stratum.)
          */
-        public StratifierGroupPopulationComponent setPatients(Reference value) { 
+        public StratifierGroupPopulationComponent setPatients(Reference value)  { 
           this.patients = value;
           return this;
         }
@@ -1721,12 +1767,24 @@ public class MeasureReport extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "The identifier of the population being reported, as defined by the population element of the measure.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("code", "CodeableConcept", "The type of the population.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("count", "integer", "The number of members of the population in this stratum.", 0, java.lang.Integer.MAX_VALUE, count));
-          childrenList.add(new Property("patients", "Reference(List)", "This element refers to a List of patient level MeasureReport resources, one for each patient in this population in this stratum.", 0, java.lang.Integer.MAX_VALUE, patients));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "The identifier of the population being reported, as defined by the population element of the measure.", 0, 1, identifier));
+          children.add(new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code));
+          children.add(new Property("count", "integer", "The number of members of the population in this stratum.", 0, 1, count));
+          children.add(new Property("patients", "Reference(List)", "This element refers to a List of patient level MeasureReport resources, one for each patient in this population in this stratum.", 0, 1, patients));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The identifier of the population being reported, as defined by the population element of the measure.", 0, 1, identifier);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code);
+          case 94851343: /*count*/  return new Property("count", "integer", "The number of members of the population in this stratum.", 0, 1, count);
+          case 1235842574: /*patients*/  return new Property("patients", "Reference(List)", "This element refers to a List of patient level MeasureReport resources, one for each patient in this population in this stratum.", 0, 1, patients);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1832,23 +1890,23 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof StratifierGroupPopulationComponent))
+        if (!(other_ instanceof StratifierGroupPopulationComponent))
           return false;
-        StratifierGroupPopulationComponent o = (StratifierGroupPopulationComponent) other;
+        StratifierGroupPopulationComponent o = (StratifierGroupPopulationComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(count, o.count, true)
            && compareDeep(patients, o.patients, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof StratifierGroupPopulationComponent))
+        if (!(other_ instanceof StratifierGroupPopulationComponent))
           return false;
-        StratifierGroupPopulationComponent o = (StratifierGroupPopulationComponent) other;
+        StratifierGroupPopulationComponent o = (StratifierGroupPopulationComponent) other_;
         return compareValues(count, o.count, true);
       }
 
@@ -1995,7 +2053,7 @@ public class MeasureReport extends DomainResource {
     /**
      * @param value {@link #identifier} (A formal identifier that is used to identify this report when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
-    public MeasureReport setIdentifier(Identifier value) { 
+    public MeasureReport setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -2109,7 +2167,7 @@ public class MeasureReport extends DomainResource {
     /**
      * @param value {@link #measure} (A reference to the Measure that was evaluated to produce this report.)
      */
-    public MeasureReport setMeasure(Reference value) { 
+    public MeasureReport setMeasure(Reference value)  { 
       this.measure = value;
       return this;
     }
@@ -2153,7 +2211,7 @@ public class MeasureReport extends DomainResource {
     /**
      * @param value {@link #patient} (Optional Patient if the report was requested for a single patient.)
      */
-    public MeasureReport setPatient(Reference value) { 
+    public MeasureReport setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -2246,7 +2304,7 @@ public class MeasureReport extends DomainResource {
     /**
      * @param value {@link #reportingOrganization} (Reporting Organization.)
      */
-    public MeasureReport setReportingOrganization(Reference value) { 
+    public MeasureReport setReportingOrganization(Reference value)  { 
       this.reportingOrganization = value;
       return this;
     }
@@ -2290,7 +2348,7 @@ public class MeasureReport extends DomainResource {
     /**
      * @param value {@link #period} (The reporting period for which the report was calculated.)
      */
-    public MeasureReport setPeriod(Period value) { 
+    public MeasureReport setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -2367,7 +2425,7 @@ public class MeasureReport extends DomainResource {
     /**
      * @param value {@link #evaluatedResources} (A reference to a Bundle containing the Resources that were used in the evaluation of this report.)
      */
-    public MeasureReport setEvaluatedResources(Reference value) { 
+    public MeasureReport setEvaluatedResources(Reference value)  { 
       this.evaluatedResources = value;
       return this;
     }
@@ -2392,18 +2450,36 @@ public class MeasureReport extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this report when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The report status. No data will be available until the report status is complete.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("type", "code", "The type of measure report. This may be an individual report, which provides a single patient's score for the measure; a patient listing, which returns the list of patients that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("measure", "Reference(Measure)", "A reference to the Measure that was evaluated to produce this report.", 0, java.lang.Integer.MAX_VALUE, measure));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Optional Patient if the report was requested for a single patient.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("date", "dateTime", "The date this measure report was generated.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("reportingOrganization", "Reference(Organization)", "Reporting Organization.", 0, java.lang.Integer.MAX_VALUE, reportingOrganization));
-        childrenList.add(new Property("period", "Period", "The reporting period for which the report was calculated.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group));
-        childrenList.add(new Property("evaluatedResources", "Reference(Bundle)", "A reference to a Bundle containing the Resources that were used in the evaluation of this report.", 0, java.lang.Integer.MAX_VALUE, evaluatedResources));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this report when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
+        children.add(new Property("status", "code", "The report status. No data will be available until the report status is complete.", 0, 1, status));
+        children.add(new Property("type", "code", "The type of measure report. This may be an individual report, which provides a single patient's score for the measure; a patient listing, which returns the list of patients that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.", 0, 1, type));
+        children.add(new Property("measure", "Reference(Measure)", "A reference to the Measure that was evaluated to produce this report.", 0, 1, measure));
+        children.add(new Property("patient", "Reference(Patient)", "Optional Patient if the report was requested for a single patient.", 0, 1, patient));
+        children.add(new Property("date", "dateTime", "The date this measure report was generated.", 0, 1, date));
+        children.add(new Property("reportingOrganization", "Reference(Organization)", "Reporting Organization.", 0, 1, reportingOrganization));
+        children.add(new Property("period", "Period", "The reporting period for which the report was calculated.", 0, 1, period));
+        children.add(new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group));
+        children.add(new Property("evaluatedResources", "Reference(Bundle)", "A reference to a Bundle containing the Resources that were used in the evaluation of this report.", 0, 1, evaluatedResources));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this report when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The report status. No data will be available until the report status is complete.", 0, 1, status);
+        case 3575610: /*type*/  return new Property("type", "code", "The type of measure report. This may be an individual report, which provides a single patient's score for the measure; a patient listing, which returns the list of patients that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.", 0, 1, type);
+        case 938321246: /*measure*/  return new Property("measure", "Reference(Measure)", "A reference to the Measure that was evaluated to produce this report.", 0, 1, measure);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Optional Patient if the report was requested for a single patient.", 0, 1, patient);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date this measure report was generated.", 0, 1, date);
+        case -2053950847: /*reportingOrganization*/  return new Property("reportingOrganization", "Reference(Organization)", "Reporting Organization.", 0, 1, reportingOrganization);
+        case -991726143: /*period*/  return new Property("period", "Period", "The reporting period for which the report was calculated.", 0, 1, period);
+        case 98629247: /*group*/  return new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group);
+        case 1599836026: /*evaluatedResources*/  return new Property("evaluatedResources", "Reference(Bundle)", "A reference to a Bundle containing the Resources that were used in the evaluation of this report.", 0, 1, evaluatedResources);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2601,12 +2677,12 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MeasureReport))
+        if (!(other_ instanceof MeasureReport))
           return false;
-        MeasureReport o = (MeasureReport) other;
+        MeasureReport o = (MeasureReport) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(measure, o.measure, true) && compareDeep(patient, o.patient, true) && compareDeep(date, o.date, true)
            && compareDeep(reportingOrganization, o.reportingOrganization, true) && compareDeep(period, o.period, true)
@@ -2615,12 +2691,12 @@ public class MeasureReport extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MeasureReport))
+        if (!(other_ instanceof MeasureReport))
           return false;
-        MeasureReport o = (MeasureReport) other;
+        MeasureReport o = (MeasureReport) other_;
         return compareValues(status, o.status, true) && compareValues(type, o.type, true) && compareValues(date, o.date, true)
           ;
       }

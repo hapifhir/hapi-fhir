@@ -388,7 +388,7 @@ public class ShExGenerator {
       for (String dt : new HashSet<String>(datatypes)) {
         if (!emittedDatatypes.contains(dt)) {
           StructureDefinition sd = context.fetchResource(StructureDefinition.class,
-                  "http://hl7.org/fhir/StructureDefinition/" + dt);
+              ProfileUtilities.sdNs(dt));
           // TODO: Figure out why the line below doesn't work
           // if (sd != null && !uniq_structures.contains(sd))
           if(sd != null && !uniq_structure_urls.contains(sd.getUrl()))
@@ -427,7 +427,7 @@ public class ShExGenerator {
     if(withComments && ed.hasShort() && !ed.getId().startsWith("Extension.")) {
       int nspaces;
       char[] sep;
-      nspaces = Math.max(COMMENT_COL - tmplt.add("comment", "#").render().indexOf('#'), MIN_COMMENT_SEP);
+      nspaces = Integer.max(COMMENT_COL - tmplt.add("comment", "#").render().indexOf('#'), MIN_COMMENT_SEP);
       tmplt.remove("comment");
       sep = new char[nspaces];
       Arrays.fill(sep, ' ');
@@ -722,10 +722,10 @@ public class ShExGenerator {
   private String getTypeName(ElementDefinition.TypeRefComponent typ) {
     // TODO: This is brittle. There has to be a utility to do this...
     if (typ.hasTargetProfile()) {
-      String[] els = typ.getTargetProfile().split("/");
+      String[] els = typ.getTargetProfile().get(0).getValue().split("/");
       return els[els.length - 1];
     } else if (typ.hasProfile()) {
-      String[] els = typ.getProfile().split("/");
+      String[] els = typ.getProfile().get(0).getValue().split("/");
       return els[els.length - 1];
     } else {
       return typ.getCode();

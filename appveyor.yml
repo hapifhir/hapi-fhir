@@ -4,4 +4,4 @@ cache:
   - C:\maven\
   - C:\Users\appveyor\.m2\repository
 build_script:
-   - cmd: mvn -P MINPARALLEL,ALLMODULES,ERRORPRONE_JDK8 install
+   - cmd: mvn -P MINPARALLEL,ALLMODULES clean install

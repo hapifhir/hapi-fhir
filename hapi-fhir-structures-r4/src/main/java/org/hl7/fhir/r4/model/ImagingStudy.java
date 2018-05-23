@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -48,126 +48,142 @@ import org.hl7.fhir.exceptions.FHIRException;
 @ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/Profile/ImagingStudy")
 public class ImagingStudy extends DomainResource {
 
-    public enum InstanceAvailability {
+    public enum ImagingStudyStatus {
         /**
-         * null
+         * The existence of the imaging study is registered, but there is nothing yet available.
          */
-        ONLINE, 
+        REGISTERED, 
         /**
-         * null
+         * At least one instance has been associated with this imaging study.
          */
-        OFFLINE, 
+        AVAILABLE, 
         /**
-         * null
+         * The imaging study is unavailable because the imaging study was not started or not completed (also sometimes called "aborted").
          */
-        NEARLINE, 
+        CANCELLED, 
         /**
-         * null
+         * The imaging study has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
          */
-        UNAVAILABLE, 
+        ENTEREDINERROR, 
+        /**
+         * The system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         */
+        UNKNOWN, 
         /**
          * added to help the parsers with the generic types
          */
         NULL;
-        public static InstanceAvailability fromCode(String codeString) throws FHIRException {
+        public static ImagingStudyStatus fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ONLINE".equals(codeString))
-          return ONLINE;
-        if ("OFFLINE".equals(codeString))
-          return OFFLINE;
-        if ("NEARLINE".equals(codeString))
-          return NEARLINE;
-        if ("UNAVAILABLE".equals(codeString))
-          return UNAVAILABLE;
+        if ("registered".equals(codeString))
+          return REGISTERED;
+        if ("available".equals(codeString))
+          return AVAILABLE;
+        if ("cancelled".equals(codeString))
+          return CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
-          throw new FHIRException("Unknown InstanceAvailability code '"+codeString+"'");
+          throw new FHIRException("Unknown ImagingStudyStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case ONLINE: return "ONLINE";
-            case OFFLINE: return "OFFLINE";
-            case NEARLINE: return "NEARLINE";
-            case UNAVAILABLE: return "UNAVAILABLE";
+            case REGISTERED: return "registered";
+            case AVAILABLE: return "available";
+            case CANCELLED: return "cancelled";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case ONLINE: return "http://dicom.nema.org/resources/ontology/DCM";
-            case OFFLINE: return "http://dicom.nema.org/resources/ontology/DCM";
-            case NEARLINE: return "http://dicom.nema.org/resources/ontology/DCM";
-            case UNAVAILABLE: return "http://dicom.nema.org/resources/ontology/DCM";
+            case REGISTERED: return "http://hl7.org/fhir/imagingstudy-status";
+            case AVAILABLE: return "http://hl7.org/fhir/imagingstudy-status";
+            case CANCELLED: return "http://hl7.org/fhir/imagingstudy-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/imagingstudy-status";
+            case UNKNOWN: return "http://hl7.org/fhir/imagingstudy-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ONLINE: return "";
-            case OFFLINE: return "";
-            case NEARLINE: return "";
-            case UNAVAILABLE: return "";
+            case REGISTERED: return "The existence of the imaging study is registered, but there is nothing yet available.";
+            case AVAILABLE: return "At least one instance has been associated with this imaging study.";
+            case CANCELLED: return "The imaging study is unavailable because the imaging study was not started or not completed (also sometimes called \"aborted\").";
+            case ENTEREDINERROR: return "The imaging study has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case UNKNOWN: return "The system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case ONLINE: return "ONLINE";
-            case OFFLINE: return "OFFLINE";
-            case NEARLINE: return "NEARLINE";
-            case UNAVAILABLE: return "UNAVAILABLE";
+            case REGISTERED: return "Registered";
+            case AVAILABLE: return "Available";
+            case CANCELLED: return "Cancelled";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
     }
 
-  public static class InstanceAvailabilityEnumFactory implements EnumFactory<InstanceAvailability> {
-    public InstanceAvailability fromCode(String codeString) throws IllegalArgumentException {
+  public static class ImagingStudyStatusEnumFactory implements EnumFactory<ImagingStudyStatus> {
+    public ImagingStudyStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("ONLINE".equals(codeString))
-          return InstanceAvailability.ONLINE;
-        if ("OFFLINE".equals(codeString))
-          return InstanceAvailability.OFFLINE;
-        if ("NEARLINE".equals(codeString))
-          return InstanceAvailability.NEARLINE;
-        if ("UNAVAILABLE".equals(codeString))
-          return InstanceAvailability.UNAVAILABLE;
-        throw new IllegalArgumentException("Unknown InstanceAvailability code '"+codeString+"'");
+        if ("registered".equals(codeString))
+          return ImagingStudyStatus.REGISTERED;
+        if ("available".equals(codeString))
+          return ImagingStudyStatus.AVAILABLE;
+        if ("cancelled".equals(codeString))
+          return ImagingStudyStatus.CANCELLED;
+        if ("entered-in-error".equals(codeString))
+          return ImagingStudyStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return ImagingStudyStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown ImagingStudyStatus code '"+codeString+"'");
         }
-        public Enumeration<InstanceAvailability> fromType(Base code) throws FHIRException {
+        public Enumeration<ImagingStudyStatus> fromType(Base code) throws FHIRException {
           if (code == null)
             return null;
           if (code.isEmpty())
-            return new Enumeration<InstanceAvailability>(this);
+            return new Enumeration<ImagingStudyStatus>(this);
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("ONLINE".equals(codeString))
-          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.ONLINE);
-        if ("OFFLINE".equals(codeString))
-          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.OFFLINE);
-        if ("NEARLINE".equals(codeString))
-          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.NEARLINE);
-        if ("UNAVAILABLE".equals(codeString))
-          return new Enumeration<InstanceAvailability>(this, InstanceAvailability.UNAVAILABLE);
-        throw new FHIRException("Unknown InstanceAvailability code '"+codeString+"'");
+        if ("registered".equals(codeString))
+          return new Enumeration<ImagingStudyStatus>(this, ImagingStudyStatus.REGISTERED);
+        if ("available".equals(codeString))
+          return new Enumeration<ImagingStudyStatus>(this, ImagingStudyStatus.AVAILABLE);
+        if ("cancelled".equals(codeString))
+          return new Enumeration<ImagingStudyStatus>(this, ImagingStudyStatus.CANCELLED);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<ImagingStudyStatus>(this, ImagingStudyStatus.ENTEREDINERROR);
+        if ("unknown".equals(codeString))
+          return new Enumeration<ImagingStudyStatus>(this, ImagingStudyStatus.UNKNOWN);
+        throw new FHIRException("Unknown ImagingStudyStatus code '"+codeString+"'");
         }
-    public String toCode(InstanceAvailability code) {
-      if (code == InstanceAvailability.ONLINE)
-        return "ONLINE";
-      if (code == InstanceAvailability.OFFLINE)
-        return "OFFLINE";
-      if (code == InstanceAvailability.NEARLINE)
-        return "NEARLINE";
-      if (code == InstanceAvailability.UNAVAILABLE)
-        return "UNAVAILABLE";
+    public String toCode(ImagingStudyStatus code) {
+      if (code == ImagingStudyStatus.REGISTERED)
+        return "registered";
+      if (code == ImagingStudyStatus.AVAILABLE)
+        return "available";
+      if (code == ImagingStudyStatus.CANCELLED)
+        return "cancelled";
+      if (code == ImagingStudyStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == ImagingStudyStatus.UNKNOWN)
+        return "unknown";
       return "?";
       }
-    public String toSystem(InstanceAvailability code) {
+    public String toSystem(ImagingStudyStatus code) {
       return code.getSystem();
       }
     }
@@ -177,9 +193,9 @@ public class ImagingStudy extends DomainResource {
         /**
          * Formal identifier for this series.
          */
-        @Child(name = "uid", type = {OidType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Formal DICOM identifier for this series", formalDefinition="Formal identifier for this series." )
-        protected OidType uid;
+        protected Identifier identifier;
 
         /**
          * The numeric identifier of this series in the study.
@@ -193,7 +209,7 @@ public class ImagingStudy extends DomainResource {
          */
         @Child(name = "modality", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The modality of the instances in the series", formalDefinition="The modality of this series sequence." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dicom-cid29")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html")
         protected Coding modality;
 
         /**
@@ -211,21 +227,13 @@ public class ImagingStudy extends DomainResource {
         protected UnsignedIntType numberOfInstances;
 
         /**
-         * Availability of series (online, offline or nearline).
+         * The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.connectionType.
          */
-        @Child(name = "availability", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE", formalDefinition="Availability of series (online, offline or nearline)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/instance-availability")
-        protected Enumeration<InstanceAvailability> availability;
-
-        /**
-         * The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.
-         */
-        @Child(name = "endpoint", type = {Endpoint.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Series access endpoint", formalDefinition="The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type." )
+        @Child(name = "endpoint", type = {Endpoint.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Series access endpoint", formalDefinition="The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.connectionType." )
         protected List<Reference> endpoint;
         /**
-         * The actual objects that are the target of the reference (The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.)
+         * The actual objects that are the target of the reference (The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.connectionType.)
          */
         protected List<Endpoint> endpointTarget;
 
@@ -233,7 +241,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.
          */
-        @Child(name = "bodySite", type = {Coding.class}, order=8, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "bodySite", type = {Coding.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Body part examined", formalDefinition="The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
         protected Coding bodySite;
@@ -241,7 +249,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.
          */
-        @Child(name = "laterality", type = {Coding.class}, order=9, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "laterality", type = {Coding.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Body part laterality", formalDefinition="The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/bodysite-laterality")
         protected Coding laterality;
@@ -249,7 +257,7 @@ public class ImagingStudy extends DomainResource {
         /**
          * The specimen imaged, e.g., for whole slide imaging of a biopsy.
          */
-        @Child(name = "specimen", type = {Specimen.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "specimen", type = {Specimen.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Specimen imaged", formalDefinition="The specimen imaged, e.g., for whole slide imaging of a biopsy." )
         protected List<Reference> specimen;
         /**
@@ -261,30 +269,25 @@ public class ImagingStudy extends DomainResource {
         /**
          * The date and time the series was started.
          */
-        @Child(name = "started", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "started", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="When the series started", formalDefinition="The date and time the series was started." )
         protected DateTimeType started;
 
         /**
-         * The physician or operator (often the radiology technician) who performed the series.
+         * Indicates who or what performed the series and how they were involved.
          */
-        @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, Patient.class, RelatedPerson.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Who performed the series", formalDefinition="The physician or operator (often the radiology technician) who performed the series." )
-        protected List<Reference> performer;
-        /**
-         * The actual objects that are the target of the reference (The physician or operator (often the radiology technician) who performed the series.)
-         */
-        protected List<Resource> performerTarget;
-
+        @Child(name = "performer", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Who performed the series", formalDefinition="Indicates who or what performed the series and how they were involved." )
+        protected List<ImagingStudySeriesPerformerComponent> performer;
 
         /**
          * A single SOP instance within the series, e.g. an image, or presentation state.
          */
-        @Child(name = "instance", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "instance", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A single SOP instance from the series", formalDefinition="A single SOP instance within the series, e.g. an image, or presentation state." )
         protected List<ImagingStudySeriesInstanceComponent> instance;
 
-        private static final long serialVersionUID = -1134668583L;
+        private static final long serialVersionUID = 1215869106L;
 
     /**
      * Constructor
@@ -296,54 +299,33 @@ public class ImagingStudy extends DomainResource {
     /**
      * Constructor
      */
-      public ImagingStudySeriesComponent(OidType uid, Coding modality) {
+      public ImagingStudySeriesComponent(Identifier identifier, Coding modality) {
         super();
-        this.uid = uid;
+        this.identifier = identifier;
         this.modality = modality;
       }
 
         /**
-         * @return {@link #uid} (Formal identifier for this series.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+         * @return {@link #identifier} (Formal identifier for this series.)
          */
-        public OidType getUidElement() { 
-          if (this.uid == null)
+        public Identifier getIdentifier() { 
+          if (this.identifier == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImagingStudySeriesComponent.uid");
+              throw new Error("Attempt to auto-create ImagingStudySeriesComponent.identifier");
             else if (Configuration.doAutoCreate())
-              this.uid = new OidType(); // bb
-          return this.uid;
+              this.identifier = new Identifier(); // cc
+          return this.identifier;
         }
 
-        public boolean hasUidElement() { 
-          return this.uid != null && !this.uid.isEmpty();
-        }
-
-        public boolean hasUid() { 
-          return this.uid != null && !this.uid.isEmpty();
+        public boolean hasIdentifier() { 
+          return this.identifier != null && !this.identifier.isEmpty();
         }
 
         /**
-         * @param value {@link #uid} (Formal identifier for this series.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+         * @param value {@link #identifier} (Formal identifier for this series.)
          */
-        public ImagingStudySeriesComponent setUidElement(OidType value) { 
-          this.uid = value;
-          return this;
-        }
-
-        /**
-         * @return Formal identifier for this series.
-         */
-        public String getUid() { 
-          return this.uid == null ? null : this.uid.getValue();
-        }
-
-        /**
-         * @param value Formal identifier for this series.
-         */
-        public ImagingStudySeriesComponent setUid(String value) { 
-            if (this.uid == null)
-              this.uid = new OidType();
-            this.uid.setValue(value);
+        public ImagingStudySeriesComponent setIdentifier(Identifier value) { 
+          this.identifier = value;
           return this;
         }
 
@@ -511,56 +493,7 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #availability} (Availability of series (online, offline or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
-         */
-        public Enumeration<InstanceAvailability> getAvailabilityElement() { 
-          if (this.availability == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImagingStudySeriesComponent.availability");
-            else if (Configuration.doAutoCreate())
-              this.availability = new Enumeration<InstanceAvailability>(new InstanceAvailabilityEnumFactory()); // bb
-          return this.availability;
-        }
-
-        public boolean hasAvailabilityElement() { 
-          return this.availability != null && !this.availability.isEmpty();
-        }
-
-        public boolean hasAvailability() { 
-          return this.availability != null && !this.availability.isEmpty();
-        }
-
-        /**
-         * @param value {@link #availability} (Availability of series (online, offline or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
-         */
-        public ImagingStudySeriesComponent setAvailabilityElement(Enumeration<InstanceAvailability> value) { 
-          this.availability = value;
-          return this;
-        }
-
-        /**
-         * @return Availability of series (online, offline or nearline).
-         */
-        public InstanceAvailability getAvailability() { 
-          return this.availability == null ? null : this.availability.getValue();
-        }
-
-        /**
-         * @param value Availability of series (online, offline or nearline).
-         */
-        public ImagingStudySeriesComponent setAvailability(InstanceAvailability value) { 
-          if (value == null)
-            this.availability = null;
-          else {
-            if (this.availability == null)
-              this.availability = new Enumeration<InstanceAvailability>(new InstanceAvailabilityEnumFactory());
-            this.availability.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #endpoint} (The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.)
+         * @return {@link #endpoint} (The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.connectionType.)
          */
         public List<Reference> getEndpoint() { 
           if (this.endpoint == null)
@@ -807,18 +740,18 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #performer} (The physician or operator (often the radiology technician) who performed the series.)
+         * @return {@link #performer} (Indicates who or what performed the series and how they were involved.)
          */
-        public List<Reference> getPerformer() { 
+        public List<ImagingStudySeriesPerformerComponent> getPerformer() { 
           if (this.performer == null)
-            this.performer = new ArrayList<Reference>();
+            this.performer = new ArrayList<ImagingStudySeriesPerformerComponent>();
           return this.performer;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public ImagingStudySeriesComponent setPerformer(List<Reference> thePerformer) { 
+        public ImagingStudySeriesComponent setPerformer(List<ImagingStudySeriesPerformerComponent> thePerformer) { 
           this.performer = thePerformer;
           return this;
         }
@@ -826,25 +759,25 @@ public class ImagingStudy extends DomainResource {
         public boolean hasPerformer() { 
           if (this.performer == null)
             return false;
-          for (Reference item : this.performer)
+          for (ImagingStudySeriesPerformerComponent item : this.performer)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Reference addPerformer() { //3
-          Reference t = new Reference();
+        public ImagingStudySeriesPerformerComponent addPerformer() { //3
+          ImagingStudySeriesPerformerComponent t = new ImagingStudySeriesPerformerComponent();
           if (this.performer == null)
-            this.performer = new ArrayList<Reference>();
+            this.performer = new ArrayList<ImagingStudySeriesPerformerComponent>();
           this.performer.add(t);
           return t;
         }
 
-        public ImagingStudySeriesComponent addPerformer(Reference t) { //3
+        public ImagingStudySeriesComponent addPerformer(ImagingStudySeriesPerformerComponent t) { //3
           if (t == null)
             return this;
           if (this.performer == null)
-            this.performer = new ArrayList<Reference>();
+            this.performer = new ArrayList<ImagingStudySeriesPerformerComponent>();
           this.performer.add(t);
           return this;
         }
@@ -852,21 +785,11 @@ public class ImagingStudy extends DomainResource {
         /**
          * @return The first repetition of repeating field {@link #performer}, creating it if it does not already exist
          */
-        public Reference getPerformerFirstRep() { 
+        public ImagingStudySeriesPerformerComponent getPerformerFirstRep() { 
           if (getPerformer().isEmpty()) {
             addPerformer();
           }
           return getPerformer().get(0);
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public List<Resource> getPerformerTarget() { 
-          if (this.performerTarget == null)
-            this.performerTarget = new ArrayList<Resource>();
-          return this.performerTarget;
         }
 
         /**
@@ -924,36 +847,34 @@ public class ImagingStudy extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("uid", "oid", "Formal identifier for this series.", 0, 1, uid));
+          children.add(new Property("identifier", "Identifier", "Formal identifier for this series.", 0, 1, identifier));
           children.add(new Property("number", "unsignedInt", "The numeric identifier of this series in the study.", 0, 1, number));
           children.add(new Property("modality", "Coding", "The modality of this series sequence.", 0, 1, modality));
           children.add(new Property("description", "string", "A description of the series.", 0, 1, description));
           children.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances));
-          children.add(new Property("availability", "code", "Availability of series (online, offline or nearline).", 0, 1, availability));
-          children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+          children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.connectionType.", 0, java.lang.Integer.MAX_VALUE, endpoint));
           children.add(new Property("bodySite", "Coding", "The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.", 0, 1, bodySite));
           children.add(new Property("laterality", "Coding", "The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.", 0, 1, laterality));
           children.add(new Property("specimen", "Reference(Specimen)", "The specimen imaged, e.g., for whole slide imaging of a biopsy.", 0, java.lang.Integer.MAX_VALUE, specimen));
           children.add(new Property("started", "dateTime", "The date and time the series was started.", 0, 1, started));
-          children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson)", "The physician or operator (often the radiology technician) who performed the series.", 0, java.lang.Integer.MAX_VALUE, performer));
+          children.add(new Property("performer", "", "Indicates who or what performed the series and how they were involved.", 0, java.lang.Integer.MAX_VALUE, performer));
           children.add(new Property("instance", "", "A single SOP instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 115792: /*uid*/  return new Property("uid", "oid", "Formal identifier for this series.", 0, 1, uid);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Formal identifier for this series.", 0, 1, identifier);
           case -1034364087: /*number*/  return new Property("number", "unsignedInt", "The numeric identifier of this series in the study.", 0, 1, number);
           case -622722335: /*modality*/  return new Property("modality", "Coding", "The modality of this series sequence.", 0, 1, modality);
           case -1724546052: /*description*/  return new Property("description", "string", "A description of the series.", 0, 1, description);
           case -1043544226: /*numberOfInstances*/  return new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in the Study. The value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances);
-          case 1997542747: /*availability*/  return new Property("availability", "code", "Availability of series (online, offline or nearline).", 0, 1, availability);
-          case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+          case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for this series. See implementation notes for information about using DICOM endpoints. A series-level endpoint, if present, has precedence over a study-level endpoint with the same Endpoint.connectionType.", 0, java.lang.Integer.MAX_VALUE, endpoint);
           case 1702620169: /*bodySite*/  return new Property("bodySite", "Coding", "The anatomic structures examined. See DICOM Part 16 Annex L (http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html) for DICOM to SNOMED-CT mappings. The bodySite may indicate the laterality of body part imaged; if so, it shall be consistent with any content of ImagingStudy.series.laterality.", 0, 1, bodySite);
           case -170291817: /*laterality*/  return new Property("laterality", "Coding", "The laterality of the (possibly paired) anatomic structures examined. E.g., the left knee, both lungs, or unpaired abdomen. If present, shall be consistent with any laterality information indicated in ImagingStudy.series.bodySite.", 0, 1, laterality);
           case -2132868344: /*specimen*/  return new Property("specimen", "Reference(Specimen)", "The specimen imaged, e.g., for whole slide imaging of a biopsy.", 0, java.lang.Integer.MAX_VALUE, specimen);
           case -1897185151: /*started*/  return new Property("started", "dateTime", "The date and time the series was started.", 0, 1, started);
-          case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson)", "The physician or operator (often the radiology technician) who performed the series.", 0, java.lang.Integer.MAX_VALUE, performer);
+          case 481140686: /*performer*/  return new Property("performer", "", "Indicates who or what performed the series and how they were involved.", 0, java.lang.Integer.MAX_VALUE, performer);
           case 555127957: /*instance*/  return new Property("instance", "", "A single SOP instance within the series, e.g. an image, or presentation state.", 0, java.lang.Integer.MAX_VALUE, instance);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -963,18 +884,17 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // UnsignedIntType
         case -622722335: /*modality*/ return this.modality == null ? new Base[0] : new Base[] {this.modality}; // Coding
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -1043544226: /*numberOfInstances*/ return this.numberOfInstances == null ? new Base[0] : new Base[] {this.numberOfInstances}; // UnsignedIntType
-        case 1997542747: /*availability*/ return this.availability == null ? new Base[0] : new Base[] {this.availability}; // Enumeration<InstanceAvailability>
         case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // Coding
         case -170291817: /*laterality*/ return this.laterality == null ? new Base[0] : new Base[] {this.laterality}; // Coding
         case -2132868344: /*specimen*/ return this.specimen == null ? new Base[0] : this.specimen.toArray(new Base[this.specimen.size()]); // Reference
         case -1897185151: /*started*/ return this.started == null ? new Base[0] : new Base[] {this.started}; // DateTimeType
-        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // Reference
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // ImagingStudySeriesPerformerComponent
         case 555127957: /*instance*/ return this.instance == null ? new Base[0] : this.instance.toArray(new Base[this.instance.size()]); // ImagingStudySeriesInstanceComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -984,8 +904,8 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 115792: // uid
-          this.uid = castToOid(value); // OidType
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           return value;
         case -1034364087: // number
           this.number = castToUnsignedInt(value); // UnsignedIntType
@@ -998,10 +918,6 @@ public class ImagingStudy extends DomainResource {
           return value;
         case -1043544226: // numberOfInstances
           this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
-          return value;
-        case 1997542747: // availability
-          value = new InstanceAvailabilityEnumFactory().fromType(castToCode(value));
-          this.availability = (Enumeration) value; // Enumeration<InstanceAvailability>
           return value;
         case 1741102485: // endpoint
           this.getEndpoint().add(castToReference(value)); // Reference
@@ -1019,7 +935,7 @@ public class ImagingStudy extends DomainResource {
           this.started = castToDateTime(value); // DateTimeType
           return value;
         case 481140686: // performer
-          this.getPerformer().add(castToReference(value)); // Reference
+          this.getPerformer().add((ImagingStudySeriesPerformerComponent) value); // ImagingStudySeriesPerformerComponent
           return value;
         case 555127957: // instance
           this.getInstance().add((ImagingStudySeriesInstanceComponent) value); // ImagingStudySeriesInstanceComponent
@@ -1031,8 +947,8 @@ public class ImagingStudy extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("uid")) {
-          this.uid = castToOid(value); // OidType
+        if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
         } else if (name.equals("number")) {
           this.number = castToUnsignedInt(value); // UnsignedIntType
         } else if (name.equals("modality")) {
@@ -1041,9 +957,6 @@ public class ImagingStudy extends DomainResource {
           this.description = castToString(value); // StringType
         } else if (name.equals("numberOfInstances")) {
           this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
-        } else if (name.equals("availability")) {
-          value = new InstanceAvailabilityEnumFactory().fromType(castToCode(value));
-          this.availability = (Enumeration) value; // Enumeration<InstanceAvailability>
         } else if (name.equals("endpoint")) {
           this.getEndpoint().add(castToReference(value));
         } else if (name.equals("bodySite")) {
@@ -1055,7 +968,7 @@ public class ImagingStudy extends DomainResource {
         } else if (name.equals("started")) {
           this.started = castToDateTime(value); // DateTimeType
         } else if (name.equals("performer")) {
-          this.getPerformer().add(castToReference(value));
+          this.getPerformer().add((ImagingStudySeriesPerformerComponent) value);
         } else if (name.equals("instance")) {
           this.getInstance().add((ImagingStudySeriesInstanceComponent) value);
         } else
@@ -1066,12 +979,11 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792:  return getUidElement();
+        case -1618432855:  return getIdentifier(); 
         case -1034364087:  return getNumberElement();
         case -622722335:  return getModality(); 
         case -1724546052:  return getDescriptionElement();
         case -1043544226:  return getNumberOfInstancesElement();
-        case 1997542747:  return getAvailabilityElement();
         case 1741102485:  return addEndpoint(); 
         case 1702620169:  return getBodySite(); 
         case -170291817:  return getLaterality(); 
@@ -1087,18 +999,17 @@ public class ImagingStudy extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return new String[] {"oid"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -1034364087: /*number*/ return new String[] {"unsignedInt"};
         case -622722335: /*modality*/ return new String[] {"Coding"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case -1043544226: /*numberOfInstances*/ return new String[] {"unsignedInt"};
-        case 1997542747: /*availability*/ return new String[] {"code"};
         case 1741102485: /*endpoint*/ return new String[] {"Reference"};
         case 1702620169: /*bodySite*/ return new String[] {"Coding"};
         case -170291817: /*laterality*/ return new String[] {"Coding"};
         case -2132868344: /*specimen*/ return new String[] {"Reference"};
         case -1897185151: /*started*/ return new String[] {"dateTime"};
-        case 481140686: /*performer*/ return new String[] {"Reference"};
+        case 481140686: /*performer*/ return new String[] {};
         case 555127957: /*instance*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1107,8 +1018,9 @@ public class ImagingStudy extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.uid");
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("number")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.number");
@@ -1122,9 +1034,6 @@ public class ImagingStudy extends DomainResource {
         }
         else if (name.equals("numberOfInstances")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.numberOfInstances");
-        }
-        else if (name.equals("availability")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.availability");
         }
         else if (name.equals("endpoint")) {
           return addEndpoint();
@@ -1156,12 +1065,11 @@ public class ImagingStudy extends DomainResource {
       public ImagingStudySeriesComponent copy() {
         ImagingStudySeriesComponent dst = new ImagingStudySeriesComponent();
         copyValues(dst);
-        dst.uid = uid == null ? null : uid.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.number = number == null ? null : number.copy();
         dst.modality = modality == null ? null : modality.copy();
         dst.description = description == null ? null : description.copy();
         dst.numberOfInstances = numberOfInstances == null ? null : numberOfInstances.copy();
-        dst.availability = availability == null ? null : availability.copy();
         if (endpoint != null) {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
@@ -1176,8 +1084,8 @@ public class ImagingStudy extends DomainResource {
         };
         dst.started = started == null ? null : started.copy();
         if (performer != null) {
-          dst.performer = new ArrayList<Reference>();
-          for (Reference i : performer)
+          dst.performer = new ArrayList<ImagingStudySeriesPerformerComponent>();
+          for (ImagingStudySeriesPerformerComponent i : performer)
             dst.performer.add(i.copy());
         };
         if (instance != null) {
@@ -1195,11 +1103,11 @@ public class ImagingStudy extends DomainResource {
         if (!(other_ instanceof ImagingStudySeriesComponent))
           return false;
         ImagingStudySeriesComponent o = (ImagingStudySeriesComponent) other_;
-        return compareDeep(uid, o.uid, true) && compareDeep(number, o.number, true) && compareDeep(modality, o.modality, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(number, o.number, true) && compareDeep(modality, o.modality, true)
            && compareDeep(description, o.description, true) && compareDeep(numberOfInstances, o.numberOfInstances, true)
-           && compareDeep(availability, o.availability, true) && compareDeep(endpoint, o.endpoint, true) && compareDeep(bodySite, o.bodySite, true)
-           && compareDeep(laterality, o.laterality, true) && compareDeep(specimen, o.specimen, true) && compareDeep(started, o.started, true)
-           && compareDeep(performer, o.performer, true) && compareDeep(instance, o.instance, true);
+           && compareDeep(endpoint, o.endpoint, true) && compareDeep(bodySite, o.bodySite, true) && compareDeep(laterality, o.laterality, true)
+           && compareDeep(specimen, o.specimen, true) && compareDeep(started, o.started, true) && compareDeep(performer, o.performer, true)
+           && compareDeep(instance, o.instance, true);
       }
 
       @Override
@@ -1209,14 +1117,13 @@ public class ImagingStudy extends DomainResource {
         if (!(other_ instanceof ImagingStudySeriesComponent))
           return false;
         ImagingStudySeriesComponent o = (ImagingStudySeriesComponent) other_;
-        return compareValues(uid, o.uid, true) && compareValues(number, o.number, true) && compareValues(description, o.description, true)
-           && compareValues(numberOfInstances, o.numberOfInstances, true) && compareValues(availability, o.availability, true)
+        return compareValues(number, o.number, true) && compareValues(description, o.description, true) && compareValues(numberOfInstances, o.numberOfInstances, true)
            && compareValues(started, o.started, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, number, modality, description
-          , numberOfInstances, availability, endpoint, bodySite, laterality, specimen, started
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, number, modality
+          , description, numberOfInstances, endpoint, bodySite, laterality, specimen, started
           , performer, instance);
       }
 
@@ -1228,13 +1135,239 @@ public class ImagingStudy extends DomainResource {
   }
 
     @Block()
+    public static class ImagingStudySeriesPerformerComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Distinguishes the type of involvement of the performer in the series.
+         */
+        @Child(name = "function", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Type of performance", formalDefinition="Distinguishes the type of involvement of the performer in the series." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/series-performer-function")
+        protected CodeableConcept function;
+
+        /**
+         * Indicates who or what performed the series.
+         */
+        @Child(name = "actor", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, Patient.class, Device.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Who performed the series", formalDefinition="Indicates who or what performed the series." )
+        protected Reference actor;
+
+        /**
+         * The actual object that is the target of the reference (Indicates who or what performed the series.)
+         */
+        protected Resource actorTarget;
+
+        private static final long serialVersionUID = 1424001049L;
+
+    /**
+     * Constructor
+     */
+      public ImagingStudySeriesPerformerComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public ImagingStudySeriesPerformerComponent(Reference actor) {
+        super();
+        this.actor = actor;
+      }
+
+        /**
+         * @return {@link #function} (Distinguishes the type of involvement of the performer in the series.)
+         */
+        public CodeableConcept getFunction() { 
+          if (this.function == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImagingStudySeriesPerformerComponent.function");
+            else if (Configuration.doAutoCreate())
+              this.function = new CodeableConcept(); // cc
+          return this.function;
+        }
+
+        public boolean hasFunction() { 
+          return this.function != null && !this.function.isEmpty();
+        }
+
+        /**
+         * @param value {@link #function} (Distinguishes the type of involvement of the performer in the series.)
+         */
+        public ImagingStudySeriesPerformerComponent setFunction(CodeableConcept value) { 
+          this.function = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #actor} (Indicates who or what performed the series.)
+         */
+        public Reference getActor() { 
+          if (this.actor == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ImagingStudySeriesPerformerComponent.actor");
+            else if (Configuration.doAutoCreate())
+              this.actor = new Reference(); // cc
+          return this.actor;
+        }
+
+        public boolean hasActor() { 
+          return this.actor != null && !this.actor.isEmpty();
+        }
+
+        /**
+         * @param value {@link #actor} (Indicates who or what performed the series.)
+         */
+        public ImagingStudySeriesPerformerComponent setActor(Reference value) { 
+          this.actor = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates who or what performed the series.)
+         */
+        public Resource getActorTarget() { 
+          return this.actorTarget;
+        }
+
+        /**
+         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates who or what performed the series.)
+         */
+        public ImagingStudySeriesPerformerComponent setActorTarget(Resource value) { 
+          this.actorTarget = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("function", "CodeableConcept", "Distinguishes the type of involvement of the performer in the series.", 0, 1, function));
+          children.add(new Property("actor", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|Patient|Device|RelatedPerson)", "Indicates who or what performed the series.", 0, 1, actor));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1380938712: /*function*/  return new Property("function", "CodeableConcept", "Distinguishes the type of involvement of the performer in the series.", 0, 1, function);
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|Patient|Device|RelatedPerson)", "Indicates who or what performed the series.", 0, 1, actor);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 1380938712: /*function*/ return this.function == null ? new Base[0] : new Base[] {this.function}; // CodeableConcept
+        case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 1380938712: // function
+          this.function = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 92645877: // actor
+          this.actor = castToReference(value); // Reference
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("function")) {
+          this.function = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("actor")) {
+          this.actor = castToReference(value); // Reference
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1380938712:  return getFunction(); 
+        case 92645877:  return getActor(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 1380938712: /*function*/ return new String[] {"CodeableConcept"};
+        case 92645877: /*actor*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("function")) {
+          this.function = new CodeableConcept();
+          return this.function;
+        }
+        else if (name.equals("actor")) {
+          this.actor = new Reference();
+          return this.actor;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public ImagingStudySeriesPerformerComponent copy() {
+        ImagingStudySeriesPerformerComponent dst = new ImagingStudySeriesPerformerComponent();
+        copyValues(dst);
+        dst.function = function == null ? null : function.copy();
+        dst.actor = actor == null ? null : actor.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof ImagingStudySeriesPerformerComponent))
+          return false;
+        ImagingStudySeriesPerformerComponent o = (ImagingStudySeriesPerformerComponent) other_;
+        return compareDeep(function, o.function, true) && compareDeep(actor, o.actor, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof ImagingStudySeriesPerformerComponent))
+          return false;
+        ImagingStudySeriesPerformerComponent o = (ImagingStudySeriesPerformerComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(function, actor);
+      }
+
+  public String fhirType() {
+    return "ImagingStudy.series.performer";
+
+  }
+
+  }
+
+    @Block()
     public static class ImagingStudySeriesInstanceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Formal identifier for this image or other content.
          */
-        @Child(name = "uid", type = {OidType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Formal DICOM identifier for this instance", formalDefinition="Formal identifier for this image or other content." )
-        protected OidType uid;
+        protected Identifier identifier;
 
         /**
          * The number of instance in the series.
@@ -1246,9 +1379,9 @@ public class ImagingStudy extends DomainResource {
         /**
          * DICOM instance  type.
          */
-        @Child(name = "sopClass", type = {OidType.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "sopClass", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="DICOM class type", formalDefinition="DICOM instance  type." )
-        protected OidType sopClass;
+        protected Coding sopClass;
 
         /**
          * The description of the instance.
@@ -1257,7 +1390,7 @@ public class ImagingStudy extends DomainResource {
         @Description(shortDefinition="Description of instance", formalDefinition="The description of the instance." )
         protected StringType title;
 
-        private static final long serialVersionUID = -771526344L;
+        private static final long serialVersionUID = -2106153652L;
 
     /**
      * Constructor
@@ -1269,54 +1402,33 @@ public class ImagingStudy extends DomainResource {
     /**
      * Constructor
      */
-      public ImagingStudySeriesInstanceComponent(OidType uid, OidType sopClass) {
+      public ImagingStudySeriesInstanceComponent(Identifier identifier, Coding sopClass) {
         super();
-        this.uid = uid;
+        this.identifier = identifier;
         this.sopClass = sopClass;
       }
 
         /**
-         * @return {@link #uid} (Formal identifier for this image or other content.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+         * @return {@link #identifier} (Formal identifier for this image or other content.)
          */
-        public OidType getUidElement() { 
-          if (this.uid == null)
+        public Identifier getIdentifier() { 
+          if (this.identifier == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ImagingStudySeriesInstanceComponent.uid");
+              throw new Error("Attempt to auto-create ImagingStudySeriesInstanceComponent.identifier");
             else if (Configuration.doAutoCreate())
-              this.uid = new OidType(); // bb
-          return this.uid;
+              this.identifier = new Identifier(); // cc
+          return this.identifier;
         }
 
-        public boolean hasUidElement() { 
-          return this.uid != null && !this.uid.isEmpty();
-        }
-
-        public boolean hasUid() { 
-          return this.uid != null && !this.uid.isEmpty();
+        public boolean hasIdentifier() { 
+          return this.identifier != null && !this.identifier.isEmpty();
         }
 
         /**
-         * @param value {@link #uid} (Formal identifier for this image or other content.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
+         * @param value {@link #identifier} (Formal identifier for this image or other content.)
          */
-        public ImagingStudySeriesInstanceComponent setUidElement(OidType value) { 
-          this.uid = value;
-          return this;
-        }
-
-        /**
-         * @return Formal identifier for this image or other content.
-         */
-        public String getUid() { 
-          return this.uid == null ? null : this.uid.getValue();
-        }
-
-        /**
-         * @param value Formal identifier for this image or other content.
-         */
-        public ImagingStudySeriesInstanceComponent setUid(String value) { 
-            if (this.uid == null)
-              this.uid = new OidType();
-            this.uid.setValue(value);
+        public ImagingStudySeriesInstanceComponent setIdentifier(Identifier value) { 
+          this.identifier = value;
           return this;
         }
 
@@ -1366,19 +1478,15 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @return {@link #sopClass} (DICOM instance  type.). This is the underlying object with id, value and extensions. The accessor "getSopClass" gives direct access to the value
+         * @return {@link #sopClass} (DICOM instance  type.)
          */
-        public OidType getSopClassElement() { 
+        public Coding getSopClass() { 
           if (this.sopClass == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ImagingStudySeriesInstanceComponent.sopClass");
             else if (Configuration.doAutoCreate())
-              this.sopClass = new OidType(); // bb
+              this.sopClass = new Coding(); // cc
           return this.sopClass;
-        }
-
-        public boolean hasSopClassElement() { 
-          return this.sopClass != null && !this.sopClass.isEmpty();
         }
 
         public boolean hasSopClass() { 
@@ -1386,27 +1494,10 @@ public class ImagingStudy extends DomainResource {
         }
 
         /**
-         * @param value {@link #sopClass} (DICOM instance  type.). This is the underlying object with id, value and extensions. The accessor "getSopClass" gives direct access to the value
+         * @param value {@link #sopClass} (DICOM instance  type.)
          */
-        public ImagingStudySeriesInstanceComponent setSopClassElement(OidType value) { 
+        public ImagingStudySeriesInstanceComponent setSopClass(Coding value) { 
           this.sopClass = value;
-          return this;
-        }
-
-        /**
-         * @return DICOM instance  type.
-         */
-        public String getSopClass() { 
-          return this.sopClass == null ? null : this.sopClass.getValue();
-        }
-
-        /**
-         * @param value DICOM instance  type.
-         */
-        public ImagingStudySeriesInstanceComponent setSopClass(String value) { 
-            if (this.sopClass == null)
-              this.sopClass = new OidType();
-            this.sopClass.setValue(value);
           return this;
         }
 
@@ -1461,18 +1552,18 @@ public class ImagingStudy extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("uid", "oid", "Formal identifier for this image or other content.", 0, 1, uid));
+          children.add(new Property("identifier", "Identifier", "Formal identifier for this image or other content.", 0, 1, identifier));
           children.add(new Property("number", "unsignedInt", "The number of instance in the series.", 0, 1, number));
-          children.add(new Property("sopClass", "oid", "DICOM instance  type.", 0, 1, sopClass));
+          children.add(new Property("sopClass", "Coding", "DICOM instance  type.", 0, 1, sopClass));
           children.add(new Property("title", "string", "The description of the instance.", 0, 1, title));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 115792: /*uid*/  return new Property("uid", "oid", "Formal identifier for this image or other content.", 0, 1, uid);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Formal identifier for this image or other content.", 0, 1, identifier);
           case -1034364087: /*number*/  return new Property("number", "unsignedInt", "The number of instance in the series.", 0, 1, number);
-          case 1560041540: /*sopClass*/  return new Property("sopClass", "oid", "DICOM instance  type.", 0, 1, sopClass);
+          case 1560041540: /*sopClass*/  return new Property("sopClass", "Coding", "DICOM instance  type.", 0, 1, sopClass);
           case 110371416: /*title*/  return new Property("title", "string", "The description of the instance.", 0, 1, title);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1482,9 +1573,9 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // UnsignedIntType
-        case 1560041540: /*sopClass*/ return this.sopClass == null ? new Base[0] : new Base[] {this.sopClass}; // OidType
+        case 1560041540: /*sopClass*/ return this.sopClass == null ? new Base[0] : new Base[] {this.sopClass}; // Coding
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1494,14 +1585,14 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 115792: // uid
-          this.uid = castToOid(value); // OidType
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           return value;
         case -1034364087: // number
           this.number = castToUnsignedInt(value); // UnsignedIntType
           return value;
         case 1560041540: // sopClass
-          this.sopClass = castToOid(value); // OidType
+          this.sopClass = castToCoding(value); // Coding
           return value;
         case 110371416: // title
           this.title = castToString(value); // StringType
@@ -1513,12 +1604,12 @@ public class ImagingStudy extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("uid")) {
-          this.uid = castToOid(value); // OidType
+        if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
         } else if (name.equals("number")) {
           this.number = castToUnsignedInt(value); // UnsignedIntType
         } else if (name.equals("sopClass")) {
-          this.sopClass = castToOid(value); // OidType
+          this.sopClass = castToCoding(value); // Coding
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
         } else
@@ -1529,9 +1620,9 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792:  return getUidElement();
+        case -1618432855:  return getIdentifier(); 
         case -1034364087:  return getNumberElement();
-        case 1560041540:  return getSopClassElement();
+        case 1560041540:  return getSopClass(); 
         case 110371416:  return getTitleElement();
         default: return super.makeProperty(hash, name);
         }
@@ -1541,9 +1632,9 @@ public class ImagingStudy extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return new String[] {"oid"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -1034364087: /*number*/ return new String[] {"unsignedInt"};
-        case 1560041540: /*sopClass*/ return new String[] {"oid"};
+        case 1560041540: /*sopClass*/ return new String[] {"Coding"};
         case 110371416: /*title*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1552,14 +1643,16 @@ public class ImagingStudy extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.uid");
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("number")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.number");
         }
         else if (name.equals("sopClass")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.sopClass");
+          this.sopClass = new Coding();
+          return this.sopClass;
         }
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.title");
@@ -1571,7 +1664,7 @@ public class ImagingStudy extends DomainResource {
       public ImagingStudySeriesInstanceComponent copy() {
         ImagingStudySeriesInstanceComponent dst = new ImagingStudySeriesInstanceComponent();
         copyValues(dst);
-        dst.uid = uid == null ? null : uid.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.number = number == null ? null : number.copy();
         dst.sopClass = sopClass == null ? null : sopClass.copy();
         dst.title = title == null ? null : title.copy();
@@ -1585,7 +1678,7 @@ public class ImagingStudy extends DomainResource {
         if (!(other_ instanceof ImagingStudySeriesInstanceComponent))
           return false;
         ImagingStudySeriesInstanceComponent o = (ImagingStudySeriesInstanceComponent) other_;
-        return compareDeep(uid, o.uid, true) && compareDeep(number, o.number, true) && compareDeep(sopClass, o.sopClass, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(number, o.number, true) && compareDeep(sopClass, o.sopClass, true)
            && compareDeep(title, o.title, true);
       }
 
@@ -1596,13 +1689,12 @@ public class ImagingStudy extends DomainResource {
         if (!(other_ instanceof ImagingStudySeriesInstanceComponent))
           return false;
         ImagingStudySeriesInstanceComponent o = (ImagingStudySeriesInstanceComponent) other_;
-        return compareValues(uid, o.uid, true) && compareValues(number, o.number, true) && compareValues(sopClass, o.sopClass, true)
-           && compareValues(title, o.title, true);
+        return compareValues(number, o.number, true) && compareValues(title, o.title, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, number, sopClass, title
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, number, sopClass
+          , title);
       }
 
   public String fhirType() {
@@ -1613,46 +1705,32 @@ public class ImagingStudy extends DomainResource {
   }
 
     /**
-     * Formal identifier for the study.
+     * DICOM Study Instance UID, and Accession Number.
      */
-    @Child(name = "uid", type = {OidType.class}, order=0, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Formal DICOM identifier for the study", formalDefinition="Formal identifier for the study." )
-    protected OidType uid;
-
-    /**
-     * Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).
-     */
-    @Child(name = "accession", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Related workflow identifier (\"Accession Number\")", formalDefinition="Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf)." )
-    protected Identifier accession;
-
-    /**
-     * Other identifiers for the study.
-     */
-    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Other identifiers for the study", formalDefinition="Other identifiers for the study." )
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Identifiers for the whole study", formalDefinition="DICOM Study Instance UID, and Accession Number." )
     protected List<Identifier> identifier;
 
     /**
-     * Availability of study (online, offline, or nearline).
+     * The current state of the ImagingStudy.
      */
-    @Child(name = "availability", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE", formalDefinition="Availability of study (online, offline, or nearline)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/instance-availability")
-    protected Enumeration<InstanceAvailability> availability;
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="registered | available | cancelled | entered-in-error | unknown", formalDefinition="The current state of the ImagingStudy." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/imagingstudy-status")
+    protected Enumeration<ImagingStudyStatus> status;
 
     /**
-     * A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).
+     * A list of all the series.modality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).
      */
-    @Child(name = "modalityList", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="All series modality if actual acquisition modalities", formalDefinition="A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dicom-cid29")
-    protected List<Coding> modalityList;
+    @Child(name = "modality", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="All series modality if actual acquisition modalities", formalDefinition="A list of all the series.modality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html")
+    protected List<Coding> modality;
 
     /**
      * The subject, typically a patient, of the imaging study.
      */
-    @Child(name = "subject", type = {Patient.class, Device.class, Group.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Device.class, Group.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who or what is the subject of the study", formalDefinition="The subject, typically a patient, of the imaging study." )
     protected Reference subject;
 
@@ -1664,7 +1742,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * The encounter or episode at which the request is initiated.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Originating context", formalDefinition="The encounter or episode at which the request is initiated." )
     protected Reference context;
 
@@ -1676,14 +1754,14 @@ public class ImagingStudy extends DomainResource {
     /**
      * Date and time the study started.
      */
-    @Child(name = "started", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "started", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the study was started", formalDefinition="Date and time the study started." )
     protected DateTimeType started;
 
     /**
      * A list of the diagnostic requests that resulted in this imaging study being performed.
      */
-    @Child(name = "basedOn", type = {CarePlan.class, ServiceRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "basedOn", type = {CarePlan.class, ServiceRequest.class, Appointment.class, AppointmentResponse.class, Task.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Request fulfilled", formalDefinition="A list of the diagnostic requests that resulted in this imaging study being performed." )
     protected List<Reference> basedOn;
     /**
@@ -1695,7 +1773,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * The requesting/referring physician.
      */
-    @Child(name = "referrer", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "referrer", type = {Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Referring physician", formalDefinition="The requesting/referring physician." )
     protected Reference referrer;
 
@@ -1707,7 +1785,7 @@ public class ImagingStudy extends DomainResource {
     /**
      * Who read the study and interpreted the images or other content.
      */
-    @Child(name = "interpreter", type = {Practitioner.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "interpreter", type = {Practitioner.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who interpreted images", formalDefinition="Who read the study and interpreted the images or other content." )
     protected List<Reference> interpreter;
     /**
@@ -1717,13 +1795,13 @@ public class ImagingStudy extends DomainResource {
 
 
     /**
-     * The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.
+     * The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.connectionType.
      */
-    @Child(name = "endpoint", type = {Endpoint.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Study access endpoint", formalDefinition="The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type." )
+    @Child(name = "endpoint", type = {Endpoint.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Study access endpoint", formalDefinition="The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.connectionType." )
     protected List<Reference> endpoint;
     /**
-     * The actual objects that are the target of the reference (The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.)
+     * The actual objects that are the target of the reference (The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.connectionType.)
      */
     protected List<Endpoint> endpointTarget;
 
@@ -1731,51 +1809,74 @@ public class ImagingStudy extends DomainResource {
     /**
      * Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.
      */
-    @Child(name = "numberOfSeries", type = {UnsignedIntType.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "numberOfSeries", type = {UnsignedIntType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Number of Study Related Series", formalDefinition="Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present." )
     protected UnsignedIntType numberOfSeries;
 
     /**
      * Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.
      */
-    @Child(name = "numberOfInstances", type = {UnsignedIntType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "numberOfInstances", type = {UnsignedIntType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Number of Study Related Instances", formalDefinition="Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present." )
     protected UnsignedIntType numberOfInstances;
 
     /**
      * A reference to the performed Procedure.
      */
-    @Child(name = "procedureReference", type = {Procedure.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "procedureReference", type = {Procedure.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The performed Procedure reference", formalDefinition="A reference to the performed Procedure." )
-    protected List<Reference> procedureReference;
-    /**
-     * The actual objects that are the target of the reference (A reference to the performed Procedure.)
-     */
-    protected List<Procedure> procedureReferenceTarget;
+    protected Reference procedureReference;
 
+    /**
+     * The actual object that is the target of the reference (A reference to the performed Procedure.)
+     */
+    protected Procedure procedureReferenceTarget;
 
     /**
      * The code for the performed procedure type.
      */
-    @Child(name = "procedureCode", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "procedureCode", type = {CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The performed procedure code", formalDefinition="The code for the performed procedure type." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-code")
     protected List<CodeableConcept> procedureCode;
+
+    /**
+     * The principal physical location where the ImagingStudy was performed.
+     */
+    @Child(name = "location", type = {Location.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Where ImagingStudy occurred", formalDefinition="The principal physical location where the ImagingStudy was performed." )
+    protected Reference location;
+
+    /**
+     * The actual object that is the target of the reference (The principal physical location where the ImagingStudy was performed.)
+     */
+    protected Location locationTarget;
 
     /**
      * Description of clinical condition indicating why the ImagingStudy was requested.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Why the study was requested", formalDefinition="Description of clinical condition indicating why the ImagingStudy was requested." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-reason")
-    protected CodeableConcept reason;
+    protected List<CodeableConcept> reasonCode;
+
+    /**
+     * Indicates another resource whose existence justifies this Study.
+     */
+    @Child(name = "reasonReference", type = {Condition.class, Observation.class, Media.class, DiagnosticReport.class, DocumentReference.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Why was study performed", formalDefinition="Indicates another resource whose existence justifies this Study." )
+    protected List<Reference> reasonReference;
+    /**
+     * The actual objects that are the target of the reference (Indicates another resource whose existence justifies this Study.)
+     */
+    protected List<Resource> reasonReferenceTarget;
+
 
     /**
      * Institution-generated description or classification of the Study performed.
      */
-    @Child(name = "description", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "note", type = {Annotation.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Institution-generated description", formalDefinition="Institution-generated description or classification of the Study performed." )
-    protected StringType description;
+    protected List<Annotation> note;
 
     /**
      * Each study has one or more series of images or other content.
@@ -1784,7 +1885,7 @@ public class ImagingStudy extends DomainResource {
     @Description(shortDefinition="Each study has one or more series of instances", formalDefinition="Each study has one or more series of images or other content." )
     protected List<ImagingStudySeriesComponent> series;
 
-    private static final long serialVersionUID = -441933946L;
+    private static final long serialVersionUID = 1771818489L;
 
   /**
    * Constructor
@@ -1796,83 +1897,14 @@ public class ImagingStudy extends DomainResource {
   /**
    * Constructor
    */
-    public ImagingStudy(OidType uid, Reference subject) {
+    public ImagingStudy(Enumeration<ImagingStudyStatus> status, Reference subject) {
       super();
-      this.uid = uid;
+      this.status = status;
       this.subject = subject;
     }
 
     /**
-     * @return {@link #uid} (Formal identifier for the study.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
-     */
-    public OidType getUidElement() { 
-      if (this.uid == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.uid");
-        else if (Configuration.doAutoCreate())
-          this.uid = new OidType(); // bb
-      return this.uid;
-    }
-
-    public boolean hasUidElement() { 
-      return this.uid != null && !this.uid.isEmpty();
-    }
-
-    public boolean hasUid() { 
-      return this.uid != null && !this.uid.isEmpty();
-    }
-
-    /**
-     * @param value {@link #uid} (Formal identifier for the study.). This is the underlying object with id, value and extensions. The accessor "getUid" gives direct access to the value
-     */
-    public ImagingStudy setUidElement(OidType value) { 
-      this.uid = value;
-      return this;
-    }
-
-    /**
-     * @return Formal identifier for the study.
-     */
-    public String getUid() { 
-      return this.uid == null ? null : this.uid.getValue();
-    }
-
-    /**
-     * @param value Formal identifier for the study.
-     */
-    public ImagingStudy setUid(String value) { 
-        if (this.uid == null)
-          this.uid = new OidType();
-        this.uid.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #accession} (Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).)
-     */
-    public Identifier getAccession() { 
-      if (this.accession == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.accession");
-        else if (Configuration.doAutoCreate())
-          this.accession = new Identifier(); // cc
-      return this.accession;
-    }
-
-    public boolean hasAccession() { 
-      return this.accession != null && !this.accession.isEmpty();
-    }
-
-    /**
-     * @param value {@link #accession} (Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).)
-     */
-    public ImagingStudy setAccession(Identifier value) { 
-      this.accession = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #identifier} (Other identifiers for the study.)
+     * @return {@link #identifier} (DICOM Study Instance UID, and Accession Number.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1925,105 +1957,101 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #availability} (Availability of study (online, offline, or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
+     * @return {@link #status} (The current state of the ImagingStudy.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<InstanceAvailability> getAvailabilityElement() { 
-      if (this.availability == null)
+    public Enumeration<ImagingStudyStatus> getStatusElement() { 
+      if (this.status == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.availability");
+          throw new Error("Attempt to auto-create ImagingStudy.status");
         else if (Configuration.doAutoCreate())
-          this.availability = new Enumeration<InstanceAvailability>(new InstanceAvailabilityEnumFactory()); // bb
-      return this.availability;
+          this.status = new Enumeration<ImagingStudyStatus>(new ImagingStudyStatusEnumFactory()); // bb
+      return this.status;
     }
 
-    public boolean hasAvailabilityElement() { 
-      return this.availability != null && !this.availability.isEmpty();
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
     }
 
-    public boolean hasAvailability() { 
-      return this.availability != null && !this.availability.isEmpty();
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
     }
 
     /**
-     * @param value {@link #availability} (Availability of study (online, offline, or nearline).). This is the underlying object with id, value and extensions. The accessor "getAvailability" gives direct access to the value
+     * @param value {@link #status} (The current state of the ImagingStudy.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public ImagingStudy setAvailabilityElement(Enumeration<InstanceAvailability> value) { 
-      this.availability = value;
+    public ImagingStudy setStatusElement(Enumeration<ImagingStudyStatus> value) { 
+      this.status = value;
       return this;
     }
 
     /**
-     * @return Availability of study (online, offline, or nearline).
+     * @return The current state of the ImagingStudy.
      */
-    public InstanceAvailability getAvailability() { 
-      return this.availability == null ? null : this.availability.getValue();
+    public ImagingStudyStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Availability of study (online, offline, or nearline).
+     * @param value The current state of the ImagingStudy.
      */
-    public ImagingStudy setAvailability(InstanceAvailability value) { 
-      if (value == null)
-        this.availability = null;
-      else {
-        if (this.availability == null)
-          this.availability = new Enumeration<InstanceAvailability>(new InstanceAvailabilityEnumFactory());
-        this.availability.setValue(value);
-      }
+    public ImagingStudy setStatus(ImagingStudyStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<ImagingStudyStatus>(new ImagingStudyStatusEnumFactory());
+        this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #modalityList} (A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).)
+     * @return {@link #modality} (A list of all the series.modality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).)
      */
-    public List<Coding> getModalityList() { 
-      if (this.modalityList == null)
-        this.modalityList = new ArrayList<Coding>();
-      return this.modalityList;
+    public List<Coding> getModality() { 
+      if (this.modality == null)
+        this.modality = new ArrayList<Coding>();
+      return this.modality;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ImagingStudy setModalityList(List<Coding> theModalityList) { 
-      this.modalityList = theModalityList;
+    public ImagingStudy setModality(List<Coding> theModality) { 
+      this.modality = theModality;
       return this;
     }
 
-    public boolean hasModalityList() { 
-      if (this.modalityList == null)
+    public boolean hasModality() { 
+      if (this.modality == null)
         return false;
-      for (Coding item : this.modalityList)
+      for (Coding item : this.modality)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Coding addModalityList() { //3
+    public Coding addModality() { //3
       Coding t = new Coding();
-      if (this.modalityList == null)
-        this.modalityList = new ArrayList<Coding>();
-      this.modalityList.add(t);
+      if (this.modality == null)
+        this.modality = new ArrayList<Coding>();
+      this.modality.add(t);
       return t;
     }
 
-    public ImagingStudy addModalityList(Coding t) { //3
+    public ImagingStudy addModality(Coding t) { //3
       if (t == null)
         return this;
-      if (this.modalityList == null)
-        this.modalityList = new ArrayList<Coding>();
-      this.modalityList.add(t);
+      if (this.modality == null)
+        this.modality = new ArrayList<Coding>();
+      this.modality.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #modalityList}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #modality}, creating it if it does not already exist
      */
-    public Coding getModalityListFirstRep() { 
-      if (getModalityList().isEmpty()) {
-        addModalityList();
+    public Coding getModalityFirstRep() { 
+      if (getModality().isEmpty()) {
+        addModality();
       }
-      return getModalityList().get(0);
+      return getModality().get(0);
     }
 
     /**
@@ -2336,7 +2364,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #endpoint} (The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.)
+     * @return {@link #endpoint} (The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.connectionType.)
      */
     public List<Reference> getEndpoint() { 
       if (this.endpoint == null)
@@ -2503,76 +2531,45 @@ public class ImagingStudy extends DomainResource {
     /**
      * @return {@link #procedureReference} (A reference to the performed Procedure.)
      */
-    public List<Reference> getProcedureReference() { 
+    public Reference getProcedureReference() { 
       if (this.procedureReference == null)
-        this.procedureReference = new ArrayList<Reference>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImagingStudy.procedureReference");
+        else if (Configuration.doAutoCreate())
+          this.procedureReference = new Reference(); // cc
       return this.procedureReference;
     }
 
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ImagingStudy setProcedureReference(List<Reference> theProcedureReference) { 
-      this.procedureReference = theProcedureReference;
-      return this;
-    }
-
     public boolean hasProcedureReference() { 
-      if (this.procedureReference == null)
-        return false;
-      for (Reference item : this.procedureReference)
-        if (!item.isEmpty())
-          return true;
-      return false;
+      return this.procedureReference != null && !this.procedureReference.isEmpty();
     }
 
-    public Reference addProcedureReference() { //3
-      Reference t = new Reference();
-      if (this.procedureReference == null)
-        this.procedureReference = new ArrayList<Reference>();
-      this.procedureReference.add(t);
-      return t;
-    }
-
-    public ImagingStudy addProcedureReference(Reference t) { //3
-      if (t == null)
-        return this;
-      if (this.procedureReference == null)
-        this.procedureReference = new ArrayList<Reference>();
-      this.procedureReference.add(t);
+    /**
+     * @param value {@link #procedureReference} (A reference to the performed Procedure.)
+     */
+    public ImagingStudy setProcedureReference(Reference value) { 
+      this.procedureReference = value;
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #procedureReference}, creating it if it does not already exist
+     * @return {@link #procedureReference} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the performed Procedure.)
      */
-    public Reference getProcedureReferenceFirstRep() { 
-      if (getProcedureReference().isEmpty()) {
-        addProcedureReference();
-      }
-      return getProcedureReference().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Procedure> getProcedureReferenceTarget() { 
+    public Procedure getProcedureReferenceTarget() { 
       if (this.procedureReferenceTarget == null)
-        this.procedureReferenceTarget = new ArrayList<Procedure>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImagingStudy.procedureReference");
+        else if (Configuration.doAutoCreate())
+          this.procedureReferenceTarget = new Procedure(); // aa
       return this.procedureReferenceTarget;
     }
 
     /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
+     * @param value {@link #procedureReference} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the performed Procedure.)
      */
-    @Deprecated
-    public Procedure addProcedureReferenceTarget() { 
-      Procedure r = new Procedure();
-      if (this.procedureReferenceTarget == null)
-        this.procedureReferenceTarget = new ArrayList<Procedure>();
-      this.procedureReferenceTarget.add(r);
-      return r;
+    public ImagingStudy setProcedureReferenceTarget(Procedure value) { 
+      this.procedureReferenceTarget = value;
+      return this;
     }
 
     /**
@@ -2629,76 +2626,216 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (Description of clinical condition indicating why the ImagingStudy was requested.)
+     * @return {@link #location} (The principal physical location where the ImagingStudy was performed.)
      */
-    public CodeableConcept getReason() { 
-      if (this.reason == null)
+    public Reference getLocation() { 
+      if (this.location == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.reason");
+          throw new Error("Attempt to auto-create ImagingStudy.location");
         else if (Configuration.doAutoCreate())
-          this.reason = new CodeableConcept(); // cc
-      return this.reason;
+          this.location = new Reference(); // cc
+      return this.location;
     }
 
-    public boolean hasReason() { 
-      return this.reason != null && !this.reason.isEmpty();
+    public boolean hasLocation() { 
+      return this.location != null && !this.location.isEmpty();
     }
 
     /**
-     * @param value {@link #reason} (Description of clinical condition indicating why the ImagingStudy was requested.)
+     * @param value {@link #location} (The principal physical location where the ImagingStudy was performed.)
      */
-    public ImagingStudy setReason(CodeableConcept value) { 
-      this.reason = value;
+    public ImagingStudy setLocation(Reference value) { 
+      this.location = value;
       return this;
     }
 
     /**
-     * @return {@link #description} (Institution-generated description or classification of the Study performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #location} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The principal physical location where the ImagingStudy was performed.)
      */
-    public StringType getDescriptionElement() { 
-      if (this.description == null)
+    public Location getLocationTarget() { 
+      if (this.locationTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ImagingStudy.description");
+          throw new Error("Attempt to auto-create ImagingStudy.location");
         else if (Configuration.doAutoCreate())
-          this.description = new StringType(); // bb
-      return this.description;
-    }
-
-    public boolean hasDescriptionElement() { 
-      return this.description != null && !this.description.isEmpty();
-    }
-
-    public boolean hasDescription() { 
-      return this.description != null && !this.description.isEmpty();
+          this.locationTarget = new Location(); // aa
+      return this.locationTarget;
     }
 
     /**
-     * @param value {@link #description} (Institution-generated description or classification of the Study performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #location} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The principal physical location where the ImagingStudy was performed.)
      */
-    public ImagingStudy setDescriptionElement(StringType value) { 
-      this.description = value;
+    public ImagingStudy setLocationTarget(Location value) { 
+      this.locationTarget = value;
       return this;
     }
 
     /**
-     * @return Institution-generated description or classification of the Study performed.
+     * @return {@link #reasonCode} (Description of clinical condition indicating why the ImagingStudy was requested.)
      */
-    public String getDescription() { 
-      return this.description == null ? null : this.description.getValue();
+    public List<CodeableConcept> getReasonCode() { 
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      return this.reasonCode;
     }
 
     /**
-     * @param value Institution-generated description or classification of the Study performed.
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ImagingStudy setDescription(String value) { 
-      if (Utilities.noString(value))
-        this.description = null;
-      else {
-        if (this.description == null)
-          this.description = new StringType();
-        this.description.setValue(value);
+    public ImagingStudy setReasonCode(List<CodeableConcept> theReasonCode) { 
+      this.reasonCode = theReasonCode;
+      return this;
+    }
+
+    public boolean hasReasonCode() { 
+      if (this.reasonCode == null)
+        return false;
+      for (CodeableConcept item : this.reasonCode)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addReasonCode() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return t;
+    }
+
+    public ImagingStudy addReasonCode(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reasonCode}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonCodeFirstRep() { 
+      if (getReasonCode().isEmpty()) {
+        addReasonCode();
       }
+      return getReasonCode().get(0);
+    }
+
+    /**
+     * @return {@link #reasonReference} (Indicates another resource whose existence justifies this Study.)
+     */
+    public List<Reference> getReasonReference() { 
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      return this.reasonReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setReasonReference(List<Reference> theReasonReference) { 
+      this.reasonReference = theReasonReference;
       return this;
+    }
+
+    public boolean hasReasonReference() { 
+      if (this.reasonReference == null)
+        return false;
+      for (Reference item : this.reasonReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addReasonReference() { //3
+      Reference t = new Reference();
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return t;
+    }
+
+    public ImagingStudy addReasonReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reasonReference}, creating it if it does not already exist
+     */
+    public Reference getReasonReferenceFirstRep() { 
+      if (getReasonReference().isEmpty()) {
+        addReasonReference();
+      }
+      return getReasonReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReasonReferenceTarget() { 
+      if (this.reasonReferenceTarget == null)
+        this.reasonReferenceTarget = new ArrayList<Resource>();
+      return this.reasonReferenceTarget;
+    }
+
+    /**
+     * @return {@link #note} (Institution-generated description or classification of the Study performed.)
+     */
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ImagingStudy setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public ImagingStudy addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
+     */
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
+      }
+      return getNote().get(0);
     }
 
     /**
@@ -2756,48 +2893,48 @@ public class ImagingStudy extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("uid", "oid", "Formal identifier for the study.", 0, 1, uid));
-        children.add(new Property("accession", "Identifier", "Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).", 0, 1, accession));
-        children.add(new Property("identifier", "Identifier", "Other identifiers for the study.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("availability", "code", "Availability of study (online, offline, or nearline).", 0, 1, availability));
-        children.add(new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList));
+        children.add(new Property("identifier", "Identifier", "DICOM Study Instance UID, and Accession Number.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The current state of the ImagingStudy.", 0, 1, status));
+        children.add(new Property("modality", "Coding", "A list of all the series.modality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modality));
         children.add(new Property("subject", "Reference(Patient|Device|Group)", "The subject, typically a patient, of the imaging study.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode at which the request is initiated.", 0, 1, context));
         children.add(new Property("started", "dateTime", "Date and time the study started.", 0, 1, started));
-        children.add(new Property("basedOn", "Reference(CarePlan|ServiceRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("basedOn", "Reference(CarePlan|ServiceRequest|Appointment|AppointmentResponse|Task)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, 1, referrer));
         children.add(new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter));
-        children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+        children.add(new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.connectionType.", 0, java.lang.Integer.MAX_VALUE, endpoint));
         children.add(new Property("numberOfSeries", "unsignedInt", "Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.", 0, 1, numberOfSeries));
         children.add(new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances));
-        children.add(new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, java.lang.Integer.MAX_VALUE, procedureReference));
+        children.add(new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, 1, procedureReference));
         children.add(new Property("procedureCode", "CodeableConcept", "The code for the performed procedure type.", 0, java.lang.Integer.MAX_VALUE, procedureCode));
-        children.add(new Property("reason", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, 1, reason));
-        children.add(new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, 1, description));
+        children.add(new Property("location", "Reference(Location)", "The principal physical location where the ImagingStudy was performed.", 0, 1, location));
+        children.add(new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation|Media|DiagnosticReport|DocumentReference)", "Indicates another resource whose existence justifies this Study.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("note", "Annotation", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 115792: /*uid*/  return new Property("uid", "oid", "Formal identifier for the study.", 0, 1, uid);
-        case -2115028956: /*accession*/  return new Property("accession", "Identifier", "Accession Number is an identifier related to some aspect of imaging workflow and data management. Usage may vary across different institutions.  See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_TF_Rev13.0_Vol1_FT_2014-07-30.pdf).", 0, 1, accession);
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Other identifiers for the study.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case 1997542747: /*availability*/  return new Property("availability", "code", "Availability of study (online, offline, or nearline).", 0, 1, availability);
-        case -1030238433: /*modalityList*/  return new Property("modalityList", "Coding", "A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modalityList);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "DICOM Study Instance UID, and Accession Number.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The current state of the ImagingStudy.", 0, 1, status);
+        case -622722335: /*modality*/  return new Property("modality", "Coding", "A list of all the series.modality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).", 0, java.lang.Integer.MAX_VALUE, modality);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Device|Group)", "The subject, typically a patient, of the imaging study.", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode at which the request is initiated.", 0, 1, context);
         case -1897185151: /*started*/  return new Property("started", "dateTime", "Date and time the study started.", 0, 1, started);
-        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ServiceRequest)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ServiceRequest|Appointment|AppointmentResponse|Task)", "A list of the diagnostic requests that resulted in this imaging study being performed.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -722568161: /*referrer*/  return new Property("referrer", "Reference(Practitioner)", "The requesting/referring physician.", 0, 1, referrer);
         case -2008009094: /*interpreter*/  return new Property("interpreter", "Reference(Practitioner)", "Who read the study and interpreted the images or other content.", 0, java.lang.Integer.MAX_VALUE, interpreter);
-        case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.type.", 0, java.lang.Integer.MAX_VALUE, endpoint);
+        case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "The network service providing access (e.g., query, view, or retrieval) for the study. See implementation notes for information about using DICOM endpoints. A study-level endpoint applies to each series in the study, unless overridden by a series-level endpoint with the same Endpoint.connectionType.", 0, java.lang.Integer.MAX_VALUE, endpoint);
         case 1920000407: /*numberOfSeries*/  return new Property("numberOfSeries", "unsignedInt", "Number of Series in the Study. This value given may be larger than the number of series elements this Resource contains due to resource availability, security, or other factors. This element should be present if any series elements are present.", 0, 1, numberOfSeries);
         case -1043544226: /*numberOfInstances*/  return new Property("numberOfInstances", "unsignedInt", "Number of SOP Instances in Study. This value given may be larger than the number of instance elements this resource contains due to resource availability, security, or other factors. This element should be present if any instance elements are present.", 0, 1, numberOfInstances);
-        case 881809848: /*procedureReference*/  return new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, java.lang.Integer.MAX_VALUE, procedureReference);
+        case 881809848: /*procedureReference*/  return new Property("procedureReference", "Reference(Procedure)", "A reference to the performed Procedure.", 0, 1, procedureReference);
         case -698023072: /*procedureCode*/  return new Property("procedureCode", "CodeableConcept", "The code for the performed procedure type.", 0, java.lang.Integer.MAX_VALUE, procedureCode);
-        case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, 1, reason);
-        case -1724546052: /*description*/  return new Property("description", "string", "Institution-generated description or classification of the Study performed.", 0, 1, description);
+        case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The principal physical location where the ImagingStudy was performed.", 0, 1, location);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|Media|DiagnosticReport|DocumentReference)", "Indicates another resource whose existence justifies this Study.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, note);
         case -905838985: /*series*/  return new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2807,11 +2944,9 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return this.uid == null ? new Base[0] : new Base[] {this.uid}; // OidType
-        case -2115028956: /*accession*/ return this.accession == null ? new Base[0] : new Base[] {this.accession}; // Identifier
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case 1997542747: /*availability*/ return this.availability == null ? new Base[0] : new Base[] {this.availability}; // Enumeration<InstanceAvailability>
-        case -1030238433: /*modalityList*/ return this.modalityList == null ? new Base[0] : this.modalityList.toArray(new Base[this.modalityList.size()]); // Coding
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ImagingStudyStatus>
+        case -622722335: /*modality*/ return this.modality == null ? new Base[0] : this.modality.toArray(new Base[this.modality.size()]); // Coding
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -1897185151: /*started*/ return this.started == null ? new Base[0] : new Base[] {this.started}; // DateTimeType
@@ -2821,10 +2956,12 @@ public class ImagingStudy extends DomainResource {
         case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : this.endpoint.toArray(new Base[this.endpoint.size()]); // Reference
         case 1920000407: /*numberOfSeries*/ return this.numberOfSeries == null ? new Base[0] : new Base[] {this.numberOfSeries}; // UnsignedIntType
         case -1043544226: /*numberOfInstances*/ return this.numberOfInstances == null ? new Base[0] : new Base[] {this.numberOfInstances}; // UnsignedIntType
-        case 881809848: /*procedureReference*/ return this.procedureReference == null ? new Base[0] : this.procedureReference.toArray(new Base[this.procedureReference.size()]); // Reference
+        case 881809848: /*procedureReference*/ return this.procedureReference == null ? new Base[0] : new Base[] {this.procedureReference}; // Reference
         case -698023072: /*procedureCode*/ return this.procedureCode == null ? new Base[0] : this.procedureCode.toArray(new Base[this.procedureCode.size()]); // CodeableConcept
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // CodeableConcept
-        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
+        case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
+        case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case -905838985: /*series*/ return this.series == null ? new Base[0] : this.series.toArray(new Base[this.series.size()]); // ImagingStudySeriesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2834,21 +2971,15 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 115792: // uid
-          this.uid = castToOid(value); // OidType
-          return value;
-        case -2115028956: // accession
-          this.accession = castToIdentifier(value); // Identifier
-          return value;
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
-        case 1997542747: // availability
-          value = new InstanceAvailabilityEnumFactory().fromType(castToCode(value));
-          this.availability = (Enumeration) value; // Enumeration<InstanceAvailability>
+        case -892481550: // status
+          value = new ImagingStudyStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ImagingStudyStatus>
           return value;
-        case -1030238433: // modalityList
-          this.getModalityList().add(castToCoding(value)); // Coding
+        case -622722335: // modality
+          this.getModality().add(castToCoding(value)); // Coding
           return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
@@ -2878,16 +3009,22 @@ public class ImagingStudy extends DomainResource {
           this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
           return value;
         case 881809848: // procedureReference
-          this.getProcedureReference().add(castToReference(value)); // Reference
+          this.procedureReference = castToReference(value); // Reference
           return value;
         case -698023072: // procedureCode
           this.getProcedureCode().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case -934964668: // reason
-          this.reason = castToCodeableConcept(value); // CodeableConcept
+        case 1901043637: // location
+          this.location = castToReference(value); // Reference
           return value;
-        case -1724546052: // description
-          this.description = castToString(value); // StringType
+        case 722137681: // reasonCode
+          this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1146218137: // reasonReference
+          this.getReasonReference().add(castToReference(value)); // Reference
+          return value;
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
           return value;
         case -905838985: // series
           this.getSeries().add((ImagingStudySeriesComponent) value); // ImagingStudySeriesComponent
@@ -2899,17 +3036,13 @@ public class ImagingStudy extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("uid")) {
-          this.uid = castToOid(value); // OidType
-        } else if (name.equals("accession")) {
-          this.accession = castToIdentifier(value); // Identifier
-        } else if (name.equals("identifier")) {
+        if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        } else if (name.equals("availability")) {
-          value = new InstanceAvailabilityEnumFactory().fromType(castToCode(value));
-          this.availability = (Enumeration) value; // Enumeration<InstanceAvailability>
-        } else if (name.equals("modalityList")) {
-          this.getModalityList().add(castToCoding(value));
+        } else if (name.equals("status")) {
+          value = new ImagingStudyStatusEnumFactory().fromType(castToCode(value));
+          this.status = (Enumeration) value; // Enumeration<ImagingStudyStatus>
+        } else if (name.equals("modality")) {
+          this.getModality().add(castToCoding(value));
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("context")) {
@@ -2929,13 +3062,17 @@ public class ImagingStudy extends DomainResource {
         } else if (name.equals("numberOfInstances")) {
           this.numberOfInstances = castToUnsignedInt(value); // UnsignedIntType
         } else if (name.equals("procedureReference")) {
-          this.getProcedureReference().add(castToReference(value));
+          this.procedureReference = castToReference(value); // Reference
         } else if (name.equals("procedureCode")) {
           this.getProcedureCode().add(castToCodeableConcept(value));
-        } else if (name.equals("reason")) {
-          this.reason = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("description")) {
-          this.description = castToString(value); // StringType
+        } else if (name.equals("location")) {
+          this.location = castToReference(value); // Reference
+        } else if (name.equals("reasonCode")) {
+          this.getReasonCode().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonReference")) {
+          this.getReasonReference().add(castToReference(value));
+        } else if (name.equals("note")) {
+          this.getNote().add(castToAnnotation(value));
         } else if (name.equals("series")) {
           this.getSeries().add((ImagingStudySeriesComponent) value);
         } else
@@ -2946,11 +3083,9 @@ public class ImagingStudy extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792:  return getUidElement();
-        case -2115028956:  return getAccession(); 
         case -1618432855:  return addIdentifier(); 
-        case 1997542747:  return getAvailabilityElement();
-        case -1030238433:  return addModalityList(); 
+        case -892481550:  return getStatusElement();
+        case -622722335:  return addModality(); 
         case -1867885268:  return getSubject(); 
         case 951530927:  return getContext(); 
         case -1897185151:  return getStartedElement();
@@ -2960,10 +3095,12 @@ public class ImagingStudy extends DomainResource {
         case 1741102485:  return addEndpoint(); 
         case 1920000407:  return getNumberOfSeriesElement();
         case -1043544226:  return getNumberOfInstancesElement();
-        case 881809848:  return addProcedureReference(); 
+        case 881809848:  return getProcedureReference(); 
         case -698023072:  return addProcedureCode(); 
-        case -934964668:  return getReason(); 
-        case -1724546052:  return getDescriptionElement();
+        case 1901043637:  return getLocation(); 
+        case 722137681:  return addReasonCode(); 
+        case -1146218137:  return addReasonReference(); 
+        case 3387378:  return addNote(); 
         case -905838985:  return addSeries(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2973,11 +3110,9 @@ public class ImagingStudy extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 115792: /*uid*/ return new String[] {"oid"};
-        case -2115028956: /*accession*/ return new String[] {"Identifier"};
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
-        case 1997542747: /*availability*/ return new String[] {"code"};
-        case -1030238433: /*modalityList*/ return new String[] {"Coding"};
+        case -892481550: /*status*/ return new String[] {"code"};
+        case -622722335: /*modality*/ return new String[] {"Coding"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
         case -1897185151: /*started*/ return new String[] {"dateTime"};
@@ -2989,8 +3124,10 @@ public class ImagingStudy extends DomainResource {
         case -1043544226: /*numberOfInstances*/ return new String[] {"unsignedInt"};
         case 881809848: /*procedureReference*/ return new String[] {"Reference"};
         case -698023072: /*procedureCode*/ return new String[] {"CodeableConcept"};
-        case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
-        case -1724546052: /*description*/ return new String[] {"string"};
+        case 1901043637: /*location*/ return new String[] {"Reference"};
+        case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
+        case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
         case -905838985: /*series*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2999,21 +3136,14 @@ public class ImagingStudy extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("uid")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.uid");
-        }
-        else if (name.equals("accession")) {
-          this.accession = new Identifier();
-          return this.accession;
-        }
-        else if (name.equals("identifier")) {
+        if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("availability")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.availability");
+        else if (name.equals("status")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.status");
         }
-        else if (name.equals("modalityList")) {
-          return addModalityList();
+        else if (name.equals("modality")) {
+          return addModality();
         }
         else if (name.equals("subject")) {
           this.subject = new Reference();
@@ -3046,17 +3176,24 @@ public class ImagingStudy extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.numberOfInstances");
         }
         else if (name.equals("procedureReference")) {
-          return addProcedureReference();
+          this.procedureReference = new Reference();
+          return this.procedureReference;
         }
         else if (name.equals("procedureCode")) {
           return addProcedureCode();
         }
-        else if (name.equals("reason")) {
-          this.reason = new CodeableConcept();
-          return this.reason;
+        else if (name.equals("location")) {
+          this.location = new Reference();
+          return this.location;
         }
-        else if (name.equals("description")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.description");
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
+        }
+        else if (name.equals("reasonReference")) {
+          return addReasonReference();
+        }
+        else if (name.equals("note")) {
+          return addNote();
         }
         else if (name.equals("series")) {
           return addSeries();
@@ -3073,18 +3210,16 @@ public class ImagingStudy extends DomainResource {
       public ImagingStudy copy() {
         ImagingStudy dst = new ImagingStudy();
         copyValues(dst);
-        dst.uid = uid == null ? null : uid.copy();
-        dst.accession = accession == null ? null : accession.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.availability = availability == null ? null : availability.copy();
-        if (modalityList != null) {
-          dst.modalityList = new ArrayList<Coding>();
-          for (Coding i : modalityList)
-            dst.modalityList.add(i.copy());
+        dst.status = status == null ? null : status.copy();
+        if (modality != null) {
+          dst.modality = new ArrayList<Coding>();
+          for (Coding i : modality)
+            dst.modality.add(i.copy());
         };
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
@@ -3107,18 +3242,28 @@ public class ImagingStudy extends DomainResource {
         };
         dst.numberOfSeries = numberOfSeries == null ? null : numberOfSeries.copy();
         dst.numberOfInstances = numberOfInstances == null ? null : numberOfInstances.copy();
-        if (procedureReference != null) {
-          dst.procedureReference = new ArrayList<Reference>();
-          for (Reference i : procedureReference)
-            dst.procedureReference.add(i.copy());
-        };
+        dst.procedureReference = procedureReference == null ? null : procedureReference.copy();
         if (procedureCode != null) {
           dst.procedureCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : procedureCode)
             dst.procedureCode.add(i.copy());
         };
-        dst.reason = reason == null ? null : reason.copy();
-        dst.description = description == null ? null : description.copy();
+        dst.location = location == null ? null : location.copy();
+        if (reasonCode != null) {
+          dst.reasonCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonCode)
+            dst.reasonCode.add(i.copy());
+        };
+        if (reasonReference != null) {
+          dst.reasonReference = new ArrayList<Reference>();
+          for (Reference i : reasonReference)
+            dst.reasonReference.add(i.copy());
+        };
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         if (series != null) {
           dst.series = new ArrayList<ImagingStudySeriesComponent>();
           for (ImagingStudySeriesComponent i : series)
@@ -3138,14 +3283,14 @@ public class ImagingStudy extends DomainResource {
         if (!(other_ instanceof ImagingStudy))
           return false;
         ImagingStudy o = (ImagingStudy) other_;
-        return compareDeep(uid, o.uid, true) && compareDeep(accession, o.accession, true) && compareDeep(identifier, o.identifier, true)
-           && compareDeep(availability, o.availability, true) && compareDeep(modalityList, o.modalityList, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(modality, o.modality, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(started, o.started, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(referrer, o.referrer, true) && compareDeep(interpreter, o.interpreter, true)
            && compareDeep(endpoint, o.endpoint, true) && compareDeep(numberOfSeries, o.numberOfSeries, true)
            && compareDeep(numberOfInstances, o.numberOfInstances, true) && compareDeep(procedureReference, o.procedureReference, true)
-           && compareDeep(procedureCode, o.procedureCode, true) && compareDeep(reason, o.reason, true) && compareDeep(description, o.description, true)
-           && compareDeep(series, o.series, true);
+           && compareDeep(procedureCode, o.procedureCode, true) && compareDeep(location, o.location, true)
+           && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
+           && compareDeep(note, o.note, true) && compareDeep(series, o.series, true);
       }
 
       @Override
@@ -3155,16 +3300,15 @@ public class ImagingStudy extends DomainResource {
         if (!(other_ instanceof ImagingStudy))
           return false;
         ImagingStudy o = (ImagingStudy) other_;
-        return compareValues(uid, o.uid, true) && compareValues(availability, o.availability, true) && compareValues(started, o.started, true)
-           && compareValues(numberOfSeries, o.numberOfSeries, true) && compareValues(numberOfInstances, o.numberOfInstances, true)
-           && compareValues(description, o.description, true);
+        return compareValues(status, o.status, true) && compareValues(started, o.started, true) && compareValues(numberOfSeries, o.numberOfSeries, true)
+           && compareValues(numberOfInstances, o.numberOfInstances, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(uid, accession, identifier
-          , availability, modalityList, subject, context, started, basedOn, referrer, interpreter
-          , endpoint, numberOfSeries, numberOfInstances, procedureReference, procedureCode, reason
-          , description, series);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, modality
+          , subject, context, started, basedOn, referrer, interpreter, endpoint, numberOfSeries
+          , numberOfInstances, procedureReference, procedureCode, location, reasonCode, reasonReference
+          , note, series);
       }
 
   @Override
@@ -3197,17 +3341,17 @@ public class ImagingStudy extends DomainResource {
    * <p>
    * Description: <b>The reason for the study</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ImagingStudy.reason</b><br>
+   * Path: <b>ImagingStudy.reasonCode</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="reason", path="ImagingStudy.reason", description="The reason for the study", type="token" )
+  @SearchParamDefinition(name="reason", path="ImagingStudy.reasonCode", description="The reason for the study", type="token" )
   public static final String SP_REASON = "reason";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>reason</b>
    * <p>
    * Description: <b>The reason for the study</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ImagingStudy.reason</b><br>
+   * Path: <b>ImagingStudy.reasonCode</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON);
@@ -3216,41 +3360,41 @@ public class ImagingStudy extends DomainResource {
    * Search parameter: <b>study</b>
    * <p>
    * Description: <b>The study identifier for the image</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.uid</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study identifier for the image", type="uri" )
+  @SearchParamDefinition(name="study", path="ImagingStudy.identifier", description="The study identifier for the image", type="token" )
   public static final String SP_STUDY = "study";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>study</b>
    * <p>
    * Description: <b>The study identifier for the image</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.uid</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam STUDY = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_STUDY);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STUDY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STUDY);
 
  /**
    * Search parameter: <b>dicom-class</b>
    * <p>
    * Description: <b>The type of the instance</b><br>
-   * Type: <b>uri</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>ImagingStudy.series.instance.sopClass</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="uri" )
+  @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopClass", description="The type of the instance", type="token" )
   public static final String SP_DICOM_CLASS = "dicom-class";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dicom-class</b>
    * <p>
    * Description: <b>The type of the instance</b><br>
-   * Type: <b>uri</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>ImagingStudy.series.instance.sopClass</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam DICOM_CLASS = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_DICOM_CLASS);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam DICOM_CLASS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_DICOM_CLASS);
 
  /**
    * Search parameter: <b>modality</b>
@@ -3297,17 +3441,17 @@ public class ImagingStudy extends DomainResource {
    * <p>
    * Description: <b>The person who performed the study</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingStudy.series.performer</b><br>
+   * Path: <b>ImagingStudy.series.performer.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="ImagingStudy.series.performer", description="The person who performed the study", type="reference", target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="performer", path="ImagingStudy.series.performer.actor", description="The person who performed the study", type="reference", target={CareTeam.class, Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
    * <p>
    * Description: <b>The person who performed the study</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ImagingStudy.series.performer</b><br>
+   * Path: <b>ImagingStudy.series.performer.actor</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PERFORMER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PERFORMER);
@@ -3369,55 +3513,55 @@ public class ImagingStudy extends DomainResource {
    * <p>
    * Description: <b>The accession identifier for the study</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ImagingStudy.accession</b><br>
+   * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession identifier for the study", type="token" )
+  @SearchParamDefinition(name="accession", path="ImagingStudy.identifier", description="The accession identifier for the study", type="token" )
   public static final String SP_ACCESSION = "accession";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>accession</b>
    * <p>
    * Description: <b>The accession identifier for the study</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>ImagingStudy.accession</b><br>
+   * Path: <b>ImagingStudy.identifier</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACCESSION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACCESSION);
 
  /**
-   * Search parameter: <b>uid</b>
+   * Search parameter: <b>inst-id</b>
    * <p>
    * Description: <b>The instance unique identifier</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.series.instance.uid</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.series.instance.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="The instance unique identifier", type="uri" )
-  public static final String SP_UID = "uid";
+  @SearchParamDefinition(name="inst-id", path="ImagingStudy.series.instance.identifier", description="The instance unique identifier", type="token" )
+  public static final String SP_INST_ID = "inst-id";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>uid</b>
+   * <b>Fluent Client</b> search parameter constant for <b>inst-id</b>
    * <p>
    * Description: <b>The instance unique identifier</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.series.instance.uid</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.series.instance.identifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam UID = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_UID);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam INST_ID = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_INST_ID);
 
  /**
    * Search parameter: <b>endpoint</b>
    * <p>
-   * Description: <b>The endpoint for te study or series</b><br>
+   * Description: <b>The endpoint for the study or series</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ImagingStudy.endpoint, ImagingStudy.series.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="endpoint", path="ImagingStudy.endpoint | ImagingStudy.series.endpoint", description="The endpoint for te study or series", type="reference", target={Endpoint.class } )
+  @SearchParamDefinition(name="endpoint", path="ImagingStudy.endpoint | ImagingStudy.series.endpoint", description="The endpoint for the study or series", type="reference", target={Endpoint.class } )
   public static final String SP_ENDPOINT = "endpoint";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
    * <p>
-   * Description: <b>The endpoint for te study or series</b><br>
+   * Description: <b>The endpoint for the study or series</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ImagingStudy.endpoint, ImagingStudy.series.endpoint</b><br>
    * </p>
@@ -3438,7 +3582,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingStudy.subject", description="Who the study is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Device.class, Group.class, Patient.class } )
+  @SearchParamDefinition(name="patient", path="ImagingStudy.subject", description="Who the study is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3460,21 +3604,21 @@ public class ImagingStudy extends DomainResource {
    * Search parameter: <b>series</b>
    * <p>
    * Description: <b>The identifier of the series of images</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.series.uid</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.series.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The identifier of the series of images", type="uri" )
+  @SearchParamDefinition(name="series", path="ImagingStudy.series.identifier", description="The identifier of the series of images", type="token" )
   public static final String SP_SERIES = "series";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>series</b>
    * <p>
    * Description: <b>The identifier of the series of images</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ImagingStudy.series.uid</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.series.identifier</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam SERIES = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_SERIES);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERIES = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERIES);
 
  /**
    * Search parameter: <b>context</b>
@@ -3510,7 +3654,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="basedon", path="ImagingStudy.basedOn", description="The order for the image", type="reference", target={CarePlan.class, ServiceRequest.class } )
+  @SearchParamDefinition(name="basedon", path="ImagingStudy.basedOn", description="The order for the image", type="reference", target={Appointment.class, AppointmentResponse.class, CarePlan.class, ServiceRequest.class, Task.class } )
   public static final String SP_BASEDON = "basedon";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>basedon</b>
@@ -3527,6 +3671,26 @@ public class ImagingStudy extends DomainResource {
    * the path value of "<b>ImagingStudy:basedon</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_BASEDON = new ca.uhn.fhir.model.api.Include("ImagingStudy:basedon").toLocked();
+
+ /**
+   * Search parameter: <b>status</b>
+   * <p>
+   * Description: <b>The status of the study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.status</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="status", path="ImagingStudy.status", description="The status of the study", type="token" )
+  public static final String SP_STATUS = "status";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>status</b>
+   * <p>
+   * Description: <b>The status of the study</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ImagingStudy.status</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
 
 
 }

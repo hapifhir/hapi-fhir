@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.elementmodel.Element.SpecialElement;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
@@ -64,7 +65,7 @@ public class JsonParser extends ParserBase {
 
 
 	@Override
-	public Element parse(InputStream stream) throws IOException, FHIRFormatError, DefinitionException {
+	public Element parse(InputStream stream) throws IOException, FHIRException {
 		// if we're parsing at this point, then we're going to use the custom parser
 		map = new HashMap<JsonElement, LocationData>();
 		String source = TextFile.streamToString(stream);
@@ -85,12 +86,12 @@ public class JsonParser extends ParserBase {
 		} 
 	}
 
-	public Element parse(JsonObject object, Map<JsonElement, LocationData> map) throws FHIRFormatError, DefinitionException {
+	public Element parse(JsonObject object, Map<JsonElement, LocationData> map) throws FHIRException {
 		this.map = map;
 		return parse(object);
 	}
 
-  public Element parse(JsonObject object) throws FHIRFormatError, DefinitionException {
+  public Element parse(JsonObject object) throws FHIRException {
 		JsonElement rt = object.get("resourceType");
 		if (rt == null) {
 			logError(line(object), col(object), "$", IssueType.INVALID, "Unable to find resourceType property", IssueSeverity.FATAL);
@@ -127,7 +128,7 @@ public class JsonParser extends ParserBase {
 		}
 	}
 
-	private void parseChildren(String path, JsonObject object, Element context, boolean hasResourceType) throws DefinitionException, FHIRFormatError {
+	private void parseChildren(String path, JsonObject object, Element context, boolean hasResourceType) throws FHIRException {
 		reapComments(object, context);
 		List<Property> properties = context.getProperty().getChildProperties(context.getName(), null);
 		Set<String> processed = new HashSet<String>();
@@ -166,7 +167,7 @@ public class JsonParser extends ParserBase {
 		}
 	}
 
-	private void parseChildComplex(String path, JsonObject object, Element context, Set<String> processed, Property property, String name) throws FHIRFormatError, DefinitionException {
+	private void parseChildComplex(String path, JsonObject object, Element context, Set<String> processed, Property property, String name) throws FHIRException {
 		processed.add(name);
 		String npath = path+"/"+property.getName();
 		JsonElement e = object.get(name);
@@ -176,11 +177,26 @@ public class JsonParser extends ParserBase {
 				parseChildComplexInstance(npath, object, context, property, name, am);
 			}
 		} else {
+		  if (property.isList()) {
+	      logError(line(e), col(e), npath, IssueType.INVALID, "This property must be an Array, not "+describeType(e), IssueSeverity.ERROR);
+		  }
 			parseChildComplexInstance(npath, object, context, property, name, e);
 		}
 	}
 
-	private void parseChildComplexInstance(String npath, JsonObject object, Element context, Property property, String name, JsonElement e) throws FHIRFormatError, DefinitionException {
+	private String describeType(JsonElement e) {
+	  if (e.isJsonArray())
+	    return "an Array";
+	  if (e.isJsonObject())
+      return "an Object";
+    if (e.isJsonPrimitive())
+      return "a primitive property";
+    if (e.isJsonNull())
+      return "a Null";
+    return null;
+  }
+
+  private void parseChildComplexInstance(String npath, JsonObject object, Element context, Property property, String name, JsonElement e) throws FHIRException {
 		if (e instanceof JsonObject) {
 			JsonObject child = (JsonObject) e;
 			Element n = new Element(name, property).markLocation(line(child), col(child));
@@ -194,7 +210,7 @@ public class JsonParser extends ParserBase {
 			logError(line(e), col(e), npath, IssueType.INVALID, "This property must be "+(property.isList() ? "an Array" : "an Object")+", not a "+e.getClass().getName(), IssueSeverity.ERROR);
 	}
 	
-	private void parseChildPrimitive(JsonObject object, Element context, Set<String> processed, Property property, String path, String name) throws FHIRFormatError, DefinitionException {
+	private void parseChildPrimitive(JsonObject object, Element context, Set<String> processed, Property property, String path, String name) throws FHIRException {
 		String npath = path+"/"+property.getName();
 		processed.add(name);
 		processed.add("_"+name);
@@ -223,7 +239,7 @@ public class JsonParser extends ParserBase {
 	}
 
 	private void parseChildPrimitiveInstance(Element context, Property property, String name, String npath,
-	    JsonElement main, JsonElement fork) throws FHIRFormatError, DefinitionException {
+	    JsonElement main, JsonElement fork) throws FHIRException {
 			if (main != null && !(main instanceof JsonPrimitive))
 				logError(line(main), col(main), npath, IssueType.INVALID, "This property must be an simple value, not a "+main.getClass().getName(), IssueSeverity.ERROR);
 			else if (fork != null && !(fork instanceof JsonObject))
@@ -262,13 +278,13 @@ public class JsonParser extends ParserBase {
 		}
 
 
-	private void parseResource(String npath, JsonObject res, Element parent, Property elementProperty) throws DefinitionException, FHIRFormatError {
+	private void parseResource(String npath, JsonObject res, Element parent, Property elementProperty) throws FHIRException {
 		JsonElement rt = res.get("resourceType");
 		if (rt == null) {
 			logError(line(res), col(res), npath, IssueType.INVALID, "Unable to find resourceType property", IssueSeverity.FATAL);
 		} else {
 			String name = rt.getAsString();
-			StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+name);
+			StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(name));
 			if (sd == null)
 				throw new FHIRFormatError("Contained resource does not appear to be a FHIR resource (unknown name '"+name+"')");
 			parent.updateProperty(new Property(context, sd.getSnapshot().getElement().get(0), sd), SpecialElement.fromProperty(parent.getProperty()), elementProperty);

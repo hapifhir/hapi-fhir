@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -153,6 +153,190 @@ public class Sequence extends DomainResource {
       return "?";
       }
     public String toSystem(SequenceType code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum OrientationType {
+        /**
+         * Sense orientation of reference sequence.
+         */
+        SENSE, 
+        /**
+         * Antisense orientation of reference sequence
+         */
+        ANTISENSE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static OrientationType fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("sense".equals(codeString))
+          return SENSE;
+        if ("antisense".equals(codeString))
+          return ANTISENSE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown OrientationType code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case SENSE: return "sense";
+            case ANTISENSE: return "antisense";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case SENSE: return "http://hl7.org/fhir/orientation-type";
+            case ANTISENSE: return "http://hl7.org/fhir/orientation-type";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case SENSE: return "Sense orientation of reference sequence.";
+            case ANTISENSE: return "Antisense orientation of reference sequence";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case SENSE: return "Sense orientation of referenceSeq";
+            case ANTISENSE: return "Antisense orientation of referenceSeq";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class OrientationTypeEnumFactory implements EnumFactory<OrientationType> {
+    public OrientationType fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("sense".equals(codeString))
+          return OrientationType.SENSE;
+        if ("antisense".equals(codeString))
+          return OrientationType.ANTISENSE;
+        throw new IllegalArgumentException("Unknown OrientationType code '"+codeString+"'");
+        }
+        public Enumeration<OrientationType> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<OrientationType>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("sense".equals(codeString))
+          return new Enumeration<OrientationType>(this, OrientationType.SENSE);
+        if ("antisense".equals(codeString))
+          return new Enumeration<OrientationType>(this, OrientationType.ANTISENSE);
+        throw new FHIRException("Unknown OrientationType code '"+codeString+"'");
+        }
+    public String toCode(OrientationType code) {
+      if (code == OrientationType.SENSE)
+        return "sense";
+      if (code == OrientationType.ANTISENSE)
+        return "antisense";
+      return "?";
+      }
+    public String toSystem(OrientationType code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum StrandType {
+        /**
+         * Watson strand of reference sequence
+         */
+        WATSON, 
+        /**
+         * Crick strand of reference sequence
+         */
+        CRICK, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static StrandType fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("watson".equals(codeString))
+          return WATSON;
+        if ("crick".equals(codeString))
+          return CRICK;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown StrandType code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case WATSON: return "watson";
+            case CRICK: return "crick";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case WATSON: return "http://hl7.org/fhir/strand-type";
+            case CRICK: return "http://hl7.org/fhir/strand-type";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case WATSON: return "Watson strand of reference sequence";
+            case CRICK: return "Crick strand of reference sequence";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case WATSON: return "Watson strand of referenceSeq";
+            case CRICK: return "Crick strand of referenceSeq";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class StrandTypeEnumFactory implements EnumFactory<StrandType> {
+    public StrandType fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("watson".equals(codeString))
+          return StrandType.WATSON;
+        if ("crick".equals(codeString))
+          return StrandType.CRICK;
+        throw new IllegalArgumentException("Unknown StrandType code '"+codeString+"'");
+        }
+        public Enumeration<StrandType> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<StrandType>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("watson".equals(codeString))
+          return new Enumeration<StrandType>(this, StrandType.WATSON);
+        if ("crick".equals(codeString))
+          return new Enumeration<StrandType>(this, StrandType.CRICK);
+        throw new FHIRException("Unknown StrandType code '"+codeString+"'");
+        }
+    public String toCode(StrandType code) {
+      if (code == StrandType.WATSON)
+        return "watson";
+      if (code == StrandType.CRICK)
+        return "crick";
+      return "?";
+      }
+    public String toSystem(StrandType code) {
       return code.getSystem();
       }
     }
@@ -423,9 +607,17 @@ public class Sequence extends DomainResource {
         protected StringType genomeBuild;
 
         /**
+         * A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the "sense" strand, and the opposite complementary strand is the "antisense" strand.
+         */
+        @Child(name = "orientation", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="sense | antisense", formalDefinition="A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the \"sense\" strand, and the opposite complementary strand is the \"antisense\" strand." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/orientation-type")
+        protected Enumeration<OrientationType> orientation;
+
+        /**
          * Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.
          */
-        @Child(name = "referenceSeqId", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "referenceSeqId", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Reference identifier", formalDefinition="Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/sequence-referenceSeq")
         protected CodeableConcept referenceSeqId;
@@ -433,7 +625,7 @@ public class Sequence extends DomainResource {
         /**
          * A Pointer to another Sequence entity as reference sequence.
          */
-        @Child(name = "referenceSeqPointer", type = {Sequence.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "referenceSeqPointer", type = {Sequence.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A Pointer to another Sequence entity as reference sequence", formalDefinition="A Pointer to another Sequence entity as reference sequence." )
         protected Reference referenceSeqPointer;
 
@@ -445,32 +637,33 @@ public class Sequence extends DomainResource {
         /**
          * A string like "ACGT".
          */
-        @Child(name = "referenceSeqString", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "referenceSeqString", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A string to represent reference sequence", formalDefinition="A string like \"ACGT\"." )
         protected StringType referenceSeqString;
 
         /**
-         * Directionality of DNA sequence. Available values are "1" for the plus strand (5' to 3')/Watson/Sense/positive  and "-1" for the minus strand(3' to 5')/Crick/Antisense/negative.
+         * An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.
          */
-        @Child(name = "strand", type = {IntegerType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Directionality of DNA ( +1/-1)", formalDefinition="Directionality of DNA sequence. Available values are \"1\" for the plus strand (5' to 3')/Watson/Sense/positive  and \"-1\" for the minus strand(3' to 5')/Crick/Antisense/negative." )
-        protected IntegerType strand;
+        @Child(name = "strand", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="watson | crick", formalDefinition="An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/strand-type")
+        protected Enumeration<StrandType> strand;
 
         /**
          * Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.
          */
-        @Child(name = "windowStart", type = {IntegerType.class}, order=7, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "windowStart", type = {IntegerType.class}, order=8, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Start position of the window on the  reference sequence", formalDefinition="Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive." )
         protected IntegerType windowStart;
 
         /**
          * End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.
          */
-        @Child(name = "windowEnd", type = {IntegerType.class}, order=8, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "windowEnd", type = {IntegerType.class}, order=9, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="End position of the window on the reference sequence", formalDefinition="End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position." )
         protected IntegerType windowEnd;
 
-        private static final long serialVersionUID = -1675617731L;
+        private static final long serialVersionUID = 1368245163L;
 
     /**
      * Constructor
@@ -557,6 +750,55 @@ public class Sequence extends DomainResource {
             if (this.genomeBuild == null)
               this.genomeBuild = new StringType();
             this.genomeBuild.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #orientation} (A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the "sense" strand, and the opposite complementary strand is the "antisense" strand.). This is the underlying object with id, value and extensions. The accessor "getOrientation" gives direct access to the value
+         */
+        public Enumeration<OrientationType> getOrientationElement() { 
+          if (this.orientation == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SequenceReferenceSeqComponent.orientation");
+            else if (Configuration.doAutoCreate())
+              this.orientation = new Enumeration<OrientationType>(new OrientationTypeEnumFactory()); // bb
+          return this.orientation;
+        }
+
+        public boolean hasOrientationElement() { 
+          return this.orientation != null && !this.orientation.isEmpty();
+        }
+
+        public boolean hasOrientation() { 
+          return this.orientation != null && !this.orientation.isEmpty();
+        }
+
+        /**
+         * @param value {@link #orientation} (A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the "sense" strand, and the opposite complementary strand is the "antisense" strand.). This is the underlying object with id, value and extensions. The accessor "getOrientation" gives direct access to the value
+         */
+        public SequenceReferenceSeqComponent setOrientationElement(Enumeration<OrientationType> value) { 
+          this.orientation = value;
+          return this;
+        }
+
+        /**
+         * @return A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the "sense" strand, and the opposite complementary strand is the "antisense" strand.
+         */
+        public OrientationType getOrientation() { 
+          return this.orientation == null ? null : this.orientation.getValue();
+        }
+
+        /**
+         * @param value A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the "sense" strand, and the opposite complementary strand is the "antisense" strand.
+         */
+        public SequenceReferenceSeqComponent setOrientation(OrientationType value) { 
+          if (value == null)
+            this.orientation = null;
+          else {
+            if (this.orientation == null)
+              this.orientation = new Enumeration<OrientationType>(new OrientationTypeEnumFactory());
+            this.orientation.setValue(value);
           }
           return this;
         }
@@ -679,14 +921,14 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @return {@link #strand} (Directionality of DNA sequence. Available values are "1" for the plus strand (5' to 3')/Watson/Sense/positive  and "-1" for the minus strand(3' to 5')/Crick/Antisense/negative.). This is the underlying object with id, value and extensions. The accessor "getStrand" gives direct access to the value
+         * @return {@link #strand} (An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.). This is the underlying object with id, value and extensions. The accessor "getStrand" gives direct access to the value
          */
-        public IntegerType getStrandElement() { 
+        public Enumeration<StrandType> getStrandElement() { 
           if (this.strand == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SequenceReferenceSeqComponent.strand");
             else if (Configuration.doAutoCreate())
-              this.strand = new IntegerType(); // bb
+              this.strand = new Enumeration<StrandType>(new StrandTypeEnumFactory()); // bb
           return this.strand;
         }
 
@@ -699,27 +941,31 @@ public class Sequence extends DomainResource {
         }
 
         /**
-         * @param value {@link #strand} (Directionality of DNA sequence. Available values are "1" for the plus strand (5' to 3')/Watson/Sense/positive  and "-1" for the minus strand(3' to 5')/Crick/Antisense/negative.). This is the underlying object with id, value and extensions. The accessor "getStrand" gives direct access to the value
+         * @param value {@link #strand} (An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.). This is the underlying object with id, value and extensions. The accessor "getStrand" gives direct access to the value
          */
-        public SequenceReferenceSeqComponent setStrandElement(IntegerType value) { 
+        public SequenceReferenceSeqComponent setStrandElement(Enumeration<StrandType> value) { 
           this.strand = value;
           return this;
         }
 
         /**
-         * @return Directionality of DNA sequence. Available values are "1" for the plus strand (5' to 3')/Watson/Sense/positive  and "-1" for the minus strand(3' to 5')/Crick/Antisense/negative.
+         * @return An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.
          */
-        public int getStrand() { 
-          return this.strand == null || this.strand.isEmpty() ? 0 : this.strand.getValue();
+        public StrandType getStrand() { 
+          return this.strand == null ? null : this.strand.getValue();
         }
 
         /**
-         * @param value Directionality of DNA sequence. Available values are "1" for the plus strand (5' to 3')/Watson/Sense/positive  and "-1" for the minus strand(3' to 5')/Crick/Antisense/negative.
+         * @param value An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.
          */
-        public SequenceReferenceSeqComponent setStrand(int value) { 
+        public SequenceReferenceSeqComponent setStrand(StrandType value) { 
+          if (value == null)
+            this.strand = null;
+          else {
             if (this.strand == null)
-              this.strand = new IntegerType();
+              this.strand = new Enumeration<StrandType>(new StrandTypeEnumFactory());
             this.strand.setValue(value);
+          }
           return this;
         }
 
@@ -817,10 +1063,11 @@ public class Sequence extends DomainResource {
           super.listChildren(children);
           children.add(new Property("chromosome", "CodeableConcept", "Structural unit composed of a nucleic acid molecule which controls its own replication through the interaction of specific proteins at one or more origins of replication ([SO:0000340](http://www.sequenceontology.org/browser/current_svn/term/SO:0000340)).", 0, 1, chromosome));
           children.add(new Property("genomeBuild", "string", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, 1, genomeBuild));
+          children.add(new Property("orientation", "code", "A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the \"sense\" strand, and the opposite complementary strand is the \"antisense\" strand.", 0, 1, orientation));
           children.add(new Property("referenceSeqId", "CodeableConcept", "Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.", 0, 1, referenceSeqId));
           children.add(new Property("referenceSeqPointer", "Reference(Sequence)", "A Pointer to another Sequence entity as reference sequence.", 0, 1, referenceSeqPointer));
           children.add(new Property("referenceSeqString", "string", "A string like \"ACGT\".", 0, 1, referenceSeqString));
-          children.add(new Property("strand", "integer", "Directionality of DNA sequence. Available values are \"1\" for the plus strand (5' to 3')/Watson/Sense/positive  and \"-1\" for the minus strand(3' to 5')/Crick/Antisense/negative.", 0, 1, strand));
+          children.add(new Property("strand", "code", "An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.", 0, 1, strand));
           children.add(new Property("windowStart", "integer", "Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, windowStart));
           children.add(new Property("windowEnd", "integer", "End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, windowEnd));
         }
@@ -830,10 +1077,11 @@ public class Sequence extends DomainResource {
           switch (_hash) {
           case -1499470472: /*chromosome*/  return new Property("chromosome", "CodeableConcept", "Structural unit composed of a nucleic acid molecule which controls its own replication through the interaction of specific proteins at one or more origins of replication ([SO:0000340](http://www.sequenceontology.org/browser/current_svn/term/SO:0000340)).", 0, 1, chromosome);
           case 1061239735: /*genomeBuild*/  return new Property("genomeBuild", "string", "The Genome Build used for reference, following GRCh build versions e.g. 'GRCh 37'.  Version number must be included if a versioned release of a primary build was used.", 0, 1, genomeBuild);
+          case -1439500848: /*orientation*/  return new Property("orientation", "code", "A relative reference to a DNA strand based on gene orientation. The strand that contains the open reading frame of the gene is the \"sense\" strand, and the opposite complementary strand is the \"antisense\" strand.", 0, 1, orientation);
           case -1911500465: /*referenceSeqId*/  return new Property("referenceSeqId", "CodeableConcept", "Reference identifier of reference sequence submitted to NCBI. It must match the type in the Sequence.type field. For example, the prefix, “NG_” identifies reference sequence for genes, “NM_” for messenger RNA transcripts, and “NP_” for amino acid sequences.", 0, 1, referenceSeqId);
           case 1923414665: /*referenceSeqPointer*/  return new Property("referenceSeqPointer", "Reference(Sequence)", "A Pointer to another Sequence entity as reference sequence.", 0, 1, referenceSeqPointer);
           case -1648301499: /*referenceSeqString*/  return new Property("referenceSeqString", "string", "A string like \"ACGT\".", 0, 1, referenceSeqString);
-          case -891993594: /*strand*/  return new Property("strand", "integer", "Directionality of DNA sequence. Available values are \"1\" for the plus strand (5' to 3')/Watson/Sense/positive  and \"-1\" for the minus strand(3' to 5')/Crick/Antisense/negative.", 0, 1, strand);
+          case -891993594: /*strand*/  return new Property("strand", "code", "An absolute reference to a strand. The Watson strand is the strand whose 5'-end is on the short arm of the chromosome, and the Crick strand as the one whose 5'-end is on the long arm.", 0, 1, strand);
           case 1903685202: /*windowStart*/  return new Property("windowStart", "integer", "Start position of the window on the reference sequence. If the coordinate system is either 0-based or 1-based, then start position is inclusive.", 0, 1, windowStart);
           case -217026869: /*windowEnd*/  return new Property("windowEnd", "integer", "End position of the window on the reference sequence. If the coordinate system is 0-based then end is is exclusive and does not include the last position. If the coordinate system is 1-base, then end is inclusive and includes the last position.", 0, 1, windowEnd);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -846,10 +1094,11 @@ public class Sequence extends DomainResource {
         switch (hash) {
         case -1499470472: /*chromosome*/ return this.chromosome == null ? new Base[0] : new Base[] {this.chromosome}; // CodeableConcept
         case 1061239735: /*genomeBuild*/ return this.genomeBuild == null ? new Base[0] : new Base[] {this.genomeBuild}; // StringType
+        case -1439500848: /*orientation*/ return this.orientation == null ? new Base[0] : new Base[] {this.orientation}; // Enumeration<OrientationType>
         case -1911500465: /*referenceSeqId*/ return this.referenceSeqId == null ? new Base[0] : new Base[] {this.referenceSeqId}; // CodeableConcept
         case 1923414665: /*referenceSeqPointer*/ return this.referenceSeqPointer == null ? new Base[0] : new Base[] {this.referenceSeqPointer}; // Reference
         case -1648301499: /*referenceSeqString*/ return this.referenceSeqString == null ? new Base[0] : new Base[] {this.referenceSeqString}; // StringType
-        case -891993594: /*strand*/ return this.strand == null ? new Base[0] : new Base[] {this.strand}; // IntegerType
+        case -891993594: /*strand*/ return this.strand == null ? new Base[0] : new Base[] {this.strand}; // Enumeration<StrandType>
         case 1903685202: /*windowStart*/ return this.windowStart == null ? new Base[0] : new Base[] {this.windowStart}; // IntegerType
         case -217026869: /*windowEnd*/ return this.windowEnd == null ? new Base[0] : new Base[] {this.windowEnd}; // IntegerType
         default: return super.getProperty(hash, name, checkValid);
@@ -866,6 +1115,10 @@ public class Sequence extends DomainResource {
         case 1061239735: // genomeBuild
           this.genomeBuild = castToString(value); // StringType
           return value;
+        case -1439500848: // orientation
+          value = new OrientationTypeEnumFactory().fromType(castToCode(value));
+          this.orientation = (Enumeration) value; // Enumeration<OrientationType>
+          return value;
         case -1911500465: // referenceSeqId
           this.referenceSeqId = castToCodeableConcept(value); // CodeableConcept
           return value;
@@ -876,7 +1129,8 @@ public class Sequence extends DomainResource {
           this.referenceSeqString = castToString(value); // StringType
           return value;
         case -891993594: // strand
-          this.strand = castToInteger(value); // IntegerType
+          value = new StrandTypeEnumFactory().fromType(castToCode(value));
+          this.strand = (Enumeration) value; // Enumeration<StrandType>
           return value;
         case 1903685202: // windowStart
           this.windowStart = castToInteger(value); // IntegerType
@@ -895,6 +1149,9 @@ public class Sequence extends DomainResource {
           this.chromosome = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("genomeBuild")) {
           this.genomeBuild = castToString(value); // StringType
+        } else if (name.equals("orientation")) {
+          value = new OrientationTypeEnumFactory().fromType(castToCode(value));
+          this.orientation = (Enumeration) value; // Enumeration<OrientationType>
         } else if (name.equals("referenceSeqId")) {
           this.referenceSeqId = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("referenceSeqPointer")) {
@@ -902,7 +1159,8 @@ public class Sequence extends DomainResource {
         } else if (name.equals("referenceSeqString")) {
           this.referenceSeqString = castToString(value); // StringType
         } else if (name.equals("strand")) {
-          this.strand = castToInteger(value); // IntegerType
+          value = new StrandTypeEnumFactory().fromType(castToCode(value));
+          this.strand = (Enumeration) value; // Enumeration<StrandType>
         } else if (name.equals("windowStart")) {
           this.windowStart = castToInteger(value); // IntegerType
         } else if (name.equals("windowEnd")) {
@@ -917,6 +1175,7 @@ public class Sequence extends DomainResource {
         switch (hash) {
         case -1499470472:  return getChromosome(); 
         case 1061239735:  return getGenomeBuildElement();
+        case -1439500848:  return getOrientationElement();
         case -1911500465:  return getReferenceSeqId(); 
         case 1923414665:  return getReferenceSeqPointer(); 
         case -1648301499:  return getReferenceSeqStringElement();
@@ -933,10 +1192,11 @@ public class Sequence extends DomainResource {
         switch (hash) {
         case -1499470472: /*chromosome*/ return new String[] {"CodeableConcept"};
         case 1061239735: /*genomeBuild*/ return new String[] {"string"};
+        case -1439500848: /*orientation*/ return new String[] {"code"};
         case -1911500465: /*referenceSeqId*/ return new String[] {"CodeableConcept"};
         case 1923414665: /*referenceSeqPointer*/ return new String[] {"Reference"};
         case -1648301499: /*referenceSeqString*/ return new String[] {"string"};
-        case -891993594: /*strand*/ return new String[] {"integer"};
+        case -891993594: /*strand*/ return new String[] {"code"};
         case 1903685202: /*windowStart*/ return new String[] {"integer"};
         case -217026869: /*windowEnd*/ return new String[] {"integer"};
         default: return super.getTypesForProperty(hash, name);
@@ -952,6 +1212,9 @@ public class Sequence extends DomainResource {
         }
         else if (name.equals("genomeBuild")) {
           throw new FHIRException("Cannot call addChild on a primitive type Sequence.genomeBuild");
+        }
+        else if (name.equals("orientation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Sequence.orientation");
         }
         else if (name.equals("referenceSeqId")) {
           this.referenceSeqId = new CodeableConcept();
@@ -982,6 +1245,7 @@ public class Sequence extends DomainResource {
         copyValues(dst);
         dst.chromosome = chromosome == null ? null : chromosome.copy();
         dst.genomeBuild = genomeBuild == null ? null : genomeBuild.copy();
+        dst.orientation = orientation == null ? null : orientation.copy();
         dst.referenceSeqId = referenceSeqId == null ? null : referenceSeqId.copy();
         dst.referenceSeqPointer = referenceSeqPointer == null ? null : referenceSeqPointer.copy();
         dst.referenceSeqString = referenceSeqString == null ? null : referenceSeqString.copy();
@@ -999,9 +1263,10 @@ public class Sequence extends DomainResource {
           return false;
         SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other_;
         return compareDeep(chromosome, o.chromosome, true) && compareDeep(genomeBuild, o.genomeBuild, true)
-           && compareDeep(referenceSeqId, o.referenceSeqId, true) && compareDeep(referenceSeqPointer, o.referenceSeqPointer, true)
-           && compareDeep(referenceSeqString, o.referenceSeqString, true) && compareDeep(strand, o.strand, true)
-           && compareDeep(windowStart, o.windowStart, true) && compareDeep(windowEnd, o.windowEnd, true);
+           && compareDeep(orientation, o.orientation, true) && compareDeep(referenceSeqId, o.referenceSeqId, true)
+           && compareDeep(referenceSeqPointer, o.referenceSeqPointer, true) && compareDeep(referenceSeqString, o.referenceSeqString, true)
+           && compareDeep(strand, o.strand, true) && compareDeep(windowStart, o.windowStart, true) && compareDeep(windowEnd, o.windowEnd, true)
+          ;
       }
 
       @Override
@@ -1011,14 +1276,15 @@ public class Sequence extends DomainResource {
         if (!(other_ instanceof SequenceReferenceSeqComponent))
           return false;
         SequenceReferenceSeqComponent o = (SequenceReferenceSeqComponent) other_;
-        return compareValues(genomeBuild, o.genomeBuild, true) && compareValues(referenceSeqString, o.referenceSeqString, true)
-           && compareValues(strand, o.strand, true) && compareValues(windowStart, o.windowStart, true) && compareValues(windowEnd, o.windowEnd, true)
-          ;
+        return compareValues(genomeBuild, o.genomeBuild, true) && compareValues(orientation, o.orientation, true)
+           && compareValues(referenceSeqString, o.referenceSeqString, true) && compareValues(strand, o.strand, true)
+           && compareValues(windowStart, o.windowStart, true) && compareValues(windowEnd, o.windowEnd, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(chromosome, genomeBuild, referenceSeqId
-          , referenceSeqPointer, referenceSeqString, strand, windowStart, windowEnd);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(chromosome, genomeBuild, orientation
+          , referenceSeqId, referenceSeqPointer, referenceSeqString, strand, windowStart, windowEnd
+          );
       }
 
   public String fhirType() {
@@ -2880,7 +3146,7 @@ public class Sequence extends DomainResource {
           if (this.score == null)
             return false;
           for (IntegerType v : this.score)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -2941,7 +3207,7 @@ public class Sequence extends DomainResource {
           if (this.numTP == null)
             return false;
           for (IntegerType v : this.numTP)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -3002,7 +3268,7 @@ public class Sequence extends DomainResource {
           if (this.numFP == null)
             return false;
           for (IntegerType v : this.numFP)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -3063,7 +3329,7 @@ public class Sequence extends DomainResource {
           if (this.numFN == null)
             return false;
           for (IntegerType v : this.numFN)
-            if (v.equals(value)) // integer
+            if (v.getValue().equals(value)) // integer
               return true;
           return false;
         }
@@ -3124,7 +3390,7 @@ public class Sequence extends DomainResource {
           if (this.precision == null)
             return false;
           for (DecimalType v : this.precision)
-            if (v.equals(value)) // decimal
+            if (v.getValue().equals(value)) // decimal
               return true;
           return false;
         }
@@ -3185,7 +3451,7 @@ public class Sequence extends DomainResource {
           if (this.sensitivity == null)
             return false;
           for (DecimalType v : this.sensitivity)
-            if (v.equals(value)) // decimal
+            if (v.getValue().equals(value)) // decimal
               return true;
           return false;
         }
@@ -3246,7 +3512,7 @@ public class Sequence extends DomainResource {
           if (this.fMeasure == null)
             return false;
           for (DecimalType v : this.fMeasure)
-            if (v.equals(value)) // decimal
+            if (v.getValue().equals(value)) // decimal
               return true;
           return false;
         }

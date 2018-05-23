@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -953,7 +953,7 @@ public class AuditEvent extends DomainResource {
           if (this.policy == null)
             return false;
           for (UriType v : this.policy)
-            if (v.equals(value)) // uri
+            if (v.getValue().equals(value)) // uri
               return true;
           return false;
         }
@@ -2642,10 +2642,10 @@ public class AuditEvent extends DomainResource {
         protected StringType type;
 
         /**
-         * The details value.
+         * The  value of the extra detail.
          */
         @Child(name = "value", type = {StringType.class, Base64BinaryType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Property value", formalDefinition="The details value." )
+        @Description(shortDefinition="Property value", formalDefinition="The  value of the extra detail." )
         protected Type value;
 
         private static final long serialVersionUID = -1035059584L;
@@ -2712,36 +2712,40 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The details value.)
+         * @return {@link #value} (The  value of the extra detail.)
          */
         public Type getValue() { 
           return this.value;
         }
 
         /**
-         * @return {@link #value} (The details value.)
+         * @return {@link #value} (The  value of the extra detail.)
          */
         public StringType getValueStringType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
         public boolean hasValueStringType() { 
-          return this.value instanceof StringType;
+          return this != null && this.value instanceof StringType;
         }
 
         /**
-         * @return {@link #value} (The details value.)
+         * @return {@link #value} (The  value of the extra detail.)
          */
         public Base64BinaryType getValueBase64BinaryType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Base64BinaryType))
             throw new FHIRException("Type mismatch: the type Base64BinaryType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Base64BinaryType) this.value;
         }
 
         public boolean hasValueBase64BinaryType() { 
-          return this.value instanceof Base64BinaryType;
+          return this != null && this.value instanceof Base64BinaryType;
         }
 
         public boolean hasValue() { 
@@ -2749,9 +2753,11 @@ public class AuditEvent extends DomainResource {
         }
 
         /**
-         * @param value {@link #value} (The details value.)
+         * @param value {@link #value} (The  value of the extra detail.)
          */
         public AuditEventEntityDetailComponent setValue(Type value) { 
+          if (value != null && !(value instanceof StringType || value instanceof Base64BinaryType))
+            throw new Error("Not the right type for AuditEvent.entity.detail.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -2759,17 +2765,17 @@ public class AuditEvent extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "string", "The type of extra detail provided in the value.", 0, 1, type));
-          children.add(new Property("value[x]", "string|base64Binary", "The details value.", 0, 1, value));
+          children.add(new Property("value[x]", "string|base64Binary", "The  value of the extra detail.", 0, 1, value));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "string", "The type of extra detail provided in the value.", 0, 1, type);
-          case -1410166417: /*value[x]*/  return new Property("value[x]", "string|base64Binary", "The details value.", 0, 1, value);
-          case 111972721: /*value*/  return new Property("value[x]", "string|base64Binary", "The details value.", 0, 1, value);
-          case -1424603934: /*valueString*/  return new Property("value[x]", "string|base64Binary", "The details value.", 0, 1, value);
-          case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "string|base64Binary", "The details value.", 0, 1, value);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "string|base64Binary", "The  value of the extra detail.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "string|base64Binary", "The  value of the extra detail.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "string|base64Binary", "The  value of the extra detail.", 0, 1, value);
+          case -1535024575: /*valueBase64Binary*/  return new Property("value[x]", "string|base64Binary", "The  value of the extra detail.", 0, 1, value);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2919,10 +2925,10 @@ public class AuditEvent extends DomainResource {
     protected Period period;
 
     /**
-     * The time when the event occurred on the source.
+     * The time when the event was recorded.
      */
     @Child(name = "recorded", type = {InstantType.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Time when the event occurred on source", formalDefinition="The time when the event occurred on the source." )
+    @Description(shortDefinition="Time when the event was recorded", formalDefinition="The time when the event was recorded." )
     protected InstantType recorded;
 
     /**
@@ -3139,7 +3145,7 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
-     * @return {@link #recorded} (The time when the event occurred on the source.). This is the underlying object with id, value and extensions. The accessor "getRecorded" gives direct access to the value
+     * @return {@link #recorded} (The time when the event was recorded.). This is the underlying object with id, value and extensions. The accessor "getRecorded" gives direct access to the value
      */
     public InstantType getRecordedElement() { 
       if (this.recorded == null)
@@ -3159,7 +3165,7 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
-     * @param value {@link #recorded} (The time when the event occurred on the source.). This is the underlying object with id, value and extensions. The accessor "getRecorded" gives direct access to the value
+     * @param value {@link #recorded} (The time when the event was recorded.). This is the underlying object with id, value and extensions. The accessor "getRecorded" gives direct access to the value
      */
     public AuditEvent setRecordedElement(InstantType value) { 
       this.recorded = value;
@@ -3167,14 +3173,14 @@ public class AuditEvent extends DomainResource {
     }
 
     /**
-     * @return The time when the event occurred on the source.
+     * @return The time when the event was recorded.
      */
     public Date getRecorded() { 
       return this.recorded == null ? null : this.recorded.getValue();
     }
 
     /**
-     * @param value The time when the event occurred on the source.
+     * @param value The time when the event was recorded.
      */
     public AuditEvent setRecorded(Date value) { 
         if (this.recorded == null)
@@ -3470,7 +3476,7 @@ public class AuditEvent extends DomainResource {
         children.add(new Property("subtype", "Coding", "Identifier for the category of event.", 0, java.lang.Integer.MAX_VALUE, subtype));
         children.add(new Property("action", "code", "Indicator for type of action performed during the event that generated the audit.", 0, 1, action));
         children.add(new Property("period", "Period", "The period during which the activity occurred.", 0, 1, period));
-        children.add(new Property("recorded", "instant", "The time when the event occurred on the source.", 0, 1, recorded));
+        children.add(new Property("recorded", "instant", "The time when the event was recorded.", 0, 1, recorded));
         children.add(new Property("outcome", "code", "Indicates whether the event succeeded or failed.", 0, 1, outcome));
         children.add(new Property("outcomeDesc", "string", "A free text description of the outcome of the event.", 0, 1, outcomeDesc));
         children.add(new Property("purposeOfEvent", "CodeableConcept", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent));
@@ -3486,7 +3492,7 @@ public class AuditEvent extends DomainResource {
         case -1867567750: /*subtype*/  return new Property("subtype", "Coding", "Identifier for the category of event.", 0, java.lang.Integer.MAX_VALUE, subtype);
         case -1422950858: /*action*/  return new Property("action", "code", "Indicator for type of action performed during the event that generated the audit.", 0, 1, action);
         case -991726143: /*period*/  return new Property("period", "Period", "The period during which the activity occurred.", 0, 1, period);
-        case -799233872: /*recorded*/  return new Property("recorded", "instant", "The time when the event occurred on the source.", 0, 1, recorded);
+        case -799233872: /*recorded*/  return new Property("recorded", "instant", "The time when the event was recorded.", 0, 1, recorded);
         case -1106507950: /*outcome*/  return new Property("outcome", "code", "Indicates whether the event succeeded or failed.", 0, 1, outcome);
         case 1062502659: /*outcomeDesc*/  return new Property("outcomeDesc", "string", "A free text description of the outcome of the event.", 0, 1, outcomeDesc);
         case -341917691: /*purposeOfEvent*/  return new Property("purposeOfEvent", "CodeableConcept", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent);
@@ -3751,17 +3757,17 @@ public class AuditEvent extends DomainResource {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>Time when the event occurred on source</b><br>
+   * Description: <b>Time when the event was recorded</b><br>
    * Type: <b>date</b><br>
    * Path: <b>AuditEvent.recorded</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AuditEvent.recorded", description="Time when the event occurred on source", type="date" )
+  @SearchParamDefinition(name="date", path="AuditEvent.recorded", description="Time when the event was recorded", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>Time when the event occurred on source</b><br>
+   * Description: <b>Time when the event was recorded</b><br>
    * Type: <b>date</b><br>
    * Path: <b>AuditEvent.recorded</b><br>
    * </p>

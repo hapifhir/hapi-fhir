@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -11,8 +12,10 @@ import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.orm.hibernate5.HibernateExceptionTranslator;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
@@ -60,7 +63,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 				} catch (Exception e) {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
-//					if ("true".equals(System.getProperty("ci"))) {
+//					if ("true".equals(System.getStringProperty("ci"))) {
 					fail("Exceeded maximum wait for connection: " + e.toString());
 //					}
 //					System.exit(1);
@@ -114,11 +117,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
@@ -129,7 +130,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
+		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
 		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "ram");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");

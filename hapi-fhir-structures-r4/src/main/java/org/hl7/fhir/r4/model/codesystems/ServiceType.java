@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -1069,11 +1069,11 @@ public enum ServiceType {
          */
         _258, 
         /**
-         * Behaviour
+         * Behavior
          */
         _259, 
         /**
-         * Behaviour Intervention
+         * Behavior Intervention
          */
         _260, 
         /**
@@ -1637,7 +1637,7 @@ public enum ServiceType {
          */
         _402, 
         /**
-         * Peak Organisations
+         * Peak Organizations
          */
         _403, 
         /**
@@ -2341,7 +2341,7 @@ public enum ServiceType {
          */
         _609, 
         /**
-         * Behaviour Support
+         * Behavior Support
          */
         _610, 
         /**
@@ -4485,8 +4485,8 @@ public enum ServiceType {
             case _256: return "Attendant Care";
             case _257: return "Babies";
             case _258: return "Bathroom Modification";
-            case _259: return "Behaviour";
-            case _260: return "Behaviour Intervention";
+            case _259: return "Behavior";
+            case _260: return "Behavior Intervention";
             case _261: return "Bereavement";
             case _262: return "Bipolar";
             case _263: return "Birth";
@@ -4627,7 +4627,7 @@ public enum ServiceType {
             case _400: return "Pain";
             case _401: return "Pap Smear";
             case _402: return "Parenting";
-            case _403: return "Peak Organisations";
+            case _403: return "Peak Organizations";
             case _404: return "Personal Care";
             case _405: return "Pharmacies";
             case _406: return "Phobias";
@@ -4803,7 +4803,7 @@ public enum ServiceType {
             case _607: return "Assistive Equip-General Tasks";
             case _608: return "Assistive Equip-Recreation";
             case _609: return "Assistive Prod-Household Task";
-            case _610: return "Behaviour Support";
+            case _610: return "Behavior Support";
             case _611: return "Comms & Info Equipment";
             case _612: return "Community Nursing Care";
             case _613: return "Daily Tasks/Shared Living";
@@ -5086,8 +5086,8 @@ public enum ServiceType {
             case _256: return "Attendant Care";
             case _257: return "Babies";
             case _258: return "Bathroom Modificatio";
-            case _259: return "Behaviour";
-            case _260: return "Behaviour Interventi";
+            case _259: return "Behavior";
+            case _260: return "Behavior Interventi";
             case _261: return "Bereavement";
             case _262: return "Bipolar";
             case _263: return "Birth";
@@ -5228,7 +5228,7 @@ public enum ServiceType {
             case _400: return "Pain";
             case _401: return "Pap Smear";
             case _402: return "Parenting";
-            case _403: return "Peak Organisations";
+            case _403: return "Peak Organizations";
             case _404: return "Personal Care";
             case _405: return "Pharmacies";
             case _406: return "Phobias";
@@ -5404,7 +5404,7 @@ public enum ServiceType {
             case _607: return "Assistive Equip-General Tasks";
             case _608: return "Assistive Equip-Recreation";
             case _609: return "Assistive Prod-Household Task";
-            case _610: return "Behaviour Support";
+            case _610: return "Behavior Support";
             case _611: return "Comms & Info Equipment";
             case _612: return "Community Nursing Care";
             case _613: return "Daily Tasks/Shared Living";

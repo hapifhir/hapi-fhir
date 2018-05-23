@@ -20,8 +20,13 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import javax.persistence.*;
 import java.io.Serializable;
+
+import static org.apache.commons.lang3.StringUtils.left;
 
 //@formatter:off
 @Table(name = "TRM_CODESYSTEM", uniqueConstraints = {
@@ -31,6 +36,7 @@ import java.io.Serializable;
 //@formatter:on
 public class TermCodeSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
+	public static final int CS_NAME_LENGTH = 200;
 
 	@Column(name = "CODE_SYSTEM_URI", nullable = false)
 	private String myCodeSystemUri;
@@ -48,9 +54,15 @@ public class TermCodeSystem implements Serializable {
 	private ResourceTable myResource;
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
+	@Column(name = "CS_NAME", nullable = true)
+	private String myName;
 
 	public String getCodeSystemUri() {
 		return myCodeSystemUri;
+	}
+
+	public String getName() {
+		return myName;
 	}
 
 	public void setCodeSystemUri(String theCodeSystemUri) {
@@ -73,7 +85,22 @@ public class TermCodeSystem implements Serializable {
 		return myResource;
 	}
 
+	public void setName(String theName) {
+		myName = left(theName, CS_NAME_LENGTH);
+	}
+
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("codeSystemUri", myCodeSystemUri)
+			.append("currentVersion", myCurrentVersion)
+			.append("pid", myPid)
+			.append("resourcePid", myResourcePid)
+			.append("name", myName)
+			.toString();
 	}
 }

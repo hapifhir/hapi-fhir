@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
+ * Specifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
  */
 @DatatypeDef(name="UsageContext")
 public class UsageContext extends Type implements ICompositeType {
@@ -115,39 +115,45 @@ public class UsageContext extends Type implements ICompositeType {
      * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
     public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
       return (CodeableConcept) this.value;
     }
 
     public boolean hasValueCodeableConcept() { 
-      return this.value instanceof CodeableConcept;
+      return this != null && this.value instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
     public Quantity getValueQuantity() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Quantity))
         throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Quantity) this.value;
     }
 
     public boolean hasValueQuantity() { 
-      return this.value instanceof Quantity;
+      return this != null && this.value instanceof Quantity;
     }
 
     /**
      * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
     public Range getValueRange() throws FHIRException { 
+      if (this.value == null)
+        return null;
       if (!(this.value instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Range) this.value;
     }
 
     public boolean hasValueRange() { 
-      return this.value instanceof Range;
+      return this != null && this.value instanceof Range;
     }
 
     public boolean hasValue() { 
@@ -158,6 +164,8 @@ public class UsageContext extends Type implements ICompositeType {
      * @param value {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
     public UsageContext setValue(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Quantity || value instanceof Range))
+        throw new Error("Not the right type for UsageContext.value[x]: "+value.fhirType());
       this.value = value;
       return this;
     }

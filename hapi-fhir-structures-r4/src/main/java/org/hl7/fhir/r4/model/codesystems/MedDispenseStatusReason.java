@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedDispenseStatusReason {
 
         /**
-         * The order has been stopped by the prescriber but this fact has not necessarily captured electronically. Example:A verbal stop, a fax, etc.
+         * The order has been stopped by the prescriber but this fact has not necessarily captured electronically. Example: A verbal stop, a fax, etc.
          */
         FRR01, 
         /**
@@ -45,7 +45,7 @@ public enum MedDispenseStatusReason {
          */
         FRR02, 
         /**
-         * Data needed to safely act on the order which was expected to become available independent of the order is not yet available. Example:Lab results, diagnostic imaging, etc.
+         * Data needed to safely act on the order which was expected to become available independent of the order is not yet available. Example: Lab results, diagnostic imaging, etc.
          */
         FRR03, 
         /**
@@ -57,7 +57,8 @@ public enum MedDispenseStatusReason {
          */
         FRR05, 
         /**
-         * Fulfiller not able to provide appropriate care associated with fulfilling the order.Example:Therapy requires ongoing monitoring by fulfiller and fulfiller will be ending practice, leaving town, unable to schedule necessary time, etc.
+         * Fulfiller not able to provide appropriate care associated with fulfilling the order.
+Example: Therapy requires ongoing monitoring by fulfiller and fulfiller will be ending practice, leaving town, unable to schedule necessary time, etc.
          */
         FRR06, 
         /**
@@ -188,12 +189,12 @@ public enum MedDispenseStatusReason {
         }
         public String getDefinition() {
           switch (this) {
-            case FRR01: return "The order has been stopped by the prescriber but this fact has not necessarily captured electronically. Example:A verbal stop, a fax, etc.";
+            case FRR01: return "The order has been stopped by the prescriber but this fact has not necessarily captured electronically. Example: A verbal stop, a fax, etc.";
             case FRR02: return "Order has not been fulfilled within a reasonable amount of time, and might not be current.";
-            case FRR03: return "Data needed to safely act on the order which was expected to become available independent of the order is not yet available. Example:Lab results, diagnostic imaging, etc.";
+            case FRR03: return "Data needed to safely act on the order which was expected to become available independent of the order is not yet available. Example: Lab results, diagnostic imaging, etc.";
             case FRR04: return "Product not available or manufactured. Cannot supply.";
             case FRR05: return "The dispenser has ethical, religious or moral objections to fulfilling the order/dispensing the product.";
-            case FRR06: return "Fulfiller not able to provide appropriate care associated with fulfilling the order.\rExample:Therapy requires ongoing monitoring by fulfiller and fulfiller will be ending practice, leaving town, unable to schedule necessary time, etc.";
+            case FRR06: return "Fulfiller not able to provide appropriate care associated with fulfilling the order.\nExample: Therapy requires ongoing monitoring by fulfiller and fulfiller will be ending practice, leaving town, unable to schedule necessary time, etc.";
             case ALTCHOICE: return "This therapy has been ordered as a backup to a preferred therapy. This order will be released when and if the preferred therapy is unsuccessful.";
             case CLARIF: return "Clarification is required before the order can be acted upon.";
             case DRUGHIGH: return "The current level of the medication in the patient's system is too high. The medication is suspended to allow the level to subside to a safer level.";

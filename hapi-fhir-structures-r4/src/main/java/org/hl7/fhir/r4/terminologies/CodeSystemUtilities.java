@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptPropertyComponent;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.Utilities;
 
@@ -39,17 +41,17 @@ public class CodeSystemUtilities {
     return false;
   }
 
-  public static void setNotSelectable(CodeSystem cs, ConceptDefinitionComponent concept) {
+  public static void setNotSelectable(CodeSystem cs, ConceptDefinitionComponent concept) throws FHIRFormatError {
     defineNotSelectableProperty(cs);
     concept.addProperty().setCode("notSelectable").setValue(new BooleanType(true));    
   }
 
-  public static void setInactive(CodeSystem cs, ConceptDefinitionComponent concept) {
+  public static void setInactive(CodeSystem cs, ConceptDefinitionComponent concept) throws FHIRFormatError {
     defineInactiveProperty(cs);
     concept.addProperty().setCode("inactive").setValue(new BooleanType(true));    
   }
 
-  public static void setDeprecated(CodeSystem cs, ConceptDefinitionComponent concept, DateTimeType date) {
+  public static void setDeprecated(CodeSystem cs, ConceptDefinitionComponent concept, DateTimeType date) throws FHIRFormatError {
     defineDeprecatedProperty(cs);
     concept.addProperty().setCode("deprecationDate").setValue(date);    
   }
@@ -95,7 +97,7 @@ public class CodeSystemUtilities {
     for (UriType t : cs.getMeta().getProfile()) 
       if (t.getValue().equals("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"))
         return cs;
-    cs.getMeta().getProfile().add(new UriType("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"));
+    cs.getMeta().getProfile().add(new CanonicalType("http://hl7.org/fhir/StructureDefinition/shareablecodesystem"));
     return cs;
   }
 

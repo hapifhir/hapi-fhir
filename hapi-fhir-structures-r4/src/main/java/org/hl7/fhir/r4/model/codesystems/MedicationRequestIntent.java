@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,11 +49,15 @@ public enum MedicationRequestIntent {
          */
         ORDER, 
         /**
+         * The request represents the original authorization for the medication request.
+         */
+        ORIGINALORDER, 
+        /**
          * The request represents an instance for the particular order, for example a medication administration record.
          */
         INSTANCEORDER, 
         /**
-         * The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.
          */
         OPTION, 
         /**
@@ -69,6 +73,8 @@ public enum MedicationRequestIntent {
           return PLAN;
         if ("order".equals(codeString))
           return ORDER;
+        if ("original-order".equals(codeString))
+          return ORIGINALORDER;
         if ("instance-order".equals(codeString))
           return INSTANCEORDER;
         if ("option".equals(codeString))
@@ -80,6 +86,7 @@ public enum MedicationRequestIntent {
             case PROPOSAL: return "proposal";
             case PLAN: return "plan";
             case ORDER: return "order";
+            case ORIGINALORDER: return "original-order";
             case INSTANCEORDER: return "instance-order";
             case OPTION: return "option";
             default: return "?";
@@ -93,8 +100,9 @@ public enum MedicationRequestIntent {
             case PROPOSAL: return "The request is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act";
             case PLAN: return "The request represents an intension to ensure something occurs without providing an authorization for others to act";
             case ORDER: return "The request represents a request/demand and authorization for action";
+            case ORIGINALORDER: return "The request represents the original authorization for the medication request.";
             case INSTANCEORDER: return "The request represents an instance for the particular order, for example a medication administration record.";
-            case OPTION: return "The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.";
             default: return "?";
           }
         }
@@ -103,6 +111,7 @@ public enum MedicationRequestIntent {
             case PROPOSAL: return "Proposal";
             case PLAN: return "Plan";
             case ORDER: return "Order";
+            case ORIGINALORDER: return "Original Order";
             case INSTANCEORDER: return "Instance Order";
             case OPTION: return "Option";
             default: return "?";

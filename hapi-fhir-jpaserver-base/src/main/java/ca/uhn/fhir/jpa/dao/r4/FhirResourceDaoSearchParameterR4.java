@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,9 +42,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoSearchParameterR4.class);
-
-
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
@@ -60,6 +59,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 	 */
 	@Override
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
+	@Transactional(propagation = Propagation.NEVER)
 	public void performReindexingPass() {
 		if (getConfig().isSchedulingDisabled()) {
 			return;
@@ -130,7 +130,6 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 			theExpression = theExpression.trim();
 
 			String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(theExpression);
-			String allResourceName = null;
 			for (String nextPath : expressionSplit) {
 				nextPath = nextPath.trim();
 
@@ -144,14 +143,6 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 					theContext.getResourceDefinition(resourceName);
 				} catch (DataFormatException e) {
 					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
-				}
-
-				if (allResourceName == null) {
-					allResourceName = resourceName;
-				} else {
-					if (!allResourceName.equals(resourceName)) {
-						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". All paths in a single SearchParameter must match the same resource type");
-					}
 				}
 
 			}

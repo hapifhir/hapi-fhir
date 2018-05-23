@@ -19,7 +19,7 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>${project.basedir}/../hapi-fhir-cli/hapi-fhir-cli-app/src/main/script</directory>
+			<directory>${project.basedir}/../hapi-fhir-cli/hapi-fhir-cli-api/src/main/script</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>hapi-fhir-cli</include>

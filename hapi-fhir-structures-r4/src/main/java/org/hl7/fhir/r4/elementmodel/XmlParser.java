@@ -18,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXSource;
 
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.elementmodel.Element.SpecialElement;
 import org.hl7.fhir.r4.formats.FormatUtilities;
@@ -242,7 +243,7 @@ public class XmlParser extends ParserBase {
 	    		else
 	    	    context.getChildren().add(new Element(property.getName(), property, property.getType(), av).markLocation(line(node), col(node)));
         } else if (!allowXsiLocation || !attr.getNodeName().endsWith(":schemaLocation") ) {
-          logError(line(node), col(node), path, IssueType.STRUCTURE, "Undefined attribute '@"+attr.getNodeName()+"' on "+node.getNodeName(), IssueSeverity.ERROR);      		
+          logError(line(node), col(node), path, IssueType.STRUCTURE, "Undefined attribute '@"+attr.getNodeName()+"' on "+node.getNodeName()+" for type "+context.fhirType()+" (properties = "+properties+")", IssueSeverity.ERROR);      		
       	}
     	}
     }
@@ -338,7 +339,7 @@ public class XmlParser extends ParserBase {
   private void parseResource(String string, org.w3c.dom.Element container, Element parent, Property elementProperty) throws FHIRFormatError, DefinitionException, FHIRException, IOException {
   	org.w3c.dom.Element res = XMLUtil.getFirstChild(container);
     String name = res.getLocalName();
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+name);
+    StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(name));
     if (sd == null)
       throw new FHIRFormatError("Contained resource does not appear to be a FHIR resource (unknown name '"+res.getLocalName()+"')");
     parent.updateProperty(new Property(context, sd.getSnapshot().getElement().get(0), sd), SpecialElement.fromProperty(parent.getProperty()), elementProperty);
@@ -388,7 +389,7 @@ public class XmlParser extends ParserBase {
     xml.setPretty(style == OutputStyle.PRETTY);
     xml.start();
     xml.setDefaultNamespace(e.getProperty().getNamespace());
-    composeElement(xml, e, e.getType());
+    composeElement(xml, e, e.getType(), true);
     xml.end();
 
   }
@@ -396,11 +397,11 @@ public class XmlParser extends ParserBase {
   public void compose(Element e, IXMLWriter xml) throws Exception {
     xml.start();
     xml.setDefaultNamespace(e.getProperty().getNamespace());
-    composeElement(xml, e, e.getType());
+    composeElement(xml, e, e.getType(), true);
     xml.end();
   }
 
-  private void composeElement(IXMLWriter xml, Element element, String elementName) throws IOException {
+  private void composeElement(IXMLWriter xml, Element element, String elementName, boolean root) throws IOException {
     for (String s : element.getComments()) {
       xml.comment(s, true);
     }
@@ -428,7 +429,7 @@ public class XmlParser extends ParserBase {
 				if (element.hasChildren()) {
 					xml.enter(elementName);
 					for (Element child : element.getChildren()) 
-						composeElement(xml, child, child.getName());
+						composeElement(xml, child, child.getName(), false);
 					xml.exit(elementName);
 				} else
         xml.element(elementName);
@@ -444,7 +445,7 @@ public class XmlParser extends ParserBase {
       if (linkResolver != null)
         xml.link(linkResolver.resolveProperty(element.getProperty()));
       xml.enter(elementName);
-      if (element.getSpecial() != null) {
+      if (!root && element.getSpecial() != null) {
         if (linkResolver != null)
           xml.link(linkResolver.resolveProperty(element.getProperty()));
         xml.enter(element.getType());
@@ -455,9 +456,9 @@ public class XmlParser extends ParserBase {
             xml.link(linkResolver.resolveProperty(element.getProperty()));
           xml.text(child.getValue());
         } else if (!isAttr(child.getProperty()))
-          composeElement(xml, child, child.getName());
+          composeElement(xml, child, child.getName(), false);
       }
-	    if (element.getSpecial() != null)
+	    if (!root && element.getSpecial() != null)
         xml.exit(element.getType());
       xml.exit(elementName);
     }

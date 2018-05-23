@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Jan 9, 2018 14:51-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The Measure resource provides the definition of a quality measure.
  */
 @ResourceDef(name="Measure", profile="http://hl7.org/fhir/Profile/Measure")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "subject", "topic", "contributor", "contact", "copyright", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "status", "experimental", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "contributor", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "set", "group", "supplementalData"})
 public class Measure extends MetadataResource {
 
     @Block()
@@ -74,10 +74,10 @@ public class Measure extends MetadataResource {
         protected List<MeasureGroupPopulationComponent> population;
 
         /**
-         * The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.
+         * The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.
          */
         @Child(name = "stratifier", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Stratifier criteria for the measure", formalDefinition="The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path." )
+        @Description(shortDefinition="Stratifier criteria for the measure", formalDefinition="The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path." )
         protected List<MeasureGroupStratifierComponent> stratifier;
 
         private static final long serialVersionUID = -1797567579L;
@@ -216,7 +216,7 @@ public class Measure extends MetadataResource {
         }
 
         /**
-         * @return {@link #stratifier} (The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.)
+         * @return {@link #stratifier} (The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.)
          */
         public List<MeasureGroupStratifierComponent> getStratifier() { 
           if (this.stratifier == null)
@@ -273,7 +273,7 @@ public class Measure extends MetadataResource {
           children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.", 0, 1, code));
           children.add(new Property("description", "string", "The human readable description of this population group.", 0, 1, description));
           children.add(new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population));
-          children.add(new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier));
+          children.add(new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier));
         }
 
         @Override
@@ -282,7 +282,7 @@ public class Measure extends MetadataResource {
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the group. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing groups to be correlated across measures.", 0, 1, code);
           case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this population group.", 0, 1, description);
           case -2023558323: /*population*/  return new Property("population", "", "A population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, population);
-          case 90983669: /*stratifier*/  return new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library, or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier);
+          case 90983669: /*stratifier*/  return new Property("stratifier", "", "The stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, stratifier);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1117,10 +1117,10 @@ public class Measure extends MetadataResource {
         protected StringType description;
 
         /**
-         * The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.
+         * The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.
          */
         @Child(name = "criteria", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Expression describing additional data to be reported", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element." )
+        @Description(shortDefinition="Expression describing additional data to be reported", formalDefinition="The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element." )
         protected StringType criteria;
 
         /**
@@ -1266,7 +1266,7 @@ public class Measure extends MetadataResource {
         }
 
         /**
-         * @return {@link #criteria} (The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
+         * @return {@link #criteria} (The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
          */
         public StringType getCriteriaElement() { 
           if (this.criteria == null)
@@ -1286,7 +1286,7 @@ public class Measure extends MetadataResource {
         }
 
         /**
-         * @param value {@link #criteria} (The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
+         * @param value {@link #criteria} (The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
          */
         public MeasureSupplementalDataComponent setCriteriaElement(StringType value) { 
           this.criteria = value;
@@ -1294,14 +1294,14 @@ public class Measure extends MetadataResource {
         }
 
         /**
-         * @return The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.
+         * @return The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.
          */
         public String getCriteria() { 
           return this.criteria == null ? null : this.criteria.getValue();
         }
 
         /**
-         * @param value The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.
+         * @param value The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.
          */
         public MeasureSupplementalDataComponent setCriteria(String value) { 
           if (Utilities.noString(value))
@@ -1368,7 +1368,7 @@ public class Measure extends MetadataResource {
           children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.", 0, 1, code));
           children.add(new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage));
           children.add(new Property("description", "string", "The human readable description of this supplemental data.", 0, 1, description));
-          children.add(new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, 1, criteria));
+          children.add(new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.", 0, 1, criteria));
           children.add(new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, 1, path));
         }
 
@@ -1378,7 +1378,7 @@ public class Measure extends MetadataResource {
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the supplemental data. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing supplemental data to be correlated across measures.", 0, 1, code);
           case 111574433: /*usage*/  return new Property("usage", "CodeableConcept", "An indicator of the intended usage for the supplemental data element. Supplemental data indicates the data is additional information requested to augment the measure information. Risk adjustment factor indicates the data is additional information used to calculate risk adjustment factors when applying a risk model to the measure calculation.", 0, java.lang.Integer.MAX_VALUE, usage);
           case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this supplemental data.", 0, 1, description);
-          case 1952046943: /*criteria*/  return new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library, and defines the data to be returned for this element.", 0, 1, criteria);
+          case 1952046943: /*criteria*/  return new Property("criteria", "string", "The criteria for the supplemental data. This must be the name of a valid expression defined within a referenced library. The criteria defines the data to be returned for this element.", 0, 1, criteria);
           case 3433509: /*path*/  return new Property("path", "string", "The supplemental data to be supplied as part of the measure response, specified as a valid FHIR Resource Path.", 0, 1, path);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1543,108 +1543,110 @@ public class Measure extends MetadataResource {
     protected List<Identifier> identifier;
 
     /**
-     * Explaination of why this measure is needed and why it has been designed as it has.
+     * An explanatory or alternate title for the measure giving additional information about its content.
      */
-    @Child(name = "purpose", type = {MarkdownType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this measure is defined", formalDefinition="Explaination of why this measure is needed and why it has been designed as it has." )
+    @Child(name = "subtitle", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Subordinate title of the measure", formalDefinition="An explanatory or alternate title for the measure giving additional information about its content." )
+    protected StringType subtitle;
+
+    /**
+     * The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.
+     */
+    @Child(name = "subject", type = {CodeableConcept.class, Group.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="E.g. Patient, Practitioner, RelatedPerson, Organization, Location, Device", formalDefinition="The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
+    protected Type subject;
+
+    /**
+     * Explanation of why this measure is needed and why it has been designed as it has.
+     */
+    @Child(name = "purpose", type = {MarkdownType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Why this measure is defined", formalDefinition="Explanation of why this measure is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
-     * A detailed description of how the measure is used from a clinical perspective.
+     * A detailed description, from a clinical perspective, of how the measure is used.
      */
-    @Child(name = "usage", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the clinical usage of the measure", formalDefinition="A detailed description of how the measure is used from a clinical perspective." )
+    @Child(name = "usage", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Describes the clinical usage of the measure", formalDefinition="A detailed description, from a clinical perspective, of how the measure is used." )
     protected StringType usage;
+
+    /**
+     * A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
+     */
+    @Child(name = "copyright", type = {MarkdownType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure." )
+    protected MarkdownType copyright;
 
     /**
      * The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
      */
-    @Child(name = "approvalDate", type = {DateType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "approvalDate", type = {DateType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When the measure was approved by publisher", formalDefinition="The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage." )
     protected DateType approvalDate;
 
     /**
-     * The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
+     * The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
      */
-    @Child(name = "lastReviewDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="When the measure was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date." )
+    @Child(name = "lastReviewDate", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="When the measure was last reviewed", formalDefinition="The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date." )
     protected DateType lastReviewDate;
 
     /**
      * The period during which the measure content was or is planned to be in active use.
      */
-    @Child(name = "effectivePeriod", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "effectivePeriod", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the measure is expected to be used", formalDefinition="The period during which the measure content was or is planned to be in active use." )
     protected Period effectivePeriod;
 
     /**
-     * The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.
+     * Descriptive topics related to the content of the measure. Topics provide a high-level categorization grouping types of measures that can be useful for filtering and searching.
      */
-    @Child(name = "subject", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="E.g. Patient, Practitioner, RelatedPerson, Organization, Location, Device", formalDefinition="The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
-    protected CodeableConcept subject;
-
-    /**
-     * Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.
-     */
-    @Child(name = "topic", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="E.g. Education, Treatment, Assessment, etc", formalDefinition="Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching." )
+    @Child(name = "topic", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="The category of the measure, such as Education, Treatment, Assessment, etc.", formalDefinition="Descriptive topics related to the content of the measure. Topics provide a high-level categorization grouping types of measures that can be useful for filtering and searching." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/definition-topic")
     protected List<CodeableConcept> topic;
 
     /**
      * A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.
      */
-    @Child(name = "contributor", type = {Contributor.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "contributor", type = {Contributor.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A content contributor", formalDefinition="A contributor to the content of the measure, including authors, editors, reviewers, and endorsers." )
     protected List<Contributor> contributor;
 
     /**
-     * A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
-     */
-    @Child(name = "copyright", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Use and/or publishing restrictions", formalDefinition="A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure." )
-    protected MarkdownType copyright;
-
-    /**
      * Related artifacts such as additional documentation, justification, or bibliographic references.
      */
-    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional documentation, citations, etc", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    @Child(name = "relatedArtifact", type = {RelatedArtifact.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Additional documentation, citations, etc.", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
     protected List<RelatedArtifact> relatedArtifact;
 
     /**
      * A reference to a Library resource containing the formal logic used by the measure.
      */
-    @Child(name = "library", type = {Library.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "library", type = {CanonicalType.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Logic used by the measure", formalDefinition="A reference to a Library resource containing the formal logic used by the measure." )
-    protected List<Reference> library;
-    /**
-     * The actual objects that are the target of the reference (A reference to a Library resource containing the formal logic used by the measure.)
-     */
-    protected List<Library> libraryTarget;
-
+    protected List<CanonicalType> library;
 
     /**
-     * Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
+     * Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.
      */
-    @Child(name = "disclaimer", type = {MarkdownType.class}, order=12, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Disclaimer for use of the measure or its referenced content", formalDefinition="Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure." )
+    @Child(name = "disclaimer", type = {MarkdownType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Disclaimer for use of the measure or its referenced content", formalDefinition="Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure." )
     protected MarkdownType disclaimer;
 
     /**
-     * Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.
+     * Indicates how the calculation is performed for the measure, including proportion, ratio, continuous-variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.
      */
-    @Child(name = "scoring", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented." )
+    @Child(name = "scoring", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="proportion | ratio | continuous-variable | cohort", formalDefinition="Indicates how the calculation is performed for the measure, including proportion, ratio, continuous-variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-scoring")
     protected CodeableConcept scoring;
 
     /**
      * If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.
      */
-    @Child(name = "compositeScoring", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "compositeScoring", type = {CodeableConcept.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="opportunity | all-or-nothing | linear | weighted", formalDefinition="If this is a composite measure, the scoring method used to combine the component measures to determine the composite score." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/composite-measure-scoring")
     protected CodeableConcept compositeScoring;
@@ -1652,7 +1654,7 @@ public class Measure extends MetadataResource {
     /**
      * Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="process | outcome | structure | patient-reported-outcome | composite", formalDefinition="Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-type")
     protected List<CodeableConcept> type;
@@ -1660,74 +1662,74 @@ public class Measure extends MetadataResource {
     /**
      * A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.
      */
-    @Child(name = "riskAdjustment", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="How is risk adjustment applied for this measure", formalDefinition="A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results." )
+    @Child(name = "riskAdjustment", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="How risk adjustment is applied for this measure", formalDefinition="A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results." )
     protected StringType riskAdjustment;
 
     /**
      * Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.
      */
-    @Child(name = "rateAggregation", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "rateAggregation", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How is rate aggregation performed for this measure", formalDefinition="Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result." )
     protected StringType rateAggregation;
 
     /**
-     * Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
+     * Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
-    @Child(name = "rationale", type = {MarkdownType.class}, order=18, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Why does this measure exist", formalDefinition="Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence." )
+    @Child(name = "rationale", type = {MarkdownType.class}, order=19, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Why does this measure exist", formalDefinition="Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence." )
     protected MarkdownType rationale;
 
     /**
      * Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.
      */
-    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=19, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "clinicalRecommendationStatement", type = {MarkdownType.class}, order=20, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Summary of clinical guidelines", formalDefinition="Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure." )
     protected MarkdownType clinicalRecommendationStatement;
 
     /**
-     * Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
+     * Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
      */
-    @Child(name = "improvementNotation", type = {StringType.class}, order=20, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range)." )
+    @Child(name = "improvementNotation", type = {StringType.class}, order=21, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Improvement notation for the measure, e.g. higher score indicates better quality", formalDefinition="Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range)." )
     protected StringType improvementNotation;
 
     /**
      * Provides a description of an individual term used within the measure.
      */
-    @Child(name = "definition", type = {MarkdownType.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "definition", type = {MarkdownType.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Defined terms used in the measure documentation", formalDefinition="Provides a description of an individual term used within the measure." )
     protected List<MarkdownType> definition;
 
     /**
      * Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.
      */
-    @Child(name = "guidance", type = {MarkdownType.class}, order=22, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "guidance", type = {MarkdownType.class}, order=23, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional guidance for implementers", formalDefinition="Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure." )
     protected MarkdownType guidance;
 
     /**
      * The measure set, e.g. Preventive Care and Screening.
      */
-    @Child(name = "set", type = {StringType.class}, order=23, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "set", type = {StringType.class}, order=24, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The measure set, e.g. Preventive Care and Screening", formalDefinition="The measure set, e.g. Preventive Care and Screening." )
     protected StringType set;
 
     /**
      * A group of population criteria for the measure.
      */
-    @Child(name = "group", type = {}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "group", type = {}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Population criteria group", formalDefinition="A group of population criteria for the measure." )
     protected List<MeasureGroupComponent> group;
 
     /**
      * The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path.
      */
-    @Child(name = "supplementalData", type = {}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supplementalData", type = {}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What other data should be reported with the measure", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
     protected List<MeasureSupplementalDataComponent> supplementalData;
 
-    private static final long serialVersionUID = 1051521084L;
+    private static final long serialVersionUID = 990527178L;
 
   /**
    * Constructor
@@ -1745,7 +1747,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1765,7 +1767,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this measure is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public Measure setUrlElement(UriType value) { 
       this.url = value;
@@ -1773,14 +1775,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.
+     * @return An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this measure is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.
+     * @param value An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this measure is (or will be) published.
      */
     public Measure setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1994,6 +1996,55 @@ public class Measure extends MetadataResource {
     }
 
     /**
+     * @return {@link #subtitle} (An explanatory or alternate title for the measure giving additional information about its content.). This is the underlying object with id, value and extensions. The accessor "getSubtitle" gives direct access to the value
+     */
+    public StringType getSubtitleElement() { 
+      if (this.subtitle == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.subtitle");
+        else if (Configuration.doAutoCreate())
+          this.subtitle = new StringType(); // bb
+      return this.subtitle;
+    }
+
+    public boolean hasSubtitleElement() { 
+      return this.subtitle != null && !this.subtitle.isEmpty();
+    }
+
+    public boolean hasSubtitle() { 
+      return this.subtitle != null && !this.subtitle.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subtitle} (An explanatory or alternate title for the measure giving additional information about its content.). This is the underlying object with id, value and extensions. The accessor "getSubtitle" gives direct access to the value
+     */
+    public Measure setSubtitleElement(StringType value) { 
+      this.subtitle = value;
+      return this;
+    }
+
+    /**
+     * @return An explanatory or alternate title for the measure giving additional information about its content.
+     */
+    public String getSubtitle() { 
+      return this.subtitle == null ? null : this.subtitle.getValue();
+    }
+
+    /**
+     * @param value An explanatory or alternate title for the measure giving additional information about its content.
+     */
+    public Measure setSubtitle(String value) { 
+      if (Utilities.noString(value))
+        this.subtitle = null;
+      else {
+        if (this.subtitle == null)
+          this.subtitle = new StringType();
+        this.subtitle.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #status} (The status of this measure. Enables tracking the life-cycle of the content.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<PublicationStatus> getStatusElement() { 
@@ -2039,7 +2090,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2059,7 +2110,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public Measure setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2067,14 +2118,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public Measure setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -2084,7 +2135,58 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     */
+    public Type getSubject() { 
+      return this.subject;
+    }
+
+    /**
+     * @return {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     */
+    public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.subject;
+    }
+
+    public boolean hasSubjectCodeableConcept() { 
+      return this != null && this.subject instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     */
+    public Reference getSubjectReference() throws FHIRException { 
+      if (this.subject == null)
+        return null;
+      if (!(this.subject instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
+      return (Reference) this.subject;
+    }
+
+    public boolean hasSubjectReference() { 
+      return this != null && this.subject instanceof Reference;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     */
+    public Measure setSubject(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for Measure.subject[x]: "+value.fhirType());
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date  (and optionally time) when the measure was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -2104,7 +2206,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the measure was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public Measure setDateElement(DateTimeType value) { 
       this.date = value;
@@ -2112,14 +2214,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
+     * @return The date  (and optionally time) when the measure was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
+     * @param value The date  (and optionally time) when the measure was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.
      */
     public Measure setDate(Date value) { 
       if (value == null)
@@ -2133,7 +2235,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -2153,7 +2255,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the measure.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public Measure setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -2161,14 +2263,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the measure.
+     * @return The name of the organization or individual that published the measure.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the measure.
+     * @param value The name of the organization or individual that published the measure.
      */
     public Measure setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -2179,6 +2281,59 @@ public class Measure extends MetadataResource {
         this.publisher.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
+     */
+    public List<ContactDetail> getContact() { 
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      return this.contact;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Measure setContact(List<ContactDetail> theContact) { 
+      this.contact = theContact;
+      return this;
+    }
+
+    public boolean hasContact() { 
+      if (this.contact == null)
+        return false;
+      for (ContactDetail item : this.contact)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public ContactDetail addContact() { //3
+      ContactDetail t = new ContactDetail();
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      this.contact.add(t);
+      return t;
+    }
+
+    public Measure addContact(ContactDetail t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactDetail>();
+      this.contact.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
+     */
+    public ContactDetail getContactFirstRep() { 
+      if (getContact().isEmpty()) {
+        addContact();
+      }
+      return getContact().get(0);
     }
 
     /**
@@ -2227,226 +2382,6 @@ public class Measure extends MetadataResource {
           this.description = new MarkdownType();
         this.description.setValue(value);
       }
-      return this;
-    }
-
-    /**
-     * @return {@link #purpose} (Explaination of why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public MarkdownType getPurposeElement() { 
-      if (this.purpose == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.purpose");
-        else if (Configuration.doAutoCreate())
-          this.purpose = new MarkdownType(); // bb
-      return this.purpose;
-    }
-
-    public boolean hasPurposeElement() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    public boolean hasPurpose() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    /**
-     * @param value {@link #purpose} (Explaination of why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public Measure setPurposeElement(MarkdownType value) { 
-      this.purpose = value;
-      return this;
-    }
-
-    /**
-     * @return Explaination of why this measure is needed and why it has been designed as it has.
-     */
-    public String getPurpose() { 
-      return this.purpose == null ? null : this.purpose.getValue();
-    }
-
-    /**
-     * @param value Explaination of why this measure is needed and why it has been designed as it has.
-     */
-    public Measure setPurpose(String value) { 
-      if (value == null)
-        this.purpose = null;
-      else {
-        if (this.purpose == null)
-          this.purpose = new MarkdownType();
-        this.purpose.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #usage} (A detailed description of how the measure is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public StringType getUsageElement() { 
-      if (this.usage == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.usage");
-        else if (Configuration.doAutoCreate())
-          this.usage = new StringType(); // bb
-      return this.usage;
-    }
-
-    public boolean hasUsageElement() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    public boolean hasUsage() { 
-      return this.usage != null && !this.usage.isEmpty();
-    }
-
-    /**
-     * @param value {@link #usage} (A detailed description of how the measure is used from a clinical perspective.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
-     */
-    public Measure setUsageElement(StringType value) { 
-      this.usage = value;
-      return this;
-    }
-
-    /**
-     * @return A detailed description of how the measure is used from a clinical perspective.
-     */
-    public String getUsage() { 
-      return this.usage == null ? null : this.usage.getValue();
-    }
-
-    /**
-     * @param value A detailed description of how the measure is used from a clinical perspective.
-     */
-    public Measure setUsage(String value) { 
-      if (Utilities.noString(value))
-        this.usage = null;
-      else {
-        if (this.usage == null)
-          this.usage = new StringType();
-        this.usage.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
-     */
-    public DateType getApprovalDateElement() { 
-      if (this.approvalDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.approvalDate");
-        else if (Configuration.doAutoCreate())
-          this.approvalDate = new DateType(); // bb
-      return this.approvalDate;
-    }
-
-    public boolean hasApprovalDateElement() { 
-      return this.approvalDate != null && !this.approvalDate.isEmpty();
-    }
-
-    public boolean hasApprovalDate() { 
-      return this.approvalDate != null && !this.approvalDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
-     */
-    public Measure setApprovalDateElement(DateType value) { 
-      this.approvalDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
-     */
-    public Date getApprovalDate() { 
-      return this.approvalDate == null ? null : this.approvalDate.getValue();
-    }
-
-    /**
-     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
-     */
-    public Measure setApprovalDate(Date value) { 
-      if (value == null)
-        this.approvalDate = null;
-      else {
-        if (this.approvalDate == null)
-          this.approvalDate = new DateType();
-        this.approvalDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
-     */
-    public DateType getLastReviewDateElement() { 
-      if (this.lastReviewDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.lastReviewDate");
-        else if (Configuration.doAutoCreate())
-          this.lastReviewDate = new DateType(); // bb
-      return this.lastReviewDate;
-    }
-
-    public boolean hasLastReviewDateElement() { 
-      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
-    }
-
-    public boolean hasLastReviewDate() { 
-      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
-     */
-    public Measure setLastReviewDateElement(DateType value) { 
-      this.lastReviewDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
-     */
-    public Date getLastReviewDate() { 
-      return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
-    }
-
-    /**
-     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.
-     */
-    public Measure setLastReviewDate(Date value) { 
-      if (value == null)
-        this.lastReviewDate = null;
-      else {
-        if (this.lastReviewDate == null)
-          this.lastReviewDate = new DateType();
-        this.lastReviewDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
-     */
-    public Period getEffectivePeriod() { 
-      if (this.effectivePeriod == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.effectivePeriod");
-        else if (Configuration.doAutoCreate())
-          this.effectivePeriod = new Period(); // cc
-      return this.effectivePeriod;
-    }
-
-    public boolean hasEffectivePeriod() { 
-      return this.effectivePeriod != null && !this.effectivePeriod.isEmpty();
-    }
-
-    /**
-     * @param value {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
-     */
-    public Measure setEffectivePeriod(Period value) { 
-      this.effectivePeriod = value;
       return this;
     }
 
@@ -2557,31 +2492,276 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     * @return {@link #purpose} (Explanation of why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
-    public CodeableConcept getSubject() { 
-      if (this.subject == null)
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.subject");
+          throw new Error("Attempt to auto-create Measure.purpose");
         else if (Configuration.doAutoCreate())
-          this.subject = new CodeableConcept(); // cc
-      return this.subject;
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
     }
 
-    public boolean hasSubject() { 
-      return this.subject != null && !this.subject.isEmpty();
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
     }
 
     /**
-     * @param value {@link #subject} (The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.)
+     * @param value {@link #purpose} (Explanation of why this measure is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
-    public Measure setSubject(CodeableConcept value) { 
-      this.subject = value;
+    public Measure setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
       return this;
     }
 
     /**
-     * @return {@link #topic} (Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.)
+     * @return Explanation of why this measure is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explanation of why this measure is needed and why it has been designed as it has.
+     */
+    public Measure setPurpose(String value) { 
+      if (value == null)
+        this.purpose = null;
+      else {
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #usage} (A detailed description, from a clinical perspective, of how the measure is used.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public StringType getUsageElement() { 
+      if (this.usage == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.usage");
+        else if (Configuration.doAutoCreate())
+          this.usage = new StringType(); // bb
+      return this.usage;
+    }
+
+    public boolean hasUsageElement() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    public boolean hasUsage() { 
+      return this.usage != null && !this.usage.isEmpty();
+    }
+
+    /**
+     * @param value {@link #usage} (A detailed description, from a clinical perspective, of how the measure is used.). This is the underlying object with id, value and extensions. The accessor "getUsage" gives direct access to the value
+     */
+    public Measure setUsageElement(StringType value) { 
+      this.usage = value;
+      return this;
+    }
+
+    /**
+     * @return A detailed description, from a clinical perspective, of how the measure is used.
+     */
+    public String getUsage() { 
+      return this.usage == null ? null : this.usage.getValue();
+    }
+
+    /**
+     * @param value A detailed description, from a clinical perspective, of how the measure is used.
+     */
+    public Measure setUsage(String value) { 
+      if (Utilities.noString(value))
+        this.usage = null;
+      else {
+        if (this.usage == null)
+          this.usage = new StringType();
+        this.usage.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #copyright} (A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public MarkdownType getCopyrightElement() { 
+      if (this.copyright == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.copyright");
+        else if (Configuration.doAutoCreate())
+          this.copyright = new MarkdownType(); // bb
+      return this.copyright;
+    }
+
+    public boolean hasCopyrightElement() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    public boolean hasCopyright() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    /**
+     * @param value {@link #copyright} (A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public Measure setCopyrightElement(MarkdownType value) { 
+      this.copyright = value;
+      return this;
+    }
+
+    /**
+     * @return A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
+     */
+    public String getCopyright() { 
+      return this.copyright == null ? null : this.copyright.getValue();
+    }
+
+    /**
+     * @param value A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
+     */
+    public Measure setCopyright(String value) { 
+      if (value == null)
+        this.copyright = null;
+      else {
+        if (this.copyright == null)
+          this.copyright = new MarkdownType();
+        this.copyright.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     */
+    public DateType getApprovalDateElement() { 
+      if (this.approvalDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.approvalDate");
+        else if (Configuration.doAutoCreate())
+          this.approvalDate = new DateType(); // bb
+      return this.approvalDate;
+    }
+
+    public boolean hasApprovalDateElement() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
+    }
+
+    public boolean hasApprovalDate() { 
+      return this.approvalDate != null && !this.approvalDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #approvalDate} (The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.). This is the underlying object with id, value and extensions. The accessor "getApprovalDate" gives direct access to the value
+     */
+    public Measure setApprovalDateElement(DateType value) { 
+      this.approvalDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     */
+    public Date getApprovalDate() { 
+      return this.approvalDate == null ? null : this.approvalDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.
+     */
+    public Measure setApprovalDate(Date value) { 
+      if (value == null)
+        this.approvalDate = null;
+      else {
+        if (this.approvalDate == null)
+          this.approvalDate = new DateType();
+        this.approvalDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     */
+    public DateType getLastReviewDateElement() { 
+      if (this.lastReviewDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.lastReviewDate");
+        else if (Configuration.doAutoCreate())
+          this.lastReviewDate = new DateType(); // bb
+      return this.lastReviewDate;
+    }
+
+    public boolean hasLastReviewDateElement() { 
+      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
+    }
+
+    public boolean hasLastReviewDate() { 
+      return this.lastReviewDate != null && !this.lastReviewDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #lastReviewDate} (The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.). This is the underlying object with id, value and extensions. The accessor "getLastReviewDate" gives direct access to the value
+     */
+    public Measure setLastReviewDateElement(DateType value) { 
+      this.lastReviewDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
+     */
+    public Date getLastReviewDate() { 
+      return this.lastReviewDate == null ? null : this.lastReviewDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.
+     */
+    public Measure setLastReviewDate(Date value) { 
+      if (value == null)
+        this.lastReviewDate = null;
+      else {
+        if (this.lastReviewDate == null)
+          this.lastReviewDate = new DateType();
+        this.lastReviewDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
+     */
+    public Period getEffectivePeriod() { 
+      if (this.effectivePeriod == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Measure.effectivePeriod");
+        else if (Configuration.doAutoCreate())
+          this.effectivePeriod = new Period(); // cc
+      return this.effectivePeriod;
+    }
+
+    public boolean hasEffectivePeriod() { 
+      return this.effectivePeriod != null && !this.effectivePeriod.isEmpty();
+    }
+
+    /**
+     * @param value {@link #effectivePeriod} (The period during which the measure content was or is planned to be in active use.)
+     */
+    public Measure setEffectivePeriod(Period value) { 
+      this.effectivePeriod = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #topic} (Descriptive topics related to the content of the measure. Topics provide a high-level categorization grouping types of measures that can be useful for filtering and searching.)
      */
     public List<CodeableConcept> getTopic() { 
       if (this.topic == null)
@@ -2687,108 +2867,6 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #contact} (Contact details to assist a user in finding and communicating with the publisher.)
-     */
-    public List<ContactDetail> getContact() { 
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      return this.contact;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Measure setContact(List<ContactDetail> theContact) { 
-      this.contact = theContact;
-      return this;
-    }
-
-    public boolean hasContact() { 
-      if (this.contact == null)
-        return false;
-      for (ContactDetail item : this.contact)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public ContactDetail addContact() { //3
-      ContactDetail t = new ContactDetail();
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      this.contact.add(t);
-      return t;
-    }
-
-    public Measure addContact(ContactDetail t) { //3
-      if (t == null)
-        return this;
-      if (this.contact == null)
-        this.contact = new ArrayList<ContactDetail>();
-      this.contact.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #contact}, creating it if it does not already exist
-     */
-    public ContactDetail getContactFirstRep() { 
-      if (getContact().isEmpty()) {
-        addContact();
-      }
-      return getContact().get(0);
-    }
-
-    /**
-     * @return {@link #copyright} (A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
-     */
-    public MarkdownType getCopyrightElement() { 
-      if (this.copyright == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Measure.copyright");
-        else if (Configuration.doAutoCreate())
-          this.copyright = new MarkdownType(); // bb
-      return this.copyright;
-    }
-
-    public boolean hasCopyrightElement() { 
-      return this.copyright != null && !this.copyright.isEmpty();
-    }
-
-    public boolean hasCopyright() { 
-      return this.copyright != null && !this.copyright.isEmpty();
-    }
-
-    /**
-     * @param value {@link #copyright} (A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
-     */
-    public Measure setCopyrightElement(MarkdownType value) { 
-      this.copyright = value;
-      return this;
-    }
-
-    /**
-     * @return A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
-     */
-    public String getCopyright() { 
-      return this.copyright == null ? null : this.copyright.getValue();
-    }
-
-    /**
-     * @param value A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.
-     */
-    public Measure setCopyright(String value) { 
-      if (value == null)
-        this.copyright = null;
-      else {
-        if (this.copyright == null)
-          this.copyright = new MarkdownType();
-        this.copyright.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #relatedArtifact} (Related artifacts such as additional documentation, justification, or bibliographic references.)
      */
     public List<RelatedArtifact> getRelatedArtifact() { 
@@ -2844,16 +2922,16 @@ public class Measure extends MetadataResource {
     /**
      * @return {@link #library} (A reference to a Library resource containing the formal logic used by the measure.)
      */
-    public List<Reference> getLibrary() { 
+    public List<CanonicalType> getLibrary() { 
       if (this.library == null)
-        this.library = new ArrayList<Reference>();
+        this.library = new ArrayList<CanonicalType>();
       return this.library;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Measure setLibrary(List<Reference> theLibrary) { 
+    public Measure setLibrary(List<CanonicalType> theLibrary) { 
       this.library = theLibrary;
       return this;
     }
@@ -2861,63 +2939,49 @@ public class Measure extends MetadataResource {
     public boolean hasLibrary() { 
       if (this.library == null)
         return false;
-      for (Reference item : this.library)
+      for (CanonicalType item : this.library)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addLibrary() { //3
-      Reference t = new Reference();
+    /**
+     * @return {@link #library} (A reference to a Library resource containing the formal logic used by the measure.)
+     */
+    public CanonicalType addLibraryElement() {//2 
+      CanonicalType t = new CanonicalType();
       if (this.library == null)
-        this.library = new ArrayList<Reference>();
+        this.library = new ArrayList<CanonicalType>();
       this.library.add(t);
       return t;
     }
 
-    public Measure addLibrary(Reference t) { //3
-      if (t == null)
-        return this;
+    /**
+     * @param value {@link #library} (A reference to a Library resource containing the formal logic used by the measure.)
+     */
+    public Measure addLibrary(String value) { //1
+      CanonicalType t = new CanonicalType();
+      t.setValue(value);
       if (this.library == null)
-        this.library = new ArrayList<Reference>();
+        this.library = new ArrayList<CanonicalType>();
       this.library.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
+     * @param value {@link #library} (A reference to a Library resource containing the formal logic used by the measure.)
      */
-    public Reference getLibraryFirstRep() { 
-      if (getLibrary().isEmpty()) {
-        addLibrary();
-      }
-      return getLibrary().get(0);
+    public boolean hasLibrary(String value) { 
+      if (this.library == null)
+        return false;
+      for (CanonicalType v : this.library)
+        if (v.getValue().equals(value)) // canonical(Library)
+          return true;
+      return false;
     }
 
     /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Library> getLibraryTarget() { 
-      if (this.libraryTarget == null)
-        this.libraryTarget = new ArrayList<Library>();
-      return this.libraryTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public Library addLibraryTarget() { 
-      Library r = new Library();
-      if (this.libraryTarget == null)
-        this.libraryTarget = new ArrayList<Library>();
-      this.libraryTarget.add(r);
-      return r;
-    }
-
-    /**
-     * @return {@link #disclaimer} (Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
+     * @return {@link #disclaimer} (Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
      */
     public MarkdownType getDisclaimerElement() { 
       if (this.disclaimer == null)
@@ -2937,7 +3001,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #disclaimer} (Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
+     * @param value {@link #disclaimer} (Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.). This is the underlying object with id, value and extensions. The accessor "getDisclaimer" gives direct access to the value
      */
     public Measure setDisclaimerElement(MarkdownType value) { 
       this.disclaimer = value;
@@ -2945,14 +3009,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
+     * @return Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.
      */
     public String getDisclaimer() { 
       return this.disclaimer == null ? null : this.disclaimer.getValue();
     }
 
     /**
-     * @param value Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.
+     * @param value Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.
      */
     public Measure setDisclaimer(String value) { 
       if (value == null)
@@ -2966,7 +3030,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
+     * @return {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous-variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
      */
     public CodeableConcept getScoring() { 
       if (this.scoring == null)
@@ -2982,7 +3046,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
+     * @param value {@link #scoring} (Indicates how the calculation is performed for the measure, including proportion, ratio, continuous-variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.)
      */
     public Measure setScoring(CodeableConcept value) { 
       this.scoring = value;
@@ -3165,7 +3229,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #rationale} (Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
+     * @return {@link #rationale} (Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
      */
     public MarkdownType getRationaleElement() { 
       if (this.rationale == null)
@@ -3185,7 +3249,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #rationale} (Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
+     * @param value {@link #rationale} (Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.). This is the underlying object with id, value and extensions. The accessor "getRationale" gives direct access to the value
      */
     public Measure setRationaleElement(MarkdownType value) { 
       this.rationale = value;
@@ -3193,14 +3257,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
+     * @return Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
     public String getRationale() { 
       return this.rationale == null ? null : this.rationale.getValue();
     }
 
     /**
-     * @param value Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
+     * @param value Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.
      */
     public Measure setRationale(String value) { 
       if (value == null)
@@ -3263,7 +3327,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @return {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
      */
     public StringType getImprovementNotationElement() { 
       if (this.improvementNotation == null)
@@ -3283,7 +3347,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @param value {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
      */
     public Measure setImprovementNotationElement(StringType value) { 
       this.improvementNotation = value;
@@ -3291,14 +3355,14 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
+     * @return Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
      */
     public String getImprovementNotation() { 
       return this.improvementNotation == null ? null : this.improvementNotation.getValue();
     }
 
     /**
-     * @param value Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).
+     * @param value Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
      */
     public Measure setImprovementNotation(String value) { 
       if (Utilities.noString(value))
@@ -3367,7 +3431,7 @@ public class Measure extends MetadataResource {
       if (this.definition == null)
         return false;
       for (MarkdownType v : this.definition)
-        if (v.equals(value)) // markdown
+        if (v.getValue().equals(value)) // markdown
           return true;
       return false;
     }
@@ -3578,39 +3642,40 @@ public class Measure extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this measure is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, 1, title));
+        children.add(new Property("subtitle", "string", "An explanatory or alternate title for the measure giving additional information about its content.", 0, 1, subtitle));
         children.add(new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the measure.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("purpose", "markdown", "Explaination of why this measure is needed and why it has been designed as it has.", 0, 1, purpose));
-        children.add(new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, 1, usage));
-        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
-        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate));
-        children.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("subject", "CodeableConcept", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject));
-        children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
-        children.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
-        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("purpose", "markdown", "Explanation of why this measure is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("usage", "string", "A detailed description, from a clinical perspective, of how the measure is used.", 0, 1, usage));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, 1, copyright));
+        children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
+        children.add(new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.", 0, 1, lastReviewDate));
+        children.add(new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod));
+        children.add(new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization grouping types of measures that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic));
+        children.add(new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
-        children.add(new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
-        children.add(new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.", 0, 1, disclaimer));
-        children.add(new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, 1, scoring));
+        children.add(new Property("library", "canonical(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library));
+        children.add(new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.", 0, 1, disclaimer));
+        children.add(new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous-variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, 1, scoring));
         children.add(new Property("compositeScoring", "CodeableConcept", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, 1, compositeScoring));
         children.add(new Property("type", "CodeableConcept", "Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, 1, riskAdjustment));
         children.add(new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, 1, rateAggregation));
-        children.add(new Property("rationale", "markdown", "Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale));
+        children.add(new Property("rationale", "markdown", "Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale));
         children.add(new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, 1, clinicalRecommendationStatement));
-        children.add(new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).", 0, 1, improvementNotation));
+        children.add(new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).", 0, 1, improvementNotation));
         children.add(new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition));
         children.add(new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, 1, guidance));
         children.add(new Property("set", "string", "The measure set, e.g. Preventive Care and Screening.", 0, 1, set));
@@ -3621,39 +3686,43 @@ public class Measure extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this measure is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this measure when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this measure is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this measure when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the measure when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the measure author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. To provide a version consistent with the Decision Support Service specification, use the format Major.Minor.Revision (e.g. 1.0.0). For more information on versioning knowledge assets, refer to the Decision Support Service specification. Note that a version is required for non-experimental active artifacts.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the measure. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the measure.", 0, 1, title);
+        case -2060497896: /*subtitle*/  return new Property("subtitle", "string", "An explanatory or alternate title for the measure giving additional information about its content.", 0, 1, subtitle);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this measure. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the measure.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this measure is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case -573640748: /*subject[x]*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject);
+        case -1257122603: /*subjectCodeableConcept*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject);
+        case 772938623: /*subjectReference*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the measure was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the measure changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the measure.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, 1, description);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this measure is needed and why it has been designed as it has.", 0, 1, purpose);
-        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the measure is used from a clinical perspective.", 0, 1, usage);
-        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
-        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval, but doesn't change the original approval date.", 0, 1, lastReviewDate);
-        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -1867885268: /*subject*/  return new Property("subject", "CodeableConcept", "The intended subjects for the measure. If this element is not provided, a Patient subject is assumed, but the subject of the measure can be anything.", 0, 1, subject);
-        case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization of the type of the measure that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
-        case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
-        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this measure is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description, from a clinical perspective, of how the measure is used.", 0, 1, usage);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the measure and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the measure.", 0, 1, copyright);
+        case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);
+        case -1687512484: /*lastReviewDate*/  return new Property("lastReviewDate", "date", "The date on which the resource content was last reviewed. Review happens periodically after approval but does not change the original approval date.", 0, 1, lastReviewDate);
+        case -403934648: /*effectivePeriod*/  return new Property("effectivePeriod", "Period", "The period during which the measure content was or is planned to be in active use.", 0, 1, effectivePeriod);
+        case 110546223: /*topic*/  return new Property("topic", "CodeableConcept", "Descriptive topics related to the content of the measure. Topics provide a high-level categorization grouping types of measures that can be useful for filtering and searching.", 0, java.lang.Integer.MAX_VALUE, topic);
+        case -1895276325: /*contributor*/  return new Property("contributor", "Contributor", "A contributor to the content of the measure, including authors, editors, reviewers, and endorsers.", 0, java.lang.Integer.MAX_VALUE, contributor);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Related artifacts such as additional documentation, justification, or bibliographic references.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
-        case 166208699: /*library*/  return new Property("library", "Reference(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library);
-        case 432371099: /*disclaimer*/  return new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure, or related to intellectual property (such as code systems) referenced by the measure.", 0, 1, disclaimer);
-        case 1924005583: /*scoring*/  return new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, 1, scoring);
+        case 166208699: /*library*/  return new Property("library", "canonical(Library)", "A reference to a Library resource containing the formal logic used by the measure.", 0, java.lang.Integer.MAX_VALUE, library);
+        case 432371099: /*disclaimer*/  return new Property("disclaimer", "markdown", "Notices and disclaimers regarding the use of the measure or related to intellectual property (such as code systems) referenced by the measure.", 0, 1, disclaimer);
+        case 1924005583: /*scoring*/  return new Property("scoring", "CodeableConcept", "Indicates how the calculation is performed for the measure, including proportion, ratio, continuous-variable, and cohort. The value set is extensible, allowing additional measure scoring types to be represented.", 0, 1, scoring);
         case 569347656: /*compositeScoring*/  return new Property("compositeScoring", "CodeableConcept", "If this is a composite measure, the scoring method used to combine the component measures to determine the composite score.", 0, 1, compositeScoring);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates whether the measure is used to examine a process, an outcome over time, a patient-reported outcome, or a structure measure such as utilization.", 0, java.lang.Integer.MAX_VALUE, type);
         case 93273500: /*riskAdjustment*/  return new Property("riskAdjustment", "string", "A description of the risk adjustment factors that may impact the resulting score for the measure and how they may be accounted for when computing and reporting measure results.", 0, 1, riskAdjustment);
         case 1254503906: /*rateAggregation*/  return new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, 1, rateAggregation);
-        case 345689335: /*rationale*/  return new Property("rationale", "markdown", "Provides a succint statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale);
+        case 345689335: /*rationale*/  return new Property("rationale", "markdown", "Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale);
         case -18631389: /*clinicalRecommendationStatement*/  return new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, 1, clinicalRecommendationStatement);
-        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is whthin a range).", 0, 1, improvementNotation);
+        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "string", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).", 0, 1, improvementNotation);
         case -1014418093: /*definition*/  return new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition);
         case -1314002088: /*guidance*/  return new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, 1, guidance);
         case 113762: /*set*/  return new Property("set", "string", "The measure set, e.g. Preventive Care and Screening.", 0, 1, set);
@@ -3672,25 +3741,26 @@ public class Measure extends MetadataResource {
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
+        case -2060497896: /*subtitle*/ return this.subtitle == null ? new Base[0] : new Base[] {this.subtitle}; // StringType
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PublicationStatus>
         case -404562712: /*experimental*/ return this.experimental == null ? new Base[0] : new Base[] {this.experimental}; // BooleanType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Type
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
+        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
+        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // StringType
+        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 223539345: /*approvalDate*/ return this.approvalDate == null ? new Base[0] : new Base[] {this.approvalDate}; // DateType
         case -1687512484: /*lastReviewDate*/ return this.lastReviewDate == null ? new Base[0] : new Base[] {this.lastReviewDate}; // DateType
         case -403934648: /*effectivePeriod*/ return this.effectivePeriod == null ? new Base[0] : new Base[] {this.effectivePeriod}; // Period
-        case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
-        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
-        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // CodeableConcept
         case 110546223: /*topic*/ return this.topic == null ? new Base[0] : this.topic.toArray(new Base[this.topic.size()]); // CodeableConcept
         case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Contributor
-        case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
-        case 1522889671: /*copyright*/ return this.copyright == null ? new Base[0] : new Base[] {this.copyright}; // MarkdownType
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
-        case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // Reference
+        case 166208699: /*library*/ return this.library == null ? new Base[0] : this.library.toArray(new Base[this.library.size()]); // CanonicalType
         case 432371099: /*disclaimer*/ return this.disclaimer == null ? new Base[0] : new Base[] {this.disclaimer}; // MarkdownType
         case 1924005583: /*scoring*/ return this.scoring == null ? new Base[0] : new Base[] {this.scoring}; // CodeableConcept
         case 569347656: /*compositeScoring*/ return this.compositeScoring == null ? new Base[0] : new Base[] {this.compositeScoring}; // CodeableConcept
@@ -3728,6 +3798,9 @@ public class Measure extends MetadataResource {
         case 110371416: // title
           this.title = castToString(value); // StringType
           return value;
+        case -2060497896: // subtitle
+          this.subtitle = castToString(value); // StringType
+          return value;
         case -892481550: // status
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
@@ -3735,20 +3808,35 @@ public class Measure extends MetadataResource {
         case -404562712: // experimental
           this.experimental = castToBoolean(value); // BooleanType
           return value;
+        case -1867885268: // subject
+          this.subject = castToType(value); // Type
+          return value;
         case 3076014: // date
           this.date = castToDateTime(value); // DateTimeType
           return value;
         case 1447404028: // publisher
           this.publisher = castToString(value); // StringType
           return value;
+        case 951526432: // contact
+          this.getContact().add(castToContactDetail(value)); // ContactDetail
+          return value;
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
+          return value;
+        case -669707736: // useContext
+          this.getUseContext().add(castToUsageContext(value)); // UsageContext
+          return value;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -220463842: // purpose
           this.purpose = castToMarkdown(value); // MarkdownType
           return value;
         case 111574433: // usage
           this.usage = castToString(value); // StringType
+          return value;
+        case 1522889671: // copyright
+          this.copyright = castToMarkdown(value); // MarkdownType
           return value;
         case 223539345: // approvalDate
           this.approvalDate = castToDate(value); // DateType
@@ -3759,32 +3847,17 @@ public class Measure extends MetadataResource {
         case -403934648: // effectivePeriod
           this.effectivePeriod = castToPeriod(value); // Period
           return value;
-        case -669707736: // useContext
-          this.getUseContext().add(castToUsageContext(value)); // UsageContext
-          return value;
-        case -507075711: // jurisdiction
-          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
-          return value;
-        case -1867885268: // subject
-          this.subject = castToCodeableConcept(value); // CodeableConcept
-          return value;
         case 110546223: // topic
           this.getTopic().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1895276325: // contributor
           this.getContributor().add(castToContributor(value)); // Contributor
           return value;
-        case 951526432: // contact
-          this.getContact().add(castToContactDetail(value)); // ContactDetail
-          return value;
-        case 1522889671: // copyright
-          this.copyright = castToMarkdown(value); // MarkdownType
-          return value;
         case 666807069: // relatedArtifact
           this.getRelatedArtifact().add(castToRelatedArtifact(value)); // RelatedArtifact
           return value;
         case 166208699: // library
-          this.getLibrary().add(castToReference(value)); // Reference
+          this.getLibrary().add(castToCanonical(value)); // CanonicalType
           return value;
         case 432371099: // disclaimer
           this.disclaimer = castToMarkdown(value); // MarkdownType
@@ -3845,45 +3918,47 @@ public class Measure extends MetadataResource {
           this.name = castToString(value); // StringType
         } else if (name.equals("title")) {
           this.title = castToString(value); // StringType
+        } else if (name.equals("subtitle")) {
+          this.subtitle = castToString(value); // StringType
         } else if (name.equals("status")) {
           value = new PublicationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<PublicationStatus>
         } else if (name.equals("experimental")) {
           this.experimental = castToBoolean(value); // BooleanType
+        } else if (name.equals("subject[x]")) {
+          this.subject = castToType(value); // Type
         } else if (name.equals("date")) {
           this.date = castToDateTime(value); // DateTimeType
         } else if (name.equals("publisher")) {
           this.publisher = castToString(value); // StringType
+        } else if (name.equals("contact")) {
+          this.getContact().add(castToContactDetail(value));
         } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
+        } else if (name.equals("useContext")) {
+          this.getUseContext().add(castToUsageContext(value));
+        } else if (name.equals("jurisdiction")) {
+          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("purpose")) {
           this.purpose = castToMarkdown(value); // MarkdownType
         } else if (name.equals("usage")) {
           this.usage = castToString(value); // StringType
+        } else if (name.equals("copyright")) {
+          this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("approvalDate")) {
           this.approvalDate = castToDate(value); // DateType
         } else if (name.equals("lastReviewDate")) {
           this.lastReviewDate = castToDate(value); // DateType
         } else if (name.equals("effectivePeriod")) {
           this.effectivePeriod = castToPeriod(value); // Period
-        } else if (name.equals("useContext")) {
-          this.getUseContext().add(castToUsageContext(value));
-        } else if (name.equals("jurisdiction")) {
-          this.getJurisdiction().add(castToCodeableConcept(value));
-        } else if (name.equals("subject")) {
-          this.subject = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("topic")) {
           this.getTopic().add(castToCodeableConcept(value));
         } else if (name.equals("contributor")) {
           this.getContributor().add(castToContributor(value));
-        } else if (name.equals("contact")) {
-          this.getContact().add(castToContactDetail(value));
-        } else if (name.equals("copyright")) {
-          this.copyright = castToMarkdown(value); // MarkdownType
         } else if (name.equals("relatedArtifact")) {
           this.getRelatedArtifact().add(castToRelatedArtifact(value));
         } else if (name.equals("library")) {
-          this.getLibrary().add(castToReference(value));
+          this.getLibrary().add(castToCanonical(value));
         } else if (name.equals("disclaimer")) {
           this.disclaimer = castToMarkdown(value); // MarkdownType
         } else if (name.equals("scoring")) {
@@ -3925,25 +4000,27 @@ public class Measure extends MetadataResource {
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
         case 110371416:  return getTitleElement();
+        case -2060497896:  return getSubtitleElement();
         case -892481550:  return getStatusElement();
         case -404562712:  return getExperimentalElement();
+        case -573640748:  return getSubject(); 
+        case -1867885268:  return getSubject(); 
         case 3076014:  return getDateElement();
         case 1447404028:  return getPublisherElement();
+        case 951526432:  return addContact(); 
         case -1724546052:  return getDescriptionElement();
+        case -669707736:  return addUseContext(); 
+        case -507075711:  return addJurisdiction(); 
         case -220463842:  return getPurposeElement();
         case 111574433:  return getUsageElement();
+        case 1522889671:  return getCopyrightElement();
         case 223539345:  return getApprovalDateElement();
         case -1687512484:  return getLastReviewDateElement();
         case -403934648:  return getEffectivePeriod(); 
-        case -669707736:  return addUseContext(); 
-        case -507075711:  return addJurisdiction(); 
-        case -1867885268:  return getSubject(); 
         case 110546223:  return addTopic(); 
         case -1895276325:  return addContributor(); 
-        case 951526432:  return addContact(); 
-        case 1522889671:  return getCopyrightElement();
         case 666807069:  return addRelatedArtifact(); 
-        case 166208699:  return addLibrary(); 
+        case 166208699:  return addLibraryElement();
         case 432371099:  return getDisclaimerElement();
         case 1924005583:  return getScoring(); 
         case 569347656:  return getCompositeScoring(); 
@@ -3971,25 +4048,26 @@ public class Measure extends MetadataResource {
         case 351608024: /*version*/ return new String[] {"string"};
         case 3373707: /*name*/ return new String[] {"string"};
         case 110371416: /*title*/ return new String[] {"string"};
+        case -2060497896: /*subtitle*/ return new String[] {"string"};
         case -892481550: /*status*/ return new String[] {"code"};
         case -404562712: /*experimental*/ return new String[] {"boolean"};
+        case -1867885268: /*subject*/ return new String[] {"CodeableConcept", "Reference"};
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case 1447404028: /*publisher*/ return new String[] {"string"};
+        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
         case -1724546052: /*description*/ return new String[] {"markdown"};
+        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 111574433: /*usage*/ return new String[] {"string"};
+        case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 223539345: /*approvalDate*/ return new String[] {"date"};
         case -1687512484: /*lastReviewDate*/ return new String[] {"date"};
         case -403934648: /*effectivePeriod*/ return new String[] {"Period"};
-        case -669707736: /*useContext*/ return new String[] {"UsageContext"};
-        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
-        case -1867885268: /*subject*/ return new String[] {"CodeableConcept"};
         case 110546223: /*topic*/ return new String[] {"CodeableConcept"};
         case -1895276325: /*contributor*/ return new String[] {"Contributor"};
-        case 951526432: /*contact*/ return new String[] {"ContactDetail"};
-        case 1522889671: /*copyright*/ return new String[] {"markdown"};
         case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
-        case 166208699: /*library*/ return new String[] {"Reference"};
+        case 166208699: /*library*/ return new String[] {"canonical"};
         case 432371099: /*disclaimer*/ return new String[] {"markdown"};
         case 1924005583: /*scoring*/ return new String[] {"CodeableConcept"};
         case 569347656: /*compositeScoring*/ return new String[] {"CodeableConcept"};
@@ -4026,11 +4104,22 @@ public class Measure extends MetadataResource {
         else if (name.equals("title")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.title");
         }
+        else if (name.equals("subtitle")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.subtitle");
+        }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.status");
         }
         else if (name.equals("experimental")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.experimental");
+        }
+        else if (name.equals("subjectCodeableConcept")) {
+          this.subject = new CodeableConcept();
+          return this.subject;
+        }
+        else if (name.equals("subjectReference")) {
+          this.subject = new Reference();
+          return this.subject;
         }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.date");
@@ -4038,14 +4127,26 @@ public class Measure extends MetadataResource {
         else if (name.equals("publisher")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.publisher");
         }
+        else if (name.equals("contact")) {
+          return addContact();
+        }
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
+        }
+        else if (name.equals("useContext")) {
+          return addUseContext();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
         }
         else if (name.equals("purpose")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.purpose");
         }
         else if (name.equals("usage")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.usage");
+        }
+        else if (name.equals("copyright")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.copyright");
         }
         else if (name.equals("approvalDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.approvalDate");
@@ -4057,33 +4158,17 @@ public class Measure extends MetadataResource {
           this.effectivePeriod = new Period();
           return this.effectivePeriod;
         }
-        else if (name.equals("useContext")) {
-          return addUseContext();
-        }
-        else if (name.equals("jurisdiction")) {
-          return addJurisdiction();
-        }
-        else if (name.equals("subject")) {
-          this.subject = new CodeableConcept();
-          return this.subject;
-        }
         else if (name.equals("topic")) {
           return addTopic();
         }
         else if (name.equals("contributor")) {
           return addContributor();
         }
-        else if (name.equals("contact")) {
-          return addContact();
-        }
-        else if (name.equals("copyright")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.copyright");
-        }
         else if (name.equals("relatedArtifact")) {
           return addRelatedArtifact();
         }
         else if (name.equals("library")) {
-          return addLibrary();
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.library");
         }
         else if (name.equals("disclaimer")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.disclaimer");
@@ -4150,16 +4235,18 @@ public class Measure extends MetadataResource {
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
+        dst.subtitle = subtitle == null ? null : subtitle.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
+        dst.subject = subject == null ? null : subject.copy();
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
+        if (contact != null) {
+          dst.contact = new ArrayList<ContactDetail>();
+          for (ContactDetail i : contact)
+            dst.contact.add(i.copy());
+        };
         dst.description = description == null ? null : description.copy();
-        dst.purpose = purpose == null ? null : purpose.copy();
-        dst.usage = usage == null ? null : usage.copy();
-        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
-        dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
-        dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
@@ -4170,7 +4257,12 @@ public class Measure extends MetadataResource {
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
         };
-        dst.subject = subject == null ? null : subject.copy();
+        dst.purpose = purpose == null ? null : purpose.copy();
+        dst.usage = usage == null ? null : usage.copy();
+        dst.copyright = copyright == null ? null : copyright.copy();
+        dst.approvalDate = approvalDate == null ? null : approvalDate.copy();
+        dst.lastReviewDate = lastReviewDate == null ? null : lastReviewDate.copy();
+        dst.effectivePeriod = effectivePeriod == null ? null : effectivePeriod.copy();
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
@@ -4181,20 +4273,14 @@ public class Measure extends MetadataResource {
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
         };
-        if (contact != null) {
-          dst.contact = new ArrayList<ContactDetail>();
-          for (ContactDetail i : contact)
-            dst.contact.add(i.copy());
-        };
-        dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
         };
         if (library != null) {
-          dst.library = new ArrayList<Reference>();
-          for (Reference i : library)
+          dst.library = new ArrayList<CanonicalType>();
+          for (CanonicalType i : library)
             dst.library.add(i.copy());
         };
         dst.disclaimer = disclaimer == null ? null : disclaimer.copy();
@@ -4241,10 +4327,10 @@ public class Measure extends MetadataResource {
         if (!(other_ instanceof Measure))
           return false;
         Measure o = (Measure) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(subtitle, o.subtitle, true) && compareDeep(subject, o.subject, true)
+           && compareDeep(purpose, o.purpose, true) && compareDeep(usage, o.usage, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(approvalDate, o.approvalDate, true) && compareDeep(lastReviewDate, o.lastReviewDate, true)
-           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true) && compareDeep(copyright, o.copyright, true)
+           && compareDeep(effectivePeriod, o.effectivePeriod, true) && compareDeep(topic, o.topic, true) && compareDeep(contributor, o.contributor, true)
            && compareDeep(relatedArtifact, o.relatedArtifact, true) && compareDeep(library, o.library, true)
            && compareDeep(disclaimer, o.disclaimer, true) && compareDeep(scoring, o.scoring, true) && compareDeep(compositeScoring, o.compositeScoring, true)
            && compareDeep(type, o.type, true) && compareDeep(riskAdjustment, o.riskAdjustment, true) && compareDeep(rateAggregation, o.rateAggregation, true)
@@ -4261,21 +4347,21 @@ public class Measure extends MetadataResource {
         if (!(other_ instanceof Measure))
           return false;
         Measure o = (Measure) other_;
-        return compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true) && compareValues(approvalDate, o.approvalDate, true)
-           && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(copyright, o.copyright, true)
-           && compareValues(disclaimer, o.disclaimer, true) && compareValues(riskAdjustment, o.riskAdjustment, true)
-           && compareValues(rateAggregation, o.rateAggregation, true) && compareValues(rationale, o.rationale, true)
-           && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true) && compareValues(improvementNotation, o.improvementNotation, true)
-           && compareValues(definition, o.definition, true) && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true)
-          ;
+        return compareValues(subtitle, o.subtitle, true) && compareValues(purpose, o.purpose, true) && compareValues(usage, o.usage, true)
+           && compareValues(copyright, o.copyright, true) && compareValues(approvalDate, o.approvalDate, true)
+           && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(disclaimer, o.disclaimer, true)
+           && compareValues(riskAdjustment, o.riskAdjustment, true) && compareValues(rateAggregation, o.rateAggregation, true)
+           && compareValues(rationale, o.rationale, true) && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
+           && compareValues(improvementNotation, o.improvementNotation, true) && compareValues(definition, o.definition, true)
+           && compareValues(guidance, o.guidance, true) && compareValues(set, o.set, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, usage
-          , approvalDate, lastReviewDate, effectivePeriod, subject, topic, contributor, copyright
-          , relatedArtifact, library, disclaimer, scoring, compositeScoring, type, riskAdjustment
-          , rateAggregation, rationale, clinicalRecommendationStatement, improvementNotation, definition
-          , guidance, set, group, supplementalData);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subtitle, subject
+          , purpose, usage, copyright, approvalDate, lastReviewDate, effectivePeriod, topic
+          , contributor, relatedArtifact, library, disclaimer, scoring, compositeScoring, type
+          , riskAdjustment, rateAggregation, rationale, clinicalRecommendationStatement, improvementNotation
+          , definition, guidance, set, group, supplementalData);
       }
 
   @Override
@@ -4555,7 +4641,7 @@ public class Measure extends MetadataResource {
    * Path: <b>Measure.relatedArtifact.resource, Measure.library</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="depends-on", path="Measure.relatedArtifact.where(type='depends-on').resource | Measure.library", description="What resource is being referenced", type="reference" )
+  @SearchParamDefinition(name="depends-on", path="Measure.relatedArtifact.where(type='depends-on').resource | Measure.library", description="What resource is being referenced", type="reference", target={Library.class } )
   public static final String SP_DEPENDS_ON = "depends-on";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>depends-on</b>
@@ -4616,17 +4702,17 @@ public class Measure extends MetadataResource {
  /**
    * Search parameter: <b>topic</b>
    * <p>
-   * Description: <b>Topics associated with the module</b><br>
+   * Description: <b>Topics associated with the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.topic</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="topic", path="Measure.topic", description="Topics associated with the module", type="token" )
+  @SearchParamDefinition(name="topic", path="Measure.topic", description="Topics associated with the measure", type="token" )
   public static final String SP_TOPIC = "topic";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>topic</b>
    * <p>
-   * Description: <b>Topics associated with the module</b><br>
+   * Description: <b>Topics associated with the measure</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Measure.topic</b><br>
    * </p>
