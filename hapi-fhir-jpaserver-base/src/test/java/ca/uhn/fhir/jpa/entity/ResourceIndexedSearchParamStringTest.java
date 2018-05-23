@@ -25,7 +25,7 @@ public class ResourceIndexedSearchParamStringTest {
 		assertEquals(6598082761639188617L, token.getHashNormalizedPrefix().longValue());
 
 		// Should be different from testHashFunctions()
-		assertEquals(-1970227166134682431L, token.getHashExact().longValue());
+		assertEquals(7045214018927566109L, token.getHashExact().longValue());
 	}
 
 }

@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -281,36 +282,51 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		public void run() {
 			TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 			txTemplate.afterPropertiesSet();
-			Throwable reindexFailure = txTemplate.execute(new TransactionCallback<Throwable>() {
-				@Override
-				public Throwable doInTransaction(TransactionStatus theStatus) {
-					ResourceTable resourceTable = myResourceTableDao.findOne(myNextId);
 
-					try {
-						/*
-						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
-						 */
-						ForcedId forcedId = resourceTable.getForcedId();
-						if (forcedId != null) {
-							if (isBlank(forcedId.getResourceType())) {
-								ourLog.info("Updating resource {} forcedId type to {}", forcedId.getForcedId(), resourceTable.getResourceType());
-								forcedId.setResourceType(resourceTable.getResourceType());
-								myForcedIdDao.save(forcedId);
+			Throwable reindexFailure;
+			try {
+				reindexFailure = txTemplate.execute(new TransactionCallback<Throwable>() {
+					@Override
+					public Throwable doInTransaction(TransactionStatus theStatus) {
+						ResourceTable resourceTable = myResourceTableDao.findOne(myNextId);
+
+						try {
+							/*
+							 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
+							 */
+							ForcedId forcedId = resourceTable.getForcedId();
+							if (forcedId != null) {
+								if (isBlank(forcedId.getResourceType())) {
+									ourLog.info("Updating resource {} forcedId type to {}", forcedId.getForcedId(), resourceTable.getResourceType());
+									forcedId.setResourceType(resourceTable.getResourceType());
+									myForcedIdDao.save(forcedId);
+								}
 							}
+
+							final IBaseResource resource = toResource(resourceTable, false);
+
+							@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDao(resource.getClass());
+							dao.reindex(resource, resourceTable);
+							return null;
+
+						} catch (Exception e) {
+							ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e.toString(), e);
+							theStatus.setRollbackOnly();
+							return e;
 						}
-
-						final IBaseResource resource = toResource(resourceTable, false);
-
-						@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDao(resource.getClass());
-						dao.reindex(resource, resourceTable);
-						return null;
-
-					} catch (Exception e) {
-						ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e.toString(), e);
-						return e;
 					}
-				}
-			});
+				});
+			} catch (ResourceVersionConflictException e) {
+				/*
+				 * We reindex in multiple threads, so it's technically possible that two threads try
+				 * to index resources that cause a constraint error now (i.e. because a unique index has been
+				 * added that didn't previously exist). In this case, one of the threads would succeed and
+				 * not get this error, so we'll let the other one fail and try
+				 * again later.
+				 */
+				ourLog.info("Failed to reindex {} because of a version conflict. Leaving in unindexed state: {}", e.getMessage());
+				reindexFailure = null;
+			}
 
 			if (reindexFailure != null) {
 				txTemplate.execute(new TransactionCallbackWithoutResult() {

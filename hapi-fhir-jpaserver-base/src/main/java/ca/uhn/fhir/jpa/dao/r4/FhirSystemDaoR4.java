@@ -603,13 +603,6 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
 	}
 
-	private IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		IFhirResourceDao<? extends IBaseResource> retVal = getDao(theClass);
-		if (retVal == null) {
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName());
-		}
-		return retVal;
-	}
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {

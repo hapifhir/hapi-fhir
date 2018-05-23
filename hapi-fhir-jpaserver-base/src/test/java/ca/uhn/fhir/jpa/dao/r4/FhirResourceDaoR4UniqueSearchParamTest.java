@@ -29,8 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -465,7 +464,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
-		assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+		assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
 		assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
 	}

@@ -98,6 +98,7 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -704,6 +705,27 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
+		Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> resourceTypeToDao = getDaos();
+		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) resourceTypeToDao.get(theType);
+		return dao;
+	}
+
+	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
+		IFhirResourceDao<? extends IBaseResource> retVal = getDao(theClass);
+		if (retVal == null) {
+			List<String> supportedResourceTypes = getDaos()
+				.keySet()
+				.stream()
+				.map(t->myContext.getResourceDefinition(t).getName())
+				.sorted()
+				.collect(Collectors.toList());
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName() + " - Can handle: " + supportedResourceTypes);
+		}
+		return retVal;
+	}
+
+
+	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> getDaos() {
 		if (myResourceTypeToDao == null) {
 			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
 			Map<String, IFhirResourceDao> daos = myApplicationContext.getBeansOfType(IFhirResourceDao.class, false, false);
@@ -719,8 +741,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			myResourceTypeToDao = theResourceTypeToDao;
 		}
 
-		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
-		return dao;
+		return Collections.unmodifiableMap(myResourceTypeToDao);
 	}
 
 
@@ -1227,9 +1248,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				case JSON:
 					bytes = encoded.getBytes(Charsets.UTF_8);
 					break;
-				default:
 				case JSONC:
 					bytes = GZipUtil.compress(encoded);
+					break;
+				default:
+				case DEL:
+					bytes = new byte[0];
 					break;
 			}
 
