@@ -35,13 +35,14 @@ public class ReindexController implements IReindexController {
 	 */
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
 	@Transactional(propagation = Propagation.NEVER)
+	@Override
 	public void performReindexingPass() {
 		if (myDaoConfig.isSchedulingDisabled()) {
 			return;
 		}
 
 		synchronized (this) {
-			if (myDontReindexUntil == null && myDontReindexUntil > System.currentTimeMillis()) {
+			if (myDontReindexUntil != null && myDontReindexUntil > System.currentTimeMillis()) {
 				return;
 			}
 		}

@@ -134,9 +134,13 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
 		for (String next : theValues) {
-			next = UrlUtil.escapeUrlParam(next);
-			byte[] bytes = next.getBytes(Charsets.UTF_8);
-			hasher.putBytes(bytes);
+			if (next == null) {
+				hasher.putByte((byte) 0);
+			} else {
+				next = UrlUtil.escapeUrlParam(next);
+				byte[] bytes = next.getBytes(Charsets.UTF_8);
+				hasher.putBytes(bytes);
+			}
 			hasher.putBytes(DELIMITER_BYTES);
 		}
 

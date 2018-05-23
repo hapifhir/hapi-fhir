@@ -12,6 +12,7 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
+						<li>Commons-Lang3 (All): 3.6 -&gt; 3.7</li>
 						<li>Hibernate (JPA): 5.2.12.Final -&gt; 5.2.16.Final</li>
 						<li>Javassist (JPA): 3.20.0-GA -&gt; 3.22.0-GA</li>
 					</ul>
@@ -243,7 +244,9 @@
 			<action type="add">
 				The JPA server automatic reindexing process has been tweaked so that it no
 				longer runs once per minute (this was a heavy strain on large databases)
-				but will instead run once an hour unless triggered for some reason.
+				but will instead run once an hour unless triggered for some reason. In addition,
+				the number of threads allocated to reindexing may now be adjusted via a
+				setting in the DaoConfig.
 			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">

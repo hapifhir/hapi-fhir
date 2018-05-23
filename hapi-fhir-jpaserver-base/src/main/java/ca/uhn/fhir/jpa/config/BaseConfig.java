@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.util.ReindexController;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -51,7 +50,6 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Resource;
 
 @Configuration
 @EnableScheduling
@@ -62,8 +60,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	@Autowired
 	protected Environment myEnv;
-	@Resource
-	private ApplicationContext myAppCtx;
 
 	@Override
 	public void configureTasks(@Nonnull ScheduledTaskRegistrar theTaskRegistrar) {
@@ -94,12 +90,12 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean
-	public HibernateJpaDialect hibernateJpaDialectIntance() {
+	public HibernateJpaDialect hibernateJpaDialectInstance() {
 		return new HibernateJpaDialect();
 	}
 
 	@Bean
-	private IReindexController reindexController() {
+	public IReindexController reindexController() {
 		return new ReindexController();
 	}
 
