@@ -66,6 +66,7 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 		return retVal;
 	}
 
+	@Override
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();

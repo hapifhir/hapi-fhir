@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,6 @@ import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
 
-//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_TOKEN", indexes = {
@@ -40,12 +39,12 @@ import javax.persistence.*;
 	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_TOKEN_RESID", columnList = "RES_ID")
 })
-//@formatter:on
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 200;
 
 	private static final long serialVersionUID = 1L;
+
 	@Field()
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	public String mySystem;
@@ -57,14 +56,56 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_SYS", nullable = true)
+	private Long myHashSystem;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_SYS_AND_VALUE", nullable = true)
+	private Long myHashSystemAndValue;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_VALUE", nullable = true)
+	private Long myHashValue;
 
+
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamToken() {
+		super();
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamToken(String theName, String theSystem, String theValue) {
+		super();
 		setParamName(theName);
 		setSystem(theSystem);
 		setValue(theValue);
+	}
+
+
+	@PrePersist
+	public void calculateHashes() {
+		if (myHashSystem == null) {
+			setHashSystem(hash(getResourceType(), getParamName(), getSystem()));
+			setHashSystemAndValue(hash(getResourceType(), getParamName(), getSystem(), getValue()));
+			setHashValue(hash(getResourceType(), getParamName(), getValue()));
+		}
+	}
+
+
+	@Override
+	protected void clearHashes() {
+		myHashSystem = null;
+		myHashSystemAndValue = null;
+		myHashValue = null;
 	}
 
 	@Override
@@ -84,7 +125,38 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getResource(), obj.getResource());
 		b.append(getSystem(), obj.getSystem());
 		b.append(getValue(), obj.getValue());
+		b.append(getHashSystem(), obj.getHashSystem());
+		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
+		b.append(getHashValue(), obj.getHashValue());
 		return b.isEquals();
+	}
+
+	public Long getHashSystem() {
+		calculateHashes();
+		return myHashSystem;
+	}
+
+	public void setHashSystem(Long theHashSystem) {
+		myHashSystem = theHashSystem;
+	}
+
+	public Long getHashSystemAndValue() {
+		calculateHashes();
+		return myHashSystemAndValue;
+	}
+
+	public void setHashSystemAndValue(Long theHashSystemAndValue) {
+		calculateHashes();
+		myHashSystemAndValue = theHashSystemAndValue;
+	}
+
+	public Long getHashValue() {
+		calculateHashes();
+		return myHashValue;
+	}
+
+	public void setHashValue(Long theHashValue) {
+		myHashValue = theHashValue;
 	}
 
 	@Override
@@ -97,6 +169,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public void setSystem(String theSystem) {
+		clearHashes();
 		mySystem = StringUtils.defaultIfBlank(theSystem, null);
 	}
 
@@ -105,6 +178,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public void setValue(String theValue) {
+		clearHashes();
 		myValue = StringUtils.defaultIfBlank(theValue, null);
 	}
 
@@ -115,8 +189,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getResource());
 		b.append(getSystem());
 		b.append(getValue());
+		b.append(getHashSystem());
+		b.append(getHashSystemAndValue());
+		b.append(getHashValue());
 		return b.toHashCode();
 	}
+
 
 	@Override
 	public IQueryParameterType toQueryParameterType() {

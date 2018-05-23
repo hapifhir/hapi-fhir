@@ -58,6 +58,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
+	@Override
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();

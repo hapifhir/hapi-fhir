@@ -18,6 +18,20 @@
 				]]>
 			</action>
 			<action type="add">
+				Several enhancements have been made to the JPA server index
+				tables. These enhancements consist of new colums that will be
+				used in a future version of HAPI FHIR to significantly decrease
+				the amount of space required for indexes on token and string index
+				types.
+				<![CDATA[<br/><br/>]]>
+				These new columns are not yet used in HAPI FHIR 3.4.0 but will be
+				enabled in HAPI FHIR 3.5.0. Anyone upgrading to HAPI FHIR 3.4.0 (or above)
+				is recommended to invoke the following SQL statement on their
+				database in order to reindex all data in a background job:
+				<![CDATA[<br/>]]>
+				<![CDATA[<code>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</code>]]>
+			</action>
+			<action type="add">
 				R4 structures have been updated to the latest definitions
 				(SVN 13732)
 			</action>
@@ -225,6 +239,11 @@
 			<action type="add" issue="875">
 				An issue in the narrative generator template for the CodeableConcept
 				datatype was corrected. Thanks to @RuthAlk for the pull request!
+			</action>
+			<action type="add">
+				The JPA server automatic reindexing process has been tweaked so that it no
+				longer runs once per minute (this was a heavy strain on large databases)
+				but will instead run once an hour unless triggered for some reason.
 			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">

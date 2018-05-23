@@ -434,8 +434,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myResourceType;
 	}
 
-	public void setResourceType(String theResourceType) {
+	public ResourceTable setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+		return this;
 	}
 
 	@Override

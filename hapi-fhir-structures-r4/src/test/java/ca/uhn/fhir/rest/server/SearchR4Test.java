@@ -128,9 +128,7 @@ public class SearchR4Test {
 	@Test
 	public void testIncludeSingleParameter() throws Exception {
 		HttpGet httpGet;
-		String linkNext;
 		Bundle bundle;
-		String linkSelf;
 
 		// No include specified
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest");

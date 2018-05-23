@@ -70,6 +70,7 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 	
+	@Override
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();

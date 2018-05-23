@@ -21,6 +21,12 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
@@ -30,6 +36,10 @@ import java.util.Date;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
+	/** Don't change this without careful consideration. You will break existing hashes! */
+	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
+	/** Don't make this public 'cause nobody better touch it! */
+	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 
 	static final int MAX_SP_NAME = 100;
 
@@ -68,7 +78,15 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	}
 
 	public void setParamName(String theName) {
+		clearHashes();
 		myParamName = theName;
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected void clearHashes() {
+		// nothing
 	}
 
 	public ResourceTable getResource() {
@@ -76,6 +94,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	}
 
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		clearHashes();
 		myResource = theResource;
 		myResourceType = theResource.getResourceType();
 		return this;
@@ -107,4 +126,23 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	}
 
 	public abstract IQueryParameterType toQueryParameterType();
+
+	/**
+	 * Applies a fast and consistent hashing algorithm to a set of strings
+	 */
+	static long hash(String... theValues) {
+		Hasher hasher = HASH_FUNCTION.newHasher();
+
+		for (String next : theValues) {
+			next = UrlUtil.escapeUrlParam(next);
+			byte[] bytes = next.getBytes(Charsets.UTF_8);
+			hasher.putBytes(bytes);
+			hasher.putBytes(DELIMITER_BYTES);
+		}
+
+		HashCode hashCode = hasher.hash();
+		return hashCode.asLong();
+	}
+
+
 }

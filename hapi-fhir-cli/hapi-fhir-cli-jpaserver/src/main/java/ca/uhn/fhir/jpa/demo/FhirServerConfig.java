@@ -63,6 +63,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 	@Qualifier("jpaProperties")
 	private Properties myJpaProperties;
 
+	@Override
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();

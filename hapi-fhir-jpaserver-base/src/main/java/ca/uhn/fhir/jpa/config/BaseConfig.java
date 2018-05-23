@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.config;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,8 @@ import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
+import ca.uhn.fhir.jpa.util.IReindexController;
+import ca.uhn.fhir.jpa.util.ReindexController;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Resource;
 
 @Configuration
@@ -63,14 +66,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	private ApplicationContext myAppCtx;
 
 	@Override
-	public void configureTasks(ScheduledTaskRegistrar theTaskRegistrar) {
+	public void configureTasks(@Nonnull ScheduledTaskRegistrar theTaskRegistrar) {
 		theTaskRegistrar.setTaskScheduler(taskScheduler());
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
-		return retVal;
+		return new DatabaseBackedPagingProvider();
 	}
 
 	/**
@@ -94,6 +96,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	public HibernateJpaDialect hibernateJpaDialectIntance() {
 		return new HibernateJpaDialect();
+	}
+
+	@Bean
+	private IReindexController reindexController() {
+		return new ReindexController();
 	}
 
 	@Bean()
@@ -166,6 +173,5 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
-
 
 }

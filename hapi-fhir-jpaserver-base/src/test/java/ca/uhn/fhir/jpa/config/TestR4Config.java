@@ -115,6 +115,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return dataSource;
 	}
 
+	@Override
 	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();

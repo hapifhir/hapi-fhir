@@ -119,7 +119,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * This is configurable but by default we just use HAPI version
 	 */
-	private String myServerVersion = VersionUtil.getVersion();
+	private String myServerVersion = createPoweredByHeaderProductVersion();
 	private boolean myStarted;
 	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<>();
 	private boolean myUncompressIncomingContents = true;
@@ -159,7 +159,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
 		String b = createPoweredByHeader();
-		theHttpResponse.addHeader("X-Powered-By", b);
+		theHttpResponse.addHeader(Constants.POWERED_BY_HEADER, b);
 	}
 
 	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation, String resourceName) {
@@ -213,12 +213,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return Lists.newArrayList("FHIR Server", "FHIR " + myFhirContext.getVersion().getVersion().getFhirVersionString() + "/" + myFhirContext.getVersion().getVersion().name());
 	}
 
+	/**
+	 * Subclasses may override to provide their own powered by
+	 * header. Note that if you want to be nice and still credit HAPI
+	 * FHIR you could consider overriding
+	 * {@link #createPoweredByAttributes()} instead and adding your own
+	 * fragments to the list.
+	 */
 	protected String createPoweredByHeader() {
 		StringBuilder b = new StringBuilder();
 		b.append(createPoweredByHeaderProductName());
 		b.append(" ");
-		b.append(VersionUtil.getVersion());
-		b.append(" REST Server (");
+		b.append(createPoweredByHeaderProductVersion());
+		b.append(" ");
+		b.append(createPoweredByHeaderComponentName());
+		b.append(" (");
 
 		List<String> poweredByAttributes = createPoweredByAttributes();
 		for (ListIterator<String> iter = poweredByAttributes.listIterator(); iter.hasNext(); ) {
@@ -232,8 +241,31 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return b.toString();
 	}
 
+	/**
+	 * Subclasses my override
+	 *
+	 * @see #createPoweredByHeader()
+	 */
+	protected String createPoweredByHeaderComponentName() {
+		return "REST Server";
+	}
+
+	/**
+	 * Subclasses my override
+	 *
+	 * @see #createPoweredByHeader()
+	 */
 	protected String createPoweredByHeaderProductName() {
 		return "HAPI FHIR";
+	}
+
+	/**
+	 * Subclasses my override
+	 *
+	 * @see #createPoweredByHeader()
+	 */
+	protected String createPoweredByHeaderProductVersion() {
+		return VersionUtil.getVersion();
 	}
 
 	@Override
@@ -539,10 +571,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(IServerInterceptor... theList) {
+	public void setInterceptors(List<IServerInterceptor> theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(Arrays.asList(theList));
+			myInterceptors.addAll(theList);
 		}
 	}
 
@@ -572,11 +604,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Collection<Object> theProviders) {
-		myPlainProviders.clear();
-		if (theProviders != null) {
-			myPlainProviders.addAll(theProviders);
-		}
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
 	}
 
 	/**
@@ -606,10 +635,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
+	public void setResourceProviders(IResourceProvider... theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(theResourceProviders);
+			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
 		}
 	}
 
@@ -632,8 +661,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Returns the server base URL (with no trailing '/') for a given request
-	 *
-	 * @param theRequest
 	 */
 	public String getServerBaseForRequest(ServletRequestDetails theRequest) {
 		String fhirServerBase;
@@ -694,9 +721,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		// passing the server into the constructor. Having that sort
 		// of cross linkage causes reference cycles in Spring wiring
 		try {
-			Method setRestfulServer = theServerConformanceProvider.getClass().getMethod("setRestfulServer", new Class[] {RestfulServer.class});
+			Method setRestfulServer = theServerConformanceProvider.getClass().getMethod("setRestfulServer", RestfulServer.class);
 			if (setRestfulServer != null) {
-				setRestfulServer.invoke(theServerConformanceProvider, new Object[] {this});
+				setRestfulServer.invoke(theServerConformanceProvider, this);
 			}
 		} catch (Exception e) {
 			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
@@ -1011,9 +1038,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 						invokeInitialize(iResourceProvider);
 					}
 				}
-				if (confProvider != null) {
-					invokeInitialize(confProvider);
-				}
+
+				invokeInitialize(confProvider);
 				if (getPlainProviders() != null) {
 					for (Object next : getPlainProviders()) {
 						invokeInitialize(next);
@@ -1300,7 +1326,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param providers a {@code Collection} of providers. The parameter could be null or an empty {@code Collection}
 	 */
-	public void registerProviders(Collection<? extends Object> providers) {
+	public void registerProviders(Collection<?> providers) {
 		myProviderRegistrationMutex.lock();
 		try {
 			if (!myStarted) {
@@ -1323,9 +1349,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/*
 	 * Inner method to actually register providers
 	 */
-	protected void registerProviders(Collection<? extends Object> providers, boolean inInit) {
-		List<IResourceProvider> newResourceProviders = new ArrayList<IResourceProvider>();
-		List<Object> newPlainProviders = new ArrayList<Object>();
+	protected void registerProviders(Collection<?> providers, boolean inInit) {
+		List<IResourceProvider> newResourceProviders = new ArrayList<>();
+		List<Object> newPlainProviders = new ArrayList<>();
 		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
 
 		if (providers != null) {
@@ -1392,7 +1418,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		ourLog.info("Removing RESTful methods for: {}", theProvider.getClass());
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
-		Collection<String> resourceNames = new ArrayList<String>();
+		Collection<String> resourceNames = new ArrayList<>();
 		while (!Object.class.equals(supertype)) {
 			removeResourceMethods(theProvider, supertype, resourceNames);
 			supertype = supertype.getSuperclass();
@@ -1468,12 +1494,18 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			case OPTIONS:
 				doOptions(theReq, theResp);
 				break;
+			case PATCH:
+				break;
 			case POST:
 				doPost(theReq, theResp);
 				break;
 			case PUT:
 				doPut(theReq, theResp);
 				break;
+			case TRACE:
+			case TRACK:
+			case HEAD:
+			case CONNECT:
 			default:
 				handleRequest(method, theReq, theResp);
 				break;
@@ -1485,10 +1517,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
+	public void setInterceptors(IServerInterceptor... theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(theList);
+			myInterceptors.addAll(Arrays.asList(theList));
 		}
 	}
 
@@ -1497,8 +1529,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Object... theProv) {
-		setPlainProviders(Arrays.asList(theProv));
+	public void setPlainProviders(Collection<Object> theProviders) {
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(theProviders);
+		}
 	}
 
 	/**
@@ -1516,10 +1551,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(IResourceProvider... theResourceProviders) {
+	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
+			myResourceProviders.addAll(theResourceProviders);
 		}
 	}
 
@@ -1539,13 +1574,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Unregister one provider (either a Resource provider or a plain provider)
-	 *
-	 * @param provider
-	 * @throws Exception
 	 */
-	public void unregisterProvider(Object provider) throws Exception {
+	public void unregisterProvider(Object provider) {
 		if (provider != null) {
-			Collection<Object> providerList = new ArrayList<Object>(1);
+			Collection<Object> providerList = new ArrayList<>(1);
 			providerList.add(provider);
 			unregisterProviders(providerList);
 		}
@@ -1553,11 +1585,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Unregister a {@code Collection} of providers
-	 *
-	 * @param providers
-	 * @throws Exception
 	 */
-	public void unregisterProviders(Collection<? extends Object> providers) throws Exception {
+	public void unregisterProviders(Collection<?> providers) {
 		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
 		if (providers != null) {
 			for (Object provider : providers) {

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,8 @@ import org.hibernate.search.annotations.*;
 
 import javax.persistence.*;
 import javax.persistence.Index;
+
+import static org.apache.commons.lang3.StringUtils.left;
 
 //@formatter:off
 @Embeddable
@@ -88,12 +90,11 @@ import javax.persistence.Index;
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
-	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here 
+	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
 	public static final int MAX_LENGTH = 200;
-
+	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
-
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
@@ -116,6 +117,16 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
 	private String myValueNormalized;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_NORM_PREFIX", nullable = true)
+	private Long myHashNormalizedPrefix;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_EXACT", nullable = true)
+	private Long myHashExact;
 
 	public ResourceIndexedSearchParamString() {
 		super();
@@ -126,6 +137,20 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setParamName(theName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
+	}
+
+	@PrePersist
+	public void calculateHashes() {
+		if (myHashNormalizedPrefix == null) {
+			setHashNormalizedPrefix(hash(getResourceType(), getParamName(), left(getValueNormalized(), HASH_PREFIX_LENGTH)));
+			setHashExact(hash(getResourceType(), getParamName(), getValueExact()));
+		}
+	}
+
+	@Override
+	protected void clearHashes() {
+		myHashNormalizedPrefix = null;
+		myHashExact = null;
 	}
 
 	@Override
@@ -144,7 +169,27 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName(), obj.getParamName());
 		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
+		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
+		b.append(getHashExact(), obj.getHashExact());
 		return b.isEquals();
+	}
+
+	public Long getHashExact() {
+		calculateHashes();
+		return myHashExact;
+	}
+
+	public void setHashExact(Long theHashExact) {
+		myHashExact = theHashExact;
+	}
+
+	public Long getHashNormalizedPrefix() {
+		calculateHashes();
+		return myHashNormalizedPrefix;
+	}
+
+	public void setHashNormalizedPrefix(Long theHashNormalizedPrefix) {
+		myHashNormalizedPrefix = theHashNormalizedPrefix;
 	}
 
 	@Override
@@ -180,6 +225,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName());
 		b.append(getResource());
 		b.append(getValueExact());
+		b.append(getHashNormalizedPrefix());
+		b.append(getHashExact());
 		return b.toHashCode();
 	}
 
