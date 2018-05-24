@@ -29,7 +29,6 @@ import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
 
-//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_COORDS", indexes = { 
@@ -37,7 +36,6 @@ import javax.persistence.*;
 	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"), 
 	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID") 
 })
-//@formatter:on
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;

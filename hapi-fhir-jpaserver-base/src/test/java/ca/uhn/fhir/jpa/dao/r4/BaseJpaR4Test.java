@@ -12,7 +12,9 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -27,6 +29,10 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -36,10 +42,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -52,10 +57,12 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
+	@Autowired
+	@Qualifier("myResourceCountsCache")
+	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
@@ -97,7 +104,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
-	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -205,6 +212,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myStructureDefinitionDaoR4")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
 	@Autowired
+	@Qualifier("myConsentDaoR4")
+	protected IFhirResourceDao<Consent> myConsentDao;
+	@Autowired
 	@Qualifier("mySubscriptionDaoR4")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
 	@Autowired
@@ -234,6 +244,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
+	protected ITermConceptMapDao myTermConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
+	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 
 	@After()
@@ -243,6 +257,16 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+	}
+
+	@After
+	public void afterClearTerminologyCaches() {
+		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		baseHapiTerminologySvc.clearTranslationCache();
+		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearDeferred();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 	}
 
 	@After()
@@ -273,7 +297,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Transactional()
 	public void beforePurgeDatabase() {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
+		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}
 
 	@Before
@@ -299,11 +323,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
-	public TransactionTemplate newTxTemplate() {
-		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		retVal.afterPropertiesSet();
-		return retVal;
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	@AfterClass
@@ -313,12 +335,103 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	/**
+	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
+	 * <br>
+	 * <ul>
+	 * <li>
+	 * One group with two elements, each identifying one target apiece.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying two targets.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying a target that also appears
+	 * in the first element of the first group.
+	 * </li>
+	 * </ul>
+	 * </br>
+	 * The first two groups identify the same source code system and different target code systems.
+	 * </br>
+	 * The first two groups also include an element with the same source code.
+	 *
+	 * @return A {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
+	 */
+	public static ConceptMap createConceptMap() {
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl(CM_URL);
+
+		conceptMap.setSource(new UriType(VS_URL));
+		conceptMap.setTarget(new UriType(VS_URL_2));
+
+		ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		SourceElementComponent element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		TargetElementComponent target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		element = group.addElement();
+		element.setCode("23456");
+		element.setDisplay("Source Code 23456");
+
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setSourceVersion("Version 3");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 4");
+
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		target = element.addTarget();
+		target.setCode("56789");
+		target.setDisplay("Target Code 56789");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		target = element.addTarget();
+		target.setCode("67890");
+		target.setDisplay("Target Code 67890");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 5");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		element = group.addElement();
+		element.setCode("78901");
+		element.setDisplay("Source Code 78901");
+
+		target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+
+		return conceptMap;
+	}
+
 	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
 		String linkNext = theBundle.getLink("next").getUrl();
 		linkNext = linkNext.substring(linkNext.indexOf('?'));
 		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		String uuid = uuidParams[ 0 ];
+		String uuid = uuidParams[0];
 		return uuid;
 	}
 

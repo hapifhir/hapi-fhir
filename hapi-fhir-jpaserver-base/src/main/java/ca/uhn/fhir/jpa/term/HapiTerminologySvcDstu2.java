@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -62,17 +61,17 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
-	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected void createOrUpdateConceptMap(ConceptMap theNextConceptMap, RequestDetails theRequestDetails) {
+	protected void createOrUpdateConceptMap(ConceptMap theNextConceptMap) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails) {
+	protected void createOrUpdateValueSet(ValueSet theValueSet) {
 		throw new UnsupportedOperationException();
 	}
 

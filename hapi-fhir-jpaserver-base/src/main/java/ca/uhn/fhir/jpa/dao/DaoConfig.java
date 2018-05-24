@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
@@ -50,12 +51,22 @@ public class DaoConfig {
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	/**
+	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 *
+	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 */
+	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
+	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -115,6 +126,8 @@ public class DaoConfig {
 	private Integer myCountSearchResultsUpTo = null;
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
+	private boolean myExpungeEnabled;
+	private int myReindexThreadCount;
 
 	/**
 	 * Constructor
@@ -124,6 +137,7 @@ public class DaoConfig {
 		setSubscriptionPollDelay(0);
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
+		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 	}
 
 	/**
@@ -139,7 +153,6 @@ public class DaoConfig {
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
-
 
 	/**
 	 * Specifies the highest number that a client is permitted to use in a
@@ -405,8 +418,11 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
 	}
 
 	/**
@@ -453,6 +469,35 @@ public class DaoConfig {
 	 */
 	public void setMaximumSearchResultCountInTransaction(Integer theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to resource reindexing
+	 * (which is only ever used if SearchParameters change, or a manual reindex is
+	 * triggered due to a HAPI FHIR upgrade or some other reason).
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public int getReindexThreadCount() {
+		return myReindexThreadCount;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to resource reindexing
+	 * (which is only ever used if SearchParameters change, or a manual reindex is
+	 * triggered due to a HAPI FHIR upgrade or some other reason).
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public void setReindexThreadCount(int theReindexThreadCount) {
+		myReindexThreadCount = theReindexThreadCount;
+		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
 	}
 
 	public ResourceEncodingEnum getResourceEncoding() {
@@ -550,6 +595,22 @@ public class DaoConfig {
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public Long getTranslationCachesExpireAfterWriteInMinutes() {
+		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
+		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
 	}
 
 	/**
@@ -657,7 +718,7 @@ public class DaoConfig {
 	/**
 	 * If enabled, the server will support the use of :contains searches,
 	 * which are helpful but can have adverse effects on performance.
-	 *
+	 * <p>
 	 * Default is <code>true</code>
 	 */
 	public boolean isAllowContainsSearches() {
@@ -667,7 +728,7 @@ public class DaoConfig {
 	/**
 	 * If enabled, the server will support the use of :contains searches,
 	 * which are helpful but can have adverse effects on performance.
-	 *
+	 * <p>
 	 * Default is <code>true</code>
 	 */
 	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
@@ -925,6 +986,36 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the $expunge operation
+	 * will be enabled on this server. This operation is potentially dangerous since it allows
+	 * a client to physically delete data in a way that can not be recovered (without resorting
+	 * to backups).
+	 * <p>
+	 * It is recommended to not enable this setting without appropriate security
+	 * in place on your server to prevent non-administrators from using this
+	 * operation.
+	 * </p>
+	 */
+	public boolean isExpungeEnabled() {
+		return myExpungeEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the $expunge operation
+	 * will be enabled on this server. This operation is potentially dangerous since it allows
+	 * a client to physically delete data in a way that can not be recovered (without resorting
+	 * to backups).
+	 * <p>
+	 * It is recommended to not enable this setting without appropriate security
+	 * in place on your server to prevent non-administrators from using this
+	 * operation.
+	 * </p>
+	 */
+	public void setExpungeEnabled(boolean theExpungeEnabled) {
+		myExpungeEnabled = theExpungeEnabled;
+	}
+
+	/**
 	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
 	 * <code>true</code>)
 	 */
@@ -1025,7 +1116,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1036,7 +1127,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link ca.uhn.fhir.jpa.util.JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1073,11 +1164,8 @@ public class DaoConfig {
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
+	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
+		myInterceptors = theInterceptors;
 	}
 
 	/**

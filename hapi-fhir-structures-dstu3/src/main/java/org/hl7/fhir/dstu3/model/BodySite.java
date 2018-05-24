@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
  */
@@ -238,7 +239,7 @@ public class BodySite extends DomainResource {
     /**
      * @param value {@link #code} (Named anatomical location - ideally coded where possible.)
      */
-    public BodySite setCode(CodeableConcept value) { 
+    public BodySite setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -417,7 +418,7 @@ public class BodySite extends DomainResource {
     /**
      * @param value {@link #patient} (The person to which the body site belongs.)
      */
-    public BodySite setPatient(Reference value) { 
+    public BodySite setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -442,15 +443,30 @@ public class BodySite extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier for this instance of the anatomical location.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("active", "boolean", "Whether this body site is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("code", "CodeableConcept", "Named anatomical location - ideally coded where possible.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("qualifier", "CodeableConcept", "Qualifier to refine the anatomical location.  These include qualifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, qualifier));
-        childrenList.add(new Property("description", "string", "A summary, charactarization or explanation of the anatomic location.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, java.lang.Integer.MAX_VALUE, patient));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier for this instance of the anatomical location.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("active", "boolean", "Whether this body site is in active use.", 0, 1, active));
+        children.add(new Property("code", "CodeableConcept", "Named anatomical location - ideally coded where possible.", 0, 1, code));
+        children.add(new Property("qualifier", "CodeableConcept", "Qualifier to refine the anatomical location.  These include qualifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, qualifier));
+        children.add(new Property("description", "string", "A summary, charactarization or explanation of the anatomic location.", 0, 1, description));
+        children.add(new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image));
+        children.add(new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, 1, patient));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for this instance of the anatomical location.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this body site is in active use.", 0, 1, active);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Named anatomical location - ideally coded where possible.", 0, 1, code);
+        case -1247940438: /*qualifier*/  return new Property("qualifier", "CodeableConcept", "Qualifier to refine the anatomical location.  These include qualifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, qualifier);
+        case -1724546052: /*description*/  return new Property("description", "string", "A summary, charactarization or explanation of the anatomic location.", 0, 1, description);
+        case 100313435: /*image*/  return new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, 1, patient);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -612,24 +628,24 @@ public class BodySite extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof BodySite))
+        if (!(other_ instanceof BodySite))
           return false;
-        BodySite o = (BodySite) other;
+        BodySite o = (BodySite) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(code, o.code, true)
            && compareDeep(qualifier, o.qualifier, true) && compareDeep(description, o.description, true) && compareDeep(image, o.image, true)
            && compareDeep(patient, o.patient, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof BodySite))
+        if (!(other_ instanceof BodySite))
           return false;
-        BodySite o = (BodySite) other;
+        BodySite o = (BodySite) other_;
         return compareValues(active, o.active, true) && compareValues(description, o.description, true);
       }
 

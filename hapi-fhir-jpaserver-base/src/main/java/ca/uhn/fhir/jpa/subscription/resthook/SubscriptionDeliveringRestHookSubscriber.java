@@ -28,8 +28,10 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,21 +53,26 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	}
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
-		IBaseResource payloadResource = theMsg.getPayload(getContext());
+		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
+		if (payloadResource == null) return;
 
+		doDelivery(theMsg, theSubscription, thePayloadType, theClient, payloadResource);
+	}
+
+	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				if (payloadResource == null || payloadResource.isEmpty()) {
+				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
 					if (thePayloadType != null ) {
-						operation = theClient.create().resource(payloadResource);
+						operation = theClient.create().resource(thePayloadResource);
 					} else {
 						sendNotification(theMsg);
 						return;
 					}
 				} else {
 					if (thePayloadType != null ) {
-						operation = theClient.update().resource(payloadResource);
+						operation = theClient.update().resource(thePayloadResource);
 					} else {
 						sendNotification(theMsg);
 						return;
@@ -73,16 +80,16 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				}
 				break;
 			case UPDATE:
-				if (payloadResource == null || payloadResource.isEmpty()) {
+				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
 					if (thePayloadType != null ) {
-						operation = theClient.create().resource(payloadResource);
+						operation = theClient.create().resource(thePayloadResource);
 					} else {
 						sendNotification(theMsg);
 						return;
 					}
 				} else {
 					if (thePayloadType != null ) {
-						operation = theClient.update().resource(payloadResource);
+						operation = theClient.update().resource(thePayloadResource);
 					} else {
 						sendNotification(theMsg);
 						return;
@@ -101,7 +108,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			operation.encoded(thePayloadType);
 		}
 
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue());
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), thePayloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue());
 
 		try {
 			operation.execute();
@@ -110,6 +117,27 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			e.printStackTrace();
 			throw e;
 		}
+	}
+
+	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
+		IBaseResource payloadResource = theMsg.getPayload(getContext());
+
+		if (theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
+			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(payloadResource.getClass());
+			try {
+				payloadResource = dao.read(payloadResource.getIdElement().toVersionless());
+			} catch (ResourceGoneException e) {
+				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadResource.getIdElement(), theSubscription.getIdElement(getContext()));
+				return null;
+			}
+		}
+
+		IIdType resourceId = payloadResource.getIdElement();
+		if (theSubscription.getRestHookDetails().isStripVersionId()) {
+			resourceId = resourceId.toVersionless();
+			payloadResource.setId(resourceId);
+		}
+		return payloadResource;
 	}
 
 	@Override

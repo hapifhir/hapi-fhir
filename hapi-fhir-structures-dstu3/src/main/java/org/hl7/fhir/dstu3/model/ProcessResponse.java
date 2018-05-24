@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides processing status, errors and notes from the processing of a resource.
  */
@@ -218,7 +219,7 @@ public class ProcessResponse extends DomainResource {
         /**
          * @param value {@link #type} (The note purpose: Print/Display.)
          */
-        public ProcessResponseProcessNoteComponent setType(CodeableConcept value) { 
+        public ProcessResponseProcessNoteComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -272,10 +273,20 @@ public class ProcessResponse extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("text", "string", "The note text.", 0, java.lang.Integer.MAX_VALUE, text));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type));
+          children.add(new Property("text", "string", "The note text.", 0, 1, text));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The note purpose: Print/Display.", 0, 1, type);
+          case 3556653: /*text*/  return new Property("text", "string", "The note text.", 0, 1, text);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -355,22 +366,22 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProcessResponseProcessNoteComponent))
+        if (!(other_ instanceof ProcessResponseProcessNoteComponent))
           return false;
-        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
+        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(text, o.text, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProcessResponseProcessNoteComponent))
+        if (!(other_ instanceof ProcessResponseProcessNoteComponent))
           return false;
-        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other;
+        ProcessResponseProcessNoteComponent o = (ProcessResponseProcessNoteComponent) other_;
         return compareValues(text, o.text, true);
       }
 
@@ -684,7 +695,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #organization} (The organization who produced this adjudicated response.)
      */
-    public ProcessResponse setOrganization(Reference value) { 
+    public ProcessResponse setOrganization(Reference value)  { 
       this.organization = value;
       return this;
     }
@@ -728,7 +739,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #request} (Original request resource reference.)
      */
-    public ProcessResponse setRequest(Reference value) { 
+    public ProcessResponse setRequest(Reference value)  { 
       this.request = value;
       return this;
     }
@@ -767,7 +778,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #outcome} (Transaction status: error, complete, held.)
      */
-    public ProcessResponse setOutcome(CodeableConcept value) { 
+    public ProcessResponse setOutcome(CodeableConcept value)  { 
       this.outcome = value;
       return this;
     }
@@ -840,7 +851,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public ProcessResponse setRequestProvider(Reference value) { 
+    public ProcessResponse setRequestProvider(Reference value)  { 
       this.requestProvider = value;
       return this;
     }
@@ -884,7 +895,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #requestOrganization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public ProcessResponse setRequestOrganization(Reference value) { 
+    public ProcessResponse setRequestOrganization(Reference value)  { 
       this.requestOrganization = value;
       return this;
     }
@@ -928,7 +939,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * @param value {@link #form} (The form to be used for printing the content.)
      */
-    public ProcessResponse setForm(CodeableConcept value) { 
+    public ProcessResponse setForm(CodeableConcept value)  { 
       this.form = value;
       return this;
     }
@@ -1114,21 +1125,42 @@ public class ProcessResponse extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("organization", "Reference(Organization)", "The organization who produced this adjudicated response.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("request", "Reference(Any)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete, held.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication or processing.", 0, java.lang.Integer.MAX_VALUE, disposition));
-        childrenList.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestProvider));
-        childrenList.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, requestOrganization));
-        childrenList.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, java.lang.Integer.MAX_VALUE, form));
-        childrenList.add(new Property("processNote", "", "Suite of processing notes or additional requirements if the processing has been held.", 0, java.lang.Integer.MAX_VALUE, processNote));
-        childrenList.add(new Property("error", "CodeableConcept", "Processing errors.", 0, java.lang.Integer.MAX_VALUE, error));
-        childrenList.add(new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
+        children.add(new Property("organization", "Reference(Organization)", "The organization who produced this adjudicated response.", 0, 1, organization));
+        children.add(new Property("request", "Reference(Any)", "Original request resource reference.", 0, 1, request));
+        children.add(new Property("outcome", "CodeableConcept", "Transaction status: error, complete, held.", 0, 1, outcome));
+        children.add(new Property("disposition", "string", "A description of the status of the adjudication or processing.", 0, 1, disposition));
+        children.add(new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
+        children.add(new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization));
+        children.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form));
+        children.add(new Property("processNote", "", "Suite of processing notes or additional requirements if the processing has been held.", 0, java.lang.Integer.MAX_VALUE, processNote));
+        children.add(new Property("error", "CodeableConcept", "Processing errors.", 0, java.lang.Integer.MAX_VALUE, error));
+        children.add(new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
+        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization who produced this adjudicated response.", 0, 1, organization);
+        case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "Original request resource reference.", 0, 1, request);
+        case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Transaction status: error, complete, held.", 0, 1, outcome);
+        case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication or processing.", 0, 1, disposition);
+        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
+        case 599053666: /*requestOrganization*/  return new Property("requestOrganization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, requestOrganization);
+        case 3148996: /*form*/  return new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form);
+        case 202339073: /*processNote*/  return new Property("processNote", "", "Suite of processing notes or additional requirements if the processing has been held.", 0, java.lang.Integer.MAX_VALUE, processNote);
+        case 96784904: /*error*/  return new Property("error", "CodeableConcept", "Processing errors.", 0, java.lang.Integer.MAX_VALUE, error);
+        case -2071896615: /*communicationRequest*/  return new Property("communicationRequest", "Reference(CommunicationRequest)", "Request for additional supporting or authorizing information, such as: documents, images or resources.", 0, java.lang.Integer.MAX_VALUE, communicationRequest);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1372,12 +1404,12 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ProcessResponse))
+        if (!(other_ instanceof ProcessResponse))
           return false;
-        ProcessResponse o = (ProcessResponse) other;
+        ProcessResponse o = (ProcessResponse) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(created, o.created, true)
            && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true) && compareDeep(outcome, o.outcome, true)
            && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
@@ -1387,12 +1419,12 @@ public class ProcessResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ProcessResponse))
+        if (!(other_ instanceof ProcessResponse))
           return false;
-        ProcessResponse o = (ProcessResponse) other;
+        ProcessResponse o = (ProcessResponse) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(disposition, o.disposition, true)
           ;
       }

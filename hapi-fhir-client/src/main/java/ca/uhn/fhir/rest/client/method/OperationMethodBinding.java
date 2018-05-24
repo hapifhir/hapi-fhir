@@ -194,7 +194,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		return createOperationInvocation(getContext(), getResourceName(), id, myName, parameters, false);
+		return createOperationInvocation(getContext(), getResourceName(), id, null, myName, parameters, false);
 	}
 
 	public boolean isCanOperateAtInstanceLevel() {
@@ -217,7 +217,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		myDescription = theDescription;
 	}
 
-	public static BaseHttpClientInvocation createOperationInvocation(FhirContext theContext, String theResourceName, String theId, String theOperationName, IBaseParameters theInput,
+	public static BaseHttpClientInvocation createOperationInvocation(FhirContext theContext, String theResourceName, String theId, String theVersion, String theOperationName, IBaseParameters theInput,
 			boolean theUseHttpGet) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
@@ -225,6 +225,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			if (isNotBlank(theId)) {
 				b.append('/');
 				b.append(theId);
+				if (isNotBlank(theVersion)) {
+					b.append("/_history/");
+					b.append(theVersion);
+				}
 			}
 		}
 		if (b.length() > 0) {

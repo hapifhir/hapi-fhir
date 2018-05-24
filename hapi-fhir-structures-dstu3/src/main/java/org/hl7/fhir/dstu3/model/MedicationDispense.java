@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.
  */
@@ -266,7 +267,7 @@ public class MedicationDispense extends DomainResource {
         /**
          * @param value {@link #actor} (The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.)
          */
-        public MedicationDispensePerformerComponent setActor(Reference value) { 
+        public MedicationDispensePerformerComponent setActor(Reference value)  { 
           this.actor = value;
           return this;
         }
@@ -305,7 +306,7 @@ public class MedicationDispense extends DomainResource {
         /**
          * @param value {@link #onBehalfOf} (The organization the device or practitioner was acting on behalf of.)
          */
-        public MedicationDispensePerformerComponent setOnBehalfOf(Reference value) { 
+        public MedicationDispensePerformerComponent setOnBehalfOf(Reference value)  { 
           this.onBehalfOf = value;
           return this;
         }
@@ -330,10 +331,20 @@ public class MedicationDispense extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.", 0, 1, actor));
+          children.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, 1, onBehalfOf));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed the action.  It should be assumed that the actor is the dispenser of the medication.", 0, 1, actor);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, 1, onBehalfOf);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -414,22 +425,22 @@ public class MedicationDispense extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationDispensePerformerComponent))
+        if (!(other_ instanceof MedicationDispensePerformerComponent))
           return false;
-        MedicationDispensePerformerComponent o = (MedicationDispensePerformerComponent) other;
+        MedicationDispensePerformerComponent o = (MedicationDispensePerformerComponent) other_;
         return compareDeep(actor, o.actor, true) && compareDeep(onBehalfOf, o.onBehalfOf, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationDispensePerformerComponent))
+        if (!(other_ instanceof MedicationDispensePerformerComponent))
           return false;
-        MedicationDispensePerformerComponent o = (MedicationDispensePerformerComponent) other;
+        MedicationDispensePerformerComponent o = (MedicationDispensePerformerComponent) other_;
         return true;
       }
 
@@ -562,7 +573,7 @@ public class MedicationDispense extends DomainResource {
         /**
          * @param value {@link #type} (A code signifying whether a different drug was dispensed from what was prescribed.)
          */
-        public MedicationDispenseSubstitutionComponent setType(CodeableConcept value) { 
+        public MedicationDispenseSubstitutionComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -695,12 +706,24 @@ public class MedicationDispense extends DomainResource {
           return r;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("wasSubstituted", "boolean", "True if the dispenser dispensed a different drug or product from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, wasSubstituted));
-          childrenList.add(new Property("type", "CodeableConcept", "A code signifying whether a different drug was dispensed from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("reason", "CodeableConcept", "Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason));
-          childrenList.add(new Property("responsibleParty", "Reference(Practitioner)", "The person or organization that has primary responsibility for the substitution.", 0, java.lang.Integer.MAX_VALUE, responsibleParty));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("wasSubstituted", "boolean", "True if the dispenser dispensed a different drug or product from what was prescribed.", 0, 1, wasSubstituted));
+          children.add(new Property("type", "CodeableConcept", "A code signifying whether a different drug was dispensed from what was prescribed.", 0, 1, type));
+          children.add(new Property("reason", "CodeableConcept", "Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason));
+          children.add(new Property("responsibleParty", "Reference(Practitioner)", "The person or organization that has primary responsibility for the substitution.", 0, java.lang.Integer.MAX_VALUE, responsibleParty));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -592113567: /*wasSubstituted*/  return new Property("wasSubstituted", "boolean", "True if the dispenser dispensed a different drug or product from what was prescribed.", 0, 1, wasSubstituted);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A code signifying whether a different drug was dispensed from what was prescribed.", 0, 1, type);
+          case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Indicates the reason for the substitution of (or lack of substitution) from what was prescribed.", 0, java.lang.Integer.MAX_VALUE, reason);
+          case 1511509392: /*responsibleParty*/  return new Property("responsibleParty", "Reference(Practitioner)", "The person or organization that has primary responsibility for the substitution.", 0, java.lang.Integer.MAX_VALUE, responsibleParty);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -812,23 +835,23 @@ public class MedicationDispense extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationDispenseSubstitutionComponent))
+        if (!(other_ instanceof MedicationDispenseSubstitutionComponent))
           return false;
-        MedicationDispenseSubstitutionComponent o = (MedicationDispenseSubstitutionComponent) other;
+        MedicationDispenseSubstitutionComponent o = (MedicationDispenseSubstitutionComponent) other_;
         return compareDeep(wasSubstituted, o.wasSubstituted, true) && compareDeep(type, o.type, true) && compareDeep(reason, o.reason, true)
            && compareDeep(responsibleParty, o.responsibleParty, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationDispenseSubstitutionComponent))
+        if (!(other_ instanceof MedicationDispenseSubstitutionComponent))
           return false;
-        MedicationDispenseSubstitutionComponent o = (MedicationDispenseSubstitutionComponent) other;
+        MedicationDispenseSubstitutionComponent o = (MedicationDispenseSubstitutionComponent) other_;
         return compareValues(wasSubstituted, o.wasSubstituted, true);
       }
 
@@ -1274,7 +1297,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #category} (Indicates type of medication dispense and where the medication is expected to be consumed or administered.)
      */
-    public MedicationDispense setCategory(CodeableConcept value) { 
+    public MedicationDispense setCategory(CodeableConcept value)  { 
       this.category = value;
       return this;
     }
@@ -1290,26 +1313,30 @@ public class MedicationDispense extends DomainResource {
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
+      if (this.medication == null)
+        return null;
       if (!(this.medication instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (CodeableConcept) this.medication;
     }
 
     public boolean hasMedicationCodeableConcept() { 
-      return this.medication instanceof CodeableConcept;
+      return this != null && this.medication instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
     public Reference getMedicationReference() throws FHIRException { 
+      if (this.medication == null)
+        return null;
       if (!(this.medication instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
     }
 
     public boolean hasMedicationReference() { 
-      return this.medication instanceof Reference;
+      return this != null && this.medication instanceof Reference;
     }
 
     public boolean hasMedication() { 
@@ -1319,7 +1346,9 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public MedicationDispense setMedication(Type value) { 
+    public MedicationDispense setMedication(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for MedicationDispense.medication[x]: "+value.fhirType());
       this.medication = value;
       return this;
     }
@@ -1343,7 +1372,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #subject} (A link to a resource representing the person or the group to whom the medication will be given.)
      */
-    public MedicationDispense setSubject(Reference value) { 
+    public MedicationDispense setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1382,7 +1411,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #context} (The encounter or episode of care that establishes the context for this event.)
      */
-    public MedicationDispense setContext(Reference value) { 
+    public MedicationDispense setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1612,7 +1641,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #type} (Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.)
      */
-    public MedicationDispense setType(CodeableConcept value) { 
+    public MedicationDispense setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -1636,7 +1665,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #quantity} (The amount of medication that has been dispensed. Includes unit of measure.)
      */
-    public MedicationDispense setQuantity(SimpleQuantity value) { 
+    public MedicationDispense setQuantity(SimpleQuantity value)  { 
       this.quantity = value;
       return this;
     }
@@ -1660,7 +1689,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #daysSupply} (The amount of medication expressed as a timing amount.)
      */
-    public MedicationDispense setDaysSupply(SimpleQuantity value) { 
+    public MedicationDispense setDaysSupply(SimpleQuantity value)  { 
       this.daysSupply = value;
       return this;
     }
@@ -1782,7 +1811,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #destination} (Identification of the facility/location where the medication was shipped to, as part of the dispense event.)
      */
-    public MedicationDispense setDestination(Reference value) { 
+    public MedicationDispense setDestination(Reference value)  { 
       this.destination = value;
       return this;
     }
@@ -1995,7 +2024,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #substitution} (Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.)
      */
-    public MedicationDispense setSubstitution(MedicationDispenseSubstitutionComponent value) { 
+    public MedicationDispense setSubstitution(MedicationDispenseSubstitutionComponent value)  { 
       this.substitution = value;
       return this;
     }
@@ -2131,26 +2160,30 @@ public class MedicationDispense extends DomainResource {
      * @return {@link #notDoneReason} (Indicates the reason why a dispense was not performed.)
      */
     public CodeableConcept getNotDoneReasonCodeableConcept() throws FHIRException { 
+      if (this.notDoneReason == null)
+        return null;
       if (!(this.notDoneReason instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.notDoneReason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.notDoneReason;
     }
 
     public boolean hasNotDoneReasonCodeableConcept() { 
-      return this.notDoneReason instanceof CodeableConcept;
+      return this != null && this.notDoneReason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #notDoneReason} (Indicates the reason why a dispense was not performed.)
      */
     public Reference getNotDoneReasonReference() throws FHIRException { 
+      if (this.notDoneReason == null)
+        return null;
       if (!(this.notDoneReason instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.notDoneReason.getClass().getName()+" was encountered");
       return (Reference) this.notDoneReason;
     }
 
     public boolean hasNotDoneReasonReference() { 
-      return this.notDoneReason instanceof Reference;
+      return this != null && this.notDoneReason instanceof Reference;
     }
 
     public boolean hasNotDoneReason() { 
@@ -2160,7 +2193,9 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #notDoneReason} (Indicates the reason why a dispense was not performed.)
      */
-    public MedicationDispense setNotDoneReason(Type value) { 
+    public MedicationDispense setNotDoneReason(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for MedicationDispense.notDoneReason[x]: "+value.fhirType());
       this.notDoneReason = value;
       return this;
     }
@@ -2240,32 +2275,70 @@ public class MedicationDispense extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("partOf", "Reference(Procedure)", "The procedure that the dispense is done because of.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "Indicates type of medication dispense and where the medication is expected to be consumed or administered.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or the group to whom the medication will be given.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("supportingInformation", "Reference(Any)", "Additional information that supports the medication being dispensed.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
-        childrenList.add(new Property("performer", "", "Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication.", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("authorizingPrescription", "Reference(MedicationRequest)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription));
-        childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, java.lang.Integer.MAX_VALUE, quantity));
-        childrenList.add(new Property("daysSupply", "SimpleQuantity", "The amount of medication expressed as a timing amount.", 0, java.lang.Integer.MAX_VALUE, daysSupply));
-        childrenList.add(new Property("whenPrepared", "dateTime", "The time when the dispensed product was packaged and reviewed.", 0, java.lang.Integer.MAX_VALUE, whenPrepared));
-        childrenList.add(new Property("whenHandedOver", "dateTime", "The time the dispensed product was provided to the patient or their representative.", 0, java.lang.Integer.MAX_VALUE, whenHandedOver));
-        childrenList.add(new Property("destination", "Reference(Location)", "Identification of the facility/location where the medication was shipped to, as part of the dispense event.", 0, java.lang.Integer.MAX_VALUE, destination));
-        childrenList.add(new Property("receiver", "Reference(Patient|Practitioner)", "Identifies the person who picked up the medication.  This will usually be a patient or their caregiver, but some cases exist where it can be a healthcare professional.", 0, java.lang.Integer.MAX_VALUE, receiver));
-        childrenList.add(new Property("note", "Annotation", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
-        childrenList.add(new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.", 0, java.lang.Integer.MAX_VALUE, substitution));
-        childrenList.add(new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue));
-        childrenList.add(new Property("notDone", "boolean", "True if the dispense was not performed for some reason.", 0, java.lang.Integer.MAX_VALUE, notDone));
-        childrenList.add(new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, java.lang.Integer.MAX_VALUE, notDoneReason));
-        childrenList.add(new Property("eventHistory", "Reference(Provenance)", "A summary of the events of interest that have occurred, such as when the dispense was verified.", 0, java.lang.Integer.MAX_VALUE, eventHistory));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("partOf", "Reference(Procedure)", "The procedure that the dispense is done because of.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "Indicates type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category));
+        children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
+        children.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or the group to whom the medication will be given.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, 1, context));
+        children.add(new Property("supportingInformation", "Reference(Any)", "Additional information that supports the medication being dispensed.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
+        children.add(new Property("performer", "", "Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication.", 0, java.lang.Integer.MAX_VALUE, performer));
+        children.add(new Property("authorizingPrescription", "Reference(MedicationRequest)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription));
+        children.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type));
+        children.add(new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, 1, quantity));
+        children.add(new Property("daysSupply", "SimpleQuantity", "The amount of medication expressed as a timing amount.", 0, 1, daysSupply));
+        children.add(new Property("whenPrepared", "dateTime", "The time when the dispensed product was packaged and reviewed.", 0, 1, whenPrepared));
+        children.add(new Property("whenHandedOver", "dateTime", "The time the dispensed product was provided to the patient or their representative.", 0, 1, whenHandedOver));
+        children.add(new Property("destination", "Reference(Location)", "Identification of the facility/location where the medication was shipped to, as part of the dispense event.", 0, 1, destination));
+        children.add(new Property("receiver", "Reference(Patient|Practitioner)", "Identifies the person who picked up the medication.  This will usually be a patient or their caregiver, but some cases exist where it can be a healthcare professional.", 0, java.lang.Integer.MAX_VALUE, receiver));
+        children.add(new Property("note", "Annotation", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
+        children.add(new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.", 0, 1, substitution));
+        children.add(new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue));
+        children.add(new Property("notDone", "boolean", "True if the dispense was not performed for some reason.", 0, 1, notDone));
+        children.add(new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, notDoneReason));
+        children.add(new Property("eventHistory", "Reference(Provenance)", "A summary of the events of interest that have occurred, such as when the dispense was verified.", 0, java.lang.Integer.MAX_VALUE, eventHistory));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Procedure)", "The procedure that the dispense is done because of.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -892481550: /*status*/  return new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category);
+        case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
+        case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
+        case -209845038: /*medicationCodeableConcept*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
+        case 2104315196: /*medicationReference*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or the group to whom the medication will be given.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, 1, context);
+        case -1248768647: /*supportingInformation*/  return new Property("supportingInformation", "Reference(Any)", "Additional information that supports the medication being dispensed.", 0, java.lang.Integer.MAX_VALUE, supportingInformation);
+        case 481140686: /*performer*/  return new Property("performer", "", "Indicates who or what performed the event.  It should be assumed that the performer is the dispenser of the medication.", 0, java.lang.Integer.MAX_VALUE, performer);
+        case -1237557856: /*authorizingPrescription*/  return new Property("authorizingPrescription", "Reference(MedicationRequest)", "Indicates the medication order that is being dispensed against.", 0, java.lang.Integer.MAX_VALUE, authorizingPrescription);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type);
+        case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The amount of medication that has been dispensed. Includes unit of measure.", 0, 1, quantity);
+        case 197175334: /*daysSupply*/  return new Property("daysSupply", "SimpleQuantity", "The amount of medication expressed as a timing amount.", 0, 1, daysSupply);
+        case -562837097: /*whenPrepared*/  return new Property("whenPrepared", "dateTime", "The time when the dispensed product was packaged and reviewed.", 0, 1, whenPrepared);
+        case -940241380: /*whenHandedOver*/  return new Property("whenHandedOver", "dateTime", "The time the dispensed product was provided to the patient or their representative.", 0, 1, whenHandedOver);
+        case -1429847026: /*destination*/  return new Property("destination", "Reference(Location)", "Identification of the facility/location where the medication was shipped to, as part of the dispense event.", 0, 1, destination);
+        case -808719889: /*receiver*/  return new Property("receiver", "Reference(Patient|Practitioner)", "Identifies the person who picked up the medication.  This will usually be a patient or their caregiver, but some cases exist where it can be a healthcare professional.", 0, java.lang.Integer.MAX_VALUE, receiver);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Extra information about the dispense that could not be conveyed in the other attributes.", 0, java.lang.Integer.MAX_VALUE, note);
+        case -1201373865: /*dosageInstruction*/  return new Property("dosageInstruction", "Dosage", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction);
+        case 826147581: /*substitution*/  return new Property("substitution", "", "Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but does not happen, in other cases substitution is not expected but does happen.  This block explains what substitution did or did not happen and why.  If nothing is specified, substitution was not done.", 0, 1, substitution);
+        case 51602295: /*detectedIssue*/  return new Property("detectedIssue", "Reference(DetectedIssue)", "Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, duplicate therapy, dosage alert etc.", 0, java.lang.Integer.MAX_VALUE, detectedIssue);
+        case 2128257269: /*notDone*/  return new Property("notDone", "boolean", "True if the dispense was not performed for some reason.", 0, 1, notDone);
+        case -1762771385: /*notDoneReason[x]*/  return new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, notDoneReason);
+        case -1973169255: /*notDoneReason*/  return new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, notDoneReason);
+        case -930607416: /*notDoneReasonCodeableConcept*/  return new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, notDoneReason);
+        case 1030457266: /*notDoneReasonReference*/  return new Property("notDoneReason[x]", "CodeableConcept|Reference(DetectedIssue)", "Indicates the reason why a dispense was not performed.", 0, 1, notDoneReason);
+        case 1835190426: /*eventHistory*/  return new Property("eventHistory", "Reference(Provenance)", "A summary of the events of interest that have occurred, such as when the dispense was verified.", 0, java.lang.Integer.MAX_VALUE, eventHistory);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2679,12 +2752,12 @@ public class MedicationDispense extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof MedicationDispense))
+        if (!(other_ instanceof MedicationDispense))
           return false;
-        MedicationDispense o = (MedicationDispense) other;
+        MedicationDispense o = (MedicationDispense) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true)
            && compareDeep(category, o.category, true) && compareDeep(medication, o.medication, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(supportingInformation, o.supportingInformation, true)
@@ -2698,12 +2771,12 @@ public class MedicationDispense extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof MedicationDispense))
+        if (!(other_ instanceof MedicationDispense))
           return false;
-        MedicationDispense o = (MedicationDispense) other;
+        MedicationDispense o = (MedicationDispense) other_;
         return compareValues(status, o.status, true) && compareValues(whenPrepared, o.whenPrepared, true) && compareValues(whenHandedOver, o.whenHandedOver, true)
            && compareValues(notDone, o.notDone, true);
       }

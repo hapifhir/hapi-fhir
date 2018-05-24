@@ -42,9 +42,9 @@ import ca.uhn.fhir.validation.schematron.SchematronProvider;
  */
 public class FhirValidator {
 
-	private static final String I18N_KEY_NO_PHLOC_ERROR = FhirValidator.class.getName() + ".noPhlocError";
+	private static final String I18N_KEY_NO_PH_ERROR = FhirValidator.class.getName() + ".noPhError";
 
-	private static volatile Boolean ourPhlocPresentOnClasspath;
+	private static volatile Boolean ourPhPresentOnClasspath;
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<IValidatorModule>();
 
@@ -54,8 +54,8 @@ public class FhirValidator {
 	public FhirValidator(FhirContext theFhirContext) {
 		myContext = theFhirContext;
 
-		if (ourPhlocPresentOnClasspath == null) {
-			ourPhlocPresentOnClasspath = SchematronProvider.isSchematronAvailable(theFhirContext);
+		if (ourPhPresentOnClasspath == null) {
+			ourPhPresentOnClasspath = SchematronProvider.isSchematronAvailable(theFhirContext);
 		}
 	}
 
@@ -96,9 +96,10 @@ public class FhirValidator {
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public synchronized boolean isValidateAgainstStandardSchematron() {
-		if (!ourPhlocPresentOnClasspath) {
-			return false; 	// No need to ask since we dont have Phloc. Also Class.forname will complain
-							// about missing phloc import.
+		if (!ourPhPresentOnClasspath) {
+			// No need to ask since we dont have Ph-Schematron. Also Class.forname will complain
+			// about missing ph-schematron import.
+			return false;
 		}
 		Class<? extends IValidatorModule> cls = SchematronProvider.getSchematronValidatorClass();
 		return haveValidatorOfType(cls);
@@ -135,8 +136,11 @@ public class FhirValidator {
 	 * @return Returns a referens to <code>this<code> for method chaining
 	 */
 	public synchronized FhirValidator setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
-		if (theValidateAgainstStandardSchematron && !ourPhlocPresentOnClasspath) {
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_ERROR));
+		if (theValidateAgainstStandardSchematron && !ourPhPresentOnClasspath) {
+			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PH_ERROR));
+		}
+		if (!theValidateAgainstStandardSchematron && !ourPhPresentOnClasspath) {
+			return this;
 		}
 		Class<? extends IValidatorModule> cls = SchematronProvider.getSchematronValidatorClass();
 		IValidatorModule instance = SchematronProvider.getSchematronValidatorInstance(myContext);
@@ -163,7 +167,7 @@ public class FhirValidator {
 	private void applyDefaultValidators() {
 		if (myValidators.isEmpty()) {
 			setValidateAgainstStandardSchema(true);
-			if (ourPhlocPresentOnClasspath) {
+			if (ourPhPresentOnClasspath) {
 				setValidateAgainstStandardSchematron(true);
 			}
 		}

@@ -31,11 +31,13 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.dstu3.model;
 
-import java.util.*;
-import java.util.zip.DataFormatException;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.zip.DataFormatException;
 
 /**
  * Represents a FHIR instant datatype. Valid precisions values for this type are:
@@ -47,12 +49,11 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 @DatatypeDef(name="instant")
 public class InstantType extends BaseDateTimeType {
 
-	private static final long serialVersionUID = 3L;
-	
 	/**
 	 * The default precision for this type
 	 */
 	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.MILLI;
+	private static final long serialVersionUID = 3L;
 
 	/**
 	 * Constructor which creates an InstantDt with <b>no timne value</b>. Note
@@ -153,15 +154,23 @@ public class InstantType extends BaseDateTimeType {
 		return getValue().before(theDate);
 	}
 
+	@Override
+	public InstantType copy() {
+		return new InstantType(getValueAsString());
+	}
+
+	public String fhirType() {
+		return "instant";
+	}
+
 	/**
-	 * Sets the value of this instant to the current time (from the system
-	 * clock) and the local/default timezone (as retrieved using
-	 * {@link TimeZone#getDefault()}. This TimeZone is generally obtained from
-	 * the underlying OS.
+	 * Returns the default precision for this datatype
+	 *
+	 * @see #DEFAULT_PRECISION
 	 */
-	public void setToCurrentTimeInLocalTimeZone() {
-		setValue(new Date());
-		setTimeZone(TimeZone.getDefault());
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
 	}
 
 	@Override
@@ -176,27 +185,14 @@ public class InstantType extends BaseDateTimeType {
 	}
 
 	/**
-	 * Factory method which creates a new InstantDt with millisecond precision and initializes it with the
-	 * current time and the system local timezone.
+	 * Sets the value of this instant to the current time (from the system
+	 * clock) and the local/default timezone (as retrieved using
+	 * {@link TimeZone#getDefault()}. This TimeZone is generally obtained from
+	 * the underlying OS.
 	 */
-	public static InstantType withCurrentTime() {
-		return new InstantType(new Date(), TemporalPrecisionEnum.MILLI, TimeZone.getDefault());
-	}
-
-	/**
-	 * Returns the default precision for this datatype
-	 * 
-	 * @see #DEFAULT_PRECISION
-	 */
-	@Override
-	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
-		return DEFAULT_PRECISION;
-	}
-
-
-	@Override
-	public InstantType copy() {
-		return new InstantType(getValueAsString());
+	public void setToCurrentTimeInLocalTimeZone() {
+		setValue(new Date());
+		setTimeZone(TimeZone.getDefault());
 	}
 
 	/**
@@ -216,7 +212,11 @@ public class InstantType extends BaseDateTimeType {
 		return retVal;
 	}
 
-	public String fhirType() {
-		return "instant";
+	/**
+	 * Factory method which creates a new InstantDt with millisecond precision and initializes it with the
+	 * current time and the system local timezone.
+	 */
+	public static InstantType withCurrentTime() {
+		return new InstantType(new Date(), TemporalPrecisionEnum.MILLI, TimeZone.getDefault());
 	}
 }

@@ -46,6 +46,7 @@ public class PortUtil {
 			int port;
 			do {
 				server = new ServerSocket(0);
+				server.setReuseAddress(true);
 				port = server.getLocalPort();
 				server.close();
 			} while (!ourPorts.add(port));

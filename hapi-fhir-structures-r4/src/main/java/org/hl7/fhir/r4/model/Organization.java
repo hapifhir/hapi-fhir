@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -402,10 +402,10 @@ public class Organization extends DomainResource {
     protected StringType name;
 
     /**
-     * A list of alternate names that the organization is known as, or was known as in the past.
+     * A list of alternate names that the organization is known as, or was known as in the past.
      */
     @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of alternate names that the organization is known as, or was known as in the past", formalDefinition="A list of alternate names that the organization is known as, or was known as in the past." )
+    @Description(shortDefinition="A list of alternate names that the organization is known as, or was known as in the past", formalDefinition="A list of alternate names that the organization is known as, or was known as in the past." )
     protected List<StringType> alias;
 
     /**
@@ -663,7 +663,7 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
      */
     public List<StringType> getAlias() { 
       if (this.alias == null)
@@ -689,7 +689,7 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
      */
     public StringType addAliasElement() {//2 
       StringType t = new StringType();
@@ -700,7 +700,7 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
      */
     public Organization addAlias(String value) { //1
       StringType t = new StringType();
@@ -712,7 +712,7 @@ public class Organization extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the organization is known as, or was known as in the past.)
      */
     public boolean hasAlias(String value) { 
       if (this.alias == null)
@@ -1007,7 +1007,7 @@ public class Organization extends DomainResource {
         children.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, 1, active));
         children.add(new Property("type", "CodeableConcept", "The kind(s) of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("name", "string", "A name associated with the organization.", 0, 1, name));
-        children.add(new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         children.add(new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
         children.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
         children.add(new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, 1, partOf));
@@ -1022,7 +1022,7 @@ public class Organization extends DomainResource {
         case -1422950650: /*active*/  return new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, 1, active);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind(s) of organization that this is.", 0, java.lang.Integer.MAX_VALUE, type);
         case 3373707: /*name*/  return new Property("name", "string", "A name associated with the organization.", 0, 1, name);
-        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the organization is known as, or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
         case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail for the organization.", 0, java.lang.Integer.MAX_VALUE, telecom);
         case -1147692044: /*address*/  return new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, 1, partOf);

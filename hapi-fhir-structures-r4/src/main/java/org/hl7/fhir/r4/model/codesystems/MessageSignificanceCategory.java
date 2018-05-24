@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -55,19 +55,19 @@ public enum MessageSignificanceCategory {
         public static MessageSignificanceCategory fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("Consequence".equals(codeString))
+        if ("consequence".equals(codeString))
           return CONSEQUENCE;
-        if ("Currency".equals(codeString))
+        if ("currency".equals(codeString))
           return CURRENCY;
-        if ("Notification".equals(codeString))
+        if ("notification".equals(codeString))
           return NOTIFICATION;
         throw new FHIRException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case CONSEQUENCE: return "Consequence";
-            case CURRENCY: return "Currency";
-            case NOTIFICATION: return "Notification";
+            case CONSEQUENCE: return "consequence";
+            case CURRENCY: return "currency";
+            case NOTIFICATION: return "notification";
             default: return "?";
           }
         }

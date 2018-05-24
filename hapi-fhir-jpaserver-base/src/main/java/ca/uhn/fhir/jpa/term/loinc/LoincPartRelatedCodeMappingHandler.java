@@ -32,20 +32,29 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements IRecordHandler {
+public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler implements IRecordHandler {
 
-	public static final String LOINC_PART_MAP_ID = "LOINC-PART-MAP";
-	public static final String LOINC_PART_MAP_URI = "http://loinc.org/fhir/loinc-part-map";
-	public static final String LOINC_PART_MAP_NAME = "LOINC Part Map";
+	public static final String LOINC_SCT_PART_MAP_ID = "loinc-parts-to-snomed-ct";
+	public static final String LOINC_SCT_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-snomed-ct";
+	public static final String LOINC_SCT_PART_MAP_NAME = "LOINC Part Map to SNOMED CT";
+	public static final String LOINC_RXNORM_PART_MAP_ID = "loinc-parts-to-rxnorm";
+	public static final String LOINC_RXNORM_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-rxnorm";
+	public static final String LOINC_RXNORM_PART_MAP_NAME = "LOINC Part Map to RxNORM";
+	public static final String LOINC_RADLEX_PART_MAP_ID = "loinc-parts-to-radlex";
+	public static final String LOINC_RADLEX_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-radlex";
+	public static final String LOINC_RADLEX_PART_MAP_NAME = "LOINC Part Map to RADLEX";
+	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private final List<ConceptMap> myConceptMaps;
 
-	public LoincPartRelatedCodeMappingHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
-		super(theCode2concept, theValueSets, theConceptMaps);
+	public LoincPartRelatedCodeMappingHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
 		myConceptMaps = theConceptMaps;
@@ -68,7 +77,8 @@ public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements I
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
 		Enumerations.ConceptMapEquivalence equivalence;
-		switch (mapType) {
+		switch (trim(defaultString(mapType))) {
+			case "":
 			case "Exact":
 				// 'equal' is more exact than 'equivalent' in the equivalence codes
 				equivalence = Enumerations.ConceptMapEquivalence.EQUAL;
@@ -80,14 +90,37 @@ public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements I
 				equivalence = Enumerations.ConceptMapEquivalence.WIDER;
 				break;
 			default:
-				throw new InternalErrorException("Unknown MapType: " + mapType);
+				throw new InternalErrorException("Unknown MapType '" + mapType + "' for PartNumber: " + partNumber);
+		}
+
+		String loincPartMapId;
+		String loincPartMapUri;
+		String loincPartMapName;
+		switch (extCodeSystem) {
+			case IHapiTerminologyLoaderSvc.SCT_URI:
+				loincPartMapId = LOINC_SCT_PART_MAP_ID;
+				loincPartMapUri = LOINC_SCT_PART_MAP_URI;
+				loincPartMapName = LOINC_SCT_PART_MAP_NAME;
+				break;
+			case "http://www.nlm.nih.gov/research/umls/rxnorm":
+				loincPartMapId = LOINC_RXNORM_PART_MAP_ID;
+				loincPartMapUri = LOINC_RXNORM_PART_MAP_URI;
+				loincPartMapName = LOINC_RXNORM_PART_MAP_NAME;
+				break;
+			case "http://www.radlex.org":
+				loincPartMapId = LOINC_RADLEX_PART_MAP_ID;
+				loincPartMapUri = LOINC_RADLEX_PART_MAP_URI;
+				loincPartMapName = LOINC_RADLEX_PART_MAP_NAME;
+				break;
+			default:
+				throw new InternalErrorException("Don't know how to handle mapping to system: " + extCodeSystem);
 		}
 
 		addConceptMapEntry(
 			new ConceptMapping()
-				.setConceptMapId(LOINC_PART_MAP_ID)
-				.setConceptMapUri(LOINC_PART_MAP_URI)
-				.setConceptMapName(LOINC_PART_MAP_NAME)
+				.setConceptMapId(loincPartMapId)
+				.setConceptMapUri(loincPartMapUri)
+				.setConceptMapName(loincPartMapName)
 				.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 				.setSourceCode(partNumber)
 				.setSourceDisplay(partName)
@@ -96,7 +129,9 @@ public class LoincPartRelatedCodeMappingHandler extends BaseHandler implements I
 				.setTargetDisplay(extCodeDisplayName)
 				.setTargetCodeSystemVersion(extCodeSystemVersion)
 				.setEquivalence(equivalence)
-				.setCopyright(extCodeSystemCopyrightNotice));
+				.setCopyright(extCodeSystemCopyrightNotice),
+			CM_COPYRIGHT
+		);
 
 	}
 

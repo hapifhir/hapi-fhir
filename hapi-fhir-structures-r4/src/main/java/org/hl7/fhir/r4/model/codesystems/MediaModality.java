@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -127,11 +127,11 @@ public enum MediaModality {
             case DIAGRAM: return "Diagram";
             case FAX: return "Fax";
             case SCAN: return "Scanned Document";
-            case RETINA: return "Retina scan";
+            case RETINA: return "Retina Scan";
             case FINGERPRINT: return "Fingerprint";
-            case IRIS: return "Iris";
-            case PALM: return "Palm";
-            case FACE: return "Face";
+            case IRIS: return "Iris Scan";
+            case PALM: return "Palm Scan";
+            case FACE: return "Face Scan";
             default: return "?";
           }
     }

@@ -236,6 +236,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/profile/profiles-resources.xml");
 			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/profile/profiles-types.xml");
 			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/profile/profiles-others.xml");
+			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu3/model/extension/extension-definitions.xml");
 
 			myStructureDefinitions = structureDefinitions;
 		}

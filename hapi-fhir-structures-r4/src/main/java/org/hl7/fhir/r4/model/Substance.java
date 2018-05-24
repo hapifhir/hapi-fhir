@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -494,26 +494,30 @@ public class Substance extends DomainResource {
          * @return {@link #substance} (Another substance that is a component of this substance.)
          */
         public CodeableConcept getSubstanceCodeableConcept() throws FHIRException { 
+          if (this.substance == null)
+            return null;
           if (!(this.substance instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (CodeableConcept) this.substance;
         }
 
         public boolean hasSubstanceCodeableConcept() { 
-          return this.substance instanceof CodeableConcept;
+          return this != null && this.substance instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #substance} (Another substance that is a component of this substance.)
          */
         public Reference getSubstanceReference() throws FHIRException { 
+          if (this.substance == null)
+            return null;
           if (!(this.substance instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (Reference) this.substance;
         }
 
         public boolean hasSubstanceReference() { 
-          return this.substance instanceof Reference;
+          return this != null && this.substance instanceof Reference;
         }
 
         public boolean hasSubstance() { 
@@ -524,6 +528,8 @@ public class Substance extends DomainResource {
          * @param value {@link #substance} (Another substance that is a component of this substance.)
          */
         public SubstanceIngredientComponent setSubstance(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for Substance.ingredient.substance[x]: "+value.fhirType());
           this.substance = value;
           return this;
         }

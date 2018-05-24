@@ -31,10 +31,15 @@ public abstract class RdfParserBase extends ParserBase implements IParser  {
 		throw new Error("Parsing not implemented yet");
 	}
 
-	@Override
-	public Type parseType(InputStream input, String knownType) throws IOException, FHIRFormatError {
-		throw new Error("Parsing not implemented yet");
-	}
+  @Override
+  public Type parseType(InputStream input, String knownType) throws IOException, FHIRFormatError {
+    throw new Error("Parsing not implemented yet");
+  }
+
+  @Override
+  public Type parseAnyType(InputStream input, String knownType) throws IOException, FHIRFormatError {
+    throw new Error("Parsing not implemented yet");
+  }
 
 	private String url;
 

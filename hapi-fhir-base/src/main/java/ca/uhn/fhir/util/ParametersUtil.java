@@ -20,39 +20,58 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.Collection;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.StringDt;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Utilities for dealing with parameters resources in a version indepenedent way
  */
 public class ParametersUtil {
 
-	/**
-	 * Add a paratemer value to a Parameters resource
-	 * @param theContext The FhirContext
-	 * @param theParameters The Parameters resource
-	 * @param theName The parametr name
-	 * @param theValue The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
-	 */
-	public static void addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName, Object theValue) {
-		RuntimeResourceDefinition def = theContext.getResourceDefinition(theParameters);
-		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+	public static List<String> getNamedParameterValuesAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		Validate.notNull(theParameters, "theParameters must not be null");
+		RuntimeResourceDefinition resDef = theCtx.getResourceDefinition(theParameters.getClass());
+		BaseRuntimeChildDefinition parameterChild = resDef.getChildByName("parameter");
+		List<IBase> parameterReps = parameterChild.getAccessor().getValues(theParameters);
 
-		addClientParameter(theContext, theValue, theParameters, paramChild, paramChildElem, theName);
+		List<String> retVal = new ArrayList<>();
+
+		for (IBase nextParameter : parameterReps) {
+			BaseRuntimeElementCompositeDefinition<?> nextParameterDef = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(nextParameter.getClass());
+			BaseRuntimeChildDefinition nameChild = nextParameterDef.getChildByName("name");
+			List<IBase> nameValues = nameChild.getAccessor().getValues(nextParameter);
+			Optional<? extends IPrimitiveType<?>> nameValue = nameValues
+				.stream()
+				.filter(t -> t instanceof IPrimitiveType<?>)
+				.map(t -> ((IPrimitiveType<?>) t))
+				.findFirst();
+			if (!nameValue.isPresent() || !theParameterName.equals(nameValue.get().getValueAsString())) {
+				continue;
+			}
+
+			BaseRuntimeChildDefinition valueChild = nextParameterDef.getChildByName("value[x]");
+			List<IBase> valueValues = valueChild.getAccessor().getValues(nextParameter);
+			valueValues
+				.stream()
+				.filter(t->t instanceof IPrimitiveType<?>)
+				.map(t->((IPrimitiveType<?>)t).getValueAsString())
+				.filter(StringUtils::isNotBlank)
+				.forEach(retVal::add);
+
+		}
+
+		return retVal;
 	}
 
 	private static void addClientParameter(FhirContext theContext, Object theValue, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
@@ -70,6 +89,22 @@ public class ParametersUtil {
 		} else {
 			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for paramater " + theName);
 		}
+	}
+
+	/**
+	 * Add a paratemer value to a Parameters resource
+	 *
+	 * @param theContext    The FhirContext
+	 * @param theParameters The Parameters resource
+	 * @param theName       The parametr name
+	 * @param theValue      The parameter value (can be a {@link IBaseResource resource} or a {@link IBaseDatatype datatype})
+	 */
+	public static void addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName, Object theValue) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theParameters);
+		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+
+		addClientParameter(theContext, theValue, theParameters, paramChild, paramChildElem, theName);
 	}
 
 	private static IBase createParameterRepetition(FhirContext theContext, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
@@ -95,4 +130,5 @@ public class ParametersUtil {
 		Validate.notNull(theContext, "theContext must not be null");
 		return (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
 	}
+
 }

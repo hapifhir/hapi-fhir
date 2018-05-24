@@ -53,6 +53,11 @@ public class TermConceptPropertyFieldBridge implements FieldBridge, StringBridge
 			for (TermConceptProperty next : properties) {
 				String propValue = next.getKey() + "=" + next.getValue();
 				theLuceneOptions.addFieldToDocument(theName, propValue, theDocument);
+
+				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
+					propValue = next.getKey() + "=" + next.getDisplay();
+					theLuceneOptions.addFieldToDocument(theName, propValue, theDocument);
+				}
 			}
 		}
 	}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum OrganizationRole {
          */
         AGENCY, 
         /**
-         * An organization providing research-related services such as conducting research, recruiting research participants, analyzing data, etc
+         * An organization providing research-related services such as conducting research, recruiting research participants, analyzing data, etc.
          */
         RESEARCH, 
         /**
@@ -113,7 +113,7 @@ public enum OrganizationRole {
           switch (this) {
             case PROVIDER: return "";
             case AGENCY: return "An organization such as a public health agency, community/social services provider, etc.";
-            case RESEARCH: return "An organization providing research-related services such as conducting research, recruiting research participants, analyzing data, etc";
+            case RESEARCH: return "An organization providing research-related services such as conducting research, recruiting research participants, analyzing data, etc.";
             case PAYER: return "An organization providing reimbursement, payment, or related services";
             case DIAGNOSTICS: return "An organization providing diagnostic testing/laboratory services";
             case SUPPLIER: return "An organization that provides medical supplies (e.g. medical devices, equipment, pharmaceutical products, etc.)";

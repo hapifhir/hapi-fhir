@@ -29,15 +29,17 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
-import java.util.Date;
-import java.util.List;
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.Description;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.Date;
+import java.util.List;
 /**
  * A time period defined by a start and end date and optionally time.
  */
@@ -191,10 +193,20 @@ public class Period extends Type implements ICompositeType {
     return this; 
   }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, start));
-        childrenList.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, java.lang.Integer.MAX_VALUE, end));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, 1, start));
+        children.add(new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, 1, end));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 109757538: /*start*/  return new Property("start", "dateTime", "The start of the period. The boundary is inclusive.", 0, 1, start);
+        case 100571: /*end*/  return new Property("end", "dateTime", "The end of the period. If the end of the period is missing, it means that the period is ongoing. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.", 0, 1, end);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -282,22 +294,22 @@ public class Period extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Period))
+        if (!(other_ instanceof Period))
           return false;
-        Period o = (Period) other;
+        Period o = (Period) other_;
         return compareDeep(start, o.start, true) && compareDeep(end, o.end, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Period))
+        if (!(other_ instanceof Period))
           return false;
-        Period o = (Period) other;
+        Period o = (Period) other_;
         return compareValues(start, o.start, true) && compareValues(end, o.end, true);
       }
 

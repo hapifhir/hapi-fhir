@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -38,6 +37,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
@@ -169,6 +169,24 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		fail();
 		return null;
 	}
+
+	@Test
+	public void testResourceCounts() {
+		Patient p = new Patient();
+		p.setActive(true);
+		myPatientDao.create(p);
+
+		Observation o = new Observation();
+		o.setStatus(ObservationStatus.AMENDED);
+		myObservationDao.create(o);
+
+		Map<String, Long> counts = mySystemDao.getResourceCounts();
+		assertEquals(new Long(1L), counts.get("Patient"));
+		assertEquals(new Long(1L), counts.get("Observation"));
+		assertEquals(null, counts.get("Organization"));
+
+	}
+
 
 	@Test
 	public void testBatchCreateWithBadRead() {
@@ -694,6 +712,36 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
+	}
+
+	@Test
+	public void testTransactionUpdateTwoResourcesWithSameId() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("DDD");
+		p.setId("Patient/ABC");
+		request.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/ABC");
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("DDD");
+		p.setId("Patient/ABC");
+		request.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/ABC");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Transaction bundle contains multiple resources with ID: Patient/ABC"));
+		}
 	}
 
 	@Test

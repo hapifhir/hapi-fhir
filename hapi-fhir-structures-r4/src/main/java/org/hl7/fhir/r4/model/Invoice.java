@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1280,10 +1280,10 @@ public class Invoice extends DomainResource {
     protected Enumeration<InvoiceStatus> status;
 
     /**
-     * In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).
+     * In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).
      */
     @Child(name = "cancelledReason", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Reason for cancellation of this Invoice", formalDefinition="In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc)." )
+    @Description(shortDefinition="Reason for cancellation of this Invoice", formalDefinition="In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.)." )
     protected StringType cancelledReason;
 
     /**
@@ -1513,7 +1513,7 @@ public class Invoice extends DomainResource {
     }
 
     /**
-     * @return {@link #cancelledReason} (In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).). This is the underlying object with id, value and extensions. The accessor "getCancelledReason" gives direct access to the value
+     * @return {@link #cancelledReason} (In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).). This is the underlying object with id, value and extensions. The accessor "getCancelledReason" gives direct access to the value
      */
     public StringType getCancelledReasonElement() { 
       if (this.cancelledReason == null)
@@ -1533,7 +1533,7 @@ public class Invoice extends DomainResource {
     }
 
     /**
-     * @param value {@link #cancelledReason} (In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).). This is the underlying object with id, value and extensions. The accessor "getCancelledReason" gives direct access to the value
+     * @param value {@link #cancelledReason} (In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).). This is the underlying object with id, value and extensions. The accessor "getCancelledReason" gives direct access to the value
      */
     public Invoice setCancelledReasonElement(StringType value) { 
       this.cancelledReason = value;
@@ -1541,14 +1541,14 @@ public class Invoice extends DomainResource {
     }
 
     /**
-     * @return In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).
+     * @return In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).
      */
     public String getCancelledReason() { 
       return this.cancelledReason == null ? null : this.cancelledReason.getValue();
     }
 
     /**
-     * @param value In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).
+     * @param value In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).
      */
     public Invoice setCancelledReason(String value) { 
       if (Utilities.noString(value))
@@ -2113,7 +2113,7 @@ public class Invoice extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Identifier of this Invoice, often used for reference in corresponcence about this invoice or for tracking of payments.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The current state of the Invoice.", 0, 1, status));
-        children.add(new Property("cancelledReason", "string", "In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).", 0, 1, cancelledReason));
+        children.add(new Property("cancelledReason", "string", "In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).", 0, 1, cancelledReason));
         children.add(new Property("type", "CodeableConcept", "Type of Invoice depending on domain, realm an usage (eg. internal/external, dental, preliminary).", 0, 1, type));
         children.add(new Property("subject", "Reference(Patient|Group)", "The individual or set of individuals receiving the goods and services billed in this invoice.", 0, 1, subject));
         children.add(new Property("recipient", "Reference(Organization|Patient|RelatedPerson)", "The individual or Organization responsible for balancing of this invoice.", 0, 1, recipient));
@@ -2134,7 +2134,7 @@ public class Invoice extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier of this Invoice, often used for reference in corresponcence about this invoice or for tracking of payments.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The current state of the Invoice.", 0, 1, status);
-        case 1550362357: /*cancelledReason*/  return new Property("cancelledReason", "string", "In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc).", 0, 1, cancelledReason);
+        case 1550362357: /*cancelledReason*/  return new Property("cancelledReason", "string", "In case of Invoice cancellation a reason must be given (entered in error, superseded by corrected invoice etc.).", 0, 1, cancelledReason);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of Invoice depending on domain, realm an usage (eg. internal/external, dental, preliminary).", 0, 1, type);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The individual or set of individuals receiving the goods and services billed in this invoice.", 0, 1, subject);
         case 820081177: /*recipient*/  return new Property("recipient", "Reference(Organization|Patient|RelatedPerson)", "The individual or Organization responsible for balancing of this invoice.", 0, 1, recipient);

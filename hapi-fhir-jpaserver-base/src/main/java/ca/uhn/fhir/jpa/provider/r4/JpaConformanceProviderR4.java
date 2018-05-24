@@ -35,6 +35,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider {
 
 	private volatile CapabilityStatement myCachedValue;
@@ -70,10 +72,11 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
 		CapabilityStatement retVal = myCachedValue;
 
-		Map<String, Long> counts = Collections.emptyMap();
+		Map<String, Long> counts = null;
 		if (myIncludeResourceCounts) {
-			counts = mySystemDao.getResourceCounts();
+			counts = mySystemDao.getResourceCountsFromCache();
 		}
+		counts = defaultIfNull(counts, Collections.emptyMap());
 
 		retVal = super.getServerConformance(theRequest);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -47,7 +47,7 @@ public enum QuestionnaireEnableOperator {
         /**
          * True if whether at least no answer has a value that is equal to the enableWhen answer
          */
-        NOT_EQUAL,
+        NOT_EQUAL, 
         /**
          * True if whether at least no answer has a value that is greater than the enableWhen answer
          */
@@ -68,49 +68,6 @@ public enum QuestionnaireEnableOperator {
          * added to help the parsers
          */
         NULL;
-        public String getDefinition() {
-          switch (this) {
-            case EXISTS: return "True if whether an answer exists is equal to the enableWhen answer (which must be a boolean)";
-            case EQUAL: return "True if whether at least one answer has a value that is equal to the enableWhen answer";
-            case NOT_EQUAL: return "True if whether at least no answer has a value that is equal to the enableWhen answer";
-            case GREATER_THAN: return "True if whether at least no answer has a value that is greater than the enableWhen answer";
-            case LESS_THAN: return "True if whether at least no answer has a value that is less than the enableWhen answer";
-            case GREATER_OR_EQUAL: return "True if whether at least no answer has a value that is greater or equal to the enableWhen answer";
-            case LESS_OR_EQUAL: return "True if whether at least no answer has a value that is less or equal to the enableWhen answer";
-            default: return "?";
-          }
-        }
-
-        public String getDisplay() {
-          switch (this) {
-            case EXISTS: return "Exists";
-            case EQUAL: return "Equals";
-            case NOT_EQUAL: return "Not Equals";
-            case GREATER_THAN: return "Greater Than";
-            case LESS_THAN: return "Less Than";
-            case GREATER_OR_EQUAL: return "Greator or Equals";
-            case LESS_OR_EQUAL: return "Less or Equals";
-            default: return "?";
-          }
-    }
-
-        public String getSystem() {
-          return "http://hl7.org/fhir/questionnaire-enable-operator";
-        }
-
-        public String toCode() {
-          switch (this) {
-            case EXISTS: return "exists";
-            case EQUAL: return "=";
-            case NOT_EQUAL: return "!=";
-            case GREATER_THAN: return ">";
-            case LESS_THAN: return "<";
-            case GREATER_OR_EQUAL: return ">=";
-            case LESS_OR_EQUAL: return "<=";
-            default: return "?";
-          }
-        }
-
         public static QuestionnaireEnableOperator fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,6 +87,45 @@ public enum QuestionnaireEnableOperator {
           return LESS_OR_EQUAL;
         throw new FHIRException("Unknown QuestionnaireEnableOperator code '"+codeString+"'");
         }
+        public String toCode() {
+          switch (this) {
+            case EXISTS: return "exists";
+            case EQUAL: return "=";
+            case NOT_EQUAL: return "!=";
+            case GREATER_THAN: return ">";
+            case LESS_THAN: return "<";
+            case GREATER_OR_EQUAL: return ">=";
+            case LESS_OR_EQUAL: return "<=";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          return "http://hl7.org/fhir/questionnaire-enable-operator";
+        }
+        public String getDefinition() {
+          switch (this) {
+            case EXISTS: return "True if whether an answer exists is equal to the enableWhen answer (which must be a boolean)";
+            case EQUAL: return "True if whether at least one answer has a value that is equal to the enableWhen answer";
+            case NOT_EQUAL: return "True if whether at least no answer has a value that is equal to the enableWhen answer";
+            case GREATER_THAN: return "True if whether at least no answer has a value that is greater than the enableWhen answer";
+            case LESS_THAN: return "True if whether at least no answer has a value that is less than the enableWhen answer";
+            case GREATER_OR_EQUAL: return "True if whether at least no answer has a value that is greater or equal to the enableWhen answer";
+            case LESS_OR_EQUAL: return "True if whether at least no answer has a value that is less or equal to the enableWhen answer";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case EXISTS: return "Exists";
+            case EQUAL: return "Equals";
+            case NOT_EQUAL: return "Not Equals";
+            case GREATER_THAN: return "Greater Than";
+            case LESS_THAN: return "Less Than";
+            case GREATER_OR_EQUAL: return "Greater or Equals";
+            case LESS_OR_EQUAL: return "Less or Equals";
+            default: return "?";
+          }
+    }
 
 
 }

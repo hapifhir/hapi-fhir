@@ -51,7 +51,9 @@ public class XLSXmlNormaliser {
   }
   
   public void go() throws FHIRException, TransformerException, ParserConfigurationException, SAXException, IOException {
-    xml = parseXml(new FileInputStream(source));
+    File inp = new File(source);
+    long time = inp.lastModified();
+    xml = parseXml(new FileInputStream(inp));
     
     Element root = xml.getDocumentElement();
 
@@ -90,7 +92,7 @@ public class XLSXmlNormaliser {
       s = s.replaceAll("\r\n","\n");
       s = replaceSignificantEoln(s);
       TextFile.stringToFile(s, dest, false);
-
+      new File(dest).setLastModified(time);
     } catch (Exception e) {
       TextFile.stringToFile("Run process helper", altName);
     }

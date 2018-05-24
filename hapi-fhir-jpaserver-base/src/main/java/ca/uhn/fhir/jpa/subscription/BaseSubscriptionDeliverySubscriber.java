@@ -67,7 +67,7 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 				// can have placeholder IDs in them.
 				IIdType payloadId = msg.getPayloadId(getContext());
 				Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
-				IFhirResourceDao dao = getSubscriptionDao().getDao(type);
+				IFhirResourceDao dao = getSubscriptionInterceptor().getDao(type);
 				IBaseResource loadedPayload;
 				try {
 					loadedPayload = dao.read(payloadId);

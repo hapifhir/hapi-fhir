@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -236,14 +236,14 @@ public class Endpoint extends DomainResource {
     protected StringType name;
 
     /**
-     * The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).
+     * The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).
      */
     @Child(name = "managingOrganization", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Organization that manages this endpoint (might not be the organization that exposes the endpoint)", formalDefinition="The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data)." )
+    @Description(shortDefinition="Organization that manages this endpoint (might not be the organization that exposes the endpoint)", formalDefinition="The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data)." )
     protected Reference managingOrganization;
 
     /**
-     * The actual object that is the target of the reference (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * The actual object that is the target of the reference (The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).)
      */
     protected Organization managingOrganizationTarget;
 
@@ -481,7 +481,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @return {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).)
      */
     public Reference getManagingOrganization() { 
       if (this.managingOrganization == null)
@@ -497,7 +497,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @param value {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @param value {@link #managingOrganization} (The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).)
      */
     public Endpoint setManagingOrganization(Reference value) { 
       this.managingOrganization = value;
@@ -505,7 +505,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).)
      */
     public Organization getManagingOrganizationTarget() { 
       if (this.managingOrganizationTarget == null)
@@ -517,7 +517,7 @@ public class Endpoint extends DomainResource {
     }
 
     /**
-     * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).)
+     * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).)
      */
     public Endpoint setManagingOrganizationTarget(Organization value) { 
       this.managingOrganizationTarget = value;
@@ -827,7 +827,7 @@ public class Endpoint extends DomainResource {
         children.add(new Property("status", "code", "active | suspended | error | off | test.", 0, 1, status));
         children.add(new Property("connectionType", "Coding", "A coded value that represents the technical details of the usage of this endpoint, such as what WSDLs should be used in what way. (e.g. XDS.b/DICOM/cds-hook).", 0, 1, connectionType));
         children.add(new Property("name", "string", "A friendly name that this endpoint can be referred to with.", 0, 1, name));
-        children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, 1, managingOrganization));
+        children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).", 0, 1, managingOrganization));
         children.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, 1, period));
         children.add(new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType));
@@ -843,7 +843,7 @@ public class Endpoint extends DomainResource {
         case -892481550: /*status*/  return new Property("status", "code", "active | suspended | error | off | test.", 0, 1, status);
         case 1270211384: /*connectionType*/  return new Property("connectionType", "Coding", "A coded value that represents the technical details of the usage of this endpoint, such as what WSDLs should be used in what way. (e.g. XDS.b/DICOM/cds-hook).", 0, 1, connectionType);
         case 3373707: /*name*/  return new Property("name", "string", "A friendly name that this endpoint can be referred to with.", 0, 1, name);
-        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organisation is hosting this in the cloud, it is the organisation associated with the data).", 0, 1, managingOrganization);
+        case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that manages this endpoint (even if technically another organization is hosting this in the cloud, it is the organization associated with the data).", 0, 1, managingOrganization);
         case 951526432: /*contact*/  return new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -991726143: /*period*/  return new Property("period", "Period", "The interval during which the endpoint is expected to be operational.", 0, 1, period);
         case 909929960: /*payloadType*/  return new Property("payloadType", "CodeableConcept", "The payload type describes the acceptable content that can be communicated on the endpoint.", 0, java.lang.Integer.MAX_VALUE, payloadType);

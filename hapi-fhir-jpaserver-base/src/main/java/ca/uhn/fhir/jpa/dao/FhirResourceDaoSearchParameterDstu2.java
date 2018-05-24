@@ -33,6 +33,8 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,31 +50,6 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 		String expression = theResource != null ? theResource.getXpath() : null;
 		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
-	}
-
-	/**
-	 * This method is called once per minute to perform any required re-indexing. During most passes this will
-	 * just check and find that there are no resources requiring re-indexing. In that case the method just returns
-	 * immediately. If the search finds that some resources require reindexing, the system will do a bunch of
-	 * reindexing and then return.
-	 */
-	@Override
-	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
-	public void performReindexingPass() {
-		if (getConfig().isSchedulingDisabled()) {
-			return;
-		}
-
-		Integer count = mySystemDao.performReindexingPass(100);
-		for (int i = 0; i < 50 && count != null && count != 0; i++) {
-			count = mySystemDao.performReindexingPass(100);
-			try {
-				Thread.sleep(DateUtils.MILLIS_PER_SECOND);
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
-
 	}
 
 	@Override

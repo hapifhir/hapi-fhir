@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum MedicationDispenseStatus {
          */
         PREPARATION, 
         /**
-         * The dispensed producut is ready for pickup.
+         * The dispensed product is ready for pickup.
          */
         INPROGRESS, 
         /**
@@ -112,7 +112,7 @@ public enum MedicationDispenseStatus {
         public String getDefinition() {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. initial compounding or packaging of medication). Preparation stages may be tracked for billing purposes.";
-            case INPROGRESS: return "The dispensed producut is ready for pickup.";
+            case INPROGRESS: return "The dispensed product is ready for pickup.";
             case CANCELLED: return "The dispensed product was not and will never be picked up by the patient.";
             case ONHOLD: return "The dispense process is paused while waiting for an external event to reactivate the dispense.  For example, new stock has arrived or the prescriber has called.";
             case COMPLETED: return "The dispensed product has been picked up.";

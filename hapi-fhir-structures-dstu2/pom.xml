@@ -103,13 +103,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<scope>test</scope><!-- <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> </exclusion> </exclusions> -->
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -330,17 +330,19 @@
 									<baseResourceName>test</baseResourceName>
 								-->
 								<baseResourceName>testscript</baseResourceName>
-								<baseResourceName>user</baseResourceName>
-								<baseResourceName>valueset</baseResourceName>
-								<baseResourceName>visionprescription</baseResourceName>
-							</baseResourceNames>
-							<package>ca.uhn.fhir.model.dstu2</package>
-							<version>dstu2</version>
-							<buildDatatypes>true</buildDatatypes>
-						</configuration>
-					</execution>
-					<!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory> 
-						</configuration> </execution> -->
+								<!-- Removed in HAPI 3.4.0 as this isn't a real resource
+                       	<baseResourceName>user</baseResourceName>
+                       	-->
+                       <baseResourceName>valueset</baseResourceName>
+                       <baseResourceName>visionprescription</baseResourceName>
+                   </baseResourceNames>
+                   <package>ca.uhn.fhir.model.dstu2</package>
+                   <version>dstu2</version>
+                   <buildDatatypes>true</buildDatatypes>
+               </configuration>
+           </execution>
+           <!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory>
+               </configuration> </execution> -->
 				</executions>
 			</plugin>
 			<plugin>

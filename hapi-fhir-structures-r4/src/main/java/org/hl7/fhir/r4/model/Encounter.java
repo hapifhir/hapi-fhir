@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1414,16 +1414,16 @@ public class Encounter extends DomainResource {
         protected Identifier preAdmissionIdentifier;
 
         /**
-         * The location from which the patient came before admission.
+         * The location/organization from which the patient came before admission.
          */
-        @Child(name = "origin", type = {Location.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The location from which the patient came before admission", formalDefinition="The location from which the patient came before admission." )
+        @Child(name = "origin", type = {Location.class, Organization.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The location/organization from which the patient came before admission", formalDefinition="The location/organization from which the patient came before admission." )
         protected Reference origin;
 
         /**
-         * The actual object that is the target of the reference (The location from which the patient came before admission.)
+         * The actual object that is the target of the reference (The location/organization from which the patient came before admission.)
          */
-        protected Location originTarget;
+        protected Resource originTarget;
 
         /**
          * From where patient was admitted (physician referral, transfer).
@@ -1466,16 +1466,16 @@ public class Encounter extends DomainResource {
         protected List<CodeableConcept> specialArrangement;
 
         /**
-         * Location to which the patient is discharged.
+         * Location/organization to which the patient is discharged.
          */
-        @Child(name = "destination", type = {Location.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Location to which the patient is discharged", formalDefinition="Location to which the patient is discharged." )
+        @Child(name = "destination", type = {Location.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Location/organization to which the patient is discharged", formalDefinition="Location/organization to which the patient is discharged." )
         protected Reference destination;
 
         /**
-         * The actual object that is the target of the reference (Location to which the patient is discharged.)
+         * The actual object that is the target of the reference (Location/organization to which the patient is discharged.)
          */
-        protected Location destinationTarget;
+        protected Resource destinationTarget;
 
         /**
          * Category or kind of location after discharge.
@@ -1485,7 +1485,7 @@ public class Encounter extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/encounter-discharge-disposition")
         protected CodeableConcept dischargeDisposition;
 
-        private static final long serialVersionUID = -1165804076L;
+        private static final long serialVersionUID = 1350555270L;
 
     /**
      * Constructor
@@ -1519,7 +1519,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #origin} (The location from which the patient came before admission.)
+         * @return {@link #origin} (The location/organization from which the patient came before admission.)
          */
         public Reference getOrigin() { 
           if (this.origin == null)
@@ -1535,7 +1535,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @param value {@link #origin} (The location from which the patient came before admission.)
+         * @param value {@link #origin} (The location/organization from which the patient came before admission.)
          */
         public EncounterHospitalizationComponent setOrigin(Reference value) { 
           this.origin = value;
@@ -1543,21 +1543,16 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #origin} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location from which the patient came before admission.)
+         * @return {@link #origin} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The location/organization from which the patient came before admission.)
          */
-        public Location getOriginTarget() { 
-          if (this.originTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create EncounterHospitalizationComponent.origin");
-            else if (Configuration.doAutoCreate())
-              this.originTarget = new Location(); // aa
+        public Resource getOriginTarget() { 
           return this.originTarget;
         }
 
         /**
-         * @param value {@link #origin} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location from which the patient came before admission.)
+         * @param value {@link #origin} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The location/organization from which the patient came before admission.)
          */
-        public EncounterHospitalizationComponent setOriginTarget(Location value) { 
+        public EncounterHospitalizationComponent setOriginTarget(Resource value) { 
           this.originTarget = value;
           return this;
         }
@@ -1770,7 +1765,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #destination} (Location to which the patient is discharged.)
+         * @return {@link #destination} (Location/organization to which the patient is discharged.)
          */
         public Reference getDestination() { 
           if (this.destination == null)
@@ -1786,7 +1781,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @param value {@link #destination} (Location to which the patient is discharged.)
+         * @param value {@link #destination} (Location/organization to which the patient is discharged.)
          */
         public EncounterHospitalizationComponent setDestination(Reference value) { 
           this.destination = value;
@@ -1794,21 +1789,16 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #destination} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Location to which the patient is discharged.)
+         * @return {@link #destination} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Location/organization to which the patient is discharged.)
          */
-        public Location getDestinationTarget() { 
-          if (this.destinationTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create EncounterHospitalizationComponent.destination");
-            else if (Configuration.doAutoCreate())
-              this.destinationTarget = new Location(); // aa
+        public Resource getDestinationTarget() { 
           return this.destinationTarget;
         }
 
         /**
-         * @param value {@link #destination} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Location to which the patient is discharged.)
+         * @param value {@link #destination} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Location/organization to which the patient is discharged.)
          */
-        public EncounterHospitalizationComponent setDestinationTarget(Location value) { 
+        public EncounterHospitalizationComponent setDestinationTarget(Resource value) { 
           this.destinationTarget = value;
           return this;
         }
@@ -1840,13 +1830,13 @@ public class Encounter extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("preAdmissionIdentifier", "Identifier", "Pre-admission identifier.", 0, 1, preAdmissionIdentifier));
-          children.add(new Property("origin", "Reference(Location)", "The location from which the patient came before admission.", 0, 1, origin));
+          children.add(new Property("origin", "Reference(Location|Organization)", "The location/organization from which the patient came before admission.", 0, 1, origin));
           children.add(new Property("admitSource", "CodeableConcept", "From where patient was admitted (physician referral, transfer).", 0, 1, admitSource));
           children.add(new Property("reAdmission", "CodeableConcept", "Whether this hospitalization is a readmission and why if known.", 0, 1, reAdmission));
           children.add(new Property("dietPreference", "CodeableConcept", "Diet preferences reported by the patient.", 0, java.lang.Integer.MAX_VALUE, dietPreference));
           children.add(new Property("specialCourtesy", "CodeableConcept", "Special courtesies (VIP, board member).", 0, java.lang.Integer.MAX_VALUE, specialCourtesy));
           children.add(new Property("specialArrangement", "CodeableConcept", "Any special requests that have been made for this hospitalization encounter, such as the provision of specific equipment or other things.", 0, java.lang.Integer.MAX_VALUE, specialArrangement));
-          children.add(new Property("destination", "Reference(Location)", "Location to which the patient is discharged.", 0, 1, destination));
+          children.add(new Property("destination", "Reference(Location|Organization)", "Location/organization to which the patient is discharged.", 0, 1, destination));
           children.add(new Property("dischargeDisposition", "CodeableConcept", "Category or kind of location after discharge.", 0, 1, dischargeDisposition));
         }
 
@@ -1854,13 +1844,13 @@ public class Encounter extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -965394961: /*preAdmissionIdentifier*/  return new Property("preAdmissionIdentifier", "Identifier", "Pre-admission identifier.", 0, 1, preAdmissionIdentifier);
-          case -1008619738: /*origin*/  return new Property("origin", "Reference(Location)", "The location from which the patient came before admission.", 0, 1, origin);
+          case -1008619738: /*origin*/  return new Property("origin", "Reference(Location|Organization)", "The location/organization from which the patient came before admission.", 0, 1, origin);
           case 538887120: /*admitSource*/  return new Property("admitSource", "CodeableConcept", "From where patient was admitted (physician referral, transfer).", 0, 1, admitSource);
           case 669348630: /*reAdmission*/  return new Property("reAdmission", "CodeableConcept", "Whether this hospitalization is a readmission and why if known.", 0, 1, reAdmission);
           case -1360641041: /*dietPreference*/  return new Property("dietPreference", "CodeableConcept", "Diet preferences reported by the patient.", 0, java.lang.Integer.MAX_VALUE, dietPreference);
           case 1583588345: /*specialCourtesy*/  return new Property("specialCourtesy", "CodeableConcept", "Special courtesies (VIP, board member).", 0, java.lang.Integer.MAX_VALUE, specialCourtesy);
           case 47410321: /*specialArrangement*/  return new Property("specialArrangement", "CodeableConcept", "Any special requests that have been made for this hospitalization encounter, such as the provision of specific equipment or other things.", 0, java.lang.Integer.MAX_VALUE, specialArrangement);
-          case -1429847026: /*destination*/  return new Property("destination", "Reference(Location)", "Location to which the patient is discharged.", 0, 1, destination);
+          case -1429847026: /*destination*/  return new Property("destination", "Reference(Location|Organization)", "Location/organization to which the patient is discharged.", 0, 1, destination);
           case 528065941: /*dischargeDisposition*/  return new Property("dischargeDisposition", "CodeableConcept", "Category or kind of location after discharge.", 0, 1, dischargeDisposition);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -2472,15 +2462,15 @@ public class Encounter extends DomainResource {
 
 
     /**
-     * The referral request this encounter satisfies (incoming referral).
+     * The request this encounter satisfies (e.g. incoming referral or procedure request).
      */
-    @Child(name = "incomingReferral", type = {ServiceRequest.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The ServiceRequest that initiated this encounter", formalDefinition="The referral request this encounter satisfies (incoming referral)." )
-    protected List<Reference> incomingReferral;
+    @Child(name = "basedOn", type = {ServiceRequest.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="The ServiceRequest that initiated this encounter", formalDefinition="The request this encounter satisfies (e.g. incoming referral or procedure request)." )
+    protected List<Reference> basedOn;
     /**
-     * The actual objects that are the target of the reference (The referral request this encounter satisfies (incoming referral).)
+     * The actual objects that are the target of the reference (The request this encounter satisfies (e.g. incoming referral or procedure request).)
      */
-    protected List<ServiceRequest> incomingReferralTarget;
+    protected List<ServiceRequest> basedOnTarget;
 
 
     /**
@@ -2581,7 +2571,7 @@ public class Encounter extends DomainResource {
      */
     protected Encounter partOfTarget;
 
-    private static final long serialVersionUID = 55607408L;
+    private static final long serialVersionUID = -244598838L;
 
   /**
    * Constructor
@@ -3043,77 +3033,77 @@ public class Encounter extends DomainResource {
     }
 
     /**
-     * @return {@link #incomingReferral} (The referral request this encounter satisfies (incoming referral).)
+     * @return {@link #basedOn} (The request this encounter satisfies (e.g. incoming referral or procedure request).)
      */
-    public List<Reference> getIncomingReferral() { 
-      if (this.incomingReferral == null)
-        this.incomingReferral = new ArrayList<Reference>();
-      return this.incomingReferral;
+    public List<Reference> getBasedOn() { 
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      return this.basedOn;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Encounter setIncomingReferral(List<Reference> theIncomingReferral) { 
-      this.incomingReferral = theIncomingReferral;
+    public Encounter setBasedOn(List<Reference> theBasedOn) { 
+      this.basedOn = theBasedOn;
       return this;
     }
 
-    public boolean hasIncomingReferral() { 
-      if (this.incomingReferral == null)
+    public boolean hasBasedOn() { 
+      if (this.basedOn == null)
         return false;
-      for (Reference item : this.incomingReferral)
+      for (Reference item : this.basedOn)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addIncomingReferral() { //3
+    public Reference addBasedOn() { //3
       Reference t = new Reference();
-      if (this.incomingReferral == null)
-        this.incomingReferral = new ArrayList<Reference>();
-      this.incomingReferral.add(t);
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
       return t;
     }
 
-    public Encounter addIncomingReferral(Reference t) { //3
+    public Encounter addBasedOn(Reference t) { //3
       if (t == null)
         return this;
-      if (this.incomingReferral == null)
-        this.incomingReferral = new ArrayList<Reference>();
-      this.incomingReferral.add(t);
+      if (this.basedOn == null)
+        this.basedOn = new ArrayList<Reference>();
+      this.basedOn.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #incomingReferral}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #basedOn}, creating it if it does not already exist
      */
-    public Reference getIncomingReferralFirstRep() { 
-      if (getIncomingReferral().isEmpty()) {
-        addIncomingReferral();
+    public Reference getBasedOnFirstRep() { 
+      if (getBasedOn().isEmpty()) {
+        addBasedOn();
       }
-      return getIncomingReferral().get(0);
+      return getBasedOn().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<ServiceRequest> getIncomingReferralTarget() { 
-      if (this.incomingReferralTarget == null)
-        this.incomingReferralTarget = new ArrayList<ServiceRequest>();
-      return this.incomingReferralTarget;
+    public List<ServiceRequest> getBasedOnTarget() { 
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<ServiceRequest>();
+      return this.basedOnTarget;
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public ServiceRequest addIncomingReferralTarget() { 
+    public ServiceRequest addBasedOnTarget() { 
       ServiceRequest r = new ServiceRequest();
-      if (this.incomingReferralTarget == null)
-        this.incomingReferralTarget = new ArrayList<ServiceRequest>();
-      this.incomingReferralTarget.add(r);
+      if (this.basedOnTarget == null)
+        this.basedOnTarget = new ArrayList<ServiceRequest>();
+      this.basedOnTarget.add(r);
       return r;
     }
 
@@ -3620,7 +3610,7 @@ public class Encounter extends DomainResource {
         children.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority));
         children.add(new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject));
         children.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
-        children.add(new Property("incomingReferral", "Reference(ServiceRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral));
+        children.add(new Property("basedOn", "Reference(ServiceRequest)", "The request this encounter satisfies (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
         children.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment));
         children.add(new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period));
@@ -3647,7 +3637,7 @@ public class Encounter extends DomainResource {
         case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject);
         case -1892140189: /*episodeOfCare*/  return new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare);
-        case -1258204701: /*incomingReferral*/  return new Property("incomingReferral", "Reference(ServiceRequest)", "The referral request this encounter satisfies (incoming referral).", 0, java.lang.Integer.MAX_VALUE, incomingReferral);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest)", "The request this encounter satisfies (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case 767422259: /*participant*/  return new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant);
         case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment);
         case -991726143: /*period*/  return new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period);
@@ -3677,7 +3667,7 @@ public class Encounter extends DomainResource {
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case -1892140189: /*episodeOfCare*/ return this.episodeOfCare == null ? new Base[0] : this.episodeOfCare.toArray(new Base[this.episodeOfCare.size()]); // Reference
-        case -1258204701: /*incomingReferral*/ return this.incomingReferral == null ? new Base[0] : this.incomingReferral.toArray(new Base[this.incomingReferral.size()]); // Reference
+        case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // EncounterParticipantComponent
         case -1474995297: /*appointment*/ return this.appointment == null ? new Base[0] : new Base[] {this.appointment}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
@@ -3728,8 +3718,8 @@ public class Encounter extends DomainResource {
         case -1892140189: // episodeOfCare
           this.getEpisodeOfCare().add(castToReference(value)); // Reference
           return value;
-        case -1258204701: // incomingReferral
-          this.getIncomingReferral().add(castToReference(value)); // Reference
+        case -332612366: // basedOn
+          this.getBasedOn().add(castToReference(value)); // Reference
           return value;
         case 767422259: // participant
           this.getParticipant().add((EncounterParticipantComponent) value); // EncounterParticipantComponent
@@ -3792,8 +3782,8 @@ public class Encounter extends DomainResource {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("episodeOfCare")) {
           this.getEpisodeOfCare().add(castToReference(value));
-        } else if (name.equals("incomingReferral")) {
-          this.getIncomingReferral().add(castToReference(value));
+        } else if (name.equals("basedOn")) {
+          this.getBasedOn().add(castToReference(value));
         } else if (name.equals("participant")) {
           this.getParticipant().add((EncounterParticipantComponent) value);
         } else if (name.equals("appointment")) {
@@ -3834,7 +3824,7 @@ public class Encounter extends DomainResource {
         case -1165461084:  return getPriority(); 
         case -1867885268:  return getSubject(); 
         case -1892140189:  return addEpisodeOfCare(); 
-        case -1258204701:  return addIncomingReferral(); 
+        case -332612366:  return addBasedOn(); 
         case 767422259:  return addParticipant(); 
         case -1474995297:  return getAppointment(); 
         case -991726143:  return getPeriod(); 
@@ -3864,7 +3854,7 @@ public class Encounter extends DomainResource {
         case -1165461084: /*priority*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case -1892140189: /*episodeOfCare*/ return new String[] {"Reference"};
-        case -1258204701: /*incomingReferral*/ return new String[] {"Reference"};
+        case -332612366: /*basedOn*/ return new String[] {"Reference"};
         case 767422259: /*participant*/ return new String[] {};
         case -1474995297: /*appointment*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
@@ -3917,8 +3907,8 @@ public class Encounter extends DomainResource {
         else if (name.equals("episodeOfCare")) {
           return addEpisodeOfCare();
         }
-        else if (name.equals("incomingReferral")) {
-          return addIncomingReferral();
+        else if (name.equals("basedOn")) {
+          return addBasedOn();
         }
         else if (name.equals("participant")) {
           return addParticipant();
@@ -4001,10 +3991,10 @@ public class Encounter extends DomainResource {
           for (Reference i : episodeOfCare)
             dst.episodeOfCare.add(i.copy());
         };
-        if (incomingReferral != null) {
-          dst.incomingReferral = new ArrayList<Reference>();
-          for (Reference i : incomingReferral)
-            dst.incomingReferral.add(i.copy());
+        if (basedOn != null) {
+          dst.basedOn = new ArrayList<Reference>();
+          for (Reference i : basedOn)
+            dst.basedOn.add(i.copy());
         };
         if (participant != null) {
           dst.participant = new ArrayList<EncounterParticipantComponent>();
@@ -4054,12 +4044,12 @@ public class Encounter extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
            && compareDeep(class_, o.class_, true) && compareDeep(classHistory, o.classHistory, true) && compareDeep(type, o.type, true)
            && compareDeep(serviceType, o.serviceType, true) && compareDeep(priority, o.priority, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(episodeOfCare, o.episodeOfCare, true) && compareDeep(incomingReferral, o.incomingReferral, true)
-           && compareDeep(participant, o.participant, true) && compareDeep(appointment, o.appointment, true)
-           && compareDeep(period, o.period, true) && compareDeep(length, o.length, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(account, o.account, true) && compareDeep(hospitalization, o.hospitalization, true)
-           && compareDeep(location, o.location, true) && compareDeep(serviceProvider, o.serviceProvider, true)
-           && compareDeep(partOf, o.partOf, true);
+           && compareDeep(episodeOfCare, o.episodeOfCare, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(participant, o.participant, true)
+           && compareDeep(appointment, o.appointment, true) && compareDeep(period, o.period, true) && compareDeep(length, o.length, true)
+           && compareDeep(reason, o.reason, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(account, o.account, true)
+           && compareDeep(hospitalization, o.hospitalization, true) && compareDeep(location, o.location, true)
+           && compareDeep(serviceProvider, o.serviceProvider, true) && compareDeep(partOf, o.partOf, true)
+          ;
       }
 
       @Override
@@ -4074,7 +4064,7 @@ public class Encounter extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
-          , class_, classHistory, type, serviceType, priority, subject, episodeOfCare, incomingReferral
+          , class_, classHistory, type, serviceType, priority, subject, episodeOfCare, basedOn
           , participant, appointment, period, length, reason, diagnosis, account, hospitalization
           , location, serviceProvider, partOf);
       }
@@ -4189,32 +4179,6 @@ public class Encounter extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PARTICIPANT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PARTICIPANT_TYPE);
-
- /**
-   * Search parameter: <b>incomingreferral</b>
-   * <p>
-   * Description: <b>The ServiceRequest that initiated this encounter</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Encounter.incomingReferral</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferral", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
-  public static final String SP_INCOMINGREFERRAL = "incomingreferral";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
-   * <p>
-   * Description: <b>The ServiceRequest that initiated this encounter</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Encounter.incomingReferral</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INCOMINGREFERRAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INCOMINGREFERRAL);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Encounter:incomingreferral</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMINGREFERRAL = new ca.uhn.fhir.model.api.Include("Encounter:incomingreferral").toLocked();
 
  /**
    * Search parameter: <b>practitioner</b>
@@ -4411,6 +4375,32 @@ public class Encounter extends DomainResource {
    * the path value of "<b>Encounter:participant</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTICIPANT = new ca.uhn.fhir.model.api.Include("Encounter:participant").toLocked();
+
+ /**
+   * Search parameter: <b>based-on</b>
+   * <p>
+   * Description: <b>The ServiceRequest that initiated this encounter</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.basedOn</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="based-on", path="Encounter.basedOn", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
+  public static final String SP_BASED_ON = "based-on";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
+   * <p>
+   * Description: <b>The ServiceRequest that initiated this encounter</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.basedOn</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASED_ON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASED_ON);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:based-on</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASED_ON = new ca.uhn.fhir.model.api.Include("Encounter:based-on").toLocked();
 
  /**
    * Search parameter: <b>patient</b>

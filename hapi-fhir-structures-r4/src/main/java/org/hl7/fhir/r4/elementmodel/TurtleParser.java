@@ -323,7 +323,7 @@ public class TurtleParser extends ParserBase {
   }
   
   protected void decorateCanonical(Complex t, Element canonical) {
-    String refURI = canonical.primitiveValue();
+    String refURI = getReferenceURI(canonical.primitiveValue());
     if(refURI != null)
       t.linkedPredicate("fhir:link", refURI, linkResolver == null ? null : linkResolver.resolvePage("rdf.html#reference"));
   }

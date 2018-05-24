@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
@@ -20,7 +21,6 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -28,13 +28,13 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Ignore
 public class QuestionnaireResponseValidatorDstu3Test {
 	public static final IdType ID_ICC_QUESTIONNAIRE_SETUP = new IdType("Questionnaire/profile");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu3Test.class);
@@ -423,6 +423,35 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No issues"));
+	}
+
+	@Test
+	public void testMissingRequiredAnswer() {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0")
+			.setType(QuestionnaireItemType.STRING)
+			.setRequired(true);
+
+		String reference = "http://example.com/Questionnaire/q1";
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference)))
+			.thenReturn(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getQuestionnaire().setReference(reference);
+		qa.addItem().setLinkId("link0");
+		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
+
+		ValidationResult errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), hasSize(1));
+		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
+
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+
+		errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), hasSize(1));
+		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
 	}
 
 	@Test

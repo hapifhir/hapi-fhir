@@ -104,7 +104,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		for (SearchTask next : myIdToSearchTask.values()) {
 			next.requestImmediateAbort();
 			try {
-				next.getCompletionLatch().await();
+				next.getCompletionLatch().await(30, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				ourLog.warn("Failed to wait for completion", e);
 			}
@@ -559,11 +559,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 				saveSearch();
 
-			}
+			} finally {
 
-			myIdToSearchTask.remove(mySearch.getUuid());
-			myInitialCollectionLatch.countDown();
-			myCompletionLatch.countDown();
+				myIdToSearchTask.remove(mySearch.getUuid());
+				myInitialCollectionLatch.countDown();
+				myCompletionLatch.countDown();
+
+			}
 			return null;
 		}
 

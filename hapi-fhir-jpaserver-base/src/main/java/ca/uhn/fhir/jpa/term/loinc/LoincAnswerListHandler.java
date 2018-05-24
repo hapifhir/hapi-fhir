@@ -23,32 +23,25 @@ package ca.uhn.fhir.jpa.term.loinc;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Properties;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
-public class LoincAnswerListHandler implements IRecordHandler {
+public class LoincAnswerListHandler extends BaseLoincHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
-	private final Set<String> myPropertyNames;
-	private final List<ValueSet> myValueSets;
-	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 
-	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, Set<String> thePropertyNames, List<ValueSet> theValueSets) {
+	public LoincAnswerListHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 		myCodeSystemVersion = theCodeSystemVersion;
 		myCode2Concept = theCode2concept;
-		myPropertyNames = thePropertyNames;
-		myValueSets = theValueSets;
 	}
 
 	@Override
@@ -70,6 +63,10 @@ public class LoincAnswerListHandler implements IRecordHandler {
 		String extCodeSystem = trim(theRecord.get("ExtCodeSystem"));
 		String extCodeSystemVersion = trim(theRecord.get("ExtCodeSystemVersion"));
 
+		if (isBlank(answerString)) {
+			return;
+		}
+
 		// Answer list code
 		if (!myCode2Concept.containsKey(answerListId)) {
 			TermConcept concept = new TermConcept(myCodeSystemVersion, answerListId);
@@ -88,21 +85,13 @@ public class LoincAnswerListHandler implements IRecordHandler {
 		}
 
 		// Answer list ValueSet
-		ValueSet vs;
-		if (!myIdToValueSet.containsKey(answerListId)) {
-			vs = new ValueSet();
-			vs.setUrl("urn:oid:" + answerListOid);
+		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, "answerlist.version");
+		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
-				.setValue(answerListId);
-			vs.setId(answerListId);
-			vs.setName(answerListName);
-			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			myIdToValueSet.put(answerListId, vs);
-			myValueSets.add(vs);
-		} else {
-			vs = myIdToValueSet.get(answerListId);
+				.setSystem("urn:ietf:rfc:3986")
+				.setValue("urn:oid:" + answerListOid);
 		}
+
 		vs
 			.getCompose()
 			.getIncludeFirstRep()

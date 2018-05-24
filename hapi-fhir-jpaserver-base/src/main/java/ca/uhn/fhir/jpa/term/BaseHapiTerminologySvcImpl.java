@@ -27,27 +27,38 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.search.Query;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -58,25 +69,43 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc {
+public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc, ApplicationContextAware {
+	public static final int DEFAULT_FETCH_SIZE = 250;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
+	private static boolean ourLastResultsFromTranslationCache; // For testing.
+	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
 	@Autowired
 	protected ITermConceptDao myConceptDao;
 	@Autowired
+	protected ITermConceptMapDao myConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupDao myConceptMapGroupDao;
+	@Autowired
+	protected ITermConceptMapGroupElementDao myConceptMapGroupElementDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myConceptMapGroupElementTargetDao;
+	@Autowired
 	protected ITermConceptPropertyDao myConceptPropertyDao;
+	@Autowired
+	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -87,15 +116,20 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	private List<TermConceptParentChildLink> myConceptLinksToSaveLater = new ArrayList<>();
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-	private List<TermConcept> myConceptsToSaveLater = new ArrayList<>();
+	private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
+	private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
+	private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private long myNextReindexPass;
 	private boolean myProcessDeferred = true;
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
-	@Autowired(required = false)
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
+	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
+	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
+	private int myFetchSize = DEFAULT_FETCH_SIZE;
+	private ApplicationContext myApplicationContext;
 
 	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
 		if (theAddedCodes.add(theConcept.getCode())) {
@@ -103,6 +137,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			contains.setCode(theConcept.getCode());
 			contains.setSystem(theCodeSystem);
 			contains.setDisplay(theConcept.getDisplay());
+			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
+				contains
+					.addDesignation()
+					.setValue(nextDesignation.getValue())
+					.getUse()
+					.setSystem(nextDesignation.getUseSystem())
+					.setCode(nextDesignation.getUseCode())
+					.setDisplay(nextDesignation.getUseDisplay());
+			}
 		}
 	}
 
@@ -146,11 +189,54 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		return retVal;
 	}
 
-	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails);
+	@PostConstruct
+	public void buildTranslationCaches() {
+		Long timeout = myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes();
 
-	protected abstract void createOrUpdateConceptMap(ConceptMap theNextConceptMap, RequestDetails theRequestDetails);
+		myTranslationCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
+				.build();
 
-	abstract void createOrUpdateValueSet(ValueSet theValueSet, RequestDetails theRequestDetails);
+		myTranslationWithReverseCache =
+			Caffeine.newBuilder()
+				.maximumSize(10000)
+				.expireAfterWrite(timeout, TimeUnit.MINUTES)
+				.build();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public void clearDeferred() {
+		myDeferredValueSets.clear();
+		myDeferredConceptMaps.clear();
+		myDeferredConcepts.clear();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public void clearTranslationCache() {
+		myTranslationCache.invalidateAll();
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting()
+	public void clearTranslationWithReverseCache() {
+		myTranslationWithReverseCache.invalidateAll();
+	}
+
+	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
+
+	protected abstract void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
+
+	abstract void createOrUpdateValueSet(ValueSet theValueSet);
 
 	@Override
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
@@ -162,10 +248,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		myCodeSystemDao.save(cs);
 		myCodeSystemDao.flush();
 
+		int i = 0;
 		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
 				myConceptPropertyDao.delete(nextConcept.getProperties());
+				myConceptDesignationDao.delete(nextConcept.getDesignations());
 				myConceptDao.delete(nextConcept);
 			}
 			if (next.getCodeSystem().getCurrentVersion() == next) {
@@ -173,10 +261,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 				myCodeSystemDao.save(next.getCodeSystem());
 			}
 			myCodeSystemVersionDao.delete(next);
+
+			if (i++ % 1000 == 0) {
+				myEntityManager.flush();
+			}
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
 		myCodeSystemDao.delete(theCodeSystem);
 
+		myEntityManager.flush();
 	}
 
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
@@ -223,11 +316,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 							haveIncludeCriteria = true;
 							TermConcept code = findCode(system, nextCode);
 							if (code != null) {
-								addedCodes.add(nextCode);
-								ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
-								contains.setCode(nextCode);
-								contains.setSystem(system);
-								contains.setDisplay(code.getDisplay());
+								addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, code);
 							}
 						}
 					}
@@ -275,7 +364,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 							} else {
 
-//					bool.must(qb.keyword().onField("myProperties").matching(nextFilter.getStringProperty()+"="+nextFilter.getValue()).createQuery());
 								bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
 
 							}
@@ -415,7 +503,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		fetchParents(concept, retVal);
 
-		ourLog.info("Fetched {} codes above code {} in {}ms", new Object[] {retVal.size(), theCode, stopwatch.getMillis()});
+		ourLog.info("Fetched {} codes above code {} in {}ms", retVal.size(), theCode, stopwatch.getMillis());
 		return retVal;
 	}
 
@@ -446,7 +534,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		fetchChildren(concept, retVal);
 
-		ourLog.info("Fetched {} codes below code {} in {}ms", new Object[] {retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS)});
+		ourLog.info("Fetched {} codes below code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 		return retVal;
 	}
 
@@ -492,7 +580,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
 			saveConcept(theConcept);
 		} else {
-			myConceptsToSaveLater.add(theConcept);
+			myDeferredConcepts.add(theConcept);
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
@@ -507,10 +595,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			}
 		}
 
-		for (TermConceptProperty next : theConcept.getProperties()) {
-			myConceptPropertyDao.save(next);
-		}
-
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
@@ -523,20 +607,30 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		}
 	}
 
+	private void processDeferredConceptMaps() {
+		int count = Math.min(myDeferredConceptMaps.size(), 20);
+		for (ConceptMap nextConceptMap : new ArrayList<>(myDeferredConceptMaps.subList(0, count))) {
+			ourLog.info("Creating ConceptMap: {}", nextConceptMap.getId());
+			createOrUpdateConceptMap(nextConceptMap);
+			myDeferredConceptMaps.remove(nextConceptMap);
+		}
+		ourLog.info("Saved {} deferred ConceptMap resources, have {} remaining", count, myDeferredConceptMaps.size());
+	}
+
 	private void processDeferredConcepts() {
 		int codeCount = 0, relCount = 0;
 		StopWatch stopwatch = new StopWatch();
 
-		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myConceptsToSaveLater.size());
+		int count = Math.min(myDaoConfig.getDeferIndexingForCodesystemsOfSize(), myDeferredConcepts.size());
 		ourLog.info("Saving {} deferred concepts...", count);
-		while (codeCount < count && myConceptsToSaveLater.size() > 0) {
-			TermConcept next = myConceptsToSaveLater.remove(0);
+		while (codeCount < count && myDeferredConcepts.size() > 0) {
+			TermConcept next = myDeferredConcepts.remove(0);
 			codeCount += saveConcept(next);
 		}
 
 		if (codeCount > 0) {
 			ourLog.info("Saved {} deferred concepts ({} codes remain and {} relationships remain) in {}ms ({}ms / code)",
-				new Object[] {codeCount, myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+				codeCount, myDeferredConcepts.size(), myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
 		}
 
 		if (codeCount == 0) {
@@ -557,12 +651,22 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		if (relCount > 0) {
 			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / code)",
-				new Object[] {relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount)});
+				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
 		}
 
-		if ((myConceptsToSaveLater.size() + myConceptLinksToSaveLater.size()) == 0) {
+		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
 			ourLog.info("All deferred concepts and relationships have now been synchronized to the database");
 		}
+	}
+
+	private void processDeferredValueSets() {
+		int count = Math.min(myDeferredValueSets.size(), 20);
+		for (ValueSet nextValueSet : new ArrayList<>(myDeferredValueSets.subList(0, count))) {
+			ourLog.info("Creating ValueSet: {}", nextValueSet.getId());
+			createOrUpdateValueSet(nextValueSet);
+			myDeferredValueSets.remove(nextValueSet);
+		}
+		ourLog.info("Saved {} deferred ValueSet resources, have {} remaining", count, myDeferredValueSets.size());
 	}
 
 	private void processReindexing() {
@@ -635,7 +739,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 					count++;
 				}
 
-				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", new Object[] {count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count)});
+				ourLog.info("Indexed {} / {} concepts in {}ms - Avg {}ms / resource", count, concepts.getContent().size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(count));
 			}
 		});
 
@@ -656,6 +760,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			myConceptDao.save(theConcept);
+
+			for (TermConceptProperty next : theConcept.getProperties()) {
+				myConceptPropertyDao.save(next);
+			}
+
+			for (TermConceptDesignation next : theConcept.getDesignations()) {
+				myConceptDesignationDao.save(next);
+			}
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
@@ -674,25 +786,46 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	public synchronized void saveDeferred() {
 		if (!myProcessDeferred) {
 			return;
-		} else if (myConceptsToSaveLater.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
+		} else if (myDeferredConcepts.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
 			processReindexing();
 			return;
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				processDeferredConcepts();
-			}
-
+		tt.execute(t -> {
+			processDeferredConcepts();
+			return null;
 		});
+
+		if (myDeferredValueSets.size() > 0) {
+			tt.execute(t -> {
+				processDeferredValueSets();
+				return null;
+			});
+		}
+		if (myDeferredConceptMaps.size() > 0) {
+			tt.execute(t -> {
+				processDeferredConceptMaps();
+				return null;
+			});
+		}
+
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
 	}
 
 	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
+	}
+
+	@PostConstruct
+	public void start() {
+		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
 	}
 
 	@Override
@@ -705,6 +838,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+
+//		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
 
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
@@ -754,8 +889,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
-		ArrayList<String> conceptsStack = new ArrayList<String>();
-		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<TermConcept, Object>();
+		ArrayList<String> conceptsStack = new ArrayList<>();
+		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
 		int totalCodeCount = 0;
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
@@ -790,17 +925,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 
 		ourLog.info("Done deleting old code system versions");
 
-		if (myConceptsToSaveLater.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
-			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myConceptsToSaveLater.size(), myConceptLinksToSaveLater.size());
+		if (myDeferredConcepts.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
+			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myDeferredConcepts.size(), myConceptLinksToSaveLater.size());
 		}
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
-		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource, theRequestDetails);
+		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource);
 
 		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
 		Long codeSystemResourcePid = resource.getId();
@@ -810,14 +945,122 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		theCodeSystemVersion.setResource(resource);
 		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemVersion);
 
-		for (ValueSet nextValueSet : theValueSets) {
-			createOrUpdateValueSet(nextValueSet, theRequestDetails);
+		myDeferredConceptMaps.addAll(theConceptMaps);
+		myDeferredValueSets.addAll(theValueSets);
+
+		return csId;
+	}
+
+	@Override
+	@Transactional
+	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
+		ourLog.info("Storing TermConceptMap {}", theConceptMap.getIdElement().getValue());
+
+		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
+
+		TermConceptMap termConceptMap = new TermConceptMap();
+		termConceptMap.setResource(theResourceTable);
+		termConceptMap.setUrl(theConceptMap.getUrl());
+
+		// Get existing entity so it can be deleted.
+		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(termConceptMap.getResourcePid());
+
+		/*
+		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
+		 */
+
+		if (optionalExistingTermConceptMapById.isPresent()) {
+			Long id = optionalExistingTermConceptMapById.get().getId();
+			ourLog.info("Deleting existing TermConceptMap {} and its children...", id);
+			myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(id);
+			myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(id);
+			myConceptMapGroupDao.deleteTermConceptMapGroupById(id);
+			myConceptMapDao.deleteTermConceptMapById(id);
+			ourLog.info("Done deleting existing TermConceptMap {} and its children.", id);
+
+			ourLog.info("Flushing...");
+			myConceptMapGroupElementTargetDao.flush();
+			myConceptMapGroupElementDao.flush();
+			myConceptMapGroupDao.flush();
+			myConceptMapDao.flush();
+			ourLog.info("Done flushing.");
 		}
 
-		for (ConceptMap nextConceptMap : theConceptMaps) {
-			createOrUpdateConceptMap(nextConceptMap, theRequestDetails);
+		/*
+		 * Do the upload.
+		 */
+		String conceptMapUrl = termConceptMap.getUrl();
+		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
+		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
+			try {
+				String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
+				if (isNotBlank(source)) {
+					termConceptMap.setSource(source);
+				}
+				String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
+				if (isNotBlank(target)) {
+					termConceptMap.setTarget(target);
+				}
+			} catch (FHIRException fe) {
+				throw new InternalErrorException(fe);
+			}
+			myConceptMapDao.save(termConceptMap);
+
+			if (theConceptMap.hasGroup()) {
+				TermConceptMapGroup termConceptMapGroup;
+				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+					if (isBlank(group.getSource())) {
+						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
+					}
+					if (isBlank(group.getTarget())) {
+						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
+					}
+					termConceptMapGroup = new TermConceptMapGroup();
+					termConceptMapGroup.setConceptMap(termConceptMap);
+					termConceptMapGroup.setSource(group.getSource());
+					termConceptMapGroup.setSourceVersion(group.getSourceVersion());
+					termConceptMapGroup.setTarget(group.getTarget());
+					termConceptMapGroup.setTargetVersion(group.getTargetVersion());
+					myConceptMapGroupDao.save(termConceptMapGroup);
+
+					if (group.hasElement()) {
+						TermConceptMapGroupElement termConceptMapGroupElement;
+						for (ConceptMap.SourceElementComponent element : group.getElement()) {
+							termConceptMapGroupElement = new TermConceptMapGroupElement();
+							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
+							termConceptMapGroupElement.setCode(element.getCode());
+							termConceptMapGroupElement.setDisplay(element.getDisplay());
+							myConceptMapGroupElementDao.save(termConceptMapGroupElement);
+
+							if (element.hasTarget()) {
+								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
+								for (ConceptMap.TargetElementComponent target : element.getTarget()) {
+									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
+									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
+									termConceptMapGroupElementTarget.setCode(target.getCode());
+									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
+									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
+									myConceptMapGroupElementTargetDao.saveAndFlush(termConceptMapGroupElementTarget);
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
+
+			String msg = myContext.getLocalizer().getMessage(
+				BaseHapiTerminologySvcImpl.class,
+				"cannotCreateDuplicateConceptMapUrl",
+				conceptMapUrl,
+				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+
+			throw new UnprocessableEntityException(msg);
 		}
 
+		ourLog.info("Done storing TermConceptMap.");
 	}
 
 	@Override
@@ -827,10 +1070,172 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	}
 
 	private ArrayList<VersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<VersionIndependentConcept>(codes.size());
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>(codes.size());
 		for (TermConcept next : codes) {
 			retVal.add(new VersionIndependentConcept(theSystem, next.getCode()));
 		}
+		return retVal;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest) {
+		List<TermConceptMapGroupElementTarget> retVal = new ArrayList<>();
+
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConceptMapGroupElementTarget> query = criteriaBuilder.createQuery(TermConceptMapGroupElementTarget.class);
+		Root<TermConceptMapGroupElementTarget> root = query.from(TermConceptMapGroupElementTarget.class);
+
+		Join<TermConceptMapGroupElementTarget, TermConceptMapGroupElement> elementJoin = root.join("myConceptMapGroupElement");
+		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = elementJoin.join("myConceptMapGroup");
+		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
+
+		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
+		List<TermConceptMapGroupElementTarget> cachedTargets;
+		ArrayList<Predicate> predicates;
+		Coding coding;
+		for (TranslationQuery translationQuery : translationQueries) {
+			cachedTargets = myTranslationCache.getIfPresent(translationQuery);
+			if (cachedTargets == null) {
+				final List<TermConceptMapGroupElementTarget> targets = new ArrayList<>();
+
+				predicates = new ArrayList<>();
+
+				coding = translationQuery.getCoding();
+				if (coding.hasCode()) {
+					predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
+				} else {
+					throw new InvalidRequestException("A code must be provided for translation to occur.");
+				}
+
+				if (coding.hasSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), coding.getSystem()));
+				}
+
+				if (coding.hasVersion()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySourceVersion"), coding.getVersion()));
+				}
+
+				if (translationQuery.hasTargetSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
+				}
+
+				if (translationQuery.hasSource()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource().getValueAsString()));
+				}
+
+				if (translationQuery.hasTarget()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getTarget().getValueAsString()));
+				}
+
+				if (translationQuery.hasResourceId()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), translationQuery.getResourceId()));
+				}
+
+				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+				query.where(outerPredicate);
+
+				// Use scrollable results.
+				final TypedQuery<TermConceptMapGroupElementTarget> typedQuery = myEntityManager.createQuery(query.select(root));
+				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
+				hibernateQuery.setFetchSize(myFetchSize);
+				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+				Iterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
+
+				while (scrollableResultsIterator.hasNext()) {
+					targets.add(scrollableResultsIterator.next());
+				}
+
+				ourLastResultsFromTranslationCache = false; // For testing.
+				myTranslationCache.get(translationQuery, k -> targets);
+				retVal.addAll(targets);
+			} else {
+				ourLastResultsFromTranslationCache = true; // For testing.
+				retVal.addAll(cachedTargets);
+			}
+		}
+
+		return retVal;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest) {
+		List<TermConceptMapGroupElement> retVal = new ArrayList<>();
+
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConceptMapGroupElement> query = criteriaBuilder.createQuery(TermConceptMapGroupElement.class);
+		Root<TermConceptMapGroupElement> root = query.from(TermConceptMapGroupElement.class);
+
+		Join<TermConceptMapGroupElement, TermConceptMapGroupElementTarget> targetJoin = root.join("myConceptMapGroupElementTargets");
+		Join<TermConceptMapGroupElement, TermConceptMapGroup> groupJoin = root.join("myConceptMapGroup");
+		Join<TermConceptMapGroup, TermConceptMap> conceptMapJoin = groupJoin.join("myConceptMap");
+
+		List<TranslationQuery> translationQueries = theTranslationRequest.getTranslationQueries();
+		List<TermConceptMapGroupElement> cachedElements;
+		ArrayList<Predicate> predicates;
+		Coding coding;
+		for (TranslationQuery translationQuery : translationQueries) {
+			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
+			if (cachedElements == null) {
+				final List<TermConceptMapGroupElement> elements = new ArrayList<>();
+
+				predicates = new ArrayList<>();
+
+				coding = translationQuery.getCoding();
+				if (coding.hasCode()) {
+					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
+				} else {
+					throw new InvalidRequestException("A code must be provided for translation to occur.");
+				}
+
+				if (coding.hasSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
+				}
+
+				if (coding.hasVersion()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTargetVersion"), coding.getVersion()));
+				}
+
+				if (translationQuery.hasTargetSystem()) {
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem().getValueAsString()));
+				}
+
+				if (translationQuery.hasSource()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getSource().getValueAsString()));
+				}
+
+				if (translationQuery.hasTarget()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getTarget().getValueAsString()));
+				}
+
+				if (translationQuery.hasResourceId()) {
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), translationQuery.getResourceId()));
+				}
+
+				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+				query.where(outerPredicate);
+
+				// Use scrollable results.
+				final TypedQuery<TermConceptMapGroupElement> typedQuery = myEntityManager.createQuery(query.select(root));
+				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
+				hibernateQuery.setFetchSize(myFetchSize);
+				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+				Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
+
+				while (scrollableResultsIterator.hasNext()) {
+					elements.add(scrollableResultsIterator.next());
+				}
+
+				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
+				myTranslationWithReverseCache.get(translationQuery, k -> elements);
+				retVal.addAll(elements);
+			} else {
+				ourLastResultsFromTranslationWithReverseCache = true; // For testing.
+				retVal.addAll(cachedElements);
+			}
+		}
+
 		return retVal;
 	}
 
@@ -863,6 +1268,47 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 		return retVal;
 	}
 
+	private void verifyNoDuplicates(Collection<TermConcept> theConcepts, Set<String> theCodes) {
+		for (TermConcept next : theConcepts) {
+			if (!theCodes.add(next.getCode())) {
+				throw new InvalidRequestException("Duplicate code " + next.getCode() + " found in codesystem after checking " + theCodes.size() + " codes");
+			}
+			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
+		}
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public static void clearOurLastResultsFromTranslationCache() {
+		ourLastResultsFromTranslationCache = false;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	public static void clearOurLastResultsFromTranslationWithReverseCache() {
+		ourLastResultsFromTranslationWithReverseCache = false;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	static boolean isOurLastResultsFromTranslationCache() {
+		return ourLastResultsFromTranslationCache;
+	}
+
+	/**
+	 * This method is present only for unit tests, do not call from client code
+	 */
+	@VisibleForTesting
+	static boolean isOurLastResultsFromTranslationWithReverseCache() {
+		return ourLastResultsFromTranslationWithReverseCache;
+	}
+
 	/**
 	 * This method is present only for unit tests, do not call from client code
 	 */
@@ -870,6 +1316,4 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc 
 	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
-
-
 }

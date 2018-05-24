@@ -110,8 +110,10 @@ public class TerminologyLoaderSvcLoincTest {
 		// Normal loinc code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
-		assertEquals("Elpot", code.getStringProperty("PROPERTY"));
-		assertEquals("Pt", code.getStringProperty("TIME_ASPCT"));
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
+		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
+		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
 
 		// Loinc code with answer
@@ -135,10 +137,11 @@ public class TerminologyLoaderSvcLoincTest {
 
 		// AnswerList valueSet
 		vs = valueSets.get("LL1001-8");
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getIdentifier().get(0).getSystem());
-		assertEquals("LL1001-8", vs.getIdentifier().get(0).getValue());
+		assertEquals("Beta.1", vs.getVersion());
+		assertEquals("urn:ietf:rfc:3986", vs.getIdentifier().get(0).getSystem());
+		assertEquals("urn:oid:1.3.6.1.4.1.12009.10.1.166", vs.getIdentifier().get(0).getValue());
 		assertEquals("PhenX05_14_30D freq amts", vs.getName());
-		assertEquals("urn:oid:1.3.6.1.4.1.12009.10.1.166", vs.getUrl());
+		assertEquals("http://loinc.org/vs/LL1001-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(7, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
@@ -151,10 +154,12 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("adjusted for maternal weight", code.getDisplay());
 
 		// Part Mappings
-		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_PART_MAP_ID);
+		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_ID);
 		assertEquals(null, conceptMap.getSource());
 		assertEquals(null, conceptMap.getTarget());
-		assertEquals("This material includes SNOMED Clinical Terms® (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO.This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement. It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org<mailto:info@snomed.org>.  This may incur a fee in SNOMED International non-Member countries.", conceptMap.getCopyright());
+		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.", conceptMap.getCopyright());
+		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroup().get(0);
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, group.getSource());
@@ -320,9 +325,6 @@ public class TerminologyLoaderSvcLoincTest {
 		// Normal loinc code
 		TermConcept code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
-		assertEquals("Elpot", code.getStringProperty("PROPERTY"));
-		assertEquals("Pt", code.getStringProperty("TIME_ASPCT"));
-		assertEquals("R' wave amplitude in lead I", code.getDisplay());
 
 		// No valuesets or conceptmaps get created
 		assertThat(valueSets.keySet(), empty());
@@ -350,6 +352,7 @@ public class TerminologyLoaderSvcLoincTest {
 	}
 
 	static void addLoincOptionalFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
+		theFiles.addFileZip("/loinc/", "loincupload.properties");
 		theFiles.addFileZip("/loinc/", "AnswerList_Beta_1.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);

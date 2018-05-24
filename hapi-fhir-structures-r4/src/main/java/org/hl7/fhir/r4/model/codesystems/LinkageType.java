@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum LinkageType {
          */
         ALTERNATE, 
         /**
-         * The record represents an obsolete record of the underlyng event/condition/etc.  It is not expected to be actively maintained.
+         * The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.
          */
         HISTORICAL, 
         /**
@@ -78,7 +78,7 @@ public enum LinkageType {
           switch (this) {
             case SOURCE: return "The record represents the \"source of truth\" (from the perspective of this Linkage resource) for the underlying event/condition/etc.";
             case ALTERNATE: return "The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.";
-            case HISTORICAL: return "The record represents an obsolete record of the underlyng event/condition/etc.  It is not expected to be actively maintained.";
+            case HISTORICAL: return "The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.";
             default: return "?";
           }
         }

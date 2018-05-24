@@ -45,7 +45,7 @@ public class InstantiationTest {
 			if (next instanceof RuntimeChildResourceBlockDefinition) {
 				RuntimeChildResourceBlockDefinition nextBlock = (RuntimeChildResourceBlockDefinition) next;
 				for (String nextName : nextBlock.getValidChildNames()) {
-					BaseRuntimeElementCompositeDefinition<?> elementDef = nextBlock.getChildByName(nextName);
+					BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) nextBlock.getChildByName(nextName);
 					if (theHashSet.add(elementDef.getImplementingClass())) {
 						scanChildren(theHashSet, elementDef.getImplementingClass(), elementDef);
 					}

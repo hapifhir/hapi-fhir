@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Eric Haas</LastAuthor>
+  <LastAuthor>lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2018-02-20T05:13:16Z</LastSaved>
+  <LastSaved>2018-04-02T21:10:12Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -18,7 +18,7 @@
   
   
   
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -829,7 +829,7 @@
    <Column ss:AutoFitWidth="0" ss:Index="27" ss:StyleID="s68" ss:Width="50.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="66.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="119.0"/>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s69">
+   <Row ss:Height="60" ss:StyleID="s69">
     <Cell ss:StyleID="s70"><Data ss:Type="String">dstu2</Data></Cell>
     <Cell ss:StyleID="s70"><Data ss:Type="String">Workflow Mapping</Data></Cell>
     <Cell ss:StyleID="s71"><Data ss:Type="String">Name</Data></Cell>
@@ -860,7 +860,7 @@
     <Cell ss:StyleID="s76"><Data ss:Type="String">Display Hint</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s77"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="90" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s78"><Data ss:Type="String">Request</Data></Cell>
     <Cell><Data ss:Type="String">xxxRequest</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">DeviceRequest</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -890,7 +890,7 @@
     <Cell ss:StyleID="s84"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><Data ss:Type="String">no map to dstu element: orderedON,priority</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="34" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell><Data ss:Type="String">identifier</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.identifier</Data></Cell>
     <Cell><Data ss:Type="String">identifier</Data></Cell>
@@ -922,7 +922,7 @@
     <Cell ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.DeviceRequest.identifier </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="52"><Data ss:Type="String">y</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="30" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.instantiates</Data></Cell>
     <Cell><Data ss:Type="String">instantiates</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.instantiates</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -936,7 +936,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Varies by domain</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s85"><Data ss:Type="String">#10296</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell><Data ss:Type="String">prnreason?</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.basedOn</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">basedOn</Data></Cell>
@@ -967,7 +967,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><Data ss:Type="String">DeviceRequest.prnReason</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="105" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.replaces</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">priorRequest</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.priorRequest</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -981,7 +981,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Handled by message location of ORC (ORC.1=RO or RU)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.groupIdentifier</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">groupIdentifier</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.groupIdentifier</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -995,7 +995,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">ORC.4</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s85"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="410" ss:StyleID="s71">
     <Cell><Data ss:Type="String">status</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.status</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">status</Data></Cell>
@@ -1026,7 +1026,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.status</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="410" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.intent</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">intent</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.intent</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1043,7 +1043,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">N/A</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="60" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.priority</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">priority</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.priority</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1070,7 +1070,7 @@
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="30" ss:StyleID="s71">
     <Cell><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.code</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">code</Data></Cell>
@@ -1101,7 +1101,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">[#14271] </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"><Data ss:Type="String">parameter</Data></Cell>
@@ -1132,7 +1132,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">[#14271] </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="30" ss:StyleID="s71">
     <Cell><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"><Data ss:Type="String">parameter.code</Data></Cell>
@@ -1163,7 +1163,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">[#14271] </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="30" ss:StyleID="s71">
     <Cell><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s86"/>
     <Cell ss:StyleID="s86"><Data ss:Type="String">parameter.value[x]</Data></Cell>
@@ -1194,7 +1194,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">[#14271] </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="60" ss:StyleID="s71">
     <Cell><Data ss:Type="String">subject</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.subject</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">subject</Data></Cell>
@@ -1225,7 +1225,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="60" ss:StyleID="s71">
     <Cell><Data ss:Type="String">encounter</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.context</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">context</Data></Cell>
@@ -1256,7 +1256,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.encounter</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="135" ss:StyleID="s71">
     <Cell><Data ss:Type="String"> timing</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.occurrence[x]</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">occurrence[x]</Data></Cell>
@@ -1287,7 +1287,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><Data ss:Type="String">DeviceRequest.timing[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="30" ss:StyleID="s71">
     <Cell><Data ss:Type="String">recordedOn, orderedON,</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.authoredOn</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">authoredOn</Data></Cell>
@@ -1318,7 +1318,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s85"><Data ss:Type="String">DeviceRequest.recordedOn</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.requester</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">requester</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.requester</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1332,7 +1332,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">ORC.12</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.performerType</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">performerType</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.performerType</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1341,13 +1341,13 @@
     <Cell ss:Index="11" ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="Default"><Data ss:Type="String">DeviceRequestParticipantRole</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">who.actor</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="18" ss:StyleID="s87"><Data ss:Type="String">Fille role</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="18" ss:StyleID="s87"><Data ss:Type="String">Filler role</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Desired type of performer for doing the diagnostic testing. </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="23" ss:StyleID="s90"><Data ss:Type="String">.participation[typeCode=PRF].role[scoper.determinerCode=KIND].code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">PRT</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="29" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="60" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.performer</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">performer</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.performer</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1365,7 +1365,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Requested Filler</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The desired perfomer for doing the diagnostic testing.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The desired performer for doing the diagnostic testing.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1377,7 +1377,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="30" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.reasonCode</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">reasonCode</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.reasonCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1407,7 +1407,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.indication</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="45" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.reasonReference</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">reasonReference</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1437,7 +1437,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="75" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.insurance</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">insurance</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.insurance</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1466,7 +1466,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="105" ss:StyleID="s71">
     <Cell><Data ss:Type="String">bodySite[x]</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.supportingInfo</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">supportingInfo</Data></Cell>
@@ -1485,7 +1485,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Additional clinical information</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Knowing where the device is targeted is important for tracking if multiple sites are possible.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1497,7 +1497,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="121" ss:StyleID="s71">
     <Cell><Data ss:Type="String">notes</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">Request.note</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">note</Data></Cell>
@@ -1528,7 +1528,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><Data ss:Type="String">DeviceRequest.notes</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:Height="345" ss:StyleID="s71">
     <Cell ss:Index="2" ss:StyleID="s86"><Data ss:Type="String">Request.relevantHistory</Data></Cell>
     <Cell ss:StyleID="s86"><Data ss:Type="String">relevantHistory</Data></Cell>
     <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s86"><Data ss:Type="String">DeviceRequest.relevantHistory</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1548,7 +1548,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Request provenance</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Key events in the history of the request.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This might not include provenances for all versions of the request – only those deemed “relevant” or important.&#xD;This SHALL NOT include the Provenance associated with this current version of the resource.  (If that provenance is deemed to be a “relevant” change, it will need to be added as part of a later update.  Until then, it can be queried directly as the Provenance that points to this version using _revinclude&#xD;All Provenances should have some historical version of this Request as their subject.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This might not include provenances for all versions of the request - only those deemed "relevant" or important.&#xD;This SHALL NOT include the Provenance associated with this current version of the resource.  (If that provenance is deemed to be a "relevant" change, it will need to be added as part of a later update.  Until then, it can be queried directly as the Provenance that points to this version using _revinclude&#xD;All Provenances should have some historical version of this Request as their subject.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.inboundRelationship(typeCode=SUBJ].source[classCode=CACT, moodCode=EVN]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">N/A</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1558,7 +1558,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1586,7 +1586,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1614,7 +1614,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1642,7 +1642,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1670,7 +1670,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1698,7 +1698,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1726,7 +1726,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1754,7 +1754,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1782,7 +1782,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1810,7 +1810,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:StyleID="s71">
+   <Row ss:StyleID="s71">
     <Cell ss:Index="4" ss:StyleID="s86"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1851,13 +1851,12 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <Zoom>110</Zoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>26</TopRowBottomPane>
    <SplitVertical>4</SplitVertical>
-   <LeftColumnRightPane>13</LeftColumnRightPane>
+   <LeftColumnRightPane>15</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -2499,7 +2498,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">requester</Data></Cell>
     <Cell ss:StyleID="s94"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:Index="4" ss:StyleID="s94"><Data ss:Type="String">DeviceRequest.requester</Data></Cell>
-    <Cell ss:StyleID="Default"><ss:Data xmlns="http://www.w3.org/TR/REC-html40" ss:Type="String"><Font html:Color="#000000">Who/what is requesting service</Font><Font html:Color="#000000" html:Size="8"> </Font></ss:Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">Who/what is requesting service</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">group-identifier</Data></Cell>
@@ -2512,7 +2511,7 @@
     <Cell ss:StyleID="s94"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s94"/>
     <Cell ss:StyleID="s122"><Data ss:Type="String">DeviceRequest.status</Data></Cell>
-    <Cell ss:StyleID="Default"><ss:Data xmlns="http://www.w3.org/TR/REC-html40" ss:Type="String"><Font html:Color="#000000">entered-in-error | draft | active |suspended | completed</Font><Font html:Color="#000000" html:Size="8"> </Font></ss:Data></Cell>
+    <Cell ss:StyleID="Default"><Data ss:Type="String">entered-in-error | draft | active |suspended | completed</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s119"><Data ss:Type="String">subject</Data></Cell>
@@ -2632,6 +2631,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

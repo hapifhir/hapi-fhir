@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import org.hl7.fhir.r4.model.*;
 
 /*
@@ -36,8 +37,7 @@ public class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<En
 	/**
 	 * Encounter/123/$everything
 	 */
-	//@formatter:off
-	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 	public IBundleProvider EncounterInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
@@ -56,7 +56,6 @@ public class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<En
 			@Sort
 			SortSpec theSortSpec
 			) {
-		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
@@ -68,8 +67,7 @@ public class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<En
 		/**
 		 * /Encounter/$everything
 		 */
-		//@formatter:off
-		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+		@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 		public IBundleProvider EncounterTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
@@ -85,7 +83,6 @@ public class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<En
 				@Sort
 				SortSpec theSortSpec
 				) {
-			//@formatter:on
 
 			startRequest(theServletRequest);
 			try {

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -367,6 +369,34 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages(), empty());
+  }
+
+  public void testMissingRequiredAnswer() {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0")
+			.setType(QuestionnaireItemType.STRING)
+			.setRequired(true);
+
+		String reference = "http://example.com/Questionnaire/q1";
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference)))
+			.thenReturn(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setQuestionnaire(reference);
+		qa.addItem().setLinkId("link0");
+		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
+
+		ValidationResult errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), hasSize(1));
+		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
+
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+
+		errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		assertThat(errors.getMessages(), hasSize(1));
+		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
 	}
 
 	@Test

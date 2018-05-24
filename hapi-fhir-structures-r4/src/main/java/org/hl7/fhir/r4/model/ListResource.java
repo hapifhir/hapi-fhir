@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -667,14 +667,14 @@ public class ListResource extends DomainResource {
     protected CodeableConcept code;
 
     /**
-     * The common subject (or patient) of the resources that are in the list, if there is one.
+     * The common subject (or patient) of the resources that are in the list if there is one.
      */
     @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If all resources have the same subject", formalDefinition="The common subject (or patient) of the resources that are in the list, if there is one." )
+    @Description(shortDefinition="If all resources have the same subject", formalDefinition="The common subject (or patient) of the resources that are in the list if there is one." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The common subject (or patient) of the resources that are in the list, if there is one.)
+     * The actual object that is the target of the reference (The common subject (or patient) of the resources that are in the list if there is one.)
      */
     protected Resource subjectTarget;
 
@@ -974,7 +974,7 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The common subject (or patient) of the resources that are in the list, if there is one.)
+     * @return {@link #subject} (The common subject (or patient) of the resources that are in the list if there is one.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -990,7 +990,7 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The common subject (or patient) of the resources that are in the list, if there is one.)
+     * @param value {@link #subject} (The common subject (or patient) of the resources that are in the list if there is one.)
      */
     public ListResource setSubject(Reference value) { 
       this.subject = value;
@@ -998,14 +998,14 @@ public class ListResource extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The common subject (or patient) of the resources that are in the list, if there is one.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The common subject (or patient) of the resources that are in the list if there is one.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The common subject (or patient) of the resources that are in the list, if there is one.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The common subject (or patient) of the resources that are in the list if there is one.)
      */
     public ListResource setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -1305,7 +1305,7 @@ public class ListResource extends DomainResource {
         children.add(new Property("mode", "code", "How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, 1, mode));
         children.add(new Property("title", "string", "A label for the list assigned by the author.", 0, 1, title));
         children.add(new Property("code", "CodeableConcept", "This code defines the purpose of the list - why it was created.", 0, 1, code));
-        children.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list, if there is one.", 0, 1, subject));
+        children.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list if there is one.", 0, 1, subject));
         children.add(new Property("encounter", "Reference(Encounter)", "The encounter that is the context in which this list was created.", 0, 1, encounter));
         children.add(new Property("date", "dateTime", "The date that the list was prepared.", 0, 1, date));
         children.add(new Property("source", "Reference(Practitioner|PractitionerRole|Patient|Device)", "The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.", 0, 1, source));
@@ -1323,7 +1323,7 @@ public class ListResource extends DomainResource {
         case 3357091: /*mode*/  return new Property("mode", "code", "How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, 1, mode);
         case 110371416: /*title*/  return new Property("title", "string", "A label for the list assigned by the author.", 0, 1, title);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "This code defines the purpose of the list - why it was created.", 0, 1, code);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list, if there is one.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list if there is one.", 0, 1, subject);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The encounter that is the context in which this list was created.", 0, 1, encounter);
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date that the list was prepared.", 0, 1, date);
         case -896505829: /*source*/  return new Property("source", "Reference(Practitioner|PractitionerRole|Patient|Device)", "The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.", 0, 1, source);

@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander.TerminologyServiceErrorCla
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.utils.INarrativeGenerator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.TranslationServices;
@@ -55,6 +56,9 @@ public interface IWorkerContext {
    * @return
    */
   public String getVersion();
+  
+  // get the UCUM service (might not be available)
+  public UcumService getUcumService();
   
   // -- Parsers (read and write instances) ----------------------------------------
 

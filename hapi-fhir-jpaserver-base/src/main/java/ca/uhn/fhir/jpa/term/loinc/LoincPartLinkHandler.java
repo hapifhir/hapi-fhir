@@ -24,19 +24,19 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincPartLinkHandler implements IRecordHandler {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(LoincPartLinkHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
+	private Long myPartCount;
 
 	public LoincPartLinkHandler(TermCodeSystemVersion theCodeSystemVersion, Map<String, TermConcept> theCode2concept) {
 		myCodeSystemVersion = theCodeSystemVersion;
@@ -53,17 +53,23 @@ public class LoincPartLinkHandler implements IRecordHandler {
 		TermConcept loincConcept = myCode2Concept.get(loincNumber);
 		TermConcept partConcept = myCode2Concept.get(partNumber);
 
-		if (loincConcept==null) {
+		if (loincConcept == null) {
 			ourLog.warn("No loinc code: {}", loincNumber);
 			return;
 		}
-		if (partConcept==null) {
-			ourLog.warn("No part code: {}", partNumber);
+		if (partConcept == null) {
+			if (myPartCount == null) {
+				myPartCount = myCode2Concept
+					.keySet()
+					.stream()
+					.filter(t->t.startsWith("LP"))
+					.count();
+			}
+			ourLog.debug("No part code: {} - Have {} part codes", partNumber, myPartCount);
 			return;
 		}
 
 		// For now we're ignoring these
 
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(LoincPartLinkHandler.class);
 }

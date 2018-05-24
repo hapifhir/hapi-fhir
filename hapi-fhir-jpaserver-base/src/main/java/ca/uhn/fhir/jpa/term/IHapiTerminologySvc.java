@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
@@ -45,9 +45,13 @@ public interface IHapiTerminologySvc {
 
 	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
 
+	List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode);
+
 	Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
 	List<VersionIndependentConcept> findCodesBelow(String theSystem, String theCode);
+
+	List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
 
 	void saveDeferred();
 
@@ -59,12 +63,16 @@ public interface IHapiTerminologySvc {
 
 	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
 
+	/**
+	 * @return Returns the ID of the created/updated code system
+	 */
+	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+
+	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
+
 	boolean supportsSystem(String theCodeSystem);
 
-	List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode);
+	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
 
-	List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
-
-	void storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
-
-	}
+	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
+}

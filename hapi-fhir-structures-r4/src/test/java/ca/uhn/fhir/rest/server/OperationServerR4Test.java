@@ -71,7 +71,7 @@ public class OperationServerR4Test {
 
 
 	@Test
-	public void testConformance() throws Exception {
+	public void testConformance() {
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLogResponseBody(true);
 		myFhirClient.registerInterceptor(loggingInterceptor);
@@ -153,13 +153,29 @@ public class OperationServerR4Test {
 	}
 	
 	@Test
-	public void testInstanceEverythingHapiClient() throws Exception {
+	public void testInstanceEverythingHapiClient() {
 		ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdType("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
 
 		assertEquals("instance $everything", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 		
+	}
+
+	@Test
+	public void testInstanceVersionEverythingHapiClient() {
+		ourCtx
+			.newRestfulGenericClient("http://localhost:" + ourPort)
+			.operation()
+			.onInstanceVersion(new IdType("Patient/123/_history/456"))
+			.named("$everything")
+			.withParameters(new Parameters())
+			.execute();
+
+		assertEquals("instance $everything", ourLastMethod);
+		assertEquals("Patient/123/_history/456", ourLastId.toUnqualified().getValue());
+
+
 	}
 
 	@Test
@@ -307,6 +323,29 @@ public class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/$OP_SERVER");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive());
+		assertEquals("$OP_SERVER", ourLastMethod);
+
+		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
+		assertEquals("RET1", resp.getParameter().get(0).getName());
+	}
+
+	@Test
+	public void testOperationOnServerWithRawString() throws Exception {
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
+		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/$OP_SERVER_WITH_RAW_STRING");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -740,6 +779,23 @@ public class OperationServerR4Test {
 
 			ourLastMethod = "$OP_SERVER";
 			ourLastParam1 = theParam1;
+			ourLastParam2 = theParam2;
+
+			Parameters retVal = new Parameters();
+			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
+			return retVal;
+		}
+
+		//@formatter:off
+		@Operation(name="$OP_SERVER_WITH_RAW_STRING")
+		public Parameters opServer(
+			@OperationParam(name="PARAM1") String theParam1,
+			@OperationParam(name="PARAM2") Patient theParam2
+		) {
+			//@formatter:on
+
+			ourLastMethod = "$OP_SERVER";
+			ourLastParam1 = new StringType(theParam1);
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();

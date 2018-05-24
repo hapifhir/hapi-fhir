@@ -26,7 +26,7 @@ public class ValidatorTest {
 			assertEquals("This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU3", e.getMessage());
 		}
 
-		// Phloc is not onthe classpath
+		// Ph-Schematron is not onthe classpath
 		assertTrue(val.isValidateAgainstStandardSchema());
 		assertFalse(val.isValidateAgainstStandardSchematron());
 
@@ -34,7 +34,7 @@ public class ValidatorTest {
 			val.setValidateAgainstStandardSchematron(true);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Phloc-schematron library not found on classpath, can not enable perform schematron validation", e.getMessage());
+			assertEquals("Ph-schematron library not found on classpath, can not enable perform schematron validation", e.getMessage());
 		}
 
 	}
