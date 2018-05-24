@@ -1,10 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
-import ca.uhn.fhir.model.dstu2.valueset.ProcedureStatusEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -27,7 +23,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import org.junit.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -35,8 +30,6 @@ import org.junit.runner.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -73,54 +66,6 @@ public class FhirInstanceValidatorDstu3Test {
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
-
-	@Test
-	public void testStress() throws IOException {
-
-		String input = IOUtils.toString(new FileReader("/home/james/Downloads/history.json"));
-
-		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
-
-		val.validateWithResult(input);
-
-		StopWatch sw = new StopWatch();
-		int loops = 100;
-		for (int i = 0; i < loops; i++) {
-			val.validateWithResult(input);
-		}
-
-		ourLog.info("Validated {} times AVG {}ms/val", loops, sw.getMillisPerOperation(loops));
-	}
-
-
-		/**
-       * See #873
-       */
-	@Test
-	public void testCompareTimesWithDifferentTimezones() {
-		Procedure procedure = new Procedure();
-		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
-		procedure.getSubject().setReference("Patient/1");
-		procedure.getCode().setText("Some proc");
-
-		Period period = new Period();
-		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
-		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
-		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
-		procedure.setPerformed(period);
-
-		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
-
-		ValidationResult result = val.validateWithResult(procedure);
-
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
-		ourLog.info(encoded);
-
-		assertTrue(result.isSuccessful());
-	}
-
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -279,6 +224,33 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	/**
+	 * See #873
+	 */
+	@Test
+	public void testCompareTimesWithDifferentTimezones() {
+		Procedure procedure = new Procedure();
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		procedure.getSubject().setReference("Patient/1");
+		procedure.getCode().setText("Some proc");
+
+		Period period = new Period();
+		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
+		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
+		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
+		procedure.setPerformed(period);
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(procedure);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
+		ourLog.info(encoded);
+
+		assertTrue(result.isSuccessful());
+	}
+
+	/**
 	 * See #531
 	 */
 	@Test
@@ -328,6 +300,25 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult results = myVal.validateWithResult(goal);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertEquals(0, outcome.size());
+	}
+
+	/**
+	 * An invalid local reference should not cause a ServiceException.
+	 */
+	@Test
+	public void testInvalidLocalReference() {
+		Questionnaire resource = new Questionnaire();
+		resource.setStatus(PublicationStatus.ACTIVE);
+
+		QuestionnaireItemComponent item = new QuestionnaireItemComponent();
+		item.setLinkId("linkId-1");
+		item.setType(QuestionnaireItemType.CHOICE);
+		item.setOptions(new Reference("#invalid-ref"));
+		resource.addItem(item);
+
+		ValidationResult output = myVal.validateWithResult(resource);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, hasSize(2));
 	}
 
 	@Test
@@ -533,7 +524,6 @@ public class FhirInstanceValidatorDstu3Test {
 		assertThat(outcome.toString(), containsString("Element 'Medication.ingredient.item[x]': minimum required = 1"));
 
 	}
-
 
 	@Test
 	public void testValidateRawJsonResource() {
@@ -762,25 +752,6 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
-	}
-
-	/**
-	 * An invalid local reference should not cause a ServiceException.
-	 */
-	@Test
-	public void testInvalidLocalReference() {
-		Questionnaire resource = new Questionnaire();
-		resource.setStatus(PublicationStatus.ACTIVE);
-
-		QuestionnaireItemComponent item = new QuestionnaireItemComponent();
-		item.setLinkId("linkId-1");
-		item.setType(QuestionnaireItemType.CHOICE);
-		item.setOptions(new Reference("#invalid-ref"));
-		resource.addItem(item);
-
-		ValidationResult output = myVal.validateWithResult(resource);
-		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, hasSize(2));
 	}
 
 	/**

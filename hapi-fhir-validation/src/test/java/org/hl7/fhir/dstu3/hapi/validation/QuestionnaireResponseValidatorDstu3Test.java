@@ -36,6 +36,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 public class QuestionnaireResponseValidatorDstu3Test {
@@ -86,11 +87,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
 		int itemCnt = 16;
 		QuestionnaireItemType[] questionnaireItemTypes = new QuestionnaireItemType[itemCnt];
@@ -132,7 +131,16 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		for (int i = 0; i < itemCnt; i++) {
 			if (questionnaireItemTypes[i] == null) continue;
 			String linkId = "link" + i;
+
+			reset(myValSupport);
 			Questionnaire q = new Questionnaire();
+			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
+				eq("http://example.com/Questionnaire/q1"))).thenReturn(q);
+			when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+			when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
+			myInstanceVal.flushCaches();
+
+			q.getItem().clear();
 			QuestionnaireItemComponent questionnaireItemComponent =
 				q.addItem().setLinkId(linkId).setRequired(true).setType(questionnaireItemTypes[i]);
 			if (i == 10 || i == 11) {
@@ -146,9 +154,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 			qa.addItem().setLinkId(linkId).addAnswer().setValue(answerValues[i]);
-
-			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
-				eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
 
 			ValidationResult errors = myVal.validateWithResult(qa);
 

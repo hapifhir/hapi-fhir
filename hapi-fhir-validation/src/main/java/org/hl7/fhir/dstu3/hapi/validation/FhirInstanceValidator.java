@@ -98,6 +98,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		return profile;
 	}
 
+	public void flushCaches() {
+		myWrappedWorkerContext = null;
+	}
+
 	/**
 	 * Returns the "best practice" warning level (default is {@link BestPracticeWarningLevel#Hint}).
 	 * <p>
@@ -182,8 +186,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public void setStructureDefintion(StructureDefinition theStructureDefintion) {
 		myStructureDefintion = theStructureDefintion;
 	}
-
-
 
 	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
 
@@ -507,13 +509,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public String getVersion() {
-			return myWrap.getVersion();
+		public UcumService getUcumService() {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public UcumService getUcumService() {
-			throw new UnsupportedOperationException();
+		public String getVersion() {
+			return myWrap.getVersion();
 		}
 
 		@Override
