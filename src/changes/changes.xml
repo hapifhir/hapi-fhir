@@ -258,6 +258,10 @@
 				Several tests were added to ensure accurate validation of QuestionnaireResponse
 				resources. Thanks to Heinz-Dieter Conradi for the pull request!
 			</action>
+			<action type="add" issue="886">
+				A NullPointerException when validating some QuestionnaireResponse reousrces
+				was fixed in the validator. Thanks to Heinz-Dieter Conradi for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
