@@ -254,6 +254,10 @@
 				to the compartment owner was defined using a resource object (ResourceReference#setResource)
 				instead of a reference (ResourceReference#setReference).
 			</action>
+			<action type="add" issue="880">
+				Several tests were added to ensure accurate validation of QuestionnaireResponse
+				resources. Thanks to Heinz-Dieter Conradi for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
