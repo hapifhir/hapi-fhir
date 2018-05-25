@@ -266,6 +266,16 @@
 				QuestionnaireResponse answers of type "text" may now be validated by the
 				FhirInstanceValidator. Thanks to Heinz-Dieter Conradi for the pull request!
 			</action>
+			<action type="fix">
+				The REST server has been modified so that the 
+				<![CDATA[<code>Location</code>]]>
+				header is no longer returned by the server on read or update responses.
+				This header was returned in the past, but this header is actually 
+				inappropriate for any response that is not a create operation.
+				The
+				<![CDATA[<code>Content-Location</code>]]>
+				will still be returned, and will hold the same contents.
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">

@@ -48,7 +48,7 @@ public class ReadDstu2_1Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_LOCATION).getValue());
+		assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 		assertEquals("http://localhost:" + ourPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
 		//@formatter:off

@@ -48,8 +48,8 @@ public class ReadDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_LOCATION).getValue());
-		assertEquals(null, status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
+		assertEquals("http://localhost:" + ourPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 
 		assertThat(responseContent, stringContainsInOrder(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",

@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -70,10 +71,40 @@ public class BinaryServerR4Test {
 			assertEquals("application/foo", status.getEntity().getContentType().getValue());
 			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
 			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
-			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_LOCATION).getValue());
+			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			byte[] content = IOUtils.toByteArray(status.getEntity().getContent());
 			assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, content);
+		} finally {
+			IOUtils.closeQuietly(status);
+		}
+	}
+
+
+	@Test
+	public void testGetWithAccept() throws Exception {
+
+		ourNextBinary = new Binary();
+		ourNextBinary.setId("Binary/A/_history/222");
+		ourNextBinary.setContent(new byte[]{0, 1, 2, 3, 4});
+		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
+		ourNextBinary.setContentType("application/foo");
+
+		HttpGet get = new HttpGet("http://localhost:" + ourPort + "/Binary/A");
+		get.addHeader("Content-Type", "application/foo");
+		get.addHeader("Accept", Constants.CT_FHIR_JSON);
+		CloseableHttpResponse status = ourClient.execute(get);
+		try {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("application/json+fhir;charset=utf-8", status.getEntity().getContentType().getValue());
+			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
+			assertEquals("http://localhost:" + ourPort + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
+
+			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"content\":\"AAECAwQ=\"}", content);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
