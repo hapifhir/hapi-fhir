@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.4.0" date="TBD">
+		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
