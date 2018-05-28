@@ -20,39 +20,50 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
+import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.Map;
 
 /**
- * @param <T>
- *           The bundle type
- * @param <MT>
- *           The Meta datatype type
+ * @param <T>  The bundle type
+ * @param <MT> The Meta datatype type
  */
 public interface IFhirSystemDao<T, MT> extends IDao {
 
+	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions);
+
+	@SuppressWarnings("unchecked")
 	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
 
 	Map<String, Long> getResourceCounts();
+
+	/**
+	 * Returns a cached count of resources using a cache that regularly
+	 * refreshes in the background. This method will never
+	 */
+	@Nullable
+	Map<String, Long> getResourceCountsFromCache();
+
 
 	IBundleProvider history(Date theDate, Date theUntil, RequestDetails theRequestDetails);
 
 	/**
 	 * Marks all indexes as needing fresh indexing
-	 * 
+	 *
 	 * @return Returns the number of affected rows
 	 */
 	int markAllResourcesForReindexing();
 
 	/**
 	 * Not supported for DSTU1
-	 * 
-	 * @param theRequestDetails
-	 *           TODO
+	 *
+	 * @param theRequestDetails TODO
 	 */
 	MT metaGetOperation(RequestDetails theRequestDetails);
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.
  */
@@ -182,7 +183,7 @@ public class Basic extends DomainResource {
     /**
      * @param value {@link #code} (Identifies the 'type' of resource - equivalent to the resource name for other resources.)
      */
-    public Basic setCode(CodeableConcept value) { 
+    public Basic setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -206,7 +207,7 @@ public class Basic extends DomainResource {
     /**
      * @param value {@link #subject} (Identifies the patient, practitioner, device or any other resource that is the "focus" of this resource.)
      */
-    public Basic setSubject(Reference value) { 
+    public Basic setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -294,7 +295,7 @@ public class Basic extends DomainResource {
     /**
      * @param value {@link #author} (Indicates who was responsible for creating the resource instance.)
      */
-    public Basic setAuthor(Reference value) { 
+    public Basic setAuthor(Reference value)  { 
       this.author = value;
       return this;
     }
@@ -314,13 +315,26 @@ public class Basic extends DomainResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier assigned to the resource for business purposes, outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("created", "date", "Identifies when the resource was first created.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Indicates who was responsible for creating the resource instance.", 0, java.lang.Integer.MAX_VALUE, author));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier assigned to the resource for business purposes, outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, 1, code));
+        children.add(new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, 1, subject));
+        children.add(new Property("created", "date", "Identifies when the resource was first created.", 0, 1, created));
+        children.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Indicates who was responsible for creating the resource instance.", 0, 1, author));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned to the resource for business purposes, outside the context of FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, 1, code);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, 1, subject);
+        case 1028554472: /*created*/  return new Property("created", "date", "Identifies when the resource was first created.", 0, 1, created);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Indicates who was responsible for creating the resource instance.", 0, 1, author);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -451,23 +465,23 @@ public class Basic extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Basic))
+        if (!(other_ instanceof Basic))
           return false;
-        Basic o = (Basic) other;
+        Basic o = (Basic) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
            && compareDeep(created, o.created, true) && compareDeep(author, o.author, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Basic))
+        if (!(other_ instanceof Basic))
           return false;
-        Basic o = (Basic) other;
+        Basic o = (Basic) other_;
         return compareValues(created, o.created, true);
       }
 

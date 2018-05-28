@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1068,7 +1068,7 @@ public class Consent extends DomainResource {
          * The class of information covered by this rule. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to.
          */
         @Child(name = "class", type = {Coding.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="e.g. Resource Type, Profile, or CDA etc", formalDefinition="The class of information covered by this rule. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to." )
+        @Description(shortDefinition="e.g. Resource Type, Profile, CDA, etc.", formalDefinition="The class of information covered by this rule. The type can be a FHIR resource type, a profile on a type, or a CDA document, or some other type that indicates what sort of information the consent relates to." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-content-class")
         protected List<Coding> class_;
 
@@ -1076,7 +1076,7 @@ public class Consent extends DomainResource {
          * If this code is found in an instance, then the rule applies.
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="e.g. LOINC or SNOMED CT code, etc in the content", formalDefinition="If this code is found in an instance, then the rule applies." )
+        @Description(shortDefinition="e.g. LOINC or SNOMED CT code, etc. in the content", formalDefinition="If this code is found in an instance, then the rule applies." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-content-code")
         protected List<CodeableConcept> code;
 
@@ -1930,14 +1930,14 @@ public class Consent extends DomainResource {
         protected CodeableConcept role;
 
         /**
-         * The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').
+         * The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').
          */
         @Child(name = "reference", type = {Device.class, Group.class, CareTeam.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, PractitionerRole.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Resource for the actor (or group, by role)", formalDefinition="The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers')." )
+        @Description(shortDefinition="Resource for the actor (or group, by role)", formalDefinition="The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers')." )
         protected Reference reference;
 
         /**
-         * The actual object that is the target of the reference (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
+         * The actual object that is the target of the reference (The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
         protected Resource referenceTarget;
 
@@ -1984,7 +1984,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @return {@link #reference} (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
+         * @return {@link #reference} (The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
         public Reference getReference() { 
           if (this.reference == null)
@@ -2000,7 +2000,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @param value {@link #reference} (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
+         * @param value {@link #reference} (The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
         public provisionActorComponent setReference(Reference value) { 
           this.reference = value;
@@ -2008,14 +2008,14 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @return {@link #reference} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
+         * @return {@link #reference} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
         public Resource getReferenceTarget() { 
           return this.referenceTarget;
         }
 
         /**
-         * @param value {@link #reference} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
+         * @param value {@link #reference} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').)
          */
         public provisionActorComponent setReferenceTarget(Resource value) { 
           this.referenceTarget = value;
@@ -2025,14 +2025,14 @@ public class Consent extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, 1, role));
-          children.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference));
+          children.add(new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "How the individual is involved in the resources content that is described in the exception.", 0, 1, role);
-          case -925155509: /*reference*/  return new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "The resource that identifies the actor. To identify a actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Device|Group|CareTeam|Organization|Patient|Practitioner|RelatedPerson|PractitionerRole)", "The resource that identifies the actor. To identify actors by type, use group to identify a set of actors by some property they share (e.g. 'admitting officers').", 0, 1, reference);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2411,10 +2411,10 @@ public class Consent extends DomainResource {
     protected Enumeration<ConsentState> status;
 
     /**
-     * A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.
+     * A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible.
      */
     @Child(name = "scope", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="Which of the four areas this resource covers", formalDefinition="A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research." )
+    @Description(shortDefinition="Which of the four areas this resource covers (extensible)", formalDefinition="A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/consent-scope")
     protected CodeableConcept scope;
 
@@ -2492,10 +2492,10 @@ public class Consent extends DomainResource {
     protected CodeableConcept policyRule;
 
     /**
-     * Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person.
+     * Whether a treatment instruction (e.g. artificial respiration yes or no) was verified with the patient, his/her family or another authorized person.
      */
     @Child(name = "verification", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Consent Verified by patient or family", formalDefinition="Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person." )
+    @Description(shortDefinition="Consent Verified by patient or family", formalDefinition="Whether a treatment instruction (e.g. artificial respiration yes or no) was verified with the patient, his/her family or another authorized person." )
     protected List<ConsentVerificationComponent> verification;
 
     /**
@@ -2622,7 +2622,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #scope} (A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.)
+     * @return {@link #scope} (A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible.)
      */
     public CodeableConcept getScope() { 
       if (this.scope == null)
@@ -2638,7 +2638,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @param value {@link #scope} (A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.)
+     * @param value {@link #scope} (A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible.)
      */
     public Consent setScope(CodeableConcept value) { 
       this.scope = value;
@@ -2940,39 +2940,45 @@ public class Consent extends DomainResource {
      * @return {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Attachment getSourceAttachment() throws FHIRException { 
+      if (this.source == null)
+        return null;
       if (!(this.source instanceof Attachment))
         throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Attachment) this.source;
     }
 
     public boolean hasSourceAttachment() { 
-      return this.source instanceof Attachment;
+      return this != null && this.source instanceof Attachment;
     }
 
     /**
      * @return {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Identifier getSourceIdentifier() throws FHIRException { 
+      if (this.source == null)
+        return null;
       if (!(this.source instanceof Identifier))
         throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Identifier) this.source;
     }
 
     public boolean hasSourceIdentifier() { 
-      return this.source instanceof Identifier;
+      return this != null && this.source instanceof Identifier;
     }
 
     /**
      * @return {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Reference getSourceReference() throws FHIRException { 
+      if (this.source == null)
+        return null;
       if (!(this.source instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Reference) this.source;
     }
 
     public boolean hasSourceReference() { 
-      return this.source instanceof Reference;
+      return this != null && this.source instanceof Reference;
     }
 
     public boolean hasSource() { 
@@ -2983,6 +2989,8 @@ public class Consent extends DomainResource {
      * @param value {@link #source} (The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.)
      */
     public Consent setSource(Type value) { 
+      if (value != null && !(value instanceof Attachment || value instanceof Identifier || value instanceof Reference))
+        throw new Error("Not the right type for Consent.source[x]: "+value.fhirType());
       this.source = value;
       return this;
     }
@@ -3065,7 +3073,7 @@ public class Consent extends DomainResource {
     }
 
     /**
-     * @return {@link #verification} (Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person.)
+     * @return {@link #verification} (Whether a treatment instruction (e.g. artificial respiration yes or no) was verified with the patient, his/her family or another authorized person.)
      */
     public List<ConsentVerificationComponent> getVerification() { 
       if (this.verification == null)
@@ -3145,7 +3153,7 @@ public class Consent extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "Indicates the current state of this consent.", 0, 1, status));
-        children.add(new Property("scope", "CodeableConcept", "A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.", 0, 1, scope));
+        children.add(new Property("scope", "CodeableConcept", "A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible.", 0, 1, scope));
         children.add(new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, 1, patient));
         children.add(new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, 1, dateTime));
@@ -3154,7 +3162,7 @@ public class Consent extends DomainResource {
         children.add(new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source));
         children.add(new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy));
         children.add(new Property("policyRule", "CodeableConcept", "A reference to the specific base computable regulation or policy.", 0, 1, policyRule));
-        children.add(new Property("verification", "", "Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person.", 0, java.lang.Integer.MAX_VALUE, verification));
+        children.add(new Property("verification", "", "Whether a treatment instruction (e.g. artificial respiration yes or no) was verified with the patient, his/her family or another authorized person.", 0, java.lang.Integer.MAX_VALUE, verification));
         children.add(new Property("provision", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, 1, provision));
       }
 
@@ -3163,7 +3171,7 @@ public class Consent extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this copy of the Consent Statement.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "Indicates the current state of this consent.", 0, 1, status);
-        case 109264468: /*scope*/  return new Property("scope", "CodeableConcept", "A selector of the type of consent being presented among the four possible: ADR, Privacy, Treatment, Research.", 0, 1, scope);
+        case 109264468: /*scope*/  return new Property("scope", "CodeableConcept", "A selector of the type of consent being presented: ADR, Privacy, Treatment, Research.  This list is now extensible.", 0, 1, scope);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A classification of the type of consents found in the statement. This element supports indexing and retrieval of consent statements.", 0, java.lang.Integer.MAX_VALUE, category);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient/healthcare consumer to whom this consent applies.", 0, 1, patient);
         case 1792749467: /*dateTime*/  return new Property("dateTime", "dateTime", "When this  Consent was issued / created / indexed.", 0, 1, dateTime);
@@ -3176,7 +3184,7 @@ public class Consent extends DomainResource {
         case -244259472: /*sourceReference*/  return new Property("source[x]", "Attachment|Identifier|Reference(Consent|DocumentReference|Contract|QuestionnaireResponse)", "The source on which this consent statement is based. The source might be a scanned original paper form, or a reference to a consent that links back to such a source, a reference to a document repository (e.g. XDS) that stores the original consent document.", 0, 1, source);
         case -982670030: /*policy*/  return new Property("policy", "", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, java.lang.Integer.MAX_VALUE, policy);
         case 1593493326: /*policyRule*/  return new Property("policyRule", "CodeableConcept", "A reference to the specific base computable regulation or policy.", 0, 1, policyRule);
-        case -1484401125: /*verification*/  return new Property("verification", "", "Whether a treatment instruction (e.g. artifical respiration yes or no) was verified with the patient, his/her family or another authorized person.", 0, java.lang.Integer.MAX_VALUE, verification);
+        case -1484401125: /*verification*/  return new Property("verification", "", "Whether a treatment instruction (e.g. artificial respiration yes or no) was verified with the patient, his/her family or another authorized person.", 0, java.lang.Integer.MAX_VALUE, verification);
         case -547120939: /*provision*/  return new Property("provision", "", "An exception to the base policy of this consent. An exception can be an addition or removal of access permissions.", 0, 1, provision);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -3602,30 +3610,50 @@ public class Consent extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PURPOSE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PURPOSE);
 
  /**
-   * Search parameter: <b>source</b>
+   * Search parameter: <b>source-reference</b>
    * <p>
-   * Description: <b>Source from which this consent is taken</b><br>
+   * Description: <b>Search by reference to a Consent, DocumentReference, Contract  or QuestionnaireResponse</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Consent.source[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source", path="Consent.source", description="Source from which this consent is taken", type="reference", target={Consent.class, Contract.class, DocumentReference.class, QuestionnaireResponse.class } )
-  public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="source-reference", path="Consent.source", description="Search by reference to a Consent, DocumentReference, Contract  or QuestionnaireResponse", type="reference", target={Consent.class, Contract.class, DocumentReference.class, QuestionnaireResponse.class } )
+  public static final String SP_SOURCE_REFERENCE = "source-reference";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>source</b>
+   * <b>Fluent Client</b> search parameter constant for <b>source-reference</b>
    * <p>
-   * Description: <b>Source from which this consent is taken</b><br>
+   * Description: <b>Search by reference to a Consent, DocumentReference, Contract  or QuestionnaireResponse</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Consent.source[x]</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SOURCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SOURCE);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SOURCE_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SOURCE_REFERENCE);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Consent:source</b>".
+   * the path value of "<b>Consent:source-reference</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE = new ca.uhn.fhir.model.api.Include("Consent:source").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SOURCE_REFERENCE = new ca.uhn.fhir.model.api.Include("Consent:source-reference").toLocked();
+
+ /**
+   * Search parameter: <b>source-identifier</b>
+   * <p>
+   * Description: <b>Search by token to an identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Consent.source[x]</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="source-identifier", path="Consent.source", description="Search by token to an identifier", type="token" )
+  public static final String SP_SOURCE_IDENTIFIER = "source-identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>source-identifier</b>
+   * <p>
+   * Description: <b>Search by token to an identifier</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Consent.source[x]</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SOURCE_IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SOURCE_IDENTIFIER);
 
  /**
    * Search parameter: <b>actor</b>
@@ -3708,17 +3736,17 @@ public class Consent extends DomainResource {
  /**
    * Search parameter: <b>scope</b>
    * <p>
-   * Description: <b>Which of the four areas this resource covers</b><br>
+   * Description: <b>Which of the four areas this resource covers (extensible)</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Consent.scope</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="scope", path="Consent.scope", description="Which of the four areas this resource covers", type="token" )
+  @SearchParamDefinition(name="scope", path="Consent.scope", description="Which of the four areas this resource covers (extensible)", type="token" )
   public static final String SP_SCOPE = "scope";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>scope</b>
    * <p>
-   * Description: <b>Which of the four areas this resource covers</b><br>
+   * Description: <b>Which of the four areas this resource covers (extensible)</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Consent.scope</b><br>
    * </p>

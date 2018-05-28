@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -290,14 +290,6 @@ into another (possibly the same) biological entity.
          */
         IMPLEMENTATIONGUIDE, 
         /**
-         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
-         */
-        IMPLEMENTATIONGUIDEINPUT, 
-        /**
-         * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
-         */
-        IMPLEMENTATIONGUIDEOUTPUT, 
-        /**
          * Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.
          */
         INVOICE, 
@@ -318,7 +310,7 @@ into another (possibly the same) biological entity.
          */
         LIST, 
         /**
-         * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
+         * Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.
          */
         LOCATION, 
         /**
@@ -326,7 +318,7 @@ into another (possibly the same) biological entity.
          */
         MEASURE, 
         /**
-         * The MeasureReport resource contains the results of evaluating a measure.
+         * The MeasureReport resource contains the results of the calculation of a measure; and optionally a reference to the resources involved in that calculation.
          */
         MEASUREREPORT, 
         /**
@@ -346,6 +338,10 @@ into another (possibly the same) biological entity.
          */
         MEDICATIONDISPENSE, 
         /**
+         * Information about a medication that is used to support knowledge.
+         */
+        MEDICATIONKNOWLEDGE, 
+        /**
          * An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called "MedicationRequest" rather than "MedicationPrescription" or "MedicationOrder" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.
          */
         MEDICATIONREQUEST, 
@@ -362,7 +358,7 @@ into another (possibly the same) biological entity.
          */
         MEDICINALPRODUCTAUTHORIZATION, 
         /**
-         * The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.
+         * The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.
          */
         MEDICINALPRODUCTCLINICALS, 
         /**
@@ -546,7 +542,7 @@ into another (possibly the same) biological entity.
          */
         STRUCTUREMAP, 
         /**
-         * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
+         * The subscription resource is used to define a push-based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system can take an appropriate action.
          */
         SUBSCRIPTION, 
         /**
@@ -594,7 +590,7 @@ into another (possibly the same) biological entity.
          */
         USERSESSION, 
         /**
-         * A value set specifies a set of codes drawn from one or more code systems.
+         * A ValueSet resource specifies a set of codes drawn from one or more code systems, intended for use in a particular context. Value sets link between [[[CodeSystem]]] definitions and their use in [coded elements](terminologies.html).
          */
         VALUESET, 
         /**
@@ -738,10 +734,6 @@ into another (possibly the same) biological entity.
           return IMMUNIZATIONRECOMMENDATION;
         if ("ImplementationGuide".equals(codeString))
           return IMPLEMENTATIONGUIDE;
-        if ("ImplementationGuideInput".equals(codeString))
-          return IMPLEMENTATIONGUIDEINPUT;
-        if ("ImplementationGuideOutput".equals(codeString))
-          return IMPLEMENTATIONGUIDEOUTPUT;
         if ("Invoice".equals(codeString))
           return INVOICE;
         if ("ItemInstance".equals(codeString))
@@ -766,6 +758,8 @@ into another (possibly the same) biological entity.
           return MEDICATIONADMINISTRATION;
         if ("MedicationDispense".equals(codeString))
           return MEDICATIONDISPENSE;
+        if ("MedicationKnowledge".equals(codeString))
+          return MEDICATIONKNOWLEDGE;
         if ("MedicationRequest".equals(codeString))
           return MEDICATIONREQUEST;
         if ("MedicationStatement".equals(codeString))
@@ -963,8 +957,6 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
-            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
             case INVOICE: return "Invoice";
             case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
@@ -977,6 +969,7 @@ into another (possibly the same) biological entity.
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
+            case MEDICATIONKNOWLEDGE: return "MedicationKnowledge";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
             case MEDICINALPRODUCT: return "MedicinalProduct";
@@ -1113,25 +1106,24 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "Describes a comparison of an immunization event against published recommendations to determine if the administration is \"valid\" in relation to those  recommendations.";
             case IMMUNIZATIONRECOMMENDATION: return "A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.";
             case IMPLEMENTATIONGUIDE: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
-            case IMPLEMENTATIONGUIDEINPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.";
             case INVOICE: return "Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.";
             case ITEMINSTANCE: return "A physical, countable instance of an item, for example one box or one unit.";
             case LIBRARY: return "The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.";
             case LINKAGE: return "Identifies two or more records (resource instances) that are referring to the same real-world \"occurrence\".";
             case LIST: return "A set of information summarized from a list of other resources.";
-            case LOCATION: return "Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.";
+            case LOCATION: return "Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.";
             case MEASURE: return "The Measure resource provides the definition of a quality measure.";
-            case MEASUREREPORT: return "The MeasureReport resource contains the results of evaluating a measure.";
+            case MEASUREREPORT: return "The MeasureReport resource contains the results of the calculation of a measure; and optionally a reference to the resources involved in that calculation.";
             case MEDIA: return "A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.";
             case MEDICATION: return "This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.";
             case MEDICATIONADMINISTRATION: return "Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.";
             case MEDICATIONDISPENSE: return "Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.";
+            case MEDICATIONKNOWLEDGE: return "Information about a medication that is used to support knowledge.";
             case MEDICATIONREQUEST: return "An order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \"MedicationRequest\" rather than \"MedicationPrescription\" or \"MedicationOrder\" to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.";
             case MEDICATIONSTATEMENT: return "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \r\rThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.";
             case MEDICINALPRODUCT: return "Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).";
             case MEDICINALPRODUCTAUTHORIZATION: return "The regulatory authorization of a medicinal product.";
-            case MEDICINALPRODUCTCLINICALS: return "The clinical particulars - indications, contraindications etc of a medicinal product, including for regulatory purposes.";
+            case MEDICINALPRODUCTCLINICALS: return "The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.";
             case MEDICINALPRODUCTDEVICESPEC: return "A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.";
             case MEDICINALPRODUCTINGREDIENT: return "An ingredient of a manufactured item or pharmaceutical product.";
             case MEDICINALPRODUCTPACKAGED: return "A medicinal product in a container or package.";
@@ -1177,7 +1169,7 @@ into another (possibly the same) biological entity.
             case SPECIMENDEFINITION: return "A kind of specimen with associated set of requirements.";
             case STRUCTUREDEFINITION: return "A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions and constraints on resources and data types.";
             case STRUCTUREMAP: return "A Map of relationships between 2 structures that can be used to transform data.";
-            case SUBSCRIPTION: return "The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system is able to take an appropriate action.";
+            case SUBSCRIPTION: return "The subscription resource is used to define a push-based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined \"channel\" so that another system can take an appropriate action.";
             case SUBSTANCE: return "A homogeneous material with a definite composition.";
             case SUBSTANCEPOLYMER: return "Todo.";
             case SUBSTANCEREFERENCEINFORMATION: return "Todo.";
@@ -1189,7 +1181,7 @@ into another (possibly the same) biological entity.
             case TESTREPORT: return "A summary of information based on the results of executing a TestScript.";
             case TESTSCRIPT: return "A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.";
             case USERSESSION: return "Information about a user's current session.";
-            case VALUESET: return "A value set specifies a set of codes drawn from one or more code systems.";
+            case VALUESET: return "A ValueSet resource specifies a set of codes drawn from one or more code systems, intended for use in a particular context. Value sets link between [[[CodeSystem]]] definitions and their use in [coded elements](terminologies.html).";
             case VERIFICATIONRESULT: return "Describes validation requirements, source(s), status and dates for one or more elements.";
             case VISIONPRESCRIPTION: return "An authorization for the supply of glasses and/or contact lenses to a patient.";
             default: return "?";
@@ -1260,8 +1252,6 @@ into another (possibly the same) biological entity.
             case IMMUNIZATIONEVALUATION: return "ImmunizationEvaluation";
             case IMMUNIZATIONRECOMMENDATION: return "ImmunizationRecommendation";
             case IMPLEMENTATIONGUIDE: return "ImplementationGuide";
-            case IMPLEMENTATIONGUIDEINPUT: return "ImplementationGuideInput";
-            case IMPLEMENTATIONGUIDEOUTPUT: return "ImplementationGuideOutput";
             case INVOICE: return "Invoice";
             case ITEMINSTANCE: return "ItemInstance";
             case LIBRARY: return "Library";
@@ -1274,6 +1264,7 @@ into another (possibly the same) biological entity.
             case MEDICATION: return "Medication";
             case MEDICATIONADMINISTRATION: return "MedicationAdministration";
             case MEDICATIONDISPENSE: return "MedicationDispense";
+            case MEDICATIONKNOWLEDGE: return "MedicationKnowledge";
             case MEDICATIONREQUEST: return "MedicationRequest";
             case MEDICATIONSTATEMENT: return "MedicationStatement";
             case MEDICINALPRODUCT: return "MedicinalProduct";

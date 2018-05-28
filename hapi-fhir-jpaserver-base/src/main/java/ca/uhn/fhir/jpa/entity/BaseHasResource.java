@@ -104,6 +104,8 @@ public abstract class BaseHasResource {
 		myPublished = thePublished;
 	}
 
+	public abstract Long getResourceId();
+
 	public abstract String getResourceType();
 
 	public abstract Collection<? extends BaseTag> getTags();

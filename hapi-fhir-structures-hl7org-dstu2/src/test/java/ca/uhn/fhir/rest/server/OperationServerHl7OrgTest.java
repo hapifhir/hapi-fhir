@@ -32,9 +32,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class OperationServerHl7OrgTest {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;

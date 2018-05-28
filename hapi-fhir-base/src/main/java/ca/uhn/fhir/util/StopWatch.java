@@ -6,7 +6,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -48,9 +49,8 @@ public class StopWatch {
 	private static final NumberFormat TEN_DAY_FORMAT = new DecimalFormat("0");
 	private static Long ourNowForUnitTest;
 	private long myStarted = now();
-	private long myCurrentTaskStarted = -1L;
-	private LinkedHashMap<String, Long> myTaskTotals;
-	private String myCurrentTaskName;
+	private TaskTiming myCurrentTask;
+	private LinkedList<TaskTiming> myTasks;
 
 	/**
 	 * Constructor
@@ -68,9 +68,9 @@ public class StopWatch {
 		myStarted = theStart.getTime();
 	}
 
-	private void ensureTaskTotalsMapExists() {
-		if (myTaskTotals == null) {
-			myTaskTotals = new LinkedHashMap<>();
+	private void addNewlineIfContentExists(StringBuilder theB) {
+		if (theB.length() > 0) {
+			theB.append("\n");
 		}
 	}
 
@@ -80,14 +80,17 @@ public class StopWatch {
 	 * is currently started so it's ok to call it more than once.
 	 */
 	public void endCurrentTask() {
-		if (isNotBlank(myCurrentTaskName)) {
-			ensureTaskTotalsMapExists();
-			Long existingTotal = myTaskTotals.get(myCurrentTaskName);
-			long taskTimeElapsed = now() - myCurrentTaskStarted;
-			Long newTotal = existingTotal != null ? existingTotal + taskTimeElapsed : taskTimeElapsed;
-			myTaskTotals.put(myCurrentTaskName, newTotal);
+		ensureTasksListExists();
+		if (myCurrentTask != null) {
+			myCurrentTask.setEnd(now());
 		}
-		myCurrentTaskName = null;
+		myCurrentTask = null;
+	}
+
+	private void ensureTasksListExists() {
+		if (myTasks == null) {
+			myTasks = new LinkedList<>();
+		}
 	}
 
 	/**
@@ -95,23 +98,49 @@ public class StopWatch {
 	 */
 	public String formatTaskDurations() {
 
-		// Flush the current task if it's ongoing
-		String continueTask = myCurrentTaskName;
-		if (isNotBlank(myCurrentTaskName)) {
-			endCurrentTask();
-			startTask(continueTask);
+		ensureTasksListExists();
+		StringBuilder b = new StringBuilder();
+
+		if (myTasks.size() > 0) {
+			long delta = myTasks.getFirst().getStart() - myStarted;
+			if (delta > 10) {
+				addNewlineIfContentExists(b);
+				b.append("Before first task");
+				b.append(": ");
+				b.append(formatMillis(delta));
+			}
 		}
 
-		ensureTaskTotalsMapExists();
-		StringBuilder b = new StringBuilder();
-		for (String nextTask : myTaskTotals.keySet()) {
-			if (b.length() > 0) {
-				b.append("\n");
+		TaskTiming last = null;
+		for (TaskTiming nextTask : myTasks) {
+
+			if (last != null) {
+				long delta = nextTask.getStart() - last.getEnd();
+				if (delta > 10) {
+					addNewlineIfContentExists(b);
+					b.append("Between");
+					b.append(": ");
+					b.append(formatMillis(delta));
+				}
 			}
 
-			b.append(nextTask);
+			addNewlineIfContentExists(b);
+			b.append(nextTask.getTaskName());
 			b.append(": ");
-			b.append(formatMillis(myTaskTotals.get(nextTask)));
+			long delta = nextTask.getMillis();
+			b.append(formatMillis(delta));
+
+			last = nextTask;
+		}
+
+		if (myTasks.size() > 0) {
+			long delta = now() - myTasks.getLast().getEnd();
+			if (delta > 10) {
+				addNewlineIfContentExists(b);
+				b.append("After last task");
+				b.append(": ");
+				b.append(formatMillis(delta));
+			}
 		}
 
 		return b.toString();
@@ -214,9 +243,11 @@ public class StopWatch {
 	public void startTask(String theTaskName) {
 		endCurrentTask();
 		if (isNotBlank(theTaskName)) {
-			myCurrentTaskStarted = now();
+			myCurrentTask = new TaskTiming()
+				.setTaskName(theTaskName)
+				.setStart(now());
+			myTasks.add(myCurrentTask);
 		}
-		myCurrentTaskName = theTaskName;
 	}
 
 	/**
@@ -299,6 +330,46 @@ public class StopWatch {
 	@VisibleForTesting
 	static void setNowForUnitTestForUnitTest(Long theNowForUnitTest) {
 		ourNowForUnitTest = theNowForUnitTest;
+	}
+
+	private static class TaskTiming {
+		private long myStart;
+		private long myEnd;
+		private String myTaskName;
+
+		public long getEnd() {
+			if (myEnd == 0) {
+				return now();
+			}
+			return myEnd;
+		}
+
+		public TaskTiming setEnd(long theEnd) {
+			myEnd = theEnd;
+			return this;
+		}
+
+		public long getMillis() {
+			return getEnd() - getStart();
+		}
+
+		public long getStart() {
+			return myStart;
+		}
+
+		public TaskTiming setStart(long theStart) {
+			myStart = theStart;
+			return this;
+		}
+
+		public String getTaskName() {
+			return myTaskName;
+		}
+
+		public TaskTiming setTaskName(String theTaskName) {
+			myTaskName = theTaskName;
+			return this;
+		}
 	}
 
 }

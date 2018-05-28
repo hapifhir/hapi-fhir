@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
@@ -64,55 +65,69 @@ public class TestUtil {
 			if (entity == null) {
 				continue;
 			}
-			
-			ourLog.info("Scanning: {}", clazz.getSimpleName());
-			
-			scan(clazz, names);
-			
-			for (Field nextField : clazz.getDeclaredFields()) {
-				ourLog.info(" * Scanning field: {}", nextField.getName());
-				scan(nextField, names);
-			}
-			
+
+			scanClass(names, clazz, false);
+
 		}
 	}
 
-	private static void scan(AnnotatedElement ae, Set<String> theNames) {
+	private static void scanClass(Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass) {
+		ourLog.info("Scanning: {}", theClazz.getSimpleName());
+
+		scan(theClazz, theNames, theIsSuperClass);
+
+		for (Field nextField : theClazz.getDeclaredFields()) {
+			ourLog.info(" * Scanning field: {}", nextField.getName());
+			scan(nextField, theNames, theIsSuperClass);
+		}
+
+		if (theClazz.getSuperclass().equals(Object.class)) {
+			return;
+		}
+
+		scanClass(theNames, theClazz.getSuperclass(), true);
+	}
+
+	private static void scan(AnnotatedElement ae, Set<String> theNames, boolean theIsSuperClass) {
 		Table table = ae.getAnnotation(Table.class);
 		if (table != null) {
-			assertThat(table.name(), theNames);
+			assertNotADuplicateName(table.name(), theNames);
 			for (UniqueConstraint nextConstraint : table.uniqueConstraints()) {
-				assertThat(nextConstraint.name(), theNames);
+				assertNotADuplicateName(nextConstraint.name(), theNames);
 				Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
 			}
 			for (Index nextConstraint : table.indexes()) {
-				assertThat(nextConstraint.name(), theNames);
+				assertNotADuplicateName(nextConstraint.name(), theNames);
 				Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
 			}
 		}
 		
 		JoinColumn joinColumn = ae.getAnnotation(JoinColumn.class);
 		if (joinColumn != null) {
-			assertThat(joinColumn.name(), null);
+			assertNotADuplicateName(joinColumn.name(), null);
 			ForeignKey fk = joinColumn.foreignKey();
-			Validate.notNull(fk);
-			Validate.isTrue(isNotBlank(fk.name()));
-			Validate.isTrue(fk.name().startsWith("FK_"));
-			assertThat(fk.name(), theNames);
+			if (theIsSuperClass) {
+				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + ae.toString() + " has a name() and should not as it is a superclass");
+			} else {
+				Validate.notNull(fk);
+				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + ae.toString() + " has no name()");
+				Validate.isTrue(fk.name().startsWith("FK_"));
+				assertNotADuplicateName(fk.name(), theNames);
+			}
 		}
 
 		Column column = ae.getAnnotation(Column.class);
 		if (column != null) {
-			assertThat(column.name(), null);
+			assertNotADuplicateName(column.name(), null);
 		}
 
 		GeneratedValue gen = ae.getAnnotation(GeneratedValue.class);
 		SequenceGenerator sg = ae.getAnnotation(SequenceGenerator.class);
 		Validate.isTrue((gen != null) == (sg != null));
 		if (gen != null) {
-			assertThat(gen.generator(), theNames);
-			assertThat(sg.name(), null);
-			assertThat(sg.sequenceName(), null);
+			assertNotADuplicateName(gen.generator(), theNames);
+			assertNotADuplicateName(sg.name(), null);
+			assertNotADuplicateName(sg.sequenceName(), null);
 			assertEquals(gen.generator(), sg.name());
 			assertEquals(gen.generator(), sg.sequenceName());
 		}
@@ -123,7 +138,10 @@ public class TestUtil {
 		Validate.isTrue(theGenerator.equals(theName));
 	}
 
-	private static void assertThat(String theName, Set<String> theNames) {
+	private static void assertNotADuplicateName(String theName, Set<String> theNames) {
+		if (isBlank(theName)) {
+			return;
+		}
 		Validate.isTrue(theName.length() <= MAX_LENGTH, "Identifier \"" + theName + "\" is " + theName.length() + " chars long");
 		if (theNames != null) {
 			Validate.isTrue(theNames.add(theName), "Duplicate name: " + theName);

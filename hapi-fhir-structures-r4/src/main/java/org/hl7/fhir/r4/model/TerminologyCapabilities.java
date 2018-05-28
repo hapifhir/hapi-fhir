@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -56,7 +56,7 @@ public class TerminologyCapabilities extends MetadataResource {
          */
         EXPLICIT, 
         /**
-         * The search for code on ValueSet only includesall codes based on the expansion of the value set
+         * The search for code on ValueSet only includes all codes based on the expansion of the value set
          */
         ALL, 
         /**
@@ -92,7 +92,7 @@ public class TerminologyCapabilities extends MetadataResource {
         public String getDefinition() {
           switch (this) {
             case EXPLICIT: return "The search for code on ValueSet only includes codes explicitly detailed on includes or expansions";
-            case ALL: return "The search for code on ValueSet only includesall codes based on the expansion of the value set";
+            case ALL: return "The search for code on ValueSet only includes all codes based on the expansion of the value set";
             default: return "?";
           }
         }
@@ -2284,10 +2284,10 @@ public class TerminologyCapabilities extends MetadataResource {
   }
 
     /**
-     * Explaination of why this terminology capabilities is needed and why it has been designed as it has.
+     * Explanation of why this terminology capabilities is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this terminology capabilities is defined", formalDefinition="Explaination of why this terminology capabilities is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this terminology capabilities is defined", formalDefinition="Explanation of why this terminology capabilities is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -2366,7 +2366,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this terminology capabilities is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this terminology capabilities is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2386,7 +2386,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this terminology capabilities is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this terminology capabilities is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public TerminologyCapabilities setUrlElement(UriType value) { 
       this.url = value;
@@ -2394,14 +2394,14 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this terminology capabilities is (or will be) published.
+     * @return An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this terminology capabilities is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this terminology capabilities is (or will be) published.
+     * @param value An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this terminology capabilities is (or will be) published.
      */
     public TerminologyCapabilities setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2607,7 +2607,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2627,7 +2627,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public TerminologyCapabilities setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2635,14 +2635,14 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public TerminologyCapabilities setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -2652,7 +2652,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the terminology capabilities was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the terminology capabilities was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -2672,7 +2672,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the terminology capabilities was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the terminology capabilities was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public TerminologyCapabilities setDateElement(DateTimeType value) { 
       this.date = value;
@@ -2680,14 +2680,14 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the terminology capabilities was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.
+     * @return The date  (and optionally time) when the terminology capabilities was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the terminology capabilities was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.
+     * @param value The date  (and optionally time) when the terminology capabilities was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.
      */
     public TerminologyCapabilities setDate(Date value) { 
         if (this.date == null)
@@ -2697,7 +2697,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the terminology capabilities.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the terminology capabilities.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -2717,7 +2717,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the terminology capabilities.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the terminology capabilities.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public TerminologyCapabilities setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -2725,14 +2725,14 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the terminology capabilities.
+     * @return The name of the organization or individual that published the terminology capabilities.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the terminology capabilities.
+     * @param value The name of the organization or individual that published the terminology capabilities.
      */
     public TerminologyCapabilities setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -2954,7 +2954,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this terminology capabilities is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @return {@link #purpose} (Explanation of why this terminology capabilities is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public MarkdownType getPurposeElement() { 
       if (this.purpose == null)
@@ -2974,7 +2974,7 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @param value {@link #purpose} (Explaination of why this terminology capabilities is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     * @param value {@link #purpose} (Explanation of why this terminology capabilities is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
      */
     public TerminologyCapabilities setPurposeElement(MarkdownType value) { 
       this.purpose = value;
@@ -2982,14 +2982,14 @@ public class TerminologyCapabilities extends MetadataResource {
     }
 
     /**
-     * @return Explaination of why this terminology capabilities is needed and why it has been designed as it has.
+     * @return Explanation of why this terminology capabilities is needed and why it has been designed as it has.
      */
     public String getPurpose() { 
       return this.purpose == null ? null : this.purpose.getValue();
     }
 
     /**
-     * @param value Explaination of why this terminology capabilities is needed and why it has been designed as it has.
+     * @param value Explanation of why this terminology capabilities is needed and why it has been designed as it has.
      */
     public TerminologyCapabilities setPurpose(String value) { 
       if (value == null)
@@ -3296,19 +3296,19 @@ public class TerminologyCapabilities extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this terminology capabilities is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this terminology capabilities is (or will be) published.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the terminology capabilities when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the terminology capabilities author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the terminology capabilities. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the terminology capabilities.", 0, 1, title));
         children.add(new Property("status", "code", "The status of this terminology capabilities. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the terminology capabilities was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the terminology capabilities.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the terminology capabilities was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the terminology capabilities.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the terminology capabilities from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate terminology capabilities instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the terminology capabilities is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        children.add(new Property("purpose", "markdown", "Explaination of why this terminology capabilities is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("purpose", "markdown", "Explanation of why this terminology capabilities is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the terminology capabilities and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the terminology capabilities.", 0, 1, copyright));
         children.add(new Property("lockedDate", "boolean", "Whether the server supports lockedDate.", 0, 1, lockedDate));
         children.add(new Property("codeSystem", "", "Identifies a code system that is supported by the server. If there is a no code system URL, then this declares the general assumptions a client can make about support for any CodeSystem resource.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
@@ -3322,19 +3322,19 @@ public class TerminologyCapabilities extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this terminology capabilities is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this terminology capabilities when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this terminology capabilities is (or will be) published.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the terminology capabilities when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the terminology capabilities author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the terminology capabilities. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the terminology capabilities.", 0, 1, title);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this terminology capabilities. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the terminology capabilities was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the terminology capabilities.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this terminology capabilities is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the terminology capabilities was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the terminology capabilities changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the terminology capabilities.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the terminology capabilities from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate terminology capabilities instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the terminology capabilities is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this terminology capabilities is needed and why it has been designed as it has.", 0, 1, purpose);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this terminology capabilities is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the terminology capabilities and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the terminology capabilities.", 0, 1, copyright);
         case 1391591896: /*lockedDate*/  return new Property("lockedDate", "boolean", "Whether the server supports lockedDate.", 0, 1, lockedDate);
         case -916511108: /*codeSystem*/  return new Property("codeSystem", "", "Identifies a code system that is supported by the server. If there is a no code system URL, then this declares the general assumptions a client can make about support for any CodeSystem resource.", 0, java.lang.Integer.MAX_VALUE, codeSystem);

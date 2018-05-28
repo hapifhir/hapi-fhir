@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource identifies an instance or a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices include durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc.
  */
@@ -772,15 +773,30 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("deviceIdentifier", "string", "The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.", 0, java.lang.Integer.MAX_VALUE, deviceIdentifier));
-          childrenList.add(new Property("name", "string", "Name of device as used in labeling or catalog.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-          childrenList.add(new Property("carrierHRF", "string", "The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.", 0, java.lang.Integer.MAX_VALUE, carrierHRF));
-          childrenList.add(new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, java.lang.Integer.MAX_VALUE, carrierAIDC));
-          childrenList.add(new Property("issuer", "uri", "Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di.", 0, java.lang.Integer.MAX_VALUE, issuer));
-          childrenList.add(new Property("entryType", "code", "A coded entry to indicate how the data was entered.", 0, java.lang.Integer.MAX_VALUE, entryType));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("deviceIdentifier", "string", "The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.", 0, 1, deviceIdentifier));
+          children.add(new Property("name", "string", "Name of device as used in labeling or catalog.", 0, 1, name));
+          children.add(new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, 1, jurisdiction));
+          children.add(new Property("carrierHRF", "string", "The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.", 0, 1, carrierHRF));
+          children.add(new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, 1, carrierAIDC));
+          children.add(new Property("issuer", "uri", "Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di.", 0, 1, issuer));
+          children.add(new Property("entryType", "code", "A coded entry to indicate how the data was entered.", 0, 1, entryType));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1322005407: /*deviceIdentifier*/  return new Property("deviceIdentifier", "string", "The device identifier (DI) is a mandatory, fixed portion of a UDI that identifies the labeler and the specific version or model of a device.", 0, 1, deviceIdentifier);
+          case 3373707: /*name*/  return new Property("name", "string", "Name of device as used in labeling or catalog.", 0, 1, name);
+          case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "uri", "The identity of the authoritative source for UDI generation within a  jurisdiction.  All UDIs are globally unique within a single namespace. with the appropriate repository uri as the system.  For example,  UDIs of devices managed in the U.S. by the FDA, the value is  http://hl7.org/fhir/NamingSystem/fda-udi.", 0, 1, jurisdiction);
+          case 806499972: /*carrierHRF*/  return new Property("carrierHRF", "string", "The full UDI carrier as the human readable form (HRF) representation of the barcode string as printed on the packaging of the device.", 0, 1, carrierHRF);
+          case -768521825: /*carrierAIDC*/  return new Property("carrierAIDC", "base64Binary", "The full UDI carrier of the Automatic Identification and Data Capture (AIDC) technology representation of the barcode string as printed on the packaging of the device - E.g a barcode or RFID.   Because of limitations on character sets in XML and the need to round-trip JSON data through XML, AIDC Formats *SHALL* be base64 encoded.", 0, 1, carrierAIDC);
+          case -1179159879: /*issuer*/  return new Property("issuer", "uri", "Organization that is charged with issuing UDIs for devices.  For example, the US FDA issuers include :\n1) GS1: \nhttp://hl7.org/fhir/NamingSystem/gs1-di, \n2) HIBCC:\nhttp://hl7.org/fhir/NamingSystem/hibcc-dI, \n3) ICCBBA for blood containers:\nhttp://hl7.org/fhir/NamingSystem/iccbba-blood-di, \n4) ICCBA for other devices:\nhttp://hl7.org/fhir/NamingSystem/iccbba-other-di.", 0, 1, issuer);
+          case -479362356: /*entryType*/  return new Property("entryType", "code", "A coded entry to indicate how the data was entered.", 0, 1, entryType);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -921,12 +937,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceUdiComponent))
+        if (!(other_ instanceof DeviceUdiComponent))
           return false;
-        DeviceUdiComponent o = (DeviceUdiComponent) other;
+        DeviceUdiComponent o = (DeviceUdiComponent) other_;
         return compareDeep(deviceIdentifier, o.deviceIdentifier, true) && compareDeep(name, o.name, true)
            && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(carrierHRF, o.carrierHRF, true)
            && compareDeep(carrierAIDC, o.carrierAIDC, true) && compareDeep(issuer, o.issuer, true) && compareDeep(entryType, o.entryType, true)
@@ -934,12 +950,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceUdiComponent))
+        if (!(other_ instanceof DeviceUdiComponent))
           return false;
-        DeviceUdiComponent o = (DeviceUdiComponent) other;
+        DeviceUdiComponent o = (DeviceUdiComponent) other_;
         return compareValues(deviceIdentifier, o.deviceIdentifier, true) && compareValues(name, o.name, true)
            && compareValues(jurisdiction, o.jurisdiction, true) && compareValues(carrierHRF, o.carrierHRF, true)
            && compareValues(carrierAIDC, o.carrierAIDC, true) && compareValues(issuer, o.issuer, true) && compareValues(entryType, o.entryType, true)
@@ -1176,7 +1192,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     /**
      * @param value {@link #udi} ([Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.)
      */
-    public Device setUdi(DeviceUdiComponent value) { 
+    public Device setUdi(DeviceUdiComponent value)  { 
       this.udi = value;
       return this;
     }
@@ -1249,7 +1265,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     /**
      * @param value {@link #type} (Code or identifier to identify a kind of device.)
      */
-    public Device setType(CodeableConcept value) { 
+    public Device setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -1567,7 +1583,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     /**
      * @param value {@link #patient} (Patient information, If the device is affixed to a person.)
      */
-    public Device setPatient(Reference value) { 
+    public Device setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1611,7 +1627,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     /**
      * @param value {@link #owner} (An organization that is responsible for the provision and ongoing maintenance of the device.)
      */
-    public Device setOwner(Reference value) { 
+    public Device setOwner(Reference value)  { 
       this.owner = value;
       return this;
     }
@@ -1708,7 +1724,7 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
     /**
      * @param value {@link #location} (The place where the device can be found.)
      */
-    public Device setLocation(Reference value) { 
+    public Device setLocation(Reference value)  { 
       this.location = value;
       return this;
     }
@@ -1888,25 +1904,50 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       return getSafety().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("udi", "", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.", 0, java.lang.Integer.MAX_VALUE, udi));
-        childrenList.add(new Property("status", "code", "Status of the Device availability.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
-        childrenList.add(new Property("manufacturer", "string", "A name of the manufacturer.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
-        childrenList.add(new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, java.lang.Integer.MAX_VALUE, manufactureDate));
-        childrenList.add(new Property("expirationDate", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, java.lang.Integer.MAX_VALUE, expirationDate));
-        childrenList.add(new Property("model", "string", "The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, java.lang.Integer.MAX_VALUE, model));
-        childrenList.add(new Property("version", "string", "The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Patient information, If the device is affixed to a person.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("owner", "Reference(Organization)", "An organization that is responsible for the provision and ongoing maintenance of the device.", 0, java.lang.Integer.MAX_VALUE, owner));
-        childrenList.add(new Property("contact", "ContactPoint", "Contact details for an organization or a particular human that is responsible for the device.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("location", "Reference(Location)", "The place where the device can be found.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("safety", "CodeableConcept", "Provides additional safety characteristics about a medical device.  For example devices containing latex.", 0, java.lang.Integer.MAX_VALUE, safety));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("udi", "", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.", 0, 1, udi));
+        children.add(new Property("status", "code", "Status of the Device availability.", 0, 1, status));
+        children.add(new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, 1, type));
+        children.add(new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, 1, lotNumber));
+        children.add(new Property("manufacturer", "string", "A name of the manufacturer.", 0, 1, manufacturer));
+        children.add(new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, 1, manufactureDate));
+        children.add(new Property("expirationDate", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, 1, expirationDate));
+        children.add(new Property("model", "string", "The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, 1, model));
+        children.add(new Property("version", "string", "The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.", 0, 1, version));
+        children.add(new Property("patient", "Reference(Patient)", "Patient information, If the device is affixed to a person.", 0, 1, patient));
+        children.add(new Property("owner", "Reference(Organization)", "An organization that is responsible for the provision and ongoing maintenance of the device.", 0, 1, owner));
+        children.add(new Property("contact", "ContactPoint", "Contact details for an organization or a particular human that is responsible for the device.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("location", "Reference(Location)", "The place where the device can be found.", 0, 1, location));
+        children.add(new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, 1, url));
+        children.add(new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("safety", "CodeableConcept", "Provides additional safety characteristics about a medical device.  For example devices containing latex.", 0, java.lang.Integer.MAX_VALUE, safety));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique instance identifiers assigned to a device by manufacturers other organizations or owners.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 115642: /*udi*/  return new Property("udi", "", "[Unique device identifier (UDI)](device.html#5.11.3.2.2) assigned to device label or package.", 0, 1, udi);
+        case -892481550: /*status*/  return new Property("status", "code", "Status of the Device availability.", 0, 1, status);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Code or identifier to identify a kind of device.", 0, 1, type);
+        case 462547450: /*lotNumber*/  return new Property("lotNumber", "string", "Lot number assigned by the manufacturer.", 0, 1, lotNumber);
+        case -1969347631: /*manufacturer*/  return new Property("manufacturer", "string", "A name of the manufacturer.", 0, 1, manufacturer);
+        case 416714767: /*manufactureDate*/  return new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, 1, manufactureDate);
+        case -668811523: /*expirationDate*/  return new Property("expirationDate", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, 1, expirationDate);
+        case 104069929: /*model*/  return new Property("model", "string", "The \"model\" is an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.", 0, 1, model);
+        case 351608024: /*version*/  return new Property("version", "string", "The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.", 0, 1, version);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Patient information, If the device is affixed to a person.", 0, 1, patient);
+        case 106164915: /*owner*/  return new Property("owner", "Reference(Organization)", "An organization that is responsible for the provision and ongoing maintenance of the device.", 0, 1, owner);
+        case 951526432: /*contact*/  return new Property("contact", "ContactPoint", "Contact details for an organization or a particular human that is responsible for the device.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The place where the device can be found.", 0, 1, location);
+        case 116079: /*url*/  return new Property("url", "uri", "A network address on which the device may be contacted directly.", 0, 1, url);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Descriptive information, usage information or implantation information that is not captured in an existing element.", 0, java.lang.Integer.MAX_VALUE, note);
+        case -909893934: /*safety*/  return new Property("safety", "CodeableConcept", "Provides additional safety characteristics about a medical device.  For example devices containing latex.", 0, java.lang.Integer.MAX_VALUE, safety);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2197,12 +2238,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Device))
+        if (!(other_ instanceof Device))
           return false;
-        Device o = (Device) other;
+        Device o = (Device) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(udi, o.udi, true) && compareDeep(status, o.status, true)
            && compareDeep(type, o.type, true) && compareDeep(lotNumber, o.lotNumber, true) && compareDeep(manufacturer, o.manufacturer, true)
            && compareDeep(manufactureDate, o.manufactureDate, true) && compareDeep(expirationDate, o.expirationDate, true)
@@ -2213,12 +2254,12 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Device))
+        if (!(other_ instanceof Device))
           return false;
-        Device o = (Device) other;
+        Device o = (Device) other_;
         return compareValues(status, o.status, true) && compareValues(lotNumber, o.lotNumber, true) && compareValues(manufacturer, o.manufacturer, true)
            && compareValues(manufactureDate, o.manufactureDate, true) && compareValues(expirationDate, o.expirationDate, true)
            && compareValues(model, o.model, true) && compareValues(version, o.version, true) && compareValues(url, o.url, true)

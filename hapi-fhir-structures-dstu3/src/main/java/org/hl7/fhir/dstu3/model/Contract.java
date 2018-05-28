@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
  */
@@ -408,7 +409,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #actor} (Who or what parties are assigned roles in this Contract.)
          */
-        public AgentComponent setActor(Reference value) { 
+        public AgentComponent setActor(Reference value)  { 
           this.actor = value;
           return this;
         }
@@ -481,10 +482,20 @@ public class Contract extends DomainResource {
           return getRole().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("actor", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "Who or what parties are assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("role", "CodeableConcept", "Role type of agent assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, role));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("actor", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "Who or what parties are assigned roles in this Contract.", 0, 1, actor));
+          children.add(new Property("role", "CodeableConcept", "Role type of agent assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, role));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "Who or what parties are assigned roles in this Contract.", 0, 1, actor);
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Role type of agent assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, role);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -568,22 +579,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AgentComponent))
+        if (!(other_ instanceof AgentComponent))
           return false;
-        AgentComponent o = (AgentComponent) other;
+        AgentComponent o = (AgentComponent) other_;
         return compareDeep(actor, o.actor, true) && compareDeep(role, o.role, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AgentComponent))
+        if (!(other_ instanceof AgentComponent))
           return false;
-        AgentComponent o = (AgentComponent) other;
+        AgentComponent o = (AgentComponent) other_;
         return true;
       }
 
@@ -664,7 +675,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #type} (Role of this Contract signer, e.g. notary, grantee.)
          */
-        public SignatoryComponent setType(Coding value) { 
+        public SignatoryComponent setType(Coding value)  { 
           this.type = value;
           return this;
         }
@@ -688,7 +699,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #party} (Party which is a signator to this Contract.)
          */
-        public SignatoryComponent setParty(Reference value) { 
+        public SignatoryComponent setParty(Reference value)  { 
           this.party = value;
           return this;
         }
@@ -761,11 +772,22 @@ public class Contract extends DomainResource {
           return getSignature().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "Coding", "Role of this Contract signer, e.g. notary, grantee.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("party", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Party which is a signator to this Contract.", 0, java.lang.Integer.MAX_VALUE, party));
-          childrenList.add(new Property("signature", "Signature", "Legally binding Contract DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "Coding", "Role of this Contract signer, e.g. notary, grantee.", 0, 1, type));
+          children.add(new Property("party", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Party which is a signator to this Contract.", 0, 1, party));
+          children.add(new Property("signature", "Signature", "Legally binding Contract DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "Coding", "Role of this Contract signer, e.g. notary, grantee.", 0, 1, type);
+          case 106437350: /*party*/  return new Property("party", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Party which is a signator to this Contract.", 0, 1, party);
+          case 1073584312: /*signature*/  return new Property("signature", "Signature", "Legally binding Contract DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -862,23 +884,23 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SignatoryComponent))
+        if (!(other_ instanceof SignatoryComponent))
           return false;
-        SignatoryComponent o = (SignatoryComponent) other;
+        SignatoryComponent o = (SignatoryComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(party, o.party, true) && compareDeep(signature, o.signature, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SignatoryComponent))
+        if (!(other_ instanceof SignatoryComponent))
           return false;
-        SignatoryComponent o = (SignatoryComponent) other;
+        SignatoryComponent o = (SignatoryComponent) other_;
         return true;
       }
 
@@ -971,26 +993,30 @@ public class Contract extends DomainResource {
          * @return {@link #entity} (Specific type of Contract Valued Item that may be priced.)
          */
         public CodeableConcept getEntityCodeableConcept() throws FHIRException { 
+          if (this.entity == null)
+            return null;
           if (!(this.entity instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (CodeableConcept) this.entity;
         }
 
         public boolean hasEntityCodeableConcept() { 
-          return this.entity instanceof CodeableConcept;
+          return this != null && this.entity instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #entity} (Specific type of Contract Valued Item that may be priced.)
          */
         public Reference getEntityReference() throws FHIRException { 
+          if (this.entity == null)
+            return null;
           if (!(this.entity instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
         }
 
         public boolean hasEntityReference() { 
-          return this.entity instanceof Reference;
+          return this != null && this.entity instanceof Reference;
         }
 
         public boolean hasEntity() { 
@@ -1000,7 +1026,9 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #entity} (Specific type of Contract Valued Item that may be priced.)
          */
-        public ValuedItemComponent setEntity(Type value) { 
+        public ValuedItemComponent setEntity(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Contract.valuedItem.entity[x]: "+value.fhirType());
           this.entity = value;
           return this;
         }
@@ -1024,7 +1052,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #identifier} (Identifies a Contract Valued Item instance.)
          */
-        public ValuedItemComponent setIdentifier(Identifier value) { 
+        public ValuedItemComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1097,7 +1125,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #quantity} (Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances.)
          */
-        public ValuedItemComponent setQuantity(SimpleQuantity value) { 
+        public ValuedItemComponent setQuantity(SimpleQuantity value)  { 
           this.quantity = value;
           return this;
         }
@@ -1121,7 +1149,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #unitPrice} (A Contract Valued Item unit valuation measure.)
          */
-        public ValuedItemComponent setUnitPrice(Money value) { 
+        public ValuedItemComponent setUnitPrice(Money value)  { 
           this.unitPrice = value;
           return this;
         }
@@ -1279,21 +1307,40 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #net} (Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
-        public ValuedItemComponent setNet(Money value) { 
+        public ValuedItemComponent setNet(Money value)  { 
           this.net = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Valued Item that may be priced.", 0, java.lang.Integer.MAX_VALUE, entity));
-          childrenList.add(new Property("identifier", "Identifier", "Identifies a Contract Valued Item instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("effectiveTime", "dateTime", "Indicates the time during which this Contract ValuedItem information is effective.", 0, java.lang.Integer.MAX_VALUE, effectiveTime));
-          childrenList.add(new Property("quantity", "SimpleQuantity", "Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("unitPrice", "Money", "A Contract Valued Item unit valuation measure.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
-          childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
-          childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
-          childrenList.add(new Property("net", "Money", "Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Valued Item that may be priced.", 0, 1, entity));
+          children.add(new Property("identifier", "Identifier", "Identifies a Contract Valued Item instance.", 0, 1, identifier));
+          children.add(new Property("effectiveTime", "dateTime", "Indicates the time during which this Contract ValuedItem information is effective.", 0, 1, effectiveTime));
+          children.add(new Property("quantity", "SimpleQuantity", "Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances.", 0, 1, quantity));
+          children.add(new Property("unitPrice", "Money", "A Contract Valued Item unit valuation measure.", 0, 1, unitPrice));
+          children.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor));
+          children.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point.", 0, 1, points));
+          children.add(new Property("net", "Money", "Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -740568643: /*entity[x]*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Valued Item that may be priced.", 0, 1, entity);
+          case -1298275357: /*entity*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Valued Item that may be priced.", 0, 1, entity);
+          case 924197182: /*entityCodeableConcept*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Valued Item that may be priced.", 0, 1, entity);
+          case -356635992: /*entityReference*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Valued Item that may be priced.", 0, 1, entity);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifies a Contract Valued Item instance.", 0, 1, identifier);
+          case -929905388: /*effectiveTime*/  return new Property("effectiveTime", "dateTime", "Indicates the time during which this Contract ValuedItem information is effective.", 0, 1, effectiveTime);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances.", 0, 1, quantity);
+          case -486196699: /*unitPrice*/  return new Property("unitPrice", "Money", "A Contract Valued Item unit valuation measure.", 0, 1, unitPrice);
+          case -1282148017: /*factor*/  return new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor);
+          case -982754077: /*points*/  return new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point.", 0, 1, points);
+          case 108957: /*net*/  return new Property("net", "Money", "Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1454,24 +1501,24 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ValuedItemComponent))
+        if (!(other_ instanceof ValuedItemComponent))
           return false;
-        ValuedItemComponent o = (ValuedItemComponent) other;
+        ValuedItemComponent o = (ValuedItemComponent) other_;
         return compareDeep(entity, o.entity, true) && compareDeep(identifier, o.identifier, true) && compareDeep(effectiveTime, o.effectiveTime, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true)
            && compareDeep(points, o.points, true) && compareDeep(net, o.net, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ValuedItemComponent))
+        if (!(other_ instanceof ValuedItemComponent))
           return false;
-        ValuedItemComponent o = (ValuedItemComponent) other;
+        ValuedItemComponent o = (ValuedItemComponent) other_;
         return compareValues(effectiveTime, o.effectiveTime, true) && compareValues(factor, o.factor, true)
            && compareValues(points, o.points, true);
       }
@@ -1619,7 +1666,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #identifier} (Unique identifier for this particular Contract Provision.)
          */
-        public TermComponent setIdentifier(Identifier value) { 
+        public TermComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1692,7 +1739,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #applies} (Relevant time or time-period when this Contract Provision is applicable.)
          */
-        public TermComponent setApplies(Period value) { 
+        public TermComponent setApplies(Period value)  { 
           this.applies = value;
           return this;
         }
@@ -1716,7 +1763,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #type} (Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit.)
          */
-        public TermComponent setType(CodeableConcept value) { 
+        public TermComponent setType(CodeableConcept value)  { 
           this.type = value;
           return this;
         }
@@ -1740,7 +1787,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #subType} (Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.)
          */
-        public TermComponent setSubType(CodeableConcept value) { 
+        public TermComponent setSubType(CodeableConcept value)  { 
           this.subType = value;
           return this;
         }
@@ -2175,21 +2222,42 @@ public class Contract extends DomainResource {
           return getGroup().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "Unique identifier for this particular Contract Provision.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("issued", "dateTime", "When this Contract Provision was issued.", 0, java.lang.Integer.MAX_VALUE, issued));
-          childrenList.add(new Property("applies", "Period", "Relevant time or time-period when this Contract Provision is applicable.", 0, java.lang.Integer.MAX_VALUE, applies));
-          childrenList.add(new Property("type", "CodeableConcept", "Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("subType", "CodeableConcept", "Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.", 0, java.lang.Integer.MAX_VALUE, subType));
-          childrenList.add(new Property("topic", "Reference(Any)", "The matter of concern in the context of this provision of the agrement.", 0, java.lang.Integer.MAX_VALUE, topic));
-          childrenList.add(new Property("action", "CodeableConcept", "Action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, action));
-          childrenList.add(new Property("actionReason", "CodeableConcept", "Reason or purpose for the action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, actionReason));
-          childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which terms are controlled by this condition.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-          childrenList.add(new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
-          childrenList.add(new Property("text", "string", "Human readable form of this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("valuedItem", "", "Contract Provision Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
-          childrenList.add(new Property("group", "@Contract.term", "Nested group of Contract Provisions.", 0, java.lang.Integer.MAX_VALUE, group));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "Unique identifier for this particular Contract Provision.", 0, 1, identifier));
+          children.add(new Property("issued", "dateTime", "When this Contract Provision was issued.", 0, 1, issued));
+          children.add(new Property("applies", "Period", "Relevant time or time-period when this Contract Provision is applicable.", 0, 1, applies));
+          children.add(new Property("type", "CodeableConcept", "Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit.", 0, 1, type));
+          children.add(new Property("subType", "CodeableConcept", "Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.", 0, 1, subType));
+          children.add(new Property("topic", "Reference(Any)", "The matter of concern in the context of this provision of the agrement.", 0, java.lang.Integer.MAX_VALUE, topic));
+          children.add(new Property("action", "CodeableConcept", "Action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, action));
+          children.add(new Property("actionReason", "CodeableConcept", "Reason or purpose for the action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, actionReason));
+          children.add(new Property("securityLabel", "Coding", "A set of security labels that define which terms are controlled by this condition.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
+          children.add(new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
+          children.add(new Property("text", "string", "Human readable form of this Contract Provision.", 0, 1, text));
+          children.add(new Property("valuedItem", "", "Contract Provision Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
+          children.add(new Property("group", "@Contract.term", "Nested group of Contract Provisions.", 0, java.lang.Integer.MAX_VALUE, group));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this particular Contract Provision.", 0, 1, identifier);
+          case -1179159893: /*issued*/  return new Property("issued", "dateTime", "When this Contract Provision was issued.", 0, 1, issued);
+          case -793235316: /*applies*/  return new Property("applies", "Period", "Relevant time or time-period when this Contract Provision is applicable.", 0, 1, applies);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g. life time maximum benefit.", 0, 1, type);
+          case -1868521062: /*subType*/  return new Property("subType", "CodeableConcept", "Subtype of this Contract Provision, e.g. life time maximum payment for a contract term for specific valued item, e.g. disability payment.", 0, 1, subType);
+          case 110546223: /*topic*/  return new Property("topic", "Reference(Any)", "The matter of concern in the context of this provision of the agrement.", 0, java.lang.Integer.MAX_VALUE, topic);
+          case -1422950858: /*action*/  return new Property("action", "CodeableConcept", "Action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, action);
+          case 1465121818: /*actionReason*/  return new Property("actionReason", "CodeableConcept", "Reason or purpose for the action stipulated by this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, actionReason);
+          case -722296940: /*securityLabel*/  return new Property("securityLabel", "Coding", "A set of security labels that define which terms are controlled by this condition.", 0, java.lang.Integer.MAX_VALUE, securityLabel);
+          case 92750597: /*agent*/  return new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent);
+          case 3556653: /*text*/  return new Property("text", "string", "Human readable form of this Contract Provision.", 0, 1, text);
+          case 2046675654: /*valuedItem*/  return new Property("valuedItem", "", "Contract Provision Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem);
+          case 98629247: /*group*/  return new Property("group", "@Contract.term", "Nested group of Contract Provisions.", 0, java.lang.Integer.MAX_VALUE, group);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2432,12 +2500,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TermComponent))
+        if (!(other_ instanceof TermComponent))
           return false;
-        TermComponent o = (TermComponent) other;
+        TermComponent o = (TermComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(issued, o.issued, true) && compareDeep(applies, o.applies, true)
            && compareDeep(type, o.type, true) && compareDeep(subType, o.subType, true) && compareDeep(topic, o.topic, true)
            && compareDeep(action, o.action, true) && compareDeep(actionReason, o.actionReason, true) && compareDeep(securityLabel, o.securityLabel, true)
@@ -2446,12 +2514,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TermComponent))
+        if (!(other_ instanceof TermComponent))
           return false;
-        TermComponent o = (TermComponent) other;
+        TermComponent o = (TermComponent) other_;
         return compareValues(issued, o.issued, true) && compareValues(text, o.text, true);
       }
 
@@ -2526,7 +2594,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #actor} (The agent assigned a role in this Contract Provision.)
          */
-        public TermAgentComponent setActor(Reference value) { 
+        public TermAgentComponent setActor(Reference value)  { 
           this.actor = value;
           return this;
         }
@@ -2599,10 +2667,20 @@ public class Contract extends DomainResource {
           return getRole().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("actor", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "The agent assigned a role in this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, actor));
-          childrenList.add(new Property("role", "CodeableConcept", "Role played by the agent assigned this role in the execution of this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, role));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("actor", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "The agent assigned a role in this Contract Provision.", 0, 1, actor));
+          children.add(new Property("role", "CodeableConcept", "Role played by the agent assigned this role in the execution of this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, role));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "The agent assigned a role in this Contract Provision.", 0, 1, actor);
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Role played by the agent assigned this role in the execution of this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, role);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2686,22 +2764,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TermAgentComponent))
+        if (!(other_ instanceof TermAgentComponent))
           return false;
-        TermAgentComponent o = (TermAgentComponent) other;
+        TermAgentComponent o = (TermAgentComponent) other_;
         return compareDeep(actor, o.actor, true) && compareDeep(role, o.role, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TermAgentComponent))
+        if (!(other_ instanceof TermAgentComponent))
           return false;
-        TermAgentComponent o = (TermAgentComponent) other;
+        TermAgentComponent o = (TermAgentComponent) other_;
         return true;
       }
 
@@ -2794,26 +2872,30 @@ public class Contract extends DomainResource {
          * @return {@link #entity} (Specific type of Contract Provision Valued Item that may be priced.)
          */
         public CodeableConcept getEntityCodeableConcept() throws FHIRException { 
+          if (this.entity == null)
+            return null;
           if (!(this.entity instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (CodeableConcept) this.entity;
         }
 
         public boolean hasEntityCodeableConcept() { 
-          return this.entity instanceof CodeableConcept;
+          return this != null && this.entity instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #entity} (Specific type of Contract Provision Valued Item that may be priced.)
          */
         public Reference getEntityReference() throws FHIRException { 
+          if (this.entity == null)
+            return null;
           if (!(this.entity instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
         }
 
         public boolean hasEntityReference() { 
-          return this.entity instanceof Reference;
+          return this != null && this.entity instanceof Reference;
         }
 
         public boolean hasEntity() { 
@@ -2823,7 +2905,9 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #entity} (Specific type of Contract Provision Valued Item that may be priced.)
          */
-        public TermValuedItemComponent setEntity(Type value) { 
+        public TermValuedItemComponent setEntity(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Contract.term.valuedItem.entity[x]: "+value.fhirType());
           this.entity = value;
           return this;
         }
@@ -2847,7 +2931,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #identifier} (Identifies a Contract Provision Valued Item instance.)
          */
-        public TermValuedItemComponent setIdentifier(Identifier value) { 
+        public TermValuedItemComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -2920,7 +3004,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #quantity} (Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances.)
          */
-        public TermValuedItemComponent setQuantity(SimpleQuantity value) { 
+        public TermValuedItemComponent setQuantity(SimpleQuantity value)  { 
           this.quantity = value;
           return this;
         }
@@ -2944,7 +3028,7 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #unitPrice} (A Contract Provision Valued Item unit valuation measure.)
          */
-        public TermValuedItemComponent setUnitPrice(Money value) { 
+        public TermValuedItemComponent setUnitPrice(Money value)  { 
           this.unitPrice = value;
           return this;
         }
@@ -3102,21 +3186,40 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #net} (Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
          */
-        public TermValuedItemComponent setNet(Money value) { 
+        public TermValuedItemComponent setNet(Money value)  { 
           this.net = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Provision Valued Item that may be priced.", 0, java.lang.Integer.MAX_VALUE, entity));
-          childrenList.add(new Property("identifier", "Identifier", "Identifies a Contract Provision Valued Item instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("effectiveTime", "dateTime", "Indicates the time during which this Contract Term ValuedItem information is effective.", 0, java.lang.Integer.MAX_VALUE, effectiveTime));
-          childrenList.add(new Property("quantity", "SimpleQuantity", "Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("unitPrice", "Money", "A Contract Provision Valued Item unit valuation measure.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
-          childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
-          childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
-          childrenList.add(new Property("net", "Money", "Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Provision Valued Item that may be priced.", 0, 1, entity));
+          children.add(new Property("identifier", "Identifier", "Identifies a Contract Provision Valued Item instance.", 0, 1, identifier));
+          children.add(new Property("effectiveTime", "dateTime", "Indicates the time during which this Contract Term ValuedItem information is effective.", 0, 1, effectiveTime));
+          children.add(new Property("quantity", "SimpleQuantity", "Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances.", 0, 1, quantity));
+          children.add(new Property("unitPrice", "Money", "A Contract Provision Valued Item unit valuation measure.", 0, 1, unitPrice));
+          children.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor));
+          children.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point.", 0, 1, points));
+          children.add(new Property("net", "Money", "Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -740568643: /*entity[x]*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Provision Valued Item that may be priced.", 0, 1, entity);
+          case -1298275357: /*entity*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Provision Valued Item that may be priced.", 0, 1, entity);
+          case 924197182: /*entityCodeableConcept*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Provision Valued Item that may be priced.", 0, 1, entity);
+          case -356635992: /*entityReference*/  return new Property("entity[x]", "CodeableConcept|Reference(Any)", "Specific type of Contract Provision Valued Item that may be priced.", 0, 1, entity);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifies a Contract Provision Valued Item instance.", 0, 1, identifier);
+          case -929905388: /*effectiveTime*/  return new Property("effectiveTime", "dateTime", "Indicates the time during which this Contract Term ValuedItem information is effective.", 0, 1, effectiveTime);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances.", 0, 1, quantity);
+          case -486196699: /*unitPrice*/  return new Property("unitPrice", "Money", "A Contract Provision Valued Item unit valuation measure.", 0, 1, unitPrice);
+          case -1282148017: /*factor*/  return new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor);
+          case -982754077: /*points*/  return new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point.", 0, 1, points);
+          case 108957: /*net*/  return new Property("net", "Money", "Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3277,24 +3380,24 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof TermValuedItemComponent))
+        if (!(other_ instanceof TermValuedItemComponent))
           return false;
-        TermValuedItemComponent o = (TermValuedItemComponent) other;
+        TermValuedItemComponent o = (TermValuedItemComponent) other_;
         return compareDeep(entity, o.entity, true) && compareDeep(identifier, o.identifier, true) && compareDeep(effectiveTime, o.effectiveTime, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true)
            && compareDeep(points, o.points, true) && compareDeep(net, o.net, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof TermValuedItemComponent))
+        if (!(other_ instanceof TermValuedItemComponent))
           return false;
-        TermValuedItemComponent o = (TermValuedItemComponent) other;
+        TermValuedItemComponent o = (TermValuedItemComponent) other_;
         return compareValues(effectiveTime, o.effectiveTime, true) && compareValues(factor, o.factor, true)
            && compareValues(points, o.points, true);
       }
@@ -3348,26 +3451,30 @@ public class Contract extends DomainResource {
          * @return {@link #content} (Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.)
          */
         public Attachment getContentAttachment() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
         public boolean hasContentAttachment() { 
-          return this.content instanceof Attachment;
+          return this != null && this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.)
          */
         public Reference getContentReference() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
         public boolean hasContentReference() { 
-          return this.content instanceof Reference;
+          return this != null && this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -3377,14 +3484,28 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #content} (Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.)
          */
-        public FriendlyLanguageComponent setContent(Type value) { 
+        public FriendlyLanguageComponent setContent(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof Attachment || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Contract.friendly.content[x]: "+value.fhirType());
           this.content = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, java.lang.Integer.MAX_VALUE, content));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, 1, content));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 264548711: /*content[x]*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, 1, content);
+          case 951530617: /*content*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, 1, content);
+          case -702028164: /*contentAttachment*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, 1, content);
+          case 1193747154: /*contentReference*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, 1, content);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3457,22 +3578,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof FriendlyLanguageComponent))
+        if (!(other_ instanceof FriendlyLanguageComponent))
           return false;
-        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other;
+        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof FriendlyLanguageComponent))
+        if (!(other_ instanceof FriendlyLanguageComponent))
           return false;
-        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other;
+        FriendlyLanguageComponent o = (FriendlyLanguageComponent) other_;
         return true;
       }
 
@@ -3524,26 +3645,30 @@ public class Contract extends DomainResource {
          * @return {@link #content} (Contract legal text in human renderable form.)
          */
         public Attachment getContentAttachment() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
         public boolean hasContentAttachment() { 
-          return this.content instanceof Attachment;
+          return this != null && this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (Contract legal text in human renderable form.)
          */
         public Reference getContentReference() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
         public boolean hasContentReference() { 
-          return this.content instanceof Reference;
+          return this != null && this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -3553,14 +3678,28 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #content} (Contract legal text in human renderable form.)
          */
-        public LegalLanguageComponent setContent(Type value) { 
+        public LegalLanguageComponent setContent(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof Attachment || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Contract.legal.content[x]: "+value.fhirType());
           this.content = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, java.lang.Integer.MAX_VALUE, content));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, 1, content));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 264548711: /*content[x]*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, 1, content);
+          case 951530617: /*content*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, 1, content);
+          case -702028164: /*contentAttachment*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, 1, content);
+          case 1193747154: /*contentReference*/  return new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, 1, content);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3633,22 +3772,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof LegalLanguageComponent))
+        if (!(other_ instanceof LegalLanguageComponent))
           return false;
-        LegalLanguageComponent o = (LegalLanguageComponent) other;
+        LegalLanguageComponent o = (LegalLanguageComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof LegalLanguageComponent))
+        if (!(other_ instanceof LegalLanguageComponent))
           return false;
-        LegalLanguageComponent o = (LegalLanguageComponent) other;
+        LegalLanguageComponent o = (LegalLanguageComponent) other_;
         return true;
       }
 
@@ -3700,26 +3839,30 @@ public class Contract extends DomainResource {
          * @return {@link #content} (Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).)
          */
         public Attachment getContentAttachment() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
         }
 
         public boolean hasContentAttachment() { 
-          return this.content instanceof Attachment;
+          return this != null && this.content instanceof Attachment;
         }
 
         /**
          * @return {@link #content} (Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).)
          */
         public Reference getContentReference() throws FHIRException { 
+          if (this.content == null)
+            return null;
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
         }
 
         public boolean hasContentReference() { 
-          return this.content instanceof Reference;
+          return this != null && this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -3729,14 +3872,28 @@ public class Contract extends DomainResource {
         /**
          * @param value {@link #content} (Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).)
          */
-        public ComputableLanguageComponent setContent(Type value) { 
+        public ComputableLanguageComponent setContent(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof Attachment || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for Contract.rule.content[x]: "+value.fhirType());
           this.content = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, java.lang.Integer.MAX_VALUE, content));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, 1, content));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 264548711: /*content[x]*/  return new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, 1, content);
+          case 951530617: /*content*/  return new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, 1, content);
+          case -702028164: /*contentAttachment*/  return new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, 1, content);
+          case 1193747154: /*contentReference*/  return new Property("content[x]", "Attachment|Reference(DocumentReference)", "Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).", 0, 1, content);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -3809,22 +3966,22 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ComputableLanguageComponent))
+        if (!(other_ instanceof ComputableLanguageComponent))
           return false;
-        ComputableLanguageComponent o = (ComputableLanguageComponent) other;
+        ComputableLanguageComponent o = (ComputableLanguageComponent) other_;
         return compareDeep(content, o.content, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ComputableLanguageComponent))
+        if (!(other_ instanceof ComputableLanguageComponent))
           return false;
-        ComputableLanguageComponent o = (ComputableLanguageComponent) other;
+        ComputableLanguageComponent o = (ComputableLanguageComponent) other_;
         return true;
       }
 
@@ -4056,7 +4213,7 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #identifier} (Unique identifier for this Contract.)
      */
-    public Contract setIdentifier(Identifier value) { 
+    public Contract setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -4178,7 +4335,7 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #applies} (Relevant time or time-period when this Contract is applicable.)
      */
-    public Contract setApplies(Period value) { 
+    public Contract setApplies(Period value)  { 
       this.applies = value;
       return this;
     }
@@ -4478,7 +4635,7 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #type} (Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.)
      */
-    public Contract setType(CodeableConcept value) { 
+    public Contract setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -4661,7 +4818,7 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #decisionType} (The type of decision made by a grantor with respect to an offer made by a grantee.)
      */
-    public Contract setDecisionType(CodeableConcept value) { 
+    public Contract setDecisionType(CodeableConcept value)  { 
       this.decisionType = value;
       return this;
     }
@@ -4685,7 +4842,7 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #contentDerivative} (The minimal content derived from the basal information source at a specific stage in its lifecycle.)
      */
-    public Contract setContentDerivative(CodeableConcept value) { 
+    public Contract setContentDerivative(CodeableConcept value)  { 
       this.contentDerivative = value;
       return this;
     }
@@ -4966,26 +5123,30 @@ public class Contract extends DomainResource {
      * @return {@link #binding} (Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.)
      */
     public Attachment getBindingAttachment() throws FHIRException { 
+      if (this.binding == null)
+        return null;
       if (!(this.binding instanceof Attachment))
         throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.binding.getClass().getName()+" was encountered");
       return (Attachment) this.binding;
     }
 
     public boolean hasBindingAttachment() { 
-      return this.binding instanceof Attachment;
+      return this != null && this.binding instanceof Attachment;
     }
 
     /**
      * @return {@link #binding} (Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.)
      */
     public Reference getBindingReference() throws FHIRException { 
+      if (this.binding == null)
+        return null;
       if (!(this.binding instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.binding.getClass().getName()+" was encountered");
       return (Reference) this.binding;
     }
 
     public boolean hasBindingReference() { 
-      return this.binding instanceof Reference;
+      return this != null && this.binding instanceof Reference;
     }
 
     public boolean hasBinding() { 
@@ -4995,7 +5156,9 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #binding} (Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.)
      */
-    public Contract setBinding(Type value) { 
+    public Contract setBinding(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Attachment || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for Contract.binding[x]: "+value.fhirType());
       this.binding = value;
       return this;
     }
@@ -5159,31 +5322,65 @@ public class Contract extends DomainResource {
       return getRule().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Unique identifier for this Contract.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("issued", "dateTime", "When this  Contract was issued.", 0, java.lang.Integer.MAX_VALUE, issued));
-        childrenList.add(new Property("applies", "Period", "Relevant time or time-period when this Contract is applicable.", 0, java.lang.Integer.MAX_VALUE, applies));
-        childrenList.add(new Property("subject", "Reference(Any)", "The target entity impacted by or of interest to parties to the agreement.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("topic", "Reference(Any)", "The matter of concern in the context of this agreement.", 0, java.lang.Integer.MAX_VALUE, topic));
-        childrenList.add(new Property("authority", "Reference(Organization)", "A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies.", 0, java.lang.Integer.MAX_VALUE, authority));
-        childrenList.add(new Property("domain", "Reference(Location)", "Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources.", 0, java.lang.Integer.MAX_VALUE, domain));
-        childrenList.add(new Property("type", "CodeableConcept", "Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("subType", "CodeableConcept", "More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.", 0, java.lang.Integer.MAX_VALUE, subType));
-        childrenList.add(new Property("action", "CodeableConcept", "Action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, action));
-        childrenList.add(new Property("actionReason", "CodeableConcept", "Reason for action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, actionReason));
-        childrenList.add(new Property("decisionType", "CodeableConcept", "The type of decision made by a grantor with respect to an offer made by a grantee.", 0, java.lang.Integer.MAX_VALUE, decisionType));
-        childrenList.add(new Property("contentDerivative", "CodeableConcept", "The minimal content derived from the basal information source at a specific stage in its lifecycle.", 0, java.lang.Integer.MAX_VALUE, contentDerivative));
-        childrenList.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-        childrenList.add(new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
-        childrenList.add(new Property("signer", "", "Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness.", 0, java.lang.Integer.MAX_VALUE, signer));
-        childrenList.add(new Property("valuedItem", "", "Contract Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
-        childrenList.add(new Property("term", "", "One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.", 0, java.lang.Integer.MAX_VALUE, term));
-        childrenList.add(new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, java.lang.Integer.MAX_VALUE, binding));
-        childrenList.add(new Property("friendly", "", "The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.", 0, java.lang.Integer.MAX_VALUE, friendly));
-        childrenList.add(new Property("legal", "", "List of Legal expressions or representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, legal));
-        childrenList.add(new Property("rule", "", "List of Computable Policy Rule Language Representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, rule));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Unique identifier for this Contract.", 0, 1, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("issued", "dateTime", "When this  Contract was issued.", 0, 1, issued));
+        children.add(new Property("applies", "Period", "Relevant time or time-period when this Contract is applicable.", 0, 1, applies));
+        children.add(new Property("subject", "Reference(Any)", "The target entity impacted by or of interest to parties to the agreement.", 0, java.lang.Integer.MAX_VALUE, subject));
+        children.add(new Property("topic", "Reference(Any)", "The matter of concern in the context of this agreement.", 0, java.lang.Integer.MAX_VALUE, topic));
+        children.add(new Property("authority", "Reference(Organization)", "A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies.", 0, java.lang.Integer.MAX_VALUE, authority));
+        children.add(new Property("domain", "Reference(Location)", "Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources.", 0, java.lang.Integer.MAX_VALUE, domain));
+        children.add(new Property("type", "CodeableConcept", "Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.", 0, 1, type));
+        children.add(new Property("subType", "CodeableConcept", "More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.", 0, java.lang.Integer.MAX_VALUE, subType));
+        children.add(new Property("action", "CodeableConcept", "Action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, action));
+        children.add(new Property("actionReason", "CodeableConcept", "Reason for action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, actionReason));
+        children.add(new Property("decisionType", "CodeableConcept", "The type of decision made by a grantor with respect to an offer made by a grantee.", 0, 1, decisionType));
+        children.add(new Property("contentDerivative", "CodeableConcept", "The minimal content derived from the basal information source at a specific stage in its lifecycle.", 0, 1, contentDerivative));
+        children.add(new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
+        children.add(new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent));
+        children.add(new Property("signer", "", "Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness.", 0, java.lang.Integer.MAX_VALUE, signer));
+        children.add(new Property("valuedItem", "", "Contract Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
+        children.add(new Property("term", "", "One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.", 0, java.lang.Integer.MAX_VALUE, term));
+        children.add(new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, 1, binding));
+        children.add(new Property("friendly", "", "The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.", 0, java.lang.Integer.MAX_VALUE, friendly));
+        children.add(new Property("legal", "", "List of Legal expressions or representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, legal));
+        children.add(new Property("rule", "", "List of Computable Policy Rule Language Representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, rule));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this Contract.", 0, 1, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case -1179159893: /*issued*/  return new Property("issued", "dateTime", "When this  Contract was issued.", 0, 1, issued);
+        case -793235316: /*applies*/  return new Property("applies", "Period", "Relevant time or time-period when this Contract is applicable.", 0, 1, applies);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "The target entity impacted by or of interest to parties to the agreement.", 0, java.lang.Integer.MAX_VALUE, subject);
+        case 110546223: /*topic*/  return new Property("topic", "Reference(Any)", "The matter of concern in the context of this agreement.", 0, java.lang.Integer.MAX_VALUE, topic);
+        case 1475610435: /*authority*/  return new Property("authority", "Reference(Organization)", "A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies.", 0, java.lang.Integer.MAX_VALUE, authority);
+        case -1326197564: /*domain*/  return new Property("domain", "Reference(Location)", "Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources.", 0, java.lang.Integer.MAX_VALUE, domain);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.", 0, 1, type);
+        case -1868521062: /*subType*/  return new Property("subType", "CodeableConcept", "More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.", 0, java.lang.Integer.MAX_VALUE, subType);
+        case -1422950858: /*action*/  return new Property("action", "CodeableConcept", "Action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, action);
+        case 1465121818: /*actionReason*/  return new Property("actionReason", "CodeableConcept", "Reason for action stipulated by this Contract.", 0, java.lang.Integer.MAX_VALUE, actionReason);
+        case 676128054: /*decisionType*/  return new Property("decisionType", "CodeableConcept", "The type of decision made by a grantor with respect to an offer made by a grantee.", 0, 1, decisionType);
+        case -92412192: /*contentDerivative*/  return new Property("contentDerivative", "CodeableConcept", "The minimal content derived from the basal information source at a specific stage in its lifecycle.", 0, 1, contentDerivative);
+        case -722296940: /*securityLabel*/  return new Property("securityLabel", "Coding", "A set of security labels that define which resources are controlled by this consent. If more than one label is specified, all resources must have all the specified labels.", 0, java.lang.Integer.MAX_VALUE, securityLabel);
+        case 92750597: /*agent*/  return new Property("agent", "", "An actor taking a role in an activity for which it can be assigned some degree of responsibility for the activity taking place.", 0, java.lang.Integer.MAX_VALUE, agent);
+        case -902467798: /*signer*/  return new Property("signer", "", "Parties with legal standing in the Contract, including the principal parties, the grantor(s) and grantee(s), which are any person or organization bound by the contract, and any ancillary parties, which facilitate the execution of the contract such as a notary or witness.", 0, java.lang.Integer.MAX_VALUE, signer);
+        case 2046675654: /*valuedItem*/  return new Property("valuedItem", "", "Contract Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem);
+        case 3556460: /*term*/  return new Property("term", "", "One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.", 0, java.lang.Integer.MAX_VALUE, term);
+        case 1514826715: /*binding[x]*/  return new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, 1, binding);
+        case -108220795: /*binding*/  return new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, 1, binding);
+        case 1218789768: /*bindingAttachment*/  return new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, 1, binding);
+        case 424425030: /*bindingReference*/  return new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, 1, binding);
+        case -1423054677: /*friendly*/  return new Property("friendly", "", "The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.", 0, java.lang.Integer.MAX_VALUE, friendly);
+        case 102851257: /*legal*/  return new Property("legal", "", "List of Legal expressions or representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, legal);
+        case 3512060: /*rule*/  return new Property("rule", "", "List of Computable Policy Rule Language Representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, rule);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -5596,12 +5793,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Contract))
+        if (!(other_ instanceof Contract))
           return false;
-        Contract o = (Contract) other;
+        Contract o = (Contract) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(issued, o.issued, true)
            && compareDeep(applies, o.applies, true) && compareDeep(subject, o.subject, true) && compareDeep(topic, o.topic, true)
            && compareDeep(authority, o.authority, true) && compareDeep(domain, o.domain, true) && compareDeep(type, o.type, true)
@@ -5614,12 +5811,12 @@ public class Contract extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Contract))
+        if (!(other_ instanceof Contract))
           return false;
-        Contract o = (Contract) other;
+        Contract o = (Contract) other_;
         return compareValues(status, o.status, true) && compareValues(issued, o.issued, true);
       }
 

@@ -188,6 +188,7 @@ public class Constants {
 	public static final String PARAM_GRAPHQL_QUERY = "query";
 	public static final String HEADER_X_CACHE = "X-Cache";
 	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
+	public static final String POWERED_BY_HEADER = "X-Powered-By";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

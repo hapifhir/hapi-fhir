@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -165,10 +165,6 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.IMMUNIZATIONRECOMMENDATION;
     if ("ImplementationGuide".equals(codeString))
       return ResourceTypes.IMPLEMENTATIONGUIDE;
-    if ("ImplementationGuideInput".equals(codeString))
-      return ResourceTypes.IMPLEMENTATIONGUIDEINPUT;
-    if ("ImplementationGuideOutput".equals(codeString))
-      return ResourceTypes.IMPLEMENTATIONGUIDEOUTPUT;
     if ("Invoice".equals(codeString))
       return ResourceTypes.INVOICE;
     if ("ItemInstance".equals(codeString))
@@ -193,6 +189,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return ResourceTypes.MEDICATIONADMINISTRATION;
     if ("MedicationDispense".equals(codeString))
       return ResourceTypes.MEDICATIONDISPENSE;
+    if ("MedicationKnowledge".equals(codeString))
+      return ResourceTypes.MEDICATIONKNOWLEDGE;
     if ("MedicationRequest".equals(codeString))
       return ResourceTypes.MEDICATIONREQUEST;
     if ("MedicationStatement".equals(codeString))
@@ -453,10 +451,6 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "ImmunizationRecommendation";
     if (code == ResourceTypes.IMPLEMENTATIONGUIDE)
       return "ImplementationGuide";
-    if (code == ResourceTypes.IMPLEMENTATIONGUIDEINPUT)
-      return "ImplementationGuideInput";
-    if (code == ResourceTypes.IMPLEMENTATIONGUIDEOUTPUT)
-      return "ImplementationGuideOutput";
     if (code == ResourceTypes.INVOICE)
       return "Invoice";
     if (code == ResourceTypes.ITEMINSTANCE)
@@ -481,6 +475,8 @@ public class ResourceTypesEnumFactory implements EnumFactory<ResourceTypes> {
       return "MedicationAdministration";
     if (code == ResourceTypes.MEDICATIONDISPENSE)
       return "MedicationDispense";
+    if (code == ResourceTypes.MEDICATIONKNOWLEDGE)
+      return "MedicationKnowledge";
     if (code == ResourceTypes.MEDICATIONREQUEST)
       return "MedicationRequest";
     if (code == ResourceTypes.MEDICATIONSTATEMENT)

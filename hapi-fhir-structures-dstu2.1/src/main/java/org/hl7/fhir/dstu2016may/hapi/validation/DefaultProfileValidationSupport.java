@@ -214,7 +214,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	private Map<String, StructureDefinition> provideStructureDefinitionMap(FhirContext theContext) {
 		Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
 		if (structureDefinitions == null) {
-			structureDefinitions = new HashMap<String, StructureDefinition>();
+			structureDefinitions = new HashMap<>();
 
 			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/model/profile/profiles-resources.xml");
 			loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/dstu2016may/model/profile/profiles-types.xml");

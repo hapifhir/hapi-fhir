@@ -111,15 +111,15 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
 		
-		ourLog.info("Validating code {} in chain with {} items", theCode, myChain.size());
+		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
 		
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
 				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
-				ourLog.info("Chain item {} returned outcome {}", next, result.isOk());
+				ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 				return result;
 			} else {
-				ourLog.info("Chain item {} does not support code system {}", next, theCodeSystem);
+				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
 		}
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);

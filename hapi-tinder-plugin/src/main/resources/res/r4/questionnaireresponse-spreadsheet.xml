@@ -6315,7 +6315,7 @@
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s152"><Data ss:Type="String">In Progress</Data></Cell>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.</Data></Cell>
+    <Cell ss:StyleID="s152"><Data ss:Type="String">This QuestionnaireResponse has been partially filled out with answers but changes or additions are still expected to be made to it.</Data></Cell>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s129"/>
     <Cell ss:StyleID="s141"/>
@@ -6326,7 +6326,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s153"/>
     <Cell ss:StyleID="s153"><Data ss:Type="String">Completed</Data></Cell>
-    <Cell ss:StyleID="s153"><Data ss:Type="String">This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.</Data></Cell>
+    <Cell ss:StyleID="s153"><Data ss:Type="String">This QuestionnaireResponse has been filled out with answers and the current content is regarded as definitive.</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s143"/>
@@ -6359,7 +6359,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s153"/>
     <Cell ss:StyleID="s153"><Data ss:Type="String">Stopped</Data></Cell>
-    <Cell ss:StyleID="s153"><Data ss:Type="String">This QuestionnaireResponse has been partially filled out with answers, but has been abandoned. It is unknown whether changes or additions are expected to be made to it.</Data></Cell>
+    <Cell ss:StyleID="s153"><Data ss:Type="String">This QuestionnaireResponse has been partially filled out with answers but has been abandoned. It is unknown whether changes or additions are expected to be made to it.</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s143"/>

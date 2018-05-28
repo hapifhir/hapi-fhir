@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -35,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<ValueSet> {
 
-	@Operation(name = "$expand", idempotent = true)
+	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true)
 	public ValueSet expand(
 		HttpServletRequest theServletRequest,
 		@IdParam(optional = true) IdType theId,
@@ -79,7 +80,7 @@ public class BaseJpaResourceProviderValueSetR4 extends JpaResourceProviderR4<Val
 
 
 	@SuppressWarnings("unchecked")
-	@Operation(name = "$validate-code", idempotent = true, returnParameters = {
+	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1),
 		@OperationParam(name = "message", type = StringType.class),
 		@OperationParam(name = "display", type = StringType.class)

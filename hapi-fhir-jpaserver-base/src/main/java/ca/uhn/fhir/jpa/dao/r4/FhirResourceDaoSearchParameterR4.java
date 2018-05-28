@@ -8,11 +8,9 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 
@@ -49,30 +47,6 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
 	}
 
-	/**
-	 * This method is called once per minute to perform any required re-indexing. During most passes this will
-	 * just check and find that there are no resources requiring re-indexing. In that case the method just returns
-	 * immediately. If the search finds that some resources require reindexing, the system will do multiple
-	 * reindexing passes and then return.
-	 */
-	@Override
-	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
-	public void performReindexingPass() {
-		if (getConfig().isSchedulingDisabled()) {
-			return;
-		}
-
-		Integer count = mySystemDao.performReindexingPass(100);
-		for (int i = 0; i < 50 && count != null && count != 0; i++) {
-			count = mySystemDao.performReindexingPass(100);
-			try {
-				Thread.sleep(DateUtils.MILLIS_PER_SECOND);
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
-
-	}
 
 	@Override
 	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
@@ -101,7 +75,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 		String expression = theResource.getExpression();
 		FhirContext context = getContext();
 		Enum<?> type = theResource.getType();
-		
+
 		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
 	}
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
@@ -406,7 +407,7 @@ public class DeviceRequest extends DomainResource {
         /**
          * @param value {@link #agent} (The device, practitioner, etc. who initiated the request.)
          */
-        public DeviceRequestRequesterComponent setAgent(Reference value) { 
+        public DeviceRequestRequesterComponent setAgent(Reference value)  { 
           this.agent = value;
           return this;
         }
@@ -445,7 +446,7 @@ public class DeviceRequest extends DomainResource {
         /**
          * @param value {@link #onBehalfOf} (The organization the device or practitioner was acting on behalf of.)
          */
-        public DeviceRequestRequesterComponent setOnBehalfOf(Reference value) { 
+        public DeviceRequestRequesterComponent setOnBehalfOf(Reference value)  { 
           this.onBehalfOf = value;
           return this;
         }
@@ -470,10 +471,20 @@ public class DeviceRequest extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("agent", "Reference(Device|Practitioner|Organization)", "The device, practitioner, etc. who initiated the request.", 0, java.lang.Integer.MAX_VALUE, agent));
-          childrenList.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, java.lang.Integer.MAX_VALUE, onBehalfOf));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("agent", "Reference(Device|Practitioner|Organization)", "The device, practitioner, etc. who initiated the request.", 0, 1, agent));
+          children.add(new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, 1, onBehalfOf));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 92750597: /*agent*/  return new Property("agent", "Reference(Device|Practitioner|Organization)", "The device, practitioner, etc. who initiated the request.", 0, 1, agent);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization)", "The organization the device or practitioner was acting on behalf of.", 0, 1, onBehalfOf);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -554,22 +565,22 @@ public class DeviceRequest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceRequestRequesterComponent))
+        if (!(other_ instanceof DeviceRequestRequesterComponent))
           return false;
-        DeviceRequestRequesterComponent o = (DeviceRequestRequesterComponent) other;
+        DeviceRequestRequesterComponent o = (DeviceRequestRequesterComponent) other_;
         return compareDeep(agent, o.agent, true) && compareDeep(onBehalfOf, o.onBehalfOf, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceRequestRequesterComponent))
+        if (!(other_ instanceof DeviceRequestRequesterComponent))
           return false;
-        DeviceRequestRequesterComponent o = (DeviceRequestRequesterComponent) other;
+        DeviceRequestRequesterComponent o = (DeviceRequestRequesterComponent) other_;
         return true;
       }
 
@@ -1061,7 +1072,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #groupIdentifier} (Composite request this is part of.)
      */
-    public DeviceRequest setGroupIdentifier(Identifier value) { 
+    public DeviceRequest setGroupIdentifier(Identifier value)  { 
       this.groupIdentifier = value;
       return this;
     }
@@ -1134,7 +1145,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #intent} (Whether the request is a proposal, plan, an original order or a reflex order.)
      */
-    public DeviceRequest setIntent(CodeableConcept value) { 
+    public DeviceRequest setIntent(CodeableConcept value)  { 
       this.intent = value;
       return this;
     }
@@ -1199,26 +1210,30 @@ public class DeviceRequest extends DomainResource {
      * @return {@link #code} (The details of the device to be used.)
      */
     public Reference getCodeReference() throws FHIRException { 
+      if (this.code == null)
+        return null;
       if (!(this.code instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.code.getClass().getName()+" was encountered");
       return (Reference) this.code;
     }
 
     public boolean hasCodeReference() { 
-      return this.code instanceof Reference;
+      return this != null && this.code instanceof Reference;
     }
 
     /**
      * @return {@link #code} (The details of the device to be used.)
      */
     public CodeableConcept getCodeCodeableConcept() throws FHIRException { 
+      if (this.code == null)
+        return null;
       if (!(this.code instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.code.getClass().getName()+" was encountered");
       return (CodeableConcept) this.code;
     }
 
     public boolean hasCodeCodeableConcept() { 
-      return this.code instanceof CodeableConcept;
+      return this != null && this.code instanceof CodeableConcept;
     }
 
     public boolean hasCode() { 
@@ -1228,7 +1243,9 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #code} (The details of the device to be used.)
      */
-    public DeviceRequest setCode(Type value) { 
+    public DeviceRequest setCode(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+        throw new FHIRFormatError("Not the right type for DeviceRequest.code[x]: "+value.fhirType());
       this.code = value;
       return this;
     }
@@ -1252,7 +1269,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #subject} (The patient who will use the device.)
      */
-    public DeviceRequest setSubject(Reference value) { 
+    public DeviceRequest setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1291,7 +1308,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #context} (An encounter that provides additional context in which this request is made.)
      */
-    public DeviceRequest setContext(Reference value) { 
+    public DeviceRequest setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1322,39 +1339,45 @@ public class DeviceRequest extends DomainResource {
      * @return {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -1364,7 +1387,9 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #occurrence} (The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
-    public DeviceRequest setOccurrence(Type value) { 
+    public DeviceRequest setOccurrence(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new FHIRFormatError("Not the right type for DeviceRequest.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1437,7 +1462,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #requester} (The individual who initiated the request and has responsibility for its activation.)
      */
-    public DeviceRequest setRequester(DeviceRequestRequesterComponent value) { 
+    public DeviceRequest setRequester(DeviceRequestRequesterComponent value)  { 
       this.requester = value;
       return this;
     }
@@ -1461,7 +1486,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #performerType} (Desired type of performer for doing the diagnostic testing.)
      */
-    public DeviceRequest setPerformerType(CodeableConcept value) { 
+    public DeviceRequest setPerformerType(CodeableConcept value)  { 
       this.performerType = value;
       return this;
     }
@@ -1485,7 +1510,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * @param value {@link #performer} (The desired perfomer for doing the diagnostic testing.)
      */
-    public DeviceRequest setPerformer(Reference value) { 
+    public DeviceRequest setPerformer(Reference value)  { 
       this.performer = value;
       return this;
     }
@@ -1812,29 +1837,65 @@ public class DeviceRequest extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.", 0, java.lang.Integer.MAX_VALUE, definition));
-        childrenList.add(new Property("basedOn", "Reference(Any)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("priorRequest", "Reference(Any)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, priorRequest));
-        childrenList.add(new Property("groupIdentifier", "Identifier", "Composite request this is part of.", 0, java.lang.Integer.MAX_VALUE, groupIdentifier));
-        childrenList.add(new Property("status", "code", "The status of the request.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("intent", "CodeableConcept", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, java.lang.Integer.MAX_VALUE, intent));
-        childrenList.add(new Property("priority", "code", "Indicates how quickly the {{title}} should be addressed with respect to other requests.", 0, java.lang.Integer.MAX_VALUE, priority));
-        childrenList.add(new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "The patient who will use the device.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter that provides additional context in which this request is made.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, java.lang.Integer.MAX_VALUE, occurrence));
-        childrenList.add(new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, java.lang.Integer.MAX_VALUE, authoredOn));
-        childrenList.add(new Property("requester", "", "The individual who initiated the request and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester));
-        childrenList.add(new Property("performerType", "CodeableConcept", "Desired type of performer for doing the diagnostic testing.", 0, java.lang.Integer.MAX_VALUE, performerType));
-        childrenList.add(new Property("performer", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson|HealthcareService)", "The desired perfomer for doing the diagnostic testing.", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        childrenList.add(new Property("reasonReference", "Reference(Any)", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
-        childrenList.add(new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
-        childrenList.add(new Property("note", "Annotation", "Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("relevantHistory", "Reference(Provenance)", "Key events in the history of the request.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.", 0, java.lang.Integer.MAX_VALUE, definition));
+        children.add(new Property("basedOn", "Reference(Any)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("priorRequest", "Reference(Any)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, priorRequest));
+        children.add(new Property("groupIdentifier", "Identifier", "Composite request this is part of.", 0, 1, groupIdentifier));
+        children.add(new Property("status", "code", "The status of the request.", 0, 1, status));
+        children.add(new Property("intent", "CodeableConcept", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent));
+        children.add(new Property("priority", "code", "Indicates how quickly the {{title}} should be addressed with respect to other requests.", 0, 1, priority));
+        children.add(new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code));
+        children.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "The patient who will use the device.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter that provides additional context in which this request is made.", 0, 1, context));
+        children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, 1, occurrence));
+        children.add(new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn));
+        children.add(new Property("requester", "", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester));
+        children.add(new Property("performerType", "CodeableConcept", "Desired type of performer for doing the diagnostic testing.", 0, 1, performerType));
+        children.add(new Property("performer", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson|HealthcareService)", "The desired perfomer for doing the diagnostic testing.", 0, 1, performer));
+        children.add(new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Any)", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
+        children.add(new Property("note", "Annotation", "Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("relevantHistory", "Reference(Provenance)", "Key events in the history of the request.", 0, java.lang.Integer.MAX_VALUE, relevantHistory));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1014418093: /*definition*/  return new Property("definition", "Reference(ActivityDefinition|PlanDefinition)", "Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.", 0, java.lang.Integer.MAX_VALUE, definition);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(Any)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case 237568101: /*priorRequest*/  return new Property("priorRequest", "Reference(Any)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, priorRequest);
+        case -445338488: /*groupIdentifier*/  return new Property("groupIdentifier", "Identifier", "Composite request this is part of.", 0, 1, groupIdentifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the request.", 0, 1, status);
+        case -1183762788: /*intent*/  return new Property("intent", "CodeableConcept", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent);
+        case -1165461084: /*priority*/  return new Property("priority", "code", "Indicates how quickly the {{title}} should be addressed with respect to other requests.", 0, 1, priority);
+        case 941839219: /*code[x]*/  return new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code);
+        case 3059181: /*code*/  return new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code);
+        case 1565461470: /*codeReference*/  return new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code);
+        case 4899316: /*codeCodeableConcept*/  return new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Location|Device)", "The patient who will use the device.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter that provides additional context in which this request is made.", 0, 1, context);
+        case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, 1, occurrence);
+        case 1687874001: /*occurrence*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, 1, occurrence);
+        case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, 1, occurrence);
+        case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, 1, occurrence);
+        case 1515218299: /*occurrenceTiming*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, 1, occurrence);
+        case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn);
+        case 693933948: /*requester*/  return new Property("requester", "", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester);
+        case -901444568: /*performerType*/  return new Property("performerType", "CodeableConcept", "Desired type of performer for doing the diagnostic testing.", 0, 1, performerType);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson|HealthcareService)", "The desired perfomer for doing the diagnostic testing.", 0, 1, performer);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Any)", "Reason or justification for the use of this device.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient that may influence the request fulfilment.  For example, this may includes body where on the subject's the device will be used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 1538891575: /*relevantHistory*/  return new Property("relevantHistory", "Reference(Provenance)", "Key events in the history of the request.", 0, java.lang.Integer.MAX_VALUE, relevantHistory);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2213,12 +2274,12 @@ public class DeviceRequest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DeviceRequest))
+        if (!(other_ instanceof DeviceRequest))
           return false;
-        DeviceRequest o = (DeviceRequest) other;
+        DeviceRequest o = (DeviceRequest) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(basedOn, o.basedOn, true) && compareDeep(priorRequest, o.priorRequest, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
@@ -2231,12 +2292,12 @@ public class DeviceRequest extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DeviceRequest))
+        if (!(other_ instanceof DeviceRequest))
           return false;
-        DeviceRequest o = (DeviceRequest) other;
+        DeviceRequest o = (DeviceRequest) other_;
         return compareValues(status, o.status, true) && compareValues(priority, o.priority, true) && compareValues(authoredOn, o.authoredOn, true)
           ;
       }

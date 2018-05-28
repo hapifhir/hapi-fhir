@@ -71,6 +71,7 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
   
   abstract protected Resource parseResource(JsonObject json) throws IOException, FHIRFormatError;
   abstract protected Type parseType(JsonObject json, String type) throws IOException, FHIRFormatError;
+  abstract protected Type parseAnyType(JsonObject json, String type) throws IOException, FHIRFormatError;
   abstract protected Type parseType(String prefix, JsonObject json) throws IOException, FHIRFormatError;
   abstract protected boolean hasTypeName(JsonObject json, String prefix);
   abstract protected void composeResource(Resource resource) throws IOException;
@@ -103,6 +104,12 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
   public Type parseType(InputStream input, String type) throws IOException, FHIRFormatError {
     JsonObject json = loadJson(input);
     return parseType(json, type);
+  }
+
+  @Override
+  public Type parseAnyType(InputStream input, String type) throws IOException, FHIRFormatError {
+    JsonObject json = loadJson(input);
+    return parseAnyType(json, type);
   }
 
   /**

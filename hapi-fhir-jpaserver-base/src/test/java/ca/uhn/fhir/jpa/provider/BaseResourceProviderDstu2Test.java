@@ -49,6 +49,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static PlatformTransactionManager ourTxManager;
+	protected static Integer ourConnectionPoolSize;
 
 	public BaseResourceProviderDstu2Test() {
 		super();
@@ -84,6 +85,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+			ourConnectionPoolSize = myAppCtx.getBean("maxDatabaseThreadsForTest", Integer.class);
 			ourRestServer.setPagingProvider(ourPagingProvider);
 
 			Server server = new Server(ourPort);
@@ -132,7 +134,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	protected List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
-		List<IdDt> list = new ArrayList<IdDt>();
+		List<IdDt> list = new ArrayList<>();
 		for (Entry next : found.getEntry()) {
 			list.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
@@ -140,7 +142,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (Entry next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString() + " " + nextPt.getNameFirstRep().getFamilyAsSingleString();

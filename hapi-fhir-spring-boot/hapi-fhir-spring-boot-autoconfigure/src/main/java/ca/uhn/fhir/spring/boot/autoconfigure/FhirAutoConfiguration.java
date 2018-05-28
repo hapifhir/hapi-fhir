@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
+import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
@@ -220,6 +221,12 @@ public class FhirAutoConfiguration {
 		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU2")
 		static class Dstu2 extends BaseJavaConfigDstu2 {
+		}
+
+		@Configuration
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "R4")
+		static class R4 extends BaseJavaConfigR4 {
 		}
 	}
 

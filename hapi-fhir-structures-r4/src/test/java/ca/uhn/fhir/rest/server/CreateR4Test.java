@@ -66,7 +66,7 @@ public class CreateR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
 		assertEquals(1, status.getHeaders("Location").length);
-		assertEquals(0, status.getHeaders("Content-Location").length);
+		assertEquals(1, status.getHeaders("Content-Location").length);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
@@ -89,7 +89,7 @@ public class CreateR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
 		assertEquals(1, status.getHeaders("Location").length);
-		assertEquals(0, status.getHeaders("Content-Location").length);
+		assertEquals(1, status.getHeaders("Content-Location").length);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}

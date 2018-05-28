@@ -63,6 +63,18 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myDao = theDao;
 	}
 
+	/**
+	 * When HAPI FHIR server is running "for real", a new
+	 * instance of the bundle provider is created to serve
+	 * every HTTP request, so it's ok for us to keep
+	 * state in here and expect that it will go away. But
+	 * in unit tests we keep this object around for longer
+	 * sometimes.
+	 */
+	public void clearCachedDataForUnitTest() {
+		mySearchEntity = null;
+	}
+
 	protected List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
 		List<ResourceHistoryTable> results;
 
@@ -248,6 +260,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Override
 	public Integer size() {
 		ensureSearchEntityLoaded();
+		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
+
 		Integer size = mySearchEntity.getTotalCount();
 		if (size == null) {
 			return null;

@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
@@ -33,19 +34,41 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   private Map<String, StructureDefinition> myStructureDefinitions;
   private Map<String, ValueSet> myValueSets;
 
+  private void addConcepts(ConceptSetComponent theInclude, ValueSetExpansionComponent theRetVal, Set<String> theWantCodes, List<ConceptDefinitionComponent> theConcepts) {
+    for (ConceptDefinitionComponent next : theConcepts) {
+      if (theWantCodes.isEmpty() || theWantCodes.contains(next.getCode())) {
+        theRetVal
+          .addContains()
+          .setSystem(theInclude.getSystem())
+          .setCode(next.getCode())
+          .setDisplay(next.getDisplay());
+      }
+      addConcepts(theInclude, theRetVal, theWantCodes, next.getConcept());
+    }
+  }
+
   @Override
   public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
     ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
 
-    Set<String> wantCodes = new HashSet<String>();
+    Set<String> wantCodes = new HashSet<>();
     for (ConceptReferenceComponent next : theInclude.getConcept()) {
       wantCodes.add(next.getCode());
     }
 
     CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
-    for (ConceptDefinitionComponent next : system.getConcept()) {
-      if (wantCodes.isEmpty() || wantCodes.contains(next.getCode())) {
-        retVal.addContains().setSystem(theInclude.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+    if (system != null) {
+      List<ConceptDefinitionComponent> concepts = system.getConcept();
+      addConcepts(theInclude, retVal, wantCodes, concepts);
+    }
+
+    for (UriType next : theInclude.getValueSet()) {
+      ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
+      if (vs != null) {
+        for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
+          ValueSetExpansionComponent contents = expandValueSet(theContext, nextInclude);
+          retVal.getContains().addAll(contents.getContains());
+        }
       }
     }
 
@@ -205,6 +228,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
       loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r4/model/profile/profiles-resources.xml");
       loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r4/model/profile/profiles-types.xml");
       loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r4/model/profile/profiles-others.xml");
+      loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r4/model/extension/extension-definitions.xml");
 
       myStructureDefinitions = structureDefinitions;
     }

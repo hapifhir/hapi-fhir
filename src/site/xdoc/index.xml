@@ -70,6 +70,68 @@
 
 		<section name="Announcements">
 			<p>
+				<b>May 28, 2018 - HAPI FHIR 3.4.0 Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This release brings logs of fixes and some significant enhancements.See the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes. Notable changes include:
+			</p>
+
+			<ul>
+				<li>
+					HAPI FHIR now supports and requires JDK 8. Support for JDK 7 and below had
+					officially been dropped.
+				</li>
+				<li>
+					The R4 draft structures have been updated to the latest versions.
+				</li>
+				<li>
+					Support for LOINC has been significantly improved thanks to a collaboration
+					between the HAPI FHIR project and the Regenstrief Institute. The HAPI FHIR
+					terminology service now imports LOINC parts, ValueSets, ConceptMaps, and all
+					related artifacts.
+				</li>
+				<li>
+					Support for the ConceptMap <![CDATA[<code>$translate</code>]]> method has been
+					implemented, meaning that the terminology service now covers validation as well
+					as translation use cases. Further enhancements are planned. A utility has also
+					been added to the HAPI FHIR CLI for importing and exporting ConceptMaps as
+					CSV files for external editing.
+				</li>
+				<li>
+					Several index table enhancements have been made to the JPA server schema, in
+					anticipation of future changes that will improve performance and decrease index
+					sizes. These enhancements consist of new columns that have been added and will be
+					populated in HAPI FHIR 3.4.0 but will not actually be used until HAPI FHIR 3.5.0.
+					Please see the changelog for an upgrade script that should be run.
+				</li>
+				<li>
+					The HAPI FHIR CLI is now available for OSX users using Homebrew.
+				</li>
+				<li>
+					The validation framework has been further harmonized so that DSTU2 resources
+					will now also share the harmonized DSTU3/R4 validation codebase. This
+					has resulted in a significanty more accurate validator
+					for DSTU2 resources.
+				</li>
+				<li>
+					A number of other enhancements have also been made, as well as several significant
+					bugfixes.
+				</li>
+			</ul>
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				- <a href="https://github.com/dmuylwyk/">Diederik Muylwyk</a>
+			</p>
+			<br/><br/>
+
+
+			<p>
 				<b>Mar 29, 2018 - HAPI FHIR 3.3.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
@@ -123,8 +185,9 @@
 			<p>
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
-
 			<br/><br/>
+
+			<!--
 			<p>
 				<b>Jan 13, 2018 - HAPI FHIR 3.2.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
@@ -168,7 +231,6 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 
-			<!--
 			<br/><br/>
 			<p>
 				<b>November 23, 2017 - HAPI FHIR 3.1.0 Released</b> -

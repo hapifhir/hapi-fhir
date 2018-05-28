@@ -47,9 +47,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Element '.subject': minimum required = 1, but only found 0"));
-		assertThat(ooString, containsString("Element encounter @ : max allowed = 0, but found 1"));
-		assertThat(ooString, containsString("Element '.device': minimum required = 1, but only found 0"));
+		assertThat(ooString, containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
+		assertThat(ooString, containsString("Element 'Observation.encounter': max allowed = 0, but found 1"));
+		assertThat(ooString, containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 	}
 
 	@Test
@@ -59,9 +59,9 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(ooString, containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
-		assertThat(ooString, containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
+		assertThat(ooString, containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
+		assertThat(ooString, containsString("Element 'Observation.encounter': max allowed = 0, but found 1"));
+		assertThat(ooString, containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {

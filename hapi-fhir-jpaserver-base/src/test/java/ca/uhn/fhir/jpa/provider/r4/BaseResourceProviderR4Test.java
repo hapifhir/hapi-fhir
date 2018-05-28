@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -25,6 +27,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -40,6 +44,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -61,6 +66,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
+	protected ResourceCountCache ourResourceCountsCache;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -99,6 +105,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+			ourResourceCountsCache = (ResourceCountCache) myAppCtx.getBean("myResourceCountsCache");
 
 			Server server = new Server(ourPort);
 
@@ -210,4 +217,56 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {
+		int retVal = 0;
+
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				retVal++;
+			}
+		}
+
+		return retVal;
+	}
+
+	public static ParametersParameterComponent getParameterByName(Parameters theParameters, String theName) {
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				return param;
+			}
+		}
+
+		return new ParametersParameterComponent();
+	}
+
+	public static List<ParametersParameterComponent> getParametersByName(Parameters theParameters, String theName) {
+		List<ParametersParameterComponent> params = new ArrayList<>();
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				params.add(param);
+			}
+		}
+
+		return params;
+	}
+
+	public static ParametersParameterComponent getPartByName(ParametersParameterComponent theParameter, String theName) {
+		for (ParametersParameterComponent part : theParameter.getPart()) {
+			if (part.getName().equals(theName)) {
+				return part;
+			}
+		}
+
+		return new ParametersParameterComponent();
+	}
+
+	public static boolean hasParameterByName(Parameters theParameters, String theName) {
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

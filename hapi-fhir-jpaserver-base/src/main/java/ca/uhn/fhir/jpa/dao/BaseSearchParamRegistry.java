@@ -32,7 +32,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
@@ -40,7 +43,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry {
+public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry, ApplicationContextAware {
 
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
@@ -49,12 +52,12 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 	@Autowired
 	private FhirContext myCtx;
-	@Autowired
-	private Collection<IFhirResourceDao<?>> myDaos;
+	private Collection<IFhirResourceDao<?>> myResourceDaos;
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private volatile long myLastRefresh;
+	private ApplicationContext myApplicationContext;
 
 	public BaseSearchParamRegistry() {
 		super();
@@ -212,7 +215,13 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public void postConstruct() {
 		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
-		for (IFhirResourceDao<?> nextDao : myDaos) {
+		myResourceDaos = new ArrayList<>();
+		Map<String, IFhirResourceDao> daos = myApplicationContext.getBeansOfType(IFhirResourceDao.class, false, false);
+		for (IFhirResourceDao next : daos.values()) {
+			myResourceDaos.add(next);
+		}
+
+		for (IFhirResourceDao<?> nextDao : myResourceDaos) {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextDao.getResourceType());
 			String nextResourceName = nextResDef.getName();
 			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
@@ -259,6 +268,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 					List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
 					for (IBaseResource nextResource : allSearchParams) {
 						SP nextSp = (SP) nextResource;
+						if (nextSp == null) {
+							continue;
+						}
+
 						RuntimeSearchParam runtimeSp = toRuntimeSp(nextSp);
 						if (runtimeSp == null) {
 							continue;
@@ -287,7 +300,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 							}
 
 							if (!activeSearchParams.containsKey(nextEntry.getKey())) {
-								activeSearchParams.put(nextEntry.getKey(), new HashMap<String, RuntimeSearchParam>());
+								activeSearchParams.put(nextEntry.getKey(), new HashMap<>());
 							}
 							if (activeSearchParams.containsKey(nextEntry.getKey())) {
 								ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
@@ -315,6 +328,11 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	public void refreshCacheOnSchedule() {
 		refreshCacheIfNecessary();
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
 	}
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);

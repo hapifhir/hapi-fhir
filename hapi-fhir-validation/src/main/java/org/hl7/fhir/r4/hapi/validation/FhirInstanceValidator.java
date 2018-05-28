@@ -99,11 +99,37 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	/**
+	 * Sets the "best practice warning level". When validating, any deviations from best practices will be reported at
+	 * this level.
+	 * <p>
+	 * The FHIR Instance Validator has a number of checks for best practices in terms of FHIR usage. If this setting is
+	 * set to {@link BestPracticeWarningLevel#Error}, any resource data which does not meet these best practices will be
+	 * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
+	 * guielines will be ignored.
+	 * </p>
+	 *
+	 * @param theBestPracticeWarningLevel
+	 *           The level, must not be <code>null</code>
+	 */
+	public void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
+		Validate.notNull(theBestPracticeWarningLevel);
+		myBestPracticeWarningLevel = theBestPracticeWarningLevel;
+	}
+
+	/**
 	 * Returns the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
 	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
 	 */
 	public IValidationSupport getValidationSupport() {
 		return myValidationSupport;
+	}
+
+	/**
+	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
+	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
+	 */
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
 	}
 
 	/**
@@ -116,13 +142,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	/**
-	 * If set to {@literal true} (default is false) the valueSet will not be validate
-	 */
-	public boolean isNoTerminologyChecks() {
-		return myNoTerminologyChecks;
-	}
-
-	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
 	 * validator (e.g. because they have not been explicitly declared in a profile) will
 	 * be validated but will not cause an error.
@@ -132,21 +151,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	/**
-	 * Sets the "best practice warning level". When validating, any deviations from best practices will be reported at
-	 * this level.
-	 * <p>
-	 * The FHIR Instance Validator has a number of checks for best practices in terms of FHIR usage. If this setting is
-	 * set to {@link BestPracticeWarningLevel#Error}, any resource data which does not meet these best practices will be
-	 * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
-	 * guielines will be ignored.
-	 * </p>
-	 * 
-	 * @param theBestPracticeWarningLevel
-	 *           The level, must not be <code>null</code>
+	 * If set to {@literal true} (default is false) the valueSet will not be validate
 	 */
-	public void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
-		Validate.notNull(theBestPracticeWarningLevel);
-		myBestPracticeWarningLevel = theBestPracticeWarningLevel;
+	public boolean isNoTerminologyChecks() {
+		return myNoTerminologyChecks;
 	}
 
 	/**
@@ -158,14 +166,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 	public void setStructureDefintion(StructureDefinition theStructureDefintion) {
 		myStructureDefintion = theStructureDefintion;
-	}
-
-	/**
-	 * Sets the {@link IValidationSupport validation support} in use by this validator. Default is an instance of
-	 * {@link DefaultProfileValidationSupport} if the no-arguments constructor for this object was used.
-	 */
-	public void setValidationSupport(IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
 	}
 
 	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
@@ -219,6 +219,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				try {
 					v.validate(null, messages, json, profile);
 				} catch (Exception e) {
+					ourLog.error("Failure during validation", e);
 					throw new InternalErrorException("Unexpected failure while validating resource", e);
 				}
 			}

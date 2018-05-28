@@ -58,13 +58,21 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		IFhirResourceDaoCodeSystem<org.hl7.fhir.dstu3.model.CodeSystem, org.hl7.fhir.dstu3.model.Coding, org.hl7.fhir.dstu3.model.CodeableConcept>
 #elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'CodeSystem' )
 		IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem, org.hl7.fhir.r4.model.Coding, org.hl7.fhir.r4.model.CodeableConcept>
+#elseif ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ConceptMap' )
+		IFhirResourceDaoConceptMap<org.hl7.fhir.dstu3.model.ConceptMap>
+#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
+		IFhirResourceDaoConceptMap<org.hl7.fhir.r4.model.ConceptMap>
 #elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #else
 		IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>
 #end
 		 dao${res.declaringClassNameComplete}${versionCapitalized}() {
-#if ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Composition' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'))
+#if ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ConceptMap' )
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
+		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
+#elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Composition' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'))
 		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #else
 		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}> retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}>();

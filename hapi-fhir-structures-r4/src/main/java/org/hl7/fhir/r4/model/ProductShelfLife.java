@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -41,10 +41,10 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * The shelf-life and storage information for a medicinal product item or container can be described using the this class.
+ * The shelf-life and storage information for a medicinal product item or container can be described using this class.
  */
 @DatatypeDef(name="ProductShelfLife")
-public class ProductShelfLife extends Type implements ICompositeType {
+public class ProductShelfLife extends BackboneElement implements ICompositeType {
 
     /**
      * Unique identifier for the packaged Medicinal Product.
@@ -54,10 +54,10 @@ public class ProductShelfLife extends Type implements ICompositeType {
     protected Identifier identifier;
 
     /**
-     * This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.
+     * This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified", formalDefinition="This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified." )
+    @Description(shortDefinition="This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified", formalDefinition="This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified." )
     protected CodeableConcept type;
 
     /**
@@ -117,7 +117,7 @@ public class ProductShelfLife extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #type} (This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.)
+     * @return {@link #type} (This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -133,7 +133,7 @@ public class ProductShelfLife extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #type} (This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.)
+     * @param value {@link #type} (This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.)
      */
     public ProductShelfLife setType(CodeableConcept value) { 
       this.type = value;
@@ -220,7 +220,7 @@ public class ProductShelfLife extends Type implements ICompositeType {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique identifier for the packaged Medicinal Product.", 0, 1, identifier));
-        children.add(new Property("type", "CodeableConcept", "This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.", 0, 1, type));
+        children.add(new Property("type", "CodeableConcept", "This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.", 0, 1, type));
         children.add(new Property("period", "Quantity", "The shelf life time period can be specified using a numerical value for the period of time and its unit of time measurement The unit of measurement shall be specified in accordance with ISO 11240 and the resulting terminology The symbol and the symbol identifier shall be used.", 0, 1, period));
         children.add(new Property("specialPrecautionsForStorage", "CodeableConcept", "Special precautions for storage, if any, can be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.", 0, java.lang.Integer.MAX_VALUE, specialPrecautionsForStorage));
       }
@@ -229,7 +229,7 @@ public class ProductShelfLife extends Type implements ICompositeType {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for the packaged Medicinal Product.", 0, 1, identifier);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "This describes the shelf life, taking into account various scenarios such as shelf life of the packaged Medicinal Product itself, shelf life after transformation where necessary and shelf life after the first opening of a bottle, etc. The shelf life type shall be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.", 0, 1, type);
         case -991726143: /*period*/  return new Property("period", "Quantity", "The shelf life time period can be specified using a numerical value for the period of time and its unit of time measurement The unit of measurement shall be specified in accordance with ISO 11240 and the resulting terminology The symbol and the symbol identifier shall be used.", 0, 1, period);
         case 2103459492: /*specialPrecautionsForStorage*/  return new Property("specialPrecautionsForStorage", "CodeableConcept", "Special precautions for storage, if any, can be specified using an appropriate controlled vocabulary The controlled term and the controlled term identifier shall be specified.", 0, java.lang.Integer.MAX_VALUE, specialPrecautionsForStorage);
         default: return super.getNamedProperty(_hash, _name, _checkValid);

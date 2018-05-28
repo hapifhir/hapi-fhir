@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A code system resource specifies a set of codes drawn from one or more code systems.
  */
@@ -907,12 +908,24 @@ public class CodeSystem extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "The code that identifies this filter when it is used in the instance.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("description", "string", "A description of how or why the filter is used.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("operator", "code", "A list of operators that can be used with the filter.", 0, java.lang.Integer.MAX_VALUE, operator));
-          childrenList.add(new Property("value", "string", "A description of what the value for the filter should be.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "code", "The code that identifies this filter when it is used in the instance.", 0, 1, code));
+          children.add(new Property("description", "string", "A description of how or why the filter is used.", 0, 1, description));
+          children.add(new Property("operator", "code", "A list of operators that can be used with the filter.", 0, java.lang.Integer.MAX_VALUE, operator));
+          children.add(new Property("value", "string", "A description of what the value for the filter should be.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "code", "The code that identifies this filter when it is used in the instance.", 0, 1, code);
+          case -1724546052: /*description*/  return new Property("description", "string", "A description of how or why the filter is used.", 0, 1, description);
+          case -500553564: /*operator*/  return new Property("operator", "code", "A list of operators that can be used with the filter.", 0, java.lang.Integer.MAX_VALUE, operator);
+          case 111972721: /*value*/  return new Property("value", "string", "A description of what the value for the filter should be.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1021,23 +1034,23 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CodeSystemFilterComponent))
+        if (!(other_ instanceof CodeSystemFilterComponent))
           return false;
-        CodeSystemFilterComponent o = (CodeSystemFilterComponent) other;
+        CodeSystemFilterComponent o = (CodeSystemFilterComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(operator, o.operator, true)
            && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CodeSystemFilterComponent))
+        if (!(other_ instanceof CodeSystemFilterComponent))
           return false;
-        CodeSystemFilterComponent o = (CodeSystemFilterComponent) other;
+        CodeSystemFilterComponent o = (CodeSystemFilterComponent) other_;
         return compareValues(code, o.code, true) && compareValues(description, o.description, true) && compareValues(operator, o.operator, true)
            && compareValues(value, o.value, true);
       }
@@ -1291,12 +1304,24 @@ public class CodeSystem extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("uri", "uri", "Reference to the formal meaning of the property. One possible source of meaning is the [Concept Properties](codesystem-concept-properties.html) code system.", 0, java.lang.Integer.MAX_VALUE, uri));
-          childrenList.add(new Property("description", "string", "A description of the property- why it is defined, and how its value might be used.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("type", "code", "The type of the property value. Properties of type \"code\" contain a code defined by the code system (e.g. a reference to anotherr defined concept).", 0, java.lang.Integer.MAX_VALUE, type));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "code", "A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.", 0, 1, code));
+          children.add(new Property("uri", "uri", "Reference to the formal meaning of the property. One possible source of meaning is the [Concept Properties](codesystem-concept-properties.html) code system.", 0, 1, uri));
+          children.add(new Property("description", "string", "A description of the property- why it is defined, and how its value might be used.", 0, 1, description));
+          children.add(new Property("type", "code", "The type of the property value. Properties of type \"code\" contain a code defined by the code system (e.g. a reference to anotherr defined concept).", 0, 1, type));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "code", "A code that is used to identify the property. The code is used internally (in CodeSystem.concept.property.code) and also externally, such as in property filters.", 0, 1, code);
+          case 116076: /*uri*/  return new Property("uri", "uri", "Reference to the formal meaning of the property. One possible source of meaning is the [Concept Properties](codesystem-concept-properties.html) code system.", 0, 1, uri);
+          case -1724546052: /*description*/  return new Property("description", "string", "A description of the property- why it is defined, and how its value might be used.", 0, 1, description);
+          case 3575610: /*type*/  return new Property("type", "code", "The type of the property value. Properties of type \"code\" contain a code defined by the code system (e.g. a reference to anotherr defined concept).", 0, 1, type);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1401,23 +1426,23 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PropertyComponent))
+        if (!(other_ instanceof PropertyComponent))
           return false;
-        PropertyComponent o = (PropertyComponent) other;
+        PropertyComponent o = (PropertyComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(uri, o.uri, true) && compareDeep(description, o.description, true)
            && compareDeep(type, o.type, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PropertyComponent))
+        if (!(other_ instanceof PropertyComponent))
           return false;
-        PropertyComponent o = (PropertyComponent) other;
+        PropertyComponent o = (PropertyComponent) other_;
         return compareValues(code, o.code, true) && compareValues(uri, o.uri, true) && compareValues(description, o.description, true)
            && compareValues(type, o.type, true);
       }
@@ -1797,14 +1822,28 @@ public class CodeSystem extends MetadataResource {
           return getConcept().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "A code - a text symbol - that uniquely identifies the concept within the code system.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("display", "string", "A human readable string that is the recommended default way to present this concept to a user.", 0, java.lang.Integer.MAX_VALUE, display));
-          childrenList.add(new Property("definition", "string", "The formal definition of the concept. The code system resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, java.lang.Integer.MAX_VALUE, definition));
-          childrenList.add(new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
-          childrenList.add(new Property("property", "", "A property value for this concept.", 0, java.lang.Integer.MAX_VALUE, property));
-          childrenList.add(new Property("concept", "@CodeSystem.concept", "Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) - see hierarchyMeaning.", 0, java.lang.Integer.MAX_VALUE, concept));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "code", "A code - a text symbol - that uniquely identifies the concept within the code system.", 0, 1, code));
+          children.add(new Property("display", "string", "A human readable string that is the recommended default way to present this concept to a user.", 0, 1, display));
+          children.add(new Property("definition", "string", "The formal definition of the concept. The code system resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, 1, definition));
+          children.add(new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
+          children.add(new Property("property", "", "A property value for this concept.", 0, java.lang.Integer.MAX_VALUE, property));
+          children.add(new Property("concept", "@CodeSystem.concept", "Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) - see hierarchyMeaning.", 0, java.lang.Integer.MAX_VALUE, concept));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "code", "A code - a text symbol - that uniquely identifies the concept within the code system.", 0, 1, code);
+          case 1671764162: /*display*/  return new Property("display", "string", "A human readable string that is the recommended default way to present this concept to a user.", 0, 1, display);
+          case -1014418093: /*definition*/  return new Property("definition", "string", "The formal definition of the concept. The code system resource does not make formal definitions required, because of the prevalence of legacy systems. However, they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, 1, definition);
+          case -900931593: /*designation*/  return new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation);
+          case -993141291: /*property*/  return new Property("property", "", "A property value for this concept.", 0, java.lang.Integer.MAX_VALUE, property);
+          case 951024232: /*concept*/  return new Property("concept", "@CodeSystem.concept", "Defines children of a concept to produce a hierarchy of concepts. The nature of the relationships is variable (is-a/contains/categorizes) - see hierarchyMeaning.", 0, java.lang.Integer.MAX_VALUE, concept);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1943,24 +1982,24 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptDefinitionComponent))
+        if (!(other_ instanceof ConceptDefinitionComponent))
           return false;
-        ConceptDefinitionComponent o = (ConceptDefinitionComponent) other;
+        ConceptDefinitionComponent o = (ConceptDefinitionComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(display, o.display, true) && compareDeep(definition, o.definition, true)
            && compareDeep(designation, o.designation, true) && compareDeep(property, o.property, true) && compareDeep(concept, o.concept, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptDefinitionComponent))
+        if (!(other_ instanceof ConceptDefinitionComponent))
           return false;
-        ConceptDefinitionComponent o = (ConceptDefinitionComponent) other;
+        ConceptDefinitionComponent o = (ConceptDefinitionComponent) other_;
         return compareValues(code, o.code, true) && compareValues(display, o.display, true) && compareValues(definition, o.definition, true)
           ;
       }
@@ -2087,7 +2126,7 @@ public class CodeSystem extends MetadataResource {
         /**
          * @param value {@link #use} (A code that details how this designation would be used.)
          */
-        public ConceptDefinitionDesignationComponent setUse(Coding value) { 
+        public ConceptDefinitionDesignationComponent setUse(Coding value)  { 
           this.use = value;
           return this;
         }
@@ -2137,11 +2176,22 @@ public class CodeSystem extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("use", "Coding", "A code that details how this designation would be used.", 0, java.lang.Integer.MAX_VALUE, use));
-          childrenList.add(new Property("value", "string", "The text value for this designation.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("language", "code", "The language this designation is defined for.", 0, 1, language));
+          children.add(new Property("use", "Coding", "A code that details how this designation would be used.", 0, 1, use));
+          children.add(new Property("value", "string", "The text value for this designation.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1613589672: /*language*/  return new Property("language", "code", "The language this designation is defined for.", 0, 1, language);
+          case 116103: /*use*/  return new Property("use", "Coding", "A code that details how this designation would be used.", 0, 1, use);
+          case 111972721: /*value*/  return new Property("value", "string", "The text value for this designation.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2233,23 +2283,23 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptDefinitionDesignationComponent))
+        if (!(other_ instanceof ConceptDefinitionDesignationComponent))
           return false;
-        ConceptDefinitionDesignationComponent o = (ConceptDefinitionDesignationComponent) other;
+        ConceptDefinitionDesignationComponent o = (ConceptDefinitionDesignationComponent) other_;
         return compareDeep(language, o.language, true) && compareDeep(use, o.use, true) && compareDeep(value, o.value, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptDefinitionDesignationComponent))
+        if (!(other_ instanceof ConceptDefinitionDesignationComponent))
           return false;
-        ConceptDefinitionDesignationComponent o = (ConceptDefinitionDesignationComponent) other;
+        ConceptDefinitionDesignationComponent o = (ConceptDefinitionDesignationComponent) other_;
         return compareValues(language, o.language, true) && compareValues(value, o.value, true);
       }
 
@@ -2354,78 +2404,90 @@ public class CodeSystem extends MetadataResource {
          * @return {@link #value} (The value of this property.)
          */
         public CodeType getValueCodeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof CodeType))
             throw new FHIRException("Type mismatch: the type CodeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeType) this.value;
         }
 
         public boolean hasValueCodeType() { 
-          return this.value instanceof CodeType;
+          return this != null && this.value instanceof CodeType;
         }
 
         /**
          * @return {@link #value} (The value of this property.)
          */
         public Coding getValueCoding() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
         }
 
         public boolean hasValueCoding() { 
-          return this.value instanceof Coding;
+          return this != null && this.value instanceof Coding;
         }
 
         /**
          * @return {@link #value} (The value of this property.)
          */
         public StringType getValueStringType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
         }
 
         public boolean hasValueStringType() { 
-          return this.value instanceof StringType;
+          return this != null && this.value instanceof StringType;
         }
 
         /**
          * @return {@link #value} (The value of this property.)
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
         }
 
         public boolean hasValueIntegerType() { 
-          return this.value instanceof IntegerType;
+          return this != null && this.value instanceof IntegerType;
         }
 
         /**
          * @return {@link #value} (The value of this property.)
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
         public boolean hasValueBooleanType() { 
-          return this.value instanceof BooleanType;
+          return this != null && this.value instanceof BooleanType;
         }
 
         /**
          * @return {@link #value} (The value of this property.)
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
         }
 
         public boolean hasValueDateTimeType() { 
-          return this.value instanceof DateTimeType;
+          return this != null && this.value instanceof DateTimeType;
         }
 
         public boolean hasValue() { 
@@ -2435,15 +2497,34 @@ public class CodeSystem extends MetadataResource {
         /**
          * @param value {@link #value} (The value of this property.)
          */
-        public ConceptPropertyComponent setValue(Type value) { 
+        public ConceptPropertyComponent setValue(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeType || value instanceof Coding || value instanceof StringType || value instanceof IntegerType || value instanceof BooleanType || value instanceof DateTimeType))
+            throw new FHIRFormatError("Not the right type for CodeSystem.concept.property.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "A code that is a reference to CodeSystem.property.code.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "code", "A code that is a reference to CodeSystem.property.code.", 0, 1, code));
+          children.add(new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "code", "A code that is a reference to CodeSystem.property.code.", 0, 1, code);
+          case -1410166417: /*value[x]*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case -766209282: /*valueCode*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case -1887705029: /*valueCoding*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case -1424603934: /*valueString*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case -1668204915: /*valueInteger*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case 733421943: /*valueBoolean*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          case 1047929900: /*valueDateTime*/  return new Property("value[x]", "code|Coding|string|integer|boolean|dateTime", "The value of this property.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2544,22 +2625,22 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConceptPropertyComponent))
+        if (!(other_ instanceof ConceptPropertyComponent))
           return false;
-        ConceptPropertyComponent o = (ConceptPropertyComponent) other;
+        ConceptPropertyComponent o = (ConceptPropertyComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConceptPropertyComponent))
+        if (!(other_ instanceof ConceptPropertyComponent))
           return false;
-        ConceptPropertyComponent o = (ConceptPropertyComponent) other;
+        ConceptPropertyComponent o = (ConceptPropertyComponent) other_;
         return compareValues(code, o.code, true);
       }
 
@@ -2753,7 +2834,7 @@ public class CodeSystem extends MetadataResource {
     /**
      * @param value {@link #identifier} (A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
-    public CodeSystem setIdentifier(Identifier value) { 
+    public CodeSystem setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -3881,33 +3962,66 @@ public class CodeSystem extends MetadataResource {
       return getConcept().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A natural language name identifying the code system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("title", "string", "A short, descriptive, user-friendly title for the code system.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("status", "code", "The status of this code system. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the code system.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the code system from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate code system instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the code system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("purpose", "markdown", "Explaination of why this code system is needed and why it has been designed as it has.", 0, java.lang.Integer.MAX_VALUE, purpose));
-        childrenList.add(new Property("copyright", "markdown", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, java.lang.Integer.MAX_VALUE, copyright));
-        childrenList.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, java.lang.Integer.MAX_VALUE, caseSensitive));
-        childrenList.add(new Property("valueSet", "uri", "Canonical URL of value set that contains the entire code system.", 0, java.lang.Integer.MAX_VALUE, valueSet));
-        childrenList.add(new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts.", 0, java.lang.Integer.MAX_VALUE, hierarchyMeaning));
-        childrenList.add(new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, java.lang.Integer.MAX_VALUE, compositional));
-        childrenList.add(new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, java.lang.Integer.MAX_VALUE, versionNeeded));
-        childrenList.add(new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, java.lang.Integer.MAX_VALUE, content));
-        childrenList.add(new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.", 0, java.lang.Integer.MAX_VALUE, count));
-        childrenList.add(new Property("filter", "", "A filter that can be used in a value set compose statement when selecting concepts using a filter.", 0, java.lang.Integer.MAX_VALUE, filter));
-        childrenList.add(new Property("property", "", "A property defines an additional slot through which additional information can be provided about a concept.", 0, java.lang.Integer.MAX_VALUE, property));
-        childrenList.add(new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.", 0, 1, url));
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
+        children.add(new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.", 0, 1, version));
+        children.add(new Property("name", "string", "A natural language name identifying the code system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
+        children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the code system.", 0, 1, title));
+        children.add(new Property("status", "code", "The status of this code system. Enables tracking the life-cycle of the content.", 0, 1, status));
+        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the individual or organization that published the code system.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("description", "markdown", "A free text natural language description of the code system from a consumer's perspective.", 0, 1, description));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate code system instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the code system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("purpose", "markdown", "Explaination of why this code system is needed and why it has been designed as it has.", 0, 1, purpose));
+        children.add(new Property("copyright", "markdown", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, 1, copyright));
+        children.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, 1, caseSensitive));
+        children.add(new Property("valueSet", "uri", "Canonical URL of value set that contains the entire code system.", 0, 1, valueSet));
+        children.add(new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts.", 0, 1, hierarchyMeaning));
+        children.add(new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, 1, compositional));
+        children.add(new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, 1, versionNeeded));
+        children.add(new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, 1, content));
+        children.add(new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.", 0, 1, count));
+        children.add(new Property("filter", "", "A filter that can be used in a value set compose statement when selecting concepts using a filter.", 0, java.lang.Integer.MAX_VALUE, filter));
+        children.add(new Property("property", "", "A property defines an additional slot through which additional information can be provided about a concept.", 0, java.lang.Integer.MAX_VALUE, property));
+        children.add(new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this code system is (or will be) published. The URL SHOULD include the major version of the code system. For more information see [Technical and Business Versions](resource.html#versions). This is used in [Coding]{datatypes.html#Coding}.system.", 0, 1, url);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
+        case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding]{datatypes.html#Coding}.version.", 0, 1, version);
+        case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the code system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
+        case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the code system.", 0, 1, title);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of this code system. Enables tracking the life-cycle of the content.", 0, 1, status);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this code system is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the code system was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the code system changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the code system.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the code system from a consumer's perspective.", 0, 1, description);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate code system instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the code system is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this code system is needed and why it has been designed as it has.", 0, 1, purpose);
+        case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, 1, copyright);
+        case -35616442: /*caseSensitive*/  return new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, 1, caseSensitive);
+        case -1410174671: /*valueSet*/  return new Property("valueSet", "uri", "Canonical URL of value set that contains the entire code system.", 0, 1, valueSet);
+        case 1913078280: /*hierarchyMeaning*/  return new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts.", 0, 1, hierarchyMeaning);
+        case 1248023381: /*compositional*/  return new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, 1, compositional);
+        case 617270957: /*versionNeeded*/  return new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, 1, versionNeeded);
+        case 951530617: /*content*/  return new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, 1, content);
+        case 94851343: /*count*/  return new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.", 0, 1, count);
+        case -1274492040: /*filter*/  return new Property("filter", "", "A filter that can be used in a value set compose statement when selecting concepts using a filter.", 0, java.lang.Integer.MAX_VALUE, filter);
+        case -993141291: /*property*/  return new Property("property", "", "A property defines an additional slot through which additional information can be provided about a concept.", 0, java.lang.Integer.MAX_VALUE, property);
+        case 951024232: /*concept*/  return new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -4302,12 +4416,12 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof CodeSystem))
+        if (!(other_ instanceof CodeSystem))
           return false;
-        CodeSystem o = (CodeSystem) other;
+        CodeSystem o = (CodeSystem) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(caseSensitive, o.caseSensitive, true) && compareDeep(valueSet, o.valueSet, true)
            && compareDeep(hierarchyMeaning, o.hierarchyMeaning, true) && compareDeep(compositional, o.compositional, true)
@@ -4317,12 +4431,12 @@ public class CodeSystem extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof CodeSystem))
+        if (!(other_ instanceof CodeSystem))
           return false;
-        CodeSystem o = (CodeSystem) other;
+        CodeSystem o = (CodeSystem) other_;
         return compareValues(purpose, o.purpose, true) && compareValues(copyright, o.copyright, true) && compareValues(caseSensitive, o.caseSensitive, true)
            && compareValues(valueSet, o.valueSet, true) && compareValues(hierarchyMeaning, o.hierarchyMeaning, true)
            && compareValues(compositional, o.compositional, true) && compareValues(versionNeeded, o.versionNeeded, true)

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Record of delivery of what is supplied.
  */
@@ -217,7 +218,7 @@ public class SupplyDelivery extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of supply that has been dispensed. Includes unit of measure.)
          */
-        public SupplyDeliverySuppliedItemComponent setQuantity(SimpleQuantity value) { 
+        public SupplyDeliverySuppliedItemComponent setQuantity(SimpleQuantity value)  { 
           this.quantity = value;
           return this;
         }
@@ -233,26 +234,30 @@ public class SupplyDelivery extends DomainResource {
          * @return {@link #item} (Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
          */
         public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
           return (CodeableConcept) this.item;
         }
 
         public boolean hasItemCodeableConcept() { 
-          return this.item instanceof CodeableConcept;
+          return this != null && this.item instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #item} (Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
          */
         public Reference getItemReference() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
           return (Reference) this.item;
         }
 
         public boolean hasItemReference() { 
-          return this.item instanceof Reference;
+          return this != null && this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -262,15 +267,30 @@ public class SupplyDelivery extends DomainResource {
         /**
          * @param value {@link #item} (Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
          */
-        public SupplyDeliverySuppliedItemComponent setItem(Type value) { 
+        public SupplyDeliverySuppliedItemComponent setItem(Type value) throws FHIRFormatError { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new FHIRFormatError("Not the right type for SupplyDelivery.suppliedItem.item[x]: "+value.fhirType());
           this.item = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of supply that has been dispensed. Includes unit of measure.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("item[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, java.lang.Integer.MAX_VALUE, item));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("quantity", "SimpleQuantity", "The amount of supply that has been dispensed. Includes unit of measure.", 0, 1, quantity));
+          children.add(new Property("item[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, 1, item));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The amount of supply that has been dispensed. Includes unit of measure.", 0, 1, quantity);
+          case 2116201613: /*item[x]*/  return new Property("item[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, 1, item);
+          case 3242771: /*item*/  return new Property("item[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, 1, item);
+          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, 1, item);
+          case 1376364920: /*itemReference*/  return new Property("item[x]", "CodeableConcept|Reference(Medication|Substance|Device)", "Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.", 0, 1, item);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -356,22 +376,22 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SupplyDeliverySuppliedItemComponent))
+        if (!(other_ instanceof SupplyDeliverySuppliedItemComponent))
           return false;
-        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other;
+        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other_;
         return compareDeep(quantity, o.quantity, true) && compareDeep(item, o.item, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SupplyDeliverySuppliedItemComponent))
+        if (!(other_ instanceof SupplyDeliverySuppliedItemComponent))
           return false;
-        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other;
+        SupplyDeliverySuppliedItemComponent o = (SupplyDeliverySuppliedItemComponent) other_;
         return true;
       }
 
@@ -523,7 +543,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #identifier} (Identifier assigned by the dispensing facility when the item(s) is dispensed.)
      */
-    public SupplyDelivery setIdentifier(Identifier value) { 
+    public SupplyDelivery setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -734,7 +754,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #patient} (A link to a resource representing the person whom the delivered item is for.)
      */
-    public SupplyDelivery setPatient(Reference value) { 
+    public SupplyDelivery setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -778,7 +798,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #type} (Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.)
      */
-    public SupplyDelivery setType(CodeableConcept value) { 
+    public SupplyDelivery setType(CodeableConcept value)  { 
       this.type = value;
       return this;
     }
@@ -802,7 +822,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #suppliedItem} (The item that is being delivered or has been supplied.)
      */
-    public SupplyDelivery setSuppliedItem(SupplyDeliverySuppliedItemComponent value) { 
+    public SupplyDelivery setSuppliedItem(SupplyDeliverySuppliedItemComponent value)  { 
       this.suppliedItem = value;
       return this;
     }
@@ -818,39 +838,45 @@ public class SupplyDelivery extends DomainResource {
      * @return {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (The date or time(s) the activity occurred.)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -860,7 +886,9 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #occurrence} (The date or time(s) the activity occurred.)
      */
-    public SupplyDelivery setOccurrence(Type value) { 
+    public SupplyDelivery setOccurrence(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new FHIRFormatError("Not the right type for SupplyDelivery.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -884,7 +912,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #supplier} (The individual responsible for dispensing the medication, supplier or device.)
      */
-    public SupplyDelivery setSupplier(Reference value) { 
+    public SupplyDelivery setSupplier(Reference value)  { 
       this.supplier = value;
       return this;
     }
@@ -923,7 +951,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #destination} (Identification of the facility/location where the Supply was shipped to, as part of the dispense event.)
      */
-    public SupplyDelivery setDestination(Reference value) { 
+    public SupplyDelivery setDestination(Reference value)  { 
       this.destination = value;
       return this;
     }
@@ -1023,19 +1051,42 @@ public class SupplyDelivery extends DomainResource {
       return r;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility when the item(s) is dispensed.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("basedOn", "Reference(SupplyRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        childrenList.add(new Property("partOf", "Reference(SupplyDelivery|Contract)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("status", "code", "A code specifying the state of the dispense event.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person whom the delivered item is for.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("suppliedItem", "", "The item that is being delivered or has been supplied.", 0, java.lang.Integer.MAX_VALUE, suppliedItem));
-        childrenList.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, java.lang.Integer.MAX_VALUE, occurrence));
-        childrenList.add(new Property("supplier", "Reference(Practitioner|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, java.lang.Integer.MAX_VALUE, supplier));
-        childrenList.add(new Property("destination", "Reference(Location)", "Identification of the facility/location where the Supply was shipped to, as part of the dispense event.", 0, java.lang.Integer.MAX_VALUE, destination));
-        childrenList.add(new Property("receiver", "Reference(Practitioner)", "Identifies the person who picked up the Supply.", 0, java.lang.Integer.MAX_VALUE, receiver));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility when the item(s) is dispensed.", 0, 1, identifier));
+        children.add(new Property("basedOn", "Reference(SupplyRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("partOf", "Reference(SupplyDelivery|Contract)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("status", "code", "A code specifying the state of the dispense event.", 0, 1, status));
+        children.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person whom the delivered item is for.", 0, 1, patient));
+        children.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type));
+        children.add(new Property("suppliedItem", "", "The item that is being delivered or has been supplied.", 0, 1, suppliedItem));
+        children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence));
+        children.add(new Property("supplier", "Reference(Practitioner|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, 1, supplier));
+        children.add(new Property("destination", "Reference(Location)", "Identification of the facility/location where the Supply was shipped to, as part of the dispense event.", 0, 1, destination));
+        children.add(new Property("receiver", "Reference(Practitioner)", "Identifies the person who picked up the Supply.", 0, java.lang.Integer.MAX_VALUE, receiver));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility when the item(s) is dispensed.", 0, 1, identifier);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(SupplyRequest)", "A plan, proposal or order that is fulfilled in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(SupplyDelivery|Contract)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -892481550: /*status*/  return new Property("status", "code", "A code specifying the state of the dispense event.", 0, 1, status);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "A link to a resource representing the person whom the delivered item is for.", 0, 1, patient);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, 1, type);
+        case 1993333233: /*suppliedItem*/  return new Property("suppliedItem", "", "The item that is being delivered or has been supplied.", 0, 1, suppliedItem);
+        case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
+        case 1687874001: /*occurrence*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
+        case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
+        case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
+        case 1515218299: /*occurrenceTiming*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date or time(s) the activity occurred.", 0, 1, occurrence);
+        case -1663305268: /*supplier*/  return new Property("supplier", "Reference(Practitioner|Organization)", "The individual responsible for dispensing the medication, supplier or device.", 0, 1, supplier);
+        case -1429847026: /*destination*/  return new Property("destination", "Reference(Location)", "Identification of the facility/location where the Supply was shipped to, as part of the dispense event.", 0, 1, destination);
+        case -808719889: /*receiver*/  return new Property("receiver", "Reference(Practitioner)", "Identifies the person who picked up the Supply.", 0, java.lang.Integer.MAX_VALUE, receiver);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1261,12 +1312,12 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof SupplyDelivery))
+        if (!(other_ instanceof SupplyDelivery))
           return false;
-        SupplyDelivery o = (SupplyDelivery) other;
+        SupplyDelivery o = (SupplyDelivery) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(partOf, o.partOf, true)
            && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true) && compareDeep(type, o.type, true)
            && compareDeep(suppliedItem, o.suppliedItem, true) && compareDeep(occurrence, o.occurrence, true)
@@ -1275,12 +1326,12 @@ public class SupplyDelivery extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof SupplyDelivery))
+        if (!(other_ instanceof SupplyDelivery))
           return false;
-        SupplyDelivery o = (SupplyDelivery) other;
+        SupplyDelivery o = (SupplyDelivery) other_;
         return compareValues(status, o.status, true);
       }
 

@@ -1,6 +1,8 @@
 package org.hl7.fhir.exceptions;
 
-public class FHIRFormatError extends FHIRException {
+import ca.uhn.fhir.parser.DataFormatException;
+
+public class FHIRFormatError extends DataFormatException {
 
 	private static final long serialVersionUID = 1L;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum UdiEntryType {
 
         /**
-         * A Barcode scanner captured the data from the device label
+         * a barcodescanner captured the data from the device label
          */
         BARCODE, 
         /**
@@ -49,11 +49,11 @@ public enum UdiEntryType {
          */
         MANUAL, 
         /**
-         * The data originated from a patient's implant card and read by an operator.
+         * The data originated from a patient's implant card and was read by an operator.
          */
         CARD, 
         /**
-         * The data originated from a patient source and not directly scanned or read from a label or card.
+         * The data originated from a patient source and was not directly scanned or read from a label or card.
          */
         SELFREPORTED, 
         /**
@@ -97,18 +97,18 @@ public enum UdiEntryType {
         }
         public String getDefinition() {
           switch (this) {
-            case BARCODE: return "A Barcode scanner captured the data from the device label";
+            case BARCODE: return "a barcodescanner captured the data from the device label";
             case RFID: return "An RFID chip reader captured the data from the device label";
             case MANUAL: return "The data was read from the label by a person and manually entered. (e.g.  via a keyboard)";
-            case CARD: return "The data originated from a patient's implant card and read by an operator.";
-            case SELFREPORTED: return "The data originated from a patient source and not directly scanned or read from a label or card.";
+            case CARD: return "The data originated from a patient's implant card and was read by an operator.";
+            case SELFREPORTED: return "The data originated from a patient source and was not directly scanned or read from a label or card.";
             case UNKNOWN: return "The method of data capture has not been determined";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case BARCODE: return "BarCode";
+            case BARCODE: return "Barcode";
             case RFID: return "RFID";
             case MANUAL: return "Manual";
             case CARD: return "Card";

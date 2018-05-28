@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -18,7 +19,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -29,8 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -316,7 +315,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		List<JpaRuntimeSearchParam> params = mySearchParamRegsitry.getActiveUniqueSearchParams("Patient");
 
 		assertEquals(1, params.size());
-		assertEquals(params.get(0).isUnique(), true);
+		assertTrue(params.get(0).isUnique());
 		assertEquals(2, params.get(0).getCompositeOf().size());
 		// Should be alphabetical order
 		assertEquals("birthdate", params.get(0).getCompositeOf().get(0).getName());
@@ -452,7 +451,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
-		assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+		assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
 		assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
 		myResourceIndexedCompositeStringUniqueDao.deleteAll();
@@ -465,7 +464,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
-		assertEquals("Observation/" + id2.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+		assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue(), either(equalTo("Observation/" + id2.getIdPart())).or(equalTo("Observation/" + id3.getIdPart())));
 		assertEquals("Observation?code=foo%7Cbar&date=2011-01-01&subject=Patient%2F" + id1.getIdPart(), uniques.get(0).getIndexString());
 
 	}
@@ -484,8 +483,8 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (JpaSystemException e) {
-			// good
+		} catch (ResourceVersionConflictException e) {
+			assertEquals("The operation has failed with a unique index constraint failure. This probably means that the operation was trying to create/update a resource that would have resulted in a duplicate value for a unique index.", e.getMessage());
 		}
 	}
 
@@ -788,7 +787,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertEquals(searchId, results.getUuid());
 		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1));
 		// Null because we just reuse the last search
-		assertEquals(null, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertNull(SearchBuilder.getLastHandlerMechanismForUnitTest());
 
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
 		params = new SearchParameterMap();

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.
  */
@@ -634,7 +635,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #reference} (Direct reference to a resource that identifies the agent.)
          */
-        public AuditEventAgentComponent setReference(Reference value) { 
+        public AuditEventAgentComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -673,7 +674,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #userId} (Unique identifier for the user actively participating in the event.)
          */
-        public AuditEventAgentComponent setUserId(Identifier value) { 
+        public AuditEventAgentComponent setUserId(Identifier value)  { 
           this.userId = value;
           return this;
         }
@@ -840,7 +841,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #location} (Where the event occurred.)
          */
-        public AuditEventAgentComponent setLocation(Reference value) { 
+        public AuditEventAgentComponent setLocation(Reference value)  { 
           this.location = value;
           return this;
         }
@@ -921,7 +922,7 @@ public class AuditEvent extends DomainResource {
           if (this.policy == null)
             return false;
           for (UriType v : this.policy)
-            if (v.equals(value)) // uri
+            if (v.getValue().equals(value)) // uri
               return true;
           return false;
         }
@@ -945,7 +946,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #media} (Type of media involved. Used when the event is about exporting/importing onto media.)
          */
-        public AuditEventAgentComponent setMedia(Coding value) { 
+        public AuditEventAgentComponent setMedia(Coding value)  { 
           this.media = value;
           return this;
         }
@@ -969,7 +970,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #network} (Logical network location for application activity, if the activity has a network location.)
          */
-        public AuditEventAgentComponent setNetwork(AuditEventAgentNetworkComponent value) { 
+        public AuditEventAgentComponent setNetwork(AuditEventAgentNetworkComponent value)  { 
           this.network = value;
           return this;
         }
@@ -1027,19 +1028,38 @@ public class AuditEvent extends DomainResource {
           return getPurposeOfUse().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("reference", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Direct reference to a resource that identifies the agent.", 0, java.lang.Integer.MAX_VALUE, reference));
-          childrenList.add(new Property("userId", "Identifier", "Unique identifier for the user actively participating in the event.", 0, java.lang.Integer.MAX_VALUE, userId));
-          childrenList.add(new Property("altId", "string", "Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.", 0, java.lang.Integer.MAX_VALUE, altId));
-          childrenList.add(new Property("name", "string", "Human-meaningful name for the agent.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("requestor", "boolean", "Indicator that the user is or is not the requestor, or initiator, for the event being audited.", 0, java.lang.Integer.MAX_VALUE, requestor));
-          childrenList.add(new Property("location", "Reference(Location)", "Where the event occurred.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("policy", "uri", "The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used.", 0, java.lang.Integer.MAX_VALUE, policy));
-          childrenList.add(new Property("media", "Coding", "Type of media involved. Used when the event is about exporting/importing onto media.", 0, java.lang.Integer.MAX_VALUE, media));
-          childrenList.add(new Property("network", "", "Logical network location for application activity, if the activity has a network location.", 0, java.lang.Integer.MAX_VALUE, network));
-          childrenList.add(new Property("purposeOfUse", "CodeableConcept", "The reason (purpose of use), specific to this agent, that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfUse));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("role", "CodeableConcept", "The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.", 0, java.lang.Integer.MAX_VALUE, role));
+          children.add(new Property("reference", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Direct reference to a resource that identifies the agent.", 0, 1, reference));
+          children.add(new Property("userId", "Identifier", "Unique identifier for the user actively participating in the event.", 0, 1, userId));
+          children.add(new Property("altId", "string", "Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.", 0, 1, altId));
+          children.add(new Property("name", "string", "Human-meaningful name for the agent.", 0, 1, name));
+          children.add(new Property("requestor", "boolean", "Indicator that the user is or is not the requestor, or initiator, for the event being audited.", 0, 1, requestor));
+          children.add(new Property("location", "Reference(Location)", "Where the event occurred.", 0, 1, location));
+          children.add(new Property("policy", "uri", "The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used.", 0, java.lang.Integer.MAX_VALUE, policy));
+          children.add(new Property("media", "Coding", "Type of media involved. Used when the event is about exporting/importing onto media.", 0, 1, media));
+          children.add(new Property("network", "", "Logical network location for application activity, if the activity has a network location.", 0, 1, network));
+          children.add(new Property("purposeOfUse", "CodeableConcept", "The reason (purpose of use), specific to this agent, that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfUse));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "The security role that the user was acting under, that come from local codes defined by the access control security system (e.g. RBAC, ABAC) used in the local context.", 0, java.lang.Integer.MAX_VALUE, role);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Direct reference to a resource that identifies the agent.", 0, 1, reference);
+          case -836030906: /*userId*/  return new Property("userId", "Identifier", "Unique identifier for the user actively participating in the event.", 0, 1, userId);
+          case 92912804: /*altId*/  return new Property("altId", "string", "Alternative agent Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g. single sign-on), if available.", 0, 1, altId);
+          case 3373707: /*name*/  return new Property("name", "string", "Human-meaningful name for the agent.", 0, 1, name);
+          case 693934258: /*requestor*/  return new Property("requestor", "boolean", "Indicator that the user is or is not the requestor, or initiator, for the event being audited.", 0, 1, requestor);
+          case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "Where the event occurred.", 0, 1, location);
+          case -982670030: /*policy*/  return new Property("policy", "uri", "The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used.", 0, java.lang.Integer.MAX_VALUE, policy);
+          case 103772132: /*media*/  return new Property("media", "Coding", "Type of media involved. Used when the event is about exporting/importing onto media.", 0, 1, media);
+          case 1843485230: /*network*/  return new Property("network", "", "Logical network location for application activity, if the activity has a network location.", 0, 1, network);
+          case -1881902670: /*purposeOfUse*/  return new Property("purposeOfUse", "CodeableConcept", "The reason (purpose of use), specific to this agent, that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfUse);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1243,12 +1263,12 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AuditEventAgentComponent))
+        if (!(other_ instanceof AuditEventAgentComponent))
           return false;
-        AuditEventAgentComponent o = (AuditEventAgentComponent) other;
+        AuditEventAgentComponent o = (AuditEventAgentComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(reference, o.reference, true) && compareDeep(userId, o.userId, true)
            && compareDeep(altId, o.altId, true) && compareDeep(name, o.name, true) && compareDeep(requestor, o.requestor, true)
            && compareDeep(location, o.location, true) && compareDeep(policy, o.policy, true) && compareDeep(media, o.media, true)
@@ -1256,12 +1276,12 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AuditEventAgentComponent))
+        if (!(other_ instanceof AuditEventAgentComponent))
           return false;
-        AuditEventAgentComponent o = (AuditEventAgentComponent) other;
+        AuditEventAgentComponent o = (AuditEventAgentComponent) other_;
         return compareValues(altId, o.altId, true) && compareValues(name, o.name, true) && compareValues(requestor, o.requestor, true)
            && compareValues(policy, o.policy, true);
       }
@@ -1402,10 +1422,20 @@ public class AuditEvent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("address", "string", "An identifier for the network access point of the user device for the audit event.", 0, java.lang.Integer.MAX_VALUE, address));
-          childrenList.add(new Property("type", "code", "An identifier for the type of network access point that originated the audit event.", 0, java.lang.Integer.MAX_VALUE, type));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("address", "string", "An identifier for the network access point of the user device for the audit event.", 0, 1, address));
+          children.add(new Property("type", "code", "An identifier for the type of network access point that originated the audit event.", 0, 1, type));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1147692044: /*address*/  return new Property("address", "string", "An identifier for the network access point of the user device for the audit event.", 0, 1, address);
+          case 3575610: /*type*/  return new Property("type", "code", "An identifier for the type of network access point that originated the audit event.", 0, 1, type);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1486,22 +1516,22 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AuditEventAgentNetworkComponent))
+        if (!(other_ instanceof AuditEventAgentNetworkComponent))
           return false;
-        AuditEventAgentNetworkComponent o = (AuditEventAgentNetworkComponent) other;
+        AuditEventAgentNetworkComponent o = (AuditEventAgentNetworkComponent) other_;
         return compareDeep(address, o.address, true) && compareDeep(type, o.type, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AuditEventAgentNetworkComponent))
+        if (!(other_ instanceof AuditEventAgentNetworkComponent))
           return false;
-        AuditEventAgentNetworkComponent o = (AuditEventAgentNetworkComponent) other;
+        AuditEventAgentNetworkComponent o = (AuditEventAgentNetworkComponent) other_;
         return compareValues(address, o.address, true) && compareValues(type, o.type, true);
       }
 
@@ -1625,7 +1655,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #identifier} (Identifier of the source where the event was detected.)
          */
-        public AuditEventSourceComponent setIdentifier(Identifier value) { 
+        public AuditEventSourceComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1683,11 +1713,22 @@ public class AuditEvent extends DomainResource {
           return getType().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("site", "string", "Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.", 0, java.lang.Integer.MAX_VALUE, site));
-          childrenList.add(new Property("identifier", "Identifier", "Identifier of the source where the event was detected.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("type", "Coding", "Code specifying the type of source where event originated.", 0, java.lang.Integer.MAX_VALUE, type));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("site", "string", "Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.", 0, 1, site));
+          children.add(new Property("identifier", "Identifier", "Identifier of the source where the event was detected.", 0, 1, identifier));
+          children.add(new Property("type", "Coding", "Code specifying the type of source where event originated.", 0, java.lang.Integer.MAX_VALUE, type));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3530567: /*site*/  return new Property("site", "string", "Logical source location within the healthcare enterprise network.  For example, a hospital or other provider location within a multi-entity provider group.", 0, 1, site);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier of the source where the event was detected.", 0, 1, identifier);
+          case 3575610: /*type*/  return new Property("type", "Coding", "Code specifying the type of source where event originated.", 0, java.lang.Integer.MAX_VALUE, type);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1783,23 +1824,23 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AuditEventSourceComponent))
+        if (!(other_ instanceof AuditEventSourceComponent))
           return false;
-        AuditEventSourceComponent o = (AuditEventSourceComponent) other;
+        AuditEventSourceComponent o = (AuditEventSourceComponent) other_;
         return compareDeep(site, o.site, true) && compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AuditEventSourceComponent))
+        if (!(other_ instanceof AuditEventSourceComponent))
           return false;
-        AuditEventSourceComponent o = (AuditEventSourceComponent) other;
+        AuditEventSourceComponent o = (AuditEventSourceComponent) other_;
         return compareValues(site, o.site, true);
       }
 
@@ -1923,7 +1964,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #identifier} (Identifies a specific instance of the entity. The reference should always be version specific.)
          */
-        public AuditEventEntityComponent setIdentifier(Identifier value) { 
+        public AuditEventEntityComponent setIdentifier(Identifier value)  { 
           this.identifier = value;
           return this;
         }
@@ -1947,7 +1988,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #reference} (Identifies a specific instance of the entity. The reference should be version specific.)
          */
-        public AuditEventEntityComponent setReference(Reference value) { 
+        public AuditEventEntityComponent setReference(Reference value)  { 
           this.reference = value;
           return this;
         }
@@ -1986,7 +2027,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #type} (The type of the object that was involved in this audit event.)
          */
-        public AuditEventEntityComponent setType(Coding value) { 
+        public AuditEventEntityComponent setType(Coding value)  { 
           this.type = value;
           return this;
         }
@@ -2010,7 +2051,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #role} (Code representing the role the entity played in the event being audited.)
          */
-        public AuditEventEntityComponent setRole(Coding value) { 
+        public AuditEventEntityComponent setRole(Coding value)  { 
           this.role = value;
           return this;
         }
@@ -2034,7 +2075,7 @@ public class AuditEvent extends DomainResource {
         /**
          * @param value {@link #lifecycle} (Identifier for the data life-cycle stage for the entity.)
          */
-        public AuditEventEntityComponent setLifecycle(Coding value) { 
+        public AuditEventEntityComponent setLifecycle(Coding value)  { 
           this.lifecycle = value;
           return this;
         }
@@ -2292,18 +2333,36 @@ public class AuditEvent extends DomainResource {
           return getDetail().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("identifier", "Identifier", "Identifies a specific instance of the entity. The reference should always be version specific.", 0, java.lang.Integer.MAX_VALUE, identifier));
-          childrenList.add(new Property("reference", "Reference(Any)", "Identifies a specific instance of the entity. The reference should be version specific.", 0, java.lang.Integer.MAX_VALUE, reference));
-          childrenList.add(new Property("type", "Coding", "The type of the object that was involved in this audit event.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("role", "Coding", "Code representing the role the entity played in the event being audited.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("lifecycle", "Coding", "Identifier for the data life-cycle stage for the entity.", 0, java.lang.Integer.MAX_VALUE, lifecycle));
-          childrenList.add(new Property("securityLabel", "Coding", "Security labels for the identified entity.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
-          childrenList.add(new Property("name", "string", "A name of the entity in the audit event.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("description", "string", "Text that describes the entity in more detail.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("query", "base64Binary", "The query parameters for a query-type entities.", 0, java.lang.Integer.MAX_VALUE, query));
-          childrenList.add(new Property("detail", "", "Tagged value pairs for conveying additional information about the entity.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "Identifies a specific instance of the entity. The reference should always be version specific.", 0, 1, identifier));
+          children.add(new Property("reference", "Reference(Any)", "Identifies a specific instance of the entity. The reference should be version specific.", 0, 1, reference));
+          children.add(new Property("type", "Coding", "The type of the object that was involved in this audit event.", 0, 1, type));
+          children.add(new Property("role", "Coding", "Code representing the role the entity played in the event being audited.", 0, 1, role));
+          children.add(new Property("lifecycle", "Coding", "Identifier for the data life-cycle stage for the entity.", 0, 1, lifecycle));
+          children.add(new Property("securityLabel", "Coding", "Security labels for the identified entity.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
+          children.add(new Property("name", "string", "A name of the entity in the audit event.", 0, 1, name));
+          children.add(new Property("description", "string", "Text that describes the entity in more detail.", 0, 1, description));
+          children.add(new Property("query", "base64Binary", "The query parameters for a query-type entities.", 0, 1, query));
+          children.add(new Property("detail", "", "Tagged value pairs for conveying additional information about the entity.", 0, java.lang.Integer.MAX_VALUE, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifies a specific instance of the entity. The reference should always be version specific.", 0, 1, identifier);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Any)", "Identifies a specific instance of the entity. The reference should be version specific.", 0, 1, reference);
+          case 3575610: /*type*/  return new Property("type", "Coding", "The type of the object that was involved in this audit event.", 0, 1, type);
+          case 3506294: /*role*/  return new Property("role", "Coding", "Code representing the role the entity played in the event being audited.", 0, 1, role);
+          case -302323862: /*lifecycle*/  return new Property("lifecycle", "Coding", "Identifier for the data life-cycle stage for the entity.", 0, 1, lifecycle);
+          case -722296940: /*securityLabel*/  return new Property("securityLabel", "Coding", "Security labels for the identified entity.", 0, java.lang.Integer.MAX_VALUE, securityLabel);
+          case 3373707: /*name*/  return new Property("name", "string", "A name of the entity in the audit event.", 0, 1, name);
+          case -1724546052: /*description*/  return new Property("description", "string", "Text that describes the entity in more detail.", 0, 1, description);
+          case 107944136: /*query*/  return new Property("query", "base64Binary", "The query parameters for a query-type entities.", 0, 1, query);
+          case -1335224239: /*detail*/  return new Property("detail", "", "Tagged value pairs for conveying additional information about the entity.", 0, java.lang.Integer.MAX_VALUE, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2491,12 +2550,12 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AuditEventEntityComponent))
+        if (!(other_ instanceof AuditEventEntityComponent))
           return false;
-        AuditEventEntityComponent o = (AuditEventEntityComponent) other;
+        AuditEventEntityComponent o = (AuditEventEntityComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(reference, o.reference, true)
            && compareDeep(type, o.type, true) && compareDeep(role, o.role, true) && compareDeep(lifecycle, o.lifecycle, true)
            && compareDeep(securityLabel, o.securityLabel, true) && compareDeep(name, o.name, true) && compareDeep(description, o.description, true)
@@ -2504,12 +2563,12 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AuditEventEntityComponent))
+        if (!(other_ instanceof AuditEventEntityComponent))
           return false;
-        AuditEventEntityComponent o = (AuditEventEntityComponent) other;
+        AuditEventEntityComponent o = (AuditEventEntityComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true) && compareValues(query, o.query, true)
           ;
       }
@@ -2650,10 +2709,20 @@ public class AuditEvent extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("type", "string", "The type of extra detail provided in the value.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("value", "base64Binary", "The details, base64 encoded. Used to carry bulk information.", 0, java.lang.Integer.MAX_VALUE, value));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("type", "string", "The type of extra detail provided in the value.", 0, 1, type));
+          children.add(new Property("value", "base64Binary", "The details, base64 encoded. Used to carry bulk information.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3575610: /*type*/  return new Property("type", "string", "The type of extra detail provided in the value.", 0, 1, type);
+          case 111972721: /*value*/  return new Property("value", "base64Binary", "The details, base64 encoded. Used to carry bulk information.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -2732,22 +2801,22 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AuditEventEntityDetailComponent))
+        if (!(other_ instanceof AuditEventEntityDetailComponent))
           return false;
-        AuditEventEntityDetailComponent o = (AuditEventEntityDetailComponent) other;
+        AuditEventEntityDetailComponent o = (AuditEventEntityDetailComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(value, o.value, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AuditEventEntityDetailComponent))
+        if (!(other_ instanceof AuditEventEntityDetailComponent))
           return false;
-        AuditEventEntityDetailComponent o = (AuditEventEntityDetailComponent) other;
+        AuditEventEntityDetailComponent o = (AuditEventEntityDetailComponent) other_;
         return compareValues(type, o.type, true) && compareValues(value, o.value, true);
       }
 
@@ -2875,7 +2944,7 @@ public class AuditEvent extends DomainResource {
     /**
      * @param value {@link #type} (Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.)
      */
-    public AuditEvent setType(Coding value) { 
+    public AuditEvent setType(Coding value)  { 
       this.type = value;
       return this;
     }
@@ -3250,7 +3319,7 @@ public class AuditEvent extends DomainResource {
     /**
      * @param value {@link #source} (The system that is reporting the event.)
      */
-    public AuditEvent setSource(AuditEventSourceComponent value) { 
+    public AuditEvent setSource(AuditEventSourceComponent value)  { 
       this.source = value;
       return this;
     }
@@ -3308,18 +3377,36 @@ public class AuditEvent extends DomainResource {
       return getEntity().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("type", "Coding", "Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("subtype", "Coding", "Identifier for the category of event.", 0, java.lang.Integer.MAX_VALUE, subtype));
-        childrenList.add(new Property("action", "code", "Indicator for type of action performed during the event that generated the audit.", 0, java.lang.Integer.MAX_VALUE, action));
-        childrenList.add(new Property("recorded", "instant", "The time when the event occurred on the source.", 0, java.lang.Integer.MAX_VALUE, recorded));
-        childrenList.add(new Property("outcome", "code", "Indicates whether the event succeeded or failed.", 0, java.lang.Integer.MAX_VALUE, outcome));
-        childrenList.add(new Property("outcomeDesc", "string", "A free text description of the outcome of the event.", 0, java.lang.Integer.MAX_VALUE, outcomeDesc));
-        childrenList.add(new Property("purposeOfEvent", "CodeableConcept", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent));
-        childrenList.add(new Property("agent", "", "An actor taking an active role in the event or activity that is logged.", 0, java.lang.Integer.MAX_VALUE, agent));
-        childrenList.add(new Property("source", "", "The system that is reporting the event.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("entity", "", "Specific instances of data or objects that have been accessed.", 0, java.lang.Integer.MAX_VALUE, entity));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("type", "Coding", "Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.", 0, 1, type));
+        children.add(new Property("subtype", "Coding", "Identifier for the category of event.", 0, java.lang.Integer.MAX_VALUE, subtype));
+        children.add(new Property("action", "code", "Indicator for type of action performed during the event that generated the audit.", 0, 1, action));
+        children.add(new Property("recorded", "instant", "The time when the event occurred on the source.", 0, 1, recorded));
+        children.add(new Property("outcome", "code", "Indicates whether the event succeeded or failed.", 0, 1, outcome));
+        children.add(new Property("outcomeDesc", "string", "A free text description of the outcome of the event.", 0, 1, outcomeDesc));
+        children.add(new Property("purposeOfEvent", "CodeableConcept", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent));
+        children.add(new Property("agent", "", "An actor taking an active role in the event or activity that is logged.", 0, java.lang.Integer.MAX_VALUE, agent));
+        children.add(new Property("source", "", "The system that is reporting the event.", 0, 1, source));
+        children.add(new Property("entity", "", "Specific instances of data or objects that have been accessed.", 0, java.lang.Integer.MAX_VALUE, entity));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3575610: /*type*/  return new Property("type", "Coding", "Identifier for a family of the event.  For example, a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function.", 0, 1, type);
+        case -1867567750: /*subtype*/  return new Property("subtype", "Coding", "Identifier for the category of event.", 0, java.lang.Integer.MAX_VALUE, subtype);
+        case -1422950858: /*action*/  return new Property("action", "code", "Indicator for type of action performed during the event that generated the audit.", 0, 1, action);
+        case -799233872: /*recorded*/  return new Property("recorded", "instant", "The time when the event occurred on the source.", 0, 1, recorded);
+        case -1106507950: /*outcome*/  return new Property("outcome", "code", "Indicates whether the event succeeded or failed.", 0, 1, outcome);
+        case 1062502659: /*outcomeDesc*/  return new Property("outcomeDesc", "string", "A free text description of the outcome of the event.", 0, 1, outcomeDesc);
+        case -341917691: /*purposeOfEvent*/  return new Property("purposeOfEvent", "CodeableConcept", "The purposeOfUse (reason) that was used during the event being recorded.", 0, java.lang.Integer.MAX_VALUE, purposeOfEvent);
+        case 92750597: /*agent*/  return new Property("agent", "", "An actor taking an active role in the event or activity that is logged.", 0, java.lang.Integer.MAX_VALUE, agent);
+        case -896505829: /*source*/  return new Property("source", "", "The system that is reporting the event.", 0, 1, source);
+        case -1298275357: /*entity*/  return new Property("entity", "", "Specific instances of data or objects that have been accessed.", 0, java.lang.Integer.MAX_VALUE, entity);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3525,12 +3612,12 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AuditEvent))
+        if (!(other_ instanceof AuditEvent))
           return false;
-        AuditEvent o = (AuditEvent) other;
+        AuditEvent o = (AuditEvent) other_;
         return compareDeep(type, o.type, true) && compareDeep(subtype, o.subtype, true) && compareDeep(action, o.action, true)
            && compareDeep(recorded, o.recorded, true) && compareDeep(outcome, o.outcome, true) && compareDeep(outcomeDesc, o.outcomeDesc, true)
            && compareDeep(purposeOfEvent, o.purposeOfEvent, true) && compareDeep(agent, o.agent, true) && compareDeep(source, o.source, true)
@@ -3538,12 +3625,12 @@ public class AuditEvent extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AuditEvent))
+        if (!(other_ instanceof AuditEvent))
           return false;
-        AuditEvent o = (AuditEvent) other;
+        AuditEvent o = (AuditEvent) other_;
         return compareValues(action, o.action, true) && compareValues(recorded, o.recorded, true) && compareValues(outcome, o.outcome, true)
            && compareValues(outcomeDesc, o.outcomeDesc, true);
       }

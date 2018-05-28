@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -404,52 +404,60 @@ public class SupplyRequest extends DomainResource {
          * @return {@link #value} (The value of the device detail.)
          */
         public CodeableConcept getValueCodeableConcept() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
         }
 
         public boolean hasValueCodeableConcept() { 
-          return this.value instanceof CodeableConcept;
+          return this != null && this.value instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #value} (The value of the device detail.)
          */
         public Quantity getValueQuantity() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
         }
 
         public boolean hasValueQuantity() { 
-          return this.value instanceof Quantity;
+          return this != null && this.value instanceof Quantity;
         }
 
         /**
          * @return {@link #value} (The value of the device detail.)
          */
         public Range getValueRange() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
         }
 
         public boolean hasValueRange() { 
-          return this.value instanceof Range;
+          return this != null && this.value instanceof Range;
         }
 
         /**
          * @return {@link #value} (The value of the device detail.)
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
+          if (this.value == null)
+            return null;
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
         }
 
         public boolean hasValueBooleanType() { 
-          return this.value instanceof BooleanType;
+          return this != null && this.value instanceof BooleanType;
         }
 
         public boolean hasValue() { 
@@ -460,6 +468,8 @@ public class SupplyRequest extends DomainResource {
          * @param value {@link #value} (The value of the device detail.)
          */
         public SupplyRequestParameterComponent setValue(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Quantity || value instanceof Range || value instanceof BooleanType))
+            throw new Error("Not the right type for SupplyRequest.parameter.value[x]: "+value.fhirType());
           this.value = value;
           return this;
         }
@@ -698,21 +708,21 @@ public class SupplyRequest extends DomainResource {
 
 
     /**
-     * Why the supply item was requested.
+     * The reason why the supply item was requested.
      */
     @Child(name = "reasonCode", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Why the supply item was requested", formalDefinition="Why the supply item was requested." )
+    @Description(shortDefinition="The reason why the supply item was requested", formalDefinition="The reason why the supply item was requested." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supplyrequest-reason")
     protected List<CodeableConcept> reasonCode;
 
     /**
-     * Why the supply item was requested.
+     * The reason why the supply item was requested.
      */
     @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Why the supply item was requested", formalDefinition="Why the supply item was requested." )
+    @Description(shortDefinition="The reason why the supply item was requested", formalDefinition="The reason why the supply item was requested." )
     protected List<Reference> reasonReference;
     /**
-     * The actual objects that are the target of the reference (Why the supply item was requested.)
+     * The actual objects that are the target of the reference (The reason why the supply item was requested.)
      */
     protected List<Resource> reasonReferenceTarget;
 
@@ -916,26 +926,30 @@ public class SupplyRequest extends DomainResource {
      * @return {@link #item} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
      */
     public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+      if (this.item == null)
+        return null;
       if (!(this.item instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
       return (CodeableConcept) this.item;
     }
 
     public boolean hasItemCodeableConcept() { 
-      return this.item instanceof CodeableConcept;
+      return this != null && this.item instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #item} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
      */
     public Reference getItemReference() throws FHIRException { 
+      if (this.item == null)
+        return null;
       if (!(this.item instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
       return (Reference) this.item;
     }
 
     public boolean hasItemReference() { 
-      return this.item instanceof Reference;
+      return this != null && this.item instanceof Reference;
     }
 
     public boolean hasItem() { 
@@ -946,6 +960,8 @@ public class SupplyRequest extends DomainResource {
      * @param value {@link #item} (The item that is requested to be supplied. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.)
      */
     public SupplyRequest setItem(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for SupplyRequest.item[x]: "+value.fhirType());
       this.item = value;
       return this;
     }
@@ -1038,39 +1054,45 @@ public class SupplyRequest extends DomainResource {
      * @return {@link #occurrence} (When the request should be fulfilled.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (When the request should be fulfilled.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     /**
      * @return {@link #occurrence} (When the request should be fulfilled.)
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
     }
 
     public boolean hasOccurrenceTiming() { 
-      return this.occurrence instanceof Timing;
+      return this != null && this.occurrence instanceof Timing;
     }
 
     public boolean hasOccurrence() { 
@@ -1081,6 +1103,8 @@ public class SupplyRequest extends DomainResource {
      * @param value {@link #occurrence} (When the request should be fulfilled.)
      */
     public SupplyRequest setOccurrence(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period || value instanceof Timing))
+        throw new Error("Not the right type for SupplyRequest.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1237,7 +1261,7 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #reasonCode} (Why the supply item was requested.)
+     * @return {@link #reasonCode} (The reason why the supply item was requested.)
      */
     public List<CodeableConcept> getReasonCode() { 
       if (this.reasonCode == null)
@@ -1290,7 +1314,7 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #reasonReference} (Why the supply item was requested.)
+     * @return {@link #reasonReference} (The reason why the supply item was requested.)
      */
     public List<Reference> getReasonReference() { 
       if (this.reasonReference == null)
@@ -1443,8 +1467,8 @@ public class SupplyRequest extends DomainResource {
         children.add(new Property("authoredOn", "dateTime", "When the request was made.", 0, 1, authoredOn));
         children.add(new Property("requester", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who initiated the request.", 0, 1, requester));
         children.add(new Property("supplier", "Reference(Organization|HealthcareService)", "Who is intended to fulfill the request.", 0, java.lang.Integer.MAX_VALUE, supplier));
-        children.add(new Property("reasonCode", "CodeableConcept", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("reasonCode", "CodeableConcept", "The reason why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "The reason why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("deliverFrom", "Reference(Organization|Location)", "Where the supply is expected to come from.", 0, 1, deliverFrom));
         children.add(new Property("deliverTo", "Reference(Organization|Location|Patient)", "Where the supply is destined to go.", 0, 1, deliverTo));
       }
@@ -1470,8 +1494,8 @@ public class SupplyRequest extends DomainResource {
         case -1500852503: /*authoredOn*/  return new Property("authoredOn", "dateTime", "When the request was made.", 0, 1, authoredOn);
         case 693933948: /*requester*/  return new Property("requester", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson|Device)", "The device, practitioner, etc. who initiated the request.", 0, 1, requester);
         case -1663305268: /*supplier*/  return new Property("supplier", "Reference(Organization|HealthcareService)", "Who is intended to fulfill the request.", 0, java.lang.Integer.MAX_VALUE, supplier);
-        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
-        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "The reason why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "The reason why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case -949323153: /*deliverFrom*/  return new Property("deliverFrom", "Reference(Organization|Location)", "Where the supply is expected to come from.", 0, 1, deliverFrom);
         case -242327936: /*deliverTo*/  return new Property("deliverTo", "Reference(Organization|Location|Patient)", "Where the supply is destined to go.", 0, 1, deliverTo);
         default: return super.getNamedProperty(_hash, _name, _checkValid);

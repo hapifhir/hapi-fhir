@@ -19,35 +19,45 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.client.method.*;
+import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.util.ICallable;
+import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.client.method.*;
-import ca.uhn.fhir.rest.gclient.*;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.util.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author James Agnew
@@ -87,7 +97,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
-			SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -149,6 +159,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return myLastRequest;
 	}
 
+	/**
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 */
+	public void setLastRequest(IHttpRequest theLastRequest) {
+		myLastRequest = theLastRequest;
+	}
+
 	protected String getPreferredId(IBaseResource theResource, String theId) {
 		if (isNotBlank(theId)) {
 			return theId;
@@ -163,12 +180,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	/**
 	 * @deprecated Use {@link LoggingInterceptor} as a client interceptor registered to your
-	 *             client instead, as this provides much more fine-grained control over what is logged. This
-	 *             method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16)
+	 * client instead, as this provides much more fine-grained control over what is logged. This
+	 * method will be removed at some point (deprecated in HAPI 1.6 - 2016-06-16)
 	 */
 	@Deprecated
 	public boolean isLogRequestAndResponse() {
 		return myLogRequestAndResponse;
+	}
+
+	@Deprecated // override deprecated method
+	@Override
+	public void setLogRequestAndResponse(boolean theLogRequestAndResponse) {
+		myLogRequestAndResponse = theLogRequestAndResponse;
 	}
 
 	@Override
@@ -221,23 +244,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return read(def.getImplementingClass(), id);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public IUntypedQuery search() {
 		return new SearchInternal();
-	}
-
-	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
-	 */
-	public void setLastRequest(IHttpRequest theLastRequest) {
-		myLastRequest = theLastRequest;
-	}
-
-	@Deprecated // override deprecated method
-	@Override
-	public void setLogRequestAndResponse(boolean theLogRequestAndResponse) {
-		myLogRequestAndResponse = theLogRequestAndResponse;
 	}
 
 	private String toResourceName(Class<? extends IBaseResource> theType) {
@@ -332,30 +342,36 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				b.append(nextChar);
 			} else {
 				switch (nextChar) {
-				case '|':
-				case '?':
-				case '$':
-				case ':':
-					b.append(UrlUtil.escapeUrlParam(Character.toString(nextChar)));
-					break;
-				default:
-					b.append(nextChar);
-					break;
+					case '|':
+					case '?':
+					case '$':
+					case ':':
+						b.append(UrlUtil.escapeUrlParam(Character.toString(nextChar)));
+						break;
+					default:
+						b.append(nextChar);
+						break;
 				}
 			}
 		}
 		return b.toString();
 	}
 
+	private enum MetaOperation {
+		ADD,
+		DELETE,
+		GET
+	}
+
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, Y>, Y> implements IClientExecutable<T, Y> {
 
 		protected EncodingEnum myParamEncoding;
-		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
 		protected Boolean myPrettyPrint;
-		private boolean myQueryLogRequestAndResponse;
-		private HashSet<String> mySubsetElements;
 		protected SummaryEnum mySummaryMode;
 		protected CacheControlDirective myCacheControlDirective;
+		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
+		private boolean myQueryLogRequestAndResponse;
+		private HashSet<String> mySubsetElements;
 
 		@Deprecated // override deprecated method
 		@SuppressWarnings("unchecked")
@@ -382,17 +398,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
-		@SuppressWarnings("unchecked")
-		@Override
-		public T encodedJson() {
-			myParamEncoding = EncodingEnum.JSON;
-			return (T) this;
-		}
-
 		@Override
 		public T encoded(EncodingEnum theEncoding) {
 			Validate.notNull(theEncoding, "theEncoding must not be null");
 			myParamEncoding = theEncoding;
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T encodedJson() {
+			myParamEncoding = EncodingEnum.JSON;
 			return (T) this;
 		}
 
@@ -672,7 +688,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class FetchConformanceInternal extends BaseClientExecutable implements IFetchConformanceUntyped, IFetchConformanceTyped {
 		private RuntimeResourceDefinition myType;
 
@@ -696,7 +712,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped<Object>, Object> implements IGetPageTyped<Object> {
 
 		private Class<? extends IBaseBundle> myBundleType;
@@ -804,7 +820,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private final class LoadPageInternal implements IGetPage, IGetPageUntyped {
 
 		private static final String PREV = "prev";
@@ -895,23 +911,23 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			IBaseParameters parameters = ParametersUtil.newInstance(myContext);
 			switch (myOperation) {
-			case ADD:
-				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
-				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-add", parameters, false);
-				break;
-			case DELETE:
-				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
-				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-delete", parameters, false);
-				break;
-			case GET:
-				if (myId != null) {
-					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, myId.getIdPart(), "$meta", parameters, true);
-				} else if (myOnType != null) {
-					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, null, "$meta", parameters, true);
-				} else {
-					invocation = OperationMethodBinding.createOperationInvocation(myContext, null, null, "$meta", parameters, true);
-				}
-				break;
+				case ADD:
+					ParametersUtil.addParameterToParameters(myContext, parameters, "meta", myMeta);
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), null, "$meta-add", parameters, false);
+					break;
+				case DELETE:
+					ParametersUtil.addParameterToParameters(myContext, parameters, "meta", myMeta);
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), null, "$meta-delete", parameters, false);
+					break;
+				case GET:
+					if (myId != null) {
+						invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, myId.getIdPart(), null, "$meta", parameters, true);
+					} else if (myOnType != null) {
+						invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, null, null, "$meta", parameters, true);
+					} else {
+						invocation = OperationMethodBinding.createOperationInvocation(myContext, null, null, null, "$meta", parameters, true);
+					}
+					break;
 			}
 
 			// Should not happen
@@ -974,12 +990,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private enum MetaOperation {
-		ADD,
-		DELETE,
-		GET
-	}
-
 	private final class MetaParametersResponseHandler<T extends IBaseMetaType> implements IClientResponseHandler<T> {
 
 		private Class<T> myType;
@@ -1018,7 +1028,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@SuppressWarnings("rawtypes")
 	private class OperationInternal extends BaseClientExecutable
-			implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput, IOperationUntypedWithInputAndPartialOutput, IOperationProcessMsg, IOperationProcessMsgMode {
+		implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput, IOperationUntypedWithInputAndPartialOutput, IOperationProcessMsg, IOperationProcessMsgMode {
 
 		private IIdType myId;
 		private Boolean myIsAsync;
@@ -1115,18 +1125,22 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			String resourceName;
 			String id;
+			String version;
 			if (myType != null) {
 				resourceName = myContext.getResourceDefinition(myType).getName();
 				id = null;
+				version = null;
 			} else if (myId != null) {
 				resourceName = myId.getResourceType();
 				id = myId.getIdPart();
+				version = myId.getVersionIdPart();
 			} else {
 				resourceName = null;
 				id = null;
+				version = null;
 			}
 
-			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
+			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, version, myOperationName, myParameters, myUseHttpGet);
 
 			if (myReturnResourceType != null) {
 				ResourceResponseHandler handler;
@@ -1165,6 +1179,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IOperationUnnamed onInstance(IIdType theId) {
+			myId = theId.toVersionless();
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onInstanceVersion(IIdType theId) {
 			myId = theId;
 			return this;
 		}
@@ -1242,7 +1262,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			if (!"Parameters".equals(def.getName())) {
 				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName()
-						+ " is a resource named: " + def.getName());
+					+ " is a resource named: " + def.getName());
 			}
 			myParameters = (IBaseParameters) def.newInstance();
 			return this;
@@ -1263,7 +1283,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-		@SuppressWarnings({ "unchecked" })
+		@SuppressWarnings({"unchecked"})
 		@Override
 		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
 			Validate.notNull(theParameters, "theParameters can not be null");
@@ -1292,7 +1312,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public IBaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
-				throws BaseServerResponseException {
+			throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -1458,7 +1478,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class ReadInternal extends BaseClientExecutable implements IRead, IReadTyped, IReadExecutable {
 		private IIdType myId;
 		private String myIfVersionMatches;
@@ -1594,7 +1614,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
-				throws BaseServerResponseException {
+			throws BaseServerResponseException {
 			Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
 			ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType);
 			IBaseResource response = handler.invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders);
@@ -1604,7 +1624,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class SearchInternal<OUTPUT> extends BaseSearch<IQuery<OUTPUT>, IQuery<OUTPUT>, OUTPUT> implements IQuery<OUTPUT>, IUntypedQuery<IQuery<OUTPUT>> {
 
 		private String myCompartmentName;
@@ -1682,7 +1702,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Collection<String> profileUris : myProfiles) {
 				StringBuilder builder = new StringBuilder();
-				for (Iterator<String> profileItr = profileUris.iterator(); profileItr.hasNext();) {
+				for (Iterator<String> profileItr = profileUris.iterator(); profileItr.hasNext(); ) {
 					builder.append(profileItr.next());
 					if (profileItr.hasNext()) {
 						builder.append(',');
@@ -1870,77 +1890,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	@SuppressWarnings("rawtypes")
-	private static class SortInternal implements ISort {
-
-		private SortOrderEnum myDirection;
-		private SearchInternal myFor;
-		private String myParamName;
-		private String myParamValue;
-
-		public SortInternal(SearchInternal theFor) {
-			myFor = theFor;
-		}
-
-		@Override
-		public IQuery ascending(IParam theParam) {
-			myParamName = Constants.PARAM_SORT_ASC;
-			myDirection = SortOrderEnum.ASC;
-			myParamValue = theParam.getParamName();
-			return myFor;
-		}
-
-		@Override
-		public IQuery ascending(String theParam) {
-			myParamName = Constants.PARAM_SORT_ASC;
-			myDirection = SortOrderEnum.ASC;
-			myParamValue = theParam;
-			return myFor;
-		}
-
-		@Override
-		public IQuery defaultOrder(IParam theParam) {
-			myParamName = Constants.PARAM_SORT;
-			myDirection = null;
-			myParamValue = theParam.getParamName();
-			return myFor;
-		}
-
-		@Override
-		public IQuery descending(IParam theParam) {
-			myParamName = Constants.PARAM_SORT_DESC;
-			myDirection = SortOrderEnum.DESC;
-			myParamValue = theParam.getParamName();
-			return myFor;
-		}
-
-		@Override
-		public IQuery descending(String theParam) {
-			myParamName = Constants.PARAM_SORT_DESC;
-			myDirection = SortOrderEnum.DESC;
-			myParamValue = theParam;
-			return myFor;
-		}
-
-		public SortOrderEnum getDirection() {
-			return myDirection;
-		}
-
-		public String getParamName() {
-			return myParamName;
-		}
-
-		public String getParamValue() {
-			return myParamValue;
-		}
-
-	}
-
 	private final class StringResponseHandler implements IClientResponseHandler<String> {
 
 		@Override
 		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
-				throws IOException, BaseServerResponseException {
+			throws IOException, BaseServerResponseException {
 			return IOUtils.toString(theResponseReader);
 		}
 	}
@@ -1968,7 +1922,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		@Override
 		public T execute() {
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
@@ -2022,7 +1976,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private class UpdateInternal extends BaseSearch<IUpdateExecutable, IUpdateWithQueryTyped, MethodOutcome>
-			implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
+		implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
 
 		private boolean myConditional;
 		private IIdType myId;
@@ -2155,14 +2109,80 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			switch (enc) {
-			case XML:
-				encodedXml();
-				break;
-			case JSON:
-				encodedJson();
-				break;
+				case XML:
+					encodedXml();
+					break;
+				case JSON:
+					encodedJson();
+					break;
 			}
 			return this;
+		}
+
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static class SortInternal implements ISort {
+
+		private SortOrderEnum myDirection;
+		private SearchInternal myFor;
+		private String myParamName;
+		private String myParamValue;
+
+		public SortInternal(SearchInternal theFor) {
+			myFor = theFor;
+		}
+
+		@Override
+		public IQuery ascending(IParam theParam) {
+			myParamName = Constants.PARAM_SORT_ASC;
+			myDirection = SortOrderEnum.ASC;
+			myParamValue = theParam.getParamName();
+			return myFor;
+		}
+
+		@Override
+		public IQuery ascending(String theParam) {
+			myParamName = Constants.PARAM_SORT_ASC;
+			myDirection = SortOrderEnum.ASC;
+			myParamValue = theParam;
+			return myFor;
+		}
+
+		@Override
+		public IQuery defaultOrder(IParam theParam) {
+			myParamName = Constants.PARAM_SORT;
+			myDirection = null;
+			myParamValue = theParam.getParamName();
+			return myFor;
+		}
+
+		@Override
+		public IQuery descending(IParam theParam) {
+			myParamName = Constants.PARAM_SORT_DESC;
+			myDirection = SortOrderEnum.DESC;
+			myParamValue = theParam.getParamName();
+			return myFor;
+		}
+
+		@Override
+		public IQuery descending(String theParam) {
+			myParamName = Constants.PARAM_SORT_DESC;
+			myDirection = SortOrderEnum.DESC;
+			myParamValue = theParam;
+			return myFor;
+		}
+
+		public SortOrderEnum getDirection() {
+			return myDirection;
+		}
+
+		public String getParamName() {
+			return myParamName;
+		}
+
+		public String getParamValue() {
+			return myParamValue;
 		}
 
 	}

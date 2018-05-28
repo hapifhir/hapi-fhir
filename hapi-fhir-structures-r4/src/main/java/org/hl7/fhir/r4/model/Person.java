@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -188,10 +188,10 @@ public class Person extends DomainResource {
         protected Resource targetTarget;
 
         /**
-         * Level of assurance that this link is actually associated with the target resource.
+         * Level of assurance that this link is associated with the target resource.
          */
         @Child(name = "assurance", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="level1 | level2 | level3 | level4", formalDefinition="Level of assurance that this link is actually associated with the target resource." )
+        @Description(shortDefinition="level1 | level2 | level3 | level4", formalDefinition="Level of assurance that this link is associated with the target resource." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/identity-assuranceLevel")
         protected Enumeration<IdentityAssuranceLevel> assurance;
 
@@ -252,7 +252,7 @@ public class Person extends DomainResource {
         }
 
         /**
-         * @return {@link #assurance} (Level of assurance that this link is actually associated with the target resource.). This is the underlying object with id, value and extensions. The accessor "getAssurance" gives direct access to the value
+         * @return {@link #assurance} (Level of assurance that this link is associated with the target resource.). This is the underlying object with id, value and extensions. The accessor "getAssurance" gives direct access to the value
          */
         public Enumeration<IdentityAssuranceLevel> getAssuranceElement() { 
           if (this.assurance == null)
@@ -272,7 +272,7 @@ public class Person extends DomainResource {
         }
 
         /**
-         * @param value {@link #assurance} (Level of assurance that this link is actually associated with the target resource.). This is the underlying object with id, value and extensions. The accessor "getAssurance" gives direct access to the value
+         * @param value {@link #assurance} (Level of assurance that this link is associated with the target resource.). This is the underlying object with id, value and extensions. The accessor "getAssurance" gives direct access to the value
          */
         public PersonLinkComponent setAssuranceElement(Enumeration<IdentityAssuranceLevel> value) { 
           this.assurance = value;
@@ -280,14 +280,14 @@ public class Person extends DomainResource {
         }
 
         /**
-         * @return Level of assurance that this link is actually associated with the target resource.
+         * @return Level of assurance that this link is associated with the target resource.
          */
         public IdentityAssuranceLevel getAssurance() { 
           return this.assurance == null ? null : this.assurance.getValue();
         }
 
         /**
-         * @param value Level of assurance that this link is actually associated with the target resource.
+         * @param value Level of assurance that this link is associated with the target resource.
          */
         public PersonLinkComponent setAssurance(IdentityAssuranceLevel value) { 
           if (value == null)
@@ -303,14 +303,14 @@ public class Person extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("target", "Reference(Patient|Practitioner|RelatedPerson|Person)", "The resource to which this actual person is associated.", 0, 1, target));
-          children.add(new Property("assurance", "code", "Level of assurance that this link is actually associated with the target resource.", 0, 1, assurance));
+          children.add(new Property("assurance", "code", "Level of assurance that this link is associated with the target resource.", 0, 1, assurance));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -880905839: /*target*/  return new Property("target", "Reference(Patient|Practitioner|RelatedPerson|Person)", "The resource to which this actual person is associated.", 0, 1, target);
-          case 1771900717: /*assurance*/  return new Property("assurance", "code", "Level of assurance that this link is actually associated with the target resource.", 0, 1, assurance);
+          case 1771900717: /*assurance*/  return new Property("assurance", "code", "Level of assurance that this link is associated with the target resource.", 0, 1, assurance);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 

@@ -44,7 +44,11 @@
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
 ## Some resource types have customized DAOs for resource specific functionality
-#if ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Composition' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter'))
+#if ( ${versionCapitalized} == 'Dstu3' && ${res.name} == 'ConceptMap')
+		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
+#elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap')
+		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
+#elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Composition' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter'))
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">

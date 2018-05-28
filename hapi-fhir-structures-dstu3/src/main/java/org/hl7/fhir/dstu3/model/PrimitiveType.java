@@ -8,6 +8,7 @@ import java.io.ObjectOutput;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -156,5 +157,35 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 	public void writeExternal(ObjectOutput theOut) throws IOException {
 		theOut.writeObject(getValueAsString());
 	}
+
+  @Override
+  public Base setProperty(int hash, String name, Base value) throws FHIRException {
+    switch (hash) {
+    case 111972721: // value
+      setValueAsString(value.toString()); 
+      return value;
+    default: return super.setProperty(hash, name, value);
+    }
+
+  }
+
+  @Override
+  public Base setProperty(String name, Base value) throws FHIRException {
+    if (name.equals("value"))
+      setValueAsString(value.toString()); 
+    else
+      return super.setProperty(name, value);
+    return value;
+  }
+
+  @Override
+  public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+    if (hash == 111972721) {
+      Base[] b = new Base[1];
+      b[0] = new StringType(getValueAsString());
+      return b;
+    } else
+      return super.getProperty(hash, name, checkValid);
+  }
 
 }

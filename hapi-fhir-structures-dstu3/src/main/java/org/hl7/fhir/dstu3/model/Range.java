@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A set of ordered Quantities defined by a low and high limit.
  */
@@ -88,7 +89,7 @@ public class Range extends Type implements ICompositeType {
     /**
      * @param value {@link #low} (The low limit. The boundary is inclusive.)
      */
-    public Range setLow(SimpleQuantity value) { 
+    public Range setLow(SimpleQuantity value)  { 
       this.low = value;
       return this;
     }
@@ -112,15 +113,25 @@ public class Range extends Type implements ICompositeType {
     /**
      * @param value {@link #high} (The high limit. The boundary is inclusive.)
      */
-    public Range setHigh(SimpleQuantity value) { 
+    public Range setHigh(SimpleQuantity value)  { 
       this.high = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("low", "SimpleQuantity", "The low limit. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, low));
-        childrenList.add(new Property("high", "SimpleQuantity", "The high limit. The boundary is inclusive.", 0, java.lang.Integer.MAX_VALUE, high));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("low", "SimpleQuantity", "The low limit. The boundary is inclusive.", 0, 1, low));
+        children.add(new Property("high", "SimpleQuantity", "The high limit. The boundary is inclusive.", 0, 1, high));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 107348: /*low*/  return new Property("low", "SimpleQuantity", "The low limit. The boundary is inclusive.", 0, 1, low);
+        case 3202466: /*high*/  return new Property("high", "SimpleQuantity", "The high limit. The boundary is inclusive.", 0, 1, high);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -210,22 +221,22 @@ public class Range extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Range))
+        if (!(other_ instanceof Range))
           return false;
-        Range o = (Range) other;
+        Range o = (Range) other_;
         return compareDeep(low, o.low, true) && compareDeep(high, o.high, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Range))
+        if (!(other_ instanceof Range))
           return false;
-        Range o = (Range) other;
+        Range o = (Range) other_;
         return true;
       }
 

@@ -41,9 +41,9 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
-	@Query("DELETE FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
+	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	@Modifying
-	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	List<TermConcept> findByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
 	@Modifying

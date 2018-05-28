@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -60,7 +60,7 @@ public class ExpansionProfile extends MetadataResource {
          */
         CHECK, 
         /**
-         * Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes. If a  version is override, the version used SHALL explicitly be represented in the expansion parameters
+         * Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes. If the value is override, the version used SHALL explicitly be represented in the expansion parameters
          */
         OVERRIDE, 
         /**
@@ -101,7 +101,7 @@ public class ExpansionProfile extends MetadataResource {
           switch (this) {
             case DEFAULT: return "Use this version of the code system if a value set doesn't specify a version";
             case CHECK: return "Use this version of the code system. If a value set specifies a different version, the expansion operation should fail";
-            case OVERRIDE: return "Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes. If a  version is override, the version used SHALL explicitly be represented in the expansion parameters";
+            case OVERRIDE: return "Use this version of the code system irrespective of which version is specified by a value set. Note that this has obvious safety issues, in that it may result in a value set expansion giving a different list of codes that is both wrong and unsafe, and implementers should only use this capability reluctantly. It primarily exists to deal with situations where specifications have fallen into decay as time passes. If the value is override, the version used SHALL explicitly be represented in the expansion parameters";
             default: return "?";
           }
         }
@@ -163,9 +163,9 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * The specific system for which to fix the version.
          */
-        @Child(name = "system", type = {CanonicalType.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="System to have its version fixed", formalDefinition="The specific system for which to fix the version." )
-        protected CanonicalType system;
+        protected UriType system;
 
         /**
          * The version of the code system from which codes in the expansion should be included.
@@ -182,7 +182,7 @@ public class ExpansionProfile extends MetadataResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/system-version-processing-mode")
         protected Enumeration<SystemVersionProcessingMode> mode;
 
-        private static final long serialVersionUID = 1936817081L;
+        private static final long serialVersionUID = 1818466753L;
 
     /**
      * Constructor
@@ -194,7 +194,7 @@ public class ExpansionProfile extends MetadataResource {
     /**
      * Constructor
      */
-      public ExpansionProfileFixedVersionComponent(CanonicalType system, StringType version, Enumeration<SystemVersionProcessingMode> mode) {
+      public ExpansionProfileFixedVersionComponent(UriType system, StringType version, Enumeration<SystemVersionProcessingMode> mode) {
         super();
         this.system = system;
         this.version = version;
@@ -204,12 +204,12 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * @return {@link #system} (The specific system for which to fix the version.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
          */
-        public CanonicalType getSystemElement() { 
+        public UriType getSystemElement() { 
           if (this.system == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ExpansionProfileFixedVersionComponent.system");
             else if (Configuration.doAutoCreate())
-              this.system = new CanonicalType(); // bb
+              this.system = new UriType(); // bb
           return this.system;
         }
 
@@ -224,7 +224,7 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * @param value {@link #system} (The specific system for which to fix the version.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
          */
-        public ExpansionProfileFixedVersionComponent setSystemElement(CanonicalType value) { 
+        public ExpansionProfileFixedVersionComponent setSystemElement(UriType value) { 
           this.system = value;
           return this;
         }
@@ -241,7 +241,7 @@ public class ExpansionProfile extends MetadataResource {
          */
         public ExpansionProfileFixedVersionComponent setSystem(String value) { 
             if (this.system == null)
-              this.system = new CanonicalType();
+              this.system = new UriType();
             this.system.setValue(value);
           return this;
         }
@@ -338,7 +338,7 @@ public class ExpansionProfile extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("system", "canonical(CodeSystem)", "The specific system for which to fix the version.", 0, 1, system));
+          children.add(new Property("system", "uri", "The specific system for which to fix the version.", 0, 1, system));
           children.add(new Property("version", "string", "The version of the code system from which codes in the expansion should be included.", 0, 1, version));
           children.add(new Property("mode", "code", "How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.", 0, 1, mode));
         }
@@ -346,7 +346,7 @@ public class ExpansionProfile extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -887328209: /*system*/  return new Property("system", "canonical(CodeSystem)", "The specific system for which to fix the version.", 0, 1, system);
+          case -887328209: /*system*/  return new Property("system", "uri", "The specific system for which to fix the version.", 0, 1, system);
           case 351608024: /*version*/  return new Property("version", "string", "The version of the code system from which codes in the expansion should be included.", 0, 1, version);
           case 3357091: /*mode*/  return new Property("mode", "code", "How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.", 0, 1, mode);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -357,7 +357,7 @@ public class ExpansionProfile extends MetadataResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // CanonicalType
+        case -887328209: /*system*/ return this.system == null ? new Base[0] : new Base[] {this.system}; // UriType
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<SystemVersionProcessingMode>
         default: return super.getProperty(hash, name, checkValid);
@@ -369,7 +369,7 @@ public class ExpansionProfile extends MetadataResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -887328209: // system
-          this.system = castToCanonical(value); // CanonicalType
+          this.system = castToUri(value); // UriType
           return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
@@ -386,7 +386,7 @@ public class ExpansionProfile extends MetadataResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("system")) {
-          this.system = castToCanonical(value); // CanonicalType
+          this.system = castToUri(value); // UriType
         } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
         } else if (name.equals("mode")) {
@@ -411,7 +411,7 @@ public class ExpansionProfile extends MetadataResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -887328209: /*system*/ return new String[] {"canonical"};
+        case -887328209: /*system*/ return new String[] {"uri"};
         case 351608024: /*version*/ return new String[] {"string"};
         case 3357091: /*mode*/ return new String[] {"code"};
         default: return super.getTypesForProperty(hash, name);
@@ -461,7 +461,8 @@ public class ExpansionProfile extends MetadataResource {
         if (!(other_ instanceof ExpansionProfileFixedVersionComponent))
           return false;
         ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other_;
-        return compareValues(version, o.version, true) && compareValues(mode, o.mode, true);
+        return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(mode, o.mode, true)
+          ;
       }
 
       public boolean isEmpty() {
@@ -1765,7 +1766,7 @@ public class ExpansionProfile extends MetadataResource {
      * A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.
      */
     @Child(name = "designation", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="When the expansion profile imposes designation contraints", formalDefinition="A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations." )
+    @Description(shortDefinition="When the expansion profile imposes designation constraints", formalDefinition="A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations." )
     protected ExpansionProfileDesignationComponent designation;
 
     /**
@@ -1815,7 +1816,7 @@ public class ExpansionProfile extends MetadataResource {
      * If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).
      */
     @Child(name = "limitedExpansion", type = {BooleanType.class}, order=11, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Controls behaviour of the value set expand operation when value sets are too large to be completely expanded", formalDefinition="If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html)." )
+    @Description(shortDefinition="Controls behavior of the value set expand operation when value sets are too large to be completely expanded", formalDefinition="If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html)." )
     protected BooleanType limitedExpansion;
 
     private static final long serialVersionUID = 1067457001L;
@@ -1836,7 +1837,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this expansion profile is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this expansion profile is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1856,7 +1857,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this expansion profile is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this expansion profile is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ExpansionProfile setUrlElement(UriType value) { 
       this.url = value;
@@ -1864,14 +1865,14 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this expansion profile is (or will be) published.
+     * @return An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this expansion profile is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this expansion profile is (or will be) published.
+     * @param value An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this expansion profile is (or will be) published.
      */
     public ExpansionProfile setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2052,7 +2053,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -2072,7 +2073,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public ExpansionProfile setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -2080,14 +2081,14 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public ExpansionProfile setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -2097,7 +2098,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -2117,7 +2118,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public ExpansionProfile setDateElement(DateTimeType value) { 
       this.date = value;
@@ -2125,14 +2126,14 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
+     * @return The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
+     * @param value The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.
      */
     public ExpansionProfile setDate(Date value) { 
       if (value == null)
@@ -2146,7 +2147,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -2166,7 +2167,7 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the expansion profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public ExpansionProfile setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -2174,14 +2175,14 @@ public class ExpansionProfile extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the expansion profile.
+     * @return The name of the organization or individual that published the expansion profile.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the expansion profile.
+     * @param value The name of the organization or individual that published the expansion profile.
      */
     public ExpansionProfile setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -2869,14 +2870,14 @@ public class ExpansionProfile extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this expansion profile is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this expansion profile is (or will be) published.", 0, 1, url));
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the expansion profile.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the expansion profile from a consumer's perspective.", 0, 1, description));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate expansion profile instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
@@ -2897,14 +2898,14 @@ public class ExpansionProfile extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this expansion profile is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this expansion profile is (or will be) published.", 0, 1, url);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the expansion profile.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the expansion profile from a consumer's perspective.", 0, 1, description);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate expansion profile instances.", 0, java.lang.Integer.MAX_VALUE, useContext);

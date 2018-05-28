@@ -89,7 +89,7 @@ public interface IValidationSupport
 	@Override
 	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-	public class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
+	class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
 
 		public CodeValidationResult(ConceptDefinitionComponent theNext) {
 			super(theNext);

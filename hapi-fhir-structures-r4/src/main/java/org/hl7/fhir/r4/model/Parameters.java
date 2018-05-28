@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -523,6 +523,34 @@ public class Parameters extends Resource implements IBaseParameters {
         }
         else if (name.equals("valueTiming")) {
           this.value = new Timing();
+          return this.value;
+        }
+        else if (name.equals("valueParameterDefinition")) {
+          this.value = new ParameterDefinition();
+          return this.value;
+        }
+        else if (name.equals("valueDataRequirement")) {
+          this.value = new DataRequirement();
+          return this.value;
+        }
+        else if (name.equals("valueRelatedArtifact")) {
+          this.value = new RelatedArtifact();
+          return this.value;
+        }
+        else if (name.equals("valueContactDetail")) {
+          this.value = new ContactDetail();
+          return this.value;
+        }
+        else if (name.equals("valueContributor")) {
+          this.value = new Contributor();
+          return this.value;
+        }
+        else if (name.equals("valueTriggerDefinition")) {
+          this.value = new TriggerDefinition();
+          return this.value;
+        }
+        else if (name.equals("valueUsageContext")) {
+          this.value = new UsageContext();
           return this.value;
         }
         else if (name.equals("valueDosage")) {

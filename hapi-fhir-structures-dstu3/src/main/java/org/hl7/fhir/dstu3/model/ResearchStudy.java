@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
  */
@@ -309,7 +310,7 @@ public class ResearchStudy extends DomainResource {
         /**
          * @param value {@link #code} (Categorization of study arm, e.g. experimental, active comparator, placebo comparater.)
          */
-        public ResearchStudyArmComponent setCode(CodeableConcept value) { 
+        public ResearchStudyArmComponent setCode(CodeableConcept value)  { 
           this.code = value;
           return this;
         }
@@ -363,11 +364,22 @@ public class ResearchStudy extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "Unique, human-readable label for this arm of the study.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("code", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("description", "string", "A succinct description of the path through the study that would be followed by a subject adhering to this arm.", 0, java.lang.Integer.MAX_VALUE, description));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("name", "string", "Unique, human-readable label for this arm of the study.", 0, 1, name));
+          children.add(new Property("code", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, 1, code));
+          children.add(new Property("description", "string", "A succinct description of the path through the study that would be followed by a subject adhering to this arm.", 0, 1, description));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3373707: /*name*/  return new Property("name", "string", "Unique, human-readable label for this arm of the study.", 0, 1, name);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Categorization of study arm, e.g. experimental, active comparator, placebo comparater.", 0, 1, code);
+          case -1724546052: /*description*/  return new Property("description", "string", "A succinct description of the path through the study that would be followed by a subject adhering to this arm.", 0, 1, description);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -459,23 +471,23 @@ public class ResearchStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ResearchStudyArmComponent))
+        if (!(other_ instanceof ResearchStudyArmComponent))
           return false;
-        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other;
+        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other_;
         return compareDeep(name, o.name, true) && compareDeep(code, o.code, true) && compareDeep(description, o.description, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ResearchStudyArmComponent))
+        if (!(other_ instanceof ResearchStudyArmComponent))
           return false;
-        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other;
+        ResearchStudyArmComponent o = (ResearchStudyArmComponent) other_;
         return compareValues(name, o.name, true) && compareValues(description, o.description, true);
       }
 
@@ -1438,7 +1450,7 @@ public class ResearchStudy extends DomainResource {
     /**
      * @param value {@link #period} (Identifies the start date and the expected (or actual, depending on status) end date for the study.)
      */
-    public ResearchStudy setPeriod(Period value) { 
+    public ResearchStudy setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
@@ -1462,7 +1474,7 @@ public class ResearchStudy extends DomainResource {
     /**
      * @param value {@link #sponsor} (The organization responsible for the execution of the study.)
      */
-    public ResearchStudy setSponsor(Reference value) { 
+    public ResearchStudy setSponsor(Reference value)  { 
       this.sponsor = value;
       return this;
     }
@@ -1506,7 +1518,7 @@ public class ResearchStudy extends DomainResource {
     /**
      * @param value {@link #principalInvestigator} (Indicates the individual who has primary oversite of the execution of the study.)
      */
-    public ResearchStudy setPrincipalInvestigator(Reference value) { 
+    public ResearchStudy setPrincipalInvestigator(Reference value)  { 
       this.principalInvestigator = value;
       return this;
     }
@@ -1625,7 +1637,7 @@ public class ResearchStudy extends DomainResource {
     /**
      * @param value {@link #reasonStopped} (A description and/or code explaining the premature termination of the study.)
      */
-    public ResearchStudy setReasonStopped(CodeableConcept value) { 
+    public ResearchStudy setReasonStopped(CodeableConcept value)  { 
       this.reasonStopped = value;
       return this;
     }
@@ -1736,28 +1748,56 @@ public class ResearchStudy extends DomainResource {
       return getArm().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("title", "string", "A short, descriptive user-friendly label for the study.", 0, java.lang.Integer.MAX_VALUE, title));
-        childrenList.add(new Property("protocol", "Reference(PlanDefinition)", "The set of steps expected to be performed as part of the execution of the study.", 0, java.lang.Integer.MAX_VALUE, protocol));
-        childrenList.add(new Property("partOf", "Reference(ResearchStudy)", "A larger research study of which this particular study is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
-        childrenList.add(new Property("status", "code", "The current state of the study.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("focus", "CodeableConcept", "The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus));
-        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
-        childrenList.add(new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("description", "markdown", "A full description of how the study is being conducted.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment));
-        childrenList.add(new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, java.lang.Integer.MAX_VALUE, period));
-        childrenList.add(new Property("sponsor", "Reference(Organization)", "The organization responsible for the execution of the study.", 0, java.lang.Integer.MAX_VALUE, sponsor));
-        childrenList.add(new Property("principalInvestigator", "Reference(Practitioner)", "Indicates the individual who has primary oversite of the execution of the study.", 0, java.lang.Integer.MAX_VALUE, principalInvestigator));
-        childrenList.add(new Property("site", "Reference(Location)", "Clinic, hospital or other healthcare location that is participating in the study.", 0, java.lang.Integer.MAX_VALUE, site));
-        childrenList.add(new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, java.lang.Integer.MAX_VALUE, reasonStopped));
-        childrenList.add(new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("arm", "", "Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up.", 0, java.lang.Integer.MAX_VALUE, arm));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("title", "string", "A short, descriptive user-friendly label for the study.", 0, 1, title));
+        children.add(new Property("protocol", "Reference(PlanDefinition)", "The set of steps expected to be performed as part of the execution of the study.", 0, java.lang.Integer.MAX_VALUE, protocol));
+        children.add(new Property("partOf", "Reference(ResearchStudy)", "A larger research study of which this particular study is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
+        children.add(new Property("status", "code", "The current state of the study.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("focus", "CodeableConcept", "The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
+        children.add(new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword));
+        children.add(new Property("jurisdiction", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("description", "markdown", "A full description of how the study is being conducted.", 0, 1, description));
+        children.add(new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment));
+        children.add(new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, 1, period));
+        children.add(new Property("sponsor", "Reference(Organization)", "The organization responsible for the execution of the study.", 0, 1, sponsor));
+        children.add(new Property("principalInvestigator", "Reference(Practitioner)", "Indicates the individual who has primary oversite of the execution of the study.", 0, 1, principalInvestigator));
+        children.add(new Property("site", "Reference(Location)", "Clinic, hospital or other healthcare location that is participating in the study.", 0, java.lang.Integer.MAX_VALUE, site));
+        children.add(new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, 1, reasonStopped));
+        children.add(new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("arm", "", "Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up.", 0, java.lang.Integer.MAX_VALUE, arm));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this research study by the sponsor or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive user-friendly label for the study.", 0, 1, title);
+        case -989163880: /*protocol*/  return new Property("protocol", "Reference(PlanDefinition)", "The set of steps expected to be performed as part of the execution of the study.", 0, java.lang.Integer.MAX_VALUE, protocol);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(ResearchStudy)", "A larger research study of which this particular study is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
+        case -892481550: /*status*/  return new Property("status", "code", "The current state of the study.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 97604824: /*focus*/  return new Property("focus", "CodeableConcept", "The condition(s), medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
+        case -814408215: /*keyword*/  return new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "Indicates a country, state or other region where the study is taking place.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A full description of how the study is being conducted.", 0, 1, description);
+        case 116089604: /*enrollment*/  return new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment);
+        case -991726143: /*period*/  return new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, 1, period);
+        case -1998892262: /*sponsor*/  return new Property("sponsor", "Reference(Organization)", "The organization responsible for the execution of the study.", 0, 1, sponsor);
+        case 1437117175: /*principalInvestigator*/  return new Property("principalInvestigator", "Reference(Practitioner)", "Indicates the individual who has primary oversite of the execution of the study.", 0, 1, principalInvestigator);
+        case 3530567: /*site*/  return new Property("site", "Reference(Location)", "Clinic, hospital or other healthcare location that is participating in the study.", 0, java.lang.Integer.MAX_VALUE, site);
+        case 1181369065: /*reasonStopped*/  return new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, 1, reasonStopped);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 96860: /*arm*/  return new Property("arm", "", "Describes an expected sequence of events for one of the participants of a study.  E.g. Exposure to drug A, wash-out, exposure to drug B, wash-out, follow-up.", 0, java.lang.Integer.MAX_VALUE, arm);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2119,12 +2159,12 @@ public class ResearchStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ResearchStudy))
+        if (!(other_ instanceof ResearchStudy))
           return false;
-        ResearchStudy o = (ResearchStudy) other;
+        ResearchStudy o = (ResearchStudy) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(title, o.title, true) && compareDeep(protocol, o.protocol, true)
            && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(focus, o.focus, true) && compareDeep(contact, o.contact, true) && compareDeep(relatedArtifact, o.relatedArtifact, true)
@@ -2136,12 +2176,12 @@ public class ResearchStudy extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ResearchStudy))
+        if (!(other_ instanceof ResearchStudy))
           return false;
-        ResearchStudy o = (ResearchStudy) other;
+        ResearchStudy o = (ResearchStudy) other_;
         return compareValues(title, o.title, true) && compareValues(status, o.status, true) && compareValues(description, o.description, true)
           ;
       }

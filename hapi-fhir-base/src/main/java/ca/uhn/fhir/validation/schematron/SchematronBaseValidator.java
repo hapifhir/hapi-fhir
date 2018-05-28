@@ -20,28 +20,28 @@ package ca.uhn.fhir.validation.schematron;
  * #L%
  */
 
-import java.io.InputStream;
-import java.io.StringReader;
-import java.util.*;
-
-import javax.xml.transform.stream.StreamSource;
-
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.oclc.purl.dsdl.svrl.SchematronOutputType;
-
-import com.phloc.commons.error.IResourceError;
-import com.phloc.commons.error.IResourceErrorGroup;
-import com.phloc.schematron.ISchematronResource;
-import com.phloc.schematron.SchematronHelper;
-import com.phloc.schematron.xslt.SchematronResourceSCH;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.*;
+import com.helger.commons.error.IError;
+import com.helger.commons.error.list.IErrorList;
+import com.helger.schematron.ISchematronResource;
+import com.helger.schematron.SchematronHelper;
+import com.helger.schematron.xslt.SchematronResourceSCH;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.oclc.purl.dsdl.svrl.SchematronOutputType;
+
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * This class is only used using reflection from {@link SchematronProvider} in order
@@ -81,27 +81,21 @@ public class SchematronBaseValidator implements IValidatorModule {
 			return;
 		}
 
-		IResourceErrorGroup errors = SchematronHelper.convertToResourceErrorGroup(results, theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName());
+		IErrorList errors = SchematronHelper.convertToErrorList(results, theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName());
 
 		if (errors.getAllErrors().containsOnlySuccess()) {
 			return;
 		}
 
-		for (IResourceError next : errors.getAllErrors().getAllResourceErrors()) {
+		for (IError next : errors) {
 			ResultSeverityEnum severity;
-			switch (next.getErrorLevel()) {
-			case ERROR:
+			if (next.isFailure()) {
 				severity = ResultSeverityEnum.ERROR;
-				break;
-			case FATAL_ERROR:
+			} else if (next.isError()) {
 				severity = ResultSeverityEnum.FATAL;
-				break;
-			case WARN:
+			} else if (next.isNoError()) {
 				severity = ResultSeverityEnum.WARNING;
-				break;
-			case INFO:
-			case SUCCESS:
-			default:
+			} else {
 				continue;
 			}
 
@@ -109,9 +103,9 @@ public class SchematronBaseValidator implements IValidatorModule {
 
 			SingleValidationMessage message = new SingleValidationMessage();
 			message.setMessage(details);
-			message.setLocationLine(next.getLocation().getLineNumber());
-			message.setLocationCol(next.getLocation().getColumnNumber());
-			message.setLocationString(next.getLocation().getAsString());
+			message.setLocationLine(next.getErrorLocation().getLineNumber());
+			message.setLocationCol(next.getErrorLocation().getColumnNumber());
+			message.setLocationString(next.getErrorLocation().getAsString());
 			message.setSeverity(severity);
 			theCtx.addValidationMessage(message);
 		}

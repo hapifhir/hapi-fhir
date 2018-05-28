@@ -76,7 +76,7 @@ public class LoggingInterceptorTest {
 		Patient patient = client.read(Patient.class, "1");
 		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-		verify(myMockAppender, times(2)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
 			public boolean matches(final Object argument) {
 				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();

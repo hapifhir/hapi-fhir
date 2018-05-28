@@ -135,7 +135,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
-	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
+	private void checkParamMissing(String paramName) throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		IOUtils.closeQuietly(resp.getEntity().getContent());
@@ -172,7 +172,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, exts.size());
 	}
 
-	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException, ClientProtocolException {
+	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 
@@ -188,7 +188,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return ids;
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException, ClientProtocolException {
+	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 
@@ -280,7 +280,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testCountParam() throws Exception {
+	public void testCountParam() {
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
@@ -303,7 +303,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See #438
 	 */
 	@Test
-	public void testCreateAndUpdateBinary() throws ClientProtocolException, Exception {
+	public void testCreateAndUpdateBinary() throws Exception {
 		byte[] arr = { 1, 21, 74, 123, -44 };
 		Binary binary = new Binary();
 		binary.setContent(arr);
@@ -320,7 +320,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Location").getValue());
+			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Content-Location").getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -336,7 +336,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		resp = ourHttpClient.execute(putRequest);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader("Location").getValue());
+			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -391,7 +391,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testCreateIncludesRequestValidatorInterceptorOutcome() throws IOException {
+	public void testCreateIncludesRequestValidatorInterceptorOutcome() {
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
 		assertTrue(interceptor.isAddValidationResultsToResponseOperationOutcome());
 		interceptor.setFailOnSeverity(null);
@@ -422,7 +422,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	@Ignore
-	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
+	public void testCreateQuestionnaireResponseWithValidation() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://urn/system");
 		cs.addConcept().setCode("code0");
@@ -583,7 +583,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testCreateWithForcedId() throws IOException {
+	public void testCreateWithForcedId() {
 		String methodName = "testCreateWithForcedId";
 
 		Patient p = new Patient();
@@ -812,7 +812,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * Based on email from Rene Spronk
 	 */
 	@Test
-	public void testDeleteResourceConditional2() throws IOException, Exception {
+	public void testDeleteResourceConditional2() throws Exception {
 		String methodName = "testDeleteResourceConditional2";
 
 		Patient pt = new Patient();
@@ -925,7 +925,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testEmptySearch() throws Exception {
+	public void testEmptySearch() {
 		Bundle responseBundle;
 
 		responseBundle = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
@@ -940,7 +940,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testEverythingEncounterInstance() throws Exception {
+	public void testEverythingEncounterInstance() {
 		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
@@ -1004,7 +1004,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testEverythingEncounterType() throws Exception {
+	public void testEverythingEncounterType() {
 		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
@@ -1104,7 +1104,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<IIdType> actual;
 		StringAndListParam param;
 
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] { ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart() });
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -1127,7 +1127,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See #147"Patient"
 	 */
 	@Test
-	public void testEverythingPatientDoesntRepeatPatient() throws Exception {
+	public void testEverythingPatientDoesntRepeatPatient() {
 		Bundle b;
 		IParser parser = myFhirCtx.newJsonParser();
 		b = parser.parseResource(Bundle.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/bug147-bundle-dstu3.json")));
@@ -1187,7 +1187,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * Test for #226
 	 */
 	@Test
-	public void testEverythingPatientIncludesBackReferences() throws Exception {
+	public void testEverythingPatientIncludesBackReferences() {
 		String methodName = "testEverythingIncludesBackReferences";
 
 		Medication med = new Medication();
@@ -1214,7 +1214,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See #148
 	 */
 	@Test
-	public void testEverythingPatientIncludesCondition() throws Exception {
+	public void testEverythingPatientIncludesCondition() {
 		Bundle b = new Bundle();
 		Patient p = new Patient();
 		p.setId("1");
@@ -1246,7 +1246,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testEverythingPatientOperation() throws Exception {
+	public void testEverythingPatientOperation() {
 		String methodName = "testEverythingOperation";
 
 		Organization org1parent = new Organization();
@@ -1291,7 +1291,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testEverythingPatientType() throws Exception {
+	public void testEverythingPatientType() {
 		String methodName = "testEverythingPatientType";
 
 		Organization o1 = new Organization();
@@ -1507,7 +1507,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * Per message from David Hay on Skype
 	 */
 	@Test
-	public void testEverythingWithLargeSet2() throws Exception {
+	public void testEverythingWithLargeSet2() {
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
@@ -1598,7 +1598,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void testFullTextSearch() throws RuntimeException, Exception {
+	public void testFullTextSearch() throws Exception {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
@@ -1631,6 +1631,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
 		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		myResourceCountsCache.clear();
+		myResourceCountsCache.update();
 
 		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
@@ -1909,7 +1912,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void testMetadataSuperParamsAreIncluded() throws IOException {
+	public void testMetadataSuperParamsAreIncluded() {
 		StructureDefinition p = new StructureDefinition();
 		p.setAbstract(true);
 		p.setUrl("http://example.com/foo");
@@ -1926,7 +1929,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testMetaOperations() throws Exception {
+	public void testMetaOperations() {
 		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
@@ -2048,7 +2051,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testPagingOverEverythingSetWithNoPagingProvider() throws InterruptedException {
+	public void testPagingOverEverythingSetWithNoPagingProvider() {
 		ourRestServer.setPagingProvider(null);
 		
 		Patient p = new Patient();
@@ -2236,7 +2239,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See issue #52
 	 */
 	@Test
-	public void testProcedureRequestResources() throws Exception {
+	public void testProcedureRequestResources() {
 		IGenericClient client = ourClient;
 
 		int initialSize = client.search().forResource(ProcedureRequest.class).returnBundle(Bundle.class).execute().getEntry().size();
@@ -2256,7 +2259,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * Test for issue #60
 	 */
 	@Test
-	public void testReadAllInstancesOfType() throws Exception {
+	public void testReadAllInstancesOfType() {
 		Patient pat;
 
 		pat = new Patient();
@@ -2694,14 +2697,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().setFamily(methodName).addGiven("Joe");
-			id1a = (IdType) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id1a = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 		IIdType id1b;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily(methodName + "XXXX").addGiven("Joe");
-			id1b = (IdType) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id1b = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
 		Thread.sleep(1100);
@@ -2713,7 +2716,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily(methodName).addGiven("John");
-			id2 = (IdType) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id2 = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
 		{
@@ -2808,7 +2811,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void testSearchPagingKeepsOldSearches() throws Exception {
+	public void testSearchPagingKeepsOldSearches() {
 		String methodName = "testSearchPagingKeepsOldSearches";
 		IIdType pid1;
 		{
@@ -2841,7 +2844,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 	}
 
-	private void testSearchReturnsResults(String search) throws IOException, ClientProtocolException {
+	private void testSearchReturnsResults(String search) throws IOException {
 		int matches;
 		HttpGet get = new HttpGet(ourServerBase + search);
 		CloseableHttpResponse response = ourHttpClient.execute(get);
@@ -2882,7 +2885,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchReusesNoParams() throws Exception {
+	public void testSearchReusesNoParams() {
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 50; i++) {
 			Organization org = new Organization();
@@ -2913,7 +2916,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchReusesResultsDisabled() throws Exception {
+	public void testSearchReusesResultsDisabled() {
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 50; i++) {
 			Organization org = new Organization();
@@ -3023,7 +3026,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchReusesResultsEnabledNoParams() throws Exception {
+	public void testSearchReusesResultsEnabledNoParams() {
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 50; i++) {
 			Organization org = new Organization();
@@ -3156,7 +3159,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		testSearchWithEmptyParameter("/Observation?code=bar&value-concept=");
 	}
 
-	private void testSearchWithEmptyParameter(String url) throws IOException, ClientProtocolException {
+	private void testSearchWithEmptyParameter(String url) throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + url);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
@@ -3170,7 +3173,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchWithInclude() throws Exception {
+	public void testSearchWithInclude() {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
 		IdType orgId = (IdType) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
@@ -3199,7 +3202,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test()
-	public void testSearchWithInvalidNumberPrefix() throws Exception {
+	public void testSearchWithInvalidNumberPrefix() {
 		try {
 			//@formatter:off
 			ourClient
@@ -3217,7 +3220,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test()
-	public void testSearchWithInvalidQuantityPrefix() throws Exception {
+	public void testSearchWithInvalidQuantityPrefix() {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
 		myObservationDao.create(o, mySrd);
@@ -3263,7 +3266,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test(expected = InvalidRequestException.class)
-	public void testSearchWithInvalidSort() throws Exception {
+	public void testSearchWithInvalidSort() {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
 		myObservationDao.create(o, mySrd);
@@ -3279,7 +3282,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchWithMissing() throws Exception {
+	public void testSearchWithMissing() {
 		ourLog.info("Starting testSearchWithMissing");
 
 		String methodName = "testSearchWithMissing";
@@ -3558,7 +3561,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * Test for issue #60
 	 */
 	@Test
-	public void testStoreUtf8Characters() throws Exception {
+	public void testStoreUtf8Characters() {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
@@ -3612,7 +3615,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateInvalidReference() throws IOException, Exception {
+	public void testUpdateInvalidReference() throws Exception {
 		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
@@ -3635,7 +3638,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateInvalidReference2() throws IOException, Exception {
+	public void testUpdateInvalidReference2() throws Exception {
 		String methodName = "testUpdateInvalidReference2";
 
 		Patient pt = new Patient();
@@ -3662,7 +3665,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	@Ignore
-	public void testUpdateNoIdInBody() throws IOException, Exception {
+	public void testUpdateNoIdInBody() throws Exception {
 		String methodName = "testUpdateNoIdInBody";
 
 		Patient pt = new Patient();
@@ -3745,7 +3748,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
+	public void testUpdateRejectsInvalidTypes() {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
@@ -3799,7 +3802,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue());
+			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue());
 			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
 			assertNotEquals(id, newId);
 		} finally {
@@ -3838,7 +3841,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id2 = new IdType(newIdString);
 		} finally {
@@ -3851,7 +3854,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateResourceWithPrefer() throws IOException, Exception {
+	public void testUpdateResourceWithPrefer() throws Exception {
 		String methodName = "testUpdateResourceWithPrefer";
 
 		Patient pt = new Patient();
@@ -3927,7 +3930,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateWithETag() throws IOException, Exception {
+	public void testUpdateWithETag() throws Exception {
 		String methodName = "testUpdateWithETag";
 
 		Patient pt = new Patient();
@@ -3968,7 +3971,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateWrongIdInBody() throws IOException, Exception {
+	public void testUpdateWrongIdInBody() throws Exception {
 		String methodName = "testUpdateWrongIdInBody";
 
 		Patient pt = new Patient();
@@ -4064,7 +4067,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));
-		;
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		Parameters input = new Parameters();

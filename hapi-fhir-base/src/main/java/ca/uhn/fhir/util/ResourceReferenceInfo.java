@@ -101,9 +101,15 @@ public class ResourceReferenceInfo {
 			if (resourceDef != null) {
 				RuntimeSearchParam searchParamDef = resourceDef.getSearchParam(paramName);
 				if (searchParamDef!=null) {
-					if (searchParamDef.getPathsSplit().contains(myOwningResource + "." + myName)) {
-						return true;
+					final String completeName = myOwningResource + "." + myName;
+					boolean matched = false;
+					for (String s : searchParamDef.getPathsSplit()) {
+						if (s.equals(completeName) ||
+								       s.startsWith(completeName + ".")) {
+							matched = true; break;
+						}
 					}
+					return matched;
 				}
 			}
 			return false;

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,7 +57,7 @@ public enum MedicationRequestIntent {
          */
         INSTANCEORDER, 
         /**
-         * The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.
          */
         OPTION, 
         /**
@@ -102,7 +102,7 @@ public enum MedicationRequestIntent {
             case ORDER: return "The request represents a request/demand and authorization for action";
             case ORIGINALORDER: return "The request represents the original authorization for the medication request.";
             case INSTANCEORDER: return "The request represents an instance for the particular order, for example a medication administration record.";
-            case OPTION: return "The request represents a component or opiton for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or  other constraints among a set of requests.";
             default: return "?";
           }
         }

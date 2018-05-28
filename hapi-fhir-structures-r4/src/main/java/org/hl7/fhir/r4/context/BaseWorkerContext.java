@@ -6,13 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +30,7 @@ import org.hl7.fhir.r4.model.NamingSystem.NamingSystemUniqueIdComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Constants;
 import org.hl7.fhir.r4.model.ExpansionProfile;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
@@ -105,7 +100,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   private List<NamingSystem> systems = new ArrayList<NamingSystem>();
 
   
-  private ValueSetExpansionCache expansionCache = new ValueSetExpansionCache(this);
+  private ValueSetExpansionCache expansionCache = new ValueSetExpansionCache(this, lock);
   protected boolean cacheValidation; // if true, do an expansion and cache the expansion
   private Set<String> failed = new HashSet<String>(); // value sets for which we don't try to do expansion, since the first attempt to get a comprehensive expansion was not successful
   protected Map<String, Map<String, ValidationResult>> validationCache = new HashMap<String, Map<String,ValidationResult>>();
@@ -220,15 +215,15 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     if (StringUtils.isNumeric(newVersion) && StringUtils.isNumeric(oldVersion))
       return Double.parseDouble(newVersion) > Double.parseDouble(oldVersion);
     else if (hasDelimiter(newVersion, oldVersion, "."))
-      return laterDelimitedVersion(newVersion, oldVersion, ".");
+      return laterDelimitedVersion(newVersion, oldVersion, "\\.");
     else if (hasDelimiter(newVersion, oldVersion, "-"))
-      return laterDelimitedVersion(newVersion, oldVersion, "-");
+      return laterDelimitedVersion(newVersion, oldVersion, "\\-");
     else if (hasDelimiter(newVersion, oldVersion, "_"))
-      return laterDelimitedVersion(newVersion, oldVersion, "_");
+      return laterDelimitedVersion(newVersion, oldVersion, "\\_");
     else if (hasDelimiter(newVersion, oldVersion, ":"))
-      return laterDelimitedVersion(newVersion, oldVersion, ":");
+      return laterDelimitedVersion(newVersion, oldVersion, "\\:");
     else if (hasDelimiter(newVersion, oldVersion, " "))
-      return laterDelimitedVersion(newVersion, oldVersion, " ");
+      return laterDelimitedVersion(newVersion, oldVersion, "\\ ");
     else {
       return newVersion.compareTo(oldVersion) > 0;
     }
@@ -249,7 +244,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
         return laterVersion(newParts[i], oldParts[i]);
     }
     // This should never happen
-    throw new Error("delimited versions have exact match");
+    throw new Error("Delimited versions have exact match for delimiter '"+delimiter+"' : "+ Arrays.asList(newParts)+" vs "+Arrays.asList(oldParts));
   }
   
   protected <T extends MetadataResource> void seeMetadataResource(T r, Map<String, T> map, boolean addId) throws FHIRException {
@@ -300,8 +295,10 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           } catch (Exception e) {
             if (canRunWithoutTerminology) {
               noTerminologyServer = true;
-              log("==============!! Running without terminology server !!============== ("+e.getMessage()+")");
-              log("Error: "+e.getMessage());
+              log("==============!! Running without terminology server !! ==============");
+              log("txServer = "+txServer.getAddress());
+              log("Error = "+e.getMessage()+"");
+              log("=====================================================================");
               return false;
             } else
               throw new TerminologyServiceException(e);
@@ -588,7 +585,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     Parameters pin = new Parameters();
     pin.addParameter().setName("codeableConcept").setValue(cc);
     pin.addParameter().setName("valueSet").setResource(vs);
-    res = serverValidateCode(pin, false);
+    res = serverValidateCode(pin, tryCache);
     Map<String, ValidationResult> cache = validationCache.get(vs.getUrl());
     cache.put(cacheId(cc), res);
     return res;
@@ -645,8 +642,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   }
 
 
-  private void tlog(String msg) {
-    //    log(msg);
+  protected void tlog(String msg) {
+    System.out.println("-tx: "+msg);
   }
 
   @SuppressWarnings("rawtypes")
@@ -825,7 +822,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
 
   public void initTS(String cachePath) throws Exception {
     cache = cachePath;
-    expansionCache = new ValueSetExpansionCache(this, null);
+    expansionCache = new ValueSetExpansionCache(this, null, lock);
     validationCachePath = Utilities.path(cachePath, "validation.cache");
     try {
       loadValidationCache();
@@ -1019,25 +1016,15 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri) throws FHIRException {
-    if (class_ == null) {
-      // it might be a special URL.
-      if (Utilities.isAbsoluteUrl(uri) || uri.startsWith("ValueSet/")) {
-        Resource res = findTxValueSet(uri);
-        if (res != null)
-          return (T) res;
-      }
-      return null;      
-    }
-
-    if (class_ == StructureDefinition.class && !uri.contains("/"))
-      uri = "http://hl7.org/fhir/StructureDefinition/"+uri;
+       if (class_ == StructureDefinition.class)
+      uri = ProfileUtilities.sdNs(uri);
     synchronized (lock) {
 
       if (uri.startsWith("http:") || uri.startsWith("https:")) {
         String version = null;
         if (uri.contains("#"))
           uri = uri.substring(0, uri.indexOf("#"));
-        if (class_ == Resource.class) {
+        if (class_ == Resource.class || class_ == null) {
           if (structures.containsKey(uri))
             return (T) structures.get(uri);
           if (valueSets.containsKey(uri))
@@ -1052,6 +1039,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
             return (T) maps.get(uri);
           if (transforms.containsKey(uri))
             return (T) transforms.get(uri);
+          if (questionnaires.containsKey(uri))
+            return (T) questionnaires.get(uri);
           return null;      
         } else if (class_ == StructureDefinition.class) {
           return (T) structures.get(uri);
@@ -1059,6 +1048,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           return (T) valueSets.get(uri);
         } else if (class_ == CodeSystem.class) {
           return (T) codeSystems.get(uri);
+        } else if (class_ == ConceptMap.class) {
+          return (T) maps.get(uri);
         } else if (class_ == OperationDefinition.class) {
           OperationDefinition od = operations.get(uri);
           return (T) od;
@@ -1071,24 +1062,45 @@ public abstract class BaseWorkerContext implements IWorkerContext {
               b.append("\r\n");
             }
           }
-
-
-          return (T) res;
+          if (res != null)
+            return (T) res;
         }
       }
       if (class_ == Questionnaire.class)
-        return null;
+        return (T) questionnaires.get(uri);
+      if (class_ == null) {
+        if (uri.matches(Constants.URI_REGEX) && !uri.contains("ValueSet"))
+          return null;
+
+        // it might be a special URL.
+        if (Utilities.isAbsoluteUrl(uri) || uri.startsWith("ValueSet/")) {
+          Resource res = findTxValueSet(uri);
+          if (res != null)
+            return (T) res;
+        }
+        return null;      
+      }      
       throw new FHIRException("not done yet: can't fetch "+uri);
     }
   }
 
+  private Set<String> notCanonical = new HashSet<String>();
+  
   private MetadataResource findTxValueSet(String uri) {
     MetadataResource res = expansionCache.getStoredResource(uri);
     if (res != null)
       return res;
+    synchronized (lock) {
+      if (notCanonical.contains(uri))
+        return null;
+    }
     try {
+      tlog("get canonical "+uri);
       res = txServer.getCanonical(ValueSet.class, uri);
     } catch (Exception e) {
+      synchronized (lock) {
+        notCanonical.add(uri);
+      }
       return null;
     }
     if (res != null)

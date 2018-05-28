@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides the status of the payment for goods and services rendered, and the request and response resource references.
  */
@@ -399,7 +400,7 @@ public class PaymentNotice extends DomainResource {
     /**
      * @param value {@link #request} (Reference of resource for which payment is being made.)
      */
-    public PaymentNotice setRequest(Reference value) { 
+    public PaymentNotice setRequest(Reference value)  { 
       this.request = value;
       return this;
     }
@@ -438,7 +439,7 @@ public class PaymentNotice extends DomainResource {
     /**
      * @param value {@link #response} (Reference of response to resource for which payment is being made.)
      */
-    public PaymentNotice setResponse(Reference value) { 
+    public PaymentNotice setResponse(Reference value)  { 
       this.response = value;
       return this;
     }
@@ -575,7 +576,7 @@ public class PaymentNotice extends DomainResource {
     /**
      * @param value {@link #target} (The Insurer who is target  of the request.)
      */
-    public PaymentNotice setTarget(Reference value) { 
+    public PaymentNotice setTarget(Reference value)  { 
       this.target = value;
       return this;
     }
@@ -619,7 +620,7 @@ public class PaymentNotice extends DomainResource {
     /**
      * @param value {@link #provider} (The practitioner who is responsible for the services rendered to the patient.)
      */
-    public PaymentNotice setProvider(Reference value) { 
+    public PaymentNotice setProvider(Reference value)  { 
       this.provider = value;
       return this;
     }
@@ -663,7 +664,7 @@ public class PaymentNotice extends DomainResource {
     /**
      * @param value {@link #organization} (The organization which is responsible for the services rendered to the patient.)
      */
-    public PaymentNotice setOrganization(Reference value) { 
+    public PaymentNotice setOrganization(Reference value)  { 
       this.organization = value;
       return this;
     }
@@ -707,23 +708,41 @@ public class PaymentNotice extends DomainResource {
     /**
      * @param value {@link #paymentStatus} (The payment status, typically paid: payment sent, cleared: payment received.)
      */
-    public PaymentNotice setPaymentStatus(CodeableConcept value) { 
+    public PaymentNotice setPaymentStatus(CodeableConcept value)  { 
       this.paymentStatus = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "The notice business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "The status of the resource instance.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, java.lang.Integer.MAX_VALUE, request));
-        childrenList.add(new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, java.lang.Integer.MAX_VALUE, response));
-        childrenList.add(new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, java.lang.Integer.MAX_VALUE, statusDate));
-        childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
-        childrenList.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, target));
-        childrenList.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
-        childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, organization));
-        childrenList.add(new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, java.lang.Integer.MAX_VALUE, paymentStatus));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "The notice business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
+        children.add(new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, 1, request));
+        children.add(new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, 1, response));
+        children.add(new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, 1, statusDate));
+        children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
+        children.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target));
+        children.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider));
+        children.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, organization));
+        children.add(new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, 1, paymentStatus));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The notice business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
+        case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, 1, request);
+        case -340323263: /*response*/  return new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, 1, response);
+        case 247524032: /*statusDate*/  return new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, 1, statusDate);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
+        case -880905839: /*target*/  return new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target);
+        case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider);
+        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, 1, organization);
+        case 1430704536: /*paymentStatus*/  return new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, 1, paymentStatus);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -919,12 +938,12 @@ public class PaymentNotice extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof PaymentNotice))
+        if (!(other_ instanceof PaymentNotice))
           return false;
-        PaymentNotice o = (PaymentNotice) other;
+        PaymentNotice o = (PaymentNotice) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
            && compareDeep(response, o.response, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(created, o.created, true)
            && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true) && compareDeep(organization, o.organization, true)
@@ -932,12 +951,12 @@ public class PaymentNotice extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof PaymentNotice))
+        if (!(other_ instanceof PaymentNotice))
           return false;
-        PaymentNotice o = (PaymentNotice) other;
+        PaymentNotice o = (PaymentNotice) other_;
         return compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true) && compareValues(created, o.created, true)
           ;
       }

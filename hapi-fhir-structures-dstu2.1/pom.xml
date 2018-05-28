@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -130,22 +130,6 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
-			<scope>test</scope>
-			<exclusions><!--
-				<exclusion>
-					<artifactId>Saxon-HE</artifactId>
-					<groupId>net.sf.saxon</groupId>
-				</exclusion>-->
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 
 		<!-- UNIT TEST DEPENDENCIES -->
@@ -206,6 +190,16 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

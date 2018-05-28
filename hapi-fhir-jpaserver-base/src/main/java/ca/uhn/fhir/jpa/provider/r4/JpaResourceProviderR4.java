@@ -20,23 +20,26 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #L%
  */
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_DELETE;
 
 public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
-
-	public static final String OPERATION_NAME_META = "$meta";
-	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
-	public static final String OPERATION_NAME_META_ADD = "$meta-add";
 
 	public JpaResourceProviderR4() {
 		// nothing
@@ -61,7 +64,7 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 	}
 
 	@Delete()
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdType theResource, @ConditionalUrlParam(supportsMultiple=true) String theConditional, RequestDetails theRequestDetails) {
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdType theResource, @ConditionalUrlParam(supportsMultiple = true) String theConditional, RequestDetails theRequestDetails) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -74,11 +77,32 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		}
 	}
 
-	//@formatter:off
-	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
-	//@formatter:on
+	public Parameters expunge(
+		@IdParam IIdType theIdParam,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions
+	) {
+		return super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
+	}
+
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
+	})
+	public Parameters expunge(
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions
+	) {
+		return super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
+	}
+
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
+	})
 	public Parameters meta(RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theRequestDetails);
@@ -86,11 +110,9 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name=OPERATION_NAME_META, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters meta(@IdParam IdType theId, RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theId, theRequestDetails);
@@ -98,11 +120,9 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name=OPERATION_NAME_META_ADD, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_META_ADD, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters metaAdd(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
@@ -113,11 +133,9 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name=OPERATION_NAME_META_DELETE, idempotent=true, returnParameters= {
-		@OperationParam(name="return", type=Meta.class)
+	@Operation(name = OPERATION_META_DELETE, idempotent = true, returnParameters = {
+		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters metaDelete(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
 		if (theMeta == null) {
 			throw new InvalidRequestException("Input contains no parameter with name 'meta'");
@@ -143,13 +161,13 @@ public class JpaResourceProviderR4<T extends IAnyResource> extends BaseJpaResour
 
 	@Validate
 	public MethodOutcome validate(@ResourceParam T theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-			@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+											@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
 		return validate(theResource, null, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
-		
+
 	@Validate
 	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdType theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
-			@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
+											@Validate.Profile String theProfile, RequestDetails theRequestDetails) {
 		return getDao().validate(theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequestDetails);
 	}
 

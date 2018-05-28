@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -16,6 +16,7 @@
 	
 	<modules>
 		<module>hapi-fhir-cli-jpaserver</module>
+		<module>hapi-fhir-cli-api</module>
 		<module>hapi-fhir-cli-app</module>
 	</modules>
 	

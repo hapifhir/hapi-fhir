@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DeviceStatus {
 
         /**
-         * The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.
+         * The device is available for use.  Note: For *implanted devices*  this means that the device is implanted in the patient.
          */
         ACTIVE, 
         /**
-         * The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.
+         * The device is no longer available for use (e.g. lost, expired, damaged).  Note: For *implanted devices*  this means that the device has been removed from the patient.
          */
         INACTIVE, 
         /**
-         * The Device was entered in error and voided.
+         * The device was entered in error and voided.
          */
         ENTEREDINERROR, 
         /**
@@ -83,9 +83,9 @@ public enum DeviceStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The Device is available for use.  Note: This means for *implanted devices*  the device is implanted in the patient.";
-            case INACTIVE: return "The Device is no longer available for use (e.g. lost, expired, damaged).  Note: This means for *implanted devices*  the device has been removed from the patient.";
-            case ENTEREDINERROR: return "The Device was entered in error and voided.";
+            case ACTIVE: return "The device is available for use.  Note: For *implanted devices*  this means that the device is implanted in the patient.";
+            case INACTIVE: return "The device is no longer available for use (e.g. lost, expired, damaged).  Note: For *implanted devices*  this means that the device has been removed from the patient.";
+            case ENTEREDINERROR: return "The device was entered in error and voided.";
             case UNKNOWN: return "The status of the device has not been determined.";
             default: return "?";
           }

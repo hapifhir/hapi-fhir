@@ -11,10 +11,8 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;

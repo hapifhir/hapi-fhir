@@ -28,10 +28,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -617,10 +614,10 @@ public class RestfulServerUtils {
 		}
 
 		if (theAddContentLocationHeader && fullId != null) {
-			if (theServer.getFhirContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				response.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
+			if (theRequestDetails.getRequestType() == RequestTypeEnum.POST) {
+				response.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
 			}
-			response.addHeader(Constants.HEADER_LOCATION, fullId.getValue());
+			response.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
@@ -631,19 +628,12 @@ public class RestfulServerUtils {
 			}
 		}
 
+		// Binary handling
 		String contentType;
-		if (theResource instanceof IBaseBinary && responseEncoding == null) {
+		if (theResource instanceof IBaseBinary) {
 			IBaseBinary bin = (IBaseBinary) theResource;
-			if (isNotBlank(bin.getContentType())) {
-				contentType = bin.getContentType();
-			} else {
-				contentType = Constants.CT_OCTET_STREAM;
-			}
 
-			// Force binary resources to download - This is a security measure to prevent
-			// malicious images or HTML blocks being served up as content.
-			response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
-
+			// Add a security context header
 			IBaseReference securityContext = BinaryUtil.getSecurityContext(theServer.getFhirContext(), bin);
 			if (securityContext != null) {
 				String securityContextRef = securityContext.getReferenceElement().getValue();
@@ -652,7 +642,21 @@ public class RestfulServerUtils {
 				}
 			}
 
-			return response.sendAttachmentResponse(bin, theStatusCode, contentType);
+			// If the user didn't explicitly request FHIR as a response, return binary
+			// content directly
+			if (responseEncoding == null) {
+				if (isNotBlank(bin.getContentType())) {
+					contentType = bin.getContentType();
+				} else {
+					contentType = Constants.CT_OCTET_STREAM;
+				}
+
+				// Force binary resources to download - This is a security measure to prevent
+				// malicious images or HTML blocks being served up as content.
+				response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+
+				return response.sendAttachmentResponse(bin, theStatusCode, contentType);
+			}
 		}
 
 		// Ok, we're not serving a binary resource, so apply default encoding

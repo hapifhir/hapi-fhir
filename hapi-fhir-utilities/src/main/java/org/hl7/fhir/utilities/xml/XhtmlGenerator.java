@@ -35,6 +35,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.MarkDownProcessor;
+import org.hl7.fhir.utilities.MarkDownProcessor.Dialect;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xml.XhtmlGeneratorAdorner.XhtmlGeneratorAdornerState;
 import org.w3c.dom.Comment;
@@ -45,7 +47,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 
-import com.github.rjeschke.txtmark.Processor;
 
 public class XhtmlGenerator {
 
@@ -154,7 +155,7 @@ public class XhtmlGenerator {
   }
 
   private String processMarkdown(String text) {
-    return Processor.process(text);
+    return new MarkDownProcessor(Dialect.COMMON_MARK).process(text, "Xhtml generator");
   }
 
   private void writeText(Writer out, Text node, int level) throws DOMException, IOException {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -507,10 +507,10 @@ public class Appointment extends DomainResource {
         protected Resource actorTarget;
 
         /**
-         * Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
+         * Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
          */
         @Child(name = "required", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="required | optional | information-only", formalDefinition="Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present." )
+        @Description(shortDefinition="required | optional | information-only", formalDefinition="Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participantrequired")
         protected Enumeration<ParticipantRequired> required;
 
@@ -639,7 +639,7 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @return {@link #required} (Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
+         * @return {@link #required} (Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
          */
         public Enumeration<ParticipantRequired> getRequiredElement() { 
           if (this.required == null)
@@ -659,7 +659,7 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @param value {@link #required} (Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
+         * @param value {@link #required} (Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.). This is the underlying object with id, value and extensions. The accessor "getRequired" gives direct access to the value
          */
         public AppointmentParticipantComponent setRequiredElement(Enumeration<ParticipantRequired> value) { 
           this.required = value;
@@ -667,14 +667,14 @@ public class Appointment extends DomainResource {
         }
 
         /**
-         * @return Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
+         * @return Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
          */
         public ParticipantRequired getRequired() { 
           return this.required == null ? null : this.required.getValue();
         }
 
         /**
-         * @param value Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
+         * @param value Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
          */
         public AppointmentParticipantComponent setRequired(ParticipantRequired value) { 
           if (value == null)
@@ -760,7 +760,7 @@ public class Appointment extends DomainResource {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, type));
           children.add(new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, 1, actor));
-          children.add(new Property("required", "code", "Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.", 0, 1, required));
+          children.add(new Property("required", "code", "Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.", 0, 1, required));
           children.add(new Property("status", "code", "Participation status of the actor.", 0, 1, status));
           children.add(new Property("period", "Period", "Participation period of the actor.", 0, 1, period));
         }
@@ -770,7 +770,7 @@ public class Appointment extends DomainResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Role of participant in the appointment.", 0, java.lang.Integer.MAX_VALUE, type);
           case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|RelatedPerson|Device|HealthcareService|Location)", "A Person, Location/HealthcareService or Device that is participating in the appointment.", 0, 1, actor);
-          case -393139297: /*required*/  return new Property("required", "code", "Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.", 0, 1, required);
+          case -393139297: /*required*/  return new Property("required", "code", "Whether this participant is required to be present at the meeting. This covers a use-case where two doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.", 0, 1, required);
           case -892481550: /*status*/  return new Property("status", "code", "Participation status of the actor.", 0, 1, status);
           case -991726143: /*period*/  return new Property("period", "Period", "Participation period of the actor.", 0, 1, period);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -948,10 +948,10 @@ public class Appointment extends DomainResource {
     protected Enumeration<AppointmentStatus> status;
 
     /**
-     * A broad categorisation of the service that is to be performed during this appointment.
+     * A broad categorization of the service that is to be performed during this appointment.
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @Description(shortDefinition="A broad categorization of the service that is to be performed during this appointment", formalDefinition="A broad categorization of the service that is to be performed during this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected List<CodeableConcept> serviceCategory;
 
@@ -1080,13 +1080,13 @@ public class Appointment extends DomainResource {
     protected StringType patientInstruction;
 
     /**
-     * The referral request this appointment is allocated to assess (incoming referral).
+     * The service request this appointment is allocated to assess (e.g. incoming referral or procedure request).
      */
     @Child(name = "basedOn", type = {ServiceRequest.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The ServiceRequest provided as information to allocate to the Encounter", formalDefinition="The referral request this appointment is allocated to assess (incoming referral)." )
+    @Description(shortDefinition="The service request this appointment is allocated to assess", formalDefinition="The service request this appointment is allocated to assess (e.g. incoming referral or procedure request)." )
     protected List<Reference> basedOn;
     /**
-     * The actual objects that are the target of the reference (The referral request this appointment is allocated to assess (incoming referral).)
+     * The actual objects that are the target of the reference (The service request this appointment is allocated to assess (e.g. incoming referral or procedure request).)
      */
     protected List<ServiceRequest> basedOnTarget;
 
@@ -1099,10 +1099,10 @@ public class Appointment extends DomainResource {
     protected List<AppointmentParticipantComponent> participant;
 
     /**
-     * A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.
+     * A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the duration (usually in minutes) should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.
      */
     @Child(name = "requestedPeriod", type = {Period.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Potential date/time interval(s) requested to allocate the appointment within", formalDefinition="A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time." )
+    @Description(shortDefinition="Potential date/time interval(s) requested to allocate the appointment within", formalDefinition="A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the duration (usually in minutes) should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time." )
     protected List<Period> requestedPeriod;
 
     private static final long serialVersionUID = -128096826L;
@@ -1221,7 +1221,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
+     * @return {@link #serviceCategory} (A broad categorization of the service that is to be performed during this appointment.)
      */
     public List<CodeableConcept> getServiceCategory() { 
       if (this.serviceCategory == null)
@@ -2042,7 +2042,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #basedOn} (The referral request this appointment is allocated to assess (incoming referral).)
+     * @return {@link #basedOn} (The service request this appointment is allocated to assess (e.g. incoming referral or procedure request).)
      */
     public List<Reference> getBasedOn() { 
       if (this.basedOn == null)
@@ -2170,7 +2170,7 @@ public class Appointment extends DomainResource {
     }
 
     /**
-     * @return {@link #requestedPeriod} (A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.)
+     * @return {@link #requestedPeriod} (A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the duration (usually in minutes) should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.)
      */
     public List<Period> getRequestedPeriod() { 
       if (this.requestedPeriod == null)
@@ -2226,7 +2226,7 @@ public class Appointment extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.", 0, 1, status));
-        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
+        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         children.add(new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
         children.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that has been booked in the slot (not service type).", 0, 1, appointmentType));
@@ -2242,9 +2242,9 @@ public class Appointment extends DomainResource {
         children.add(new Property("created", "dateTime", "The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.", 0, 1, created));
         children.add(new Property("comment", "string", "Additional comments about the appointment.", 0, 1, comment));
         children.add(new Property("patientInstruction", "string", "While Appointment.comment contains information for internal use, Appointment.patientInstructions is used to capture patient facing information about the Appointment (e.g. please bring your referral or fast from 8pm night before).", 0, 1, patientInstruction));
-        children.add(new Property("basedOn", "Reference(ServiceRequest)", "The referral request this appointment is allocated to assess (incoming referral).", 0, java.lang.Integer.MAX_VALUE, basedOn));
+        children.add(new Property("basedOn", "Reference(ServiceRequest)", "The service request this appointment is allocated to assess (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant));
-        children.add(new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod));
+        children.add(new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the duration (usually in minutes) should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod));
       }
 
       @Override
@@ -2252,7 +2252,7 @@ public class Appointment extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this appointment concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.", 0, 1, status);
-        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
+        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
         case -1596426375: /*appointmentType*/  return new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that has been booked in the slot (not service type).", 0, 1, appointmentType);
@@ -2268,9 +2268,9 @@ public class Appointment extends DomainResource {
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date that this appointment was initially created. This could be different to the meta.lastModified value on the initial entry, as this could have been before the resource was created on the FHIR server, and should remain unchanged over the lifespan of the appointment.", 0, 1, created);
         case 950398559: /*comment*/  return new Property("comment", "string", "Additional comments about the appointment.", 0, 1, comment);
         case 737543241: /*patientInstruction*/  return new Property("patientInstruction", "string", "While Appointment.comment contains information for internal use, Appointment.patientInstructions is used to capture patient facing information about the Appointment (e.g. please bring your referral or fast from 8pm night before).", 0, 1, patientInstruction);
-        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest)", "The referral request this appointment is allocated to assess (incoming referral).", 0, java.lang.Integer.MAX_VALUE, basedOn);
+        case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest)", "The service request this appointment is allocated to assess (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case 767422259: /*participant*/  return new Property("participant", "", "List of participants involved in the appointment.", 0, java.lang.Integer.MAX_VALUE, participant);
-        case -897241393: /*requestedPeriod*/  return new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the minutes duration should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod);
+        case -897241393: /*requestedPeriod*/  return new Property("requestedPeriod", "Period", "A set of date ranges (potentially including times) that the appointment is preferred to be scheduled within. When using these values, the duration (usually in minutes) should be provided to indicate the length of the appointment to fill and populate the start/end times for the actual allocated time.", 0, java.lang.Integer.MAX_VALUE, requestedPeriod);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2745,6 +2745,32 @@ public class Appointment extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>based-on</b>
+   * <p>
+   * Description: <b>The service request this appointment is allocated to assess</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Appointment.basedOn</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="based-on", path="Appointment.basedOn", description="The service request this appointment is allocated to assess", type="reference", target={ServiceRequest.class } )
+  public static final String SP_BASED_ON = "based-on";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
+   * <p>
+   * Description: <b>The service request this appointment is allocated to assess</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Appointment.basedOn</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASED_ON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASED_ON);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Appointment:based-on</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASED_ON = new ca.uhn.fhir.model.api.Include("Appointment:based-on").toLocked();
+
+ /**
    * Search parameter: <b>practitioner</b>
    * <p>
    * Description: <b>One of the individuals of the appointment is this practitioner</b><br>
@@ -2881,32 +2907,6 @@ public class Appointment extends DomainResource {
    * the path value of "<b>Appointment:location</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("Appointment:location").toLocked();
-
- /**
-   * Search parameter: <b>basedon</b>
-   * <p>
-   * Description: <b>The ServiceRequest provided as information to allocate to the Encounter</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Appointment.basedOn</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="basedon", path="Appointment.basedOn", description="The ServiceRequest provided as information to allocate to the Encounter", type="reference", target={ServiceRequest.class } )
-  public static final String SP_BASEDON = "basedon";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>basedon</b>
-   * <p>
-   * Description: <b>The ServiceRequest provided as information to allocate to the Encounter</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Appointment.basedOn</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam BASEDON = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_BASEDON);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Appointment:basedon</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_BASEDON = new ca.uhn.fhir.model.api.Include("Appointment:basedon").toLocked();
 
  /**
    * Search parameter: <b>status</b>

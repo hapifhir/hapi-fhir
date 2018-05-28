@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Base definition for all elements in a resource.
  */
@@ -204,9 +205,19 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
     return ext.get(0).getValue().primitiveValue();
   }
 
-      protected void listChildren(List<Property> childrenList) {
-        childrenList.add(new Property("id", "string", "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.", 0, java.lang.Integer.MAX_VALUE, id));
-        childrenList.add(new Property("extension", "Extension", "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", 0, java.lang.Integer.MAX_VALUE, extension));
+      protected void listChildren(List<Property> children) {
+        children.add(new Property("id", "string", "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.", 0, 1, id));
+        children.add(new Property("extension", "Extension", "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", 0, java.lang.Integer.MAX_VALUE, extension));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3355: /*id*/  return new Property("id", "string", "unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.", 0, 1, id);
+        case -612557761: /*extension*/  return new Property("extension", "Extension", "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", 0, java.lang.Integer.MAX_VALUE, extension);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -293,22 +304,22 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Element))
+        if (!(other_ instanceof Element))
           return false;
-        Element o = (Element) other;
+        Element o = (Element) other_;
         return compareDeep(id, o.id, true) && compareDeep(extension, o.extension, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Element))
+        if (!(other_ instanceof Element))
           return false;
-        Element o = (Element) other;
+        Element o = (Element) other_;
         return compareValues(id, o.id, true);
       }
 

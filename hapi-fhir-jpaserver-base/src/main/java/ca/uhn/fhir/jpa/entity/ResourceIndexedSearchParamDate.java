@@ -66,6 +66,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamDate() {
+		super();
 	}
 
 	/**
