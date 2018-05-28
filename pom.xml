@@ -2087,6 +2087,7 @@
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-dynamic</module>
+				<module>example-projects/hapi-fhir-jpaserver-example-postgres</module>
 				<module>tests/hapi-fhir-base-test-mindeps-client</module>
 				<module>tests/hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-fhir-spring-boot</module>
