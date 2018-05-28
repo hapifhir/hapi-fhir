@@ -62,7 +62,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		IFhirResourceDaoConceptMap<org.hl7.fhir.dstu3.model.ConceptMap>
 #elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
 		IFhirResourceDaoConceptMap<org.hl7.fhir.r4.model.ConceptMap>
-#elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter'))
+#elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Composition' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #else
 		IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>
