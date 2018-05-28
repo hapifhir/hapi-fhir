@@ -1,6 +1,8 @@
 Running hapi-fhir-jpaserver-example in Tomcat from IntelliJ
 
 Install Tomcat.
+Install mvn
+run `mvn clean install`
 
 Make sure you have Tomcat set up in IntelliJ.
 File->Settings->Build, Execution, Deployment->Application Servers
@@ -26,6 +28,6 @@ Select your server, and click the green triangle (or the bug if you want to debu
 Wait for the console output to stop
 
 Point your browser (or fiddler, or what have you) to 
-http://localhost:8080/hapi/base/Patient
+http://localhost:8080/hapi/baseDstu3/Patient
 
 You should get an empty bundle back.
