@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -83,7 +83,7 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"activity-reference"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  			ReferenceAndListParam theActivity_reference, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"Fulfills care plan"</span>)
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"Fulfills CarePlan"</span>)
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"based-on"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  			ReferenceAndListParam theBased_on, 
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>    
@@ -131,7 +131,7 @@
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 			@OptionalParam(name=<span class="jxr_string">"part-of"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 			ReferenceAndListParam thePart_of, 
 <a class="jxr_linenumber" name="L125" href="#L125">125</a>   
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			@Description(shortDefinition=<span class="jxr_string">"Who care plan is for"</span>)
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			@Description(shortDefinition=<span class="jxr_string">"Who the care plan is for"</span>)
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 			ReferenceAndListParam thePatient, 
 <a class="jxr_linenumber" name="L129" href="#L129">129</a>   
@@ -147,7 +147,7 @@
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L141" href="#L141">141</a>   
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			@Description(shortDefinition=<span class="jxr_string">"Who care plan is for"</span>)
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			@Description(shortDefinition=<span class="jxr_string">"Who the care plan is for"</span>)
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 			@OptionalParam(name=<span class="jxr_string">"subject"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 			ReferenceAndListParam theSubject, 
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 

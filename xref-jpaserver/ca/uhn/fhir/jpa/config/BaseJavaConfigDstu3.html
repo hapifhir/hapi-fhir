@@ -766,9 +766,9 @@
 <a class="jxr_linenumber" name="L758" href="#L758">758</a> 	@Bean(name=<span class="jxr_string">"myConceptMapDaoDstu3"</span>, autowire=Autowire.BY_NAME)
 <a class="jxr_linenumber" name="L759" href="#L759">759</a> 	@Lazy
 <a class="jxr_linenumber" name="L760" href="#L760">760</a> 	<strong class="jxr_keyword">public</strong> 
-<a class="jxr_linenumber" name="L761" href="#L761">761</a> 		IFhirResourceDao&lt;org.hl7.fhir.dstu3.model.ConceptMap&gt;
+<a class="jxr_linenumber" name="L761" href="#L761">761</a> 		IFhirResourceDaoConceptMap&lt;org.hl7.fhir.dstu3.model.ConceptMap&gt;
 <a class="jxr_linenumber" name="L762" href="#L762">762</a> 		 daoConceptMapDstu3() {
-<a class="jxr_linenumber" name="L763" href="#L763">763</a> 		ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3&lt;org.hl7.fhir.dstu3.model.ConceptMap&gt; retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3&lt;org.hl7.fhir.dstu3.model.ConceptMap&gt;();
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> 		ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoConceptMapDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoConceptMapDstu3();
 <a class="jxr_linenumber" name="L764" href="#L764">764</a> 		retVal.setResourceType(org.hl7.fhir.dstu3.model.ConceptMap.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L765" href="#L765">765</a> 		retVal.setContext(fhirContextDstu3());
 <a class="jxr_linenumber" name="L766" href="#L766">766</a> 		<strong class="jxr_keyword">return</strong> retVal;

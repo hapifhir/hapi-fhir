@@ -6,8 +6,6 @@ org.hl7.fhir.r4.hapi.ctx
 org.hl7.fhir.r4.hapi.fluentpath
 org.hl7.fhir.r4.hapi.rest.server
 org.hl7.fhir.r4.model
-org.hl7.fhir.r4.model.annotations
-org.hl7.fhir.r4.model.api
 org.hl7.fhir.r4.model.codesystems
 org.hl7.fhir.r4.terminologies
 org.hl7.fhir.r4.utils

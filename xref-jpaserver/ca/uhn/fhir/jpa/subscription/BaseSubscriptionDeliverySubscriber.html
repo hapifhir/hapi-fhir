@@ -75,7 +75,7 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  				<em class="jxr_comment">// can have placeholder IDs in them.</em>
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  				IIdType payloadId = msg.getPayloadId(getContext());
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  				Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  				IFhirResourceDao dao = getSubscriptionDao().getDao(type);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  				IFhirResourceDao dao = getSubscriptionInterceptor().getDao(type);
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  				IBaseResource loadedPayload;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  				<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  					loadedPayload = dao.read(payloadId);

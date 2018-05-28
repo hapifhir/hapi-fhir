@@ -85,7 +85,7 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  	}
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  	@Override
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	@Transactional(propagation = Propagation.NEVER)
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> pollForStaleSearchesAndDeleteThem() {
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<strong class="jxr_keyword">if</strong> (!myDaoConfig.isExpireSearchResults()) {
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  			<strong class="jxr_keyword">return</strong>;
@@ -135,7 +135,7 @@
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	@Transactional(propagation = Propagation.NEVER)
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 	@Override
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> schedulePollForStaleSearches() {
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 		<strong class="jxr_keyword">if</strong> (!myDaoConfig.isSchedulingDisabled()) {

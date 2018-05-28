@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -75,49 +75,49 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"based-on"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			ReferenceAndListParam theBased_on, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Classification of media as image, video, or audio"</span>)
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"category"</span>)
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TokenAndListParam theCategory, 
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			@Description(shortDefinition=<span class="jxr_string">"Encounter / Episode associated with media"</span>)
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"context"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			ReferenceAndListParam theContext, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"Encounter / Episode associated with media"</span>)
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"context"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			ReferenceAndListParam theContext, 
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"When Media was collected"</span>)
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"created"</span>)
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			DateRangeParam theCreated, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"When Media was collected"</span>)
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"created"</span>)
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			DateRangeParam theCreated, 
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			@Description(shortDefinition=<span class="jxr_string">"Observing Device"</span>)
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			@OptionalParam(name=<span class="jxr_string">"device"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			ReferenceAndListParam theDevice, 
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>    
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@Description(shortDefinition=<span class="jxr_string">"Observing Device"</span>)
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"device"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			ReferenceAndListParam theDevice, 
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			@Description(shortDefinition=<span class="jxr_string">"Identifier(s) for the image"</span>)
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			TokenAndListParam theIdentifier, 
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>    
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"Identifier(s) for the image"</span>)
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"identifier"</span>)
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			TokenAndListParam theIdentifier, 
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"The type of acquisition equipment/process"</span>)
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"modality"</span>)
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			TokenAndListParam theModality, 
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>    
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"The type of acquisition equipment/process"</span>)
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"modality"</span>)
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			TokenAndListParam theModality, 
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"The person who generated the image"</span>)
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"operator"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			ReferenceAndListParam theOperator, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"The person who generated the image"</span>)
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"operator"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam theOperator, 
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Who/What this Media is a record of"</span>)
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam thePatient, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"Who/What this Media is a record of"</span>)
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			ReferenceAndListParam thePatient, 
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			@Description(shortDefinition=<span class="jxr_string">"Observed body part"</span>)
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			@OptionalParam(name=<span class="jxr_string">"site"</span>)
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			TokenAndListParam theSite, 
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>   
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"Observed body part"</span>)
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"site"</span>)
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			TokenAndListParam theSite, 
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			@Description(shortDefinition=<span class="jxr_string">"preparation | in-progress | not-done | suspended | aborted | completed | entered-in-error | unknown"</span>)
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>   
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"preparation | in-progress | not-done | suspended | aborted | completed | entered-in-error | unknown"</span>)
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			TokenAndListParam theStatus, 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"Who/What this Media is a record of"</span>)
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"subject"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			ReferenceAndListParam theSubject, 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>   
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"Who/What this Media is a record of"</span>)
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"subject"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			ReferenceAndListParam theSubject, 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			@Description(shortDefinition=<span class="jxr_string">"Classification of media as image, video, or audio"</span>)
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"type"</span>)
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			TokenAndListParam theType, 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>   
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"Imaging view, e.g. Lateral or Antero-posterior"</span>)
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"view"</span>)
@@ -155,17 +155,17 @@
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, the_id);
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 			paramMap.add(<span class="jxr_string">"based-on"</span>, theBased_on);
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			paramMap.add(<span class="jxr_string">"category"</span>, theCategory);
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(<span class="jxr_string">"context"</span>, theContext);
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(<span class="jxr_string">"created"</span>, theCreated);
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"device"</span>, theDevice);
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"modality"</span>, theModality);
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"operator"</span>, theOperator);
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"patient"</span>, thePatient);
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"site"</span>, theSite);
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"subject"</span>, theSubject);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			paramMap.add(<span class="jxr_string">"context"</span>, theContext);
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(<span class="jxr_string">"created"</span>, theCreated);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(<span class="jxr_string">"device"</span>, theDevice);
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"modality"</span>, theModality);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"operator"</span>, theOperator);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"patient"</span>, thePatient);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"site"</span>, theSite);
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"subject"</span>, theSubject);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"type"</span>, theType);
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> 			paramMap.add(<span class="jxr_string">"view"</span>, theView);
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 			paramMap.setRevIncludes(theRevIncludes);
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 			paramMap.setLastUpdated(theLastUpdated);

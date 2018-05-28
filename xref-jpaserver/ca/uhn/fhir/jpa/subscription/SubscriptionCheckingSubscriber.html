@@ -148,7 +148,7 @@
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 		RequestDetails req = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/provider/ServletSubRequestDetails.html">ServletSubRequestDetails</a>();
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 		req.setSubRequest(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; responseDao = getSubscriptionDao().getDao(responseResourceDef.getImplementingClass());
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; responseDao = getSubscriptionInterceptor().getDao(responseResourceDef.getImplementingClass());
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);

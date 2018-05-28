@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -99,7 +99,7 @@
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"experimental"</span>)
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			TokenAndListParam theExperimental, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"The system is the URL for the context-type: e.g. http://hl7.org/fhir/ValueSet/extension-context-type#element|CodeableConcept.text"</span>)
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"The system is the URL for the context-type: e.g. http://hl7.org/fhir/extension-context-type#element|CodeableConcept.text"</span>)
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"ext-context"</span>)
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			TokenAndListParam theExt_context, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
@@ -141,7 +141,7 @@
 <a class="jxr_linenumber" name="L133" href="#L133">133</a>   
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> 			@Description(shortDefinition=<span class="jxr_string">"Type defined or constrained by this structure"</span>)
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 			@OptionalParam(name=<span class="jxr_string">"type"</span>)
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			TokenAndListParam theType, 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			UriAndListParam theType, 
 <a class="jxr_linenumber" name="L137" href="#L137">137</a>   
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 			@Description(shortDefinition=<span class="jxr_string">"The uri that identifies the structure definition"</span>)
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@OptionalParam(name=<span class="jxr_string">"url"</span>)

@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -71,7 +71,7 @@
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  			@OptionalParam(name=<span class="jxr_string">"_language"</span>)
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  			StringAndListParam the_language, 
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>    
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  			@Description(shortDefinition=<span class="jxr_string">"Care manager/care co-ordinator for the patient"</span>)
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  			@Description(shortDefinition=<span class="jxr_string">"Care manager/care coordinator for the patient"</span>)
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			@OptionalParam(name=<span class="jxr_string">"care-manager"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  			ReferenceAndListParam theCare_manager, 
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>    

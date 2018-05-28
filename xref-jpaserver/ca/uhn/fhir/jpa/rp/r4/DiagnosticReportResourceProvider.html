@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -79,7 +79,7 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			@OptionalParam(name=<span class="jxr_string">"category"</span>)
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TokenAndListParam theCategory, 
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>    
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result"</span>)
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			@Description(shortDefinition=<span class="jxr_string">"The code for the report, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result"</span>)
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  			@OptionalParam(name=<span class="jxr_string">"code"</span>)
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  			TokenAndListParam theCode, 
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>    

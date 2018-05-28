@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -91,7 +91,7 @@
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  			@OptionalParam(name=<span class="jxr_string">"dicom-class"</span>)
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  			TokenAndListParam theDicom_<strong class="jxr_keyword">class</strong>, 
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>    
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"The endpoint for te study or series"</span>)
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			@Description(shortDefinition=<span class="jxr_string">"The endpoint for the study or series"</span>)
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"endpoint"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  			ReferenceAndListParam theEndpoint, 
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>    

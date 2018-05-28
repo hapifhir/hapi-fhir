@@ -117,15 +117,15 @@
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">public</strong> String toString() {
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 		ToStringBuilder b = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.SHORT_PREFIX_STYLE);
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">if</strong> (myLocationCol != <strong class="jxr_keyword">null</strong> || myLocationLine != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			b.append(<span class="jxr_string">"myLocationCol"</span>, myLocationCol);
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			b.append(<span class="jxr_string">"myLocationRow"</span>, myLocationLine);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			b.append(<span class="jxr_string">"col"</span>, myLocationCol);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			b.append(<span class="jxr_string">"row"</span>, myLocationLine);
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 		}
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">if</strong> (myLocationString != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			b.append(<span class="jxr_string">"myLocationString"</span>, myLocationString);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			b.append(<span class="jxr_string">"locationString"</span>, myLocationString);
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 		}
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		b.append(<span class="jxr_string">"myMessage"</span>, myMessage);
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		b.append(<span class="jxr_string">"message"</span>, myMessage);
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 		<strong class="jxr_keyword">if</strong> (mySeverity != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			b.append(<span class="jxr_string">"mySeverity"</span>, mySeverity.getCode());
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			b.append(<span class="jxr_string">"severity"</span>, mySeverity.getCode());
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 		}
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">return</strong> b.toString();
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 	}

@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -99,7 +99,7 @@
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			ReferenceAndListParam thePatient, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"The identify of the individual who administered the medication"</span>)
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"The identity of the individual who administered the medication"</span>)
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"performer"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam thePerformer, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
@@ -119,7 +119,7 @@
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			@OptionalParam(name=<span class="jxr_string">"status"</span>)
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 			TokenAndListParam theStatus, 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>   
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"The identify of the individual or group to list administrations for"</span>)
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			@Description(shortDefinition=<span class="jxr_string">"The identity of the individual or group to list administrations for"</span>)
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 			@OptionalParam(name=<span class="jxr_string">"subject"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 			ReferenceAndListParam theSubject, 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 

@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -111,7 +111,7 @@
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 			@OptionalParam(name=<span class="jxr_string">"intent"</span>)
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			TokenAndListParam theIntent, 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>   
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"Return prescriptions of this medication reference"</span>)
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			@Description(shortDefinition=<span class="jxr_string">"Return prescriptions for this medication reference"</span>)
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			@OptionalParam(name=<span class="jxr_string">"medication"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 			ReferenceAndListParam theMedication, 
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>   

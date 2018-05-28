@@ -666,7 +666,7 @@
 <a class="jxr_linenumber" name="L658" href="#L658">658</a> 		nameToElementDefinition.putAll(myNameToElementDefinition);
 <a class="jxr_linenumber" name="L659" href="#L659">659</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;String, BaseRuntimeElementDefinition&lt;?&gt;&gt; next : scanner.getNameToElementDefinitions().entrySet()) {
 <a class="jxr_linenumber" name="L660" href="#L660">660</a> 			<strong class="jxr_keyword">if</strong> (!nameToElementDefinition.containsKey(next.getKey())) {
-<a class="jxr_linenumber" name="L661" href="#L661">661</a> 				nameToElementDefinition.put(next.getKey(), next.getValue());
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> 				nameToElementDefinition.put(next.getKey().toLowerCase(), next.getValue());
 <a class="jxr_linenumber" name="L662" href="#L662">662</a> 			}
 <a class="jxr_linenumber" name="L663" href="#L663">663</a> 		}
 <a class="jxr_linenumber" name="L664" href="#L664">664</a> 

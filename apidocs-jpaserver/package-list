@@ -20,6 +20,8 @@ ca.uhn.fhir.jpa.subscription.email
 ca.uhn.fhir.jpa.subscription.resthook
 ca.uhn.fhir.jpa.subscription.websocket
 ca.uhn.fhir.jpa.term
+ca.uhn.fhir.jpa.term.loinc
+ca.uhn.fhir.jpa.term.snomedct
 ca.uhn.fhir.jpa.util
 ca.uhn.fhir.jpa.util.jsonpatch
 ca.uhn.fhir.jpa.util.xmlpatch

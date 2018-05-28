@@ -13,7 +13,7 @@
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.JpaResourceProviderR4;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
@@ -95,11 +95,11 @@
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			@OptionalParam(name=<span class="jxr_string">"address-use"</span>)
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  			TokenAndListParam theAddress_use, 
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>    
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"Administrator of the product/plan"</span>)
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			@Description(shortDefinition=<span class="jxr_string">"Product administrator"</span>)
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  			@OptionalParam(name=<span class="jxr_string">"administered-by"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  			ReferenceAndListParam theAdministered_by, 
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>    
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Technical endpoints providing access to services operated for the organization"</span>)
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Description(shortDefinition=<span class="jxr_string">"Technical endpoint"</span>)
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  			@OptionalParam(name=<span class="jxr_string">"endpoint"</span>, targetTypes={  } )
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			ReferenceAndListParam theEndpoint, 
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>    
