@@ -31,6 +31,11 @@
 				database in order to reindex all data in a background job:
 				<![CDATA[<br/>]]>
 				<![CDATA[<code>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</code>]]>
+				<![CDATA[<br/>]]>
+				Note that if you do this reindex now, you will not have any downtime while
+				you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the
+				time that you upgrade to HAPI FHIR 3.5.0 some indexes may not be
+				available.
 			</action>
 			<action type="add">
 				R4 structures have been updated to the latest definitions

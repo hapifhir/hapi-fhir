@@ -79,7 +79,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
- * searchs for resources
+ * searches for resources
  */
 public class SearchBuilder implements ISearchBuilder {
 
