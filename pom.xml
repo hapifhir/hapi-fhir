@@ -452,6 +452,10 @@
 			<id>hdconradi</id>
 			<name>Heinz-Dieter Conradi</name>
 		</developer>
+		<developer>
+			<id>kliu99</id>
+			<name>Kai Liu</name>
+		</developer>
 	</developers>
 
 	<licenses>

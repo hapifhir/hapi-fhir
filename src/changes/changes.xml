@@ -276,6 +276,11 @@
 				<![CDATA[<code>Content-Location</code>]]>
 				will still be returned, and will hold the same contents.
 			</action>
+			<action type="fix">
+				The Postgres sample JPA project was fixed to use the current version
+				of HAPI FHIR (it was previously stuck on 2.2). Thanks to
+				Kai Liu for the pull request!
+			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
 			<action type="add">
