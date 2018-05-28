@@ -70,7 +70,7 @@
 
 		<section name="Announcements">
 			<p>
-				<b>May 29, 2018 - HAPI FHIR 3.4.0 Released</b> -
+				<b>May 28, 2018 - HAPI FHIR 3.4.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
 			</p>
@@ -126,7 +126,7 @@
 				Thanks to everyone who contributed to this release!
 			</p>
 			<p>
-				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+				- <a href="https://github.com/dmuylwyk/">Diederik Muylwyk</a>
 			</p>
 			<br/><br/>
 
