@@ -46,7 +46,7 @@
 			
 				<p>
 					A public test server is now operating at
-					<a href="http://fhirtest.uhn.ca">http://fhirtest.uhn.ca</a>. 
+					<a href="http://hapi.fhir.org">http://hapi.fhir.org</a>.
 					This server is built entirely using components of HAPI-FHIR
 					and demonstrates all of its capabilities. This server is also
 					entirely open source. You can host your own copy by 
