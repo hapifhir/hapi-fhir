@@ -107,6 +107,9 @@ public class LoggingInterceptor implements IClientInterceptor {
 			 * Add response location
 			 */
 			List<String> locationHeaders = theResponse.getHeaders(Constants.HEADER_LOCATION);
+			if (locationHeaders == null || locationHeaders.isEmpty()) {
+				locationHeaders = theResponse.getHeaders(Constants.HEADER_CONTENT_LOCATION);
+			}
 			if (locationHeaders != null && locationHeaders.size() > 0) {
 				String locationValue = locationHeaders.get(0);
 				IdDt locationValueId = new IdDt(locationValue);
