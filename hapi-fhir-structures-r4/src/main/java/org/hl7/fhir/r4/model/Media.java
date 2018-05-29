@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -279,10 +279,10 @@ public class Media extends DomainResource {
     /**
      * A code that classifies whether the media is an image, video or audio recording or some other media category.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Classification of media as image, video, or audio", formalDefinition="A code that classifies whether the media is an image, video or audio recording or some other media category." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/media-category")
-    protected CodeableConcept category;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/media-type")
+    protected CodeableConcept type;
 
     /**
      * Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.
@@ -427,7 +427,7 @@ public class Media extends DomainResource {
     @Description(shortDefinition="Comments made about the media", formalDefinition="Comments made about the media by the performer, subject or other participants." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 282315907L;
+    private static final long serialVersionUID = 413873607L;
 
   /**
    * Constructor
@@ -670,26 +670,26 @@ public class Media extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (A code that classifies whether the media is an image, video or audio recording or some other media category.)
+     * @return {@link #type} (A code that classifies whether the media is an image, video or audio recording or some other media category.)
      */
-    public CodeableConcept getCategory() { 
-      if (this.category == null)
+    public CodeableConcept getType() { 
+      if (this.type == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Media.category");
+          throw new Error("Attempt to auto-create Media.type");
         else if (Configuration.doAutoCreate())
-          this.category = new CodeableConcept(); // cc
-      return this.category;
+          this.type = new CodeableConcept(); // cc
+      return this.type;
     }
 
-    public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
     }
 
     /**
-     * @param value {@link #category} (A code that classifies whether the media is an image, video or audio recording or some other media category.)
+     * @param value {@link #type} (A code that classifies whether the media is an image, video or audio recording or some other media category.)
      */
-    public Media setCategory(CodeableConcept value) { 
-      this.category = value;
+    public Media setType(CodeableConcept value) { 
+      this.type = value;
       return this;
     }
 
@@ -830,26 +830,30 @@ public class Media extends DomainResource {
      * @return {@link #created} (The date and time(s) at which the media was collected.)
      */
     public DateTimeType getCreatedDateTimeType() throws FHIRException { 
+      if (this.created == null)
+        return null;
       if (!(this.created instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.created.getClass().getName()+" was encountered");
       return (DateTimeType) this.created;
     }
 
     public boolean hasCreatedDateTimeType() { 
-      return this.created instanceof DateTimeType;
+      return this != null && this.created instanceof DateTimeType;
     }
 
     /**
      * @return {@link #created} (The date and time(s) at which the media was collected.)
      */
     public Period getCreatedPeriod() throws FHIRException { 
+      if (this.created == null)
+        return null;
       if (!(this.created instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.created.getClass().getName()+" was encountered");
       return (Period) this.created;
     }
 
     public boolean hasCreatedPeriod() { 
-      return this.created instanceof Period;
+      return this != null && this.created instanceof Period;
     }
 
     public boolean hasCreated() { 
@@ -860,6 +864,8 @@ public class Media extends DomainResource {
      * @param value {@link #created} (The date and time(s) at which the media was collected.)
      */
     public Media setCreated(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new Error("Not the right type for Media.created[x]: "+value.fhirType());
       this.created = value;
       return this;
     }
@@ -1402,7 +1408,7 @@ public class Media extends DomainResource {
         children.add(new Property("basedOn", "Reference(ServiceRequest|CarePlan)", "A procedure that is fulfilled in whole or in part by the creation of this media.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("partOf", "Reference(Any)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "The current state of the {{title}}.", 0, 1, status));
-        children.add(new Property("category", "CodeableConcept", "A code that classifies whether the media is an image, video or audio recording or some other media category.", 0, 1, category));
+        children.add(new Property("type", "CodeableConcept", "A code that classifies whether the media is an image, video or audio recording or some other media category.", 0, 1, type));
         children.add(new Property("modality", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, 1, modality));
         children.add(new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, 1, view));
         children.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen|Location)", "Who/What this Media is a record of.", 0, 1, subject));
@@ -1429,7 +1435,7 @@ public class Media extends DomainResource {
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest|CarePlan)", "A procedure that is fulfilled in whole or in part by the creation of this media.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Any)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "The current state of the {{title}}.", 0, 1, status);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies whether the media is an image, video or audio recording or some other media category.", 0, 1, category);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "A code that classifies whether the media is an image, video or audio recording or some other media category.", 0, 1, type);
         case -622722335: /*modality*/  return new Property("modality", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, 1, modality);
         case 3619493: /*view*/  return new Property("view", "CodeableConcept", "The name of the imaging view e.g. Lateral or Antero-posterior (AP).", 0, 1, view);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen|Location)", "Who/What this Media is a record of.", 0, 1, subject);
@@ -1462,7 +1468,7 @@ public class Media extends DomainResource {
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : this.partOf.toArray(new Base[this.partOf.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<MediaStatus>
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -622722335: /*modality*/ return this.modality == null ? new Base[0] : new Base[] {this.modality}; // CodeableConcept
         case 3619493: /*view*/ return this.view == null ? new Base[0] : new Base[] {this.view}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
@@ -1501,8 +1507,8 @@ public class Media extends DomainResource {
           value = new MediaStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<MediaStatus>
           return value;
-        case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -622722335: // modality
           this.modality = castToCodeableConcept(value); // CodeableConcept
@@ -1571,8 +1577,8 @@ public class Media extends DomainResource {
         } else if (name.equals("status")) {
           value = new MediaStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<MediaStatus>
-        } else if (name.equals("category")) {
-          this.category = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("modality")) {
           this.modality = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("view")) {
@@ -1619,7 +1625,7 @@ public class Media extends DomainResource {
         case -332612366:  return addBasedOn(); 
         case -995410646:  return addPartOf(); 
         case -892481550:  return getStatusElement();
-        case 50511102:  return getCategory(); 
+        case 3575610:  return getType(); 
         case -622722335:  return getModality(); 
         case 3619493:  return getView(); 
         case -1867885268:  return getSubject(); 
@@ -1650,7 +1656,7 @@ public class Media extends DomainResource {
         case -332612366: /*basedOn*/ return new String[] {"Reference"};
         case -995410646: /*partOf*/ return new String[] {"Reference"};
         case -892481550: /*status*/ return new String[] {"code"};
-        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -622722335: /*modality*/ return new String[] {"CodeableConcept"};
         case 3619493: /*view*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
@@ -1687,9 +1693,9 @@ public class Media extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Media.status");
         }
-        else if (name.equals("category")) {
-          this.category = new CodeableConcept();
-          return this.category;
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
         }
         else if (name.equals("modality")) {
           this.modality = new CodeableConcept();
@@ -1783,7 +1789,7 @@ public class Media extends DomainResource {
             dst.partOf.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
-        dst.category = category == null ? null : category.copy();
+        dst.type = type == null ? null : type.copy();
         dst.modality = modality == null ? null : modality.copy();
         dst.view = view == null ? null : view.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -1824,7 +1830,7 @@ public class Media extends DomainResource {
           return false;
         Media o = (Media) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(partOf, o.partOf, true)
-           && compareDeep(status, o.status, true) && compareDeep(category, o.category, true) && compareDeep(modality, o.modality, true)
+           && compareDeep(status, o.status, true) && compareDeep(type, o.type, true) && compareDeep(modality, o.modality, true)
            && compareDeep(view, o.view, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
            && compareDeep(created, o.created, true) && compareDeep(issued, o.issued, true) && compareDeep(operator, o.operator, true)
            && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(bodySite, o.bodySite, true) && compareDeep(deviceName, o.deviceName, true)
@@ -1847,7 +1853,7 @@ public class Media extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, partOf
-          , status, category, modality, view, subject, context, created, issued, operator
+          , status, type, modality, view, subject, context, created, issued, operator
           , reasonCode, bodySite, deviceName, device, height, width, frames, duration
           , content, note);
       }
@@ -1942,6 +1948,26 @@ public class Media extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
+
+ /**
+   * Search parameter: <b>type</b>
+   * <p>
+   * Description: <b>Classification of media as image, video, or audio</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Media.type</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="type", path="Media.type", description="Classification of media as image, video, or audio", type="token" )
+  public static final String SP_TYPE = "type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>type</b>
+   * <p>
+   * Description: <b>Classification of media as image, video, or audio</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Media.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
 
  /**
    * Search parameter: <b>operator</b>
@@ -2086,26 +2112,6 @@ public class Media extends DomainResource {
    * the path value of "<b>Media:context</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("Media:context").toLocked();
-
- /**
-   * Search parameter: <b>category</b>
-   * <p>
-   * Description: <b>Classification of media as image, video, or audio</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Media.category</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="category", path="Media.category", description="Classification of media as image, video, or audio", type="token" )
-  public static final String SP_CATEGORY = "category";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>category</b>
-   * <p>
-   * Description: <b>Classification of media as image, video, or audio</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Media.category</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
 
  /**
    * Search parameter: <b>device</b>

@@ -21,6 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
@@ -31,11 +32,20 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LoadingValidationSupportDstu2 implements IValidationSupport {
 
 	private FhirContext myCtx = FhirContext.forDstu2Hl7Org();
 
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoadingValidationSupportDstu2.class);
+
+	@Override
+	public List<StructureDefinition> allStructures() {
+		return new ArrayList<>();
+	}
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {

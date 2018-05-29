@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -106,6 +107,29 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
 	}
+
+	@Test
+	public void testDeleteConditional() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM").addGiven("GIV");
+		IIdType id = myPatientDao.create(p).getId();
+
+		myClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+
+		myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?family=FAM&given=giv")
+			.execute();
+
+		try {
+			myClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -306,7 +330,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Location").getValue());
+			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Content-Location").getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -322,7 +346,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		resp = ourHttpClient.execute(putRequest);
 		try {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader("Location").getValue());
+			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -1561,7 +1585,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testExtensionUrlWithHl7Url() throws IOException {
 		String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/" + JpaConstants.OPERATION_VALIDATE);
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 
 		CloseableHttpResponse resp = ourHttpClient.execute(post);
@@ -4247,7 +4271,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue());
+			IdType newId = new IdType(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue());
 			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
 			assertNotEquals(id, newId);
 		} finally {
@@ -4286,7 +4310,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		response = ourHttpClient.execute(put);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
 			id2 = new IdType(newIdString);
 		} finally {

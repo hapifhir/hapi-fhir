@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -43,13 +44,16 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	Slice<Long> findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param("resid") Long theResourceId, @Param("restype") String theResourceName);
 
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL")
-	Slice<Long> findUnindexed(Pageable thePageRequest);
+	Slice<Long> findIdsOfResourcesRequiringReindexing(Pageable thePageable);
 
 	@Query("SELECT t.myResourceType as type, COUNT(*) as count FROM ResourceTable t GROUP BY t.myResourceType")
-	List<Map<?,?>> getResourceCounts();
+	List<Map<?, ?>> getResourceCounts();
 
 	@Modifying
 	@Query("UPDATE ResourceTable r SET r.myIndexStatus = null WHERE r.myResourceType = :restype")
 	int markResourcesOfTypeAsRequiringReindexing(@Param("restype") String theResourceType);
 
+	@Modifying
+	@Query("UPDATE ResourceTable r SET r.myIndexStatus = " + BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED + " WHERE r.myId = :resid")
+	void updateStatusToErrored(@Param("resid") Long theId);
 }

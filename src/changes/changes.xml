@@ -6,16 +6,53 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.4.0" date="TBD">
+		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
+						<li>Commons-Lang3 (All): 3.6 -&gt; 3.7</li>
 						<li>Hibernate (JPA): 5.2.12.Final -&gt; 5.2.16.Final</li>
 						<li>Javassist (JPA): 3.20.0-GA -&gt; 3.22.0-GA</li>
 					</ul>
 				]]>
+			</action>
+			<action type="add">
+				Several enhancements have been made to the JPA server index
+				tables. These enhancements consist of new colums that will be
+				used in a future version of HAPI FHIR to significantly decrease
+				the amount of space required for indexes on token and string index
+				types.
+				<![CDATA[<br/><br/>]]>
+				These new columns are not yet used in HAPI FHIR 3.4.0 but will be
+				enabled in HAPI FHIR 3.5.0. Anyone upgrading to HAPI FHIR 3.4.0 (or above)
+				is recommended to invoke the following SQL statement on their
+				database in order to reindex all data in a background job:
+				<![CDATA[<br/>]]>
+				<![CDATA[<pre>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</pre>]]>
+				<![CDATA[<br/>]]>
+				Note that if you do this reindex now, you will not have any downtime while
+				you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the
+				time that you upgrade to HAPI FHIR 3.5.0 some indexes may not be
+				available.
+				<![CDATA[<br/>]]>
+				In addition, the following schema changes should be made while upgrading:
+				<![CDATA[<br/>]]>
+				<![CDATA[<pre>update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
+alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</pre>]]>
+			</action>
+			<action type="add">
+				R4 structures have been updated to the latest definitions
+				(SVN 13732)
+			</action>
+			<action type="fix" issue="846">
+				When calling a getter on a DSTU3/R4 structure for a choice type
+				(e.g. Observation#getValueString()), a NullPointerException
+				was thrown if there was no value in this field, and the NPE
+				had no useful error message. Now this method call will simply
+				return null.
+				method
 			</action>
 			<action type="fix">
 				When performing a FHIR resource update in the JPA server
@@ -44,6 +81,13 @@
 				a number of LOINC ValueSets, and a number of LOINC ConceptMaps.
 				This work was sponsored by the Regenstrief Institute. Thanks
 				to Regenstrief for their support!
+			</action>
+			<action type="add">
+				The DSTU2 validator has been refactored to use the same codebase
+				as the DSTU3/R4 validator (which were harmonized in HAPI FHIR 3.3.0).
+				This means that we now have a single codebase for all validators, which
+				improves maintainability and brings a number of improvements
+				to the accuracy of DSTU2 resource validation.
 			</action>
 			<action type="fix">
 				When encoding a resource that had contained resources with user-supplied
@@ -115,6 +159,137 @@
 				content on the fly in order to reduct duplication in the codebase. These conversions
 				happened upon every validation however, instead of only happening once which adversely
 				affected performance. A cache has been added.
+			</action>
+			<action type="add" issue="903">
+				Fix a bug in the DSTU2 QuestionnaireResponseValidator which prevented validation
+				on groups with only one question. Thanks David Gileadi for the pull request!
+			</action>
+			<action type="add" issue="709">
+				The <![CDATA[<code>ConceptMap</code>]] operation <![CDATA[<code>$translate</code>]]> has been
+				implemented.
+			</action>
+			<action type="add" issue="927">
+				HAPI-FHIR_CLI now includes two new commands: one for importing and populating a
+				<![CDATA[<code>ConceptMap</code>]]> resource from a CSV; and one for exporting a
+				<![CDATA[<code>ConceptMap</code>]]> resource to a CSV.
+			</action>
+			<action type="add">
+				Operation methods on a plain server may now use parameters
+				of type String (i.e. plain Java strings), and any FHIR primitive
+				datatype will be automatically coerced into a String.
+			</action>
+			<action type="add">
+				The HAPI FHIR CLI now supports importing an IGPack file as an import
+				to the validation process.
+			</action>
+			<action type="add">
+				When two threads attempt to update the same resource at the same time, previously
+				an unspecified error was thrown by the JPA server. An HTTP 409
+				(Conflict) with an informative error message is now thrown.
+			</action>
+			<action type="fix">
+				A bug in the JPA server's DSTU2 transaction processing routine caused it
+				to occasionally consume two database connections, which could lead to deadlocks
+				under heavy load. This has been fixed.
+			</action>
+			<action type="fix">
+				AuthorizationInterceptor sometimes incorrectly identified an operation
+				invocation at the type level as being at the instance level if the method
+				indicated that the IdParam parameter was optional. This has been fixed.
+			</action>
+			<action type="add">
+				StructureDefinitions for the FHIR standard extensions have been added to the
+				hapi-fhir-validation-resources-XXXX modules. Thanks to Patrick Werner for the
+				pull request! These have also been added to the list of definitions uploaded
+				by the CLI "upload-definitions" command.
+			</action>
+			<action type="fix">
+				A workaround for an invalid search parameter path in the R4 consent
+				resource has been implemented. This path was preventing some Consent
+				resources from successfully being uploaded to the JPA server. Thanks to
+				Anthony Sute for identifying this.
+			</action>
+			<action type="fix" issue="937">
+				A hard-to-understand validation message was fixed in the validator when 
+				validating against profiles that declare some elements as mustSupport
+				but have others used but not declared as mustSupport. Thanks to Patrick
+				Werner for the PR!
+			</action>
+			<action type="add" issue="926">
+				The HAPI FHIR CLI is now available for installation on OSX using the
+				(really excellent) Homebrew package manager thanks to an effort by
+				John Grimes to get it added. Thanks John!
+			</action>
+			<action type="add" issue="953">
+				When the REST Server experiences an expected error (such as a NullPointerException)
+				in a resource provider class, a simple message of "Failed to call access method" is
+				returned to the user. This has been enhanced to also include the message from
+				the underlying exception.
+			</action>
+			<action type="fix" issue="836">
+				A bug in the plain server was fixed that prevented some includes from
+				correctly causing their targets to be included in the response bundle.
+				Thanks to GitHub user @RuthAlk for the pull request!
+			</action>
+			<action type="add" issue="857">
+				DateRangeParameter was enhanced to support convenient method chanining, and 
+				the parameter validation was improved to only change state after validating
+				that parameters were valid. Thanks to Gaetano Gallo for the pull request!
+			</action>
+			<action type="fix" issue="867">
+				The HumanName DSTU3+ datatype had convenience methods for testing
+				whether the name has a specific given name or not, but these methods
+				did not work. Thanks to Jason Owen for reporting and providing a test
+				case!
+			</action>
+			<action type="fix" issue="874">
+				An issue was corrected in the validator where Questionnaire references that
+				used contained resources caused an unexpected crash. Thanks to
+				Heinz-Dieter Conradi for the pull request!
+			</action>
+			<action type="add" issue="875">
+				An issue in the narrative generator template for the CodeableConcept
+				datatype was corrected. Thanks to @RuthAlk for the pull request!
+			</action>
+			<action type="add">
+				The JPA server automatic reindexing process has been tweaked so that it no
+				longer runs once per minute (this was a heavy strain on large databases)
+				but will instead run once an hour unless triggered for some reason. In addition,
+				the number of threads allocated to reindexing may now be adjusted via a
+				setting in the DaoConfig.
+			</action>
+			<action type="fix">
+				AuthorizationInterceptor did not correctly grant access to resources
+				by compartment when the reference on the target resource that pointed
+				to the compartment owner was defined using a resource object (ResourceReference#setResource)
+				instead of a reference (ResourceReference#setReference).
+			</action>
+			<action type="add" issue="880">
+				Several tests were added to ensure accurate validation of QuestionnaireResponse
+				resources. Thanks to Heinz-Dieter Conradi for the pull request!
+			</action>
+			<action type="add" issue="886">
+				A NullPointerException when validating some QuestionnaireResponse reousrces
+				was fixed in the validator. Thanks to Heinz-Dieter Conradi for the pull request!
+			</action>
+			<action type="add" issue="892">
+				QuestionnaireResponse answers of type "text" may now be validated by the
+				FhirInstanceValidator. Thanks to Heinz-Dieter Conradi for the pull request!
+			</action>
+			<action type="fix">
+				The REST server has been modified so that the 
+				<![CDATA[<code>Location</code>]]>
+				header is no longer returned by the server on read or update responses.
+				This header was returned in the past, but this header is actually 
+				inappropriate for any response that is not a create operation.
+				The
+				<![CDATA[<code>Content-Location</code>]]>
+				will still be returned, and will hold the same contents.
+			</action>
+			<action type="fix">
+				The Postgres sample JPA project was fixed to use the current version
+				of HAPI FHIR (it was previously stuck on 2.2). Thanks to
+				Kai Liu for the pull request!
 			</action>
 		</release>
 		<release version="3.3.0" date="2018-03-29">
@@ -690,7 +865,7 @@ ALTER TABLE hfj_res_ver ALTER COLUMN res_text DROP NOT NULL;</pre>
 				in FHIR resource (XML/JSON) format.
 			</action>
 			<action type="add">
-				The Binary resource endpoint now supports the `X-Security-Context` header when
+				The Binary resource endpoint now supports the <![CDATA[<code>X-Security-Context</code>]]> header when
 				reading or writing Binary contents using their native Content-Type (i.e exchanging
 				the raw binary with the server, as opposed to exchanging a FHIR resource).
 			</action>

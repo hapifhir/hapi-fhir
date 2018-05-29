@@ -6,8 +6,9 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.4.0-SNAPSHOT</version>
+	<version>3.5.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
+	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
 
 	<organization>
@@ -27,6 +28,10 @@
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
 		<site>
 			<id>git.server</id>
 			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
@@ -51,11 +56,21 @@
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
+		<!--
+		Snapshots should generally not be needed
+		<repository>
+			<id>oss-snapshot</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		-->
 	</repositories>
-
-	<description>
-	</description>
 
 	<dependencies>
 		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
@@ -415,6 +430,34 @@
 			<name>John Poth</name>
 			<organization>Red Hat</organization>
 		</developer>
+		<developer>
+			<id>t4deon</id>
+			<name>Andreas Keil</name>
+		</developer>
+		<developer>
+			<id>dgileadi</id>
+			<name>David Gileadi</name>
+		</developer>
+		<developer>
+			<id>RuthAlk</id>
+		</developer>
+		<developer>
+			<id>Tastelezz</id>
+			<name>Gaetano Gallo</name>
+			<organization>InterComponentWare AG</organization>
+		</developer>
+		<developer>
+			<id>jasonaown</id>
+			<name>Jason Owen</name>
+		</developer>
+		<developer>
+			<id>hdconradi</id>
+			<name>Heinz-Dieter Conradi</name>
+		</developer>
+		<developer>
+			<id>kliu99</id>
+			<name>Kai Liu</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -436,16 +479,17 @@
 
 		<!-- Dependency Versions -->
 		<apache_karaf_version>4.1.4</apache_karaf_version>
+		<aries_spifly_version>1.0.10</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.10</commons_codec_version>
 		<commons_io_version>2.5</commons_io_version>
-		<commons_lang3_version>3.6</commons_lang3_version>
-		<derby_version>10.14.1.0</derby_version>
+		<commons_lang3_version>3.7</commons_lang3_version>
+		<derby_version>10.14.2.0</derby_version>
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
 		<guava_version>25.0-jre</guava_version>
 		<gson_version>2.8.1</gson_version>
 		<jaxb_api_version>2.3.0</jaxb_api_version>
-		<jaxb_core_version>2.3.0</jaxb_core_version>
+		<jaxb_runtime_version>2.3.0</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
 		<jetty_version>9.4.8.v20171121</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
@@ -456,12 +500,13 @@
 		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
+		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<phloc_schematron_version>2.7.1</phloc_schematron_version>
-		<phloc_commons_version>4.4.11</phloc_commons_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
+		<ph_schematron_version>5.0.4</ph_schematron_version>
+		<ph_commons_version>9.1.1</ph_commons_version>
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<spring_version>5.0.3.RELEASE</spring_version>
@@ -565,14 +610,14 @@
 				<version>23.0</version>
 			</dependency>
 			<dependency>
-				<groupId>com.phloc</groupId>
-				<artifactId>phloc-schematron</artifactId>
-				<version>${phloc_schematron_version}</version>
+				<groupId>com.helger</groupId>
+				<artifactId>ph-schematron</artifactId>
+				<version>${ph_schematron_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.phloc</groupId>
-				<artifactId>phloc-commons</artifactId>
-				<version>${phloc_commons_version}</version>
+				<groupId>com.helger</groupId>
+				<artifactId>ph-commons</artifactId>
+				<version>${ph_commons_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
@@ -593,6 +638,11 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>${commons_codec_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -950,7 +1000,12 @@
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
 			</dependency>
-			<!--<dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>${jaxb_runtime_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
 				<version>${jersey_version}</version>
@@ -1192,6 +1247,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.7.0</version>
 					<configuration>
@@ -1259,7 +1319,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>2.20</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1320,7 +1380,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.14</version>
+					<version>1.16</version>
 					<configuration>
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
@@ -1524,18 +1584,22 @@
 						<goals>
 							<goal>enforce</goal>
 						</goals>
-						<configuration>
-							<rules>
-								<requireJavaVersion>
-									<version>[1.8,)</version>
-									<message>
-										The hapi-fhir Maven build requires JDK version 1.8 or higher.
-									</message>
-								</requireJavaVersion>
-							</rules>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<rules>
+						<requireMavenVersion>
+							<version>3.3</version>
+						</requireMavenVersion>
+						<requireJavaVersion>
+							<!--<version>[1.8,)</version>-->
+							<version>1.8</version>
+							<message>
+								The hapi-fhir Maven build requires JDK version 1.8.x.
+							</message>
+						</requireJavaVersion>
+					</rules>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -2034,6 +2098,7 @@
 				<module>hapi-fhir-validation-resources-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
+				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
@@ -2055,9 +2120,9 @@
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-dynamic</module>
+				<module>example-projects/hapi-fhir-jpaserver-example-postgres</module>
 				<module>tests/hapi-fhir-base-test-mindeps-client</module>
 				<module>tests/hapi-fhir-base-test-mindeps-server</module>
-				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-spring-boot</module>
 				<!--<module>hapi-fhir-osgi-core</module>-->
 			</modules>

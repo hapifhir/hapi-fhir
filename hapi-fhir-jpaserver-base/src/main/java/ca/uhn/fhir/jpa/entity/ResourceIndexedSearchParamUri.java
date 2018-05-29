@@ -30,7 +30,6 @@ import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
 
-//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_URI", indexes = {
@@ -39,11 +38,10 @@ import javax.persistence.*;
 	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 })
-//@formatter:on
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
-	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here 
+	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
 	public static final int MAX_LENGTH = 255;
 
@@ -56,13 +54,36 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
 	@Column(name = "SP_ID")
 	private Long myId;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_URI", nullable = true)
+	private Long myHashUri;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamUri() {
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamUri(String theName, String theUri) {
 		setParamName(theName);
 		setUri(theUri);
+	}
+
+	@PrePersist
+	public void calculateHashes() {
+		if (myHashUri == null) {
+			setHashUri(hash(getResourceType(), getParamName(), getUri()));
+		}
+	}
+
+	@Override
+	protected void clearHashes() {
+		myHashUri = null;
 	}
 
 	@Override
@@ -81,7 +102,17 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getParamName(), obj.getParamName());
 		b.append(getResource(), obj.getResource());
 		b.append(getUri(), obj.getUri());
+		b.append(getHashUri(), obj.getHashUri());
 		return b.isEquals();
+	}
+
+	public Long getHashUri() {
+		calculateHashes();
+		return myHashUri;
+	}
+
+	public void setHashUri(Long theHashUri) {
+		myHashUri = theHashUri;
 	}
 
 	@Override
@@ -103,6 +134,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getParamName());
 		b.append(getResource());
 		b.append(getUri());
+		b.append(getHashUri());
 		return b.toHashCode();
 	}
 

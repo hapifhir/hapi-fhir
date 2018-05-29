@@ -1085,7 +1085,7 @@
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s68"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s77"><Data ss:Type="String">Date that that application was made</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s77"><Data ss:Type="String">Date that the application was made</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="Default">
     <Cell ss:StyleID="s76"><Data ss:Type="String">MedicinalProductAuthorization.marketingStatus</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>

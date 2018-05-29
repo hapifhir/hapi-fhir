@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
  */
@@ -248,7 +249,7 @@ public class Meta extends Type implements IBaseMetaType {
       if (this.profile == null)
         return false;
       for (UriType v : this.profile)
-        if (v.equals(value)) // uri
+        if (v.getValue().equals(value)) // uri
           return true;
       return false;
     }
@@ -408,13 +409,26 @@ public class Meta extends Type implements IBaseMetaType {
     }
     return null;
   }
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, java.lang.Integer.MAX_VALUE, versionId));
-        childrenList.add(new Property("lastUpdated", "instant", "When the resource last changed - e.g. when the version changed.", 0, java.lang.Integer.MAX_VALUE, lastUpdated));
-        childrenList.add(new Property("profile", "uri", "A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].", 0, java.lang.Integer.MAX_VALUE, profile));
-        childrenList.add(new Property("security", "Coding", "Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.", 0, java.lang.Integer.MAX_VALUE, security));
-        childrenList.add(new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, 1, versionId));
+        children.add(new Property("lastUpdated", "instant", "When the resource last changed - e.g. when the version changed.", 0, 1, lastUpdated));
+        children.add(new Property("profile", "uri", "A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].", 0, java.lang.Integer.MAX_VALUE, profile));
+        children.add(new Property("security", "Coding", "Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.", 0, java.lang.Integer.MAX_VALUE, security));
+        children.add(new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1407102957: /*versionId*/  return new Property("versionId", "id", "The version specific identifier, as it appears in the version portion of the URL. This values changes when the resource is created, updated, or deleted.", 0, 1, versionId);
+        case 1649733957: /*lastUpdated*/  return new Property("lastUpdated", "instant", "When the resource last changed - e.g. when the version changed.", 0, 1, lastUpdated);
+        case -309425751: /*profile*/  return new Property("profile", "uri", "A list of profiles (references to [[[StructureDefinition]]] resources) that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].", 0, java.lang.Integer.MAX_VALUE, profile);
+        case 949122880: /*security*/  return new Property("security", "Coding", "Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.", 0, java.lang.Integer.MAX_VALUE, security);
+        case 114586: /*tag*/  return new Property("tag", "Coding", "Tags applied to this resource. Tags are intended to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.", 0, java.lang.Integer.MAX_VALUE, tag);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -550,24 +564,24 @@ public class Meta extends Type implements IBaseMetaType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Meta))
+        if (!(other_ instanceof Meta))
           return false;
-        Meta o = (Meta) other;
+        Meta o = (Meta) other_;
         return compareDeep(versionId, o.versionId, true) && compareDeep(lastUpdated, o.lastUpdated, true)
            && compareDeep(profile, o.profile, true) && compareDeep(security, o.security, true) && compareDeep(tag, o.tag, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Meta))
+        if (!(other_ instanceof Meta))
           return false;
-        Meta o = (Meta) other;
+        Meta o = (Meta) other_;
         return compareValues(versionId, o.versionId, true) && compareValues(lastUpdated, o.lastUpdated, true)
            && compareValues(profile, o.profile, true);
       }

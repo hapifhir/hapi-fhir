@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -1875,14 +1875,14 @@ public class VisionPrescription extends DomainResource {
     /**
      * The healthcare professional responsible for authorizing the prescription.
      */
-    @Child(name = "prescriber", type = {Practitioner.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "prescriber", type = {Practitioner.class, PractitionerRole.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who authorizes the vision product", formalDefinition="The healthcare professional responsible for authorizing the prescription." )
     protected Reference prescriber;
 
     /**
      * The actual object that is the target of the reference (The healthcare professional responsible for authorizing the prescription.)
      */
-    protected Practitioner prescriberTarget;
+    protected Resource prescriberTarget;
 
     /**
      * Can be the reason or the indication for writing the prescription.
@@ -1898,7 +1898,7 @@ public class VisionPrescription extends DomainResource {
     @Description(shortDefinition="Vision supply authorization", formalDefinition="Deals with details of the dispense part of the supply specification." )
     protected List<VisionPrescriptionDispenseComponent> dispense;
 
-    private static final long serialVersionUID = 603347490L;
+    private static final long serialVersionUID = -1803032530L;
 
   /**
    * Constructor
@@ -2173,19 +2173,14 @@ public class VisionPrescription extends DomainResource {
     /**
      * @return {@link #prescriber} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare professional responsible for authorizing the prescription.)
      */
-    public Practitioner getPrescriberTarget() { 
-      if (this.prescriberTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create VisionPrescription.prescriber");
-        else if (Configuration.doAutoCreate())
-          this.prescriberTarget = new Practitioner(); // aa
+    public Resource getPrescriberTarget() { 
       return this.prescriberTarget;
     }
 
     /**
      * @param value {@link #prescriber} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare professional responsible for authorizing the prescription.)
      */
-    public VisionPrescription setPrescriberTarget(Practitioner value) { 
+    public VisionPrescription setPrescriberTarget(Resource value) { 
       this.prescriberTarget = value;
       return this;
     }
@@ -2201,26 +2196,30 @@ public class VisionPrescription extends DomainResource {
      * @return {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
     public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
+      if (this.reason == null)
+        return null;
       if (!(this.reason instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
     public boolean hasReasonCodeableConcept() { 
-      return this.reason instanceof CodeableConcept;
+      return this != null && this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
     public Reference getReasonReference() throws FHIRException { 
+      if (this.reason == null)
+        return null;
       if (!(this.reason instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
     public boolean hasReasonReference() { 
-      return this.reason instanceof Reference;
+      return this != null && this.reason instanceof Reference;
     }
 
     public boolean hasReason() { 
@@ -2231,6 +2230,8 @@ public class VisionPrescription extends DomainResource {
      * @param value {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
     public VisionPrescription setReason(Type value) { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new Error("Not the right type for VisionPrescription.reason[x]: "+value.fhirType());
       this.reason = value;
       return this;
     }
@@ -2295,7 +2296,7 @@ public class VisionPrescription extends DomainResource {
         children.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the vision products will be supplied.", 0, 1, patient));
         children.add(new Property("encounter", "Reference(Encounter)", "A link to a resource that identifies the particular occurrence of contact between patient and health care provider.", 0, 1, encounter));
         children.add(new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, 1, dateWritten));
-        children.add(new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, 1, prescriber));
+        children.add(new Property("prescriber", "Reference(Practitioner|PractitionerRole)", "The healthcare professional responsible for authorizing the prescription.", 0, 1, prescriber));
         children.add(new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason));
         children.add(new Property("dispense", "", "Deals with details of the dispense part of the supply specification.", 0, java.lang.Integer.MAX_VALUE, dispense));
       }
@@ -2308,7 +2309,7 @@ public class VisionPrescription extends DomainResource {
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the vision products will be supplied.", 0, 1, patient);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "A link to a resource that identifies the particular occurrence of contact between patient and health care provider.", 0, 1, encounter);
         case -1496880759: /*dateWritten*/  return new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, 1, dateWritten);
-        case 1430631077: /*prescriber*/  return new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, 1, prescriber);
+        case 1430631077: /*prescriber*/  return new Property("prescriber", "Reference(Practitioner|PractitionerRole)", "The healthcare professional responsible for authorizing the prescription.", 0, 1, prescriber);
         case -669418564: /*reason[x]*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
         case -934964668: /*reason*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
         case -610155331: /*reasonCodeableConcept*/  return new Property("reason[x]", "CodeableConcept|Reference(Condition)", "Can be the reason or the indication for writing the prescription.", 0, 1, reason);
@@ -2534,7 +2535,7 @@ public class VisionPrescription extends DomainResource {
    * Path: <b>VisionPrescription.prescriber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the vision product", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class, PractitionerRole.class } )
   public static final String SP_PRESCRIBER = "prescriber";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>prescriber</b>

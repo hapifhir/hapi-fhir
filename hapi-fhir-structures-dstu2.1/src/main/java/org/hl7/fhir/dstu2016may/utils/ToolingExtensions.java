@@ -98,7 +98,7 @@ public class ToolingExtensions {
   public static final String EXT_CIMI_REFERENCE = "http://hl7.org/fhir/StructureDefinition/cimi-reference";
   public static final String EXT_UNCLOSED = "http://hl7.org/fhir/StructureDefinition/valueset-unclosed";
   public static final String EXT_FMM_LEVEL = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm";
-
+  
 
   // specific extension helpers
 

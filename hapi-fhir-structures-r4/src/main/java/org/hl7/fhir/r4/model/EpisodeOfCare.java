@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -829,14 +829,14 @@ public class EpisodeOfCare extends DomainResource {
 
 
     /**
-     * The practitioner that is the care manager/care co-ordinator for this patient.
+     * The practitioner that is the care manager/care coordinator for this patient.
      */
     @Child(name = "careManager", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Care manager/care co-ordinator for the patient", formalDefinition="The practitioner that is the care manager/care co-ordinator for this patient." )
+    @Description(shortDefinition="Care manager/care coordinator for the patient", formalDefinition="The practitioner that is the care manager/care coordinator for this patient." )
     protected Reference careManager;
 
     /**
-     * The actual object that is the target of the reference (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * The actual object that is the target of the reference (The practitioner that is the care manager/care coordinator for this patient.)
      */
     protected Practitioner careManagerTarget;
 
@@ -1327,7 +1327,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #careManager} (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @return {@link #careManager} (The practitioner that is the care manager/care coordinator for this patient.)
      */
     public Reference getCareManager() { 
       if (this.careManager == null)
@@ -1343,7 +1343,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @param value {@link #careManager} (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @param value {@link #careManager} (The practitioner that is the care manager/care coordinator for this patient.)
      */
     public EpisodeOfCare setCareManager(Reference value) { 
       this.careManager = value;
@@ -1351,7 +1351,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #careManager} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @return {@link #careManager} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care coordinator for this patient.)
      */
     public Practitioner getCareManagerTarget() { 
       if (this.careManagerTarget == null)
@@ -1363,7 +1363,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @param value {@link #careManager} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @param value {@link #careManager} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care coordinator for this patient.)
      */
     public EpisodeOfCare setCareManagerTarget(Practitioner value) { 
       this.careManagerTarget = value;
@@ -1531,7 +1531,7 @@ public class EpisodeOfCare extends DomainResource {
         children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, 1, managingOrganization));
         children.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, 1, period));
         children.add(new Property("referralRequest", "Reference(ServiceRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
-        children.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, 1, careManager));
+        children.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care coordinator for this patient.", 0, 1, careManager));
         children.add(new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team));
         children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account));
       }
@@ -1548,7 +1548,7 @@ public class EpisodeOfCare extends DomainResource {
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, 1, managingOrganization);
         case -991726143: /*period*/  return new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, 1, period);
         case -310299598: /*referralRequest*/  return new Property("referralRequest", "Reference(ServiceRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest);
-        case -1147746468: /*careManager*/  return new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, 1, careManager);
+        case -1147746468: /*careManager*/  return new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care coordinator for this patient.", 0, 1, careManager);
         case 3555933: /*team*/  return new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team);
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1996,17 +1996,17 @@ public class EpisodeOfCare extends DomainResource {
  /**
    * Search parameter: <b>care-manager</b>
    * <p>
-   * Description: <b>Care manager/care co-ordinator for the patient</b><br>
+   * Description: <b>Care manager/care coordinator for the patient</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care coordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_CARE_MANAGER = "care-manager";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>care-manager</b>
    * <p>
-   * Description: <b>Care manager/care co-ordinator for the patient</b><br>
+   * Description: <b>Care manager/care coordinator for the patient</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>

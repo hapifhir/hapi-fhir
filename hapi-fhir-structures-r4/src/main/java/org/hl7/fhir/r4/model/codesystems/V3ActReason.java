@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -228,6 +228,18 @@ public enum V3ActReason {
          */
         HOPERAT, 
         /**
+         * To perform analytics, evaluation and other secondary uses of treatment and healthcare related information to manage the quality, efficacy, patient safety, population health, and cost effectiveness of healthcare delivery. Explicitly excludes the use of information to organize the delivery of health care for care coordination and case management, or to provide healthcare treatment.
+
+                        
+                           Usage Note: The concept of care management is narrower than the list of activities related to more general organizational objectives such as provider profiling, education of healthcare and non-healthcare professionals; insurance underwriting, premium rating, reinsurance; organizational legal, medical review, auditing, compliance and fraud and abuse detection; business planning, development, and restructuring; fund-raising; and customer service.
+
+                        
+                           Map: Maps to ISO 14265 Classification Term "Health service management and quality assurance" described as "To inform persons or processes responsible for determining the availability, quality, safety, equity and cost-effectiveness of health care services." 
+
+                        There is a semantic gap in concepts.  This classification term  is described as activities, i.e., "to inform persons" or "to inform processes" rather than the rationale for performing actions/operations on information related to the activity.
+         */
+        CAREMGT, 
+        /**
          * To perform one or more operations on information used for cadaveric organ, eye or tissue donation.
          */
         DONAT, 
@@ -265,6 +277,19 @@ public enum V3ActReason {
                            health information exchange patient directory
          */
         HDIRECT, 
+        /**
+         * To perform one or more actions on information used for conducting administrative and contractual activities by or on behalf of organizational entities responsible for delivery of  an individual's benefits in a healthcare program, health plan or insurance.   Explicitly excludes the use of information to organize the delivery of health care for care coordination and case management, or to provide healthcare treatment.
+
+
+                        
+                           Usage Note: Examples of activities conducted under this purpose of use: provider profiling, risk adjustment, underwriting, fraud and abuse, quality improvement population health and care management. Aligns with HIPAA Operation POU minus coordination of care or other treatment related activities. Similar to the description in SAMHSA Confidentiality of Substance Use Disorder Patient Records Supplemental notice of proposed rulemaking.
+
+                        
+                           Map: Maps to ISO 14265 Classification Term  "Administration of care for an individual subject of care" described as "To inform persons or processes responsible for enabling the availability of resources or funding or permissions for providing health care services to the subject of care."
+
+                        However, this classification term is described as activities, i.e., "to inform persons" or "to inform processes" rather than the rationale for performing actions/operations on information related to the activity.
+         */
+        HDM, 
         /**
          * To perform one or more operations on information for conducting activities required by legal proceeding.
          */
@@ -441,17 +466,45 @@ public enum V3ActReason {
          */
         TREAT, 
         /**
-         * To perform one or more operations on information for provision of health care coordination.
-         */
-        CAREMGT, 
-        /**
          * To perform health care as part of the clinical trial protocol.
          */
         CLINTRL, 
         /**
+         * To perform one or more actions on information in order to organize the provision and case management of an individualâ€™s healthcare, including: Monitoring a person's goals, needs, and preferences; acting as the communication link between two or more participants concerned with a person's health and wellness; organizing and facilitating care activities and promoting self-management by advocating for, empowering, and educating a person; and ensuring safe, appropriate, non-duplicative, and effective integrated care.
+
+                        
+                           Usage Note: Use when describing these functions: 1. Monitoring a personâ€™s goals, needs, and preferences.   2. Acting as the communication link between two or more participants concerned with a person's health and wellness.  3. Organizing and facilitating care activities and promoting self-management by advocating for, empowering, and educating a person.  4. Ensuring safe, appropriate, non-duplicative, and effective integrated care.
+
+                        The goal is to clearly differentiate this type of coordination of care from HIPAA Operations by specifying that these actions on information are undertaken in the provision of healthcare treatment.
+
+                        For similar uses of this concept, see SAMHSA Confidentiality of Substance Use Disorder Patient Records Supplemental notice of proposed rulemaking, which differentiates concepts of care coordination and case management for the provision of treatment as specifically distinct from activities related to health care delivery management and the operations of organizational entities involved in the delivery of healthcare.
+
+                        
+                           Map: Maps to ISO 14265 Classification Terms: "Support of care activities within the provider organisation for an individual subject of care" described as "To inform persons or processes enabling others to provide health care services to the subject of care."  "Subject of Care Uses" described as "To inform the subject of care in support of his or her own interests."
+         */
+        COC, 
+        /**
          * To perform one or more operations on information for provision of immediately needed health care for an emergent condition.
          */
         ETREAT, 
+        /**
+         * To perform policy override operations on information for provision of immediately needed health care for an emergent condition affecting potential harm, death or patient safety by end users who are not provisioned for this purpose of use.  Includes override of organizational provisioning policies and may include override of subject of care consent directive restricting access.
+
+                        
+                           Map: Partially Maps to ISO 14265 Classification Term "Emergency care provision to an individual subject of care" described as "To inform persons needing to provide health care services to the subject of care urgently, possibly needing to over-ride the  policies and consents pertaining to Purpose 1 above." Purpose 1 is equivalent to HL7 treatment purpose of use: "Clinical care provision to an individual subject of care" described as "To inform persons or processes responsible for providing health care services to the subject of care."
+The ISO description conflates both of the proposed specializations of HL7 ETREAT: break the glass and the typically broader access to health information normally available to providers who are provisioned for emergency workflows on a regular basis, e.g., Emergency Room providers. Examples of greater access than is normally accessible by providers based on the need to know are access to sensitive information for which access typically requires a patient's consent.  This is not an override of a patient's dissent to disclose sensitive information in cases where the applicable policy waives the need for that consent to access this information. In US, Title 38 Section 7332 and 42 CFR Part 2 both permit emergency access without the need to override a patient's consent directive; rather, this access is a limitation to the patient's right to dissent from disclosure.
+         */
+        BTG, 
+        /**
+         * To perform one or more operations on information for provision of immediately needed health care for an emergent condition in an emergency room or similar emergent care context by end users provisioned for this purpose, which does not constitute as policy override such as in a "Break the Glass" purpose of use.
+
+                        Map:Partially Maps to ISO 14265 Classification Term "Emergency care provision to an individual subject of care" described as "To inform persons needing to provide health care services to the subject of care urgently, possibly needing to over-ride the  policies and consents pertaining to Purpose 1 above." Purpose 1 is equivalent to HL7 treatment purpose of use: "Clinical care provision to an individual subject of care" described as "To inform persons or processes responsible for providing health care services to the subject of care."
+
+                        The ISO description conflates both of the proposed specializations of HL7 ETREAT: break the glass and the typically broader access to health information normally available to providers who are provisioned for emergency workflows on a regular basis, e.g., Emergency Room providers. Examples of greater access than is normally accessible by providers based on the need to know are access to sensitive information for which access typically requires a patient's consent.  This is not an override of a patient's dissent to disclose sensitive information in cases where the applicable policy waives the need for that consent to access this information. In US, Title 38 Section 7332 and 42 CFR Part 2 both permit emergency access without the need to override a patient's consent directive; rather, this access is a limitation to the patient's right to dissent from disclosure. 
+
+                        There is a semantic gap in concepts.  This classification term is described as activities â€œto inform personsâ€? rather than the rationale for performing actions/operations on information related to the activity.
+         */
+        ERTREAT, 
         /**
          * To perform one or more operations on information for provision of health care to a population of living subjects, e.g., needle exchange program.
          */
@@ -1325,6 +1378,8 @@ public enum V3ActReason {
           return HMARKT;
         if ("HOPERAT".equals(codeString))
           return HOPERAT;
+        if ("CAREMGT".equals(codeString))
+          return CAREMGT;
         if ("DONAT".equals(codeString))
           return DONAT;
         if ("FRAUD".equals(codeString))
@@ -1339,6 +1394,8 @@ public enum V3ActReason {
           return HDECD;
         if ("HDIRECT".equals(codeString))
           return HDIRECT;
+        if ("HDM".equals(codeString))
+          return HDM;
         if ("HLEGAL".equals(codeString))
           return HLEGAL;
         if ("HOUTCOMS".equals(codeString))
@@ -1423,12 +1480,16 @@ public enum V3ActReason {
           return THREAT;
         if ("TREAT".equals(codeString))
           return TREAT;
-        if ("CAREMGT".equals(codeString))
-          return CAREMGT;
         if ("CLINTRL".equals(codeString))
           return CLINTRL;
+        if ("COC".equals(codeString))
+          return COC;
         if ("ETREAT".equals(codeString))
           return ETREAT;
+        if ("BTG".equals(codeString))
+          return BTG;
+        if ("ERTREAT".equals(codeString))
+          return ERTREAT;
         if ("POPHLTH".equals(codeString))
           return POPHLTH;
         if ("_ActInformationPrivacyReason".equals(codeString))
@@ -1847,6 +1908,7 @@ public enum V3ActReason {
             case PURPOSEOFUSE: return "PurposeOfUse";
             case HMARKT: return "HMARKT";
             case HOPERAT: return "HOPERAT";
+            case CAREMGT: return "CAREMGT";
             case DONAT: return "DONAT";
             case FRAUD: return "FRAUD";
             case GOV: return "GOV";
@@ -1854,6 +1916,7 @@ public enum V3ActReason {
             case HCOMPL: return "HCOMPL";
             case HDECD: return "HDECD";
             case HDIRECT: return "HDIRECT";
+            case HDM: return "HDM";
             case HLEGAL: return "HLEGAL";
             case HOUTCOMS: return "HOUTCOMS";
             case HPRGRP: return "HPRGRP";
@@ -1896,9 +1959,11 @@ public enum V3ActReason {
             case DISASTER: return "DISASTER";
             case THREAT: return "THREAT";
             case TREAT: return "TREAT";
-            case CAREMGT: return "CAREMGT";
             case CLINTRL: return "CLINTRL";
+            case COC: return "COC";
             case ETREAT: return "ETREAT";
+            case BTG: return "BTG";
+            case ERTREAT: return "ERTREAT";
             case POPHLTH: return "POPHLTH";
             case _ACTINFORMATIONPRIVACYREASON: return "_ActInformationPrivacyReason";
             case MARKT: return "MARKT";
@@ -2131,6 +2196,7 @@ public enum V3ActReason {
             case PURPOSEOFUSE: return "Reason for performing one or more operations on information, which may be permitted by source system's security policy in accordance with one or more privacy policies and consent directives.\r\n\n                        \n                           Usage Notes: The rationale or purpose for an act relating to the management of personal health information, such as collecting personal health information for research or public health purposes.";
             case HMARKT: return "To perform one or more operations on information for marketing services and products related to health care.";
             case HOPERAT: return "To perform one or more operations on information used for conducting administrative and contractual activities related to the provision of health care.";
+            case CAREMGT: return "To perform analytics, evaluation and other secondary uses of treatment and healthcare related information to manage the quality, efficacy, patient safety, population health, and cost effectiveness of healthcare delivery. Explicitly excludes the use of information to organize the delivery of health care for care coordination and case management, or to provide healthcare treatment.\r\n\n                        \n                           Usage Note: The concept of care management is narrower than the list of activities related to more general organizational objectives such as provider profiling, education of healthcare and non-healthcare professionals; insurance underwriting, premium rating, reinsurance; organizational legal, medical review, auditing, compliance and fraud and abuse detection; business planning, development, and restructuring; fund-raising; and customer service.\r\n\n                        \n                           Map: Maps to ISO 14265 Classification Term \"Health service management and quality assurance\" described as \"To inform persons or processes responsible for determining the availability, quality, safety, equity and cost-effectiveness of health care services.\" \r\n\n                        There is a semantic gap in concepts.  This classification term  is described as activities, i.e., \"to inform persons\" or \"to inform processes\" rather than the rationale for performing actions/operations on information related to the activity.";
             case DONAT: return "To perform one or more operations on information used for cadaveric organ, eye or tissue donation.";
             case FRAUD: return "To perform one or more operations on information used for fraud detection and prevention processes.";
             case GOV: return "To perform one or more operations on information used within government processes.";
@@ -2138,6 +2204,7 @@ public enum V3ActReason {
             case HCOMPL: return "To perform one or more operations on information used for conducting activities required to meet a mandate.";
             case HDECD: return "To perform one or more operations on information used for handling deceased patient matters.";
             case HDIRECT: return "To perform one or more operation operations on information used to manage a patient directory.\r\n\n                        \n                           Examples: \n                        \r\n\n                        \n                           facility\n                           enterprise\n                           payer\n                           health information exchange patient directory";
+            case HDM: return "To perform one or more actions on information used for conducting administrative and contractual activities by or on behalf of organizational entities responsible for delivery of  an individual's benefits in a healthcare program, health plan or insurance.   Explicitly excludes the use of information to organize the delivery of health care for care coordination and case management, or to provide healthcare treatment.\n\r\n\n                        \n                           Usage Note: Examples of activities conducted under this purpose of use: provider profiling, risk adjustment, underwriting, fraud and abuse, quality improvement population health and care management. Aligns with HIPAA Operation POU minus coordination of care or other treatment related activities. Similar to the description in SAMHSA Confidentiality of Substance Use Disorder Patient Records Supplemental notice of proposed rulemaking.\r\n\n                        \n                           Map: Maps to ISO 14265 Classification Term  \"Administration of care for an individual subject of care\" described as \"To inform persons or processes responsible for enabling the availability of resources or funding or permissions for providing health care services to the subject of care.\"\r\n\n                        However, this classification term is described as activities, i.e., \"to inform persons\" or \"to inform processes\" rather than the rationale for performing actions/operations on information related to the activity.";
             case HLEGAL: return "To perform one or more operations on information for conducting activities required by legal proceeding.";
             case HOUTCOMS: return "To perform one or more operations on information used for assessing results and comparative effectiveness achieved by health care practices and interventions.";
             case HPRGRP: return "To perform one or more operations on information used for conducting activities to meet program accounting requirements.";
@@ -2180,9 +2247,11 @@ public enum V3ActReason {
             case DISASTER: return "To perform one or more operations on information used for provision of immediately needed health care to a population of living subjects located in a disaster zone.";
             case THREAT: return "To perform one or more operations on information used to prevent injury or disease to living subjects who may be the target of violence.";
             case TREAT: return "To perform one or more operations on information for provision of health care.";
-            case CAREMGT: return "To perform one or more operations on information for provision of health care coordination.";
             case CLINTRL: return "To perform health care as part of the clinical trial protocol.";
+            case COC: return "To perform one or more actions on information in order to organize the provision and case management of an individualâ€™s healthcare, including: Monitoring a person's goals, needs, and preferences; acting as the communication link between two or more participants concerned with a person's health and wellness; organizing and facilitating care activities and promoting self-management by advocating for, empowering, and educating a person; and ensuring safe, appropriate, non-duplicative, and effective integrated care.\r\n\n                        \n                           Usage Note: Use when describing these functions: 1. Monitoring a personâ€™s goals, needs, and preferences.   2. Acting as the communication link between two or more participants concerned with a person's health and wellness.  3. Organizing and facilitating care activities and promoting self-management by advocating for, empowering, and educating a person.  4. Ensuring safe, appropriate, non-duplicative, and effective integrated care.\r\n\n                        The goal is to clearly differentiate this type of coordination of care from HIPAA Operations by specifying that these actions on information are undertaken in the provision of healthcare treatment.\r\n\n                        For similar uses of this concept, see SAMHSA Confidentiality of Substance Use Disorder Patient Records Supplemental notice of proposed rulemaking, which differentiates concepts of care coordination and case management for the provision of treatment as specifically distinct from activities related to health care delivery management and the operations of organizational entities involved in the delivery of healthcare.\r\n\n                        \n                           Map: Maps to ISO 14265 Classification Terms: \"Support of care activities within the provider organisation for an individual subject of care\" described as \"To inform persons or processes enabling others to provide health care services to the subject of care.\"  \"Subject of Care Uses\" described as \"To inform the subject of care in support of his or her own interests.\"";
             case ETREAT: return "To perform one or more operations on information for provision of immediately needed health care for an emergent condition.";
+            case BTG: return "To perform policy override operations on information for provision of immediately needed health care for an emergent condition affecting potential harm, death or patient safety by end users who are not provisioned for this purpose of use.  Includes override of organizational provisioning policies and may include override of subject of care consent directive restricting access.\r\n\n                        \n                           Map: Partially Maps to ISO 14265 Classification Term \"Emergency care provision to an individual subject of care\" described as \"To inform persons needing to provide health care services to the subject of care urgently, possibly needing to over-ride the  policies and consents pertaining to Purpose 1 above.\" Purpose 1 is equivalent to HL7 treatment purpose of use: \"Clinical care provision to an individual subject of care\" described as \"To inform persons or processes responsible for providing health care services to the subject of care.\"\nThe ISO description conflates both of the proposed specializations of HL7 ETREAT: break the glass and the typically broader access to health information normally available to providers who are provisioned for emergency workflows on a regular basis, e.g., Emergency Room providers. Examples of greater access than is normally accessible by providers based on the need to know are access to sensitive information for which access typically requires a patient's consent.  This is not an override of a patient's dissent to disclose sensitive information in cases where the applicable policy waives the need for that consent to access this information. In US, Title 38 Section 7332 and 42 CFR Part 2 both permit emergency access without the need to override a patient's consent directive; rather, this access is a limitation to the patient's right to dissent from disclosure.";
+            case ERTREAT: return "To perform one or more operations on information for provision of immediately needed health care for an emergent condition in an emergency room or similar emergent care context by end users provisioned for this purpose, which does not constitute as policy override such as in a \"Break the Glass\" purpose of use.\r\n\n                        Map:Partially Maps to ISO 14265 Classification Term \"Emergency care provision to an individual subject of care\" described as \"To inform persons needing to provide health care services to the subject of care urgently, possibly needing to over-ride the  policies and consents pertaining to Purpose 1 above.\" Purpose 1 is equivalent to HL7 treatment purpose of use: \"Clinical care provision to an individual subject of care\" described as \"To inform persons or processes responsible for providing health care services to the subject of care.\"\r\n\n                        The ISO description conflates both of the proposed specializations of HL7 ETREAT: break the glass and the typically broader access to health information normally available to providers who are provisioned for emergency workflows on a regular basis, e.g., Emergency Room providers. Examples of greater access than is normally accessible by providers based on the need to know are access to sensitive information for which access typically requires a patient's consent.  This is not an override of a patient's dissent to disclose sensitive information in cases where the applicable policy waives the need for that consent to access this information. In US, Title 38 Section 7332 and 42 CFR Part 2 both permit emergency access without the need to override a patient's consent directive; rather, this access is a limitation to the patient's right to dissent from disclosure. \r\n\n                        There is a semantic gap in concepts.  This classification term is described as activities â€œto inform personsâ€? rather than the rationale for performing actions/operations on information related to the activity.";
             case POPHLTH: return "To perform one or more operations on information for provision of health care to a population of living subjects, e.g., needle exchange program.";
             case _ACTINFORMATIONPRIVACYREASON: return "Description:The rationale or purpose for an act relating to the management of personal information, such as disclosing personal tax information for the purpose of complying with a court order.";
             case MARKT: return "Description:";
@@ -2412,6 +2481,7 @@ public enum V3ActReason {
             case PURPOSEOFUSE: return "purpose of use";
             case HMARKT: return "healthcare marketing";
             case HOPERAT: return "healthcare operations";
+            case CAREMGT: return "care management";
             case DONAT: return "donation";
             case FRAUD: return "fraud";
             case GOV: return "government";
@@ -2419,6 +2489,7 @@ public enum V3ActReason {
             case HCOMPL: return "health compliance";
             case HDECD: return "decedent";
             case HDIRECT: return "directory";
+            case HDM: return "healthcare delivery management";
             case HLEGAL: return "legal";
             case HOUTCOMS: return "health outcome measure";
             case HPRGRP: return "health program reporting";
@@ -2461,9 +2532,11 @@ public enum V3ActReason {
             case DISASTER: return "disaster";
             case THREAT: return "threat";
             case TREAT: return "treatment";
-            case CAREMGT: return "Care Management";
             case CLINTRL: return "clinical trial";
+            case COC: return "coordination of care";
             case ETREAT: return "Emergency Treatment";
+            case BTG: return "break the glass";
+            case ERTREAT: return "emergency room treatment";
             case POPHLTH: return "population health";
             case _ACTINFORMATIONPRIVACYREASON: return "ActInformationPrivacyReason";
             case MARKT: return "marketing";

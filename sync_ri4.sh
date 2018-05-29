@@ -4,6 +4,7 @@
 cp -R /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.utilities/src/org hapi-fhir-utilities/src/main/java/
 #cp -R ./hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/tests/* ./hapi-fhir-utilities/src/test/java/org/hl7/fhir/utilities/tests/
 #rm -R ./hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/tests
+rm# hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/xls/XLSXmlNormaliserTests.java
 
 # RI Validation 
 cp -R /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.validation/src/org hapi-fhir-validation/src/main/java/
@@ -39,7 +40,10 @@ rm -R ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/test
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/ToolingExtensions.java ./hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/utils/ToolingExtensions.java
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/ExtensionHelper.java ./hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/utils/ExtensionHelper.java
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu2016may/src/org/hl7/fhir/dstu2016may/utils/ToolingExtensions.java ./hapi-fhir-structures-dstu2.1/src/main/java/org/hl7/fhir/dstu2016may/utils/ToolingExtensions.java
+cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/JsonParser.java ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/JsonParser.java
 
+cp /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/XmlParser.java ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/XmlParser.java
+cp /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/JsonParser.java ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/JsonParser.java
 
 
 # Resource Spreadsheets
@@ -56,3 +60,4 @@ cp ~/workspace/fhir/trunk/build/publish/profiles-*.xml       hapi-fhir-validatio
 cp ~/workspace/fhir/trunk/build/publish/v2-tables.xml        hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
 cp ~/workspace/fhir/trunk/build/publish/v3-codesystems.xml   hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
 cp ~/workspace/fhir/trunk/build/publish/valuesets.xml        hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/valueset/
+cp ~/workspace/fhir/trunk/build/publish/extension-definitions.xml hapi-fhir-validation-resources-r4/src/main/resources/org/hl7/fhir/r4/model/extension/

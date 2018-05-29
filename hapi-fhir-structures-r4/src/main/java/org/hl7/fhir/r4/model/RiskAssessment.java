@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -242,22 +242,22 @@ public class RiskAssessment extends DomainResource {
         /**
          * One of the potential outcomes for the patient (e.g. remission, death,  a particular condition).
          */
-        @Child(name = "outcome", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "outcome", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Possible outcome for the subject", formalDefinition="One of the potential outcomes for the patient (e.g. remission, death,  a particular condition)." )
         protected CodeableConcept outcome;
 
         /**
-         * How likely is the outcome (in the specified timeframe).
+         * Indicates how likely the outcome is (in the specified timeframe).
          */
         @Child(name = "probability", type = {DecimalType.class, Range.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Likelihood of specified outcome", formalDefinition="How likely is the outcome (in the specified timeframe)." )
+        @Description(shortDefinition="Likelihood of specified outcome", formalDefinition="Indicates how likely the outcome is (in the specified timeframe)." )
         protected Type probability;
 
         /**
-         * How likely is the outcome (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, high).
+         * Indicates how likely the outcome is (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, or high).
          */
         @Child(name = "qualitativeRisk", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Likelihood of specified outcome as a qualitative value", formalDefinition="How likely is the outcome (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, high)." )
+        @Description(shortDefinition="Likelihood of specified outcome as a qualitative value", formalDefinition="Indicates how likely the outcome is (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, or high)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/risk-probability")
         protected CodeableConcept qualitativeRisk;
 
@@ -291,14 +291,6 @@ public class RiskAssessment extends DomainResource {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public RiskAssessmentPredictionComponent(CodeableConcept outcome) {
-        super();
-        this.outcome = outcome;
-      }
-
         /**
          * @return {@link #outcome} (One of the potential outcomes for the patient (e.g. remission, death,  a particular condition).)
          */
@@ -324,36 +316,40 @@ public class RiskAssessment extends DomainResource {
         }
 
         /**
-         * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
+         * @return {@link #probability} (Indicates how likely the outcome is (in the specified timeframe).)
          */
         public Type getProbability() { 
           return this.probability;
         }
 
         /**
-         * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
+         * @return {@link #probability} (Indicates how likely the outcome is (in the specified timeframe).)
          */
         public DecimalType getProbabilityDecimalType() throws FHIRException { 
+          if (this.probability == null)
+            return null;
           if (!(this.probability instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (DecimalType) this.probability;
         }
 
         public boolean hasProbabilityDecimalType() { 
-          return this.probability instanceof DecimalType;
+          return this != null && this.probability instanceof DecimalType;
         }
 
         /**
-         * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
+         * @return {@link #probability} (Indicates how likely the outcome is (in the specified timeframe).)
          */
         public Range getProbabilityRange() throws FHIRException { 
+          if (this.probability == null)
+            return null;
           if (!(this.probability instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (Range) this.probability;
         }
 
         public boolean hasProbabilityRange() { 
-          return this.probability instanceof Range;
+          return this != null && this.probability instanceof Range;
         }
 
         public boolean hasProbability() { 
@@ -361,15 +357,17 @@ public class RiskAssessment extends DomainResource {
         }
 
         /**
-         * @param value {@link #probability} (How likely is the outcome (in the specified timeframe).)
+         * @param value {@link #probability} (Indicates how likely the outcome is (in the specified timeframe).)
          */
         public RiskAssessmentPredictionComponent setProbability(Type value) { 
+          if (value != null && !(value instanceof DecimalType || value instanceof Range))
+            throw new Error("Not the right type for RiskAssessment.prediction.probability[x]: "+value.fhirType());
           this.probability = value;
           return this;
         }
 
         /**
-         * @return {@link #qualitativeRisk} (How likely is the outcome (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, high).)
+         * @return {@link #qualitativeRisk} (Indicates how likely the outcome is (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, or high).)
          */
         public CodeableConcept getQualitativeRisk() { 
           if (this.qualitativeRisk == null)
@@ -385,7 +383,7 @@ public class RiskAssessment extends DomainResource {
         }
 
         /**
-         * @param value {@link #qualitativeRisk} (How likely is the outcome (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, high).)
+         * @param value {@link #qualitativeRisk} (Indicates how likely the outcome is (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, or high).)
          */
         public RiskAssessmentPredictionComponent setQualitativeRisk(CodeableConcept value) { 
           this.qualitativeRisk = value;
@@ -470,26 +468,30 @@ public class RiskAssessment extends DomainResource {
          * @return {@link #when} (Indicates the period of time or age range of the subject to which the specified probability applies.)
          */
         public Period getWhenPeriod() throws FHIRException { 
+          if (this.when == null)
+            return null;
           if (!(this.when instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Period) this.when;
         }
 
         public boolean hasWhenPeriod() { 
-          return this.when instanceof Period;
+          return this != null && this.when instanceof Period;
         }
 
         /**
          * @return {@link #when} (Indicates the period of time or age range of the subject to which the specified probability applies.)
          */
         public Range getWhenRange() throws FHIRException { 
+          if (this.when == null)
+            return null;
           if (!(this.when instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Range) this.when;
         }
 
         public boolean hasWhenRange() { 
-          return this.when instanceof Range;
+          return this != null && this.when instanceof Range;
         }
 
         public boolean hasWhen() { 
@@ -500,6 +502,8 @@ public class RiskAssessment extends DomainResource {
          * @param value {@link #when} (Indicates the period of time or age range of the subject to which the specified probability applies.)
          */
         public RiskAssessmentPredictionComponent setWhen(Type value) { 
+          if (value != null && !(value instanceof Period || value instanceof Range))
+            throw new Error("Not the right type for RiskAssessment.prediction.when[x]: "+value.fhirType());
           this.when = value;
           return this;
         }
@@ -556,8 +560,8 @@ public class RiskAssessment extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("outcome", "CodeableConcept", "One of the potential outcomes for the patient (e.g. remission, death,  a particular condition).", 0, 1, outcome));
-          children.add(new Property("probability[x]", "decimal|Range", "How likely is the outcome (in the specified timeframe).", 0, 1, probability));
-          children.add(new Property("qualitativeRisk", "CodeableConcept", "How likely is the outcome (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, high).", 0, 1, qualitativeRisk));
+          children.add(new Property("probability[x]", "decimal|Range", "Indicates how likely the outcome is (in the specified timeframe).", 0, 1, probability));
+          children.add(new Property("qualitativeRisk", "CodeableConcept", "Indicates how likely the outcome is (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, or high).", 0, 1, qualitativeRisk));
           children.add(new Property("relativeRisk", "decimal", "Indicates the risk for this particular subject (with their specific characteristics) divided by the risk of the population in general.  (Numbers greater than 1 = higher risk than the population, numbers less than 1 = lower risk.).", 0, 1, relativeRisk));
           children.add(new Property("when[x]", "Period|Range", "Indicates the period of time or age range of the subject to which the specified probability applies.", 0, 1, when));
           children.add(new Property("rationale", "string", "Additional information explaining the basis for the prediction.", 0, 1, rationale));
@@ -567,11 +571,11 @@ public class RiskAssessment extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "One of the potential outcomes for the patient (e.g. remission, death,  a particular condition).", 0, 1, outcome);
-          case 1430185003: /*probability[x]*/  return new Property("probability[x]", "decimal|Range", "How likely is the outcome (in the specified timeframe).", 0, 1, probability);
-          case -1290561483: /*probability*/  return new Property("probability[x]", "decimal|Range", "How likely is the outcome (in the specified timeframe).", 0, 1, probability);
-          case 888495452: /*probabilityDecimal*/  return new Property("probability[x]", "decimal|Range", "How likely is the outcome (in the specified timeframe).", 0, 1, probability);
-          case 9275912: /*probabilityRange*/  return new Property("probability[x]", "decimal|Range", "How likely is the outcome (in the specified timeframe).", 0, 1, probability);
-          case 123308730: /*qualitativeRisk*/  return new Property("qualitativeRisk", "CodeableConcept", "How likely is the outcome (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, high).", 0, 1, qualitativeRisk);
+          case 1430185003: /*probability[x]*/  return new Property("probability[x]", "decimal|Range", "Indicates how likely the outcome is (in the specified timeframe).", 0, 1, probability);
+          case -1290561483: /*probability*/  return new Property("probability[x]", "decimal|Range", "Indicates how likely the outcome is (in the specified timeframe).", 0, 1, probability);
+          case 888495452: /*probabilityDecimal*/  return new Property("probability[x]", "decimal|Range", "Indicates how likely the outcome is (in the specified timeframe).", 0, 1, probability);
+          case 9275912: /*probabilityRange*/  return new Property("probability[x]", "decimal|Range", "Indicates how likely the outcome is (in the specified timeframe).", 0, 1, probability);
+          case 123308730: /*qualitativeRisk*/  return new Property("qualitativeRisk", "CodeableConcept", "Indicates how likely the outcome is (in the specified timeframe), expressed as a qualitative value (e.g. low, medium, or high).", 0, 1, qualitativeRisk);
           case -70741061: /*relativeRisk*/  return new Property("relativeRisk", "decimal", "Indicates the risk for this particular subject (with their specific characteristics) divided by the risk of the population in general.  (Numbers greater than 1 = higher risk than the population, numbers less than 1 = lower risk.).", 0, 1, relativeRisk);
           case 1312831238: /*when[x]*/  return new Property("when[x]", "Period|Range", "Indicates the period of time or age range of the subject to which the specified probability applies.", 0, 1, when);
           case 3648314: /*when*/  return new Property("when[x]", "Period|Range", "Indicates the period of time or age range of the subject to which the specified probability applies.", 0, 1, when);
@@ -758,9 +762,9 @@ public class RiskAssessment extends DomainResource {
     /**
      * Business identifier assigned to the risk assessment.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifier for the assessment", formalDefinition="Business identifier assigned to the risk assessment." )
-    protected Identifier identifier;
+    protected List<Identifier> identifier;
 
     /**
      * A reference to the request that is fulfilled by this risk assessment.
@@ -811,7 +815,7 @@ public class RiskAssessment extends DomainResource {
     /**
      * The patient or group the risk assessment applies to.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/what does assessment apply to?", formalDefinition="The patient or group the risk assessment applies to." )
     protected Reference subject;
 
@@ -866,18 +870,30 @@ public class RiskAssessment extends DomainResource {
     /**
      * The reason the risk assessment was performed.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Reference.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Why the assessment was necessary?", formalDefinition="The reason the risk assessment was performed." )
-    protected Type reason;
+    protected List<CodeableConcept> reasonCode;
 
     /**
-     * Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).
+     * Resources supporting the reason the risk assessment was performed.
      */
-    @Child(name = "basis", type = {Reference.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Information used in assessment", formalDefinition="Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.)." )
+    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Why the assessment was necessary?", formalDefinition="Resources supporting the reason the risk assessment was performed." )
+    protected List<Reference> reasonReference;
+    /**
+     * The actual objects that are the target of the reference (Resources supporting the reason the risk assessment was performed.)
+     */
+    protected List<Resource> reasonReferenceTarget;
+
+
+    /**
+     * Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).
+     */
+    @Child(name = "basis", type = {Reference.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Information used in assessment", formalDefinition="Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.)." )
     protected List<Reference> basis;
     /**
-     * The actual objects that are the target of the reference (Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).)
+     * The actual objects that are the target of the reference (Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).)
      */
     protected List<Resource> basisTarget;
 
@@ -885,25 +901,25 @@ public class RiskAssessment extends DomainResource {
     /**
      * Describes the expected outcome for the subject.
      */
-    @Child(name = "prediction", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "prediction", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Outcome predicted", formalDefinition="Describes the expected outcome for the subject." )
     protected List<RiskAssessmentPredictionComponent> prediction;
 
     /**
      * A description of the steps that might be taken to reduce the identified risk(s).
      */
-    @Child(name = "mitigation", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "mitigation", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How to reduce risk", formalDefinition="A description of the steps that might be taken to reduce the identified risk(s)." )
     protected StringType mitigation;
 
     /**
      * Additional comments about the risk assessment.
      */
-    @Child(name = "comment", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments on the risk assessment", formalDefinition="Additional comments about the risk assessment." )
-    protected StringType comment;
+    protected List<Annotation> note;
 
-    private static final long serialVersionUID = -715866284L;
+    private static final long serialVersionUID = -1402022407L;
 
   /**
    * Constructor
@@ -915,33 +931,63 @@ public class RiskAssessment extends DomainResource {
   /**
    * Constructor
    */
-    public RiskAssessment(Enumeration<RiskAssessmentStatus> status) {
+    public RiskAssessment(Enumeration<RiskAssessmentStatus> status, Reference subject) {
       super();
       this.status = status;
+      this.subject = subject;
     }
 
     /**
      * @return {@link #identifier} (Business identifier assigned to the risk assessment.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RiskAssessment setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public RiskAssessment addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Business identifier assigned to the risk assessment.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public RiskAssessment setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1204,26 +1250,30 @@ public class RiskAssessment extends DomainResource {
      * @return {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
     }
 
     public boolean hasOccurrenceDateTimeType() { 
-      return this.occurrence instanceof DateTimeType;
+      return this != null && this.occurrence instanceof DateTimeType;
     }
 
     /**
      * @return {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
      */
     public Period getOccurrencePeriod() throws FHIRException { 
+      if (this.occurrence == null)
+        return null;
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
     }
 
     public boolean hasOccurrencePeriod() { 
-      return this.occurrence instanceof Period;
+      return this != null && this.occurrence instanceof Period;
     }
 
     public boolean hasOccurrence() { 
@@ -1234,6 +1284,8 @@ public class RiskAssessment extends DomainResource {
      * @param value {@link #occurrence} (The date (and possibly time) the risk assessment was performed.)
      */
     public RiskAssessment setOccurrence(Type value) { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Period))
+        throw new Error("Not the right type for RiskAssessment.occurrence[x]: "+value.fhirType());
       this.occurrence = value;
       return this;
     }
@@ -1322,52 +1374,123 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (The reason the risk assessment was performed.)
+     * @return {@link #reasonCode} (The reason the risk assessment was performed.)
      */
-    public Type getReason() { 
-      return this.reason;
+    public List<CodeableConcept> getReasonCode() { 
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      return this.reasonCode;
     }
 
     /**
-     * @return {@link #reason} (The reason the risk assessment was performed.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
-      if (!(this.reason instanceof CodeableConcept))
-        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.reason;
+    public RiskAssessment setReasonCode(List<CodeableConcept> theReasonCode) { 
+      this.reasonCode = theReasonCode;
+      return this;
     }
 
-    public boolean hasReasonCodeableConcept() { 
-      return this.reason instanceof CodeableConcept;
+    public boolean hasReasonCode() { 
+      if (this.reasonCode == null)
+        return false;
+      for (CodeableConcept item : this.reasonCode)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    /**
-     * @return {@link #reason} (The reason the risk assessment was performed.)
-     */
-    public Reference getReasonReference() throws FHIRException { 
-      if (!(this.reason instanceof Reference))
-        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
-      return (Reference) this.reason;
+    public CodeableConcept addReasonCode() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
+      return t;
     }
 
-    public boolean hasReasonReference() { 
-      return this.reason instanceof Reference;
-    }
-
-    public boolean hasReason() { 
-      return this.reason != null && !this.reason.isEmpty();
-    }
-
-    /**
-     * @param value {@link #reason} (The reason the risk assessment was performed.)
-     */
-    public RiskAssessment setReason(Type value) { 
-      this.reason = value;
+    public RiskAssessment addReasonCode(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
       return this;
     }
 
     /**
-     * @return {@link #basis} (Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).)
+     * @return The first repetition of repeating field {@link #reasonCode}, creating it if it does not already exist
+     */
+    public CodeableConcept getReasonCodeFirstRep() { 
+      if (getReasonCode().isEmpty()) {
+        addReasonCode();
+      }
+      return getReasonCode().get(0);
+    }
+
+    /**
+     * @return {@link #reasonReference} (Resources supporting the reason the risk assessment was performed.)
+     */
+    public List<Reference> getReasonReference() { 
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      return this.reasonReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public RiskAssessment setReasonReference(List<Reference> theReasonReference) { 
+      this.reasonReference = theReasonReference;
+      return this;
+    }
+
+    public boolean hasReasonReference() { 
+      if (this.reasonReference == null)
+        return false;
+      for (Reference item : this.reasonReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addReasonReference() { //3
+      Reference t = new Reference();
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return t;
+    }
+
+    public RiskAssessment addReasonReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reasonReference}, creating it if it does not already exist
+     */
+    public Reference getReasonReferenceFirstRep() { 
+      if (getReasonReference().isEmpty()) {
+        addReasonReference();
+      }
+      return getReasonReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReasonReferenceTarget() { 
+      if (this.reasonReferenceTarget == null)
+        this.reasonReferenceTarget = new ArrayList<Resource>();
+      return this.reasonReferenceTarget;
+    }
+
+    /**
+     * @return {@link #basis} (Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).)
      */
     public List<Reference> getBasis() { 
       if (this.basis == null)
@@ -1532,57 +1655,61 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #comment} (Additional comments about the risk assessment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     * @return {@link #note} (Additional comments about the risk assessment.)
      */
-    public StringType getCommentElement() { 
-      if (this.comment == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.comment");
-        else if (Configuration.doAutoCreate())
-          this.comment = new StringType(); // bb
-      return this.comment;
-    }
-
-    public boolean hasCommentElement() { 
-      return this.comment != null && !this.comment.isEmpty();
-    }
-
-    public boolean hasComment() { 
-      return this.comment != null && !this.comment.isEmpty();
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
     }
 
     /**
-     * @param value {@link #comment} (Additional comments about the risk assessment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public RiskAssessment setCommentElement(StringType value) { 
-      this.comment = value;
+    public RiskAssessment setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public RiskAssessment addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
       return this;
     }
 
     /**
-     * @return Additional comments about the risk assessment.
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
      */
-    public String getComment() { 
-      return this.comment == null ? null : this.comment.getValue();
-    }
-
-    /**
-     * @param value Additional comments about the risk assessment.
-     */
-    public RiskAssessment setComment(String value) { 
-      if (Utilities.noString(value))
-        this.comment = null;
-      else {
-        if (this.comment == null)
-          this.comment = new StringType();
-        this.comment.setValue(value);
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
       }
-      return this;
+      return getNote().get(0);
     }
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, 1, identifier));
+        children.add(new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("basedOn", "Reference(Any)", "A reference to the request that is fulfilled by this risk assessment.", 0, 1, basedOn));
         children.add(new Property("parent", "Reference(Any)", "A reference to a resource that this risk assessment is part of, such as a Procedure.", 0, 1, parent));
         children.add(new Property("status", "code", "The status of the RiskAssessment, using the same statuses as an Observation.", 0, 1, status));
@@ -1593,17 +1720,18 @@ public class RiskAssessment extends DomainResource {
         children.add(new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence));
         children.add(new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, 1, condition));
         children.add(new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, 1, performer));
-        children.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "The reason the risk assessment was performed.", 0, 1, reason));
-        children.add(new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis));
+        children.add(new Property("reasonCode", "CodeableConcept", "The reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Resources supporting the reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis));
         children.add(new Property("prediction", "", "Describes the expected outcome for the subject.", 0, java.lang.Integer.MAX_VALUE, prediction));
         children.add(new Property("mitigation", "string", "A description of the steps that might be taken to reduce the identified risk(s).", 0, 1, mitigation));
-        children.add(new Property("comment", "string", "Additional comments about the risk assessment.", 0, 1, comment));
+        children.add(new Property("note", "Annotation", "Additional comments about the risk assessment.", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, 1, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier assigned to the risk assessment.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(Any)", "A reference to the request that is fulfilled by this risk assessment.", 0, 1, basedOn);
         case -995424086: /*parent*/  return new Property("parent", "Reference(Any)", "A reference to a resource that this risk assessment is part of, such as a Procedure.", 0, 1, parent);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the RiskAssessment, using the same statuses as an Observation.", 0, 1, status);
@@ -1617,14 +1745,12 @@ public class RiskAssessment extends DomainResource {
         case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence);
         case -861311717: /*condition*/  return new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, 1, condition);
         case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, 1, performer);
-        case -669418564: /*reason[x]*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "The reason the risk assessment was performed.", 0, 1, reason);
-        case -934964668: /*reason*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "The reason the risk assessment was performed.", 0, 1, reason);
-        case -610155331: /*reasonCodeableConcept*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "The reason the risk assessment was performed.", 0, 1, reason);
-        case -1146218137: /*reasonReference*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "The reason the risk assessment was performed.", 0, 1, reason);
-        case 93508670: /*basis*/  return new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "The reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Resources supporting the reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case 93508670: /*basis*/  return new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis);
         case 1161234575: /*prediction*/  return new Property("prediction", "", "Describes the expected outcome for the subject.", 0, java.lang.Integer.MAX_VALUE, prediction);
         case 1293793087: /*mitigation*/  return new Property("mitigation", "string", "A description of the steps that might be taken to reduce the identified risk(s).", 0, 1, mitigation);
-        case 950398559: /*comment*/  return new Property("comment", "string", "Additional comments about the risk assessment.", 0, 1, comment);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Additional comments about the risk assessment.", 0, java.lang.Integer.MAX_VALUE, note);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1633,7 +1759,7 @@ public class RiskAssessment extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : new Base[] {this.basedOn}; // Reference
         case -995424086: /*parent*/ return this.parent == null ? new Base[0] : new Base[] {this.parent}; // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<RiskAssessmentStatus>
@@ -1644,11 +1770,12 @@ public class RiskAssessment extends DomainResource {
         case 1687874001: /*occurrence*/ return this.occurrence == null ? new Base[0] : new Base[] {this.occurrence}; // Type
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Reference
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : new Base[] {this.reason}; // Type
+        case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
+        case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 93508670: /*basis*/ return this.basis == null ? new Base[0] : this.basis.toArray(new Base[this.basis.size()]); // Reference
         case 1161234575: /*prediction*/ return this.prediction == null ? new Base[0] : this.prediction.toArray(new Base[this.prediction.size()]); // RiskAssessmentPredictionComponent
         case 1293793087: /*mitigation*/ return this.mitigation == null ? new Base[0] : new Base[] {this.mitigation}; // StringType
-        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1658,7 +1785,7 @@ public class RiskAssessment extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case -332612366: // basedOn
           this.basedOn = castToReference(value); // Reference
@@ -1691,8 +1818,11 @@ public class RiskAssessment extends DomainResource {
         case 481140686: // performer
           this.performer = castToReference(value); // Reference
           return value;
-        case -934964668: // reason
-          this.reason = castToType(value); // Type
+        case 722137681: // reasonCode
+          this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1146218137: // reasonReference
+          this.getReasonReference().add(castToReference(value)); // Reference
           return value;
         case 93508670: // basis
           this.getBasis().add(castToReference(value)); // Reference
@@ -1703,8 +1833,8 @@ public class RiskAssessment extends DomainResource {
         case 1293793087: // mitigation
           this.mitigation = castToString(value); // StringType
           return value;
-        case 950398559: // comment
-          this.comment = castToString(value); // StringType
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1714,7 +1844,7 @@ public class RiskAssessment extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("basedOn")) {
           this.basedOn = castToReference(value); // Reference
         } else if (name.equals("parent")) {
@@ -1736,16 +1866,18 @@ public class RiskAssessment extends DomainResource {
           this.condition = castToReference(value); // Reference
         } else if (name.equals("performer")) {
           this.performer = castToReference(value); // Reference
-        } else if (name.equals("reason[x]")) {
-          this.reason = castToType(value); // Type
+        } else if (name.equals("reasonCode")) {
+          this.getReasonCode().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonReference")) {
+          this.getReasonReference().add(castToReference(value));
         } else if (name.equals("basis")) {
           this.getBasis().add(castToReference(value));
         } else if (name.equals("prediction")) {
           this.getPrediction().add((RiskAssessmentPredictionComponent) value);
         } else if (name.equals("mitigation")) {
           this.mitigation = castToString(value); // StringType
-        } else if (name.equals("comment")) {
-          this.comment = castToString(value); // StringType
+        } else if (name.equals("note")) {
+          this.getNote().add(castToAnnotation(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -1754,7 +1886,7 @@ public class RiskAssessment extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case -332612366:  return getBasedOn(); 
         case -995424086:  return getParent(); 
         case -892481550:  return getStatusElement();
@@ -1766,12 +1898,12 @@ public class RiskAssessment extends DomainResource {
         case 1687874001:  return getOccurrence(); 
         case -861311717:  return getCondition(); 
         case 481140686:  return getPerformer(); 
-        case -669418564:  return getReason(); 
-        case -934964668:  return getReason(); 
+        case 722137681:  return addReasonCode(); 
+        case -1146218137:  return addReasonReference(); 
         case 93508670:  return addBasis(); 
         case 1161234575:  return addPrediction(); 
         case 1293793087:  return getMitigationElement();
-        case 950398559:  return getCommentElement();
+        case 3387378:  return addNote(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1791,11 +1923,12 @@ public class RiskAssessment extends DomainResource {
         case 1687874001: /*occurrence*/ return new String[] {"dateTime", "Period"};
         case -861311717: /*condition*/ return new String[] {"Reference"};
         case 481140686: /*performer*/ return new String[] {"Reference"};
-        case -934964668: /*reason*/ return new String[] {"CodeableConcept", "Reference"};
+        case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
+        case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 93508670: /*basis*/ return new String[] {"Reference"};
         case 1161234575: /*prediction*/ return new String[] {};
         case 1293793087: /*mitigation*/ return new String[] {"string"};
-        case 950398559: /*comment*/ return new String[] {"string"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1804,8 +1937,7 @@ public class RiskAssessment extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("basedOn")) {
           this.basedOn = new Reference();
@@ -1850,13 +1982,11 @@ public class RiskAssessment extends DomainResource {
           this.performer = new Reference();
           return this.performer;
         }
-        else if (name.equals("reasonCodeableConcept")) {
-          this.reason = new CodeableConcept();
-          return this.reason;
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
         }
         else if (name.equals("reasonReference")) {
-          this.reason = new Reference();
-          return this.reason;
+          return addReasonReference();
         }
         else if (name.equals("basis")) {
           return addBasis();
@@ -1867,8 +1997,8 @@ public class RiskAssessment extends DomainResource {
         else if (name.equals("mitigation")) {
           throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.mitigation");
         }
-        else if (name.equals("comment")) {
-          throw new FHIRException("Cannot call addChild on a primitive type RiskAssessment.comment");
+        else if (name.equals("note")) {
+          return addNote();
         }
         else
           return super.addChild(name);
@@ -1882,7 +2012,11 @@ public class RiskAssessment extends DomainResource {
       public RiskAssessment copy() {
         RiskAssessment dst = new RiskAssessment();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.basedOn = basedOn == null ? null : basedOn.copy();
         dst.parent = parent == null ? null : parent.copy();
         dst.status = status == null ? null : status.copy();
@@ -1893,7 +2027,16 @@ public class RiskAssessment extends DomainResource {
         dst.occurrence = occurrence == null ? null : occurrence.copy();
         dst.condition = condition == null ? null : condition.copy();
         dst.performer = performer == null ? null : performer.copy();
-        dst.reason = reason == null ? null : reason.copy();
+        if (reasonCode != null) {
+          dst.reasonCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonCode)
+            dst.reasonCode.add(i.copy());
+        };
+        if (reasonReference != null) {
+          dst.reasonReference = new ArrayList<Reference>();
+          for (Reference i : reasonReference)
+            dst.reasonReference.add(i.copy());
+        };
         if (basis != null) {
           dst.basis = new ArrayList<Reference>();
           for (Reference i : basis)
@@ -1905,7 +2048,11 @@ public class RiskAssessment extends DomainResource {
             dst.prediction.add(i.copy());
         };
         dst.mitigation = mitigation == null ? null : mitigation.copy();
-        dst.comment = comment == null ? null : comment.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         return dst;
       }
 
@@ -1923,9 +2070,9 @@ public class RiskAssessment extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
            && compareDeep(status, o.status, true) && compareDeep(method, o.method, true) && compareDeep(code, o.code, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
-           && compareDeep(condition, o.condition, true) && compareDeep(performer, o.performer, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true) && compareDeep(mitigation, o.mitigation, true)
-           && compareDeep(comment, o.comment, true);
+           && compareDeep(condition, o.condition, true) && compareDeep(performer, o.performer, true) && compareDeep(reasonCode, o.reasonCode, true)
+           && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true)
+           && compareDeep(mitigation, o.mitigation, true) && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -1935,14 +2082,13 @@ public class RiskAssessment extends DomainResource {
         if (!(other_ instanceof RiskAssessment))
           return false;
         RiskAssessment o = (RiskAssessment) other_;
-        return compareValues(status, o.status, true) && compareValues(mitigation, o.mitigation, true) && compareValues(comment, o.comment, true)
-          ;
+        return compareValues(status, o.status, true) && compareValues(mitigation, o.mitigation, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
-          , status, method, code, subject, context, occurrence, condition, performer, reason
-          , basis, prediction, mitigation, comment);
+          , status, method, code, subject, context, occurrence, condition, performer, reasonCode
+          , reasonReference, basis, prediction, mitigation, note);
       }
 
   @Override

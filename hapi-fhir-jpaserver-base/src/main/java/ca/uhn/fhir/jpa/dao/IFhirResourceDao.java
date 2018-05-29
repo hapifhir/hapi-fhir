@@ -112,8 +112,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	TagList getAllResourceTags(RequestDetails theRequestDetails);
 
-	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
-
 	Class<T> getResourceType();
 
 	TagList getTags(IIdType theResourceId, RequestDetails theRequestDetails);

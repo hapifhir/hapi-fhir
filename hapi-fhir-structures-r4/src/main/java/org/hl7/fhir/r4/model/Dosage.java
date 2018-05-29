@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * Indicates how the medication is/was taken or should be taken by the patient.
  */
 @DatatypeDef(name="Dosage")
-public class Dosage extends Type implements ICompositeType {
+public class Dosage extends BackboneType implements ICompositeType {
 
     @Block()
     public static class DosageDoseAndRateComponent extends Element implements IBaseDatatypeElement {
@@ -123,26 +123,30 @@ public class Dosage extends Type implements ICompositeType {
          * @return {@link #dose} (Amount of medication per dose.)
          */
         public Range getDoseRange() throws FHIRException { 
+          if (this.dose == null)
+            return null;
           if (!(this.dose instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.dose.getClass().getName()+" was encountered");
           return (Range) this.dose;
         }
 
         public boolean hasDoseRange() { 
-          return this.dose instanceof Range;
+          return this != null && this.dose instanceof Range;
         }
 
         /**
          * @return {@link #dose} (Amount of medication per dose.)
          */
         public SimpleQuantity getDoseSimpleQuantity() throws FHIRException { 
+          if (this.dose == null)
+            return null;
           if (!(this.dose instanceof SimpleQuantity))
             throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.dose.getClass().getName()+" was encountered");
           return (SimpleQuantity) this.dose;
         }
 
         public boolean hasDoseSimpleQuantity() { 
-          return this.dose instanceof SimpleQuantity;
+          return this != null && this.dose instanceof SimpleQuantity;
         }
 
         public boolean hasDose() { 
@@ -153,6 +157,8 @@ public class Dosage extends Type implements ICompositeType {
          * @param value {@link #dose} (Amount of medication per dose.)
          */
         public DosageDoseAndRateComponent setDose(Type value) { 
+          if (value != null && !(value instanceof Range || value instanceof SimpleQuantity))
+            throw new Error("Not the right type for Dosage.doseAndRate.dose[x]: "+value.fhirType());
           this.dose = value;
           return this;
         }
@@ -168,39 +174,45 @@ public class Dosage extends Type implements ICompositeType {
          * @return {@link #rate} (Amount of medication per unit of time.)
          */
         public Ratio getRateRatio() throws FHIRException { 
+          if (this.rate == null)
+            return null;
           if (!(this.rate instanceof Ratio))
             throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
         }
 
         public boolean hasRateRatio() { 
-          return this.rate instanceof Ratio;
+          return this != null && this.rate instanceof Ratio;
         }
 
         /**
          * @return {@link #rate} (Amount of medication per unit of time.)
          */
         public Range getRateRange() throws FHIRException { 
+          if (this.rate == null)
+            return null;
           if (!(this.rate instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Range) this.rate;
         }
 
         public boolean hasRateRange() { 
-          return this.rate instanceof Range;
+          return this != null && this.rate instanceof Range;
         }
 
         /**
          * @return {@link #rate} (Amount of medication per unit of time.)
          */
         public SimpleQuantity getRateSimpleQuantity() throws FHIRException { 
+          if (this.rate == null)
+            return null;
           if (!(this.rate instanceof SimpleQuantity))
             throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (SimpleQuantity) this.rate;
         }
 
         public boolean hasRateSimpleQuantity() { 
-          return this.rate instanceof SimpleQuantity;
+          return this != null && this.rate instanceof SimpleQuantity;
         }
 
         public boolean hasRate() { 
@@ -211,6 +223,8 @@ public class Dosage extends Type implements ICompositeType {
          * @param value {@link #rate} (Amount of medication per unit of time.)
          */
         public DosageDoseAndRateComponent setRate(Type value) { 
+          if (value != null && !(value instanceof Ratio || value instanceof Range || value instanceof SimpleQuantity))
+            throw new Error("Not the right type for Dosage.doseAndRate.rate[x]: "+value.fhirType());
           this.rate = value;
           return this;
         }
@@ -712,26 +726,30 @@ public class Dosage extends Type implements ICompositeType {
      * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).)
      */
     public BooleanType getAsNeededBooleanType() throws FHIRException { 
+      if (this.asNeeded == null)
+        return null;
       if (!(this.asNeeded instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (BooleanType) this.asNeeded;
     }
 
     public boolean hasAsNeededBooleanType() { 
-      return this.asNeeded instanceof BooleanType;
+      return this != null && this.asNeeded instanceof BooleanType;
     }
 
     /**
      * @return {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).)
      */
     public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
+      if (this.asNeeded == null)
+        return null;
       if (!(this.asNeeded instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;
     }
 
     public boolean hasAsNeededCodeableConcept() { 
-      return this.asNeeded instanceof CodeableConcept;
+      return this != null && this.asNeeded instanceof CodeableConcept;
     }
 
     public boolean hasAsNeeded() { 
@@ -742,6 +760,8 @@ public class Dosage extends Type implements ICompositeType {
      * @param value {@link #asNeeded} (Indicates whether the Medication is only taken when needed within a specific dosing schedule (Boolean option), or it indicates the precondition for taking the Medication (CodeableConcept).)
      */
     public Dosage setAsNeeded(Type value) { 
+      if (value != null && !(value instanceof BooleanType || value instanceof CodeableConcept))
+        throw new Error("Not the right type for Dosage.asNeeded[x]: "+value.fhirType());
       this.asNeeded = value;
       return this;
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
@@ -198,7 +199,7 @@ public class Immunization extends DomainResource {
         /**
          * @param value {@link #role} (Describes the type of performance (e.g. ordering provider, administering provider, etc.).)
          */
-        public ImmunizationPractitionerComponent setRole(CodeableConcept value) { 
+        public ImmunizationPractitionerComponent setRole(CodeableConcept value)  { 
           this.role = value;
           return this;
         }
@@ -222,7 +223,7 @@ public class Immunization extends DomainResource {
         /**
          * @param value {@link #actor} (The device, practitioner, etc. who performed the action.)
          */
-        public ImmunizationPractitionerComponent setActor(Reference value) { 
+        public ImmunizationPractitionerComponent setActor(Reference value)  { 
           this.actor = value;
           return this;
         }
@@ -247,10 +248,20 @@ public class Immunization extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("role", "CodeableConcept", "Describes the type of performance (e.g. ordering provider, administering provider, etc.).", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("actor", "Reference(Practitioner)", "The device, practitioner, etc. who performed the action.", 0, java.lang.Integer.MAX_VALUE, actor));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("role", "CodeableConcept", "Describes the type of performance (e.g. ordering provider, administering provider, etc.).", 0, 1, role));
+          children.add(new Property("actor", "Reference(Practitioner)", "The device, practitioner, etc. who performed the action.", 0, 1, actor));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Describes the type of performance (e.g. ordering provider, administering provider, etc.).", 0, 1, role);
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner)", "The device, practitioner, etc. who performed the action.", 0, 1, actor);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -331,22 +342,22 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationPractitionerComponent))
+        if (!(other_ instanceof ImmunizationPractitionerComponent))
           return false;
-        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other;
+        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other_;
         return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationPractitionerComponent))
+        if (!(other_ instanceof ImmunizationPractitionerComponent))
           return false;
-        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other;
+        ImmunizationPractitionerComponent o = (ImmunizationPractitionerComponent) other_;
         return true;
       }
 
@@ -494,10 +505,20 @@ public class Immunization extends DomainResource {
           return getReasonNotGiven().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("reason", "CodeableConcept", "Reasons why a vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, reason));
-          childrenList.add(new Property("reasonNotGiven", "CodeableConcept", "Reason why a vaccine was not administered.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("reason", "CodeableConcept", "Reasons why a vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, reason));
+          children.add(new Property("reasonNotGiven", "CodeableConcept", "Reason why a vaccine was not administered.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Reasons why a vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, reason);
+          case 2101123790: /*reasonNotGiven*/  return new Property("reasonNotGiven", "CodeableConcept", "Reason why a vaccine was not administered.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -584,23 +605,23 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationExplanationComponent))
+        if (!(other_ instanceof ImmunizationExplanationComponent))
           return false;
-        ImmunizationExplanationComponent o = (ImmunizationExplanationComponent) other;
+        ImmunizationExplanationComponent o = (ImmunizationExplanationComponent) other_;
         return compareDeep(reason, o.reason, true) && compareDeep(reasonNotGiven, o.reasonNotGiven, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationExplanationComponent))
+        if (!(other_ instanceof ImmunizationExplanationComponent))
           return false;
-        ImmunizationExplanationComponent o = (ImmunizationExplanationComponent) other;
+        ImmunizationExplanationComponent o = (ImmunizationExplanationComponent) other_;
         return true;
       }
 
@@ -720,7 +741,7 @@ public class Immunization extends DomainResource {
         /**
          * @param value {@link #detail} (Details of the reaction.)
          */
-        public ImmunizationReactionComponent setDetail(Reference value) { 
+        public ImmunizationReactionComponent setDetail(Reference value)  { 
           this.detail = value;
           return this;
         }
@@ -790,11 +811,22 @@ public class Immunization extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("date", "dateTime", "Date of reaction to the immunization.", 0, java.lang.Integer.MAX_VALUE, date));
-          childrenList.add(new Property("detail", "Reference(Observation)", "Details of the reaction.", 0, java.lang.Integer.MAX_VALUE, detail));
-          childrenList.add(new Property("reported", "boolean", "Self-reported indicator.", 0, java.lang.Integer.MAX_VALUE, reported));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("date", "dateTime", "Date of reaction to the immunization.", 0, 1, date));
+          children.add(new Property("detail", "Reference(Observation)", "Details of the reaction.", 0, 1, detail));
+          children.add(new Property("reported", "boolean", "Self-reported indicator.", 0, 1, reported));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3076014: /*date*/  return new Property("date", "dateTime", "Date of reaction to the immunization.", 0, 1, date);
+          case -1335224239: /*detail*/  return new Property("detail", "Reference(Observation)", "Details of the reaction.", 0, 1, detail);
+          case -427039533: /*reported*/  return new Property("reported", "boolean", "Self-reported indicator.", 0, 1, reported);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -886,23 +918,23 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationReactionComponent))
+        if (!(other_ instanceof ImmunizationReactionComponent))
           return false;
-        ImmunizationReactionComponent o = (ImmunizationReactionComponent) other;
+        ImmunizationReactionComponent o = (ImmunizationReactionComponent) other_;
         return compareDeep(date, o.date, true) && compareDeep(detail, o.detail, true) && compareDeep(reported, o.reported, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationReactionComponent))
+        if (!(other_ instanceof ImmunizationReactionComponent))
           return false;
-        ImmunizationReactionComponent o = (ImmunizationReactionComponent) other;
+        ImmunizationReactionComponent o = (ImmunizationReactionComponent) other_;
         return compareValues(date, o.date, true) && compareValues(reported, o.reported, true);
       }
 
@@ -1113,7 +1145,7 @@ public class Immunization extends DomainResource {
         /**
          * @param value {@link #authority} (Indicates the authority who published the protocol.  E.g. ACIP.)
          */
-        public ImmunizationVaccinationProtocolComponent setAuthority(Reference value) { 
+        public ImmunizationVaccinationProtocolComponent setAuthority(Reference value)  { 
           this.authority = value;
           return this;
         }
@@ -1304,7 +1336,7 @@ public class Immunization extends DomainResource {
         /**
          * @param value {@link #doseStatus} (Indicates if the immunization event should "count" against  the protocol.)
          */
-        public ImmunizationVaccinationProtocolComponent setDoseStatus(CodeableConcept value) { 
+        public ImmunizationVaccinationProtocolComponent setDoseStatus(CodeableConcept value)  { 
           this.doseStatus = value;
           return this;
         }
@@ -1328,21 +1360,37 @@ public class Immunization extends DomainResource {
         /**
          * @param value {@link #doseStatusReason} (Provides an explanation as to why an immunization event should or should not count against the protocol.)
          */
-        public ImmunizationVaccinationProtocolComponent setDoseStatusReason(CodeableConcept value) { 
+        public ImmunizationVaccinationProtocolComponent setDoseStatusReason(CodeableConcept value)  { 
           this.doseStatusReason = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("doseSequence", "positiveInt", "Nominal position in a series.", 0, java.lang.Integer.MAX_VALUE, doseSequence));
-          childrenList.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  E.g. ACIP.", 0, java.lang.Integer.MAX_VALUE, authority));
-          childrenList.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, java.lang.Integer.MAX_VALUE, series));
-          childrenList.add(new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, java.lang.Integer.MAX_VALUE, seriesDoses));
-          childrenList.add(new Property("targetDisease", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, targetDisease));
-          childrenList.add(new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatus));
-          childrenList.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("doseSequence", "positiveInt", "Nominal position in a series.", 0, 1, doseSequence));
+          children.add(new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description));
+          children.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  E.g. ACIP.", 0, 1, authority));
+          children.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series));
+          children.add(new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, 1, seriesDoses));
+          children.add(new Property("targetDisease", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, targetDisease));
+          children.add(new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, 1, doseStatus));
+          children.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, 1, doseStatusReason));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 550933246: /*doseSequence*/  return new Property("doseSequence", "positiveInt", "Nominal position in a series.", 0, 1, doseSequence);
+          case -1724546052: /*description*/  return new Property("description", "string", "Contains the description about the protocol under which the vaccine was administered.", 0, 1, description);
+          case 1475610435: /*authority*/  return new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol.  E.g. ACIP.", 0, 1, authority);
+          case -905838985: /*series*/  return new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, 1, series);
+          case -1936727105: /*seriesDoses*/  return new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, 1, seriesDoses);
+          case -319593813: /*targetDisease*/  return new Property("targetDisease", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, targetDisease);
+          case -745826705: /*doseStatus*/  return new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, 1, doseStatus);
+          case 662783379: /*doseStatusReason*/  return new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why an immunization event should or should not count against the protocol.", 0, 1, doseStatusReason);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1500,12 +1548,12 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ImmunizationVaccinationProtocolComponent))
+        if (!(other_ instanceof ImmunizationVaccinationProtocolComponent))
           return false;
-        ImmunizationVaccinationProtocolComponent o = (ImmunizationVaccinationProtocolComponent) other;
+        ImmunizationVaccinationProtocolComponent o = (ImmunizationVaccinationProtocolComponent) other_;
         return compareDeep(doseSequence, o.doseSequence, true) && compareDeep(description, o.description, true)
            && compareDeep(authority, o.authority, true) && compareDeep(series, o.series, true) && compareDeep(seriesDoses, o.seriesDoses, true)
            && compareDeep(targetDisease, o.targetDisease, true) && compareDeep(doseStatus, o.doseStatus, true)
@@ -1513,12 +1561,12 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ImmunizationVaccinationProtocolComponent))
+        if (!(other_ instanceof ImmunizationVaccinationProtocolComponent))
           return false;
-        ImmunizationVaccinationProtocolComponent o = (ImmunizationVaccinationProtocolComponent) other;
+        ImmunizationVaccinationProtocolComponent o = (ImmunizationVaccinationProtocolComponent) other_;
         return compareValues(doseSequence, o.doseSequence, true) && compareValues(description, o.description, true)
            && compareValues(series, o.series, true) && compareValues(seriesDoses, o.seriesDoses, true);
       }
@@ -1890,7 +1938,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #vaccineCode} (Vaccine that was administered or was to be administered.)
      */
-    public Immunization setVaccineCode(CodeableConcept value) { 
+    public Immunization setVaccineCode(CodeableConcept value)  { 
       this.vaccineCode = value;
       return this;
     }
@@ -1914,7 +1962,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #patient} (The patient who either received or did not receive the immunization.)
      */
-    public Immunization setPatient(Reference value) { 
+    public Immunization setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1958,7 +2006,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #encounter} (The visit or admission or other contact between patient and health care provider the immunization was performed as part of.)
      */
-    public Immunization setEncounter(Reference value) { 
+    public Immunization setEncounter(Reference value)  { 
       this.encounter = value;
       return this;
     }
@@ -2096,7 +2144,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #reportOrigin} (The source of the data when the report of the immunization event is not based on information from the person who administered the vaccine.)
      */
-    public Immunization setReportOrigin(CodeableConcept value) { 
+    public Immunization setReportOrigin(CodeableConcept value)  { 
       this.reportOrigin = value;
       return this;
     }
@@ -2120,7 +2168,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #location} (The service delivery location where the vaccine administration occurred.)
      */
-    public Immunization setLocation(Reference value) { 
+    public Immunization setLocation(Reference value)  { 
       this.location = value;
       return this;
     }
@@ -2164,7 +2212,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #manufacturer} (Name of vaccine manufacturer.)
      */
-    public Immunization setManufacturer(Reference value) { 
+    public Immunization setManufacturer(Reference value)  { 
       this.manufacturer = value;
       return this;
     }
@@ -2306,7 +2354,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #site} (Body site where vaccine was administered.)
      */
-    public Immunization setSite(CodeableConcept value) { 
+    public Immunization setSite(CodeableConcept value)  { 
       this.site = value;
       return this;
     }
@@ -2330,7 +2378,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #route} (The path by which the vaccine product is taken into the body.)
      */
-    public Immunization setRoute(CodeableConcept value) { 
+    public Immunization setRoute(CodeableConcept value)  { 
       this.route = value;
       return this;
     }
@@ -2354,7 +2402,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #doseQuantity} (The quantity of vaccine product that was administered.)
      */
-    public Immunization setDoseQuantity(SimpleQuantity value) { 
+    public Immunization setDoseQuantity(SimpleQuantity value)  { 
       this.doseQuantity = value;
       return this;
     }
@@ -2484,7 +2532,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #explanation} (Reasons why a vaccine was or was not administered.)
      */
-    public Immunization setExplanation(ImmunizationExplanationComponent value) { 
+    public Immunization setExplanation(ImmunizationExplanationComponent value)  { 
       this.explanation = value;
       return this;
     }
@@ -2595,29 +2643,58 @@ public class Immunization extends DomainResource {
       return getVaccinationProtocol().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "A unique identifier assigned to this immunization record.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Indicates the current status of the vaccination event.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("notGiven", "boolean", "Indicates if the vaccination was or was not given.", 0, java.lang.Integer.MAX_VALUE, notGiven));
-        childrenList.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that was administered or was to be administered.", 0, java.lang.Integer.MAX_VALUE, vaccineCode));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient who either received or did not receive the immunization.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "The visit or admission or other contact between patient and health care provider the immunization was performed as part of.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("date", "dateTime", "Date vaccine administered or was to be administered.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("primarySource", "boolean", "An indication that the content of the record is based on information from the person who administered the vaccine. This reflects the context under which the data was originally recorded.", 0, java.lang.Integer.MAX_VALUE, primarySource));
-        childrenList.add(new Property("reportOrigin", "CodeableConcept", "The source of the data when the report of the immunization event is not based on information from the person who administered the vaccine.", 0, java.lang.Integer.MAX_VALUE, reportOrigin));
-        childrenList.add(new Property("location", "Reference(Location)", "The service delivery location where the vaccine administration occurred.", 0, java.lang.Integer.MAX_VALUE, location));
-        childrenList.add(new Property("manufacturer", "Reference(Organization)", "Name of vaccine manufacturer.", 0, java.lang.Integer.MAX_VALUE, manufacturer));
-        childrenList.add(new Property("lotNumber", "string", "Lot number of the  vaccine product.", 0, java.lang.Integer.MAX_VALUE, lotNumber));
-        childrenList.add(new Property("expirationDate", "date", "Date vaccine batch expires.", 0, java.lang.Integer.MAX_VALUE, expirationDate));
-        childrenList.add(new Property("site", "CodeableConcept", "Body site where vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, site));
-        childrenList.add(new Property("route", "CodeableConcept", "The path by which the vaccine product is taken into the body.", 0, java.lang.Integer.MAX_VALUE, route));
-        childrenList.add(new Property("doseQuantity", "SimpleQuantity", "The quantity of vaccine product that was administered.", 0, java.lang.Integer.MAX_VALUE, doseQuantity));
-        childrenList.add(new Property("practitioner", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, practitioner));
-        childrenList.add(new Property("note", "Annotation", "Extra information about the immunization that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("explanation", "", "Reasons why a vaccine was or was not administered.", 0, java.lang.Integer.MAX_VALUE, explanation));
-        childrenList.add(new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction));
-        childrenList.add(new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "A unique identifier assigned to this immunization record.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("status", "code", "Indicates the current status of the vaccination event.", 0, 1, status));
+        children.add(new Property("notGiven", "boolean", "Indicates if the vaccination was or was not given.", 0, 1, notGiven));
+        children.add(new Property("vaccineCode", "CodeableConcept", "Vaccine that was administered or was to be administered.", 0, 1, vaccineCode));
+        children.add(new Property("patient", "Reference(Patient)", "The patient who either received or did not receive the immunization.", 0, 1, patient));
+        children.add(new Property("encounter", "Reference(Encounter)", "The visit or admission or other contact between patient and health care provider the immunization was performed as part of.", 0, 1, encounter));
+        children.add(new Property("date", "dateTime", "Date vaccine administered or was to be administered.", 0, 1, date));
+        children.add(new Property("primarySource", "boolean", "An indication that the content of the record is based on information from the person who administered the vaccine. This reflects the context under which the data was originally recorded.", 0, 1, primarySource));
+        children.add(new Property("reportOrigin", "CodeableConcept", "The source of the data when the report of the immunization event is not based on information from the person who administered the vaccine.", 0, 1, reportOrigin));
+        children.add(new Property("location", "Reference(Location)", "The service delivery location where the vaccine administration occurred.", 0, 1, location));
+        children.add(new Property("manufacturer", "Reference(Organization)", "Name of vaccine manufacturer.", 0, 1, manufacturer));
+        children.add(new Property("lotNumber", "string", "Lot number of the  vaccine product.", 0, 1, lotNumber));
+        children.add(new Property("expirationDate", "date", "Date vaccine batch expires.", 0, 1, expirationDate));
+        children.add(new Property("site", "CodeableConcept", "Body site where vaccine was administered.", 0, 1, site));
+        children.add(new Property("route", "CodeableConcept", "The path by which the vaccine product is taken into the body.", 0, 1, route));
+        children.add(new Property("doseQuantity", "SimpleQuantity", "The quantity of vaccine product that was administered.", 0, 1, doseQuantity));
+        children.add(new Property("practitioner", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, practitioner));
+        children.add(new Property("note", "Annotation", "Extra information about the immunization that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("explanation", "", "Reasons why a vaccine was or was not administered.", 0, 1, explanation));
+        children.add(new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction));
+        children.add(new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to this immunization record.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates the current status of the vaccination event.", 0, 1, status);
+        case 1554065514: /*notGiven*/  return new Property("notGiven", "boolean", "Indicates if the vaccination was or was not given.", 0, 1, notGiven);
+        case 664556354: /*vaccineCode*/  return new Property("vaccineCode", "CodeableConcept", "Vaccine that was administered or was to be administered.", 0, 1, vaccineCode);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient who either received or did not receive the immunization.", 0, 1, patient);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The visit or admission or other contact between patient and health care provider the immunization was performed as part of.", 0, 1, encounter);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "Date vaccine administered or was to be administered.", 0, 1, date);
+        case -528721731: /*primarySource*/  return new Property("primarySource", "boolean", "An indication that the content of the record is based on information from the person who administered the vaccine. This reflects the context under which the data was originally recorded.", 0, 1, primarySource);
+        case 486750586: /*reportOrigin*/  return new Property("reportOrigin", "CodeableConcept", "The source of the data when the report of the immunization event is not based on information from the person who administered the vaccine.", 0, 1, reportOrigin);
+        case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The service delivery location where the vaccine administration occurred.", 0, 1, location);
+        case -1969347631: /*manufacturer*/  return new Property("manufacturer", "Reference(Organization)", "Name of vaccine manufacturer.", 0, 1, manufacturer);
+        case 462547450: /*lotNumber*/  return new Property("lotNumber", "string", "Lot number of the  vaccine product.", 0, 1, lotNumber);
+        case -668811523: /*expirationDate*/  return new Property("expirationDate", "date", "Date vaccine batch expires.", 0, 1, expirationDate);
+        case 3530567: /*site*/  return new Property("site", "CodeableConcept", "Body site where vaccine was administered.", 0, 1, site);
+        case 108704329: /*route*/  return new Property("route", "CodeableConcept", "The path by which the vaccine product is taken into the body.", 0, 1, route);
+        case -2083618872: /*doseQuantity*/  return new Property("doseQuantity", "SimpleQuantity", "The quantity of vaccine product that was administered.", 0, 1, doseQuantity);
+        case 574573338: /*practitioner*/  return new Property("practitioner", "", "Indicates who or what performed the event.", 0, java.lang.Integer.MAX_VALUE, practitioner);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Extra information about the immunization that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note);
+        case -1105867239: /*explanation*/  return new Property("explanation", "", "Reasons why a vaccine was or was not administered.", 0, 1, explanation);
+        case -867509719: /*reaction*/  return new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction);
+        case -179633155: /*vaccinationProtocol*/  return new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2965,12 +3042,12 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Immunization))
+        if (!(other_ instanceof Immunization))
           return false;
-        Immunization o = (Immunization) other;
+        Immunization o = (Immunization) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(notGiven, o.notGiven, true)
            && compareDeep(vaccineCode, o.vaccineCode, true) && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(date, o.date, true) && compareDeep(primarySource, o.primarySource, true) && compareDeep(reportOrigin, o.reportOrigin, true)
@@ -2982,12 +3059,12 @@ public class Immunization extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Immunization))
+        if (!(other_ instanceof Immunization))
           return false;
-        Immunization o = (Immunization) other;
+        Immunization o = (Immunization) other_;
         return compareValues(status, o.status, true) && compareValues(notGiven, o.notGiven, true) && compareValues(date, o.date, true)
            && compareValues(primarySource, o.primarySource, true) && compareValues(lotNumber, o.lotNumber, true)
            && compareValues(expirationDate, o.expirationDate, true);

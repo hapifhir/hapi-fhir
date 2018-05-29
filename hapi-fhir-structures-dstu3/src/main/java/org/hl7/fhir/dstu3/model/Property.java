@@ -135,9 +135,6 @@ public class Property {
     this.structure = structure;
   }
 
-  public boolean isList() {
-    return maxCardinality > 1;
-  }
 
 	
 }

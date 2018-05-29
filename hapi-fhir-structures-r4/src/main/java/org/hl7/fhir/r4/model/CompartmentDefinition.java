@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A compartment definition that defines how resources are accessed on a server.
  */
 @ResourceDef(name="CompartmentDefinition", profile="http://hl7.org/fhir/Profile/CompartmentDefinition")
-@ChildOrder(names={"url", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "purpose", "useContext", "jurisdiction", "code", "search", "resource"})
+@ChildOrder(names={"url", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "code", "search", "resource"})
 public class CompartmentDefinition extends MetadataResource {
 
     public enum CompartmentType {
@@ -530,10 +530,10 @@ public class CompartmentDefinition extends MetadataResource {
   }
 
     /**
-     * Explaination of why this compartment definition is needed and why it has been designed as it has.
+     * Explanation of why this compartment definition is needed and why it has been designed as it has.
      */
     @Child(name = "purpose", type = {MarkdownType.class}, order=0, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Why this compartment definition is defined", formalDefinition="Explaination of why this compartment definition is needed and why it has been designed as it has." )
+    @Description(shortDefinition="Why this compartment definition is defined", formalDefinition="Explanation of why this compartment definition is needed and why it has been designed as it has." )
     protected MarkdownType purpose;
 
     /**
@@ -580,7 +580,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this compartment definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this compartment definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -600,7 +600,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this compartment definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this compartment definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public CompartmentDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -608,14 +608,14 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this compartment definition is (or will be) published.
+     * @return An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this compartment definition is (or will be) published.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this compartment definition is (or will be) published.
+     * @param value An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this compartment definition is (or will be) published.
      */
     public CompartmentDefinition setUrl(String value) { 
         if (this.url == null)
@@ -764,7 +764,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #experimental} (A boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (A Boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -784,7 +784,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #experimental} (A boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (A Boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public CompartmentDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -792,14 +792,14 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return A boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return A Boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
       return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value A boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value A Boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.
      */
     public CompartmentDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -809,7 +809,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #date} (The date  (and optionally time) when the compartment definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date  (and optionally time) when the compartment definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -829,7 +829,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #date} (The date  (and optionally time) when the compartment definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date  (and optionally time) when the compartment definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public CompartmentDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -837,14 +837,14 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return The date  (and optionally time) when the compartment definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.
+     * @return The date  (and optionally time) when the compartment definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date  (and optionally time) when the compartment definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.
+     * @param value The date  (and optionally time) when the compartment definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.
      */
     public CompartmentDefinition setDate(Date value) { 
       if (value == null)
@@ -858,7 +858,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #publisher} (The name of the individual or organization that published the compartment definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the organization or individual that published the compartment definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -878,7 +878,7 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #publisher} (The name of the individual or organization that published the compartment definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the organization or individual that published the compartment definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public CompartmentDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -886,14 +886,14 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return The name of the individual or organization that published the compartment definition.
+     * @return The name of the organization or individual that published the compartment definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value The name of the individual or organization that published the compartment definition.
+     * @param value The name of the organization or individual that published the compartment definition.
      */
     public CompartmentDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -1009,55 +1009,6 @@ public class CompartmentDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #purpose} (Explaination of why this compartment definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public MarkdownType getPurposeElement() { 
-      if (this.purpose == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CompartmentDefinition.purpose");
-        else if (Configuration.doAutoCreate())
-          this.purpose = new MarkdownType(); // bb
-      return this.purpose;
-    }
-
-    public boolean hasPurposeElement() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    public boolean hasPurpose() { 
-      return this.purpose != null && !this.purpose.isEmpty();
-    }
-
-    /**
-     * @param value {@link #purpose} (Explaination of why this compartment definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
-     */
-    public CompartmentDefinition setPurposeElement(MarkdownType value) { 
-      this.purpose = value;
-      return this;
-    }
-
-    /**
-     * @return Explaination of why this compartment definition is needed and why it has been designed as it has.
-     */
-    public String getPurpose() { 
-      return this.purpose == null ? null : this.purpose.getValue();
-    }
-
-    /**
-     * @param value Explaination of why this compartment definition is needed and why it has been designed as it has.
-     */
-    public CompartmentDefinition setPurpose(String value) { 
-      if (value == null)
-        this.purpose = null;
-      else {
-        if (this.purpose == null)
-          this.purpose = new MarkdownType();
-        this.purpose.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate compartment definition instances.)
      */
     public List<UsageContext> getUseContext() { 
@@ -1161,6 +1112,55 @@ public class CompartmentDefinition extends MetadataResource {
         addJurisdiction();
       }
       return getJurisdiction().get(0);
+    }
+
+    /**
+     * @return {@link #purpose} (Explanation of why this compartment definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public MarkdownType getPurposeElement() { 
+      if (this.purpose == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create CompartmentDefinition.purpose");
+        else if (Configuration.doAutoCreate())
+          this.purpose = new MarkdownType(); // bb
+      return this.purpose;
+    }
+
+    public boolean hasPurposeElement() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    public boolean hasPurpose() { 
+      return this.purpose != null && !this.purpose.isEmpty();
+    }
+
+    /**
+     * @param value {@link #purpose} (Explanation of why this compartment definition is needed and why it has been designed as it has.). This is the underlying object with id, value and extensions. The accessor "getPurpose" gives direct access to the value
+     */
+    public CompartmentDefinition setPurposeElement(MarkdownType value) { 
+      this.purpose = value;
+      return this;
+    }
+
+    /**
+     * @return Explanation of why this compartment definition is needed and why it has been designed as it has.
+     */
+    public String getPurpose() { 
+      return this.purpose == null ? null : this.purpose.getValue();
+    }
+
+    /**
+     * @param value Explanation of why this compartment definition is needed and why it has been designed as it has.
+     */
+    public CompartmentDefinition setPurpose(String value) { 
+      if (value == null)
+        this.purpose = null;
+      else {
+        if (this.purpose == null)
+          this.purpose = new MarkdownType();
+        this.purpose.setValue(value);
+      }
+      return this;
     }
 
     /**
@@ -1308,18 +1308,18 @@ public class CompartmentDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this compartment definition is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this compartment definition is (or will be) published.", 0, 1, url));
         children.add(new Property("name", "string", "A natural language name identifying the compartment definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the compartment definition.", 0, 1, title));
         children.add(new Property("status", "code", "The status of this compartment definition. Enables tracking the life-cycle of the content.", 0, 1, status));
-        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
-        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the compartment definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.", 0, 1, date));
-        children.add(new Property("publisher", "string", "The name of the individual or organization that published the compartment definition.", 0, 1, publisher));
+        children.add(new Property("experimental", "boolean", "A Boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the compartment definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the organization or individual that published the compartment definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the compartment definition from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("purpose", "markdown", "Explaination of why this compartment definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate compartment definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the compartment definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("purpose", "markdown", "Explanation of why this compartment definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("code", "code", "Which compartment this definition describes.", 0, 1, code));
         children.add(new Property("search", "boolean", "Whether the search syntax is supported,.", 0, 1, search));
         children.add(new Property("resource", "", "Information about how a resource is related to the compartment.", 0, java.lang.Integer.MAX_VALUE, resource));
@@ -1328,18 +1328,18 @@ public class CompartmentDefinition extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance. This SHOULD be globally unique, and SHOULD be a literal address at which this compartment definition is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this compartment definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this compartment definition is (or will be) published.", 0, 1, url);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the compartment definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the compartment definition.", 0, 1, title);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this compartment definition. Enables tracking the life-cycle of the content.", 0, 1, status);
-        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
-        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the compartment definition was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.", 0, 1, date);
-        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the compartment definition.", 0, 1, publisher);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A Boolean value to indicate that this compartment definition is authored for testing purposes (or education/evaluation/marketing) and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the compartment definition was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the compartment definition changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the compartment definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the compartment definition from a consumer's perspective.", 0, 1, description);
-        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explaination of why this compartment definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate compartment definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the compartment definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this compartment definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 3059181: /*code*/  return new Property("code", "code", "Which compartment this definition describes.", 0, 1, code);
         case -906336856: /*search*/  return new Property("search", "boolean", "Whether the search syntax is supported,.", 0, 1, search);
         case -341064690: /*resource*/  return new Property("resource", "", "Information about how a resource is related to the compartment.", 0, java.lang.Integer.MAX_VALUE, resource);
@@ -1360,9 +1360,9 @@ public class CompartmentDefinition extends MetadataResource {
         case 1447404028: /*publisher*/ return this.publisher == null ? new Base[0] : new Base[] {this.publisher}; // StringType
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // MarkdownType
-        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case -669707736: /*useContext*/ return this.useContext == null ? new Base[0] : this.useContext.toArray(new Base[this.useContext.size()]); // UsageContext
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
+        case -220463842: /*purpose*/ return this.purpose == null ? new Base[0] : new Base[] {this.purpose}; // MarkdownType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Enumeration<CompartmentType>
         case -906336856: /*search*/ return this.search == null ? new Base[0] : new Base[] {this.search}; // BooleanType
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : this.resource.toArray(new Base[this.resource.size()]); // CompartmentDefinitionResourceComponent
@@ -1402,14 +1402,14 @@ public class CompartmentDefinition extends MetadataResource {
         case -1724546052: // description
           this.description = castToMarkdown(value); // MarkdownType
           return value;
-        case -220463842: // purpose
-          this.purpose = castToMarkdown(value); // MarkdownType
-          return value;
         case -669707736: // useContext
           this.getUseContext().add(castToUsageContext(value)); // UsageContext
           return value;
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -220463842: // purpose
+          this.purpose = castToMarkdown(value); // MarkdownType
           return value;
         case 3059181: // code
           value = new CompartmentTypeEnumFactory().fromType(castToCode(value));
@@ -1447,12 +1447,12 @@ public class CompartmentDefinition extends MetadataResource {
           this.getContact().add(castToContactDetail(value));
         } else if (name.equals("description")) {
           this.description = castToMarkdown(value); // MarkdownType
-        } else if (name.equals("purpose")) {
-          this.purpose = castToMarkdown(value); // MarkdownType
         } else if (name.equals("useContext")) {
           this.getUseContext().add(castToUsageContext(value));
         } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
+        } else if (name.equals("purpose")) {
+          this.purpose = castToMarkdown(value); // MarkdownType
         } else if (name.equals("code")) {
           value = new CompartmentTypeEnumFactory().fromType(castToCode(value));
           this.code = (Enumeration) value; // Enumeration<CompartmentType>
@@ -1477,9 +1477,9 @@ public class CompartmentDefinition extends MetadataResource {
         case 1447404028:  return getPublisherElement();
         case 951526432:  return addContact(); 
         case -1724546052:  return getDescriptionElement();
-        case -220463842:  return getPurposeElement();
         case -669707736:  return addUseContext(); 
         case -507075711:  return addJurisdiction(); 
+        case -220463842:  return getPurposeElement();
         case 3059181:  return getCodeElement();
         case -906336856:  return getSearchElement();
         case -341064690:  return addResource(); 
@@ -1500,9 +1500,9 @@ public class CompartmentDefinition extends MetadataResource {
         case 1447404028: /*publisher*/ return new String[] {"string"};
         case 951526432: /*contact*/ return new String[] {"ContactDetail"};
         case -1724546052: /*description*/ return new String[] {"markdown"};
-        case -220463842: /*purpose*/ return new String[] {"markdown"};
         case -669707736: /*useContext*/ return new String[] {"UsageContext"};
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
+        case -220463842: /*purpose*/ return new String[] {"markdown"};
         case 3059181: /*code*/ return new String[] {"code"};
         case -906336856: /*search*/ return new String[] {"boolean"};
         case -341064690: /*resource*/ return new String[] {};
@@ -1540,14 +1540,14 @@ public class CompartmentDefinition extends MetadataResource {
         else if (name.equals("description")) {
           throw new FHIRException("Cannot call addChild on a primitive type CompartmentDefinition.description");
         }
-        else if (name.equals("purpose")) {
-          throw new FHIRException("Cannot call addChild on a primitive type CompartmentDefinition.purpose");
-        }
         else if (name.equals("useContext")) {
           return addUseContext();
         }
         else if (name.equals("jurisdiction")) {
           return addJurisdiction();
+        }
+        else if (name.equals("purpose")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CompartmentDefinition.purpose");
         }
         else if (name.equals("code")) {
           throw new FHIRException("Cannot call addChild on a primitive type CompartmentDefinition.code");
@@ -1583,7 +1583,6 @@ public class CompartmentDefinition extends MetadataResource {
             dst.contact.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
-        dst.purpose = purpose == null ? null : purpose.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
@@ -1594,6 +1593,7 @@ public class CompartmentDefinition extends MetadataResource {
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
         };
+        dst.purpose = purpose == null ? null : purpose.copy();
         dst.code = code == null ? null : code.copy();
         dst.search = search == null ? null : search.copy();
         if (resource != null) {

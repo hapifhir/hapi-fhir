@@ -33,6 +33,7 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 //@formatter:off
 @Embeddable
@@ -64,6 +65,16 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")
 	@Column(name = "SP_ID")
 	private Long myId;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_UNITS_AND_VALPREFIX", nullable = true)
+	private Long myHashUnitsAndValPrefix;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_VALPREFIX", nullable = true)
+	private Long myHashValPrefix;
 
 	public ResourceIndexedSearchParamQuantity() {
 		// nothing
@@ -74,6 +85,20 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
+	}
+
+	@PrePersist
+	public void calculateHashes() {
+		if (myHashUnitsAndValPrefix == null) {
+			setHashUnitsAndValPrefix(hash(getResourceType(), getParamName(), getSystem(), getUnits(), toTruncatedString(getValue())));
+			setHashValPrefix(hash(getResourceType(), getParamName(), toTruncatedString(getValue())));
+		}
+	}
+
+	@Override
+	protected void clearHashes() {
+		myHashUnitsAndValPrefix = null;
+		myHashValPrefix = null;
 	}
 
 	@Override
@@ -94,7 +119,27 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getSystem(), obj.getSystem());
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
+		b.append(getHashUnitsAndValPrefix(), obj.getHashUnitsAndValPrefix());
+		b.append(getHashValPrefix(), obj.getHashValPrefix());
 		return b.isEquals();
+	}
+
+	public Long getHashUnitsAndValPrefix() {
+		calculateHashes();
+		return myHashUnitsAndValPrefix;
+	}
+
+	public void setHashUnitsAndValPrefix(Long theHashUnitsAndValPrefix) {
+		myHashUnitsAndValPrefix = theHashUnitsAndValPrefix;
+	}
+
+	public Long getHashValPrefix() {
+		calculateHashes();
+		return myHashValPrefix;
+	}
+
+	public void setHashValPrefix(Long theHashValPrefix) {
+		myHashValPrefix = theHashValPrefix;
 	}
 
 	@Override
@@ -107,6 +152,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public void setSystem(String theSystem) {
+		clearHashes();
 		mySystem = theSystem;
 	}
 
@@ -115,6 +161,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public void setUnits(String theUnits) {
+		clearHashes();
 		myUnits = theUnits;
 	}
 
@@ -123,6 +170,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public void setValue(BigDecimal theValue) {
+		clearHashes();
 		myValue = theValue;
 	}
 
@@ -134,6 +182,8 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getSystem());
 		b.append(getUnits());
 		b.append(getValue());
+		b.append(getHashUnitsAndValPrefix());
+		b.append(getHashValPrefix());
 		return b.toHashCode();
 	}
 
@@ -150,7 +200,15 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append("system", getSystem());
 		b.append("units", getUnits());
 		b.append("value", getValue());
+		b.append("missing", isMissing());
 		return b.build();
+	}
+
+	private static String toTruncatedString(BigDecimal theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		return theValue.setScale(0, RoundingMode.FLOOR).toPlainString();
 	}
 
 }

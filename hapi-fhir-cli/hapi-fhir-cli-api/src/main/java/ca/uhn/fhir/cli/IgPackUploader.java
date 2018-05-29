@@ -23,7 +23,6 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import net.sf.ehcache.transaction.xa.commands.Command;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -42,6 +41,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 public class IgPackUploader extends BaseCommand {
+	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final Logger ourLog = LoggerFactory.getLogger(IgPackUploader.class);
 
 	@Override

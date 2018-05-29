@@ -34,24 +34,24 @@ public class ResourceBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
 
 	private String resourceName;
-	private List<BaseMethodBinding<?>> methods = new ArrayList<BaseMethodBinding<?>>();
+	private List<BaseMethodBinding<?>> myMethodBindings = new ArrayList<>();
 
 	public ResourceBinding() {
 	}
 
 	public ResourceBinding(String resourceName, List<BaseMethodBinding<?>> methods) {
 		this.resourceName = resourceName;
-		this.methods = methods;
+		this.myMethodBindings = methods;
 	}
 
 	public BaseMethodBinding<?> getMethod(RequestDetails theRequest) {
-		if (null == methods) {
+		if (null == myMethodBindings) {
 			ourLog.warn("No methods exist for resource: {}", resourceName);
 			return null;
 		}
 
 		ourLog.debug("Looking for a handler for {}", theRequest);
-		for (BaseMethodBinding<?> rm : methods) {
+		for (BaseMethodBinding<?> rm : myMethodBindings) {
 			if (rm.incomingServerRequestMatchesMethod(theRequest)) {
 				ourLog.debug("Handler {} matches", rm);
 				return rm;
@@ -70,15 +70,15 @@ public class ResourceBinding {
 	}
 
 	public List<BaseMethodBinding<?>> getMethodBindings() {
-		return methods;
+		return myMethodBindings;
 	}
 
 	public void setMethods(List<BaseMethodBinding<?>> methods) {
-		this.methods = methods;
+		this.myMethodBindings = methods;
 	}
 
 	public void addMethod(BaseMethodBinding<?> method) {
-		this.methods.add(method);
+		this.myMethodBindings.add(method);
 	}
 
 	@Override

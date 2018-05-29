@@ -38,11 +38,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_DELETE;
 
-	public static final String OPERATION_NAME_META = "$meta";
-	public static final String OPERATION_NAME_META_DELETE = "$meta-delete";
-	public static final String OPERATION_NAME_META_ADD = "$meta-add";
+public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
 	public JpaResourceProviderDstu3() {
 		// nothing
@@ -80,7 +80,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
-	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
@@ -97,7 +97,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
-	@Operation(name = JpaConstants.OPERATION_NAME_EXPUNGE, idempotent = false, returnParameters = {
+	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerType.class)
 	})
 	public Parameters expunge(
@@ -113,11 +113,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		}
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters meta(RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theRequestDetails);
@@ -125,11 +123,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		return parameters;
 	}
 
-	//@formatter:off
-	@Operation(name = OPERATION_NAME_META, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
-	//@formatter:on
 	public Parameters meta(@IdParam IdType theId, RequestDetails theRequestDetails) {
 		Parameters parameters = new Parameters();
 		Meta metaGetOperation = getDao().metaGetOperation(Meta.class, theId, theRequestDetails);
@@ -137,7 +133,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		return parameters;
 	}
 
-	@Operation(name = OPERATION_NAME_META_ADD, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META_ADD, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
 	public Parameters metaAdd(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {
@@ -150,7 +146,7 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		return parameters;
 	}
 
-	@Operation(name = OPERATION_NAME_META_DELETE, idempotent = true, returnParameters = {
+	@Operation(name = OPERATION_META_DELETE, idempotent = true, returnParameters = {
 		@OperationParam(name = "return", type = Meta.class)
 	})
 	public Parameters metaDelete(@IdParam IdType theId, @OperationParam(name = "meta") Meta theMeta, RequestDetails theRequestDetails) {

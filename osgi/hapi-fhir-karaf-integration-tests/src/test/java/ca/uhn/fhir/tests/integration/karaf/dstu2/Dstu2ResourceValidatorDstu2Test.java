@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.tests.integration.karaf.ValidationConstants;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.ValidationFailureException;
@@ -85,7 +86,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 	private FhirValidator createFhirValidator() {
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
-		val.setValidateAgainstStandardSchematron(true);
+		val.setValidateAgainstStandardSchematron(ValidationConstants.SCHEMATRON_ENABLED);
 		return val;
 	}
 
@@ -156,7 +157,9 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
-		val.setValidateAgainstStandardSchematron(false);
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 
 		val.validate(p);
 
@@ -246,7 +249,9 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 
 		ValidationResult result = val.validateWithResult(messageString);
 
@@ -299,7 +304,9 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		if (ValidationConstants.SCHEMATRON_ENABLED) {
+			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
+		}
 
 		ValidationResult result = val.validateWithResult(messageString);
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -207,26 +207,30 @@ public class Medication extends DomainResource {
          * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
         public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
           return (CodeableConcept) this.item;
         }
 
         public boolean hasItemCodeableConcept() { 
-          return this.item instanceof CodeableConcept;
+          return this != null && this.item instanceof CodeableConcept;
         }
 
         /**
          * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
         public Reference getItemReference() throws FHIRException { 
+          if (this.item == null)
+            return null;
           if (!(this.item instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
           return (Reference) this.item;
         }
 
         public boolean hasItemReference() { 
-          return this.item instanceof Reference;
+          return this != null && this.item instanceof Reference;
         }
 
         public boolean hasItem() { 
@@ -237,6 +241,8 @@ public class Medication extends DomainResource {
          * @param value {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
          */
         public MedicationIngredientComponent setItem(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for Medication.ingredient.item[x]: "+value.fhirType());
           this.item = value;
           return this;
         }
@@ -474,10 +480,10 @@ public class Medication extends DomainResource {
         protected DateTimeType expirationDate;
 
         /**
-         * An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.
+         * An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.
          */
         @Child(name = "serialNumber", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Identifier assigned to a drug at the time of manufacture", formalDefinition="An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs." )
+        @Description(shortDefinition="Identifier assigned to a drug at the time of manufacture", formalDefinition="An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs." )
         protected StringType serialNumber;
 
         private static final long serialVersionUID = 321549563L;
@@ -588,7 +594,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return {@link #serialNumber} (An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.). This is the underlying object with id, value and extensions. The accessor "getSerialNumber" gives direct access to the value
+         * @return {@link #serialNumber} (An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.). This is the underlying object with id, value and extensions. The accessor "getSerialNumber" gives direct access to the value
          */
         public StringType getSerialNumberElement() { 
           if (this.serialNumber == null)
@@ -608,7 +614,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @param value {@link #serialNumber} (An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.). This is the underlying object with id, value and extensions. The accessor "getSerialNumber" gives direct access to the value
+         * @param value {@link #serialNumber} (An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.). This is the underlying object with id, value and extensions. The accessor "getSerialNumber" gives direct access to the value
          */
         public MedicationBatchComponent setSerialNumberElement(StringType value) { 
           this.serialNumber = value;
@@ -616,14 +622,14 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.
+         * @return An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.
          */
         public String getSerialNumber() { 
           return this.serialNumber == null ? null : this.serialNumber.getValue();
         }
 
         /**
-         * @param value An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.
+         * @param value An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.
          */
         public MedicationBatchComponent setSerialNumber(String value) { 
           if (Utilities.noString(value))
@@ -640,7 +646,7 @@ public class Medication extends DomainResource {
           super.listChildren(children);
           children.add(new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, 1, lotNumber));
           children.add(new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, 1, expirationDate));
-          children.add(new Property("serialNumber", "string", "An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.", 0, 1, serialNumber));
+          children.add(new Property("serialNumber", "string", "An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.", 0, 1, serialNumber));
         }
 
         @Override
@@ -648,7 +654,7 @@ public class Medication extends DomainResource {
           switch (_hash) {
           case 462547450: /*lotNumber*/  return new Property("lotNumber", "string", "The assigned lot number of a batch of the specified product.", 0, 1, lotNumber);
           case -668811523: /*expirationDate*/  return new Property("expirationDate", "dateTime", "When this specific batch of product will expire.", 0, 1, expirationDate);
-          case 83787357: /*serialNumber*/  return new Property("serialNumber", "string", "An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficenti to facilitate the identification, validatation, authentication and tracking and tracking of drugs.", 0, 1, serialNumber);
+          case 83787357: /*serialNumber*/  return new Property("serialNumber", "string", "An identifier assigned to a drug at the point of manufacturing and repackaging (at the package or pallet level), sufficient to facilitate the identification, validation, authentication, and tracking and tracking of drugs.", 0, 1, serialNumber);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -812,10 +818,10 @@ public class Medication extends DomainResource {
     protected CodeableConcept form;
 
     /**
-     * Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc).
+     * Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).
      */
     @Child(name = "amount", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="Amount of drug in package", formalDefinition="Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc)." )
+    @Description(shortDefinition="Amount of drug in package", formalDefinition="Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.)." )
     protected SimpleQuantity amount;
 
     /**
@@ -983,7 +989,7 @@ public class Medication extends DomainResource {
     }
 
     /**
-     * @return {@link #amount} (Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc).)
+     * @return {@link #amount} (Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).)
      */
     public SimpleQuantity getAmount() { 
       if (this.amount == null)
@@ -999,7 +1005,7 @@ public class Medication extends DomainResource {
     }
 
     /**
-     * @param value {@link #amount} (Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc).)
+     * @param value {@link #amount} (Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).)
      */
     public Medication setAmount(SimpleQuantity value) { 
       this.amount = value;
@@ -1089,7 +1095,7 @@ public class Medication extends DomainResource {
         children.add(new Property("status", "code", "A code to indicate if the medication is in active use.", 0, 1, status));
         children.add(new Property("manufacturer", "Reference(Organization)", "Describes the details of the manufacturer of the medication product.  This is not intended to represent the distributor of a medication product.", 0, 1, manufacturer));
         children.add(new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; capsule.", 0, 1, form));
-        children.add(new Property("amount", "SimpleQuantity", "Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc).", 0, 1, amount));
+        children.add(new Property("amount", "SimpleQuantity", "Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).", 0, 1, amount));
         children.add(new Property("ingredient", "", "Identifies a particular constituent of interest in the product.", 0, java.lang.Integer.MAX_VALUE, ingredient));
         children.add(new Property("batch", "", "Information that only applies to packages (not products).", 0, 1, batch));
       }
@@ -1101,7 +1107,7 @@ public class Medication extends DomainResource {
         case -892481550: /*status*/  return new Property("status", "code", "A code to indicate if the medication is in active use.", 0, 1, status);
         case -1969347631: /*manufacturer*/  return new Property("manufacturer", "Reference(Organization)", "Describes the details of the manufacturer of the medication product.  This is not intended to represent the distributor of a medication product.", 0, 1, manufacturer);
         case 3148996: /*form*/  return new Property("form", "CodeableConcept", "Describes the form of the item.  Powder; tablets; capsule.", 0, 1, form);
-        case -1413853096: /*amount*/  return new Property("amount", "SimpleQuantity", "Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc).", 0, 1, amount);
+        case -1413853096: /*amount*/  return new Property("amount", "SimpleQuantity", "Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).", 0, 1, amount);
         case -206409263: /*ingredient*/  return new Property("ingredient", "", "Identifies a particular constituent of interest in the product.", 0, java.lang.Integer.MAX_VALUE, ingredient);
         case 93509434: /*batch*/  return new Property("batch", "", "Information that only applies to packages (not products).", 0, 1, batch);
         default: return super.getNamedProperty(_hash, _name, _checkValid);

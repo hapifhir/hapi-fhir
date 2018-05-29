@@ -333,9 +333,9 @@ public class ClientUtils {
           error = (OperationOutcome) resource;
         }
       } catch(IOException ioe) {
-        throw new EFhirClientException("Error unmarshalling entity from Http Response", ioe);
+        throw new EFhirClientException("Error unmarshalling entity from Http Response: "+ioe.getMessage(), ioe);
       } catch(Exception e) {
-        throw new EFhirClientException("Error parsing response message", e);
+        throw new EFhirClientException("Error parsing response message: "+e.getMessage(), e);
       } finally {
         try{instream.close();}catch(IOException ioe){/* TODO log error */}
       }

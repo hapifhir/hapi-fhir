@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum IssueSeverity {
          */
         ERROR, 
         /**
-         * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
+         * The issue is not important enough to cause the action to fail but may cause it to be performed suboptimally or in a way that is not as desired.
          */
         WARNING, 
         /**
@@ -85,7 +85,7 @@ public enum IssueSeverity {
           switch (this) {
             case FATAL: return "The issue caused the action to fail, and no further checking could be performed.";
             case ERROR: return "The issue is sufficiently important to cause the action to fail.";
-            case WARNING: return "The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.";
+            case WARNING: return "The issue is not important enough to cause the action to fail but may cause it to be performed suboptimally or in a way that is not as desired.";
             case INFORMATION: return "The issue has no relation to the degree of success of the action.";
             default: return "?";
           }

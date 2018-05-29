@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Resource to define constraints on the Expansion of a FHIR ValueSet.
  */
@@ -336,11 +337,22 @@ public class ExpansionProfile extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("system", "uri", "The specific system for which to fix the version.", 0, java.lang.Integer.MAX_VALUE, system));
-          childrenList.add(new Property("version", "string", "The version of the code system from which codes in the expansion should be included.", 0, java.lang.Integer.MAX_VALUE, version));
-          childrenList.add(new Property("mode", "code", "How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.", 0, java.lang.Integer.MAX_VALUE, mode));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("system", "uri", "The specific system for which to fix the version.", 0, 1, system));
+          children.add(new Property("version", "string", "The version of the code system from which codes in the expansion should be included.", 0, 1, version));
+          children.add(new Property("mode", "code", "How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.", 0, 1, mode));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -887328209: /*system*/  return new Property("system", "uri", "The specific system for which to fix the version.", 0, 1, system);
+          case 351608024: /*version*/  return new Property("version", "string", "The version of the code system from which codes in the expansion should be included.", 0, 1, version);
+          case 3357091: /*mode*/  return new Property("mode", "code", "How to manage the intersection between a fixed version in a value set, and this fixed version of the system in the expansion profile.", 0, 1, mode);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -433,23 +445,23 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExpansionProfileFixedVersionComponent))
+        if (!(other_ instanceof ExpansionProfileFixedVersionComponent))
           return false;
-        ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other;
+        ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other_;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(mode, o.mode, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExpansionProfileFixedVersionComponent))
+        if (!(other_ instanceof ExpansionProfileFixedVersionComponent))
           return false;
-        ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other;
+        ExpansionProfileFixedVersionComponent o = (ExpansionProfileFixedVersionComponent) other_;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(mode, o.mode, true)
           ;
       }
@@ -592,10 +604,20 @@ public class ExpansionProfile extends MetadataResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("system", "uri", "An absolute URI which is the code system to be excluded.", 0, java.lang.Integer.MAX_VALUE, system));
-          childrenList.add(new Property("version", "string", "The version of the code system from which codes in the expansion should be excluded.", 0, java.lang.Integer.MAX_VALUE, version));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("system", "uri", "An absolute URI which is the code system to be excluded.", 0, 1, system));
+          children.add(new Property("version", "string", "The version of the code system from which codes in the expansion should be excluded.", 0, 1, version));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -887328209: /*system*/  return new Property("system", "uri", "An absolute URI which is the code system to be excluded.", 0, 1, system);
+          case 351608024: /*version*/  return new Property("version", "string", "The version of the code system from which codes in the expansion should be excluded.", 0, 1, version);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -674,22 +696,22 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExpansionProfileExcludedSystemComponent))
+        if (!(other_ instanceof ExpansionProfileExcludedSystemComponent))
           return false;
-        ExpansionProfileExcludedSystemComponent o = (ExpansionProfileExcludedSystemComponent) other;
+        ExpansionProfileExcludedSystemComponent o = (ExpansionProfileExcludedSystemComponent) other_;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExpansionProfileExcludedSystemComponent))
+        if (!(other_ instanceof ExpansionProfileExcludedSystemComponent))
           return false;
-        ExpansionProfileExcludedSystemComponent o = (ExpansionProfileExcludedSystemComponent) other;
+        ExpansionProfileExcludedSystemComponent o = (ExpansionProfileExcludedSystemComponent) other_;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true);
       }
 
@@ -748,7 +770,7 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * @param value {@link #include} (Designations to be included.)
          */
-        public ExpansionProfileDesignationComponent setInclude(DesignationIncludeComponent value) { 
+        public ExpansionProfileDesignationComponent setInclude(DesignationIncludeComponent value)  { 
           this.include = value;
           return this;
         }
@@ -772,15 +794,25 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * @param value {@link #exclude} (Designations to be excluded.)
          */
-        public ExpansionProfileDesignationComponent setExclude(DesignationExcludeComponent value) { 
+        public ExpansionProfileDesignationComponent setExclude(DesignationExcludeComponent value)  { 
           this.exclude = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("include", "", "Designations to be included.", 0, java.lang.Integer.MAX_VALUE, include));
-          childrenList.add(new Property("exclude", "", "Designations to be excluded.", 0, java.lang.Integer.MAX_VALUE, exclude));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("include", "", "Designations to be included.", 0, 1, include));
+          children.add(new Property("exclude", "", "Designations to be excluded.", 0, 1, exclude));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 1942574248: /*include*/  return new Property("include", "", "Designations to be included.", 0, 1, include);
+          case -1321148966: /*exclude*/  return new Property("exclude", "", "Designations to be excluded.", 0, 1, exclude);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -861,22 +893,22 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExpansionProfileDesignationComponent))
+        if (!(other_ instanceof ExpansionProfileDesignationComponent))
           return false;
-        ExpansionProfileDesignationComponent o = (ExpansionProfileDesignationComponent) other;
+        ExpansionProfileDesignationComponent o = (ExpansionProfileDesignationComponent) other_;
         return compareDeep(include, o.include, true) && compareDeep(exclude, o.exclude, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExpansionProfileDesignationComponent))
+        if (!(other_ instanceof ExpansionProfileDesignationComponent))
           return false;
-        ExpansionProfileDesignationComponent o = (ExpansionProfileDesignationComponent) other;
+        ExpansionProfileDesignationComponent o = (ExpansionProfileDesignationComponent) other_;
         return true;
       }
 
@@ -962,9 +994,18 @@ public class ExpansionProfile extends MetadataResource {
           return getDesignation().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("designation", "", "A data group for each designation to be included.", 0, java.lang.Integer.MAX_VALUE, designation));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("designation", "", "A data group for each designation to be included.", 0, java.lang.Integer.MAX_VALUE, designation));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -900931593: /*designation*/  return new Property("designation", "", "A data group for each designation to be included.", 0, java.lang.Integer.MAX_VALUE, designation);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1035,22 +1076,22 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DesignationIncludeComponent))
+        if (!(other_ instanceof DesignationIncludeComponent))
           return false;
-        DesignationIncludeComponent o = (DesignationIncludeComponent) other;
+        DesignationIncludeComponent o = (DesignationIncludeComponent) other_;
         return compareDeep(designation, o.designation, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DesignationIncludeComponent))
+        if (!(other_ instanceof DesignationIncludeComponent))
           return false;
-        DesignationIncludeComponent o = (DesignationIncludeComponent) other;
+        DesignationIncludeComponent o = (DesignationIncludeComponent) other_;
         return true;
       }
 
@@ -1160,15 +1201,25 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * @param value {@link #use} (Which kinds of designation to include in the expansion.)
          */
-        public DesignationIncludeDesignationComponent setUse(Coding value) { 
+        public DesignationIncludeDesignationComponent setUse(Coding value)  { 
           this.use = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("use", "Coding", "Which kinds of designation to include in the expansion.", 0, java.lang.Integer.MAX_VALUE, use));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("language", "code", "The language this designation is defined for.", 0, 1, language));
+          children.add(new Property("use", "Coding", "Which kinds of designation to include in the expansion.", 0, 1, use));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1613589672: /*language*/  return new Property("language", "code", "The language this designation is defined for.", 0, 1, language);
+          case 116103: /*use*/  return new Property("use", "Coding", "Which kinds of designation to include in the expansion.", 0, 1, use);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1248,22 +1299,22 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DesignationIncludeDesignationComponent))
+        if (!(other_ instanceof DesignationIncludeDesignationComponent))
           return false;
-        DesignationIncludeDesignationComponent o = (DesignationIncludeDesignationComponent) other;
+        DesignationIncludeDesignationComponent o = (DesignationIncludeDesignationComponent) other_;
         return compareDeep(language, o.language, true) && compareDeep(use, o.use, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DesignationIncludeDesignationComponent))
+        if (!(other_ instanceof DesignationIncludeDesignationComponent))
           return false;
-        DesignationIncludeDesignationComponent o = (DesignationIncludeDesignationComponent) other;
+        DesignationIncludeDesignationComponent o = (DesignationIncludeDesignationComponent) other_;
         return compareValues(language, o.language, true);
       }
 
@@ -1349,9 +1400,18 @@ public class ExpansionProfile extends MetadataResource {
           return getDesignation().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("designation", "", "A data group for each designation to be excluded.", 0, java.lang.Integer.MAX_VALUE, designation));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("designation", "", "A data group for each designation to be excluded.", 0, java.lang.Integer.MAX_VALUE, designation));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -900931593: /*designation*/  return new Property("designation", "", "A data group for each designation to be excluded.", 0, java.lang.Integer.MAX_VALUE, designation);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1422,22 +1482,22 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DesignationExcludeComponent))
+        if (!(other_ instanceof DesignationExcludeComponent))
           return false;
-        DesignationExcludeComponent o = (DesignationExcludeComponent) other;
+        DesignationExcludeComponent o = (DesignationExcludeComponent) other_;
         return compareDeep(designation, o.designation, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DesignationExcludeComponent))
+        if (!(other_ instanceof DesignationExcludeComponent))
           return false;
-        DesignationExcludeComponent o = (DesignationExcludeComponent) other;
+        DesignationExcludeComponent o = (DesignationExcludeComponent) other_;
         return true;
       }
 
@@ -1547,15 +1607,25 @@ public class ExpansionProfile extends MetadataResource {
         /**
          * @param value {@link #use} (Which kinds of designation to exclude from the expansion.)
          */
-        public DesignationExcludeDesignationComponent setUse(Coding value) { 
+        public DesignationExcludeDesignationComponent setUse(Coding value)  { 
           this.use = value;
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("language", "code", "The language this designation is defined for.", 0, java.lang.Integer.MAX_VALUE, language));
-          childrenList.add(new Property("use", "Coding", "Which kinds of designation to exclude from the expansion.", 0, java.lang.Integer.MAX_VALUE, use));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("language", "code", "The language this designation is defined for.", 0, 1, language));
+          children.add(new Property("use", "Coding", "Which kinds of designation to exclude from the expansion.", 0, 1, use));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1613589672: /*language*/  return new Property("language", "code", "The language this designation is defined for.", 0, 1, language);
+          case 116103: /*use*/  return new Property("use", "Coding", "Which kinds of designation to exclude from the expansion.", 0, 1, use);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1635,22 +1705,22 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DesignationExcludeDesignationComponent))
+        if (!(other_ instanceof DesignationExcludeDesignationComponent))
           return false;
-        DesignationExcludeDesignationComponent o = (DesignationExcludeDesignationComponent) other;
+        DesignationExcludeDesignationComponent o = (DesignationExcludeDesignationComponent) other_;
         return compareDeep(language, o.language, true) && compareDeep(use, o.use, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DesignationExcludeDesignationComponent))
+        if (!(other_ instanceof DesignationExcludeDesignationComponent))
           return false;
-        DesignationExcludeDesignationComponent o = (DesignationExcludeDesignationComponent) other;
+        DesignationExcludeDesignationComponent o = (DesignationExcludeDesignationComponent) other_;
         return compareValues(language, o.language, true);
       }
 
@@ -1835,7 +1905,7 @@ public class ExpansionProfile extends MetadataResource {
     /**
      * @param value {@link #identifier} (A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
-    public ExpansionProfile setIdentifier(Identifier value) { 
+    public ExpansionProfile setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -2406,7 +2476,7 @@ public class ExpansionProfile extends MetadataResource {
     /**
      * @param value {@link #excludedSystem} (Code system, or a particular version of a code system to be excluded from value set expansions.)
      */
-    public ExpansionProfile setExcludedSystem(ExpansionProfileExcludedSystemComponent value) { 
+    public ExpansionProfile setExcludedSystem(ExpansionProfileExcludedSystemComponent value)  { 
       this.excludedSystem = value;
       return this;
     }
@@ -2475,7 +2545,7 @@ public class ExpansionProfile extends MetadataResource {
     /**
      * @param value {@link #designation} (A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.)
      */
-    public ExpansionProfile setDesignation(ExpansionProfileDesignationComponent value) { 
+    public ExpansionProfile setDesignation(ExpansionProfileDesignationComponent value)  { 
       this.designation = value;
       return this;
     }
@@ -2799,31 +2869,62 @@ public class ExpansionProfile extends MetadataResource {
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("description", "markdown", "A free text natural language description of the expansion profile from a consumer's perspective.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate expansion profile instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
-        childrenList.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the expansion profile is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-        childrenList.add(new Property("fixedVersion", "", "Fix use of a particular code system to a particular version.", 0, java.lang.Integer.MAX_VALUE, fixedVersion));
-        childrenList.add(new Property("excludedSystem", "", "Code system, or a particular version of a code system to be excluded from value set expansions.", 0, java.lang.Integer.MAX_VALUE, excludedSystem));
-        childrenList.add(new Property("includeDesignations", "boolean", "Controls whether concept designations are to be included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeDesignations));
-        childrenList.add(new Property("designation", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.", 0, java.lang.Integer.MAX_VALUE, designation));
-        childrenList.add(new Property("includeDefinition", "boolean", "Controls whether the value set definition is included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, includeDefinition));
-        childrenList.add(new Property("activeOnly", "boolean", "Controls whether inactive concepts are included or excluded in value set expansions.", 0, java.lang.Integer.MAX_VALUE, activeOnly));
-        childrenList.add(new Property("excludeNested", "boolean", "Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).", 0, java.lang.Integer.MAX_VALUE, excludeNested));
-        childrenList.add(new Property("excludeNotForUI", "boolean", "Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces.", 0, java.lang.Integer.MAX_VALUE, excludeNotForUI));
-        childrenList.add(new Property("excludePostCoordinated", "boolean", "Controls whether or not the value set expansion includes post coordinated codes.", 0, java.lang.Integer.MAX_VALUE, excludePostCoordinated));
-        childrenList.add(new Property("displayLanguage", "code", "Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display.", 0, java.lang.Integer.MAX_VALUE, displayLanguage));
-        childrenList.add(new Property("limitedExpansion", "boolean", "If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).", 0, java.lang.Integer.MAX_VALUE, limitedExpansion));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url));
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
+        children.add(new Property("version", "string", "The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
+        children.add(new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
+        children.add(new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, 1, status));
+        children.add(new Property("experimental", "boolean", "A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental));
+        children.add(new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, 1, date));
+        children.add(new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, 1, publisher));
+        children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        children.add(new Property("description", "markdown", "A free text natural language description of the expansion profile from a consumer's perspective.", 0, 1, description));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate expansion profile instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the expansion profile is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
+        children.add(new Property("fixedVersion", "", "Fix use of a particular code system to a particular version.", 0, java.lang.Integer.MAX_VALUE, fixedVersion));
+        children.add(new Property("excludedSystem", "", "Code system, or a particular version of a code system to be excluded from value set expansions.", 0, 1, excludedSystem));
+        children.add(new Property("includeDesignations", "boolean", "Controls whether concept designations are to be included or excluded in value set expansions.", 0, 1, includeDesignations));
+        children.add(new Property("designation", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.", 0, 1, designation));
+        children.add(new Property("includeDefinition", "boolean", "Controls whether the value set definition is included or excluded in value set expansions.", 0, 1, includeDefinition));
+        children.add(new Property("activeOnly", "boolean", "Controls whether inactive concepts are included or excluded in value set expansions.", 0, 1, activeOnly));
+        children.add(new Property("excludeNested", "boolean", "Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).", 0, 1, excludeNested));
+        children.add(new Property("excludeNotForUI", "boolean", "Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces.", 0, 1, excludeNotForUI));
+        children.add(new Property("excludePostCoordinated", "boolean", "Controls whether or not the value set expansion includes post coordinated codes.", 0, 1, excludePostCoordinated));
+        children.add(new Property("displayLanguage", "code", "Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display.", 0, 1, displayLanguage));
+        children.add(new Property("limitedExpansion", "boolean", "If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).", 0, 1, limitedExpansion));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this expansion profile when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this expansion profile is (or will be) published. The URL SHOULD include the major version of the expansion profile. For more information see [Technical and Business Versions](resource.html#versions).", 0, 1, url);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this expansion profile when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
+        case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the expansion profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the expansion profile author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
+        case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the expansion profile. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of this expansion profile. Enables tracking the life-cycle of the content.", 0, 1, status);
+        case -404562712: /*experimental*/  return new Property("experimental", "boolean", "A boolean value to indicate that this expansion profile is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, 1, experimental);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the expansion profile was published. The date must change if and when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the expansion profile changes.", 0, 1, date);
+        case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the individual or organization that published the expansion profile.", 0, 1, publisher);
+        case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the expansion profile from a consumer's perspective.", 0, 1, description);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate expansion profile instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the expansion profile is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
+        case 807748292: /*fixedVersion*/  return new Property("fixedVersion", "", "Fix use of a particular code system to a particular version.", 0, java.lang.Integer.MAX_VALUE, fixedVersion);
+        case 2125282457: /*excludedSystem*/  return new Property("excludedSystem", "", "Code system, or a particular version of a code system to be excluded from value set expansions.", 0, 1, excludedSystem);
+        case 461507620: /*includeDesignations*/  return new Property("includeDesignations", "boolean", "Controls whether concept designations are to be included or excluded in value set expansions.", 0, 1, includeDesignations);
+        case -900931593: /*designation*/  return new Property("designation", "", "A set of criteria that provide the constraints imposed on the value set expansion by including or excluding designations.", 0, 1, designation);
+        case 127972379: /*includeDefinition*/  return new Property("includeDefinition", "boolean", "Controls whether the value set definition is included or excluded in value set expansions.", 0, 1, includeDefinition);
+        case 2043813842: /*activeOnly*/  return new Property("activeOnly", "boolean", "Controls whether inactive concepts are included or excluded in value set expansions.", 0, 1, activeOnly);
+        case 424992625: /*excludeNested*/  return new Property("excludeNested", "boolean", "Controls whether or not the value set expansion nests codes or not (i.e. ValueSet.expansion.contains.contains).", 0, 1, excludeNested);
+        case 667582980: /*excludeNotForUI*/  return new Property("excludeNotForUI", "boolean", "Controls whether or not the value set expansion includes codes which cannot be displayed in user interfaces.", 0, 1, excludeNotForUI);
+        case 563335154: /*excludePostCoordinated*/  return new Property("excludePostCoordinated", "boolean", "Controls whether or not the value set expansion includes post coordinated codes.", 0, 1, excludePostCoordinated);
+        case 1486237242: /*displayLanguage*/  return new Property("displayLanguage", "code", "Specifies the language to be used for description in the expansions i.e. the language to be used for ValueSet.expansion.contains.display.", 0, 1, displayLanguage);
+        case 597771333: /*limitedExpansion*/  return new Property("limitedExpansion", "boolean", "If the value set being expanded is incomplete (because it is too big to expand), return a limited expansion (a subset) with an indicator that expansion is incomplete, using the extension [http://hl7.org/fhir/StructureDefinition/valueset-toocostly](extension-valueset-toocostly.html).", 0, 1, limitedExpansion);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -3184,12 +3285,12 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ExpansionProfile))
+        if (!(other_ instanceof ExpansionProfile))
           return false;
-        ExpansionProfile o = (ExpansionProfile) other;
+        ExpansionProfile o = (ExpansionProfile) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(fixedVersion, o.fixedVersion, true)
            && compareDeep(excludedSystem, o.excludedSystem, true) && compareDeep(includeDesignations, o.includeDesignations, true)
            && compareDeep(designation, o.designation, true) && compareDeep(includeDefinition, o.includeDefinition, true)
@@ -3200,12 +3301,12 @@ public class ExpansionProfile extends MetadataResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ExpansionProfile))
+        if (!(other_ instanceof ExpansionProfile))
           return false;
-        ExpansionProfile o = (ExpansionProfile) other;
+        ExpansionProfile o = (ExpansionProfile) other_;
         return compareValues(includeDesignations, o.includeDesignations, true) && compareValues(includeDefinition, o.includeDefinition, true)
            && compareValues(activeOnly, o.activeOnly, true) && compareValues(excludeNested, o.excludeNested, true)
            && compareValues(excludeNotForUI, o.excludeNotForUI, true) && compareValues(excludePostCoordinated, o.excludePostCoordinated, true)

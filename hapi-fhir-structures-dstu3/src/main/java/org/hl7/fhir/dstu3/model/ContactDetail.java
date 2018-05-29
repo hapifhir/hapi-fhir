@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Specifies contact information for a person or organization.
  */
@@ -172,10 +173,20 @@ public class ContactDetail extends Type implements ICompositeType {
       return getTelecom().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("name", "string", "The name of an individual to contact.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("telecom", "ContactPoint", "The contact details for the individual (if a name was provided) or the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("name", "string", "The name of an individual to contact.", 0, 1, name));
+        children.add(new Property("telecom", "ContactPoint", "The contact details for the individual (if a name was provided) or the organization.", 0, java.lang.Integer.MAX_VALUE, telecom));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 3373707: /*name*/  return new Property("name", "string", "The name of an individual to contact.", 0, 1, name);
+        case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "The contact details for the individual (if a name was provided) or the organization.", 0, java.lang.Integer.MAX_VALUE, telecom);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -267,22 +278,22 @@ public class ContactDetail extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContactDetail))
+        if (!(other_ instanceof ContactDetail))
           return false;
-        ContactDetail o = (ContactDetail) other;
+        ContactDetail o = (ContactDetail) other_;
         return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContactDetail))
+        if (!(other_ instanceof ContactDetail))
           return false;
-        ContactDetail o = (ContactDetail) other;
+        ContactDetail o = (ContactDetail) other_;
         return compareValues(name, o.name, true);
       }
 

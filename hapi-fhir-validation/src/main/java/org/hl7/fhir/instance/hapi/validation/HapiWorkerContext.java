@@ -33,7 +33,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public List<StructureDefinition> allStructures() {
-		throw new UnsupportedOperationException();
+		return myValidationSupport.allStructures();
 	}
 
 	@Override

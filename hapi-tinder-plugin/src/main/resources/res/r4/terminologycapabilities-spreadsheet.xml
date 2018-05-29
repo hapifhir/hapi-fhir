@@ -6448,7 +6448,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s153"/>
     <Cell ss:StyleID="s153"><Data ss:Type="String">Implicit Codes</Data></Cell>
-    <Cell ss:StyleID="s152"><Data ss:Type="String">The search for code on ValueSet only includesall codes based on the expansion of the value set</Data></Cell>
+    <Cell ss:StyleID="s152"><Data ss:Type="String">The search for code on ValueSet only includes all codes based on the expansion of the value set</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s145"/>

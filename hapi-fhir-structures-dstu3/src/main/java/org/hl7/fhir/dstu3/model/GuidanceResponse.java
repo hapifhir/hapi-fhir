@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.
  */
@@ -424,7 +425,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #identifier} (Allows a service to provide a unique, business identifier for the response.)
      */
-    public GuidanceResponse setIdentifier(Identifier value) { 
+    public GuidanceResponse setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -448,7 +449,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #module} (A reference to the knowledge module that was invoked.)
      */
-    public GuidanceResponse setModule(Reference value) { 
+    public GuidanceResponse setModule(Reference value)  { 
       this.module = value;
       return this;
     }
@@ -537,7 +538,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #subject} (The patient for which the request was processed.)
      */
-    public GuidanceResponse setSubject(Reference value) { 
+    public GuidanceResponse setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -576,7 +577,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #context} (Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.)
      */
-    public GuidanceResponse setContext(Reference value) { 
+    public GuidanceResponse setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -664,7 +665,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #performer} (Provides a reference to the device that performed the guidance.)
      */
-    public GuidanceResponse setPerformer(Reference value) { 
+    public GuidanceResponse setPerformer(Reference value)  { 
       this.performer = value;
       return this;
     }
@@ -700,26 +701,30 @@ public class GuidanceResponse extends DomainResource {
      * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
      */
     public CodeableConcept getReasonCodeableConcept() throws FHIRException { 
+      if (this.reason == null)
+        return null;
       if (!(this.reason instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (CodeableConcept) this.reason;
     }
 
     public boolean hasReasonCodeableConcept() { 
-      return this.reason instanceof CodeableConcept;
+      return this != null && this.reason instanceof CodeableConcept;
     }
 
     /**
      * @return {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
      */
     public Reference getReasonReference() throws FHIRException { 
+      if (this.reason == null)
+        return null;
       if (!(this.reason instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
     }
 
     public boolean hasReasonReference() { 
-      return this.reason instanceof Reference;
+      return this != null && this.reason instanceof Reference;
     }
 
     public boolean hasReason() { 
@@ -729,7 +734,9 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #reason} (Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.)
      */
-    public GuidanceResponse setReason(Type value) { 
+    public GuidanceResponse setReason(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+        throw new FHIRFormatError("Not the right type for GuidanceResponse.reason[x]: "+value.fhirType());
       this.reason = value;
       return this;
     }
@@ -881,7 +888,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #outputParameters} (The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.)
      */
-    public GuidanceResponse setOutputParameters(Reference value) { 
+    public GuidanceResponse setOutputParameters(Reference value)  { 
       this.outputParameters = value;
       return this;
     }
@@ -925,7 +932,7 @@ public class GuidanceResponse extends DomainResource {
     /**
      * @param value {@link #result} (The actions, if any, produced by the evaluation of the artifact.)
      */
-    public GuidanceResponse setResult(Reference value) { 
+    public GuidanceResponse setResult(Reference value)  { 
       this.result = value;
       return this;
     }
@@ -998,22 +1005,47 @@ public class GuidanceResponse extends DomainResource {
       return getDataRequirement().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, java.lang.Integer.MAX_VALUE, requestId));
-        childrenList.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("module", "Reference(ServiceDefinition)", "A reference to the knowledge module that was invoked.", 0, java.lang.Integer.MAX_VALUE, module));
-        childrenList.add(new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "The patient for which the request was processed.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("occurrenceDateTime", "dateTime", "Indicates when the guidance response was processed.", 0, java.lang.Integer.MAX_VALUE, occurrenceDateTime));
-        childrenList.add(new Property("performer", "Reference(Device)", "Provides a reference to the device that performed the guidance.", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage));
-        childrenList.add(new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, java.lang.Integer.MAX_VALUE, outputParameters));
-        childrenList.add(new Property("result", "Reference(CarePlan|RequestGroup)", "The actions, if any, produced by the evaluation of the artifact.", 0, java.lang.Integer.MAX_VALUE, result));
-        childrenList.add(new Property("dataRequirement", "DataRequirement", "If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.", 0, java.lang.Integer.MAX_VALUE, dataRequirement));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestId));
+        children.add(new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, 1, identifier));
+        children.add(new Property("module", "Reference(ServiceDefinition)", "A reference to the knowledge module that was invoked.", 0, 1, module));
+        children.add(new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, 1, status));
+        children.add(new Property("subject", "Reference(Patient|Group)", "The patient for which the request was processed.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.", 0, 1, context));
+        children.add(new Property("occurrenceDateTime", "dateTime", "Indicates when the guidance response was processed.", 0, 1, occurrenceDateTime));
+        children.add(new Property("performer", "Reference(Device)", "Provides a reference to the device that performed the guidance.", 0, 1, performer));
+        children.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason));
+        children.add(new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage));
+        children.add(new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, 1, outputParameters));
+        children.add(new Property("result", "Reference(CarePlan|RequestGroup)", "The actions, if any, produced by the evaluation of the artifact.", 0, 1, result));
+        children.add(new Property("dataRequirement", "DataRequirement", "If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.", 0, java.lang.Integer.MAX_VALUE, dataRequirement));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case 693933066: /*requestId*/  return new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestId);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Allows a service to provide a unique, business identifier for the response.", 0, 1, identifier);
+        case -1068784020: /*module*/  return new Property("module", "Reference(ServiceDefinition)", "A reference to the knowledge module that was invoked.", 0, 1, module);
+        case -892481550: /*status*/  return new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, 1, status);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient for which the request was processed.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Allows the context of the guidance response to be provided if available. In a service context, this would likely be unavailable.", 0, 1, context);
+        case -298443636: /*occurrenceDateTime*/  return new Property("occurrenceDateTime", "dateTime", "Indicates when the guidance response was processed.", 0, 1, occurrenceDateTime);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Device)", "Provides a reference to the device that performed the guidance.", 0, 1, performer);
+        case -669418564: /*reason[x]*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
+        case -934964668: /*reason*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
+        case -610155331: /*reasonCodeableConcept*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
+        case -1146218137: /*reasonReference*/  return new Property("reason[x]", "CodeableConcept|Reference(Any)", "Indicates the reason the request was initiated. This is typically provided as a parameter to the evaluation and echoed by the service, although for some use cases, such as subscription- or event-based scenarios, it may provide an indication of the cause for the response.", 0, 1, reason);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Provides a mechanism to communicate additional information about the response.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 1081619755: /*evaluationMessage*/  return new Property("evaluationMessage", "Reference(OperationOutcome)", "Messages resulting from the evaluation of the artifact or artifacts. As part of evaluating the request, the engine may produce informational or warning messages. These messages will be provided by this element.", 0, java.lang.Integer.MAX_VALUE, evaluationMessage);
+        case 525609419: /*outputParameters*/  return new Property("outputParameters", "Reference(Parameters)", "The output parameters of the evaluation, if any. Many modules will result in the return of specific resources such as procedure or communication requests that are returned as part of the operation result. However, modules may define specific outputs that would be returned as the result of the evaluation, and these would be returned in this element.", 0, 1, outputParameters);
+        case -934426595: /*result*/  return new Property("result", "Reference(CarePlan|RequestGroup)", "The actions, if any, produced by the evaluation of the artifact.", 0, 1, result);
+        case 629147193: /*dataRequirement*/  return new Property("dataRequirement", "DataRequirement", "If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data.", 0, java.lang.Integer.MAX_VALUE, dataRequirement);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1272,12 +1304,12 @@ public class GuidanceResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof GuidanceResponse))
+        if (!(other_ instanceof GuidanceResponse))
           return false;
-        GuidanceResponse o = (GuidanceResponse) other;
+        GuidanceResponse o = (GuidanceResponse) other_;
         return compareDeep(requestId, o.requestId, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(module, o.module, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true)
@@ -1288,12 +1320,12 @@ public class GuidanceResponse extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof GuidanceResponse))
+        if (!(other_ instanceof GuidanceResponse))
           return false;
-        GuidanceResponse o = (GuidanceResponse) other;
+        GuidanceResponse o = (GuidanceResponse) other_;
         return compareValues(requestId, o.requestId, true) && compareValues(status, o.status, true) && compareValues(occurrenceDateTime, o.occurrenceDateTime, true)
           ;
       }

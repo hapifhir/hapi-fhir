@@ -25,6 +25,19 @@ public class BundleUtilTest {
 		Assert.assertEquals(null, BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
 	}
 
+	@Test
+	public void testGetTotal() {
+		Bundle b = new Bundle();
+		b.setTotal(999);
+		Assert.assertEquals(999, BundleUtil.getTotal(ourCtx, b).intValue());
+	}
+
+	@Test
+	public void testGetTotalNull() {
+		Bundle b = new Bundle();
+		Assert.assertEquals(null, BundleUtil.getTotal(ourCtx, b));
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

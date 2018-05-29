@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
+
 public class JpaConstants {
 
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
@@ -71,7 +73,14 @@ public class JpaConstants {
 	/**
 	 * Operation name for the $expunge operation
 	 */
-	public static final String OPERATION_NAME_EXPUNGE = "$expunge";
+	public static final String OPERATION_EXPUNGE = "$expunge";
+
+	/**
+	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
+	 */
+	@Deprecated
+	public static final String OPERATION_NAME_EXPUNGE = OPERATION_EXPUNGE;
+
 	/**
 	 * Parameter name for the $expunge operation
 	 */
@@ -99,4 +108,60 @@ public class JpaConstants {
 	 * be removed if they are nt explicitly included in updates
 	 */
 	public static final String HEADER_META_SNAPSHOT_MODE = "X-Meta-Snapshot-Mode";
+
+	/**
+	 * Operation name for the $lookup operation
+	 */
+	public static final String OPERATION_LOOKUP = "$lookup";
+
+	/**
+	 * Operation name for the $expand operation
+	 */
+	public static final String OPERATION_EXPAND = "$expand";
+
+	/**
+	 * Operation name for the $validate-code operation
+	 */
+	public static final String OPERATION_VALIDATE_CODE = "$validate-code";
+
+	/**
+	 * Operation name for the $get-resource-counts operation
+	 */
+	public static final String OPERATION_GET_RESOURCE_COUNTS = "$get-resource-counts";
+
+	/**
+	 * Operation name for the $meta operation
+	 */
+	public static final String OPERATION_META = "$meta";
+
+	/**
+	 * Operation name for the $validate operation
+	 */
+	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from Constants.java
+	public static final String OPERATION_VALIDATE = Constants.EXTOP_VALIDATE;
+
+	/**
+	 * Operation name for the $suggest-keywords operation
+	 */
+	public static final String OPERATION_SUGGEST_KEYWORDS = "$suggest-keywords";
+
+	/**
+	 * Operation name for the $everything operation
+	 */
+	public static final String OPERATION_EVERYTHING = "$everything";
+
+	/**
+	 * Operation name for the $meta-delete operation
+	 */
+	public static final String OPERATION_META_DELETE = "$meta-delete";
+
+	/**
+	 * Operation name for the $meta-add operation
+	 */
+	public static final String OPERATION_META_ADD = "$meta-add";
+
+	/**
+	 * Operation name for the $translate operation
+	 */
+	public static final String OPERATION_TRANSLATE = "$translate";
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Mar 1, 2018 20:26+1100 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 import java.util.*;
 
@@ -58,7 +58,7 @@ public class Slot extends DomainResource {
          */
         FREE, 
         /**
-         * Indicates that the time interval is busy and that the interval can not be scheduled.
+         * Indicates that the time interval is busy and that the interval cannot be scheduled.
          */
         BUSYUNAVAILABLE, 
         /**
@@ -115,7 +115,7 @@ public class Slot extends DomainResource {
           switch (this) {
             case BUSY: return "Indicates that the time interval is busy because one  or more events have been scheduled for that interval.";
             case FREE: return "Indicates that the time interval is free for scheduling.";
-            case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval can not be scheduled.";
+            case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval cannot be scheduled.";
             case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";
@@ -196,10 +196,10 @@ public class Slot extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * A broad categorisation of the service that is to be performed during this appointment.
+     * A broad categorization of the service that is to be performed during this appointment.
      */
     @Child(name = "serviceCategory", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A broad categorisation of the service that is to be performed during this appointment", formalDefinition="A broad categorisation of the service that is to be performed during this appointment." )
+    @Description(shortDefinition="A broad categorization of the service that is to be performed during this appointment", formalDefinition="A broad categorization of the service that is to be performed during this appointment." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-category")
     protected List<CodeableConcept> serviceCategory;
 
@@ -349,7 +349,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return {@link #serviceCategory} (A broad categorisation of the service that is to be performed during this appointment.)
+     * @return {@link #serviceCategory} (A broad categorization of the service that is to be performed during this appointment.)
      */
     public List<CodeableConcept> getServiceCategory() { 
       if (this.serviceCategory == null)
@@ -807,7 +807,7 @@ public class Slot extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
+        children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         children.add(new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
         children.add(new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, 1, appointmentType));
@@ -823,7 +823,7 @@ public class Slot extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorisation of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
+        case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, serviceType);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
         case -1596426375: /*appointmentType*/  return new Property("appointmentType", "CodeableConcept", "The style of appointment or patient that may be booked in the slot (not service type).", 0, 1, appointmentType);

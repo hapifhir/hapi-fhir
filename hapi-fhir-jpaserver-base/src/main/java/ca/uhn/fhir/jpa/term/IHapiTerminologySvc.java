@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
@@ -69,6 +68,11 @@ public interface IHapiTerminologySvc {
 	 */
 	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
+	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
+
 	boolean supportsSystem(String theCodeSystem);
 
+	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
+
+	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
 }

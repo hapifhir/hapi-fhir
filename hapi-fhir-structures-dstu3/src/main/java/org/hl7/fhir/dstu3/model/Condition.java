@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.
  */
@@ -394,7 +395,7 @@ public class Condition extends DomainResource {
         /**
          * @param value {@link #summary} (A simple summary of the stage such as "Stage 3". The determination of the stage is disease-specific.)
          */
-        public ConditionStageComponent setSummary(CodeableConcept value) { 
+        public ConditionStageComponent setSummary(CodeableConcept value)  { 
           this.summary = value;
           return this;
         }
@@ -462,10 +463,20 @@ public class Condition extends DomainResource {
           return this.assessmentTarget;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("summary", "CodeableConcept", "A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific.", 0, java.lang.Integer.MAX_VALUE, summary));
-          childrenList.add(new Property("assessment", "Reference(ClinicalImpression|DiagnosticReport|Observation)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("summary", "CodeableConcept", "A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific.", 0, 1, summary));
+          children.add(new Property("assessment", "Reference(ClinicalImpression|DiagnosticReport|Observation)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1857640538: /*summary*/  return new Property("summary", "CodeableConcept", "A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific.", 0, 1, summary);
+          case 2119382722: /*assessment*/  return new Property("assessment", "Reference(ClinicalImpression|DiagnosticReport|Observation)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -549,22 +560,22 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConditionStageComponent))
+        if (!(other_ instanceof ConditionStageComponent))
           return false;
-        ConditionStageComponent o = (ConditionStageComponent) other;
+        ConditionStageComponent o = (ConditionStageComponent) other_;
         return compareDeep(summary, o.summary, true) && compareDeep(assessment, o.assessment, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConditionStageComponent))
+        if (!(other_ instanceof ConditionStageComponent))
           return false;
-        ConditionStageComponent o = (ConditionStageComponent) other;
+        ConditionStageComponent o = (ConditionStageComponent) other_;
         return true;
       }
 
@@ -726,10 +737,20 @@ public class Condition extends DomainResource {
           return this.detailTarget;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "A manifestation or symptom that led to the recording of this condition.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("detail", "Reference(Any)", "Links to other relevant information, including pathology reports.", 0, java.lang.Integer.MAX_VALUE, detail));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "A manifestation or symptom that led to the recording of this condition.", 0, java.lang.Integer.MAX_VALUE, code));
+          children.add(new Property("detail", "Reference(Any)", "Links to other relevant information, including pathology reports.", 0, java.lang.Integer.MAX_VALUE, detail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A manifestation or symptom that led to the recording of this condition.", 0, java.lang.Integer.MAX_VALUE, code);
+          case -1335224239: /*detail*/  return new Property("detail", "Reference(Any)", "Links to other relevant information, including pathology reports.", 0, java.lang.Integer.MAX_VALUE, detail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -816,22 +837,22 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ConditionEvidenceComponent))
+        if (!(other_ instanceof ConditionEvidenceComponent))
           return false;
-        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other;
+        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(detail, o.detail, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ConditionEvidenceComponent))
+        if (!(other_ instanceof ConditionEvidenceComponent))
           return false;
-        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other;
+        ConditionEvidenceComponent o = (ConditionEvidenceComponent) other_;
         return true;
       }
 
@@ -1219,7 +1240,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #severity} (A subjective assessment of the severity of the condition as evaluated by the clinician.)
      */
-    public Condition setSeverity(CodeableConcept value) { 
+    public Condition setSeverity(CodeableConcept value)  { 
       this.severity = value;
       return this;
     }
@@ -1243,7 +1264,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #code} (Identification of the condition, problem or diagnosis.)
      */
-    public Condition setCode(CodeableConcept value) { 
+    public Condition setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -1320,7 +1341,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #subject} (Indicates the patient or group who the condition record is associated with.)
      */
-    public Condition setSubject(Reference value) { 
+    public Condition setSubject(Reference value)  { 
       this.subject = value;
       return this;
     }
@@ -1359,7 +1380,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #context} (Encounter during which the condition was first asserted.)
      */
-    public Condition setContext(Reference value) { 
+    public Condition setContext(Reference value)  { 
       this.context = value;
       return this;
     }
@@ -1390,65 +1411,75 @@ public class Condition extends DomainResource {
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
     public DateTimeType getOnsetDateTimeType() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (DateTimeType) this.onset;
     }
 
     public boolean hasOnsetDateTimeType() { 
-      return this.onset instanceof DateTimeType;
+      return this != null && this.onset instanceof DateTimeType;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
     public Age getOnsetAge() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof Age))
         throw new FHIRException("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Age) this.onset;
     }
 
     public boolean hasOnsetAge() { 
-      return this.onset instanceof Age;
+      return this != null && this.onset instanceof Age;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
     public Period getOnsetPeriod() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Period) this.onset;
     }
 
     public boolean hasOnsetPeriod() { 
-      return this.onset instanceof Period;
+      return this != null && this.onset instanceof Period;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
     public Range getOnsetRange() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Range) this.onset;
     }
 
     public boolean hasOnsetRange() { 
-      return this.onset instanceof Range;
+      return this != null && this.onset instanceof Range;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
     public StringType getOnsetStringType() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (StringType) this.onset;
     }
 
     public boolean hasOnsetStringType() { 
-      return this.onset instanceof StringType;
+      return this != null && this.onset instanceof StringType;
     }
 
     public boolean hasOnset() { 
@@ -1458,7 +1489,9 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
-    public Condition setOnset(Type value) { 
+    public Condition setOnset(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Age || value instanceof Period || value instanceof Range || value instanceof StringType))
+        throw new FHIRFormatError("Not the right type for Condition.onset[x]: "+value.fhirType());
       this.onset = value;
       return this;
     }
@@ -1474,78 +1507,90 @@ public class Condition extends DomainResource {
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
     public DateTimeType getAbatementDateTimeType() throws FHIRException { 
+      if (this.abatement == null)
+        return null;
       if (!(this.abatement instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (DateTimeType) this.abatement;
     }
 
     public boolean hasAbatementDateTimeType() { 
-      return this.abatement instanceof DateTimeType;
+      return this != null && this.abatement instanceof DateTimeType;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
     public Age getAbatementAge() throws FHIRException { 
+      if (this.abatement == null)
+        return null;
       if (!(this.abatement instanceof Age))
         throw new FHIRException("Type mismatch: the type Age was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Age) this.abatement;
     }
 
     public boolean hasAbatementAge() { 
-      return this.abatement instanceof Age;
+      return this != null && this.abatement instanceof Age;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
     public BooleanType getAbatementBooleanType() throws FHIRException { 
+      if (this.abatement == null)
+        return null;
       if (!(this.abatement instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (BooleanType) this.abatement;
     }
 
     public boolean hasAbatementBooleanType() { 
-      return this.abatement instanceof BooleanType;
+      return this != null && this.abatement instanceof BooleanType;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
     public Period getAbatementPeriod() throws FHIRException { 
+      if (this.abatement == null)
+        return null;
       if (!(this.abatement instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Period) this.abatement;
     }
 
     public boolean hasAbatementPeriod() { 
-      return this.abatement instanceof Period;
+      return this != null && this.abatement instanceof Period;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
     public Range getAbatementRange() throws FHIRException { 
+      if (this.abatement == null)
+        return null;
       if (!(this.abatement instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Range) this.abatement;
     }
 
     public boolean hasAbatementRange() { 
-      return this.abatement instanceof Range;
+      return this != null && this.abatement instanceof Range;
     }
 
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
     public StringType getAbatementStringType() throws FHIRException { 
+      if (this.abatement == null)
+        return null;
       if (!(this.abatement instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (StringType) this.abatement;
     }
 
     public boolean hasAbatementStringType() { 
-      return this.abatement instanceof StringType;
+      return this != null && this.abatement instanceof StringType;
     }
 
     public boolean hasAbatement() { 
@@ -1555,7 +1600,9 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
-    public Condition setAbatement(Type value) { 
+    public Condition setAbatement(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Age || value instanceof BooleanType || value instanceof Period || value instanceof Range || value instanceof StringType))
+        throw new FHIRFormatError("Not the right type for Condition.abatement[x]: "+value.fhirType());
       this.abatement = value;
       return this;
     }
@@ -1628,7 +1675,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #asserter} (Individual who is making the condition statement.)
      */
-    public Condition setAsserter(Reference value) { 
+    public Condition setAsserter(Reference value)  { 
       this.asserter = value;
       return this;
     }
@@ -1667,7 +1714,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #stage} (Clinical stage or grade of a condition. May include formal severity assessments.)
      */
-    public Condition setStage(ConditionStageComponent value) { 
+    public Condition setStage(ConditionStageComponent value)  { 
       this.stage = value;
       return this;
     }
@@ -1778,24 +1825,61 @@ public class Condition extends DomainResource {
       return getNote().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this condition that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("clinicalStatus", "code", "The clinical status of the condition.", 0, java.lang.Integer.MAX_VALUE, clinicalStatus));
-        childrenList.add(new Property("verificationStatus", "code", "The verification status to support the clinical status of the condition.", 0, java.lang.Integer.MAX_VALUE, verificationStatus));
-        childrenList.add(new Property("category", "CodeableConcept", "A category assigned to the condition.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("severity", "CodeableConcept", "A subjective assessment of the severity of the condition as evaluated by the clinician.", 0, java.lang.Integer.MAX_VALUE, severity));
-        childrenList.add(new Property("code", "CodeableConcept", "Identification of the condition, problem or diagnosis.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("bodySite", "CodeableConcept", "The anatomical location where this condition manifests itself.", 0, java.lang.Integer.MAX_VALUE, bodySite));
-        childrenList.add(new Property("subject", "Reference(Patient|Group)", "Indicates the patient or group who the condition record is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Encounter during which the condition was first asserted.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, java.lang.Integer.MAX_VALUE, onset));
-        childrenList.add(new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, java.lang.Integer.MAX_VALUE, abatement));
-        childrenList.add(new Property("assertedDate", "dateTime", "The date on which the existance of the Condition was first asserted or acknowledged.", 0, java.lang.Integer.MAX_VALUE, assertedDate));
-        childrenList.add(new Property("asserter", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, java.lang.Integer.MAX_VALUE, asserter));
-        childrenList.add(new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, java.lang.Integer.MAX_VALUE, stage));
-        childrenList.add(new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence));
-        childrenList.add(new Property("note", "Annotation", "Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.", 0, java.lang.Integer.MAX_VALUE, note));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "This records identifiers associated with this condition that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("clinicalStatus", "code", "The clinical status of the condition.", 0, 1, clinicalStatus));
+        children.add(new Property("verificationStatus", "code", "The verification status to support the clinical status of the condition.", 0, 1, verificationStatus));
+        children.add(new Property("category", "CodeableConcept", "A category assigned to the condition.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("severity", "CodeableConcept", "A subjective assessment of the severity of the condition as evaluated by the clinician.", 0, 1, severity));
+        children.add(new Property("code", "CodeableConcept", "Identification of the condition, problem or diagnosis.", 0, 1, code));
+        children.add(new Property("bodySite", "CodeableConcept", "The anatomical location where this condition manifests itself.", 0, java.lang.Integer.MAX_VALUE, bodySite));
+        children.add(new Property("subject", "Reference(Patient|Group)", "Indicates the patient or group who the condition record is associated with.", 0, 1, subject));
+        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Encounter during which the condition was first asserted.", 0, 1, context));
+        children.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset));
+        children.add(new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement));
+        children.add(new Property("assertedDate", "dateTime", "The date on which the existance of the Condition was first asserted or acknowledged.", 0, 1, assertedDate));
+        children.add(new Property("asserter", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, 1, asserter));
+        children.add(new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, 1, stage));
+        children.add(new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence));
+        children.add(new Property("note", "Annotation", "Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.", 0, java.lang.Integer.MAX_VALUE, note));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this condition that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -462853915: /*clinicalStatus*/  return new Property("clinicalStatus", "code", "The clinical status of the condition.", 0, 1, clinicalStatus);
+        case -842509843: /*verificationStatus*/  return new Property("verificationStatus", "code", "The verification status to support the clinical status of the condition.", 0, 1, verificationStatus);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A category assigned to the condition.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 1478300413: /*severity*/  return new Property("severity", "CodeableConcept", "A subjective assessment of the severity of the condition as evaluated by the clinician.", 0, 1, severity);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Identification of the condition, problem or diagnosis.", 0, 1, code);
+        case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "The anatomical location where this condition manifests itself.", 0, java.lang.Integer.MAX_VALUE, bodySite);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "Indicates the patient or group who the condition record is associated with.", 0, 1, subject);
+        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Encounter during which the condition was first asserted.", 0, 1, context);
+        case -1886216323: /*onset[x]*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case 105901603: /*onset*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case -1701663010: /*onsetDateTime*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case -1886241828: /*onsetAge*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case -1545082428: /*onsetPeriod*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case -186664742: /*onsetRange*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case -1445342188: /*onsetString*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, 1, onset);
+        case -584196495: /*abatement[x]*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case -921554001: /*abatement*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case 44869738: /*abatementDateTime*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case -584222000: /*abatementAge*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case -2069881479: /*abatementBoolean*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case -922036656: /*abatementPeriod*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case 1218906830: /*abatementRange*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case -822296416: /*abatementString*/  return new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, 1, abatement);
+        case -174231629: /*assertedDate*/  return new Property("assertedDate", "dateTime", "The date on which the existance of the Condition was first asserted or acknowledged.", 0, 1, assertedDate);
+        case -373242253: /*asserter*/  return new Property("asserter", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who is making the condition statement.", 0, 1, asserter);
+        case 109757182: /*stage*/  return new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, 1, stage);
+        case 382967383: /*evidence*/  return new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.", 0, java.lang.Integer.MAX_VALUE, note);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2121,12 +2205,12 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Condition))
+        if (!(other_ instanceof Condition))
           return false;
-        Condition o = (Condition) other;
+        Condition o = (Condition) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(clinicalStatus, o.clinicalStatus, true)
            && compareDeep(verificationStatus, o.verificationStatus, true) && compareDeep(category, o.category, true)
            && compareDeep(severity, o.severity, true) && compareDeep(code, o.code, true) && compareDeep(bodySite, o.bodySite, true)
@@ -2137,12 +2221,12 @@ public class Condition extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Condition))
+        if (!(other_ instanceof Condition))
           return false;
-        Condition o = (Condition) other;
+        Condition o = (Condition) other_;
         return compareValues(clinicalStatus, o.clinicalStatus, true) && compareValues(verificationStatus, o.verificationStatus, true)
            && compareValues(assertedDate, o.assertedDate, true);
       }

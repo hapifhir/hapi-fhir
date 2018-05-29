@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
  */
@@ -409,7 +410,7 @@ public class DetectedIssue extends DomainResource {
         /**
          * @param value {@link #action} (Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified issue.)
          */
-        public DetectedIssueMitigationComponent setAction(CodeableConcept value) { 
+        public DetectedIssueMitigationComponent setAction(CodeableConcept value)  { 
           this.action = value;
           return this;
         }
@@ -482,7 +483,7 @@ public class DetectedIssue extends DomainResource {
         /**
          * @param value {@link #author} (Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring.)
          */
-        public DetectedIssueMitigationComponent setAuthor(Reference value) { 
+        public DetectedIssueMitigationComponent setAuthor(Reference value)  { 
           this.author = value;
           return this;
         }
@@ -507,11 +508,22 @@ public class DetectedIssue extends DomainResource {
           return this;
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("action", "CodeableConcept", "Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified issue.", 0, java.lang.Integer.MAX_VALUE, action));
-          childrenList.add(new Property("date", "dateTime", "Indicates when the mitigating action was documented.", 0, java.lang.Integer.MAX_VALUE, date));
-          childrenList.add(new Property("author", "Reference(Practitioner)", "Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring.", 0, java.lang.Integer.MAX_VALUE, author));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("action", "CodeableConcept", "Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified issue.", 0, 1, action));
+          children.add(new Property("date", "dateTime", "Indicates when the mitigating action was documented.", 0, 1, date));
+          children.add(new Property("author", "Reference(Practitioner)", "Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring.", 0, 1, author));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case -1422950858: /*action*/  return new Property("action", "CodeableConcept", "Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified issue.", 0, 1, action);
+          case 3076014: /*date*/  return new Property("date", "dateTime", "Indicates when the mitigating action was documented.", 0, 1, date);
+          case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner)", "Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring.", 0, 1, author);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -604,23 +616,23 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DetectedIssueMitigationComponent))
+        if (!(other_ instanceof DetectedIssueMitigationComponent))
           return false;
-        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other;
+        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other_;
         return compareDeep(action, o.action, true) && compareDeep(date, o.date, true) && compareDeep(author, o.author, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DetectedIssueMitigationComponent))
+        if (!(other_ instanceof DetectedIssueMitigationComponent))
           return false;
-        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other;
+        DetectedIssueMitigationComponent o = (DetectedIssueMitigationComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -766,7 +778,7 @@ public class DetectedIssue extends DomainResource {
     /**
      * @param value {@link #identifier} (Business identifier associated with the detected issue record.)
      */
-    public DetectedIssue setIdentifier(Identifier value) { 
+    public DetectedIssue setIdentifier(Identifier value)  { 
       this.identifier = value;
       return this;
     }
@@ -835,7 +847,7 @@ public class DetectedIssue extends DomainResource {
     /**
      * @param value {@link #category} (Identifies the general type of issue identified.)
      */
-    public DetectedIssue setCategory(CodeableConcept value) { 
+    public DetectedIssue setCategory(CodeableConcept value)  { 
       this.category = value;
       return this;
     }
@@ -908,7 +920,7 @@ public class DetectedIssue extends DomainResource {
     /**
      * @param value {@link #patient} (Indicates the patient whose record the detected issue is associated with.)
      */
-    public DetectedIssue setPatient(Reference value) { 
+    public DetectedIssue setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1001,7 +1013,7 @@ public class DetectedIssue extends DomainResource {
     /**
      * @param value {@link #author} (Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.)
      */
-    public DetectedIssue setAuthor(Reference value) { 
+    public DetectedIssue setAuthor(Reference value)  { 
       this.author = value;
       return this;
     }
@@ -1235,19 +1247,38 @@ public class DetectedIssue extends DomainResource {
       return getMitigation().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Business identifier associated with the detected issue record.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("status", "code", "Indicates the status of the detected issue.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("category", "CodeableConcept", "Identifies the general type of issue identified.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("severity", "code", "Indicates the degree of importance associated with the identified issue based on the potential impact on the patient.", 0, java.lang.Integer.MAX_VALUE, severity));
-        childrenList.add(new Property("patient", "Reference(Patient)", "Indicates the patient whose record the detected issue is associated with.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("date", "dateTime", "The date or date-time when the detected issue was initially identified.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("author", "Reference(Practitioner|Device)", "Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("implicated", "Reference(Any)", "Indicates the resource representing the current activity or proposed activity that is potentially problematic.", 0, java.lang.Integer.MAX_VALUE, implicated));
-        childrenList.add(new Property("detail", "string", "A textual explanation of the detected issue.", 0, java.lang.Integer.MAX_VALUE, detail));
-        childrenList.add(new Property("reference", "uri", "The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.", 0, java.lang.Integer.MAX_VALUE, reference));
-        childrenList.add(new Property("mitigation", "", "Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.", 0, java.lang.Integer.MAX_VALUE, mitigation));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Business identifier associated with the detected issue record.", 0, 1, identifier));
+        children.add(new Property("status", "code", "Indicates the status of the detected issue.", 0, 1, status));
+        children.add(new Property("category", "CodeableConcept", "Identifies the general type of issue identified.", 0, 1, category));
+        children.add(new Property("severity", "code", "Indicates the degree of importance associated with the identified issue based on the potential impact on the patient.", 0, 1, severity));
+        children.add(new Property("patient", "Reference(Patient)", "Indicates the patient whose record the detected issue is associated with.", 0, 1, patient));
+        children.add(new Property("date", "dateTime", "The date or date-time when the detected issue was initially identified.", 0, 1, date));
+        children.add(new Property("author", "Reference(Practitioner|Device)", "Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.", 0, 1, author));
+        children.add(new Property("implicated", "Reference(Any)", "Indicates the resource representing the current activity or proposed activity that is potentially problematic.", 0, java.lang.Integer.MAX_VALUE, implicated));
+        children.add(new Property("detail", "string", "A textual explanation of the detected issue.", 0, 1, detail));
+        children.add(new Property("reference", "uri", "The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.", 0, 1, reference));
+        children.add(new Property("mitigation", "", "Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.", 0, java.lang.Integer.MAX_VALUE, mitigation));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier associated with the detected issue record.", 0, 1, identifier);
+        case -892481550: /*status*/  return new Property("status", "code", "Indicates the status of the detected issue.", 0, 1, status);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Identifies the general type of issue identified.", 0, 1, category);
+        case 1478300413: /*severity*/  return new Property("severity", "code", "Indicates the degree of importance associated with the identified issue based on the potential impact on the patient.", 0, 1, severity);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Indicates the patient whose record the detected issue is associated with.", 0, 1, patient);
+        case 3076014: /*date*/  return new Property("date", "dateTime", "The date or date-time when the detected issue was initially identified.", 0, 1, date);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Device)", "Individual or device responsible for the issue being raised.  For example, a decision support application or a pharmacist conducting a medication review.", 0, 1, author);
+        case -810216884: /*implicated*/  return new Property("implicated", "Reference(Any)", "Indicates the resource representing the current activity or proposed activity that is potentially problematic.", 0, java.lang.Integer.MAX_VALUE, implicated);
+        case -1335224239: /*detail*/  return new Property("detail", "string", "A textual explanation of the detected issue.", 0, 1, detail);
+        case -925155509: /*reference*/  return new Property("reference", "uri", "The literature, knowledge-base or similar reference that describes the propensity for the detected issue identified.", 0, 1, reference);
+        case 1293793087: /*mitigation*/  return new Property("mitigation", "", "Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the detected issue from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.", 0, java.lang.Integer.MAX_VALUE, mitigation);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -1459,12 +1490,12 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DetectedIssue))
+        if (!(other_ instanceof DetectedIssue))
           return false;
-        DetectedIssue o = (DetectedIssue) other;
+        DetectedIssue o = (DetectedIssue) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(severity, o.severity, true) && compareDeep(patient, o.patient, true) && compareDeep(date, o.date, true)
            && compareDeep(author, o.author, true) && compareDeep(implicated, o.implicated, true) && compareDeep(detail, o.detail, true)
@@ -1472,12 +1503,12 @@ public class DetectedIssue extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DetectedIssue))
+        if (!(other_ instanceof DetectedIssue))
           return false;
-        DetectedIssue o = (DetectedIssue) other;
+        DetectedIssue o = (DetectedIssue) other_;
         return compareValues(status, o.status, true) && compareValues(severity, o.severity, true) && compareValues(date, o.date, true)
            && compareValues(detail, o.detail, true) && compareValues(reference, o.reference, true);
       }

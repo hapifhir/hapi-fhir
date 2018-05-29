@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.
  */
@@ -267,7 +268,7 @@ public class RelatedPerson extends DomainResource {
     /**
      * @param value {@link #patient} (The patient this person is related to.)
      */
-    public RelatedPerson setPatient(Reference value) { 
+    public RelatedPerson setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -311,7 +312,7 @@ public class RelatedPerson extends DomainResource {
     /**
      * @param value {@link #relationship} (The nature of the relationship between a patient and the related person.)
      */
-    public RelatedPerson setRelationship(CodeableConcept value) { 
+    public RelatedPerson setRelationship(CodeableConcept value)  { 
       this.relationship = value;
       return this;
     }
@@ -645,24 +646,43 @@ public class RelatedPerson extends DomainResource {
     /**
      * @param value {@link #period} (The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.)
      */
-    public RelatedPerson setPeriod(Period value) { 
+    public RelatedPerson setPeriod(Period value)  { 
       this.period = value;
       return this;
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("active", "boolean", "Whether this related person record is in active use.", 0, java.lang.Integer.MAX_VALUE, active));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient this person is related to.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, java.lang.Integer.MAX_VALUE, relationship));
-        childrenList.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
-        childrenList.add(new Property("birthDate", "date", "The date on which the related person was born.", 0, java.lang.Integer.MAX_VALUE, birthDate));
-        childrenList.add(new Property("address", "Address", "Address where the related person can be contacted or visited.", 0, java.lang.Integer.MAX_VALUE, address));
-        childrenList.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
-        childrenList.add(new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, java.lang.Integer.MAX_VALUE, period));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("active", "boolean", "Whether this related person record is in active use.", 0, 1, active));
+        children.add(new Property("patient", "Reference(Patient)", "The patient this person is related to.", 0, 1, patient));
+        children.add(new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, 1, relationship));
+        children.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
+        children.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        children.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, 1, gender));
+        children.add(new Property("birthDate", "date", "The date on which the related person was born.", 0, 1, birthDate));
+        children.add(new Property("address", "Address", "Address where the related person can be contacted or visited.", 0, java.lang.Integer.MAX_VALUE, address));
+        children.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
+        children.add(new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, 1, period));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for a person within a particular scope.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this related person record is in active use.", 0, 1, active);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient this person is related to.", 0, 1, patient);
+        case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The nature of the relationship between a patient and the related person.", 0, 1, relationship);
+        case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name);
+        case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom);
+        case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, 1, gender);
+        case -1210031859: /*birthDate*/  return new Property("birthDate", "date", "The date on which the related person was born.", 0, 1, birthDate);
+        case -1147692044: /*address*/  return new Property("address", "Address", "Address where the related person can be contacted or visited.", 0, java.lang.Integer.MAX_VALUE, address);
+        case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo);
+        case -991726143: /*period*/  return new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, 1, period);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -883,12 +903,12 @@ public class RelatedPerson extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof RelatedPerson))
+        if (!(other_ instanceof RelatedPerson))
           return false;
-        RelatedPerson o = (RelatedPerson) other;
+        RelatedPerson o = (RelatedPerson) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(patient, o.patient, true)
            && compareDeep(relationship, o.relationship, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true)
@@ -896,12 +916,12 @@ public class RelatedPerson extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof RelatedPerson))
+        if (!(other_ instanceof RelatedPerson))
           return false;
-        RelatedPerson o = (RelatedPerson) other;
+        RelatedPerson o = (RelatedPerson) other_;
         return compareValues(active, o.active, true) && compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true)
           ;
       }

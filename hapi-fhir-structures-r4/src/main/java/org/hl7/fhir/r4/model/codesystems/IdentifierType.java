@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum IdentifierType {
 
         /**
-         * A identifier assigned to a device using the Universal Device Identifier framework as defined by FDA (http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/).
+         * An identifier assigned to a device using the Universal Device Identifier framework as defined by FDA (http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/).
          */
         UDI, 
         /**
@@ -90,7 +90,7 @@ public enum IdentifierType {
         }
         public String getDefinition() {
           switch (this) {
-            case UDI: return "A identifier assigned to a device using the Universal Device Identifier framework as defined by FDA (http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/).";
+            case UDI: return "An identifier assigned to a device using the Universal Device Identifier framework as defined by FDA (http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/).";
             case SNO: return "An identifier affixed to an item by the manufacturer when it is first made, where each item has a different identifier.";
             case SB: return "An identifier issued by a governmental organization to an individual for the purpose of the receipt of social services and benefits.";
             case PLAC: return "The identifier associated with the person or service that requests or places an order.";

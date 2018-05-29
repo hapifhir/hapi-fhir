@@ -15,6 +15,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -95,6 +96,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
 		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
 		return profile;
+	}
+
+	public void flushCaches() {
+		myWrappedWorkerContext = null;
 	}
 
 	/**
@@ -182,8 +187,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myStructureDefintion = theStructureDefintion;
 	}
 
-
-
 	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
 
 		WorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
@@ -228,6 +231,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				try {
 					v.validate(null, messages, document, profile.getUrl());
 				} catch (Exception e) {
+					ourLog.error("Failure during validation", e);
 					throw new InternalErrorException("Unexpected failure while validating resource", e);
 				}
 			}
@@ -502,6 +506,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public List<String> getTypeNames() {
 			return myWrap.getTypeNames();
+		}
+
+		@Override
+		public UcumService getUcumService() {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

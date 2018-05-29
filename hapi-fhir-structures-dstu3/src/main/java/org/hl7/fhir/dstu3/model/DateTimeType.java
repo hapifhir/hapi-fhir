@@ -29,15 +29,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.dstu3.model;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.zip.DataFormatException;
-
-import org.apache.commons.lang3.time.DateUtils;
-
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Represents a FHIR dateTime datatype. Valid precisions values for this type are:

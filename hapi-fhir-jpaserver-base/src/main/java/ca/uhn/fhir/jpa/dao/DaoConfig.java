@@ -51,12 +51,22 @@ public class DaoConfig {
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	/**
+	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 *
+	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 */
+	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
+	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+	/**
+	 * update setter javadoc if default changes
+	 */
+	private Long myTranslationCachesExpireAfterWriteInMinutes = DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -117,6 +127,7 @@ public class DaoConfig {
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
+	private int myReindexThreadCount;
 
 	/**
 	 * Constructor
@@ -126,6 +137,7 @@ public class DaoConfig {
 		setSubscriptionPollDelay(0);
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
+		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 	}
 
 	/**
@@ -141,7 +153,6 @@ public class DaoConfig {
 		}
 		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
 	}
-
 
 	/**
 	 * Specifies the highest number that a client is permitted to use in a
@@ -460,6 +471,35 @@ public class DaoConfig {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
 	}
 
+	/**
+	 * This setting controls the number of threads allocated to resource reindexing
+	 * (which is only ever used if SearchParameters change, or a manual reindex is
+	 * triggered due to a HAPI FHIR upgrade or some other reason).
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public int getReindexThreadCount() {
+		return myReindexThreadCount;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to resource reindexing
+	 * (which is only ever used if SearchParameters change, or a manual reindex is
+	 * triggered due to a HAPI FHIR upgrade or some other reason).
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public void setReindexThreadCount(int theReindexThreadCount) {
+		myReindexThreadCount = theReindexThreadCount;
+		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
+	}
+
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
@@ -555,6 +595,22 @@ public class DaoConfig {
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public Long getTranslationCachesExpireAfterWriteInMinutes() {
+		return myTranslationCachesExpireAfterWriteInMinutes;
+	}
+
+	/**
+	 * Specifies the duration in minutes for which values will be retained after being
+	 * written to the terminology translation cache. Defaults to 60.
+	 */
+	public void setTranslationCachesExpireAfterWriteInMinutes(Long translationCachesExpireAfterWriteInMinutes) {
+		myTranslationCachesExpireAfterWriteInMinutes = translationCachesExpireAfterWriteInMinutes;
 	}
 
 	/**

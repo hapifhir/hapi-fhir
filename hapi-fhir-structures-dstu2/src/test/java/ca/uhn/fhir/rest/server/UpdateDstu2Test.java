@@ -97,7 +97,7 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(null, status.getFirstHeader("location"));
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
 		assertNull(ourLastId.getValue());
@@ -127,7 +127,7 @@ public class UpdateDstu2Test {
 		
 		assertThat(responseContent, blankOrNullString());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(null, status.getFirstHeader("location"));
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		assertEquals("W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
 		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
@@ -152,7 +152,7 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals(null, status.getFirstHeader("location"));
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
 		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());

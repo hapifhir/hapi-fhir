@@ -18,7 +18,7 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PublicSecurityInterceptor.class);
 	private HashSet<String> myTokens;
-	
+
 	public PublicSecurityInterceptor() {
 		String passwordsString = System.getProperty("fhir.tdlpass");
 		String[] passwords = passwordsString.split(",");

@@ -34,6 +34,13 @@ public class TypesUtilities {
     return res;
   }
   
+  // this is the master list for what data types are allowed where the types = *
+  // that this list is incomplete means that the following types cannot have fixed values in a profile:
+  //   Narrative
+  //   Meta
+  //   Any of the IDMP data types
+  // You have to walk into them to profile them.
+  //
   public static List<WildcardInformation> wildcards() {
     List<WildcardInformation> res = new ArrayList<WildcardInformation>();
 
@@ -80,6 +87,15 @@ public class TypesUtilities {
     res.add(new WildcardInformation("SampledData"));
     res.add(new WildcardInformation("Signature"));
     res.add(new WildcardInformation("Timing"));
+    
+    // metadata types
+    res.add(new WildcardInformation("ParameterDefinition"));
+    res.add(new WildcardInformation("DataRequirement"));
+    res.add(new WildcardInformation("RelatedArtifact"));
+    res.add(new WildcardInformation("ContactDetail"));
+    res.add(new WildcardInformation("Contributor"));
+    res.add(new WildcardInformation("TriggerDefinition"));
+    res.add(new WildcardInformation("UsageContext"));
     
     // special cases
     res.add(new WildcardInformation("Dosage"));

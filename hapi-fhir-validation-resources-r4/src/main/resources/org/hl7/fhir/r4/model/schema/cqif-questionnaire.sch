@@ -65,7 +65,7 @@
     <sch:title>Questionnaire.item.enableWhen</sch:title>
     <sch:rule context="f:Questionnaire/f:item/f:enableWhen">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
-      <sch:assert test="(f:operator/value != 'operator') or (exists(f:answerBoolean)">If the operator is 'exists', the value must be a boolean (inherited)</sch:assert>
+      <sch:assert test="f:operator/@value != 'exists' or exists(f:answerBoolean)">If the operator is 'exists', the value must be a boolean (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>

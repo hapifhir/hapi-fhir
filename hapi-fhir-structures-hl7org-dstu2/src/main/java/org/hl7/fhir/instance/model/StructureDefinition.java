@@ -118,6 +118,8 @@ public class StructureDefinition extends DomainResource {
           return StructureDefinitionKind.RESOURCE;
         if ("logical".equals(codeString))
           return StructureDefinitionKind.LOGICAL;
+        if ("complex-type".equals(codeString))
+          return StructureDefinitionKind.DATATYPE;
         throw new IllegalArgumentException("Unknown StructureDefinitionKind code '"+codeString+"'");
         }
         public Enumeration<StructureDefinitionKind> fromType(Base code) throws FHIRException {

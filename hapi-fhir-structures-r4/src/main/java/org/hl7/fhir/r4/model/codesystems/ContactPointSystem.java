@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Mar 3, 2018 18:00-0500 for FHIR v3.2.0
+// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,7 +57,7 @@ public enum ContactPointSystem {
          */
         URL, 
         /**
-         * A contact that can be used for sending an sms message (e.g. mobide phones, some landlines)
+         * A contact that can be used for sending an sms message (e.g. mobile phones, some landlines)
          */
         SMS, 
         /**
@@ -109,7 +109,7 @@ public enum ContactPointSystem {
             case EMAIL: return "The value is an email address.";
             case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system.";
             case URL: return "A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various personal contacts including blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.";
-            case SMS: return "A contact that can be used for sending an sms message (e.g. mobide phones, some landlines)";
+            case SMS: return "A contact that can be used for sending an sms message (e.g. mobile phones, some landlines)";
             case OTHER: return "A contact that is not a phone, fax, page or email address and is not expressible as a URL.  E.g. Internal mail address.  This SHOULD NOT be used for contacts that are expressible as a URL (e.g. Skype, Twitter, Facebook, etc.)  Extensions may be used to distinguish \"other\" contact types.";
             default: return "?";
           }

@@ -24,7 +24,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import com.phloc.commons.io.file.FileUtils;
+import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -33,6 +33,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,16 +53,20 @@ public abstract class BaseApp {
 		loggingConfigOff();
 
 		// We don't use qualified names for loggers in CLI
-		ourLog = LoggerFactory.getLogger(App.class.getSimpleName());
+		ourLog = LoggerFactory.getLogger(App.class);
 	}
+
+	private MyShutdownHook myShutdownHook;
+	private boolean myShutdownHookHasNotRun;
 
 	private void logAppHeader() {
 		System.out.flush();
 		System.out.println("------------------------------------------------------------");
 		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 		System.out.println("------------------------------------------------------------");
-		System.out.println("Max configured JVM memory (Xmx): " + FileUtils.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
-		System.out.println("Detected Java version: " + System.getProperty("java.version"));
+		System.out.println("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
+		System.out.println("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		System.out.println("Detected Java version           : " + System.getProperty("java.version"));
 		System.out.println("------------------------------------------------------------");
 	}
 
@@ -132,6 +137,8 @@ public abstract class BaseApp {
 		commands.add(new WebsocketSubscribeCommand());
 		commands.add(new UploadTerminologyCommand());
 		commands.add(new IgPackUploader());
+		commands.add(new ExportConceptMapToCsvCommand());
+		commands.add(new ImportCsvToConceptMapCommand());
 		return commands;
 	}
 
@@ -195,6 +202,9 @@ public abstract class BaseApp {
 			return;
 		}
 
+		myShutdownHook = new MyShutdownHook(command);
+		Runtime.getRuntime().addShutdownHook(myShutdownHook);
+
 		Options options = command.getOptions();
 		DefaultParser parser = new DefaultParser();
 		CommandLine parsedOptions;
@@ -213,6 +223,9 @@ public abstract class BaseApp {
 			// Actually execute the command
 			command.run(parsedOptions);
 
+			myShutdownHookHasNotRun = true;
+			runCleanupHookAndUnregister();
+
 			if (!"true".equals(System.getProperty("test"))) {
 				System.exit(0);
 			}
@@ -223,21 +236,33 @@ public abstract class BaseApp {
 			System.err.println("  " + ansi().fg(Ansi.Color.RED).bold() + e.getMessage());
 			System.err.println("" + ansi().fg(Ansi.Color.WHITE).boldOff());
 			logCommandUsageNoHeader(command);
+			runCleanupHookAndUnregister();
 			System.exit(1);
 		} catch (CommandFailureException e) {
 			ourLog.error(e.getMessage());
+			runCleanupHookAndUnregister();
 			if ("true".equals(System.getProperty("test"))) {
 				throw e;
 			} else {
 				System.exit(1);
 			}
-		} catch (Exception e) {
-			ourLog.error("Error during execution: ", e);
+		} catch (Throwable t) {
+			ourLog.error("Error during execution: ", t);
+			runCleanupHookAndUnregister();
 			if ("true".equals(System.getProperty("test"))) {
-				throw new CommandFailureException("Error: " + e.toString(), e);
+				throw new CommandFailureException("Error: " + t.toString(), t);
 			} else {
 				System.exit(1);
 			}
+		}
+
+	}
+
+	private void runCleanupHookAndUnregister() {
+		if (myShutdownHookHasNotRun) {
+			Runtime.getRuntime().removeShutdownHook(myShutdownHook);
+			myShutdownHook.run();
+			myShutdownHookHasNotRun = false;
 		}
 	}
 
@@ -273,4 +298,17 @@ public abstract class BaseApp {
 	}
 
 
+	private class MyShutdownHook extends Thread {
+		private final BaseCommand myFinalCommand;
+
+		public MyShutdownHook(BaseCommand theFinalCommand) {
+			myFinalCommand = theFinalCommand;
+		}
+
+		@Override
+		public void run() {
+			ourLog.info(provideProductName() + " is shutting down...");
+			myFinalCommand.cleanup();
+		}
+	}
 }

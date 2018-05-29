@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.4.0-SNAPSHOT</version>
+		<version>3.5.0-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -32,6 +32,11 @@
 			<version>${project.version}</version>
 			<type>jar</type>
 			<classifier>classes</classifier>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-igpacks</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -64,12 +69,6 @@
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-igpacks</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -168,8 +167,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<exclusions>
 				<exclusion>
 					<artifactId>Saxon-HE</artifactId>
@@ -178,8 +177,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 		</dependency>
 
 		<!--
@@ -191,13 +190,10 @@
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-core</artifactId>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.fusesource.jansi</groupId>

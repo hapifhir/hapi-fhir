@@ -29,7 +29,7 @@ package org.hl7.fhir.dstu3.model;
   
 */
 
-// Generated on Mon, Apr 17, 2017 17:38-0400 for FHIR v3.0.1
+// Generated on Fri, Mar 16, 2018 15:21+1100 for FHIR v3.0.1
 
 import java.util.*;
 
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
  */
@@ -795,7 +796,7 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @param value {@link #substance} (Identification of the specific substance (or pharmaceutical product) considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different from the substance identified as the cause of the risk, but it must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite product that includes the identified substance. It must be clinically safe to only process the 'code' and ignore the 'reaction.substance'.)
          */
-        public AllergyIntoleranceReactionComponent setSubstance(CodeableConcept value) { 
+        public AllergyIntoleranceReactionComponent setSubstance(CodeableConcept value)  { 
           this.substance = value;
           return this;
         }
@@ -1019,7 +1020,7 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @param value {@link #exposureRoute} (Identification of the route by which the subject was exposed to the substance.)
          */
-        public AllergyIntoleranceReactionComponent setExposureRoute(CodeableConcept value) { 
+        public AllergyIntoleranceReactionComponent setExposureRoute(CodeableConcept value)  { 
           this.exposureRoute = value;
           return this;
         }
@@ -1077,15 +1078,30 @@ public class AllergyIntolerance extends DomainResource {
           return getNote().get(0);
         }
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("substance", "CodeableConcept", "Identification of the specific substance (or pharmaceutical product) considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different from the substance identified as the cause of the risk, but it must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite product that includes the identified substance. It must be clinically safe to only process the 'code' and ignore the 'reaction.substance'.", 0, java.lang.Integer.MAX_VALUE, substance));
-          childrenList.add(new Property("manifestation", "CodeableConcept", "Clinical symptoms and/or signs that are observed or associated with the adverse reaction event.", 0, java.lang.Integer.MAX_VALUE, manifestation));
-          childrenList.add(new Property("description", "string", "Text description about the reaction as a whole, including details of the manifestation if required.", 0, java.lang.Integer.MAX_VALUE, description));
-          childrenList.add(new Property("onset", "dateTime", "Record of the date and/or time of the onset of the Reaction.", 0, java.lang.Integer.MAX_VALUE, onset));
-          childrenList.add(new Property("severity", "code", "Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.", 0, java.lang.Integer.MAX_VALUE, severity));
-          childrenList.add(new Property("exposureRoute", "CodeableConcept", "Identification of the route by which the subject was exposed to the substance.", 0, java.lang.Integer.MAX_VALUE, exposureRoute));
-          childrenList.add(new Property("note", "Annotation", "Additional text about the adverse reaction event not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("substance", "CodeableConcept", "Identification of the specific substance (or pharmaceutical product) considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different from the substance identified as the cause of the risk, but it must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite product that includes the identified substance. It must be clinically safe to only process the 'code' and ignore the 'reaction.substance'.", 0, 1, substance));
+          children.add(new Property("manifestation", "CodeableConcept", "Clinical symptoms and/or signs that are observed or associated with the adverse reaction event.", 0, java.lang.Integer.MAX_VALUE, manifestation));
+          children.add(new Property("description", "string", "Text description about the reaction as a whole, including details of the manifestation if required.", 0, 1, description));
+          children.add(new Property("onset", "dateTime", "Record of the date and/or time of the onset of the Reaction.", 0, 1, onset));
+          children.add(new Property("severity", "code", "Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.", 0, 1, severity));
+          children.add(new Property("exposureRoute", "CodeableConcept", "Identification of the route by which the subject was exposed to the substance.", 0, 1, exposureRoute));
+          children.add(new Property("note", "Annotation", "Additional text about the adverse reaction event not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 530040176: /*substance*/  return new Property("substance", "CodeableConcept", "Identification of the specific substance (or pharmaceutical product) considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different from the substance identified as the cause of the risk, but it must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite product that includes the identified substance. It must be clinically safe to only process the 'code' and ignore the 'reaction.substance'.", 0, 1, substance);
+          case 1115984422: /*manifestation*/  return new Property("manifestation", "CodeableConcept", "Clinical symptoms and/or signs that are observed or associated with the adverse reaction event.", 0, java.lang.Integer.MAX_VALUE, manifestation);
+          case -1724546052: /*description*/  return new Property("description", "string", "Text description about the reaction as a whole, including details of the manifestation if required.", 0, 1, description);
+          case 105901603: /*onset*/  return new Property("onset", "dateTime", "Record of the date and/or time of the onset of the Reaction.", 0, 1, onset);
+          case 1478300413: /*severity*/  return new Property("severity", "code", "Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.", 0, 1, severity);
+          case 421286274: /*exposureRoute*/  return new Property("exposureRoute", "CodeableConcept", "Identification of the route by which the subject was exposed to the substance.", 0, 1, exposureRoute);
+          case 3387378: /*note*/  return new Property("note", "Annotation", "Additional text about the adverse reaction event not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
         }
 
       @Override
@@ -1236,24 +1252,24 @@ public class AllergyIntolerance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AllergyIntoleranceReactionComponent))
+        if (!(other_ instanceof AllergyIntoleranceReactionComponent))
           return false;
-        AllergyIntoleranceReactionComponent o = (AllergyIntoleranceReactionComponent) other;
+        AllergyIntoleranceReactionComponent o = (AllergyIntoleranceReactionComponent) other_;
         return compareDeep(substance, o.substance, true) && compareDeep(manifestation, o.manifestation, true)
            && compareDeep(description, o.description, true) && compareDeep(onset, o.onset, true) && compareDeep(severity, o.severity, true)
            && compareDeep(exposureRoute, o.exposureRoute, true) && compareDeep(note, o.note, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AllergyIntoleranceReactionComponent))
+        if (!(other_ instanceof AllergyIntoleranceReactionComponent))
           return false;
-        AllergyIntoleranceReactionComponent o = (AllergyIntoleranceReactionComponent) other;
+        AllergyIntoleranceReactionComponent o = (AllergyIntoleranceReactionComponent) other_;
         return compareValues(description, o.description, true) && compareValues(onset, o.onset, true) && compareValues(severity, o.severity, true)
           ;
       }
@@ -1739,7 +1755,7 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @param value {@link #code} (Code for an allergy or intolerance statement (either a positive or a negated/excluded statement).  This may be a code for a substance or pharmaceutical product that is considered to be responsible for the adverse reaction risk (e.g., "Latex"), an allergy or intolerance condition (e.g., "Latex allergy"), or a negated/excluded code for a specific substance or class (e.g., "No latex allergy") or a general or categorical negated statement (e.g.,  "No known allergy", "No known drug allergies").)
      */
-    public AllergyIntolerance setCode(CodeableConcept value) { 
+    public AllergyIntolerance setCode(CodeableConcept value)  { 
       this.code = value;
       return this;
     }
@@ -1763,7 +1779,7 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @param value {@link #patient} (The patient who has the allergy or intolerance.)
      */
-    public AllergyIntolerance setPatient(Reference value) { 
+    public AllergyIntolerance setPatient(Reference value)  { 
       this.patient = value;
       return this;
     }
@@ -1799,65 +1815,75 @@ public class AllergyIntolerance extends DomainResource {
      * @return {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
     public DateTimeType getOnsetDateTimeType() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (DateTimeType) this.onset;
     }
 
     public boolean hasOnsetDateTimeType() { 
-      return this.onset instanceof DateTimeType;
+      return this != null && this.onset instanceof DateTimeType;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
     public Age getOnsetAge() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof Age))
         throw new FHIRException("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Age) this.onset;
     }
 
     public boolean hasOnsetAge() { 
-      return this.onset instanceof Age;
+      return this != null && this.onset instanceof Age;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
     public Period getOnsetPeriod() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Period) this.onset;
     }
 
     public boolean hasOnsetPeriod() { 
-      return this.onset instanceof Period;
+      return this != null && this.onset instanceof Period;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
     public Range getOnsetRange() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Range) this.onset;
     }
 
     public boolean hasOnsetRange() { 
-      return this.onset instanceof Range;
+      return this != null && this.onset instanceof Range;
     }
 
     /**
      * @return {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
     public StringType getOnsetStringType() throws FHIRException { 
+      if (this.onset == null)
+        return null;
       if (!(this.onset instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (StringType) this.onset;
     }
 
     public boolean hasOnsetStringType() { 
-      return this.onset instanceof StringType;
+      return this != null && this.onset instanceof StringType;
     }
 
     public boolean hasOnset() { 
@@ -1867,7 +1893,9 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @param value {@link #onset} (Estimated or actual date,  date-time, or age when allergy or intolerance was identified.)
      */
-    public AllergyIntolerance setOnset(Type value) { 
+    public AllergyIntolerance setOnset(Type value) throws FHIRFormatError { 
+      if (value != null && !(value instanceof DateTimeType || value instanceof Age || value instanceof Period || value instanceof Range || value instanceof StringType))
+        throw new FHIRFormatError("Not the right type for AllergyIntolerance.onset[x]: "+value.fhirType());
       this.onset = value;
       return this;
     }
@@ -1940,7 +1968,7 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @param value {@link #recorder} (Individual who recorded the record and takes responsibility for its content.)
      */
-    public AllergyIntolerance setRecorder(Reference value) { 
+    public AllergyIntolerance setRecorder(Reference value)  { 
       this.recorder = value;
       return this;
     }
@@ -1979,7 +2007,7 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @param value {@link #asserter} (The source of the information about the allergy that is recorded.)
      */
-    public AllergyIntolerance setAsserter(Reference value) { 
+    public AllergyIntolerance setAsserter(Reference value)  { 
       this.asserter = value;
       return this;
     }
@@ -2154,23 +2182,52 @@ public class AllergyIntolerance extends DomainResource {
       return getReaction().get(0);
     }
 
-      protected void listChildren(List<Property> childrenList) {
-        super.listChildren(childrenList);
-        childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("clinicalStatus", "code", "The clinical status of the allergy or intolerance.", 0, java.lang.Integer.MAX_VALUE, clinicalStatus));
-        childrenList.add(new Property("verificationStatus", "code", "Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified substance (including pharmaceutical product).", 0, java.lang.Integer.MAX_VALUE, verificationStatus));
-        childrenList.add(new Property("type", "code", "Identification of the underlying physiological mechanism for the reaction risk.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("category", "code", "Category of the identified substance.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("criticality", "code", "Estimate of the potential clinical harm, or seriousness, of the reaction to the identified substance.", 0, java.lang.Integer.MAX_VALUE, criticality));
-        childrenList.add(new Property("code", "CodeableConcept", "Code for an allergy or intolerance statement (either a positive or a negated/excluded statement).  This may be a code for a substance or pharmaceutical product that is considered to be responsible for the adverse reaction risk (e.g., \"Latex\"), an allergy or intolerance condition (e.g., \"Latex allergy\"), or a negated/excluded code for a specific substance or class (e.g., \"No latex allergy\") or a general or categorical negated statement (e.g.,  \"No known allergy\", \"No known drug allergies\").", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient who has the allergy or intolerance.", 0, java.lang.Integer.MAX_VALUE, patient));
-        childrenList.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, java.lang.Integer.MAX_VALUE, onset));
-        childrenList.add(new Property("assertedDate", "dateTime", "The date on which the existance of the AllergyIntolerance was first asserted or acknowledged.", 0, java.lang.Integer.MAX_VALUE, assertedDate));
-        childrenList.add(new Property("recorder", "Reference(Practitioner|Patient)", "Individual who recorded the record and takes responsibility for its content.", 0, java.lang.Integer.MAX_VALUE, recorder));
-        childrenList.add(new Property("asserter", "Reference(Patient|RelatedPerson|Practitioner)", "The source of the information about the allergy that is recorded.", 0, java.lang.Integer.MAX_VALUE, asserter));
-        childrenList.add(new Property("lastOccurrence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, java.lang.Integer.MAX_VALUE, lastOccurrence));
-        childrenList.add(new Property("note", "Annotation", "Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("reaction", "", "Details about each adverse reaction event linked to exposure to the identified substance.", 0, java.lang.Integer.MAX_VALUE, reaction));
+      protected void listChildren(List<Property> children) {
+        super.listChildren(children);
+        children.add(new Property("identifier", "Identifier", "This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("clinicalStatus", "code", "The clinical status of the allergy or intolerance.", 0, 1, clinicalStatus));
+        children.add(new Property("verificationStatus", "code", "Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified substance (including pharmaceutical product).", 0, 1, verificationStatus));
+        children.add(new Property("type", "code", "Identification of the underlying physiological mechanism for the reaction risk.", 0, 1, type));
+        children.add(new Property("category", "code", "Category of the identified substance.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("criticality", "code", "Estimate of the potential clinical harm, or seriousness, of the reaction to the identified substance.", 0, 1, criticality));
+        children.add(new Property("code", "CodeableConcept", "Code for an allergy or intolerance statement (either a positive or a negated/excluded statement).  This may be a code for a substance or pharmaceutical product that is considered to be responsible for the adverse reaction risk (e.g., \"Latex\"), an allergy or intolerance condition (e.g., \"Latex allergy\"), or a negated/excluded code for a specific substance or class (e.g., \"No latex allergy\") or a general or categorical negated statement (e.g.,  \"No known allergy\", \"No known drug allergies\").", 0, 1, code));
+        children.add(new Property("patient", "Reference(Patient)", "The patient who has the allergy or intolerance.", 0, 1, patient));
+        children.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset));
+        children.add(new Property("assertedDate", "dateTime", "The date on which the existance of the AllergyIntolerance was first asserted or acknowledged.", 0, 1, assertedDate));
+        children.add(new Property("recorder", "Reference(Practitioner|Patient)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder));
+        children.add(new Property("asserter", "Reference(Patient|RelatedPerson|Practitioner)", "The source of the information about the allergy that is recorded.", 0, 1, asserter));
+        children.add(new Property("lastOccurrence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, 1, lastOccurrence));
+        children.add(new Property("note", "Annotation", "Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("reaction", "", "Details about each adverse reaction event linked to exposure to the identified substance.", 0, java.lang.Integer.MAX_VALUE, reaction));
+      }
+
+      @Override
+      public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+        switch (_hash) {
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "This records identifiers associated with this allergy/intolerance concern that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -462853915: /*clinicalStatus*/  return new Property("clinicalStatus", "code", "The clinical status of the allergy or intolerance.", 0, 1, clinicalStatus);
+        case -842509843: /*verificationStatus*/  return new Property("verificationStatus", "code", "Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified substance (including pharmaceutical product).", 0, 1, verificationStatus);
+        case 3575610: /*type*/  return new Property("type", "code", "Identification of the underlying physiological mechanism for the reaction risk.", 0, 1, type);
+        case 50511102: /*category*/  return new Property("category", "code", "Category of the identified substance.", 0, java.lang.Integer.MAX_VALUE, category);
+        case -1608054609: /*criticality*/  return new Property("criticality", "code", "Estimate of the potential clinical harm, or seriousness, of the reaction to the identified substance.", 0, 1, criticality);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Code for an allergy or intolerance statement (either a positive or a negated/excluded statement).  This may be a code for a substance or pharmaceutical product that is considered to be responsible for the adverse reaction risk (e.g., \"Latex\"), an allergy or intolerance condition (e.g., \"Latex allergy\"), or a negated/excluded code for a specific substance or class (e.g., \"No latex allergy\") or a general or categorical negated statement (e.g.,  \"No known allergy\", \"No known drug allergies\").", 0, 1, code);
+        case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient who has the allergy or intolerance.", 0, 1, patient);
+        case -1886216323: /*onset[x]*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case 105901603: /*onset*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case -1701663010: /*onsetDateTime*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case -1886241828: /*onsetAge*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case -1545082428: /*onsetPeriod*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case -186664742: /*onsetRange*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case -1445342188: /*onsetString*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
+        case -174231629: /*assertedDate*/  return new Property("assertedDate", "dateTime", "The date on which the existance of the AllergyIntolerance was first asserted or acknowledged.", 0, 1, assertedDate);
+        case -799233858: /*recorder*/  return new Property("recorder", "Reference(Practitioner|Patient)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder);
+        case -373242253: /*asserter*/  return new Property("asserter", "Reference(Patient|RelatedPerson|Practitioner)", "The source of the information about the allergy that is recorded.", 0, 1, asserter);
+        case 1896977671: /*lastOccurrence*/  return new Property("lastOccurrence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, 1, lastOccurrence);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.", 0, java.lang.Integer.MAX_VALUE, note);
+        case -867509719: /*reaction*/  return new Property("reaction", "", "Details about each adverse reaction event linked to exposure to the identified substance.", 0, java.lang.Integer.MAX_VALUE, reaction);
+        default: return super.getNamedProperty(_hash, _name, _checkValid);
+        }
+
       }
 
       @Override
@@ -2462,12 +2519,12 @@ public class AllergyIntolerance extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof AllergyIntolerance))
+        if (!(other_ instanceof AllergyIntolerance))
           return false;
-        AllergyIntolerance o = (AllergyIntolerance) other;
+        AllergyIntolerance o = (AllergyIntolerance) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(clinicalStatus, o.clinicalStatus, true)
            && compareDeep(verificationStatus, o.verificationStatus, true) && compareDeep(type, o.type, true)
            && compareDeep(category, o.category, true) && compareDeep(criticality, o.criticality, true) && compareDeep(code, o.code, true)
@@ -2477,12 +2534,12 @@ public class AllergyIntolerance extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof AllergyIntolerance))
+        if (!(other_ instanceof AllergyIntolerance))
           return false;
-        AllergyIntolerance o = (AllergyIntolerance) other;
+        AllergyIntolerance o = (AllergyIntolerance) other_;
         return compareValues(clinicalStatus, o.clinicalStatus, true) && compareValues(verificationStatus, o.verificationStatus, true)
            && compareValues(type, o.type, true) && compareValues(category, o.category, true) && compareValues(criticality, o.criticality, true)
            && compareValues(assertedDate, o.assertedDate, true) && compareValues(lastOccurrence, o.lastOccurrence, true)

@@ -1016,7 +1016,7 @@
     <Cell ss:StyleID="s64"/>
     <Cell ss:StyleID="s64"/>
     <Cell ss:StyleID="s64"/>
-    <Cell ss:StyleID="s64"><Data ss:Type="String">Dimensions, color etc</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Dimensions, color etc.</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="54" ss:StyleID="s75">
     <Cell ss:StyleID="s71"><Data ss:Type="String">MedicinalProductPackaged.packageItem.otherCharacteristics</Data></Cell>
@@ -1065,7 +1065,7 @@
     <Cell ss:StyleID="s64"/>
     <Cell ss:StyleID="s64"/>
     <Cell ss:StyleID="s64"/>
-    <Cell ss:StyleID="s64"><Data ss:Type="String">Dimensions, color etc</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Dimensions, color etc.</Data></Cell>
     <Cell ss:Index="22" ss:StyleID="s74"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="52">

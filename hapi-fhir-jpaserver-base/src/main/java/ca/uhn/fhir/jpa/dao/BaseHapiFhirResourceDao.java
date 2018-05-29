@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.jpa.util.IReindexController;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.*;
@@ -46,7 +47,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -61,6 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -88,6 +89,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String mySecondaryPrimaryKeyParamName;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IReindexController myReindexController;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -97,7 +100,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theId);
 		}
 
-		//@formatter:off
 		for (BaseTag next : new ArrayList<>(entity.getTags())) {
 			if (ObjectUtil.equals(next.getTag().getTagType(), theTagType) &&
 				ObjectUtil.equals(next.getTag().getSystem(), theScheme) &&
@@ -105,7 +107,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				return;
 			}
 		}
-		//@formatter:on
 
 		entity.setHasTags(true);
 
@@ -459,7 +460,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaAdd);
 
@@ -537,7 +537,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		return doExpunge(getResourceName(), null, null, theExpungeOptions);
 	}
-
 
 	@Override
 	public TagList getAllResourceTags(RequestDetails theRequestDetails) {
@@ -630,7 +629,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				Integer updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
 					@Override
 					public @NonNull
-					Integer doInTransaction(TransactionStatus theStatus) {
+					Integer doInTransaction(@Nonnull TransactionStatus theStatus) {
 						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
 					}
 				});
@@ -640,6 +639,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		mySearchParamRegistry.requestRefresh();
+		myReindexController.requestReindex();
 	}
 
 	@Override
