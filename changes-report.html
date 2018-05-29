@@ -155,7 +155,7 @@
 				<li>HAPI FHIR Changelog</li>
 				<li class="publishDate version-date pull-right">Last Published: 2018-05-28</li>
 				<li class="divider pull-right">|</li>
-				<li class="projectVersion version-date pull-right">Version: 3.4.0</li>
+				<li class="projectVersion version-date pull-right">Version: 3.5.0-SNAPSHOT</li>
 			</ul>
 		</div>
 	</header>
@@ -341,7 +341,8 @@
     </tr> 
     <tr class="a"> 
      <td><i class="icon-plus"></i></td> 
-     <td>Several enhancements have been made to the JPA server index tables. These enhancements consist of new colums that will be used in a future version of HAPI FHIR to significantly decrease the amount of space required for indexes on token and string index types. <br /><br /> These new columns are not yet used in HAPI FHIR 3.4.0 but will be enabled in HAPI FHIR 3.5.0. Anyone upgrading to HAPI FHIR 3.4.0 (or above) is recommended to invoke the following SQL statement on their database in order to reindex all data in a background job: <br /> <code>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</code> <br /> Note that if you do this reindex now, you will not have any downtime while you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the time that you upgrade to HAPI FHIR 3.5.0 some indexes may not be available.</td> 
+     <td>Several enhancements have been made to the JPA server index tables. These enhancements consist of new colums that will be used in a future version of HAPI FHIR to significantly decrease the amount of space required for indexes on token and string index types. <br /><br /> These new columns are not yet used in HAPI FHIR 3.4.0 but will be enabled in HAPI FHIR 3.5.0. Anyone upgrading to HAPI FHIR 3.4.0 (or above) is recommended to invoke the following SQL statement on their database in order to reindex all data in a background job: <br /> <pre>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</pre> <br /> Note that if you do this reindex now, you will not have any downtime while you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the time that you upgrade to HAPI FHIR 3.5.0 some indexes may not be available. <br /> In addition, the following schema changes should be made while upgrading: <br /> <pre>update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
+alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</pre></td> 
      <td><a href="team-list.html#null"></a></td> 
     </tr> 
     <tr class="b"> 

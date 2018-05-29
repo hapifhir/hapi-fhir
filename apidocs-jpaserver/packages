@@ -1,6 +1,0 @@
-ca.uhn.fhir.jpa.dao
-ca.uhn.fhir.jpa.entity
-ca.uhn.fhir.jpa.provider
-ca.uhn.fhir.jpa.util
-ca.uhn.fhir.jpa.rp.dstu
-ca.uhn.fhir.jpa.rp.dstu2
