@@ -165,7 +165,7 @@ alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</pre>
 				on groups with only one question. Thanks David Gileadi for the pull request!
 			</action>
 			<action type="add" issue="709">
-				The <![CDATA[<code>ConceptMap</code>]] operation <![CDATA[<code>$translate</code>]]> has been
+				The <![CDATA[<code>ConceptMap</code>]]> operation <![CDATA[<code>$translate</code>]]> has been
 				implemented.
 			</action>
 			<action type="add" issue="927">
