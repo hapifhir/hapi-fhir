@@ -46,7 +46,7 @@
 			
 				<p>
 					A public test server is now operating at
-					<a href="http://fhirtest.uhn.ca">http://fhirtest.uhn.ca</a>. 
+					<a href="http://hapi.fhir.org">http://hapi.fhir.org</a>.
 					This server is built entirely using components of HAPI-FHIR
 					and demonstrates all of its capabilities. This server is also
 					entirely open source. You can host your own copy by 
@@ -75,14 +75,14 @@
 				GitHub's releases section.
 			</p>
 			<p>
-				This release brings logs of fixes and some significant enhancements.See the
+				This release brings lots of fixes and some significant enhancements. See the
 				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
 				of changes. Notable changes include:
 			</p>
 
 			<ul>
 				<li>
-					HAPI FHIR now supports and requires JDK 8. Support for JDK 7 and below had
+					HAPI FHIR now supports and requires JDK 8. Support for JDK 7 and below has
 					officially been dropped.
 				</li>
 				<li>
@@ -102,7 +102,7 @@
 					CSV files for external editing.
 				</li>
 				<li>
-					Several index table enhancements have been made to the JPA server schema, in
+					Several index table enhancements have been made to the JPA server schema in
 					anticipation of future changes that will improve performance and decrease index
 					sizes. These enhancements consist of new columns that have been added and will be
 					populated in HAPI FHIR 3.4.0 but will not actually be used until HAPI FHIR 3.5.0.
@@ -114,7 +114,7 @@
 				<li>
 					The validation framework has been further harmonized so that DSTU2 resources
 					will now also share the harmonized DSTU3/R4 validation codebase. This
-					has resulted in a significanty more accurate validator
+					has resulted in a significantly more accurate validator
 					for DSTU2 resources.
 				</li>
 				<li>
