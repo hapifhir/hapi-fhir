@@ -6,8 +6,9 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.4.0</version>
+	<version>3.5.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
+	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
 
 	<organization>
@@ -70,9 +71,6 @@
 		</repository>
 		-->
 	</repositories>
-
-	<description>
-	</description>
 
 	<dependencies>
 		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
