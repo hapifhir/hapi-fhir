@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
@@ -107,12 +108,14 @@ public class SearchBuilder implements ISearchBuilder {
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
 
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	/**
 	 * Constructor
 	 */
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, IFulltextSearchSvc theFulltextSearchSvc,
 								BaseHapiFhirDao<?> theDao,
-								IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry) {
+								IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
+								IResourceHistoryTableDao theResourceHistoryTableDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myFulltextSearchSvc = theFulltextSearchSvc;
@@ -121,6 +124,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myForcedIdDao = theForcedIdDao;
 		myTerminologySvc = theTerminologySvc;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
 	}
 
 	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1603,9 +1607,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourceTable> resultList = q.getResultList();
 
+		//-- Issue #963: Load resource histories based on pids once to improve the performance
+		Collection<ResourceHistoryTable> historyList = myResourceHistoryTableDao.findByResourceIds(pids);
+				
 		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
+			IBaseResource resource = theDao.toResource(resourceType, next, historyList, theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;

@@ -1156,7 +1156,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public SearchBuilder newSearchBuilder() {
 		SearchBuilder builder = new SearchBuilder(getContext(), myEntityManager, myFulltextSearchSvc, this, myResourceIndexedSearchParamUriDao,
 			myForcedIdDao,
-			myTerminologySvc, mySerarchParamRegistry);
+			myTerminologySvc, mySerarchParamRegistry, myResourceHistoryTableDao);
 		return builder;
 	}
 
@@ -1583,19 +1583,25 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
-		return toResource(resourceType, theEntity, theForHistoryOperation);
+		return toResource(resourceType, theEntity, null, theForHistoryOperation);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity,
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, Collection<ResourceHistoryTable> historyList,
 																 boolean theForHistoryOperation) {
 
+		// May 28, 2018 - #936
+		// Could set historyList to null, if it's not called in the loop for the backward compatibility
 		ResourceHistoryTable history;
 		if (theEntity instanceof ResourceHistoryTable) {
 			history = (ResourceHistoryTable) theEntity;
 		} else {
-			history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
+			if (historyList == null) {
+				history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
+			} else {
+				history = getHistory(historyList, theEntity.getId(), theEntity.getVersion());
+			}
 		}
 
 		if (history == null) {
@@ -1713,6 +1719,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
+	private ResourceHistoryTable getHistory(Collection<ResourceHistoryTable> historyList, Long resourceId, Long versionId) {
+		if (resourceId == null || versionId == null)
+			return null;		
+		for (ResourceHistoryTable history : historyList) {
+			if (resourceId.equals(history.getResourceId()) && versionId.equals( history.getVersion()))
+				return history;
+		}		
+		return null;
+	}
+	
 	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
