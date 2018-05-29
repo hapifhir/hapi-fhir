@@ -1024,7 +1024,7 @@
 				<groupId>org.glassfish.jersey.media</groupId>
 				<artifactId>jersey-media-moxy</artifactId>
 				<version>${jersey_version}</version>
-			</dependency>-->
+			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-jaxrs</artifactId>
@@ -1408,10 +1408,8 @@
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
-					<artifactId>
-						jacoco-maven-plugin
-					</artifactId>
-					<version>0.7.9</version>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
