@@ -476,7 +476,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	/**
 	 * This is Gramahe's test transaction - it requires some set up in order to work
 	 */
-	// @Test
+	@Test
+	@Ignore
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
