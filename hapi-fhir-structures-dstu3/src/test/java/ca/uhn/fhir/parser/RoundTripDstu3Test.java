@@ -30,7 +30,7 @@ public class RoundTripDstu3Test {
 	}
 
 
-//	@Test
+	@Test
 	public void testRoundTrip() throws Exception {
 		ZipInputStream is = new ZipInputStream(new FileInputStream("src/test/resources/examples.zip"));
 		try {
