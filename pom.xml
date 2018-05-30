@@ -493,13 +493,13 @@
 		<jaxb_api_version>2.3.0</jaxb_api_version>
 		<jaxb_core_version>2.3.0</jaxb_core_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.8.v20171121</jetty_version>
+		<jetty_version>9.4.10.v20180503</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.2.16.Final</hibernate_version>
+		<hibernate_version>5.3.1.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
+		<hibernate_search_version>5.10.1.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
 		<lucene_version>5.5.4</lucene_version>
@@ -510,7 +510,7 @@
 		<ph_commons_version>9.1.1</ph_commons_version>
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<spring_version>5.0.3.RELEASE</spring_version>
+		<spring_version>5.0.6.RELEASE</spring_version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
@@ -624,6 +624,11 @@
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
 				<version>3.8.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>javax.activation</artifactId>
+				<version>1.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>

@@ -99,23 +99,6 @@ public class BinaryHl7OrgDstu2Test {
 
 	}
 
-	public void testCreateWrongType() throws Exception {
-		Binary res = new Binary();
-		res.setContent(new byte[] { 1, 2, 3, 4 });
-		res.setContentType("text/plain");
-		String stringContent = ourCtx.newJsonParser().encodeResourceToString(res);
-
-		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		http.setEntity(new StringEntity(stringContent, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(http);
-		assertEquals(201, status.getStatusLine().getStatusCode());
-
-		assertEquals("text/plain", ourLast.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
-
-	}
-
 	@Test
 	public void testRead() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
