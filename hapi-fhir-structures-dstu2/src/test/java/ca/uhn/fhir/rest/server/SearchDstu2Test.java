@@ -149,7 +149,7 @@ public class SearchDstu2Test {
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, matchesPattern("id value..[0-9a-f-]+\\\""));
+		assertThat(responseContent, matchesPattern(".*id value..[0-9a-f-]+\\\".*"));
 	}
 
 	@Test

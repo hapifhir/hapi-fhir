@@ -478,6 +478,7 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Dependency Versions -->
+		<activation_api_version>1.2.0</activation_api_version>
 		<apache_karaf_version>4.1.4</apache_karaf_version>
 		<aries_spifly_version>1.0.10</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
@@ -488,8 +489,9 @@
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
 		<guava_version>25.0-jre</guava_version>
 		<gson_version>2.8.1</gson_version>
+		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.0</jaxb_api_version>
-		<jaxb_runtime_version>2.3.0</jaxb_runtime_version>
+		<jaxb_core_version>2.3.0</jaxb_core_version>
 		<jersey_version>2.25.1</jersey_version>
 		<jetty_version>9.4.8.v20171121</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
@@ -500,7 +502,6 @@
 		<hibernate_search_version>5.7.1.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
-		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<lucene_version>5.5.4</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -670,6 +671,11 @@
 				<groupId>es.nitaur.markdown</groupId>
 				<artifactId>txtmark</artifactId>
 				<version>0.16</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>javax.activation-api</artifactId>
+				<version>${activation_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.annotation</groupId>
@@ -1000,11 +1006,13 @@
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>${jaxb_runtime_version}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
