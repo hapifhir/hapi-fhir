@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DeleteMethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -567,8 +568,8 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	@Test
 	public void testServerOperationPreDelete() {
 
-		doAnswer(new MyOneResourceAnswer()).when(myJpaInterceptor).resourcePreDelete(any(RequestDetails.class), any(IBaseResource.class));
-		doAnswer(new MyOneResourceAnswer()).when(myJpaInterceptor).resourceDeleted(any(RequestDetails.class), any(IBaseResource.class));
+		doAnswer(new MyOneResourceAnswer()).when(myJpaInterceptor).resourcePreDelete(nullable(ServletRequestDetails.class), any(Patient.class));
+		doAnswer(new MyOneResourceAnswer()).when(myJpaInterceptor).resourceDeleted(nullable(ServletRequestDetails.class), any(Patient.class));
 
 		Patient p = new Patient();
 		p.setActive(false);
@@ -578,8 +579,8 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		myPatientDao.delete(id);
 
 		InOrder inorder = inOrder(myJpaInterceptor);
-		inorder.verify(myJpaInterceptor, times(1)).resourcePreDelete(any(RequestDetails.class), any(IBaseResource.class));
-		inorder.verify(myJpaInterceptor, times(1)).resourceDeleted(any(RequestDetails.class), any(IBaseResource.class));
+		inorder.verify(myJpaInterceptor, times(1)).resourcePreDelete(nullable(ServletRequestDetails.class), any(Patient.class));
+		inorder.verify(myJpaInterceptor, times(1)).resourceDeleted(nullable(ServletRequestDetails.class), any(Patient.class));
 		// resourcePreDelete
 		assertEquals(idPart, myIds.get(0).getIdPart());
 		assertEquals("1", myIds.get(0).getVersionIdPart());
