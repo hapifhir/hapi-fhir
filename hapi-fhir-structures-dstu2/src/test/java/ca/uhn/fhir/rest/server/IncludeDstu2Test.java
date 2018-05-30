@@ -19,6 +19,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
@@ -159,7 +160,8 @@ public class IncludeDstu2Test {
 
 	}
 
-	// @Test
+	@Test
+	@Ignore
 	public void testMixedContainedAndNonContained() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
