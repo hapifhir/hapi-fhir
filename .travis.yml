@@ -4,6 +4,7 @@
 
 # Use VM based build environment
 sudo: required
+dist: trusty
 
 language: java
 jdk:
