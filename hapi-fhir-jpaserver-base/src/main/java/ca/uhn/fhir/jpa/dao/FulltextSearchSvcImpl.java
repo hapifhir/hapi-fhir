@@ -59,7 +59,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
