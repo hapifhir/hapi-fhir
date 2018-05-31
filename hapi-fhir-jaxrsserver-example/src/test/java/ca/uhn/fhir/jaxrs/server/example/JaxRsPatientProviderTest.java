@@ -119,11 +119,6 @@ public class JaxRsPatientProviderTest {
 		}
 	}
 
-	/** Search using other query options */
-	public void testOther() {
-		// missing
-	}
-
 	/** */
 	@Test
 	public void testSearchPost() {

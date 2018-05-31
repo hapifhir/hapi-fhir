@@ -206,11 +206,6 @@ public class AbstractJaxRsResourceProviderTest {
 		assertEquals("outputValue", ((StringDt) outParams.getParameter().get(0).getValue()).getValueAsString());
 	}
 
-	/** Search using other query options */
-	public void testOther() {
-		// missing
-	}
-
 	@Test
 	public void testRead() {
 		when(mock.find(idCaptor.capture())).thenReturn(createPatient(1));

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionRegistryBuilder;
-import org.hibernate.search.elasticsearch.analyzer.definition.spi.ElasticsearchAnalysisDefinitionProvider;
+import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionProvider;
 
 public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefinitionProvider {
 
