@@ -243,7 +243,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
 
 		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findOne(theCodeSystem.getPid());
+		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
 		cs.setCurrentVersion(null);
 		myCodeSystemDao.save(cs);
 		myCodeSystemDao.flush();
@@ -252,8 +252,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
-				myConceptPropertyDao.delete(nextConcept.getProperties());
-				myConceptDesignationDao.delete(nextConcept.getDesignations());
+				myConceptPropertyDao.deleteAll(nextConcept.getProperties());
+				myConceptDesignationDao.deleteAll(nextConcept.getDesignations());
 				myConceptDao.delete(nextConcept);
 			}
 			if (next.getCodeSystem().getCurrentVersion() == next) {
@@ -639,7 +639,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			while (relCount < count && myConceptLinksToSaveLater.size() > 0) {
 				TermConceptParentChildLink next = myConceptLinksToSaveLater.remove(0);
 
-				if (myConceptDao.findOne(next.getChild().getId()) == null || myConceptDao.findOne(next.getParent().getId()) == null) {
+				if (!myConceptDao.findById(next.getChild().getId()).isPresent() || !myConceptDao.findById(next.getParent().getId()).isPresent()) {
 					ourLog.warn("Not inserting link from child {} to parent {} because it appears to have been deleted", next.getParent().getCode(), next.getChild().getCode());
 					continue;
 				}
@@ -850,7 +850,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			ourLog.info(" * Deleting code system version {}", next.getPid());
 			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
 			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
-				myConceptPropertyDao.delete(nextConcept.getProperties());
+				myConceptPropertyDao.deleteAll(nextConcept.getProperties());
 				myConceptDao.delete(nextConcept);
 			}
 		}

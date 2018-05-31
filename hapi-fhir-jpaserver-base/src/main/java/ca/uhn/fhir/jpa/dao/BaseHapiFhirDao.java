@@ -372,22 +372,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	private void expungeCurrentVersionOfResource(Long theResourceId) {
-		ResourceTable resource = myResourceTableDao.findOne(theResourceId);
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
 		expungeHistoricalVersion(currentVersion.getId());
 
 		ourLog.info("Deleting current version of resource {}", resource.getIdDt().getValue());
 
-		myResourceIndexedSearchParamUriDao.delete(resource.getParamsUri());
-		myResourceIndexedSearchParamCoordsDao.delete(resource.getParamsCoords());
-		myResourceIndexedSearchParamDateDao.delete(resource.getParamsDate());
-		myResourceIndexedSearchParamNumberDao.delete(resource.getParamsNumber());
-		myResourceIndexedSearchParamQuantityDao.delete(resource.getParamsQuantity());
-		myResourceIndexedSearchParamStringDao.delete(resource.getParamsString());
-		myResourceIndexedSearchParamTokenDao.delete(resource.getParamsToken());
+		myResourceIndexedSearchParamUriDao.deleteAll(resource.getParamsUri());
+		myResourceIndexedSearchParamCoordsDao.deleteAll(resource.getParamsCoords());
+		myResourceIndexedSearchParamDateDao.deleteAll(resource.getParamsDate());
+		myResourceIndexedSearchParamNumberDao.deleteAll(resource.getParamsNumber());
+		myResourceIndexedSearchParamQuantityDao.deleteAll(resource.getParamsQuantity());
+		myResourceIndexedSearchParamStringDao.deleteAll(resource.getParamsString());
+		myResourceIndexedSearchParamTokenDao.deleteAll(resource.getParamsToken());
 
-		myResourceTagDao.delete(resource.getTags());
+		myResourceTagDao.deleteAll(resource.getTags());
 		resource.getTags().clear();
 
 		if (resource.getForcedId() != null) {
@@ -402,15 +402,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	protected void expungeHistoricalVersion(Long theNextVersionId) {
-		ResourceHistoryTable version = myResourceHistoryTableDao.findOne(theNextVersionId);
+		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
 		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
 
-		myResourceHistoryTagDao.delete(version.getTags());
+		myResourceHistoryTagDao.deleteAll(version.getTags());
 		myResourceHistoryTableDao.delete(version);
 	}
 
 	protected void expungeHistoricalVersionsOfId(Long theResourceId, AtomicInteger theRemainingCount) {
-		ResourceTable resource = myResourceTableDao.findOne(theResourceId);
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalArgumentException::new);
 
 		Pageable page = new PageRequest(0, theRemainingCount.get());
 

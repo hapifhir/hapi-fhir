@@ -508,6 +508,7 @@
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<spring_version>5.0.3.RELEASE</spring_version>
+		<spring_data_version>2.0.7.RELEASE</spring_data_version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
@@ -1096,7 +1097,12 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.11.6.RELEASE</version>
+				<version>${spring_data_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-commons</artifactId>
+				<version>${spring_data_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
