@@ -20,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -316,7 +317,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	/**
 	 * This is Gramahe's test transaction - it requires some set up in order to work
 	 */
-	// @Test
+	@Test
+	@Ignore
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/grahame-transaction.xml");
