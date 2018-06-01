@@ -609,13 +609,6 @@
 						<artifactId>jaxb-impl</artifactId>
 						<version>${jaxb_core_version}</version>
 					</dependency>
-					<!--
-					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-runtime</artifactId>
-						<version>${jaxb_runtime_version}</version>
-					</dependency>
-					-->
 				</dependencies>
 			</plugin>
 			<plugin>
