@@ -25,13 +25,18 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public class FhirResourceDaoBundleDstu3 extends FhirResourceDaoDstu3<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {
 		super.preProcessResourceForStorage(theResource);
 
-		if (theResource.getType() != BundleType.DOCUMENT && theResource.getType() != BundleType.COLLECTION) {
+		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
+		if (!allowedBundleTypes.contains(defaultString(theResource.getType().toCode()))) {
 			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType().toCode() : "(missing)");
 			throw new UnprocessableEntityException(message);
 		}

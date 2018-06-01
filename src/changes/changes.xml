@@ -24,6 +24,11 @@
 					</ul>
 				]]>
 			</action>
+			<action type="add">
+				The JPA server now has a configuration item in the DaoConfig to specify which bundle types
+				may be stored as-is on the /Bundle endpoint. By default the following types
+				are allowed: collection, document, message.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
