@@ -22,11 +22,6 @@ public class SearchBuilderTest {
 
 
 	@Test
-	public void testAA() {
-		assertTrue(123.00004f <= 123.0001f);
-	}
-	
-	@Test
 	public void testCalculateMultiplierEqualNoDecimal() {
 		BigDecimal in = new BigDecimal("200");
 		BigDecimal out = SearchBuilder.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);

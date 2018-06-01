@@ -21,6 +21,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Matchers;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -2551,7 +2553,7 @@ public class XmlParserDstu2Test {
 		assertThat(patient.getIdentifier().get(0).getType().getValueAsEnum(), IsEmptyCollection.empty());
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).unknownAttribute(any(IParseLocation.class), capt.capture());
+		verify(errorHandler, times(1)).unknownAttribute(ArgumentMatchers.nullable(IParseLocation.class), capt.capture());
 
 		assertEquals("value", capt.getValue());
 	}

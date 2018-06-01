@@ -69,6 +69,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
 	private org.hl7.fhir.instance.model.Conformance myDstu2Hl7OrgConformance;
 	private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
+	private boolean myInitialized;
 
 	/**
 	 * Constructor allowing the description, servername and server to be set
@@ -112,7 +113,11 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	 * conformance
 	 */
 	@PostConstruct
-	protected void setUpPostConstruct() {
+	protected synchronized void setUpPostConstruct() {
+		if (myInitialized) {
+			return;
+		}
+
 		for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : getProviders().entrySet()) {
 			addProvider(provider.getValue(), provider.getKey());
 		}
@@ -155,6 +160,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			default:
 				throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
 		}
+
+		myInitialized = true;
 	}
 
 	/**
@@ -184,6 +191,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	@GET
 	@Path("/metadata")
 	public Response conformance() throws IOException {
+		setUpPostConstruct();
+
 		Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
 		IRestfulResponse response = request.build().getResponse();
 		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");

@@ -43,7 +43,9 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -57,9 +59,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+	@Autowired
+	private PlatformTransactionManager myTxManager;
 
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
+
+	private Boolean ourDisabled;
 
 	/**
 	 * Constructor
@@ -73,7 +79,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
-			Set<String> terms = new HashSet<String>();
+			Set<String> terms = new HashSet<>();
 			for (IQueryParameterType nextOr : nextAnd) {
 				StringParam nextOrString = (StringParam) nextOr;
 				String nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
@@ -229,15 +235,25 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public boolean isDisabled() {
-		try {
-			FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-			em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
-		} catch (Exception e) {
-			ourLog.trace("FullText test failed", e);
-			ourLog.debug("Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
-			return true;
+		Boolean retVal = ourDisabled;
+
+		if (retVal == null) {
+			retVal = new TransactionTemplate(myTxManager).execute(t -> {
+				try {
+					FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+					em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+					return Boolean.FALSE;
+				} catch (Exception e) {
+					ourLog.trace("FullText test failed", e);
+					ourLog.debug("Hibernate Search (Lucene) appears to be disabled on this server, fulltext will be disabled");
+					return Boolean.TRUE;
+				}
+			});
+			ourDisabled = retVal;
 		}
-		return false;
+
+		assert retVal != null;
+		return retVal;
 	}
 
 	@Transactional()
@@ -246,6 +262,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return doSearch(theResourceName, theParams, null);
 	}
 
+	@Transactional()
 	@Override
 	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText) {
 		Validate.notBlank(theContext, "theContext must be provided");

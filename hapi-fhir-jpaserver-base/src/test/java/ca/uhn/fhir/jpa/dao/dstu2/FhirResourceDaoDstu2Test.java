@@ -2435,6 +2435,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(actual, contains(id3, id2, id1));
 	}
 
+	@Test
+	@Ignore
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -2700,6 +2702,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	}
 
+	@Test
+	@Ignore
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
 		res.addElement().addTarget().addDependsOn().setElement("http://foo2");

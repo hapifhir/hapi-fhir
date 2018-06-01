@@ -110,6 +110,7 @@ public class BinaryDstu2Test {
 
 	}
 
+	@Test
 	public void testCreateWrongType() throws Exception {
 		Binary res = new Binary();
 		res.setContent(new byte[] { 1, 2, 3, 4 });
@@ -122,8 +123,7 @@ public class BinaryDstu2Test {
 		HttpResponse status = ourClient.execute(http);
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertEquals("text/plain", ourLast.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
+		assertEquals("application/json+fhir;charset=utf-8", ourLast.getContentType().replace(" ","").toLowerCase());
 
 	}
 

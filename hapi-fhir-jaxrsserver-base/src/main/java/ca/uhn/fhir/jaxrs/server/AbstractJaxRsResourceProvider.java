@@ -47,8 +47,8 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
  * a large amount of the fhir api functionality using JAXRS
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
+@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW, "application/octet-stream" })
 @Interceptors(JaxRsExceptionInterceptor.class)
 public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> extends AbstractJaxRsProvider
 

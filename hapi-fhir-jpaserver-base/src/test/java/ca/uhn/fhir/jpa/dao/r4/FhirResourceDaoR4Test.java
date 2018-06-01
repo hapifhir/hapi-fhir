@@ -3140,6 +3140,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(actual, contains(toValues(id3, id2, id1)));
 	}
 
+	@Test
+	@Ignore
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -3405,6 +3407,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	@Ignore
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
 		res.addGroup().setSource("http://foo2");
