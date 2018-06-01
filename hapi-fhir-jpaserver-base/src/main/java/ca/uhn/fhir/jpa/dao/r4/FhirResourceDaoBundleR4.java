@@ -37,7 +37,7 @@ public class FhirResourceDaoBundleR4 extends FhirResourceDaoR4<Bundle> {
 		super.preProcessResourceForStorage(theResource);
 
 		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
-		if (!allowedBundleTypes.contains(defaultString(theResource.getType().toCode()))) {
+		if (theResource.getType() == null || !allowedBundleTypes.contains(defaultString(theResource.getType().toCode()))) {
 			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType().toCode() : "(missing)");
 			throw new UnprocessableEntityException(message);
 		}

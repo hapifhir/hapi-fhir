@@ -188,6 +188,7 @@ public class DaoConfig {
 	 * @see #DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE
 	 */
 	public void setBundleTypesAllowedForStorage(Set<String> theBundleTypesAllowedForStorage) {
+		Validate.notNull(theBundleTypesAllowedForStorage, "theBundleTypesAllowedForStorage must not be null");
 		myBundleTypesAllowedForStorage = theBundleTypesAllowedForStorage;
 	}
 
