@@ -345,6 +345,13 @@
 						<sourceDirectory>../hapi-fhir-client-okhttp/src/main/java</sourceDirectory>
 					</sourceDirectories>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>2.3.0</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
