@@ -15,6 +15,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,7 +35,7 @@ public class GraphQLEngineTest {
 
 	private GraphQLEngine.IGraphQLStorageServices createStorageServices() throws FHIRException {
 		GraphQLEngine.IGraphQLStorageServices retVal = mock(GraphQLEngine.IGraphQLStorageServices.class);
-		when(retVal.lookup(any(Object.class), any(Resource.class), any(Reference.class))).thenAnswer(new Answer<Object>() {
+		when(retVal.lookup(nullable(Object.class), nullable(Resource.class), nullable(Reference.class))).thenAnswer(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) {
 				Object appInfo = invocation.getArguments()[0];

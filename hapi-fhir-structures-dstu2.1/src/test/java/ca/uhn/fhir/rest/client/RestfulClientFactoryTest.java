@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,10 +46,10 @@ public class RestfulClientFactoryTest {
 		when(ctx.getVersion()).thenReturn(FhirVersionEnum.DSTU2_1.getVersionImplementation());
 		when(ctx.getRestfulClientFactory()).thenReturn(restfulClientFactory);
 
-		when(restfulClientFactory.getHttpClient(any(StringBuilder.class), (Map<String, List<String>>)any(Map.class), any(String.class), any(RequestTypeEnum.class), any(List.class))).thenReturn(httpClient);
+		when(restfulClientFactory.getHttpClient(any(StringBuilder.class), (Map<String, List<String>>)nullable(Map.class), nullable(String.class), any(RequestTypeEnum.class), any(List.class))).thenReturn(httpClient);
 		
 		IHttpRequest httpRequest = mock(IHttpRequest.class);
-		when(httpClient.createGetRequest(any(FhirContext.class), any(EncodingEnum.class))).thenReturn(httpRequest);
+		when(httpClient.createGetRequest(any(FhirContext.class), nullable(EncodingEnum.class))).thenReturn(httpRequest);
 	
 		IHttpResponse httpResponse = mock(IHttpResponse.class);
 		when(httpRequest.execute()).thenReturn(httpResponse);

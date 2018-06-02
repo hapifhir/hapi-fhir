@@ -2,7 +2,7 @@ package ca.uhn.fhir.util;
 
 import static org.junit.Assert.fail;
 
-import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.hl7.fhir.dstu3.model.Patient;
@@ -37,7 +37,8 @@ public class XmlUtilDstu3Test {
 			// good
 		}
 	}
-	
+
+	@Test
 	public void testXmlFactoryThrowsXmlStreamException() {
 		XmlUtil.setThrowExceptionForUnitTest(new XMLStreamException("FOO"));
 		
@@ -54,18 +55,13 @@ public class XmlUtilDstu3Test {
 			// good
 		}
 	}
-	
+
+	@Test
 	public void testXmlFactoryThrowsFactoryConfigurationError() {
 		XmlUtil.setThrowExceptionForUnitTest(new FactoryConfigurationError("FOO"));
 		
 		try {
 			ourCtx.newXmlParser().parseResource("AAAAA");
-			fail();
-		} catch (DataFormatException e) {
-			// good
-		}
-		try {
-			ourCtx.newXmlParser().encodeResourceToString(myPatient);
 			fail();
 		} catch (ConfigurationException e) {
 			// good

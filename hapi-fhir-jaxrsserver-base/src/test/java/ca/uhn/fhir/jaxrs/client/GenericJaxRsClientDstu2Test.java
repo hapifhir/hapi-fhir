@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.*;
 
+import javax.annotation.Priority;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,7 +82,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testAcceptHeaderFetchConformance() throws Exception {
+	public void testAcceptHeaderFetchConformance() {
 		IParser p = ourCtx.newXmlParser();
 
 		Conformance conf = new Conformance();
@@ -115,7 +116,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testAcceptHeaderPreflightConformance() throws Exception {
+	public void testAcceptHeaderPreflightConformance() {
 		final IParser p = ourCtx.newXmlParser();
 
 		final Conformance conf = new Conformance();
@@ -145,7 +146,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testAcceptHeaderPreflightConformancePreferJson() throws Exception {
+	public void testAcceptHeaderPreflightConformancePreferJson() {
 		final IParser p = ourCtx.newXmlParser();
 
 		final Conformance conf = new Conformance();
@@ -175,7 +176,7 @@ public class GenericJaxRsClientDstu2Test {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testConformance() throws Exception {
+	public void testConformance() {
 		IParser p = ourCtx.newXmlParser();
 
 		Conformance conf = new Conformance();
@@ -198,7 +199,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testProviderWhereWeForgotToSetTheContext() throws Exception {		
+	public void testProviderWhereWeForgotToSetTheContext() {
 		JaxRsRestfulClientFactory clientFactory = new JaxRsRestfulClientFactory(); // no ctx
 		clientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
 		
@@ -214,7 +215,7 @@ public class GenericJaxRsClientDstu2Test {
 	
 	
 	@Test
-	public void testCreate() throws Exception {		
+	public void testCreate() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
 		
@@ -246,7 +247,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testCreateConditional() throws Exception {
+	public void testCreateConditional() {
 		
 		
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -290,7 +291,7 @@ public class GenericJaxRsClientDstu2Test {
 
 
 	@Test
-	public void testCreatePrefer() throws Exception {
+	public void testCreatePrefer() {
 		
 		
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -315,7 +316,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testCreateReturningResourceBody() throws Exception {
+	public void testCreateReturningResourceBody() {
 		Patient p = new Patient();
 		p.setId("123");
 		final String formatted = ourCtx.newXmlParser().encodeResourceToString(p);
@@ -338,7 +339,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testDeleteConditional() throws Exception {
+	public void testDeleteConditional() {
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -363,7 +364,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testDelete() throws Exception {
+	public void testDelete() {
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 		
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
@@ -377,7 +378,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testHistory() throws Exception {
+	public void testHistory() {
 
 		final String msg = getPatientFeedWithOneResult();
 		
@@ -474,7 +475,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testMetaAdd() throws Exception {
+	public void testMetaAdd() {
 		IParser p = ourCtx.newXmlParser();
 
 		MetaDt inMeta = new MetaDt().addProfile("urn:profile:in");
@@ -507,7 +508,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testMetaGet() throws Exception {
+	public void testMetaGet() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters inParams = new Parameters();
@@ -563,7 +564,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationAsGetWithInParameters() throws Exception {
+	public void testOperationAsGetWithInParameters() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters inParams = new Parameters();
@@ -642,7 +643,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationAsGetWithNoInParameters() throws Exception {
+	public void testOperationAsGetWithNoInParameters() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters outParams = new Parameters();
@@ -713,7 +714,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationWithBundleResponseJson() throws Exception {
+	public void testOperationWithBundleResponseJson() {
 
 		ourResponseContentType = Constants.CT_FHIR_JSON;
 		final String respString = "{\n" + "    \"resourceType\":\"Bundle\",\n" + "    \"id\":\"8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19\",\n" + "    \"base\":\"http://localhost:" + ourPort + "/fhir\"\n" + "}";
@@ -743,7 +744,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationWithBundleResponseXml() throws Exception {
+	public void testOperationWithBundleResponseXml() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters inParams = new Parameters();
@@ -780,7 +781,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationWithInlineParams() throws Exception {
+	public void testOperationWithInlineParams() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters outParams = new Parameters();
@@ -899,7 +900,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationWithProfiledDatatypeParam() throws IOException, Exception {
+	public void testOperationWithProfiledDatatypeParam() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters outParams = new Parameters();
@@ -948,7 +949,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationWithListOfParameterResponse() throws Exception {
+	public void testOperationWithListOfParameterResponse() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters inParams = new Parameters();
@@ -1023,7 +1024,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testOperationWithNoInParameters() throws Exception {
+	public void testOperationWithNoInParameters() {
 		IParser p = ourCtx.newXmlParser();
 
 		Parameters inParams = new Parameters();
@@ -1102,7 +1103,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testPageNext() throws Exception {
+	public void testPageNext() {
 		
 		ourResponseContentType = Constants.CT_FHIR_XML + "; charset=UTF-8";
 		ourResponseBody = getPatientFeedWithOneResult();
@@ -1129,7 +1130,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testPageNextNoLink() throws Exception {
+	public void testPageNextNoLink() {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
@@ -1141,7 +1142,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testPagePrev() throws Exception {
+	public void testPagePrev() {
 		
 		
 		
@@ -1187,7 +1188,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testReadByUri() throws Exception {
+	public void testReadByUri() {
 
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAM");
@@ -1207,7 +1208,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testReadFluentByUri() throws Exception {
+	public void testReadFluentByUri() {
 
 		Patient patient = new Patient();
 		patient.addName().addFamily("FAM");
@@ -1220,13 +1221,13 @@ public class GenericJaxRsClientDstu2Test {
 
 		Patient response;
 
-		response = (Patient) client.read().resource(Patient.class).withUrl(new IdDt("http://localhost:" + ourPort + "/AAA/Patient/123")).execute();
+		response = client.read().resource(Patient.class).withUrl(new IdDt("http://localhost:" + ourPort + "/AAA/Patient/123")).execute();
 		assertEquals("http://localhost:" + ourPort + "/AAA/Patient/123", ourRequestUri);
 		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
-	public void testReadUpdatedHeaderDoesntOverwriteResourceValue() throws Exception {
+	public void testReadUpdatedHeaderDoesntOverwriteResourceValue() {
 
 		
 		final String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -1264,7 +1265,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testReadWithElementsParam() throws Exception {
+	public void testReadWithElementsParam() {
 		String msg = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}";
 
 		
@@ -1287,7 +1288,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testReadWithSummaryInvalid() throws Exception {
+	public void testReadWithSummaryInvalid() {
 		String msg = "<>>>><<<<>";
 
 		
@@ -1313,7 +1314,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testReadWithSummaryParamHtml() throws Exception {
+	public void testReadWithSummaryParamHtml() {
 		String msg = "<div>HELP IM A DIV</div>";
 
 		
@@ -1338,7 +1339,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchByString() throws Exception {
+	public void testSearchByString() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1362,7 +1363,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchByUrl() throws Exception {
+	public void testSearchByUrl() {
 
 		final String msg = getPatientFeedWithOneResult();
 
@@ -1469,7 +1470,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithElementsParam() throws Exception {
+	public void testSearchWithElementsParam() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1496,7 +1497,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchByPost() throws Exception {
+	public void testSearchByPost() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1533,7 +1534,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchByPostUseJson() throws Exception {
+	public void testSearchByPostUseJson() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1571,7 +1572,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithLastUpdated() throws Exception {
+	public void testSearchWithLastUpdated() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1598,7 +1599,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithProfileAndSecurity() throws Exception {
+	public void testSearchWithProfileAndSecurity() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1628,7 +1629,7 @@ public class GenericJaxRsClientDstu2Test {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void testSearchWithReverseInclude() throws Exception {
+	public void testSearchWithReverseInclude() {
 
 		String msg = getPatientFeedWithOneResult();
 
@@ -1655,7 +1656,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithSummaryParam() throws Exception {
+	public void testSearchWithSummaryParam() {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		
@@ -1682,7 +1683,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithListOfResources() throws Exception {
+	public void testTransactionWithListOfResources() {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
@@ -1735,7 +1736,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithString() throws Exception {
+	public void testTransactionWithString() {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle req = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		Patient patient = new Patient();
@@ -1781,7 +1782,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithTransactionResource() throws Exception {
+	public void testTransactionWithTransactionResource() {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
@@ -1822,7 +1823,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testUpdateConditional() throws Exception {
+	public void testUpdateConditional() {
 		
 		
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -1877,7 +1878,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testUpdateNonFluent() throws Exception {
+	public void testUpdateNonFluent() {
 		
 		
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -1907,7 +1908,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testUpdatePrefer() throws Exception {
+	public void testUpdatePrefer() {
 		
 		
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -1933,7 +1934,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testUpdateReturningResourceBody() throws Exception {
+	public void testUpdateReturningResourceBody() {
 		Patient p = new Patient();
 		p.setId("123");
 		final String formatted = ourCtx.newXmlParser().encodeResourceToString(p);
@@ -1956,7 +1957,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testValidateFluent() throws Exception {
+	public void testValidateFluent() {
 
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("FOOBAR");
@@ -2010,7 +2011,7 @@ public class GenericJaxRsClientDstu2Test {
 	}
 
 	@Test
-	public void testValidateNonFluent() throws Exception {
+	public void testValidateNonFluent() {
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("FOOBAR");
 		final String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
@@ -2080,7 +2081,7 @@ public class GenericJaxRsClientDstu2Test {
 		ourServer.setHandler(new AbstractHandler() {
 
 			@Override
-			public void handle(String theArg0, Request theRequest, HttpServletRequest theServletRequest, HttpServletResponse theResp) throws IOException, ServletException {				
+			public void handle(String theArg0, Request theRequest, HttpServletRequest theServletRequest, HttpServletResponse theResp) throws IOException {
 				theRequest.setHandled(true);
 				ourRequestUri = "http:" + theRequest.getHttpURI().toString();
 				ourRequestUriAll.add(ourRequestUri);

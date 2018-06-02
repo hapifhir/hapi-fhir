@@ -46,12 +46,13 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	public void after() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setUniqueIndexesCheckedBeforeSave(new DaoConfig().isUniqueIndexesCheckedBeforeSave());
+		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
 	}
 
 	@Before
 	public void before() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
-		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
+		myDaoConfig.setSchedulingDisabled(true);
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {

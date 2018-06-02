@@ -451,6 +451,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		assertThat(errors.getMessages(), empty());
   }
 
+  @Test
   public void testMissingRequiredAnswer() {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0")
@@ -691,40 +692,6 @@ public class QuestionnaireResponseValidatorR4Test {
 		assertThat(errors.toString(), containsString("No issues"));
 	}
 
-	// @Test
-	public void validateHealthConnexExample() throws Exception {
-		String input = IOUtils.toString(QuestionnaireResponseValidatorR4Test.class.getResourceAsStream("/questionnaireanswers-0f431c50ddbe4fff8e0dd6b7323625fc.xml"));
-
-		QuestionnaireResponse qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, input);
-		ValidationResult errors = myVal.validateWithResult(qa);
-		assertEquals(errors.toString(), 0, errors.getMessages().size());
-
-		/*
-		 * Now change a coded value
-		 */
-		//@formatter:off
-		input = input.replaceAll(
-			"<answer>\n" +
-				"					<valueCoding>\n" +
-				"						<system value=\"f69573b8-cb63-4d31-85a4-23ac784735ab\"/>\n" +
-				"						<code value=\"2\"/>\n" +
-				"						<display value=\"Once/twice\"/>\n" +
-				"					</valueCoding>\n" +
-				"				</answer>",
-			"<answer>\n" +
-				"					<valueCoding>\n" +
-				"						<system value=\"f69573b8-cb63-4d31-85a4-23ac784735ab\"/>\n" +
-				"						<code value=\"GGG\"/>\n" +
-				"						<display value=\"Once/twice\"/>\n" +
-				"					</valueCoding>\n" +
-				"				</answer>");
-		assertThat(input, containsString("GGG"));
-		//@formatter:on
-
-		qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, input);
-		errors = myVal.validateWithResult(qa);
-		assertEquals(errors.toString(), 10, errors.getMessages().size());
-	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

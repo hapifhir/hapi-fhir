@@ -43,15 +43,15 @@ public class JaxRsPatientProviderDstu3Test {
 		System.out.println(ourPort);
 		jettyServer = new Server(ourPort);
 		jettyServer.setHandler(context);
-		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
+		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
 		//@formatter:off
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames",
+		jerseyServlet.setInitParameter("resteasy.resources",
 				StringUtils.join(Arrays.asList(
 						JaxRsConformanceProviderDstu3.class.getCanonicalName(),
 						JaxRsPatientRestProviderDstu3.class.getCanonicalName(), 
 						JaxRsPageProviderDstu3.class.getCanonicalName()
-					), ";"));
+					), ","));
 		//@formatter:on
 		jettyServer.start();
 
@@ -106,11 +106,6 @@ public class JaxRsPatientProviderDstu3Test {
             final Bundle nextPage = client.loadPage().next(results).execute();
             System.out.println(nextPage.getEntry().size());
         }
-    }
-    
-    /** Search using other query options */
-    public void testOther() {
-        //missing
     }
     
     /** */ 

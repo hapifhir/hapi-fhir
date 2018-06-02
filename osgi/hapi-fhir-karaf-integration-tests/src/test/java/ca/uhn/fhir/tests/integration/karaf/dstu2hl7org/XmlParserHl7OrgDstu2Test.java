@@ -1228,38 +1228,6 @@ public class XmlParserHl7OrgDstu2Test {
 			"<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
 	}
 
-	// Narrative generation not currently supported for HL7org structures
-	public void testNarrativeGeneration() throws DataFormatException, IOException {
-
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
-		patient.addName().addFamily("Smith");
-		Organization org = new Organization();
-		patient.getManagingOrganization().setResource(org);
-
-		INarrativeGenerator gen = new INarrativeGenerator() {
-
-			@Override
-			public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
-				try {
-					theNarrative.setDivAsString("<div>help</div>");
-				} catch (Exception e) {
-					throw new Error(e);
-				}
-				theNarrative.setStatusAsString("generated");
-			}
-
-		};
-
-		FhirContext context = ourCtx;
-		context.setNarrativeGenerator(gen);
-		IParser p = context.newXmlParser();
-		String str = p.encodeResourceToString(patient);
-
-		ourLog.info(str);
-
-		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
-	}
-
 	@Test
 	public void testNestedContainedResources() {
 

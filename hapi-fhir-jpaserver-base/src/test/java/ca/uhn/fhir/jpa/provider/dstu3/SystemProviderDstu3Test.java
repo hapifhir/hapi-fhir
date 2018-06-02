@@ -519,7 +519,8 @@ public class SystemProviderDstu3Test extends BaseJpaDstu3Test {
 	/**
 	 * This is Gramahe's test transaction - it requires some set up in order to work
 	 */
-	// @Test
+	@Test
+	@Ignore
 	public void testTransactionFromBundle3() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu3Test.class.getResourceAsStream("/grahame-transaction.xml");
