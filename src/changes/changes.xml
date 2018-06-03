@@ -23,6 +23,7 @@
 						<li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.10.v20180503</li>
 						<li>Commons-Codec (All): 1.10 -&gt; 1.11</li>
 						<li>Commons-IO (All): 2.5 -&gt; 2.6</li>
+						<li>Spring-Data (JPA): 1.11.6.RELEASE -&gt; 2.0.7.RELEASE</li>
 					</ul>
 				]]>
 			</action>
@@ -36,6 +37,10 @@
 				base URL in the
 				<![CDATA[<code>CapabilityStatement.implementation.url</code>]]>
 				field.
+			</action>
+			<action type="add" issue="974">
+				Spring-data (used by the JPA server) has been upgraded to version 2.0.7
+				(from version 1.11.6). Thanks to Roman Doboni for the pull request!
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
