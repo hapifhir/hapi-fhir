@@ -167,7 +167,13 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
 		// needs to be modified to actually allow it
 
-		retVal.getImplementation().setDescription(myServerConfiguration.getImplementationDescription());
+		ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+		String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+		retVal
+			.getImplementation()
+			.setUrl(serverBase)
+			.setDescription(myServerConfiguration.getImplementationDescription());
+
 		retVal.setKind(ConformanceStatementKindEnum.INSTANCE);
 		retVal.getSoftware().setName(myServerConfiguration.getServerName());
 		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
@@ -189,8 +195,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-				ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-				String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 
 				TreeSet<String> includes = new TreeSet<String>();

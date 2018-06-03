@@ -175,8 +175,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		retVal.setDateElement(conformanceDate());
 		retVal.setFhirVersion(FhirVersionEnum.R4.getFhirVersionString());
 
-		retVal.getImplementation().setDescription(myServerConfiguration.getImplementationDescription());
-		retVal.setKind(CapabilityStatementKind.INSTANCE);
+     ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+     String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+     retVal
+       .getImplementation()
+       .setUrl(serverBase)
+       .setDescription(myServerConfiguration.getImplementationDescription());
+
+     retVal.setKind(CapabilityStatementKind.INSTANCE);
 		retVal.getSoftware().setName(myServerConfiguration.getServerName());
 		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML_NEW);
@@ -198,11 +204,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				String resourceName = nextEntry.getKey();
 				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-				ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-				String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfileElement().setValue(def.getResourceProfile(serverBase));
 
-				TreeSet<String> includes = new TreeSet<String>();
+				TreeSet<String> includes = new TreeSet<>();
 
 				// Map<String, CapabilityStatement.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// CapabilityStatement.RestResourceSearchParam>();
@@ -268,23 +272,23 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 						}
 					}
 
-					Collections.sort(resource.getInteraction(), new Comparator<ResourceInteractionComponent>() {
-						@Override
-						public int compare(ResourceInteractionComponent theO1, ResourceInteractionComponent theO2) {
-							TypeRestfulInteraction o1 = theO1.getCode();
-							TypeRestfulInteraction o2 = theO2.getCode();
-							if (o1 == null && o2 == null) {
-								return 0;
-							}
-							if (o1 == null) {
-								return 1;
-							}
-							if (o2 == null) {
-								return -1;
-							}
-							return o1.ordinal() - o2.ordinal();
-						}
-					});
+					resource.getInteraction().sort(new Comparator<ResourceInteractionComponent>() {
+                 @Override
+                 public int compare(ResourceInteractionComponent theO1, ResourceInteractionComponent theO2) {
+                   TypeRestfulInteraction o1 = theO1.getCode();
+                   TypeRestfulInteraction o2 = theO2.getCode();
+                   if (o1 == null && o2 == null) {
+                     return 0;
+                   }
+                   if (o1 == null) {
+                     return 1;
+                   }
+                   if (o2 == null) {
+                     return -1;
+                   }
+                   return o1.ordinal() - o2.ordinal();
+                 }
+               });
 
 				}
 
