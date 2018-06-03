@@ -1,6 +1,45 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceInteraction;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
+import ca.uhn.fhir.model.dstu2.valueset.*;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Initialize;
+import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.method.*;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -10,9 +49,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,39 +59,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.dstu2.resource.Conformance.*;
-import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
-import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
-import ca.uhn.fhir.model.dstu2.valueset.*;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.*;
-import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
- * 
+ *
  * <p>
  * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
  * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
@@ -65,25 +75,27 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-	private RestulfulServerConfiguration myServerConfiguration;
+	private Callable<RestulfulServerConfiguration> myServerConfiguration;
 
-	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		this.myServerConfiguration = theRestfulServer.createConfiguration();
-	}
-
-	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
-		this.myServerConfiguration = theServerConfiguration;
-	}
-
-	/*
-	 * Add a no-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
+	/**
+	 * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
 	 */
 	public ServerConformanceProvider() {
 		super();
 	}
 
-	public void setRestfulServer(RestfulServer theRestfulServer) {
-		myServerConfiguration = theRestfulServer.createConfiguration();
+	/**
+	 * Constructor
+	 */
+	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		this.myServerConfiguration = theRestfulServer::createConfiguration;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
+		this.myServerConfiguration = () -> theServerConfiguration;
 	}
 
 	private void checkBindingForSystemOps(Rest rest, Set<SystemRestfulInteractionEnum> systemOps, BaseMethodBinding<?> nextMethodBinding) {
@@ -104,7 +116,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 	private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
-		for (ResourceBinding next : myServerConfiguration.getResourceBindings()) {
+		for (ResourceBinding next : getServerConfiguration().getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
@@ -113,7 +125,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding<?> nextMethodBinding : myServerConfiguration.getServerBindings()) {
+		for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration().getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
 				resourceToMethods.put(resourceName, new ArrayList<BaseMethodBinding<?>>());
@@ -121,6 +133,18 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			resourceToMethods.get(resourceName).add(nextMethodBinding);
 		}
 		return resourceToMethods;
+	}
+
+	private DateTimeDt conformanceDate() {
+		String buildDate = getServerConfiguration().getConformanceDate();
+		if (buildDate != null) {
+			try {
+				return new DateTimeDt(buildDate);
+			} catch (DataFormatException e) {
+				// fall through
+			}
+		}
+		return DateTimeDt.withCurrentTime();
 	}
 
 	private String createOperationName(OperationMethodBinding theMethodBinding) {
@@ -137,10 +161,10 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			retVal.append('s');
 		}
 		retVal.append('-');
-		
+
 		// Exclude the leading $
 		retVal.append(theMethodBinding.getName(), 1, theMethodBinding.getName().length());
-		
+
 		return retVal.toString();
 	}
 
@@ -150,6 +174,22 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	 */
 	public String getPublisher() {
 		return myPublisher;
+	}
+
+	/**
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 */
+	public void setPublisher(String thePublisher) {
+		myPublisher = thePublisher;
+	}
+
+	RestulfulServerConfiguration getServerConfiguration() {
+		try {
+			return myServerConfiguration.call();
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
 	}
 
 	@Override
@@ -168,36 +208,36 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		// needs to be modified to actually allow it
 
 		ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-		String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+		String serverBase = getServerConfiguration().getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 		retVal
 			.getImplementation()
 			.setUrl(serverBase)
-			.setDescription(myServerConfiguration.getImplementationDescription());
+			.setDescription(getServerConfiguration().getImplementationDescription());
 
 		retVal.setKind(ConformanceStatementKindEnum.INSTANCE);
-		retVal.getSoftware().setName(myServerConfiguration.getServerName());
-		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
+		retVal.getSoftware().setName(getServerConfiguration().getServerName());
+		retVal.getSoftware().setVersion(getServerConfiguration().getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
 		retVal.addFormat(Constants.CT_FHIR_JSON);
 
 		Rest rest = retVal.addRest();
 		rest.setMode(RestfulConformanceModeEnum.SERVER);
 
-		Set<SystemRestfulInteractionEnum> systemOps = new HashSet<SystemRestfulInteractionEnum>();
-		Set<String> operationNames = new HashSet<String>();
+		Set<SystemRestfulInteractionEnum> systemOps = new HashSet<>();
+		Set<String> operationNames = new HashSet<>();
 
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
 		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
 			if (nextEntry.getKey().isEmpty() == false) {
-				Set<TypeRestfulInteractionEnum> resourceOps = new HashSet<TypeRestfulInteractionEnum>();
+				Set<TypeRestfulInteractionEnum> resourceOps = new HashSet<>();
 				RestResource resource = rest.addResource();
 				String resourceName = nextEntry.getKey();
-				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
+				RuntimeResourceDefinition def = getServerConfiguration().getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
 				resource.getProfile().setReference(new IdDt(def.getResourceProfile(serverBase)));
 
-				TreeSet<String> includes = new TreeSet<String>();
+				TreeSet<String> includes = new TreeSet<>();
 
 				// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// Conformance.RestResourceSearchParam>();
@@ -222,21 +262,21 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 								if (nextMethodBinding.isSupportsConditional()) {
 									switch (resOp) {
-									case CREATE:
-										resource.setConditionalCreate(true);
-										break;
-									case DELETE:
-										if (nextMethodBinding.isSupportsConditionalMultiple()) {
-											resource.setConditionalDelete(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
-										} else {
-											resource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
-										}
-										break;
-									case UPDATE:
-										resource.setConditionalUpdate(true);
-										break;
-									default:
-										break;
+										case CREATE:
+											resource.setConditionalCreate(true);
+											break;
+										case DELETE:
+											if (nextMethodBinding.isSupportsConditionalMultiple()) {
+												resource.setConditionalDelete(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
+											} else {
+												resource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+											}
+											break;
+										case UPDATE:
+											resource.setConditionalUpdate(true);
+											break;
+										default:
+											break;
 									}
 								}
 							}
@@ -297,18 +337,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		myConformance = retVal;
 		return retVal;
-	}
-
-	private DateTimeDt conformanceDate() {
-		String buildDate = myServerConfiguration.getConformanceDate();
-		if (buildDate != null) {
-			try {
-				return new DateTimeDt(buildDate);
-			} catch (DataFormatException e) {
-				// fall through
-			}
-		}
-		return DateTimeDt.withCurrentTime();
 	}
 
 	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
@@ -424,7 +452,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
 				}
 				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
-					RuntimeResourceDefinition targetDef = myServerConfiguration.getFhirContext().getResourceDefinition(nextTarget);
+					RuntimeResourceDefinition targetDef = getServerConfiguration().getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
 						ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
 						if (code != null) {
@@ -537,7 +565,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				op.setName(op.getCode());
 			}
 		}
-		
+
 		if (op.getSystem() == null) {
 			op.setSystem(false);
 		}
@@ -558,12 +586,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		myCache = theCache;
 	}
 
-	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
-	 */
-	public void setPublisher(String thePublisher) {
-		myPublisher = thePublisher;
+	@Override
+	public void setRestfulServer(RestfulServer theRestfulServer) {
+		myServerConfiguration = theRestfulServer::createConfiguration;
 	}
 
 	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
@@ -589,4 +614,5 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			}
 		});
 	}
+
 }

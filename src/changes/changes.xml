@@ -21,6 +21,8 @@
 						<li>Hibernate OR (JPA): 5.2.16.Final -&gt; 5.3.1.Final</li>
 						<li>Hibernate Search (JPA): 5.7.1.Final -&gt; 5.10.1.Final</li>
 						<li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.10.v20180503</li>
+						<li>Commons-Codec (All): 1.10 -&gt; 1.11</li>
+						<li>Commons-IO (All): 2.5 -&gt; 2.6</li>
 					</ul>
 				]]>
 			</action>

@@ -123,6 +123,31 @@ public class MetadataCapabilityStatementDstu3Test {
 	}
 
 	@Test
+	public void testResponseContainsBaseUrlFixed() throws Exception {
+		IServerAddressStrategy addressStrategy = ourServlet.getServerAddressStrategy();
+		try {
+			ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
+
+			String output;
+
+			HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_format=json");
+			CloseableHttpResponse status = ourClient.execute(httpPost);
+			try {
+				output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertEquals(200, status.getStatusLine().getStatusCode());
+				ourLog.info(output);
+				CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
+
+				assertEquals("http://foo/bar", cs.getImplementation().getUrl());
+			} finally {
+				IOUtils.closeQuietly(status.getEntity().getContent());
+			}
+		} finally {
+			ourServlet.setServerAddressStrategy(addressStrategy);
+		}
+	}
+
+	@Test
 	public void testSummary() throws Exception {
 		String output;
 
