@@ -25,6 +25,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,6 +45,11 @@ public class MetadataCapabilityStatementDstu3Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
+
+	@After
+	public void after() {
+		ourServlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
+	}
 
 	@Test
 	public void testElements() throws Exception {
@@ -124,26 +130,21 @@ public class MetadataCapabilityStatementDstu3Test {
 
 	@Test
 	public void testResponseContainsBaseUrlFixed() throws Exception {
-		IServerAddressStrategy addressStrategy = ourServlet.getServerAddressStrategy();
+		ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
+
+		String output;
+
+		HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_format=json");
+		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
+			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			ourLog.info(output);
+			CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
 
-			String output;
-
-			HttpRequestBase httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_format=json");
-			CloseableHttpResponse status = ourClient.execute(httpPost);
-			try {
-				output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-				ourLog.info(output);
-				CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
-
-				assertEquals("http://foo/bar", cs.getImplementation().getUrl());
-			} finally {
-				IOUtils.closeQuietly(status.getEntity().getContent());
-			}
+			assertEquals("http://foo/bar", cs.getImplementation().getUrl());
 		} finally {
-			ourServlet.setServerAddressStrategy(addressStrategy);
+			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 	}
 
@@ -197,7 +198,7 @@ public class MetadataCapabilityStatementDstu3Test {
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setResourceProviders(patientProvider);
 
-		ourServlet.setServerConformanceProvider(new ServerCapabilityStatementProvider(ourServlet));
+		ourServlet.setServerConformanceProvider(new ServerCapabilityStatementProvider(ourServlet).setCache(false));
 
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

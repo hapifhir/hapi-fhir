@@ -131,7 +131,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
     for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration().getServerBindings()) {
       String resourceName = "";
       if (resourceToMethods.containsKey(resourceName) == false) {
-        resourceToMethods.put(resourceName, new ArrayList<BaseMethodBinding<?>>());
+        resourceToMethods.put(resourceName, new ArrayList<>());
       }
       resourceToMethods.get(resourceName).add(nextMethodBinding);
     }
@@ -618,8 +618,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
    * See the class documentation for an important note if you are extending this class
    * </p>
    */
-  public void setCache(boolean theCache) {
+  public ServerCapabilityStatementProvider setCache(boolean theCache) {
     myCache = theCache;
+    return this;
   }
 
   @Override
