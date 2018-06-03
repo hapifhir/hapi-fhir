@@ -180,7 +180,7 @@ public class SearchCoordinatorSvcImplTest {
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchDao, atLeastOnce()).save(searchCaptor.capture());
 
-		verify(mySearchResultDao, atLeastOnce()).save(mySearchResultIterCaptor.capture());
+		verify(mySearchResultDao, atLeastOnce()).saveAll(mySearchResultIterCaptor.capture());
 		List<SearchResult> allResults = new ArrayList<SearchResult>();
 		for (Iterable<SearchResult> next : mySearchResultIterCaptor.getAllValues()) {
 			allResults.addAll(Lists.newArrayList(next));
@@ -328,7 +328,7 @@ public class SearchCoordinatorSvcImplTest {
 
 						ArrayList<SearchResult> results = new ArrayList<SearchResult>();
 						int max = (page.getPageNumber() * page.getPageSize()) + page.getPageSize();
-						for (int i = page.getOffset(); i < max; i++) {
+						for (long i = page.getOffset(); i < max; i++) {
 							results.add(new SearchResult().setResourcePid(i + 10L));
 						}
 
