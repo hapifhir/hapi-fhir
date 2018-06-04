@@ -2,12 +2,9 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +24,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu2016may.model.OperationOutcome;
 import org.hl7.fhir.dstu2016may.model.Patient;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
@@ -43,9 +41,11 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InterceptorDstu2_1Test {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorDstu2_1Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static int ourPort;
@@ -56,22 +56,22 @@ public class InterceptorDstu2_1Test {
 
 	@Before
 	public void before() {
-		myInterceptor1 = mock(IServerInterceptor.class);
-		myInterceptor2 = mock(IServerInterceptor.class);
+		myInterceptor1 = mock(IServerInterceptor.class, withSettings().verboseLogging());
+		myInterceptor2 = mock(IServerInterceptor.class, withSettings().verboseLogging());
 		ourServlet.setInterceptors(myInterceptor1, myInterceptor2);
 	}
 
 
 	@Test
 	public void testValidate() throws Exception {
-		when(myInterceptor1.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
-		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(any(ServletRequestDetails.class), any(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(IResource.class))).thenReturn(true);
-		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 
 		//@formatter:off
 		String input = 
@@ -95,30 +95,32 @@ public class InterceptorDstu2_1Test {
 				"}";
 		//@formatter:on
 
+		ourLog.info("Starting call");
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		InOrder order = inOrder(myInterceptor1, myInterceptor2);
-		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class));
-		order.verify(myInterceptor2, times(1)).incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class));
-		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		order.verify(myInterceptor2, times(1)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
 		ArgumentCaptor<ActionRequestDetails> arTypeCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
-		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(any(RestOperationTypeEnum.class), any(ActionRequestDetails.class));
-		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
-		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class));
-		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(ActionRequestDetails.class));
+		order.verify(myInterceptor2, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class));
+		order.verify(myInterceptor2, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
+		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(OperationOutcome.class));
+		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		
 		// Avoid concurrency issues
 		Thread.sleep(500);
 		
-		order.verify(myInterceptor2, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
-		order.verify(myInterceptor1, times(1)).processingCompletedNormally(any(ServletRequestDetails.class));
+		order.verify(myInterceptor2, times(1)).processingCompletedNormally(nullable(ServletRequestDetails.class));
+		order.verify(myInterceptor1, times(1)).processingCompletedNormally(nullable(ServletRequestDetails.class));
 		verifyNoMoreInteractions(myInterceptor1);
 		verifyNoMoreInteractions(myInterceptor2);
 		

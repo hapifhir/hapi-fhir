@@ -72,6 +72,7 @@ public class BuiltJarDstu2IT {
 	 * android uses) and see if this passes
 	 */
 	@SuppressWarnings("deprecation")
+	@Test
 	public void testClient() {
 		FhirContext ctx = FhirContext.forDstu2();
 		try {

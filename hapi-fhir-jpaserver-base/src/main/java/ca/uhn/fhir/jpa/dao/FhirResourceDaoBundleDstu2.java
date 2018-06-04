@@ -25,14 +25,19 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public class FhirResourceDaoBundleDstu2 extends FhirResourceDaoDstu2<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {
 		super.preProcessResourceForStorage(theResource);
 
-		if (theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.DOCUMENT && theResource.getTypeElement().getValueAsEnum() != BundleTypeEnum.COLLECTION) {
-			String message = "Unable to store a Bundle resource on this server with a Bundle.type of: " + (theResource.getTypeElement().getValueAsEnum() != null ? theResource.getTypeElement().getValueAsEnum().getCode() : "(missing)");
+		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
+		if (!allowedBundleTypes.contains(defaultString(theResource.getType()))) {
+			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType() : "(missing)");
 			throw new UnprocessableEntityException(message);
 		}
 

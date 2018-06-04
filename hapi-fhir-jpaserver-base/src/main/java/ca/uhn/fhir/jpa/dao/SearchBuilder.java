@@ -87,6 +87,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
+	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -1017,6 +1018,8 @@ public class SearchBuilder implements ISearchBuilder {
 					num = builder.or(lowPred, highPred);
 				}
 				break;
+			case ENDS_BEFORE:
+			case STARTS_AFTER:
 			default:
 				String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
 				throw new InvalidRequestException(msg);
@@ -1302,6 +1305,7 @@ public class SearchBuilder implements ISearchBuilder {
 									}
 
 									Set<String> uniqueQueryStrings = BaseHapiFhirDao.extractCompositeStringUniquesValueChains(myResourceName, params);
+									ourLastHandlerParamsForUnitTest = theParams;
 									ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
 									return new UniqueIndexIterator(uniqueQueryStrings);
 
@@ -1313,6 +1317,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		}
 
+		ourLastHandlerParamsForUnitTest = theParams;
 		ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.STANDARD_QUERY;
 		return new QueryIterator();
 	}
@@ -1526,6 +1531,8 @@ public class SearchBuilder implements ISearchBuilder {
 				sortAttrName = new String[] {"myValue"};
 				joinType = JoinEnum.QUANTITY;
 				break;
+			case COMPOSITE:
+			case HAS:
 			default:
 				throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
@@ -1698,7 +1705,6 @@ public class SearchBuilder implements ISearchBuilder {
 			roundCounts++;
 
 			HashSet<Long> pidsToInclude = new HashSet<>();
-			Set<Long> nextRoundOmit = new HashSet<>();
 
 			for (Iterator<Include> iter = includes.iterator(); iter.hasNext(); ) {
 				Include nextInclude = iter.next();
@@ -1792,8 +1798,6 @@ public class SearchBuilder implements ISearchBuilder {
 					theMatches.add(next);
 				}
 			}
-
-			pidsToInclude.removeAll(nextRoundOmit);
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 			nextRoundMatches = pidsToInclude;
@@ -1970,6 +1974,8 @@ public class SearchBuilder implements ISearchBuilder {
 			case REFERENCE:
 				qp = new ReferenceParam();
 				break;
+			case URI:
+			case HAS:
 			default:
 				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
 		}
@@ -2068,14 +2074,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@VisibleForTesting
 	public static HandlerTypeEnum getLastHandlerMechanismForUnitTest() {
-		ourLog.info("Retrieving last handler mechanism: {}", ourLastHandlerMechanismForUnitTest);
 		return ourLastHandlerMechanismForUnitTest;
 	}
 
 	@VisibleForTesting
+	public static SearchParameterMap getLastHandlerParamsForUnitTest() {
+		return ourLastHandlerParamsForUnitTest;
+	}
+
+	@VisibleForTesting
 	public static void resetLastHandlerMechanismForUnitTest() {
-		ourLog.info("Clearing last handler mechanism (was {})", ourLastHandlerMechanismForUnitTest);
 		ourLastHandlerMechanismForUnitTest = null;
+		ourLastHandlerParamsForUnitTest = null;
 	}
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {

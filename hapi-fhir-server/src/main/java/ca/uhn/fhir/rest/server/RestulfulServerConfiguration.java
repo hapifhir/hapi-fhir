@@ -27,6 +27,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.util.VersionUtil;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class RestulfulServerConfiguration {
     
     private Collection<ResourceBinding> resourceBindings;
@@ -84,6 +86,9 @@ public class RestulfulServerConfiguration {
      * @return the implementationDescription
      */
     public String getImplementationDescription() {
+    	if (isBlank(implementationDescription)) {
+			return "HAPI FHIR";
+		}
         return implementationDescription;
     }
 

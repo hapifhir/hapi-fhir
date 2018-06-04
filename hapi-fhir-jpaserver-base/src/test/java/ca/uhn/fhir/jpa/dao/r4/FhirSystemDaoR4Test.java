@@ -512,7 +512,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				}
 				myResourceHistoryTableDao.save(resourceHistoryTable);
 
-				ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+				ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 				table.setIndexStatus(null);
 				myResourceTableDao.save(table);
 

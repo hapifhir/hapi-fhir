@@ -1757,8 +1757,8 @@ public class XmlUtil {
 
 	private static void throwUnitTestExceptionIfConfiguredToDoSo() throws FactoryConfigurationError, XMLStreamException {
 		if (ourNextException != null) {
-			if (ourNextException instanceof FactoryConfigurationError) {
-				throw ((FactoryConfigurationError)ourNextException);
+			if (ourNextException instanceof javax.xml.stream.FactoryConfigurationError) {
+				throw ((javax.xml.stream.FactoryConfigurationError)ourNextException);
 			}
 			throw (XMLStreamException)ourNextException;
 		}

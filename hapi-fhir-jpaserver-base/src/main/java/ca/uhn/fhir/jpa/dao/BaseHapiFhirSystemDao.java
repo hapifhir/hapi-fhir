@@ -288,7 +288,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 				reindexFailure = txTemplate.execute(new TransactionCallback<Throwable>() {
 					@Override
 					public Throwable doInTransaction(TransactionStatus theStatus) {
-						ResourceTable resourceTable = myResourceTableDao.findOne(myNextId);
+						ResourceTable resourceTable = myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
 
 						try {
 							/*

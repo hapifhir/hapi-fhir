@@ -190,7 +190,7 @@ public class GenericClientDstu3IT {
 	@Test
 	public void testClientFailures() throws Exception {
 		ResponseBody body = mock(ResponseBody.class);
-		when(body.source()).thenThrow(IllegalStateException.class, RuntimeException.class, Exception.class);
+		when(body.source()).thenThrow(IllegalStateException.class, RuntimeException.class);
 		
 		myHttpResponse = new Response.Builder()
 				.request(myRequest)
@@ -216,12 +216,6 @@ public class GenericClientDstu3IT {
 			assertEquals("java.lang.RuntimeException", e.toString());
 		}
 
-		try {
-			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (FhirClientConnectionException e) {
-			assertEquals("java.lang.Exception", e.getMessage());
-		}
 	}
 
 

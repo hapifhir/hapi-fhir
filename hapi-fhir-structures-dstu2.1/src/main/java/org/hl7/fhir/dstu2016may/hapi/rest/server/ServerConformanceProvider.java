@@ -24,10 +24,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.Conformance.*;
@@ -64,21 +66,27 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-	private RestulfulServerConfiguration myServerConfiguration;
+	private Callable<RestulfulServerConfiguration> myServerConfiguration;
 
-	/*
-	 * Add a no-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
+	/**
+	 * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
 	 */
 	public ServerConformanceProvider() {
 		super();
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		this.myServerConfiguration = theRestfulServer.createConfiguration();
+		this.myServerConfiguration = theRestfulServer::createConfiguration;
 	}
 
+	/**
+	 * Constructor
+	 */
 	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
-		this.myServerConfiguration = theServerConfiguration;
+		this.myServerConfiguration = () -> theServerConfiguration;
 	}
 
 	private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding<?> nextMethodBinding) {
@@ -103,20 +111,20 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
-		for (ResourceBinding next : myServerConfiguration.getResourceBindings()) {
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
+		for (ResourceBinding next : getServerConfiguration().getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
-					resourceToMethods.put(resourceName, new ArrayList<BaseMethodBinding<?>>());
+					resourceToMethods.put(resourceName, new ArrayList<>());
 				}
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding<?> nextMethodBinding : myServerConfiguration.getServerBindings()) {
+		for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration().getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
-				resourceToMethods.put(resourceName, new ArrayList<BaseMethodBinding<?>>());
+				resourceToMethods.put(resourceName, new ArrayList<>());
 			}
 			resourceToMethods.get(resourceName).add(nextMethodBinding);
 		}
@@ -124,7 +132,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private DateTimeType conformanceDate() {
-		String buildDate = myServerConfiguration.getConformanceDate();
+		String buildDate = getServerConfiguration().getConformanceDate();
 		if (buildDate != null) {
 			try {
 				return new DateTimeType(buildDate);
@@ -180,10 +188,16 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 																					// effort since the parser
 		// needs to be modified to actually allow it
 
-		retVal.getImplementation().setDescription(myServerConfiguration.getImplementationDescription());
+		ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+		String serverBase = getServerConfiguration().getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+		retVal
+			.getImplementation()
+			.setUrl(serverBase)
+			.setDescription(getServerConfiguration().getImplementationDescription());
+
 		retVal.setKind(ConformanceStatementKind.INSTANCE);
-		retVal.getSoftware().setName(myServerConfiguration.getServerName());
-		retVal.getSoftware().setVersion(myServerConfiguration.getServerVersion());
+		retVal.getSoftware().setName(getServerConfiguration().getServerName());
+		retVal.getSoftware().setVersion(getServerConfiguration().getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
 		retVal.addFormat(Constants.CT_FHIR_JSON);
 		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
@@ -191,23 +205,21 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		ConformanceRestComponent rest = retVal.addRest();
 		rest.setMode(RestfulConformanceMode.SERVER);
 
-		Set<SystemRestfulInteraction> systemOps = new HashSet<SystemRestfulInteraction>();
-		Set<String> operationNames = new HashSet<String>();
+		Set<SystemRestfulInteraction> systemOps = new HashSet<>();
+		Set<String> operationNames = new HashSet<>();
 
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
 		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
 			if (nextEntry.getKey().isEmpty() == false) {
-				Set<TypeRestfulInteraction> resourceOps = new HashSet<TypeRestfulInteraction>();
+				Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
 				ConformanceRestResourceComponent resource = rest.addResource();
 				String resourceName = nextEntry.getKey();
-				RuntimeResourceDefinition def = myServerConfiguration.getFhirContext().getResourceDefinition(resourceName);
+				RuntimeResourceDefinition def = getServerConfiguration().getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
-				ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-				String serverBase = myServerConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 				resource.getProfile().setReference((def.getResourceProfile(serverBase)));
 
-				TreeSet<String> includes = new TreeSet<String>();
+				TreeSet<String> includes = new TreeSet<>();
 
 				// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// Conformance.RestResourceSearchParam>();
@@ -273,7 +285,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						}
 					}
 
-					Collections.sort(resource.getInteraction(), new Comparator<ResourceInteractionComponent>() {
+					resource.getInteraction().sort(new Comparator<ResourceInteractionComponent>() {
 						@Override
 						public int compare(ResourceInteractionComponent theO1, ResourceInteractionComponent theO2) {
 							TypeRestfulInteraction o1 = theO1.getCode();
@@ -428,7 +440,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
 				}
 				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
-					RuntimeResourceDefinition targetDef = myServerConfiguration.getFhirContext().getResourceDefinition(nextTarget);
+					RuntimeResourceDefinition targetDef = getServerConfiguration().getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
 						ResourceType code;
 						try {
@@ -590,11 +602,15 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 	@Override
 	public void setRestfulServer(RestfulServer theRestfulServer) {
-		myServerConfiguration = theRestfulServer.createConfiguration();
+		myServerConfiguration = theRestfulServer::createConfiguration;
 	}
 
 	RestulfulServerConfiguration getServerConfiguration() {
-		return myServerConfiguration;
+		try {
+			return myServerConfiguration.call();
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
 	}
 
 	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {

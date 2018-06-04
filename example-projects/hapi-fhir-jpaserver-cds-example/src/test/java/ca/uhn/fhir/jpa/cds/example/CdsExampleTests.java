@@ -14,6 +14,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -188,7 +189,8 @@ public class CdsExampleTests {
 		Assert.assertTrue(procedureRequest.getDoNotPerform());
 	}
 
-	//@Test
+	@Test
+	@Ignore
 	public void CdsHooksPatientViewTest() throws IOException {
 		putResource("cds-bcs-library.json", "patient-view");
 		putResource("cds-bcs-patient.json", "Patient-6532");
