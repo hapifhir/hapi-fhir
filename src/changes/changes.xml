@@ -30,12 +30,17 @@
 				is recommended to invoke the following SQL statement on their
 				database in order to reindex all data in a background job:
 				<![CDATA[<br/>]]>
-				<![CDATA[<code>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</code>]]>
+				<![CDATA[<pre>update HFJ_RESOURCE set SP_INDEX_STATUS = null;</pre>]]>
 				<![CDATA[<br/>]]>
 				Note that if you do this reindex now, you will not have any downtime while
 				you upgrade to HAPI FHIR 3.5.0. If you need to perform the reindex at the
 				time that you upgrade to HAPI FHIR 3.5.0 some indexes may not be
 				available.
+				<![CDATA[<br/>]]>
+				In addition, the following schema changes should be made while upgrading:
+				<![CDATA[<br/>]]>
+				<![CDATA[<pre>update table TRM_CODESYSTEM_VER drop column RES_VERSION_ID;
+alter table TRM_CODESYSTEM_VER drop constraint IDX_CSV_RESOURCEPID_AND_VER</pre>]]>
 			</action>
 			<action type="add">
 				R4 structures have been updated to the latest definitions
