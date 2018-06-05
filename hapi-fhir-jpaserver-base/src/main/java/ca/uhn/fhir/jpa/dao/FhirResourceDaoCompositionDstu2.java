@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -38,7 +37,7 @@ public class FhirResourceDaoCompositionDstu2 extends FhirResourceDaoDstu2<Compos
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
-	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
+	public org.hl7.fhir.instance.model.Bundle getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
 		throw new NotImplementedOperationException("$document in DSTU2 is not implemented ");
 	}
 }

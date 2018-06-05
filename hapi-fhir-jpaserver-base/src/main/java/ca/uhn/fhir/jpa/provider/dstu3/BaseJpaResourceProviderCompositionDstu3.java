@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 /*
  * #%L
@@ -42,8 +43,8 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 	 * @param theRequestDetails
 	 */
 	//@formatter:off
-	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public IBundleProvider getDocumentForComposition(
+	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.DOCUMENT)
+	public IBaseBundle getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 

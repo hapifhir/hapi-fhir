@@ -13,10 +13,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,11 +28,10 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompositionDocumentDstu3Test.class);
 	private String orgId;
 	private String patId;
-	private String encId1;
-	private String encId2;
 	private ArrayList<String> myObsIds;
-	private String myWrongPatId;
-	private String myWrongEnc1;
+	private String encId;
+	private String listId;
+	private String compId;
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -56,7 +52,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
-		
+
 		Organization org = new Organization();
 		org.setName("an org");
 		orgId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
@@ -66,139 +62,82 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		patient.getManagingOrganization().setReference(orgId);
 		patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Patient patient2 = new Patient();
-		patient2.getManagingOrganization().setReference(orgId);
-		myWrongPatId = ourClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
+		Encounter enc = new Encounter();
+		enc.setStatus(EncounterStatus.ARRIVED);
+		enc.getSubject().setReference(patId);
+		enc.getServiceProvider().setReference(orgId);
+		encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Encounter enc1 = new Encounter();
-		enc1.setStatus(EncounterStatus.CANCELLED);
-		enc1.getSubject().setReference(patId);
-		enc1.getServiceProvider().setReference(orgId);
-		encId1 = ourClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
+		ListResource listResource = new ListResource();
 
-		Encounter enc2 = new Encounter();
-		enc2.setStatus(EncounterStatus.ARRIVED);
-		enc2.getSubject().setReference(patId);
-		enc2.getServiceProvider().setReference(orgId);
-		encId2 = ourClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
-
-		Encounter wrongEnc1 = new Encounter();
-		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
-		wrongEnc1.getSubject().setReference(myWrongPatId);
-		wrongEnc1.getServiceProvider().setReference(orgId);
-		myWrongEnc1 = ourClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
-
+		ArrayList<Observation> myObs = new ArrayList<>();
 		myObsIds = new ArrayList<String>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 5; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(ObservationStatus.FINAL);
 			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			listResource.addEntry(new ListResource.ListEntryComponent().setItem(new Reference(obs)));
+			myObs.add(obs);
 			myObsIds.add(obsId);
 		}
 
-	}
+		listId = ourClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
-	/**
-	 * See #674
-	 */
-	@Test
-	public void testEverythingReturnsCorrectResources() throws Exception {
-		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		
-		assertNull(bundle.getLink("next"));
-		
-		Set<String> actual = new TreeSet<String>();
-		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		Composition composition = new Composition();
+		composition.setSubject(new Reference(patient));
+		composition.addSection().addEntry(new Reference(patient));
+		composition.addSection().addEntry(new Reference(org));
+		composition.addSection().addEntry(new Reference(enc));
+		composition.addSection().addEntry(new Reference(listResource));
+		composition.addSection().addEntry(new Reference(listResource));
+
+		for (Observation obs : myObs) {
+			composition.addSection().addEntry(new Reference(obs));
 		}
-		
-		ourLog.info("Found IDs: {}", actual);
-		
-		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(encId1));
-		assertThat(actual, hasItem(encId2));
-		assertThat(actual, hasItem(orgId));
-		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
+
+		compId = ourClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 	}
 
-	/**
-	 * See #674
-	 */
 	@Test
-	public void testEverythingReturnsCorrectResourcesSmallPage() throws Exception {
+	public void testDocumentBundleReturnedCorrect() throws Exception {
 		myDaoConfig.setEverythingIncludesFetchPageSize(1);
-		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		
+
+		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json&_count=100";
+		System.out.println(theUrl);
+		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+
 		assertNull(bundle.getLink("next"));
-		
+
 		Set<String> actual = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
-		
+
 		ourLog.info("Found IDs: {}", actual);
-		
+
 		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(encId1));
-		assertThat(actual, hasItem(encId2));
+		assertThat(actual, hasItem(encId));
+		assertThat(actual, hasItem(encId));
 		assertThat(actual, hasItem(orgId));
 		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
-	}
-	
-	/**
-	 * See #674
-	 */
-	@Test
-	public void testEverythingPagesWithCorrectEncodingJson() throws Exception {
-		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
-		
-		assertNotNull(bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
-		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
-		
-		assertNotNull(bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
-		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
-	}
-
-	/**
-	 * See #674
-	 */
-	@Test
-	public void testEverythingPagesWithCorrectEncodingXml() throws Exception {
-		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
-		
-		assertNotNull(bundle.getLink("next").getUrl());
-		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
-		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
-
-		assertNotNull(bundle.getLink("next").getUrl());
-		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
-		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
-		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
 		Bundle bundle;
 		HttpGet get = new HttpGet(theUrl);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
+
 		try {
+			String test = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			System.out.println(test);
+
 			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
+			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, test);
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
-		
+
 		return bundle;
 	}
 

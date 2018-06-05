@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,7 +38,7 @@ public class FhirResourceDaoCompositionR4 extends FhirResourceDaoR4<Composition>
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
-	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
+	public org.hl7.fhir.instance.model.Bundle getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
 		return null;
 	}
 }

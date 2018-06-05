@@ -21,28 +21,26 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Composition;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Composition> implements IFhirResourceDaoComposition<Composition> {
 
@@ -50,7 +48,7 @@ public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Compos
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
-	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
+	public Bundle getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -65,7 +63,13 @@ public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Compos
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
 		IBundleProvider retVal = search(paramMap);
-		return retVal;
+		List<IBaseResource> resourceList = retVal.getResources(0, retVal.size());
+
+		Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
+		for (IBaseResource resource : resourceList)
+			bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+
+		return bundle;
 	}
 }
 

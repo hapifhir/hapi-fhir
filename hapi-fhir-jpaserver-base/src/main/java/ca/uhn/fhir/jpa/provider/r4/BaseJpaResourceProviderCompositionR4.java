@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
@@ -46,7 +47,7 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 	 */
 	//@formatter:off
 	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public IBundleProvider getDocumentForComposition(
+	public IBaseBundle getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 

@@ -26,13 +26,4 @@ public class FhirResourceDaoDocumentDstu3Test extends BaseJpaDstu3Test {
 		Bundle inputBundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		DaoMethodOutcome responseBundle = myBundleDao.create(inputBundle, mySrd);
 	}
-
-	@Test
-	public void testGetDocument() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/sample-document.xml"), StandardCharsets.UTF_8);
-		Bundle inputBundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
-		DaoMethodOutcome responseBundle = myBundleDao.create(inputBundle, mySrd);
-
-	}
-
 }

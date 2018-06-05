@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.model.api.annotation.Description;
 
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -44,7 +46,7 @@ public class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProvider
 	 */
 	//@formatter:off
 	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public IBundleProvider getDocumentForComposition(
+	public IBaseBundle getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest) {
 		//@formatter:on
