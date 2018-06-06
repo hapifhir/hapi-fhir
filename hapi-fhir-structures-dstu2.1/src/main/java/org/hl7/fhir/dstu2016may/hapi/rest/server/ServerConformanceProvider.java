@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.*;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
@@ -132,10 +133,10 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private DateTimeType conformanceDate() {
-		String buildDate = getServerConfiguration().getConformanceDate();
-		if (buildDate != null) {
+		IPrimitiveType<Date> buildDate = getServerConfiguration().getConformanceDate();
+		if (buildDate != null && buildDate.getValue() != null) {
 			try {
-				return new DateTimeType(buildDate);
+				return new DateTimeType(buildDate.getValueAsString());
 			} catch (DataFormatException e) {
 				// fall through
 			}
