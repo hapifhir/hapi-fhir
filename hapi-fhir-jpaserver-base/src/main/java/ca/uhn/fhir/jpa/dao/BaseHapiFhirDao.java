@@ -58,6 +58,7 @@ import ca.uhn.fhir.util.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -85,6 +86,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -727,21 +729,30 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> getDaos() {
 		if (myResourceTypeToDao == null) {
-			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
+			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> resourceTypeToDao = new HashMap<>();
+
 			Map<String, IFhirResourceDao> daos = myApplicationContext.getBeansOfType(IFhirResourceDao.class, false, false);
+
+			String[] beanNames = myApplicationContext.getBeanNamesForType(IFhirResourceDao.class);
+
 			for (IFhirResourceDao<?> next : daos.values()) {
-				theResourceTypeToDao.put(next.getResourceType(), next);
+				resourceTypeToDao.put(next.getResourceType(), next);
 			}
 
 			if (this instanceof IFhirResourceDao<?>) {
 				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
-				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
+				resourceTypeToDao.put(thiz.getResourceType(), thiz);
 			}
 
-			myResourceTypeToDao = theResourceTypeToDao;
+			myResourceTypeToDao = resourceTypeToDao;
 		}
 
 		return Collections.unmodifiableMap(myResourceTypeToDao);
+	}
+
+	@PostConstruct
+	public void startClearCaches() {
+		myResourceTypeToDao = null;
 	}
 
 
@@ -948,7 +959,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myApplicationContext = theApplicationContext;
+		if (myApplicationContext == null) {
+			myApplicationContext = theApplicationContext;
+		}
 	}
 
 	public void setConfig(DaoConfig theConfig) {
