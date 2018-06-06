@@ -11,12 +11,12 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
-import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
-import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
-import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.dstu3.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,8 +26,8 @@ import java.io.File;
 
 import static org.junit.Assert.*;
 
-public class ImportCsvToConceptMapCommandTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandTest.class);
+public class ImportCsvToConceptMapCommandDstu3Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandDstu3Test.class);
 	private static final String CM_URL = "http://example.com/conceptmap";
 	private static final String VS_URL_1 = "http://example.com/valueset/1";
 	private static final String VS_URL_2 = "http://example.com/valueset/2";
@@ -39,13 +39,14 @@ public class ImportCsvToConceptMapCommandTest {
 	private static String file;
 	private static String ourBase;
 	private static IGenericClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static Server ourServer;
+	private static String ourVersion = "dstu3";
 
 	private static RestfulServer restfulServer;
 
-	private static HashMapResourceProviderConceptMapR4 hashMapResourceProviderConceptMapR4;
+	private static HashMapResourceProviderConceptMapDstu3 hashMapResourceProviderConceptMapDstu3;
 
 	static {
 		System.setProperty("test", "true");
@@ -53,7 +54,7 @@ public class ImportCsvToConceptMapCommandTest {
 
 	@After
 	public void afterClearResourceProvider() {
-		HashMapResourceProviderConceptMapR4 resourceProvider = (HashMapResourceProviderConceptMapR4) restfulServer.getResourceProviders().iterator().next();
+		HashMapResourceProviderConceptMapDstu3 resourceProvider = (HashMapResourceProviderConceptMapDstu3) restfulServer.getResourceProviders().iterator().next();
 		resourceProvider.clear();
 	}
 
@@ -72,7 +73,7 @@ public class ImportCsvToConceptMapCommandTest {
 
 		restfulServer = new RestfulServer(ourCtx);
 		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
-		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapR4(ourCtx));
+		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
 
 		ServletHolder servletHolder = new ServletHolder(restfulServer);
 		servletHandler.addServletWithMapping(servletHolder, "/*");
@@ -87,7 +88,7 @@ public class ImportCsvToConceptMapCommandTest {
 
 	@Test
 	public void testConditionalUpdateResultsInCreate() {
-		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
+		ConceptMap conceptMap = ExportConceptMapToCsvCommandDstu3Test.createConceptMap();
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
@@ -104,7 +105,7 @@ public class ImportCsvToConceptMapCommandTest {
 
 	@Test
 	public void testConditionalUpdateResultsInUpdate() {
-		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
+		ConceptMap conceptMap = ExportConceptMapToCsvCommandDstu3Test.createConceptMap();
 		ourClient.create().resource(conceptMap).execute();
 		String conceptMapUrl = conceptMap.getUrl();
 
@@ -122,7 +123,7 @@ public class ImportCsvToConceptMapCommandTest {
 
 	@Test
 	public void testNonConditionalUpdate() {
-		ConceptMap conceptMap = ExportConceptMapToCsvCommandTest.createConceptMap();
+		ConceptMap conceptMap = ExportConceptMapToCsvCommandDstu3Test.createConceptMap();
 		ourClient.create().resource(conceptMap).execute();
 
 		Bundle response = ourClient
@@ -150,10 +151,10 @@ public class ImportCsvToConceptMapCommandTest {
 	public void testImportCsvToConceptMapCommand() throws FHIRException {
 		ClassLoader classLoader = getClass().getClassLoader();
 		File fileToImport = new File(classLoader.getResource(FILENAME).getFile());
-		ImportCsvToConceptMapCommandTest.file = fileToImport.getAbsolutePath();
+		ImportCsvToConceptMapCommandDstu3Test.file = fileToImport.getAbsolutePath();
 
 		App.main(new String[] {"import-csv-to-conceptmap",
-			"-v", "r4",
+			"-v", ourVersion,
 			"-t", ourBase,
 			"-u", CM_URL,
 			"-i", VS_URL_1,
@@ -349,7 +350,7 @@ public class ImportCsvToConceptMapCommandTest {
 		assertEquals("3d This is a comment.", target.getComment());
 
 		App.main(new String[] {"import-csv-to-conceptmap",
-			"-v", "r4",
+			"-v", ourVersion,
 			"-t", ourBase,
 			"-u", CM_URL,
 			"-i", VS_URL_1,
