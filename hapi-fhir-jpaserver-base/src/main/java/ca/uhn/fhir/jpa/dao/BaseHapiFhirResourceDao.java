@@ -1336,5 +1336,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
+	@PostConstruct
+	public void start() {
+		ourLog.info("Starting resource DAO for type: {}", getResourceName());
+	}
 
 }

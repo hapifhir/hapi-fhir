@@ -31,7 +31,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * 
 	 * See the class documentation for an important note if you are extending this class
 	 */
-	public abstract T getServerConformance(HttpServletRequest theRequest);
+	T getServerConformance(HttpServletRequest theRequest);
 
 	/**
 	 * This setter is needed in implementation classes (along with
@@ -40,5 +40,5 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * 
 	 * @param theRestfulServer
 	 */
-	public void setRestfulServer(RestfulServer theRestfulServer);
+	void setRestfulServer(RestfulServer theRestfulServer);
 }

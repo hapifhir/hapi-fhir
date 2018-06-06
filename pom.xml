@@ -60,8 +60,6 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<!--
-		Snapshots should generally not be needed
 		<repository>
 			<id>oss-snapshot</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -69,7 +67,6 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		-->
 	</repositories>
 
 	<dependencies>
@@ -1213,6 +1210,17 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>ossrh</id>
+			<name>Sonatype</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<build>
 		<pluginManagement>

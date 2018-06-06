@@ -15,6 +15,7 @@ import java.util.*;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -527,29 +528,42 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	@Test
 	public void testSearchReferenceParameterWithList() throws Exception {
 
-		RestfulServer rsNoType = new RestfulServer(ourCtx);
+		RestfulServer rsNoType = new RestfulServer(ourCtx){
+			@Override
+			public RestulfulServerConfiguration createConfiguration() {
+				RestulfulServerConfiguration retVal = super.createConfiguration();
+				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
+				return retVal;
+			}
+		};
 		rsNoType.registerProvider(new SearchProviderWithListNoType());
 		ServerCapabilityStatementProvider scNoType = new ServerCapabilityStatementProvider(rsNoType);
 		rsNoType.setServerConformanceProvider(scNoType);
 		rsNoType.init(createServletConfig());
-		scNoType.getServerConfiguration().setConformanceDate("2011-02-22T11:22:33Z");
-		
+
 		CapabilityStatement conformance = scNoType.getServerConformance(createHttpServletRequest());
 		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(confNoType);
 
-		RestfulServer rsWithType = new RestfulServer(ourCtx);
+		RestfulServer rsWithType = new RestfulServer(ourCtx){
+			@Override
+			public RestulfulServerConfiguration createConfiguration() {
+				RestulfulServerConfiguration retVal = super.createConfiguration();
+				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
+				return retVal;
+			}
+		};
 		rsWithType.registerProvider(new SearchProviderWithListWithType());
 		ServerCapabilityStatementProvider scWithType = new ServerCapabilityStatementProvider(rsWithType);
 		rsWithType.setServerConformanceProvider(scWithType);
 		rsWithType.init(createServletConfig());
-		scWithType.getServerConfiguration().setConformanceDate("2011-02-22T11:22:33Z");
 
 		CapabilityStatement conformanceWithType = scWithType.getServerConformance(createHttpServletRequest());
 		String confWithType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);
 		ourLog.info(confWithType);
 
 		assertEquals(confNoType, confWithType);
+		assertThat(confNoType, containsString("<date value=\"2011-02-22T11:22:33Z\"/>"));
 	}
 
 	@Test
