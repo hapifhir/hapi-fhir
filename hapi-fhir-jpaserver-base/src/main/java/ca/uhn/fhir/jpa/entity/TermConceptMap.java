@@ -115,11 +115,12 @@ public class TermConceptMap implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
 			.append("myId", myId)
 			.append("myResource", myResource.toString())
+			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
 			.append("myResourcePid", myResourcePid)
 			.append("mySource", mySource)
 			.append("myTarget", myTarget)
 			.append("myUrl", myUrl)
-			.append("myConceptMapGroups - size", myConceptMapGroups.size())
+			.append(myConceptMapGroups != null ? ("myConceptMapGroups - size=" + myConceptMapGroups.size()) : ("myConceptMapGroups=(null)"))
 			.toString();
 	}
 }

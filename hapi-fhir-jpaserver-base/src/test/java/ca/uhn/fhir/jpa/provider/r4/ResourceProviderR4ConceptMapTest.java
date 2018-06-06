@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test {
@@ -27,6 +29,39 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	@Transactional
 	public void before02() {
 		myConceptMapId = myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Test
+	public void testStoreExistingTermConceptMapAndChildren() {
+		ConceptMap conceptMap = createConceptMap();
+
+		MethodOutcome methodOutcome = myClient
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
+			.execute();
+
+		// Do not simplify to assertEquals(...)
+		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertThat(methodOutcome.getId().getValue(), containsString("ConceptMap/1/_history/1"));
+	}
+
+	@Test
+	public void testStoreUpdatedTermConceptMapAndChildren() {
+		ConceptMap conceptMap = createConceptMap();
+		conceptMap.getGroupFirstRep().getElementFirstRep().setCode("UPDATED_CODE");
+
+		MethodOutcome methodOutcome = myClient
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
+			.execute();
+
+		// Do not simplify to assertEquals(...)
+		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertThat(methodOutcome.getId().getValue(), containsString("ConceptMap/1/_history/2"));
 	}
 
 	@Test
