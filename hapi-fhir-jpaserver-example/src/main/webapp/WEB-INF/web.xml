@@ -76,7 +76,7 @@
 		<init-param>
 			<description>A comma separated list of allowed headers when making a non simple CORS request.</description>
 			<param-name>cors.allowed.headers</param-name>
-			<param-value>X-FHIR-Starter,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Prefer</param-value>
+			<param-value>Accept,Access-Control-Request-Headers,Access-Control-Request-Method,Cache-Control,Content-Type,Origin,Prefer,X-FHIR-Starter,X-Requested-With</param-value>
 		</init-param>
 		<init-param>
 			<description>A comma separated list non-standard response headers that will be exposed to XHR2 object.</description>
