@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -125,6 +126,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
+	private Date myConformanceDate;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -194,19 +196,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		result.setServerName(getServerName());
 		result.setFhirContext(getFhirContext());
 		result.setServerAddressStrategy(myServerAddressStrategy);
-		InputStream inputStream = null;
-		try {
-			inputStream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF");
+		try (InputStream inputStream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF")) {
 			if (inputStream != null) {
 				Manifest manifest = new Manifest(inputStream);
-				result.setConformanceDate(manifest.getMainAttributes().getValue("Build-Time"));
+				String value = manifest.getMainAttributes().getValue("Build-Time");
+				result.setConformanceDate(new InstantDt(value));
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// fall through
-		} finally {
-			if (inputStream != null) {
-				IOUtils.closeQuietly(inputStream);
-			}
 		}
 		return result;
 	}
@@ -573,10 +570,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
+	public void setInterceptors(IServerInterceptor... theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(theList);
+			myInterceptors.addAll(Arrays.asList(theList));
 		}
 	}
 
@@ -606,8 +603,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Object... theProv) {
-		setPlainProviders(Arrays.asList(theProv));
+	public void setPlainProviders(Collection<Object> theProviders) {
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(theProviders);
+		}
 	}
 
 	/**
@@ -637,10 +637,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(IResourceProvider... theResourceProviders) {
+	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
+			myResourceProviders.addAll(theResourceProviders);
 		}
 	}
 
@@ -1518,10 +1518,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(IServerInterceptor... theList) {
+	public void setInterceptors(List<IServerInterceptor> theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(Arrays.asList(theList));
+			myInterceptors.addAll(theList);
 		}
 	}
 
@@ -1530,11 +1530,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Collection<Object> theProviders) {
-		myPlainProviders.clear();
-		if (theProviders != null) {
-			myPlainProviders.addAll(theProviders);
-		}
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
 	}
 
 	/**
@@ -1552,10 +1549,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
+	public void setResourceProviders(IResourceProvider... theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(theResourceProviders);
+			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
 		}
 	}
 

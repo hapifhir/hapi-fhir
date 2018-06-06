@@ -959,6 +959,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		/*
+		 * We do a null check here because Smile's module system tries to
+		 * initialize the application context twice if two modules depend on
+		 * the persistence module. The second time sets the dependency's appctx.
+		 */
 		if (myApplicationContext == null) {
 			myApplicationContext = theApplicationContext;
 		}
