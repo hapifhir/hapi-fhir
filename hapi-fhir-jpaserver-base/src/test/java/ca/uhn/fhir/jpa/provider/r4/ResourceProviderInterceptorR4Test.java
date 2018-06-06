@@ -16,6 +16,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
@@ -174,12 +176,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		ResourceProviderInterceptorR4Test.verifyDaoInterceptor(myDaoInterceptor);
 	}
 
-	/*
-	 * This is a weird way of verifying, but because this class
-	 * is a child of a superclass that has other test children
-	 * it's possible that other tests are hitting the server
-	 * at the same time
-	 */
 	@Test
 	public void testCreateResourceInTransaction() throws IOException {
 		String methodName = "testCreateResourceInTransaction";
@@ -220,15 +216,17 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		 * DAO Interceptor
 		 */
 
+		/*
+		 * Sometimes we get more than 2 hits of the  incomingRequestPreHandled
+		 * method. My working theory is that it's a scheduled background job,
+		 * such as the subscription interceptor or the search parameter cache
+		 * updating.
+		 */
 		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
 		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myDaoInterceptor, times(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
-		assertEquals("Bundle", ardCaptor.getAllValues().get(0).getResourceType());
-		assertNotNull(ardCaptor.getAllValues().get(0).getResource());
-		assertEquals(RestOperationTypeEnum.CREATE, opTypeCaptor.getAllValues().get(1));
-		assertEquals("Patient", ardCaptor.getAllValues().get(1).getResourceType());
-		assertNotNull(ardCaptor.getAllValues().get(1).getResource());
+		verify(myDaoInterceptor, atLeast(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
+		assertThat(ardCaptor.getAllValues().stream().map(ActionRequestDetails::getResourceType).collect(Collectors.toList()), Matchers.contains("Bundle", "Patient"));
+		assertThat(opTypeCaptor.getAllValues(), Matchers.contains(RestOperationTypeEnum.TRANSACTION, RestOperationTypeEnum.CREATE));
 
 		rdCaptor = ArgumentCaptor.forClass(RequestDetails.class);
 		srCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);

@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.server.method.SearchParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CapabilityStatement.*;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -139,10 +140,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   }
 
   private DateTimeType conformanceDate() {
-    String buildDate = getServerConfiguration().getConformanceDate();
-    if (buildDate != null) {
+    IPrimitiveType<Date> buildDate = getServerConfiguration().getConformanceDate();
+    if (buildDate != null && buildDate.getValue() != null) {
       try {
-        return new DateTimeType(buildDate);
+        return new DateTimeType(buildDate.getValueAsString());
       } catch (DataFormatException e) {
         // fall through
       }

@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.method.*;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -136,10 +137,10 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private DateTimeDt conformanceDate() {
-		String buildDate = getServerConfiguration().getConformanceDate();
-		if (buildDate != null) {
+		IPrimitiveType<Date> buildDate = getServerConfiguration().getConformanceDate();
+		if (buildDate != null && buildDate.getValue() != null) {
 			try {
-				return new DateTimeDt(buildDate);
+				return new DateTimeDt(buildDate.getValueAsString());
 			} catch (DataFormatException e) {
 				// fall through
 			}
