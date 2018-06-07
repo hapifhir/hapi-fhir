@@ -27,6 +27,7 @@ import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -76,7 +77,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   private Callable<RestulfulServerConfiguration> myServerConfiguration;
 
   /**
-   * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
+   * No-arg constructor and setter so that the ServerConformanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
    */
   public ServerCapabilityStatementProvider() {
     super();
@@ -139,10 +140,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   }
 
   private DateTimeType conformanceDate() {
-    String buildDate = getServerConfiguration().getConformanceDate();
-    if (buildDate != null) {
+    IPrimitiveType<Date> buildDate = getServerConfiguration().getConformanceDate();
+    if (buildDate != null && buildDate.getValue() != null) {
       try {
-        return new DateTimeType(buildDate);
+        return new DateTimeType(buildDate.getValueAsString());
       } catch (DataFormatException e) {
         // fall through
       }
