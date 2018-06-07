@@ -1337,7 +1337,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, BaseHasResource theEntity, Collection<? extends BaseTag> myTagList, boolean theForHistoryOperation, IResource res) {
+	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, BaseHasResource theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
@@ -1366,7 +1366,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
 
-		Collection<? extends BaseTag> tags = myTagList;
+		Collection<? extends BaseTag> tags = theTagList;
 		if (theEntity.isHasTags()) {
 			TagList tagList = new TagList();
 			List<IBaseCoding> securityLabels = new ArrayList<>();
@@ -1403,7 +1403,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, BaseHasResource theEntity, Collection<? extends BaseTag> myTagList, boolean theForHistoryOperation, IAnyResource res) {
+	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, BaseHasResource theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IAnyResource) myContext.getResourceDefinition(theResourceType).newInstance();
@@ -1436,7 +1436,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
 
-		Collection<? extends BaseTag> tags = myTagList;
+		Collection<? extends BaseTag> tags = theTagList;
 
 		if (theEntity.isHasTags()) {
 			for (BaseTag next : tags) {
@@ -1588,7 +1588,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, ResourceHistoryTable myHistory, Collection<ResourceTag> tagList,
+	public <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, ResourceHistoryTable theHistory, Collection<ResourceTag> theTagList,
 																 boolean theForHistoryOperation) {
 
 		// May 28, 2018 - #936
@@ -1597,10 +1597,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (theEntity instanceof ResourceHistoryTable) {
 			history = (ResourceHistoryTable) theEntity;
 		} else {
-			if (myHistory == null) {
+			if (theHistory == null) {
 				history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 			} else {
-				history = myHistory;
+				history = theHistory;
 			}
 		}
 
@@ -1630,10 +1630,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		// get preload the tagList
 		Collection<? extends BaseTag> myTagList;
 		
-		if (tagList == null)
+		if (theTagList == null)
 			myTagList = theEntity.getTags();
 		else
-			myTagList = tagList;
+			myTagList = theTagList;
 		
 		
 		/*

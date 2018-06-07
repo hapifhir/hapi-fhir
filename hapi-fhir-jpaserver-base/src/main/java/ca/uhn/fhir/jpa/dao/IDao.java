@@ -59,6 +59,6 @@ public interface IDao {
 
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
 
-	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, ResourceHistoryTable myHistory, Collection<ResourceTag> tagList, boolean theForHistoryOperation);
+	<R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity, ResourceHistoryTable theHistory, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
 
 }
