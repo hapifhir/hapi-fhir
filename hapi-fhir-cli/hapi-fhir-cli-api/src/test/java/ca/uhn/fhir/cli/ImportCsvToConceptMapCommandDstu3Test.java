@@ -99,8 +99,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-		// Do not simplify to assertEquals(...)
-		assertTrue(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertEquals(Boolean.TRUE, methodOutcome.getCreated());
 	}
 
 	@Test
@@ -117,8 +116,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-		// Do not simplify to assertEquals(...)
-		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertNull(methodOutcome.getCreated());
 	}
 
 	@Test
@@ -142,9 +140,6 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 			.execute();
 
 		assertNull(methodOutcome.getCreated());
-
-		// Do not simplify to assertEquals(...)
-		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@Test

@@ -41,8 +41,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
 			.execute();
 
-		// Do not simplify to assertEquals(...)
-		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertNull(methodOutcome.getCreated());
 		assertEquals("1", methodOutcome.getId().getVersionIdPart());
 	}
 
@@ -58,8 +57,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
 			.execute();
 
-		// Do not simplify to assertEquals(...)
-		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertNull(methodOutcome.getCreated());
 		assertEquals("2", methodOutcome.getId().getVersionIdPart());
 	}
 
