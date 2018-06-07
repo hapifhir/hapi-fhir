@@ -153,7 +153,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
 			.append("myId", myId)
-			.append("myConceptMapGroupElement - id", myConceptMapGroupElement.getId())
+			.append(myConceptMapGroupElement != null ? ("myConceptMapGroupElement - id=" + myConceptMapGroupElement.getId()) : ("myConceptMapGroupElement=(null)"))
 			.append("myCode", myCode)
 			.append("myDisplay", myDisplay)
 			.append("myEquivalence", myEquivalence.toCode())

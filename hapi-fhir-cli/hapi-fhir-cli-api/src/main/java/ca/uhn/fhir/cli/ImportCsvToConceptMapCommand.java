@@ -25,11 +25,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -43,7 +41,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -96,7 +97,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	}
 
 	@Override
-	protected void parseAdditionalParameters(CommandLine theCommandLine) throws ParseException {
+	protected void parseAdditionalParameters(CommandLine theCommandLine) {
 		sourceValueSet = theCommandLine.getOptionValue(SOURCE_VALUE_SET_PARAM);
 		if (isBlank(sourceValueSet)) {
 			ourLog.info("Source value set is not specified (i.e. ConceptMap.sourceUri).");
@@ -113,11 +114,11 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	}
 
 	@Override
-	protected void process() throws ParseException, ExecutionException {
+	protected void process() throws ExecutionException {
 		searchForConceptMapByUrl();
 	}
 
-	private void searchForConceptMapByUrl() throws ParseException, ExecutionException {
+	private void searchForConceptMapByUrl() throws ExecutionException {
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			org.hl7.fhir.dstu3.model.ConceptMap conceptMap = convertCsvToConceptMapDstu3();
 
@@ -153,7 +154,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		}
 	}
 
-	private org.hl7.fhir.dstu3.model.ConceptMap convertCsvToConceptMapDstu3() throws ParseException, ExecutionException {
+	private org.hl7.fhir.dstu3.model.ConceptMap convertCsvToConceptMapDstu3() throws ExecutionException {
 		try {
 			return VersionConvertor_30_40.convertConceptMap(convertCsvToConceptMapR4());
 		} catch (FHIRException fe) {
@@ -161,14 +162,12 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		}
 	}
 
-	private ConceptMap convertCsvToConceptMapR4() throws ParseException, ExecutionException {
+	private ConceptMap convertCsvToConceptMapR4() throws ExecutionException {
 		ourLog.info("Converting CSV to ConceptMap...");
 		ConceptMap retVal = new ConceptMap();
-		Reader reader = null;
-		CSVParser csvParser = null;
-		try {
-			reader = Files.newBufferedReader(Paths.get(file));
-			csvParser = new CSVParser(
+		try (
+			Reader reader = Files.newBufferedReader(Paths.get(file));
+			CSVParser csvParser = new CSVParser(
 				reader,
 				CSVFormat
 					.DEFAULT
@@ -178,7 +177,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 					.withIgnoreHeaderCase()
 					.withIgnoreEmptyLines()
 					.withTrim());
-
+		) {
 			retVal.setUrl(conceptMapUrl);
 
 			if (isNotBlank(sourceValueSet)) {
@@ -278,9 +277,6 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 			}
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
-		} finally {
-			IOUtils.closeQuietly(csvParser);
-			IOUtils.closeQuietly(reader);
 		}
 
 		ourLog.info("Finished converting CSV to ConceptMap.");

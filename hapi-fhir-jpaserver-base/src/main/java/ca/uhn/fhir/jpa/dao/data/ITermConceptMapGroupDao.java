@@ -27,7 +27,7 @@ import org.springframework.data.repository.query.Param;
  */
 
 public interface ITermConceptMapGroupDao extends JpaRepository<TermConceptMapGroup, Long> {
-	@Query("DELETE FROM TermConceptMapGroup g WHERE g.myConceptMap.myId = :pid")
+	@Query("DELETE FROM TermConceptMapGroup g WHERE g.myId = :pid")
 	@Modifying
 	void deleteTermConceptMapGroupById(@Param("pid") Long theId);
 }
