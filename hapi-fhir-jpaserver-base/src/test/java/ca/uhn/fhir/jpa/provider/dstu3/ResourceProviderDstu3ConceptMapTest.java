@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
@@ -27,6 +28,39 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	@Transactional
 	public void before02() {
 		myConceptMapId = myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Test
+	public void testStoreExistingTermConceptMapAndChildren() {
+		ConceptMap conceptMap = createConceptMap();
+
+		MethodOutcome methodOutcome = ourClient
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
+			.execute();
+
+		// Do not simplify to assertEquals(...)
+		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertEquals("1", methodOutcome.getId().getVersionIdPart());
+	}
+
+	@Test
+	public void testStoreUpdatedTermConceptMapAndChildren() {
+		ConceptMap conceptMap = createConceptMap();
+		conceptMap.getGroupFirstRep().getElementFirstRep().setCode("UPDATED_CODE");
+
+		MethodOutcome methodOutcome = ourClient
+			.update()
+			.resource(conceptMap)
+			.conditional()
+			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
+			.execute();
+
+		// Do not simplify to assertEquals(...)
+		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
+		assertEquals("2", methodOutcome.getId().getVersionIdPart());
 	}
 
 	@Test

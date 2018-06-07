@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test {
@@ -44,7 +43,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		// Do not simplify to assertEquals(...)
 		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
-		assertThat(methodOutcome.getId().getValue(), containsString("ConceptMap/1/_history/1"));
+		assertEquals("1", methodOutcome.getId().getVersionIdPart());
 	}
 
 	@Test
@@ -61,7 +60,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		// Do not simplify to assertEquals(...)
 		assertFalse(Boolean.TRUE.equals(methodOutcome.getCreated()));
-		assertThat(methodOutcome.getId().getValue(), containsString("ConceptMap/1/_history/2"));
+		assertEquals("2", methodOutcome.getId().getVersionIdPart());
 	}
 
 	@Test
