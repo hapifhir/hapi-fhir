@@ -42,6 +42,10 @@
 				Spring-data (used by the JPA server) has been upgraded to version 2.0.7
 				(from version 1.11.6). Thanks to Roman Doboni for the pull request!
 			</action>
+			<action type="fix">
+				A crash in the validator was fixed: Validating a Bundle that did not have fullUrl entries
+				in a required spot caused a NullPointerException.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
