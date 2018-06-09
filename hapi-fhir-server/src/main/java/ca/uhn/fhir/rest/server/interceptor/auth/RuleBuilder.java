@@ -174,7 +174,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
 			}
 			if (myOperationRule != null) {
-				myOperationRule.setTenentApplicabilityChecker(myTenantApplicabilityChecker);
+				myOperationRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
 			}
 		}
 
