@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -94,12 +94,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashSystem == null) {
-			setHashSystem(hash(getResourceType(), getParamName(), getSystem()));
-			setHashSystemAndValue(hash(getResourceType(), getParamName(), getSystem(), getValue()));
-			setHashValue(hash(getResourceType(), getParamName(), getValue()));
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			String system = getSystem();
+			String value = getValue();
+			setHashSystem(createHashForSystem(resourceType, paramName, system));
+			setHashSystemAndValue(createHashForSystemAndValue(resourceType, paramName, system, value));
+			setHashValue(createHashForValue(resourceType, paramName, value));
 		}
 	}
-
 
 	@Override
 	protected void clearHashes() {
@@ -195,7 +198,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return b.toHashCode();
 	}
 
-
 	@Override
 	public IQueryParameterType toQueryParameterType() {
 		return new TokenParam(getSystem(), getValue());
@@ -209,5 +211,17 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("system", getSystem());
 		b.append("value", getValue());
 		return b.build();
+	}
+
+	public static long createHashForSystem(String theResourceType, String theParamName, String theSystem) {
+		return hash(theResourceType, theParamName, theSystem);
+	}
+
+	public static long createHashForSystemAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
+		return hash(theResourceType, theParamName, theSystem, theValue);
+	}
+
+	public static long createHashForValue(String theResourceType, String theParamName, String theValue) {
+		return hash(theResourceType, theParamName, theValue);
 	}
 }
