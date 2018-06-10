@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.CoverageIgnore;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -35,12 +36,12 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -56,9 +57,10 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  */
 public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter implements IRuleApplier {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptor.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
+	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
 
 	/**
 	 * Constructor
@@ -92,11 +94,12 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	public Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId,
 															 IBaseResource theOutputResource) {
 		List<IAuthRule> rules = buildRuleList(theRequestDetails);
+		Set<AuthorizationFlagsEnum> flags = getFlags();
 		ourLog.trace("Applying {} rules to render an auth decision for operation {}", rules.size(), theOperation);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
-			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this);
+			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this, flags);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
 				break;
@@ -105,7 +108,7 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 
 		if (verdict == null) {
 			ourLog.trace("No rules returned a decision, applying default {}", myDefaultPolicy);
-			return new Verdict(myDefaultPolicy, null);
+			return new Verdict(getDefaultPolicy(), null);
 		}
 
 		return verdict;
@@ -204,6 +207,28 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	public void setDefaultPolicy(PolicyEnum theDefaultPolicy) {
 		Validate.notNull(theDefaultPolicy, "theDefaultPolicy must not be null");
 		myDefaultPolicy = theDefaultPolicy;
+	}
+
+	/**
+	 * This property configures any flags affecting how authorization is
+	 * applied. By default no flags are applied.
+	 *
+	 * @see #setFlags(Collection)
+	 */
+	public Set<AuthorizationFlagsEnum> getFlags() {
+		return Collections.unmodifiableSet(myFlags);
+	}
+
+	/**
+	 * This property configures any flags affecting how authorization is
+	 * applied. By default no flags are applied.
+	 *
+	 * @param theFlags The flags (must not be null)
+	 * @see #setFlags(Collection)
+	 */
+	public AuthorizationInterceptor setFlags(AuthorizationFlagsEnum... theFlags) {
+		Validate.notNull(theFlags, "theFlags must not be null");
+		return setFlags(Lists.newArrayList(theFlags));
 	}
 
 	/**
@@ -325,6 +350,19 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		handleUserOperation(theRequest, theNewResource, RestOperationTypeEnum.UPDATE);
 	}
 
+	/**
+	 * This property configures any flags affecting how authorization is
+	 * applied. By default no flags are applied.
+	 *
+	 * @param theFlags The flags (must not be null)
+	 * @see #setFlags(AuthorizationFlagsEnum...)
+	 */
+	public AuthorizationInterceptor setFlags(Collection<AuthorizationFlagsEnum> theFlags) {
+		Validate.notNull(theFlags, "theFlags must not be null");
+		myFlags = new HashSet<>(theFlags);
+		return this;
+	}
+
 	private static UnsupportedOperationException failForDstu1() {
 		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
 	}
@@ -333,7 +371,7 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		if (theResponseObject == null) {
 			return Collections.emptyList();
 		}
-		
+
 		List<IBaseResource> retVal;
 
 		boolean isContainer = false;
@@ -342,11 +380,11 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		} else if (theResponseObject instanceof IBaseParameters) {
 			isContainer = true;
 		}
-		
+
 		if (!isContainer) {
 			return Collections.singletonList(theResponseObject);
 		}
-	
+
 		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
 
 		// Exclude the container
