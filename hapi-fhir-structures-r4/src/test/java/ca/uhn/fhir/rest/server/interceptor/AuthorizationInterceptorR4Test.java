@@ -99,6 +99,16 @@ public class AuthorizationInterceptorR4Test {
 		return retVal;
 	}
 
+	private Resource createDiagnosticReport(Integer theId, String theSubjectId) {
+		DiagnosticReport retVal = new DiagnosticReport();
+		if (theId != null) {
+			retVal.setId(new IdType("DiagnosticReport", (long) theId));
+		}
+		retVal.getCode().setText("OBS");
+		retVal.setSubject(new Reference(theSubjectId));
+		return retVal;
+	}
+
 	private Organization createOrganization(int theIndex) {
 		Organization retVal = new Organization();
 		retVal.setId("" + theIndex);
@@ -1806,6 +1816,85 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
+
+	@Test
+	public void testReadByCompartmentReadByPatientParam() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().allResources().inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?patient=Patient/1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?patient=1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?patient=Patient/2");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
+		@Test
+	public void testReadByCompartmentReadByIdParam() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().allResources().inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+
+		ourReturn = Collections.singletonList(createPatient(1));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Collections.singletonList(createPatient(1));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/2");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
+
 	@Test
 	public void testReadByCompartmentRight() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -2811,12 +2900,13 @@ public class AuthorizationInterceptorR4Test {
 		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
 		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
 		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
+		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
 		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
 		ourServlet.setPlainProviders(plainProvider);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
@@ -2890,6 +2980,23 @@ public class AuthorizationInterceptorR4Test {
 			return (Parameters) new Parameters().setId("1");
 		}
 
+	}
+
+	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
+
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return DiagnosticReport.class;
+		}
+		@Search()
+		public List<Resource> search(
+			@OptionalParam(name = "subject") ReferenceParam theSubject,
+			@OptionalParam(name = "patient") ReferenceParam thePatient
+			) {
+			ourHitMethod = true;
+			return ourReturn;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -3076,7 +3183,7 @@ public class AuthorizationInterceptorR4Test {
 		}
 
 		@Search()
-		public List<Resource> search() {
+		public List<Resource> search(@OptionalParam(name="_id") IdType theIdParam) {
 			ourHitMethod = true;
 			return ourReturn;
 		}

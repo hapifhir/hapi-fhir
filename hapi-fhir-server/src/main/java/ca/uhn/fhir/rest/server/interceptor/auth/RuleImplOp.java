@@ -14,10 +14,12 @@ import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -305,14 +307,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						}
 					}
 				}
-//				if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-					if (appliesToResourceId != null && appliesToResourceId.hasResourceType()) {
-						Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceId.getResourceType()).getImplementingClass();
-						if (myAppliesToTypes.contains(type) == false) {
-							return null;
-						}
+				if (appliesToResourceId != null && appliesToResourceId.hasResourceType()) {
+					Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceId.getResourceType()).getImplementingClass();
+					if (myAppliesToTypes.contains(type) == false) {
+						return null;
 					}
-//				}
+				}
 				if (appliesToResourceType != null) {
 					Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceType).getImplementingClass();
 					if (myAppliesToTypes.contains(type)) {
@@ -352,6 +352,19 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					}
 
 					/*
+					 * If the client has permission to read compartment
+					 * Patient/ABC, then a search for Patient?_id=Patient/ABC
+					 * should be permitted. This is kind of a one-off case, but
+					 * it makes sense.
+					 */
+					if (next.getResourceType().equals(appliesToResourceType)) {
+						Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(appliesToSearchParams, next, IAnyResource.SP_RES_ID);
+						if (verdict != null) {
+							return verdict;
+						}
+					}
+
+					/*
 					 * If we're trying to read a resource that could potentially be
 					 * in the given compartment, we'll let the request through and
 					 * catch any issues on the response.
@@ -377,13 +390,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 								 */
 								if (appliesToSearchParams != null && !theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 									for (RuntimeSearchParam nextRuntimeSearchParam : params) {
-										String[] values = appliesToSearchParams.get(nextRuntimeSearchParam.getName());
-										if (values != null) {
-											for (String nextParameterValue : values) {
-												if (nextParameterValue.equals(next.getValue())) {
-													return new Verdict(PolicyEnum.ALLOW, this);
-												}
-											}
+										String name = nextRuntimeSearchParam.getName();
+										Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(appliesToSearchParams, next, name);
+										if (verdict != null) {
+											return verdict;
 										}
 									}
 								} else {
@@ -407,6 +417,26 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		}
 
 		return newVerdict();
+	}
+
+	private Verdict checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(Map<String, String[]> theSearchParams, IIdType theCompartmentOwner, String theSearchParamName) {
+		Verdict verdict = null;
+		if (theSearchParams != null) {
+			String[] values = theSearchParams.get(theSearchParamName);
+			if (values != null) {
+				for (String nextParameterValue : values) {
+					if (nextParameterValue.equals(theCompartmentOwner.getValue())) {
+						verdict = new Verdict(PolicyEnum.ALLOW, this);
+						break;
+					}
+					if (nextParameterValue.equals(theCompartmentOwner.getIdPart())) {
+						verdict = new Verdict(PolicyEnum.ALLOW, this);
+						break;
+					}
+				}
+			}
+		}
+		return verdict;
 	}
 
 	public TransactionAppliesToEnum getTransactionAppliesToOp() {
