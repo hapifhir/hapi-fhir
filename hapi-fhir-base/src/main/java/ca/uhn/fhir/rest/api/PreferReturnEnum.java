@@ -27,7 +27,7 @@ import java.util.HashMap;
  */
 public enum PreferReturnEnum {
 
-	REPRESENTATION("representation"), MINIMAL("minimal");
+	REPRESENTATION("representation"), MINIMAL("minimal"), OPERATION_OUTCOME("OperationOutcome");
 
 	private String myHeaderValue;
 	private static HashMap<String, PreferReturnEnum> ourValues;

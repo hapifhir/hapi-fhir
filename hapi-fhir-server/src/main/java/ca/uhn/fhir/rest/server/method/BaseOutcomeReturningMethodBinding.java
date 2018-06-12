@@ -183,19 +183,24 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
 		boolean allowPrefer = false;
 		int operationStatus = getOperationStatus(response);
-		IBaseResource outcome = originalOutcome;
+		IBaseResource outcome = resource;
 
 		if (ourOperationsWhichAllowPreferHeader.contains(getRestOperationType())) {
 			allowPrefer = true;
 		}
 
-		if (resource != null && allowPrefer) {
+		if (allowPrefer) {
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
 			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
 			if (preferReturn != null) {
-				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
-					outcome = resource;
+				if (preferReturn == PreferReturnEnum.MINIMAL) {
+					outcome = null;
 				}
+				else {
+					if (preferReturn == PreferReturnEnum.OPERATION_OUTCOME) {
+						outcome = originalOutcome;
+					}
+				}				
 			}
 		}
 
