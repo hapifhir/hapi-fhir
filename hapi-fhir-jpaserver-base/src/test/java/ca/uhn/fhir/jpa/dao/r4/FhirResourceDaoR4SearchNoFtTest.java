@@ -2261,6 +2261,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContains() {
+		myDaoConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("ABCDEFGHIJK");

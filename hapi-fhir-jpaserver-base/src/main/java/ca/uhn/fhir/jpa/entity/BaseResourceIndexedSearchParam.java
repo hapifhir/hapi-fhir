@@ -38,7 +38,7 @@ import java.util.Date;
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	/** Don't change this without careful consideration. You will break existing hashes! */
 	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
-	/** Don't make this public 'cause nobody better touch it! */
+	/** Don't make this public 'cause nobody better be able to modify it! */
 	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 
 	static final int MAX_SP_NAME = 100;

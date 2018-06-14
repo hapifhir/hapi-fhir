@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,6 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 //@formatter:off
 @Embeddable
@@ -66,15 +65,15 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	@Column(name = "SP_ID")
 	private Long myId;
 	/**
-	 * @since 3.4.0 - At some point this should be made not-null
+	 * @since 3.5.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_UNITS_AND_VALPREFIX", nullable = true)
-	private Long myHashUnitsAndValPrefix;
+	@Column(name = "HASH_IDENTITY_AND_UNITS", nullable = true)
+	private Long myHashIdentityAndUnits;
 	/**
-	 * @since 3.4.0 - At some point this should be made not-null
+	 * @since 3.5.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_VALPREFIX", nullable = true)
-	private Long myHashValPrefix;
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
 
 	public ResourceIndexedSearchParamQuantity() {
 		// nothing
@@ -89,16 +88,16 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashUnitsAndValPrefix == null) {
-			setHashUnitsAndValPrefix(hash(getResourceType(), getParamName(), getSystem(), getUnits(), toTruncatedString(getValue())));
-			setHashValPrefix(hash(getResourceType(), getParamName(), toTruncatedString(getValue())));
+		if (myHashIdentity == null) {
+			setHashIdentity(hash(getResourceType(), getParamName()));
+			setHashIdentityAndUnits(hash(getResourceType(), getParamName(), getSystem(), getUnits()));
 		}
 	}
 
 	@Override
 	protected void clearHashes() {
-		myHashUnitsAndValPrefix = null;
-		myHashValPrefix = null;
+		myHashIdentity = null;
+		myHashIdentityAndUnits = null;
 	}
 
 	@Override
@@ -119,27 +118,25 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getSystem(), obj.getSystem());
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
-		b.append(getHashUnitsAndValPrefix(), obj.getHashUnitsAndValPrefix());
-		b.append(getHashValPrefix(), obj.getHashValPrefix());
 		return b.isEquals();
 	}
 
-	public Long getHashUnitsAndValPrefix() {
+	public Long getHashIdentity() {
 		calculateHashes();
-		return myHashUnitsAndValPrefix;
+		return myHashIdentity;
 	}
 
-	public void setHashUnitsAndValPrefix(Long theHashUnitsAndValPrefix) {
-		myHashUnitsAndValPrefix = theHashUnitsAndValPrefix;
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
 	}
 
-	public Long getHashValPrefix() {
+	public Long getHashIdentityAndUnits() {
 		calculateHashes();
-		return myHashValPrefix;
+		return myHashIdentityAndUnits;
 	}
 
-	public void setHashValPrefix(Long theHashValPrefix) {
-		myHashValPrefix = theHashValPrefix;
+	public void setHashIdentityAndUnits(Long theHashIdentityAndUnits) {
+		myHashIdentityAndUnits = theHashIdentityAndUnits;
 	}
 
 	@Override
@@ -176,14 +173,13 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@Override
 	public int hashCode() {
+		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getSystem());
 		b.append(getUnits());
 		b.append(getValue());
-		b.append(getHashUnitsAndValPrefix());
-		b.append(getHashValPrefix());
 		return b.toHashCode();
 	}
 
@@ -202,13 +198,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append("value", getValue());
 		b.append("missing", isMissing());
 		return b.build();
-	}
-
-	private static String toTruncatedString(BigDecimal theValue) {
-		if (theValue == null) {
-			return null;
-		}
-		return theValue.setScale(0, RoundingMode.FLOOR).toPlainString();
 	}
 
 }

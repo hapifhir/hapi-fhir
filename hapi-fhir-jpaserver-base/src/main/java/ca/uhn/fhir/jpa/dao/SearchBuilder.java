@@ -61,6 +61,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
+import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -594,7 +596,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType theParameter = nextOr;
 			Predicate singleCode = createPredicateString(theParameter, theResourceName, theParamName, myBuilder, join);
@@ -742,7 +744,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof TokenParam) {
@@ -1087,6 +1089,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
+		DaoConfig daoConfig = myCallingDao.getConfig();
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
 			if (!id.isText()) {
@@ -1097,7 +1100,7 @@ public class SearchBuilder implements ISearchBuilder {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
 			if (id.isContains()) {
-				if (!myCallingDao.getConfig().isAllowContainsSearches()) {
+				if (!daoConfig.isAllowContainsSearches()) {
 					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
 				}
 			}
@@ -1113,22 +1116,34 @@ public class SearchBuilder implements ISearchBuilder {
 				+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
-		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-		if (theParameter instanceof StringParam &&
-			((StringParam) theParameter).isContains() &&
-			myCallingDao.getConfig().isAllowContainsSearches()) {
-			likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
+		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
+		if (exactMatch) {
+
+			// Exact match
+
+			Long hash = ResourceIndexedSearchParamString.calculateHashExact(theResourceName, theParamName, rawSearchTerm);
+			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
+
 		} else {
-			likeExpression = createLeftMatchLikeExpression(likeExpression);
-		}
 
-		Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-		if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
-			Predicate exactCode = theBuilder.equal(theFrom.get("myValueExact"), rawSearchTerm);
-			singleCode = theBuilder.and(singleCode, exactCode);
-		}
+			// Normalized Match
 
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+			String normalizedString = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String likeExpression;
+			if (theParameter instanceof StringParam &&
+				((StringParam) theParameter).isContains() &&
+				daoConfig.isAllowContainsSearches()) {
+				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
+			} else {
+				likeExpression = createLeftMatchLikeExpression(normalizedString);
+			}
+
+			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(daoConfig, theResourceName, theParamName, normalizedString);
+			Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
+			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+			return theBuilder.and(hashCode, singleCode);
+
+		}
 	}
 
 	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
@@ -1183,7 +1198,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Process token modifiers (:in, :below, :above)
 		 */
 
-		List<VersionIndependentConcept> codes = null;
+		List<VersionIndependentConcept> codes;
 		if (modifier == TokenParamModifier.IN) {
 			codes = myTerminologySvc.expandValueSet(code);
 		} else if (modifier == TokenParamModifier.ABOVE) {
@@ -1192,81 +1207,53 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (modifier == TokenParamModifier.BELOW) {
 			system = determineSystemIfMissing(theParamName, code, system);
 			codes = myTerminologySvc.findCodesBelow(system, code);
-		}
-
-		ArrayList<Predicate> singleCodePredicates = new ArrayList<>();
-		if (codes != null) {
-
-			if (codes.isEmpty()) {
-
-				// This will never match anything
-				Predicate codePredicate = theBuilder.isNull(theFrom.get("myMissing"));
-				singleCodePredicates.add(codePredicate);
-
-			} else {
-				List<Predicate> orPredicates = new ArrayList<Predicate>();
-				Map<String, List<VersionIndependentConcept>> map = new HashMap<String, List<VersionIndependentConcept>>();
-				for (VersionIndependentConcept nextCode : codes) {
-					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
-					if (null == systemCodes) {
-						systemCodes = new ArrayList<>();
-						map.put(nextCode.getSystem(), systemCodes);
-					}
-					systemCodes.add(nextCode);
-				}
-				// Use "in" in case of large numbers of codes due to param modifiers
-				final Path<String> systemExpression = theFrom.get("mySystem");
-				final Path<String> valueExpression = theFrom.get("myValue");
-				for (Map.Entry<String, List<VersionIndependentConcept>> entry : map.entrySet()) {
-					Predicate systemPredicate = theBuilder.equal(systemExpression, entry.getKey());
-					In<String> codePredicate = theBuilder.in(valueExpression);
-					for (VersionIndependentConcept nextCode : entry.getValue()) {
-						codePredicate.value(nextCode.getCode());
-					}
-					orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
-				}
-
-				singleCodePredicates.add(theBuilder.or(orPredicates.toArray(new Predicate[orPredicates.size()])));
-			}
-
 		} else {
+			codes = Collections.singletonList(new VersionIndependentConcept(system, code));
+		}
 
-			/*
-			 * Ok, this is a normal query
-			 */
+		if (codes.isEmpty()) {
+			// This will never match anything
+			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false);
+		}
 
-			if (StringUtils.isNotBlank(system)) {
-				if (modifier != null && modifier == TokenParamModifier.NOT) {
-					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
-				} else {
-					singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
-				}
-			} else if (system == null) {
-				// don't check the system
+		/*
+		 * Note: A null system value means "match any system", but
+		 * an empty-string system value means "match values that
+		 * explicitly have no system".
+		 */
+		boolean haveSystem = codes.get(0).getSystem() != null;
+		boolean haveCode = isNotBlank(codes.get(0).getCode());
+		Expression<Long> hashField;
+		if (!haveSystem && !haveCode) {
+			// If we have neither, this isn't actually an expression so
+			// just return 1=1
+			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, true);
+		} else if (haveSystem && haveCode) {
+			hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
+		} else if (haveSystem) {
+			hashField = theFrom.get("myHashSystem").as(Long.class);
+		} else {
+			hashField = theFrom.get("myHashValue").as(Long.class);
+		}
+
+		List<Long> values = new ArrayList<>(codes.size());
+		for (VersionIndependentConcept next : codes) {
+			if (haveSystem && haveCode) {
+				values.add(ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, next.getSystem(), next.getCode()));
+			} else if (haveSystem) {
+				values.add(ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, next.getSystem()));
 			} else {
-				// If the system is "", we only match on null systems
-				singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
-			}
-
-			if (StringUtils.isNotBlank(code)) {
-				if (modifier != null && modifier == TokenParamModifier.NOT) {
-					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
-				} else {
-					singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
-				}
-			} else {
-				/*
-				 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
-				 * match all tokens with the given value.
-				 *
-				 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
-				 */
-				// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
+				values.add(ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, next.getCode()));
 			}
 		}
 
-		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		Predicate predicate = hashField.in(values);
+		if (modifier == TokenParamModifier.NOT) {
+			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), ResourceIndexedSearchParamToken.calculateHashIdentity(theResourceName, theParamName));
+			Predicate disjunctionPredicate = theBuilder.not(predicate);
+			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
+		}
+		return predicate;
 	}
 
 	@Override

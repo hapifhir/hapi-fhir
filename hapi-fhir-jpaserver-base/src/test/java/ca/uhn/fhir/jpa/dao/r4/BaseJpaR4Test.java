@@ -257,6 +257,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 	}
 
 	@After

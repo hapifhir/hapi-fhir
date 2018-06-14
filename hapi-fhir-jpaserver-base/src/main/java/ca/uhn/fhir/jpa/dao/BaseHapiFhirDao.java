@@ -910,7 +910,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 							param = new ResourceIndexedSearchParamQuantity();
 							break;
 						case STRING:
-							param = new ResourceIndexedSearchParamString();
+							param = new ResourceIndexedSearchParamString()
+								.setDaoConfig(myConfig);
 							break;
 						case TOKEN:
 							param = new ResourceIndexedSearchParamToken();
@@ -2057,6 +2058,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (thePerformIndexing) {
 
 			for (ResourceIndexedSearchParamString next : removeCommon(existingStringParams, stringParams)) {
+				next.setDaoConfig(myConfig);
 				myEntityManager.remove(next);
 				theEntity.getParamsString().remove(next);
 			}

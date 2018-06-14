@@ -3571,14 +3571,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void testSearchWithEmptyParameter(String url) throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + url);
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, respString);
 			assertEquals(1, bundle.getEntry().size());
-		} finally {
-			IOUtils.closeQuietly(resp.getEntity().getContent());
 		}
 	}
 
