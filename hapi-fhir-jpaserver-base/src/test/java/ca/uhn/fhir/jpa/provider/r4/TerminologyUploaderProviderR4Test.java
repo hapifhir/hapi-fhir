@@ -29,10 +29,10 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
-		zos.putNextEntry(new ZipEntry("loinc.csv"));
-		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/loinc.csv")));
-		zos.putNextEntry(new ZipEntry("LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV"));
-		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV")));
+		zos.putNextEntry(new ZipEntry("Loinc.csv"));
+		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/Loinc.csv")));
+		zos.putNextEntry(new ZipEntry("MultiAxialHierarchy.csv"));
+		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/MultiAxialHierarchy.csv")));
 		zos.close();
 
 		byte[] packageBytes = bos.toByteArray();
