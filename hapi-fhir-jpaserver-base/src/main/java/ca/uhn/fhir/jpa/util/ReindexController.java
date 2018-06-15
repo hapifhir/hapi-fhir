@@ -83,14 +83,19 @@ public class ReindexController implements IReindexController {
 					break;
 				}
 			}
+		} catch (Exception e) {
+			ourLog.error("Failure during reindex", e);
+			count = -1;
 		} finally {
 			myReindexingLock.release();
 		}
 
 		synchronized (this) {
 			if (count == null) {
+				ourLog.info("Reindex pass complete, no remaining resource to index");
 				myDontReindexUntil = System.currentTimeMillis() + DateUtils.MILLIS_PER_HOUR;
 			} else {
+				ourLog.info("Reindex pass complete, {} remaining resource to index", count);
 				myDontReindexUntil = null;
 			}
 		}
