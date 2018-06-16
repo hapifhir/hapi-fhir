@@ -238,10 +238,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return hash(theResourceType, theParamName, trim(theSystem));
 	}
 
-	public static long calculateHashIdentity(String theResourceType, String theParamName) {
-		return hash(theResourceType, theParamName);
-	}
-
 	public static long calculateHashSystemAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
 		return hash(theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
 	}

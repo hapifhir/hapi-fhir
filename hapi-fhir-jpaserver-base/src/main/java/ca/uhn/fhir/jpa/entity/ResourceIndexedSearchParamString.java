@@ -192,11 +192,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return myHashExact;
 	}
 
-	public BaseResourceIndexedSearchParam setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
-		return this;
-	}
-
 	public void setHashExact(Long theHashExact) {
 		myHashExact = theHashExact;
 	}
@@ -245,6 +240,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getResource());
 		b.append(getValueExact());
 		return b.toHashCode();
+	}
+
+	public BaseResourceIndexedSearchParam setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+		return this;
 	}
 
 	@Override
