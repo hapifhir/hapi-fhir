@@ -136,3 +136,11 @@ drop table cdr_audit_evt_target_user cascade constraints;
 drop table cdr_xact_log_step cascade constraints;
 drop table cdr_xact_log cascade constraints;
 
+
+Upgrading
+drop index IDX_SP_STRING;
+drop index IDX_SP_TOKEN;
+drop index IDX_SP_TOKEN_UNQUAL;
+
+   16919 | public             | hfj_spidx_token             |   5.5205e+07 | 24763842560 | 17233928192 |        8192 |  7529906176 | 23 GB      | 16 GB      | 8192 bytes | 7181 MB
+
