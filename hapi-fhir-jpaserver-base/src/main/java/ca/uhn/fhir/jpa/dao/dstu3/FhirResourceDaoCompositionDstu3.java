@@ -29,18 +29,13 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Composition;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
 public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Composition> implements IFhirResourceDaoComposition<Composition> {
 
@@ -48,7 +43,7 @@ public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Compos
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
-	public Bundle getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
+	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
@@ -61,12 +56,7 @@ public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Compos
 		}
 		//TODO: check if the search actually only returns one Composition, otherwise throw error
 		IBundleProvider bundleProvider = search(paramMap);
-		List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
-
-		Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
-		for (IBaseResource resource : resourceList)
-			bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
-		return bundle;
+		return bundleProvider;
 	}
 }
 

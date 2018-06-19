@@ -71,7 +71,8 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			return  null;
 		} finally {
 			endRequest(theServletRequest);
 		}

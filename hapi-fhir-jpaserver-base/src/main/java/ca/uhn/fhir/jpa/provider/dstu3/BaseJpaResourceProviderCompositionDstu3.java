@@ -15,6 +15,10 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * #%L
@@ -40,6 +44,7 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 
 	/**
 	 * Composition/123/$document
+	 *
 	 * @param theRequestDetails
 	 */
 	//@formatter:off
@@ -68,7 +73,12 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
+			for (IBaseResource resource : resourceList)
+				bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+			return bundle;
 		} finally {
 			endRequest(theServletRequest);
 		}
