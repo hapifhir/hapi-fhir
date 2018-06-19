@@ -16,9 +16,7 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.junit.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -28,7 +26,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompositionDocumentDstu3Test.class);
 	private String orgId;
 	private String patId;
-	private ArrayList<String> myObsIds;
+	private List<String> myObsIds;
 	private String encId;
 	private String listId;
 	private String compId;
@@ -85,25 +83,23 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		listId = ourClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Composition composition = new Composition();
-		composition.setSubject(new Reference(patient));
-		composition.addSection().addEntry(new Reference(patient));
-		composition.addSection().addEntry(new Reference(org));
-		composition.addSection().addEntry(new Reference(enc));
-		composition.addSection().addEntry(new Reference(listResource));
-		composition.addSection().addEntry(new Reference(listResource));
+		composition.setSubject(new Reference(patId));
+		composition.addSection().addEntry(new Reference(patId));
+		composition.addSection().addEntry(new Reference(orgId));
+		composition.addSection().addEntry(new Reference(encId));
+		composition.addSection().addEntry(new Reference(listId));
 
-		for (Observation obs : myObs) {
-			composition.addSection().addEntry(new Reference(obs));
+		for (String obsId : myObsIds) {
+			composition.addSection().addEntry(new Reference(obsId));
 		}
-
 		compId = ourClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 	}
 
 	@Test
 	public void testDocumentBundleReturnedCorrect() throws Exception {
-		myDaoConfig.setEverythingIncludesFetchPageSize(1);
+	//	myDaoConfig.setEverythingIncludesFetchPageSize(1);
 
-		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json&_count=100";
+		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
 		System.out.println(theUrl);
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 
@@ -115,11 +111,10 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		}
 
 		ourLog.info("Found IDs: {}", actual);
-
 		assertThat(actual, hasItem(patId));
-		assertThat(actual, hasItem(encId));
-		assertThat(actual, hasItem(encId));
 		assertThat(actual, hasItem(orgId));
+		assertThat(actual, hasItem(encId));
+		assertThat(actual, hasItem(listId));
 		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
 	}
 
@@ -127,13 +122,9 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		Bundle bundle;
 		HttpGet get = new HttpGet(theUrl);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
-
 		try {
-			String test = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			System.out.println(test);
-
 			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, test);
+			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -145,5 +136,4 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-
 }

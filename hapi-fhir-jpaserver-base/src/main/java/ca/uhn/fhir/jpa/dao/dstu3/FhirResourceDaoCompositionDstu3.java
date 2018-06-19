@@ -53,22 +53,19 @@ public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Compos
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
 		}
-
-//		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-//		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.ENCOUNTER_INSTANCE : EverythingModeEnum.ENCOUNTER_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdate);
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider retVal = search(paramMap);
-		List<IBaseResource> resourceList = retVal.getResources(0, retVal.size());
+		//TODO: check if the search actually only returns one Composition, otherwise throw error
+		IBundleProvider bundleProvider = search(paramMap);
+		List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
 
 		Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
 		for (IBaseResource resource : resourceList)
 			bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
-
 		return bundle;
 	}
 }
