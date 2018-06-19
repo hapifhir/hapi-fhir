@@ -23,23 +23,23 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
-import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -72,11 +72,11 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 	}
 
 	@Override
-	protected void process() throws ParseException {
+	protected void process() throws ExecutionException {
 		searchForConceptMapByUrl();
 	}
 
-	private void searchForConceptMapByUrl() {
+	private void searchForConceptMapByUrl() throws ExecutionException {
 		ourLog.info("Searching for ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			org.hl7.fhir.dstu3.model.Bundle response = client
@@ -111,61 +111,26 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 		}
 	}
 
-	private void convertConceptMapToCsv(org.hl7.fhir.dstu3.model.ConceptMap theConceptMap) {
-		ourLog.info("Exporting ConceptMap to CSV...");
-		BufferedWriter bufferedWriter = null;
-		CSVPrinter csvPrinter = null;
+	private void convertConceptMapToCsv(org.hl7.fhir.dstu3.model.ConceptMap theConceptMap) throws ExecutionException {
 		try {
-			bufferedWriter = Files.newBufferedWriter(Paths.get(file));
-			csvPrinter = new CSVPrinter(
-				bufferedWriter,
-				CSVFormat
-					.DEFAULT
-					.withRecordSeparator("\n")
-					.withHeader(Header.class));
-
-			for (org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
-				for (org.hl7.fhir.dstu3.model.ConceptMap.SourceElementComponent element : group.getElement()) {
-					for (org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent target : element.getTarget()) {
-
-						List<String> columns = new ArrayList<>();
-						columns.add(defaultString(group.getSource()));
-						columns.add(defaultString(group.getSourceVersion()));
-						columns.add(defaultString(group.getTarget()));
-						columns.add(defaultString(group.getTargetVersion()));
-						columns.add(defaultString(element.getCode()));
-						columns.add(defaultString(element.getDisplay()));
-						columns.add(defaultString(target.getCode()));
-						columns.add(defaultString(target.getDisplay()));
-						columns.add(defaultString(target.getEquivalence().toCode()));
-						columns.add(defaultString(target.getComment()));
-
-						csvPrinter.print(columns);
-					}
-				}
-			}
-		} catch (IOException ioe) {
-			throw new InternalErrorException(ioe);
-		} finally {
-			IOUtils.closeQuietly(csvPrinter);
-			IOUtils.closeQuietly(bufferedWriter);
+			convertConceptMapToCsv(VersionConvertor_30_40.convertConceptMap(theConceptMap));
+		} catch (FHIRException fe) {
+			throw new ExecutionException(fe);
 		}
-		ourLog.info("Finished exporting to {}", file);
 	}
 
 	private void convertConceptMapToCsv(ConceptMap theConceptMap) {
 		ourLog.info("Exporting ConceptMap to CSV...");
-		Writer writer = null;
-		CSVPrinter csvPrinter = null;
-		try {
-			writer = Files.newBufferedWriter(Paths.get(file));
-			csvPrinter = new CSVPrinter(
+		try (
+			Writer writer = Files.newBufferedWriter(Paths.get(file));
+			CSVPrinter csvPrinter = new CSVPrinter(
 				writer,
 				CSVFormat
 					.DEFAULT
 					.withRecordSeparator("\n")
-					.withHeader(Header.class).withQuoteMode(QuoteMode.ALL));
-
+					.withHeader(Header.class)
+					.withQuoteMode(QuoteMode.ALL));
+		) {
 			for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 				for (SourceElementComponent element : group.getElement()) {
 					for (ConceptMap.TargetElementComponent target : element.getTarget()) {
@@ -188,10 +153,8 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 			}
 		} catch (IOException ioe) {
 			throw new InternalErrorException(ioe);
-		} finally {
-			IOUtils.closeQuietly(csvPrinter);
-			IOUtils.closeQuietly(writer);
 		}
+
 		ourLog.info("Finished exporting to {}", file);
 	}
 }

@@ -41,7 +41,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier) {
+									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
 
 		if (theInputResourceId != null) {
 			return null;

@@ -964,20 +964,33 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		termConceptMap.setUrl(theConceptMap.getUrl());
 
 		// Get existing entity so it can be deleted.
-		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(termConceptMap.getResourcePid());
+		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
 
 		/*
 		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
 		 */
 
 		if (optionalExistingTermConceptMapById.isPresent()) {
-			Long id = optionalExistingTermConceptMapById.get().getId();
-			ourLog.info("Deleting existing TermConceptMap {} and its children...", id);
-			myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(id);
-			myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(id);
-			myConceptMapGroupDao.deleteTermConceptMapGroupById(id);
-			myConceptMapDao.deleteTermConceptMapById(id);
-			ourLog.info("Done deleting existing TermConceptMap {} and its children.", id);
+			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();
+
+			ourLog.info("Deleting existing TermConceptMap {} and its children...", existingTermConceptMap.getId());
+			for (TermConceptMapGroup group : existingTermConceptMap.getConceptMapGroups()) {
+
+				for (TermConceptMapGroupElement element : group.getConceptMapGroupElements()) {
+
+					for (TermConceptMapGroupElementTarget target : element.getConceptMapGroupElementTargets()) {
+
+						myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(target.getId());
+					}
+
+					myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(element.getId());
+				}
+
+				myConceptMapGroupDao.deleteTermConceptMapGroupById(group.getId());
+			}
+
+			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
+			ourLog.info("Done deleting existing TermConceptMap {} and its children.", existingTermConceptMap.getId());
 
 			ourLog.info("Flushing...");
 			myConceptMapGroupElementTargetDao.flush();

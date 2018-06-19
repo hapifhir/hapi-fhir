@@ -25,8 +25,8 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class ExportConceptMapToCsvCommandTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandTest.class);
+public class ExportConceptMapToCsvCommandR4Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandR4Test.class);
 	private static final String CM_URL = "http://example.com/conceptmap";
 	private static final String VS_URL_1 = "http://example.com/valueset/1";
 	private static final String VS_URL_2 = "http://example.com/valueset/2";
@@ -40,6 +40,7 @@ public class ExportConceptMapToCsvCommandTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
 	private static Server ourServer;
+	private static String ourVersion = "r4";
 
 	static {
 		System.setProperty("test", "true");
@@ -80,7 +81,7 @@ public class ExportConceptMapToCsvCommandTest {
 		ourLog.info("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
 
 		App.main(new String[] {"export-conceptmap-to-csv",
-			"-v", "r4",
+			"-v", ourVersion,
 			"-t", ourBase,
 			"-u", CM_URL,
 			"-f", FILE,

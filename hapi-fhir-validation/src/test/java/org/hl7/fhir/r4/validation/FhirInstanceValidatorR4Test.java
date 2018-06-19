@@ -318,6 +318,15 @@ public class FhirInstanceValidatorR4Test {
 	}
 
 	@Test
+	public void testValidateBundleWithNoFullUrl() throws IOException {
+		String encoded = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/r4-caredove-bundle.json"));
+
+		ValidationResult output = myVal.validateWithResult(encoded);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(44, errors.size());
+	}
+
+	@Test
 	public void testBase64Valid() {
 		Base64BinaryType value = new Base64BinaryType(new byte[] {2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
 		Media med = new Media();

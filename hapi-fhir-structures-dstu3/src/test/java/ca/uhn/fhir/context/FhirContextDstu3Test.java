@@ -33,6 +33,12 @@ public class FhirContextDstu3Test {
 	}
 
 	@Test
+	public void testRuntimeSearchParamToString() {
+		String val = ourCtx.getResourceDefinition("Patient").getSearchParam("gender").toString();
+		assertEquals("RuntimeSearchParam[base=[Patient],name=gender,path=Patient.gender,id=<null>,uri=<null>]", val);
+	}
+
+	@Test
 	public void testCustomTypeDoesntBecomeDefault() {
 		FhirContext ctx = FhirContext.forDstu3();
 
@@ -69,7 +75,7 @@ public class FhirContextDstu3Test {
 		final FhirContext ctx = FhirContext.forDstu3();
 
 		final int numThreads = 40;
-		final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
+		final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
 		final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
 		try {
 			final CountDownLatch threadsReady = new CountDownLatch(numThreads);
@@ -77,19 +83,17 @@ public class FhirContextDstu3Test {
 
 			for (int i = 0; i < numThreads; i++) {
 				threadPool.submit(
-					new Runnable() {
-						public void run() {
-							threadsReady.countDown();
-							try {
-								threadsReady.await();
-								RuntimeResourceDefinition def = ctx.getResourceDefinition("patient");
-								ourLog.info(def.toString());
-								assertNotNull(def);
-							} catch (final Exception e) {
-								exceptions.add(e);
-							}
-							threadsFinished.countDown();
+					() -> {
+						threadsReady.countDown();
+						try {
+							threadsReady.await();
+							RuntimeResourceDefinition def = ctx.getResourceDefinition("patient");
+							ourLog.info(def.toString());
+							assertNotNull(def);
+						} catch (final Exception e) {
+							exceptions.add(e);
 						}
+						threadsFinished.countDown();
 					}
 				);
 			}
@@ -108,18 +112,15 @@ public class FhirContextDstu3Test {
 	 * See #794
 	 */
 	@Test
-	public void testInitializeThreadSafety2() throws InterruptedException {
+	public void testInitializeThreadSafety2() {
 		final FhirContext dstu3FhirContext = FhirContext.forDstu3();
 
 		final AtomicInteger count = new AtomicInteger();
 
 		for (int i = 0; i < 10; i++) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					OperationOutcomeUtil.newInstance(dstu3FhirContext);
-					ourLog.info("Have finished {}", count.incrementAndGet());
-				}
+			new Thread(() -> {
+				OperationOutcomeUtil.newInstance(dstu3FhirContext);
+				ourLog.info("Have finished {}", count.incrementAndGet());
 			}).start();
 		}
 

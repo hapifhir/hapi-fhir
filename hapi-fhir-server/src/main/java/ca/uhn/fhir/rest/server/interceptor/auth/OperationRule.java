@@ -29,10 +29,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class OperationRule extends BaseRule implements IAuthRule {
 
-	private RuleBuilder.ITenantApplicabilityChecker myTenentApplicabilityChecker;
+	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -75,17 +76,25 @@ class OperationRule extends BaseRule implements IAuthRule {
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
+	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		if (myTenentApplicabilityChecker != null) {
-			if (!myTenentApplicabilityChecker.applies(theRequestDetails)) {
+		if (myTenantApplicabilityChecker != null) {
+			if (!myTenantApplicabilityChecker.applies(theRequestDetails)) {
 				return null;
 			}
 		}
 
 		boolean applies = false;
 		switch (theOperation) {
+			case ADD_TAGS:
+			case DELETE_TAGS:
+			case GET_TAGS:
+			case GET_PAGE:
+			case GRAPHQL_REQUEST:
+				// These things can't be tracked by the AuthorizationInterceptor
+				// at this time
+				return null;
 			case EXTENDED_OPERATION_SERVER:
 				if (myAppliesToServer || myAppliesAtAnyLevel) {
 					applies = true;
@@ -130,6 +139,40 @@ class OperationRule extends BaseRule implements IAuthRule {
 					}
 				}
 				break;
+			case CREATE:
+				break;
+			case DELETE:
+				break;
+			case HISTORY_INSTANCE:
+				break;
+			case HISTORY_SYSTEM:
+				break;
+			case HISTORY_TYPE:
+				break;
+			case READ:
+				break;
+			case SEARCH_SYSTEM:
+				break;
+			case SEARCH_TYPE:
+				break;
+			case TRANSACTION:
+				break;
+			case UPDATE:
+				break;
+			case VALIDATE:
+				break;
+			case VREAD:
+				break;
+			case METADATA:
+				break;
+			case META_ADD:
+				break;
+			case META:
+				break;
+			case META_DELETE:
+				break;
+			case PATCH:
+				break;
 			default:
 				return null;
 		}
@@ -160,8 +203,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myOperationName = theOperationName;
 	}
 
-	public void setTenentApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenentApplicabilityChecker) {
-		myTenentApplicabilityChecker = theTenentApplicabilityChecker;
+	public void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
 	}
 
 }

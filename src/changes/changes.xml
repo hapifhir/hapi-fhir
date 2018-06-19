@@ -42,6 +42,30 @@
 				Spring-data (used by the JPA server) has been upgraded to version 2.0.7
 				(from version 1.11.6). Thanks to Roman Doboni for the pull request!
 			</action>
+			<action type="fix">
+				A crash in the validator was fixed: Validating a Bundle that did not have fullUrl entries
+				in a required spot caused a NullPointerException.
+			</action>
+			<action type="add">
+				AuthorizationInterceptor now examines requests more closely in order
+				to block requests early that are not possibly going to return
+				allowable results when compartment rules are used. For example,
+				if an AuthorizationInterceptor is configured to allow only
+				<![CDATA[<b>read</b>]]>
+				access to compartment
+				<![CDATA[<code>Patient/123</code>]]>,
+				a search for
+				<![CDATA[<code>Observation?subject=987</code>]]>
+				will now be blocked before the method handler is called. Previously
+				the search was performed and the results were examined in order to
+				determine whether they were all in the appropriate compartment, but
+				this incurs a performance cost, and means that this search would
+				successfully return an empty Bundle if no matches were present.
+				<![CDATA[<br/><br/>]]>
+				A new setting on AuthorizationInterceptor called
+				<![CDATA[<code>setFlags(flags)</code>]]>
+				can be used to maintain the previous behaviour.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

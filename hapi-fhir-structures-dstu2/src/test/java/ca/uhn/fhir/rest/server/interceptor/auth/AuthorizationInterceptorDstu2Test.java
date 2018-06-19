@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -65,7 +66,7 @@ public class AuthorizationInterceptorDstu2Test {
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
+		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
 			ourServlet.unregisterInterceptor(next);
 		}
 		ourReturn = null;
@@ -1166,8 +1167,8 @@ public class AuthorizationInterceptorDstu2Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -1177,8 +1178,8 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-						.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
-						.build();
+					.allow("Rule 1").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
 			}
 		});
 
@@ -1187,13 +1188,13 @@ public class AuthorizationInterceptorDstu2Test {
 		String respString;
 		Bundle respBundle;
 
-		ourReturn = new ArrayList<IResource>();
+		ourReturn = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
-			ourReturn.add(createPatient(1));
+			ourReturn.add(createObservation(i, "Patient/1"));
 		}
 
 		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=5&_format=json");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_count=5&_format=json&subject=Patient/1");
 		status = ourClient.execute(httpGet);
 		respString = extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -1201,7 +1202,7 @@ public class AuthorizationInterceptorDstu2Test {
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
 		assertEquals(5, respBundle.getEntry().size());
 		assertEquals(10, respBundle.getTotal().intValue());
-		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
@@ -1215,7 +1216,7 @@ public class AuthorizationInterceptorDstu2Test {
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
 		assertEquals(5, respBundle.getEntry().size());
 		assertEquals(10, respBundle.getTotal().intValue());
-		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals("Observation/5", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNull(respBundle.getLink("next"));
 
 	}
@@ -1226,8 +1227,8 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-						.allow("Rule 1").read().resourcesOfType(Patient.class).inCompartment("Patient", new IdDt("Patient/1"))
-						.build();
+					.allow("Rule 1").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdDt("Patient/1"))
+					.build();
 			}
 		});
 
@@ -1236,16 +1237,16 @@ public class AuthorizationInterceptorDstu2Test {
 		String respString;
 		Bundle respBundle;
 
-		ourReturn = new ArrayList<IResource>();
+		ourReturn = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
-			ourReturn.add(createPatient(1));
+			ourReturn.add(createObservation(i, "Patient/1"));
 		}
-		for (int i = 0; i < 5; i++) {
-			ourReturn.add(createPatient(2));
+		for (int i = 5; i < 10; i++) {
+			ourReturn.add(createObservation(i, "Patient/2"));
 		}
 
 		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=5&_format=json");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_count=5&_format=json&subject=Patient/1");
 		status = ourClient.execute(httpGet);
 		respString = extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -1253,7 +1254,7 @@ public class AuthorizationInterceptorDstu2Test {
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
 		assertEquals(5, respBundle.getEntry().size());
 		assertEquals(10, respBundle.getTotal().intValue());
-		assertEquals("Patient/1", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
@@ -1261,7 +1262,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourHitMethod = false;
 		httpGet = new HttpGet(respBundle.getLink("next").getUrl());
 		status = ourClient.execute(httpGet);
-		respString = extractResponseAndClose(status);
+		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 
@@ -1283,7 +1284,7 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpResponse status;
 		String response;
 
-		ourReturn = Arrays.asList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2");
 		status = ourClient.execute(httpGet);
@@ -1291,9 +1292,9 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
-		ourReturn = Arrays.asList(createObservation(10, "Patient/2"));
+		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
 		status = ourClient.execute(httpGet);
@@ -1303,7 +1304,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
-		ourReturn = Arrays.asList(createCarePlan(10, "Patient/2"));
+		ourReturn = Collections.singletonList(createCarePlan(10, "Patient/2"));
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/CarePlan/10");
 		status = ourClient.execute(httpGet);
@@ -1321,7 +1322,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -1331,7 +1332,7 @@ public class AuthorizationInterceptorDstu2Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -1359,7 +1360,7 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpPost httpPost;
 		HttpResponse status;
 
-		ourReturn = Arrays.asList((IResource) output);
+		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(createFhirResourceEntity(input));
@@ -1419,6 +1420,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/1")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
+		ourLog.debug(response);
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
@@ -1469,7 +1471,7 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpDelete httpDelete;
 		HttpResponse status;
 
-		ourReturn = Arrays.asList(createPatient(1));
+		ourReturn = Collections.singletonList(createPatient(1));
 
 		ourHitMethod = false;
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
@@ -1497,7 +1499,7 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpDelete httpDelete;
 		HttpResponse status;
 
-		ourReturn = Arrays.asList(createPatient(1));
+		ourReturn = Collections.singletonList(createPatient(1));
 
 		ourHitMethod = false;
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
@@ -1525,7 +1527,7 @@ public class AuthorizationInterceptorDstu2Test {
 		HttpResponse status;
 
 		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/2");
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
@@ -1533,7 +1535,7 @@ public class AuthorizationInterceptorDstu2Test {
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
-		ourReturn = Arrays.asList(createPatient(1));
+		ourReturn = Collections.singletonList(createPatient(1));
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/1");
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
@@ -1665,6 +1667,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
+		ourLog.debug(response);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
@@ -1703,6 +1706,7 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
+		ourLog.debug(response);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
@@ -1718,7 +1722,7 @@ public class AuthorizationInterceptorDstu2Test {
 	}
 
 	@Test
-	public void testInvalidInstanceIds() throws Exception {
+	public void testInvalidInstanceIds() {
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance((String) null);
 			fail();
@@ -2009,7 +2013,7 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 		@Search()
-		public List<IResource> search() {
+		public List<IResource> search(@OptionalParam(name="subject")ReferenceParam theSubject) {
 			ourHitMethod = true;
 			return ourReturn;
 		}
