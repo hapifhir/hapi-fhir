@@ -2440,7 +2440,7 @@ public class XmlParserDstu2_1Test {
 		assertThat(patient.getIdentifier().get(0).getType().getCoding(), IsEmptyCollection.empty());
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).unknownAttribute(any(IParseLocation.class), capt.capture());
+		verify(errorHandler, times(1)).unknownAttribute(nullable(IParseLocation.class), capt.capture());
 
 		assertEquals("value", capt.getValue());
 	}

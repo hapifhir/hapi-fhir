@@ -118,7 +118,7 @@ public class JaxRsMethodBindings {
      */
     public BaseMethodBinding<?> getBinding(RestOperationTypeEnum operationType, String theBindingKey) {
         String bindingKey = StringUtils.defaultIfBlank(theBindingKey, DEFAULT_METHOD_KEY);
-		ConcurrentHashMap<String, BaseMethodBinding<?>> map = operationBindings.get(operationType);
+		ConcurrentHashMap<String, BaseMethodBinding<?>> map = getMapForOperation(operationType);
         if(map == null || !map.containsKey(bindingKey)) {
             throw new NotImplementedOperationException("Operation not implemented");
         }  else {

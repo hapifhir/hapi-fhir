@@ -21,11 +21,15 @@ package ca.uhn.fhir.rest.server;
  */
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.util.VersionUtil;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RestulfulServerConfiguration {
     
@@ -36,7 +40,7 @@ public class RestulfulServerConfiguration {
     private String serverName = "HAPI FHIR";
     private FhirContext fhirContext;
     private IServerAddressStrategy serverAddressStrategy;
-    private String conformanceDate;
+    private IPrimitiveType<Date> myConformanceDate;
     
     /**
      * Constructor
@@ -71,11 +75,10 @@ public class RestulfulServerConfiguration {
     }
 
     /**
-     * Set the serverBindings
-     * @param serverBindings the serverBindings to set
+     * Set the theServerBindings
      */
-    public RestulfulServerConfiguration setServerBindings(List<BaseMethodBinding<?>> serverBindings) {
-        this.serverBindings = serverBindings;
+    public RestulfulServerConfiguration setServerBindings(List<BaseMethodBinding<?>> theServerBindings) {
+        this.serverBindings = theServerBindings;
         return this;
     }
 
@@ -84,6 +87,9 @@ public class RestulfulServerConfiguration {
      * @return the implementationDescription
      */
     public String getImplementationDescription() {
+    	if (isBlank(implementationDescription)) {
+			return "HAPI FHIR";
+		}
         return implementationDescription;
     }
 
@@ -161,23 +167,25 @@ public class RestulfulServerConfiguration {
      */
     public void setServerAddressStrategy(IServerAddressStrategy serverAddressStrategy) {
         this.serverAddressStrategy = serverAddressStrategy;
-    }    
+    }
 
-    
-    /**
-     * Get the conformanceDate
-     * @return the conformanceDate
-     */
-    public String getConformanceDate() {
-        return conformanceDate;
+
+	/**
+	 * Get the date that will be specified in the conformance profile
+	 * exported by this server. Typically this would be populated with
+	 * an InstanceType.
+	 */
+    public IPrimitiveType<Date> getConformanceDate() {
+        return myConformanceDate;
     }
 
     /**
-     * Set the conformanceDate
-     * @param conformanceDate the conformanceDate to set
+     * Set the date that will be specified in the conformance profile
+	  * exported by this server. Typically this would be populated with
+	  * an InstanceType.
      */
-    public void setConformanceDate(String conformanceDate) {
-        this.conformanceDate = conformanceDate;
+    public void setConformanceDate(IPrimitiveType<Date> theConformanceDate) {
+        myConformanceDate = theConformanceDate;
     }
     
 }

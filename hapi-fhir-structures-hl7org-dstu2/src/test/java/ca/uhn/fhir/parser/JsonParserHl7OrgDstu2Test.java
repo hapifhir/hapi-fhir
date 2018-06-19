@@ -1016,42 +1016,6 @@ public class JsonParserHl7OrgDstu2Test {
 		//@formatter:on
   }
 
-  /*
-   * Narrative generation is disabled for HL7org structs for now
-   */
-  // @Test
-  public void testNarrativeGeneration() throws DataFormatException, IOException {
-
-    Patient patient = new Patient();
-    patient.addName().addFamily("Smith");
-    Organization org = new Organization();
-    patient.getManagingOrganization().setResource(org);
-
-    INarrativeGenerator gen = new INarrativeGenerator() {
-
-      @Override
-      public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
-        try {
-          theNarrative.setDivAsString("<div>help</div>");
-        } catch (Exception e) {
-          throw new Error(e);
-        }
-        theNarrative.setStatusAsString("generated");
-      }
-
-    };
-
-    FhirContext context = ourCtx;
-    context.setNarrativeGenerator(gen);
-    IParser p = context.newJsonParser();
-    p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
-    String str = p.encodeResourceToString(patient);
-
-    ourLog.info(str);
-
-    assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
-  }
-
   @Test
   public void testNestedContainedResources() {
 

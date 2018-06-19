@@ -420,7 +420,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public int getOffset() {
+			public long getOffset() {
 				return theFromIndex;
 			}
 		};
@@ -702,7 +702,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						nextResult.setOrder(myCountSaved++);
 						resultsToSave.add(nextResult);
 					}
-					mySearchResultDao.save(resultsToSave);
+					mySearchResultDao.saveAll(resultsToSave);
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = myUnsyncedPids.size();

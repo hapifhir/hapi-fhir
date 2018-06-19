@@ -274,6 +274,7 @@ public class Constants {
 		corsAllowedHeaders.add("Content-Type");
 		corsAllowedHeaders.add("Origin");
 		corsAllowedHeaders.add("Prefer");
+		corsAllowedHeaders.add("X-FHIR-Starter");
 		corsAllowedHeaders.add("X-Requested-With");
 		CORS_ALLOWED_HEADERS = Collections.unmodifiableSet(corsAllowedHeaders);
 

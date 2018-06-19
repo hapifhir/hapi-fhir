@@ -43,6 +43,7 @@ import java.util.zip.GZIPInputStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -102,19 +103,19 @@ public class FhirInstanceValidatorR4Test {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(any(FhirContext.class), any(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
+		when(myMockSupport.expandValueSet(nullable(FhirContext.class), nullable(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpansionComponent>() {
 			@Override
 			public ValueSetExpansionComponent answer(InvocationOnMock theInvocation) throws Throwable {
 				ConceptSetComponent arg = (ConceptSetComponent) theInvocation.getArguments()[ 0 ];
 				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
 				if (retVal == null) {
-					retVal = myDefaultValidationSupport.expandValueSet(any(FhirContext.class), arg);
+					retVal = myDefaultValidationSupport.expandValueSet(nullable(FhirContext.class), arg);
 				}
 				ourLog.debug("expandValueSet({}) : {}", new Object[] {theInvocation.getArguments()[ 0 ], retVal});
 				return retVal;
 			}
 		});
-		when(myMockSupport.isCodeSystemSupported(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<Boolean>() {
+		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
 				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[ 1 ]);
@@ -122,7 +123,7 @@ public class FhirInstanceValidatorR4Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchResource(any(FhirContext.class), any(Class.class), any(String.class))).thenAnswer(new Answer<IBaseResource>() {
+		when(myMockSupport.fetchResource(nullable(FhirContext.class), nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
 				IBaseResource retVal;
@@ -136,7 +137,7 @@ public class FhirInstanceValidatorR4Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(any(FhirContext.class), any(String.class), any(String.class), any(String.class))).thenAnswer(new Answer<CodeValidationResult>() {
+		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<CodeValidationResult>() {
 			@Override
 			public CodeValidationResult answer(InvocationOnMock theInvocation) throws Throwable {
 				FhirContext ctx = (FhirContext) theInvocation.getArguments()[ 0 ];
@@ -152,7 +153,7 @@ public class FhirInstanceValidatorR4Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchCodeSystem(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<CodeSystem>() {
+		when(myMockSupport.fetchCodeSystem(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) throws Throwable {
 				CodeSystem retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[ 0 ], (String) theInvocation.getArguments()[ 1 ]);
@@ -160,7 +161,7 @@ public class FhirInstanceValidatorR4Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchStructureDefinition(any(FhirContext.class), any(String.class))).thenAnswer(new Answer<StructureDefinition>() {
+		when(myMockSupport.fetchStructureDefinition(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) throws Throwable {
 				StructureDefinition retVal = myDefaultValidationSupport.fetchStructureDefinition((FhirContext) theInvocation.getArguments()[ 0 ], (String) theInvocation.getArguments()[ 1 ]);
@@ -168,7 +169,7 @@ public class FhirInstanceValidatorR4Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.fetchAllStructureDefinitions(any(FhirContext.class))).thenAnswer(new Answer<List<StructureDefinition>>() {
+		when(myMockSupport.fetchAllStructureDefinitions(nullable(FhirContext.class))).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) throws Throwable {
 				List<StructureDefinition> retVal = myDefaultValidationSupport.fetchAllStructureDefinitions((FhirContext) theInvocation.getArguments()[ 0 ]);
@@ -314,6 +315,15 @@ public class FhirInstanceValidatorR4Test {
 		assertEquals(1, errors.size());
 		assertEquals("The value \"%%%2@()()\" is not a valid Base64 value", errors.get(0).getMessage());
 
+	}
+
+	@Test
+	public void testValidateBundleWithNoFullUrl() throws IOException {
+		String encoded = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/r4-caredove-bundle.json"));
+
+		ValidationResult output = myVal.validateWithResult(encoded);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(44, errors.size());
 	}
 
 	@Test

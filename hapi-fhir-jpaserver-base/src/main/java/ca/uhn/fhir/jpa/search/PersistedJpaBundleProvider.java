@@ -75,13 +75,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		mySearchEntity = null;
 	}
 
-	protected List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
+	private List<IBaseResource> doHistoryInTransaction(int theFromIndex, int theToIndex) {
 		List<ResourceHistoryTable> results;
 
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> q = cb.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
-		List<Predicate> predicates = new ArrayList<Predicate>();
+		List<Predicate> predicates = new ArrayList<>();
 
 		if (mySearchEntity.getResourceType() == null) {
 			// All resource types
@@ -215,6 +215,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 	}
 
+	@Override
 	public String getUuid() {
 		return myUuid;
 	}
@@ -223,7 +224,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myCacheHit;
 	}
 
-	public void setCacheHit(boolean theCacheHit) {
+	void setCacheHit(boolean theCacheHit) {
 		myCacheHit = theCacheHit;
 	}
 
@@ -253,7 +254,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		mySearchDao = theSearchDao;
 	}
 
-	protected void setSearchEntity(Search theSearchEntity) {
+	void setSearchEntity(Search theSearchEntity) {
 		mySearchEntity = theSearchEntity;
 	}
 
@@ -269,8 +270,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return Math.max(0, size);
 	}
 
-	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
-		Set<Long> includedPids = new HashSet<Long>();
+	List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
+		Set<Long> includedPids = new HashSet<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			includedPids.addAll(sb.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
 			includedPids.addAll(sb.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));

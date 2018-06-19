@@ -5,6 +5,10 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.*;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -38,6 +42,18 @@ public class RuntimeSearchParam {
 	private final RestSearchParameterTypeEnum myParamType;
 	private final String myPath;
 	private final Set<String> myTargets;
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("base", myBase)
+			.append("name", myName)
+			.append("path", myPath)
+			.append("id", myId)
+			.append("uri", myUri)
+			.toString();
+	}
+
 	private final Set<String> myProvidesMembershipInCompartments;
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
@@ -55,9 +71,36 @@ public class RuntimeSearchParam {
 		this(theId, theUri, theName, theDescription, thePath, theParamType, theCompositeOf, theProvidesMembershipInCompartments, theTargets, theStatus, null);
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		RuntimeSearchParam that = (RuntimeSearchParam) theO;
+
+		return new EqualsBuilder()
+			.append(getId(), that.getId())
+			.append(getName(), that.getName())
+			.append(getPath(), that.getPath())
+			.append(getUri(), that.getUri())
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(getId())
+			.append(getName())
+			.append(getPath())
+			.append(getUri())
+			.toHashCode();
+	}
+
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf,
-			Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
+									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
 		super();
+
 		myId = theId;
 		myUri = theUri;
 		myName = theName;

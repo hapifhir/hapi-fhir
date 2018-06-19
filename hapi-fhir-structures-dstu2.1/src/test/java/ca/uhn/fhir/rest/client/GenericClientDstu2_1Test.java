@@ -470,7 +470,7 @@ public class GenericClientDstu2_1Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenThrow(IllegalStateException.class, RuntimeException.class, Exception.class);
+		when(myHttpResponse.getEntity().getContent()).thenThrow(IllegalStateException.class, RuntimeException.class, IOException.class);
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -492,7 +492,7 @@ public class GenericClientDstu2_1Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals("java.lang.Exception", e.getMessage());
+			assertThat(e.getMessage(), containsString("java.io.IOException"));
 		}
 	}
 

@@ -1,24 +1,5 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.net.URL;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.*;
-import org.mockito.ArgumentMatcher;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -35,6 +16,20 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.*;
+import org.mockito.ArgumentMatcher;
+import org.slf4j.LoggerFactory;
+
+import java.net.URL;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 public class LoggingInterceptorTest {
 
@@ -76,10 +71,10 @@ public class LoggingInterceptorTest {
 		Patient patient = client.read(Patient.class, "1");
 		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+		verify(myMockAppender, times(2)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
-			public boolean matches(final Object argument) {
-				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+			public boolean matches(final ILoggingEvent argument) {
+				String formattedMessage = argument.getFormattedMessage();
 				System.out.flush();
 				System.out.println("** Got Message: " + formattedMessage);
 				System.out.flush();
@@ -103,8 +98,8 @@ public class LoggingInterceptorTest {
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
-			public boolean matches(final Object argument) {
-				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+			public boolean matches(final ILoggingEvent argument) {
+				String formattedMessage = argument.getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
 				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}
@@ -118,8 +113,8 @@ public class LoggingInterceptorTest {
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
-			public boolean matches(final Object argument) {
-				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+			public boolean matches(final ILoggingEvent argument) {
+				String formattedMessage = argument.getFormattedMessage();
 				System.out.println("Verifying: " + formattedMessage);
 				return formattedMessage.replace("; ", ";").toLowerCase().contains("Content-Type: application/fhir+xml;charset=utf-8".toLowerCase());
 			}

@@ -47,7 +47,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 	 * See #778
 	 */
 	@Test
-	public void testReadingObservationAccessRight() throws IOException {
+	public void testReadingObservationAccessRight() {
 		Practitioner practitioner1 = new Practitioner();
 		final IIdType practitionerId1 = ourClient.create().resource(practitioner1).execute().getId().toUnqualifiedVersionless();
 
@@ -105,7 +105,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 	 * See #667
 	 */
 	@Test
-	public void testBlockUpdatingPatientUserDoesnNotHaveAccessTo() throws IOException {
+	public void testBlockUpdatingPatientUserDoesnNotHaveAccessTo() {
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
 		final IIdType pid1 = ourClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();

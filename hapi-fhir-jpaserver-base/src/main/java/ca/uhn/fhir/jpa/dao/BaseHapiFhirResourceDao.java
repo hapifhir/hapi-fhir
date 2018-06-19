@@ -1314,7 +1314,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false && !theForValidate) {
 			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
-			myResourceLinkDao.delete(resultList);
+			myResourceLinkDao.deleteAll(resultList);
 			return;
 		}
 
@@ -1336,5 +1336,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
+	@PostConstruct
+	public void start() {
+		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
+	}
 
 }
