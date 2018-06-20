@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.print.attribute.standard.Severity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,9 +76,19 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 		try {
 			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
 			List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+
+			boolean foundCompositionResource = false;
 			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
-			for (IBaseResource resource : resourceList)
-				bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+			for (IBaseResource resource : resourceList) {
+								bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+								if (((Resource) resource).getResourceType() == ResourceType.Composition) {
+									if (foundCompositionResource == true) {
+										OperationOutcome operationOutcome = new OperationOutcome().addIssue(new OperationOutcome.OperationOutcomeIssueComponent().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.PROCESSING));
+										throw new InvalidRequestException("$document can only be applied to a single Composition Resource", operationOutcome);
+									}
+									foundCompositionResource = true;
+								}
+			}
 			return bundle;
 		} finally {
 			endRequest(theServletRequest);

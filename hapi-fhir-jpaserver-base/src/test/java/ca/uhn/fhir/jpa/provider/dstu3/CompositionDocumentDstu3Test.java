@@ -93,19 +93,37 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			composition.addSection().addEntry(new Reference(obsId));
 		}
 		compId = ourClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Composition composition2 = new Composition();
+		composition.setSubject(new Reference(patId));
 	}
 
 	@Test
-	public void testDocumentBundleReturnedCorrect() throws Exception {
-	//	myDaoConfig.setEverythingIncludesFetchPageSize(1);
-
-		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+	public void testDocumentBundleMultipleCompositions() throws Exception {
+		String theUrl = ourServerBase + "/Composition?patient=" + patId + "/$document?_format=json";
 		System.out.println(theUrl);
+
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
-		Set<String> actual = new TreeSet<String>();
+		Set<String> actual = new HashSet<>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+	}
+
+	@Test
+	public void testDocumentBundleReturnedCorrect() throws IOException {
+	//	myDaoConfig.setEverythingIncludesFetchPageSize(1);
+
+		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+
+		assertNull(bundle.getLink("next"));
+
+		Set<String> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
@@ -123,8 +141,10 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		HttpGet get = new HttpGet(theUrl);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
-			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
+	//		assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
+			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			System.out.println(resourceString);
+			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, resourceString);
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
