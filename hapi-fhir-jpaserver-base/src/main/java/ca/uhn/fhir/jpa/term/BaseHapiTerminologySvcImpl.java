@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,9 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.RegexpQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -79,6 +81,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Ascii.toLowerCase;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -352,19 +355,39 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 								} else {
 									addDisplayFilterInexact(qb, bool, nextFilter);
 								}
-							} else if ((nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) && nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
+							} else if (nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) {
 
 								TermConcept code = findCode(system, nextFilter.getValue());
 								if (code == null) {
 									throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
 								}
 
-								ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-								bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+								if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
+									ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+									bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+								} else {
+									throw new InvalidRequestException("Don't know how to handle op=" + nextFilter.getOp() + " on property " + nextFilter.getProperty());
+								}
 
 							} else {
 
-								bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
+								if (nextFilter.getOp() == ValueSet.FilterOperator.REGEX) {
+
+									String value = nextFilter.getValue();
+									if (value.endsWith("$")) {
+										value = value.substring(0,value.length() - 1);
+									}
+									Term term = new Term("PROP"+nextFilter.getProperty(), value);
+									RegexpQuery query = new RegexpQuery(term);
+									bool.must(query);
+
+
+								} else {
+
+									bool.must(qb.phrase().onField("PROP" + nextFilter.getProperty()).sentence(nextFilter.getValue()).createQuery());
+//									bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
+
+								}
 
 							}
 						}
@@ -905,7 +928,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		codeSystem.setCurrentVersion(theCodeSystemVersion);
 		codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
 
-		ourLog.info("Setting codesystemversion on {} concepts...", totalCodeCount);
+		ourLog.info("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			populateVersion(next, codeSystemVersion);

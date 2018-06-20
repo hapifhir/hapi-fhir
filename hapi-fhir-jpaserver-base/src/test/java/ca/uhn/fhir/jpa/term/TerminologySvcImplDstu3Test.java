@@ -144,6 +144,98 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testExpandValueSetPropertySearchWithRegexInclude() {
+		runInTransaction(()->{
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CS_URL);
+			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+			TermCodeSystemVersion cs = new TermCodeSystemVersion();
+			cs.setResource(table);
+
+			TermConcept code;
+			code = new TermConcept(cs, "50015-7");
+			code.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-3");
+			code.addPropertyString("SYSTEM", "Ser");
+			cs.getConcepts().add(code);
+
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+		});
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("SYSTEM")
+			.setOp(ValueSet.FilterOperator.REGEX)
+			.setValue(".*\\^Donor$");
+//			.setValue("\\\\^Donor$");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
+	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExclude() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept code;
+		code = new TermConcept(cs, "50015-7");
+		code.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+		cs.getConcepts().add(code);
+
+		code = new TermConcept(cs, "43343-3");
+		code.addPropertyString("SYSTEM", "Ser");
+		cs.getConcepts().add(code);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("SYSTEM")
+			.setOp(ValueSet.FilterOperator.REGEX)
+			.setValue("\\\\^Donor$");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3"));
+	}
+
+		@Test
 	public void testExpandValueSetPropertySearch() {
 		createCodeSystem();
 		createCodeSystem2();

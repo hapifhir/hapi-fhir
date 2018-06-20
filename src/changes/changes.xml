@@ -66,6 +66,11 @@
 				<![CDATA[<code>setFlags(flags)</code>]]>
 				can be used to maintain the previous behaviour.
 			</action>
+			<action type="974">
+				JPA server loading logic has been improved to enhance performance when
+				loading a large number of results in a page, or when loading multiple
+				search results with tags. Thanks to Frank Tao for the pull request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
