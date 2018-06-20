@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.persistence.TemporalType;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,8 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 
-import javax.persistence.TemporalType;
-import java.util.Date;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 
 /*
  * #%L
@@ -82,4 +85,10 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
 		"WHERE v.myResourceVersion != t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
+	
+	@Query("" + 
+		"SELECT h FROM ResourceHistoryTable h " + 
+		"INNER JOIN ResourceTable r ON (r.myId = h.myResourceId and r.myVersion = h.myResourceVersion) " + 
+		"WHERE r.myId in (:pids)")
+	Collection<ResourceHistoryTable> findByResourceIds(@Param("pids") Collection<Long> pids);
 }

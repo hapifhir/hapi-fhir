@@ -207,7 +207,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 
-		T resourceToDelete = toResource(myResourceType, entity, false);
+		T resourceToDelete = toResource(myResourceType, entity, null, null, false);
 
 		// Notify IServerOperationInterceptors about pre-action call
 		if (theReques != null) {
@@ -289,7 +289,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 			deletedResources.add(entity);
 
-			T resourceToDelete = toResource(myResourceType, entity, false);
+			T resourceToDelete = toResource(myResourceType, entity, null, null, false);
 
 			// Notify IServerOperationInterceptors about pre-action call
 			if (theRequest != null) {
@@ -854,7 +854,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		BaseHasResource entity = readEntity(theId);
 		validateResourceType(entity);
 
-		T retVal = toResource(myResourceType, entity, false);
+		T retVal = toResource(myResourceType, entity, null, null, false);
 
 		IPrimitiveType<Date> deleted;
 		if (retVal instanceof IResource) {
