@@ -328,7 +328,7 @@ public class SearchCoordinatorSvcImplTest {
 
 						ArrayList<Long> results = new ArrayList<Long>();
 						int max = (page.getPageNumber() * page.getPageSize()) + page.getPageSize();
-						for (int i = page.getOffset(); i < max; i++) {
+						for (long i = page.getOffset(); i < max; i++) {
 							results.add(i + 10L);
 						}
 
