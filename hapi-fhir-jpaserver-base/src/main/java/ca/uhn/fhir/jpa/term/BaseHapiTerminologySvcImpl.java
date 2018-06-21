@@ -40,9 +40,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.TermsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.hibernate.ScrollMode;
@@ -81,7 +83,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Ascii.toLowerCase;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -134,10 +135,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
 	private ApplicationContext myApplicationContext;
 
-	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept) {
-		if (theAddedCodes.add(theConcept.getCode())) {
+	/**
+	 * @param theAdd If true, add the code. If false, remove the code.
+	 */
+	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd) {
+		String code = theConcept.getCode();
+		if (theAdd && theAddedCodes.add(code)) {
 			ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
-			contains.setCode(theConcept.getCode());
+			contains.setCode(code);
 			contains.setSystem(theCodeSystem);
 			contains.setDisplay(theConcept.getDisplay());
 			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
@@ -150,18 +155,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					.setDisplay(nextDesignation.getUseDisplay());
 			}
 		}
+
+		if (!theAdd && theAddedCodes.remove(code)) {
+			removeCodeFromExpansion(theCodeSystem, code, theExpansionComponent);
+		}
 	}
 
-	private void addConceptsToList(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept) {
+	private void removeCodeFromExpansion(String theCodeSystem, String theCode, ValueSet.ValueSetExpansionComponent theExpansionComponent) {
+		theExpansionComponent
+			.getContains()
+			.removeIf(t ->
+				theCodeSystem.equals(t.getSystem()) &&
+					theCode.equals(t.getCode()));
+	}
+
+	private void addConceptsToList(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
-			if (!theAddedCodes.contains(next.getCode())) {
-				theAddedCodes.add(next.getCode());
+			if (theAdd && theAddedCodes.add(next.getCode())) {
 				ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
 				contains.setCode(next.getCode());
 				contains.setSystem(theSystem);
 				contains.setDisplay(next.getDisplay());
 			}
-			addConceptsToList(theExpansionComponent, theAddedCodes, theSystem, next.getConcept());
+			if (!theAdd && theAddedCodes.remove(next.getCode())) {
+				removeCodeFromExpansion(theSystem, next.getCode(), theExpansionComponent);
+			}
+			addConceptsToList(theExpansionComponent, theAddedCodes, theSystem, next.getConcept(), theAdd);
 		}
 	}
 
@@ -299,158 +318,178 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public ValueSet expandValueSet(ValueSet theValueSetToExpand) {
 		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
 		Set<String> addedCodes = new HashSet<>();
-		boolean haveIncludeCriteria = false;
 
+		// Handle includes
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
-			String system = include.getSystem();
-			if (isNotBlank(system)) {
-				ourLog.info("Starting expansion around code system: {}", system);
+			boolean add = true;
+			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add);
+		}
 
-				TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
-				if (cs != null) {
-					TermCodeSystemVersion csv = cs.getCurrentVersion();
-
-					/*
-					 * Include Concepts
-					 */
-					for (ValueSet.ConceptReferenceComponent next : include.getConcept()) {
-						String nextCode = next.getCode();
-						if (isNotBlank(nextCode) && !addedCodes.contains(nextCode)) {
-							haveIncludeCriteria = true;
-							TermConcept code = findCode(system, nextCode);
-							if (code != null) {
-								addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, code);
-							}
-						}
-					}
-
-					/*
-					 * Filters
-					 */
-
-					if (include.getFilter().size() > 0) {
-						haveIncludeCriteria = true;
-
-						FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-						QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
-						BooleanJunction<?> bool = qb.bool();
-
-						bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
-
-						for (ValueSet.ConceptSetFilterComponent nextFilter : include.getFilter()) {
-							if (isBlank(nextFilter.getValue()) && nextFilter.getOp() == null && isBlank(nextFilter.getProperty())) {
-								continue;
-							}
-
-							if (isBlank(nextFilter.getValue()) || nextFilter.getOp() == null || isBlank(nextFilter.getProperty())) {
-								throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
-							}
-
-
-							if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-								addDisplayFilterExact(qb, bool, nextFilter);
-							} else if ("display".equals(nextFilter.getProperty()) && nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-								if (nextFilter.getValue().trim().contains(" ")) {
-									addDisplayFilterExact(qb, bool, nextFilter);
-								} else {
-									addDisplayFilterInexact(qb, bool, nextFilter);
-								}
-							} else if (nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) {
-
-								TermConcept code = findCode(system, nextFilter.getValue());
-								if (code == null) {
-									throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
-								}
-
-								if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
-									ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-									bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
-								} else {
-									throw new InvalidRequestException("Don't know how to handle op=" + nextFilter.getOp() + " on property " + nextFilter.getProperty());
-								}
-
-							} else {
-
-								if (nextFilter.getOp() == ValueSet.FilterOperator.REGEX) {
-
-									String value = nextFilter.getValue();
-									if (value.endsWith("$")) {
-										value = value.substring(0,value.length() - 1);
-									}
-									Term term = new Term("PROP"+nextFilter.getProperty(), value);
-									RegexpQuery query = new RegexpQuery(term);
-									bool.must(query);
-
-
-								} else {
-
-									bool.must(qb.phrase().onField("PROP" + nextFilter.getProperty()).sentence(nextFilter.getValue()).createQuery());
-//									bool.must(qb.phrase().onField("myProperties").sentence(nextFilter.getProperty() + "=" + nextFilter.getValue()).createQuery());
-
-								}
-
-							}
-						}
-
-						Query luceneQuery = bool.createQuery();
-						FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
-						jpaQuery.setMaxResults(1000);
-
-						StopWatch sw = new StopWatch();
-
-						@SuppressWarnings("unchecked")
-						List<TermConcept> result = jpaQuery.getResultList();
-
-						ourLog.info("Expansion completed in {}ms", sw.getMillis());
-
-						for (TermConcept nextConcept : result) {
-							addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, nextConcept);
-						}
-
-						expansionComponent.setTotal(jpaQuery.getResultSize());
-					}
-
-					if (!haveIncludeCriteria) {
-						List<TermConcept> allCodes = findCodes(system);
-						for (TermConcept nextConcept : allCodes) {
-							addCodeIfNotAlreadyAdded(system, expansionComponent, addedCodes, nextConcept);
-						}
-					}
-
-				} else {
-					// No codesystem matching the URL found in the database
-
-					CodeSystem codeSystemFromContext = getCodeSystemFromContext(system);
-					if (codeSystemFromContext == null) {
-						throw new InvalidRequestException("Unknown code system: " + system);
-					}
-
-					if (include.getConcept().isEmpty() == false) {
-						for (ValueSet.ConceptReferenceComponent next : include.getConcept()) {
-							String nextCode = next.getCode();
-							if (isNotBlank(nextCode) && !addedCodes.contains(nextCode)) {
-								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-								if (code != null) {
-									addedCodes.add(nextCode);
-									ValueSet.ValueSetExpansionContainsComponent contains = expansionComponent.addContains();
-									contains.setCode(nextCode);
-									contains.setSystem(system);
-									contains.setDisplay(code.getDisplay());
-								}
-							}
-						}
-					} else {
-						List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
-						addConceptsToList(expansionComponent, addedCodes, system, concept);
-					}
-
-				}
-			}
+		// Handle excludes
+		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getExclude()) {
+			boolean add = false;
+			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add);
 		}
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
+	}
+
+	public void expandValueSetHandleIncludeOrExclude(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent include, boolean theAdd) {
+		String system = include.getSystem();
+		if (isNotBlank(system)) {
+			ourLog.info("Starting expansion around code system: {}", system);
+
+			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
+			if (cs != null) {
+				TermCodeSystemVersion csv = cs.getCurrentVersion();
+				FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+				QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
+				BooleanJunction<?> bool = qb.bool();
+
+				bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
+
+				/*
+				 * Include Concepts
+				 */
+
+				String codes = include
+					.getConcept()
+					.stream()
+					.filter(Objects::nonNull)
+					.map(ValueSet.ConceptReferenceComponent::getCode)
+					.filter(StringUtils::isNotBlank)
+					.collect(Collectors.joining(" "));
+				if (isNotBlank(codes)) {
+					bool.must(qb.keyword().onField("myCode").matching(codes).createQuery());
+				}
+
+				/*
+				 * Filters
+				 */
+
+				if (include.getFilter().size() > 0) {
+
+					for (ValueSet.ConceptSetFilterComponent nextFilter : include.getFilter()) {
+						if (isBlank(nextFilter.getValue()) && nextFilter.getOp() == null && isBlank(nextFilter.getProperty())) {
+							continue;
+						}
+
+						if (isBlank(nextFilter.getValue()) || nextFilter.getOp() == null || isBlank(nextFilter.getProperty())) {
+							throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
+						}
+
+
+						if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+							addDisplayFilterExact(qb, bool, nextFilter);
+						} else if ("display".equals(nextFilter.getProperty()) && nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+							if (nextFilter.getValue().trim().contains(" ")) {
+								addDisplayFilterExact(qb, bool, nextFilter);
+							} else {
+								addDisplayFilterInexact(qb, bool, nextFilter);
+							}
+						} else if (nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) {
+
+							TermConcept code = findCode(system, nextFilter.getValue());
+							if (code == null) {
+								throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
+							}
+
+							if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
+								ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+								bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+							} else {
+								throw new InvalidRequestException("Don't know how to handle op=" + nextFilter.getOp() + " on property " + nextFilter.getProperty());
+							}
+
+						} else {
+
+							if (nextFilter.getOp() == ValueSet.FilterOperator.REGEX) {
+
+								/*
+								 * We treat the regex filter as a match on the regex
+								 * anywhere in the property string. The spec does not
+								 * say whether or not this is the right behaviour, but
+								 * there are examples that seem to suggest that it is.
+								 */
+								String value = nextFilter.getValue();
+								if (value.endsWith("$")) {
+									value = value.substring(0, value.length() - 1);
+								} else if (value.endsWith(".*") == false) {
+									value = value + ".*";
+								}
+								if (value.startsWith("^") == false && value.startsWith(".*") == false) {
+									value = ".*" + value;
+								} else if (value.startsWith("^")) {
+									value = value.substring(1);
+								}
+
+								Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + nextFilter.getProperty(), value);
+								RegexpQuery query = new RegexpQuery(term);
+								bool.must(query);
+
+							} else {
+
+								String value = nextFilter.getValue();
+								Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + nextFilter.getProperty(), value);
+								bool.must(new TermsQuery(term));
+
+							}
+
+						}
+					}
+
+				}
+
+				Query luceneQuery = bool.createQuery();
+				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
+				jpaQuery.setMaxResults(1000);
+
+				StopWatch sw = new StopWatch();
+
+				@SuppressWarnings("unchecked")
+				List<TermConcept> result = jpaQuery.getResultList();
+
+				ourLog.info("Expansion completed in {}ms", sw.getMillis());
+
+				for (TermConcept nextConcept : result) {
+					addCodeIfNotAlreadyAdded(system, theExpansionComponent, theAddedCodes, nextConcept, theAdd);
+				}
+
+			} else {
+				// No codesystem matching the URL found in the database
+
+				CodeSystem codeSystemFromContext = getCodeSystemFromContext(system);
+				if (codeSystemFromContext == null) {
+					throw new InvalidRequestException("Unknown code system: " + system);
+				}
+
+				if (include.getConcept().isEmpty() == false) {
+					for (ValueSet.ConceptReferenceComponent next : include.getConcept()) {
+						String nextCode = next.getCode();
+						if (isNotBlank(nextCode) && !theAddedCodes.contains(nextCode)) {
+							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
+							if (code != null) {
+								if (theAdd && theAddedCodes.add(nextCode)) {
+									ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
+									contains.setCode(nextCode);
+									contains.setSystem(system);
+									contains.setDisplay(code.getDisplay());
+								}
+								if (!theAdd && theAddedCodes.remove(nextCode)) {
+									removeCodeFromExpansion(system, nextCode, theExpansionComponent);
+								}
+							}
+						}
+					}
+				} else {
+					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
+					addConceptsToList(theExpansionComponent, theAddedCodes, system, concept, theAdd);
+				}
+
+			}
+		}
 	}
 
 	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4) {

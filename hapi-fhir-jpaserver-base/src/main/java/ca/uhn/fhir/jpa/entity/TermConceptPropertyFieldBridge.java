@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class TermConceptPropertyFieldBridge implements FieldBridge, StringBridge {
 
-	public static final String PROP_PREFIX = "PROP__";
+	public static final String CONCEPT_FIELD_PROPERTY_PREFIX = "PROP";
 
 	/**
 	 * Constructor
@@ -52,26 +52,18 @@ public class TermConceptPropertyFieldBridge implements FieldBridge, StringBridge
 
 	@Override
 	public void set(String theName, Object theValue, Document theDocument, LuceneOptions theLuceneOptions) {
+		@SuppressWarnings("unchecked")
 		Collection<TermConceptProperty> properties = (Collection<TermConceptProperty>) theValue;
+
 		if (properties != null) {
 			for (TermConceptProperty next : properties) {
-//				String propValue = next.getKey() + "=" + next.getValue();
-//				theLuceneOptions.addFieldToDocument(theName, propValue, theDocument);
-//
-//				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
-//					propValue = next.getKey() + "=" + next.getDisplay();
-//					theLuceneOptions.addFieldToDocument(theName, propValue, theDocument);
-//				}
-
-				theDocument.add(new StringField("PROP"+next.getKey(), next.getValue(), Field.Store.YES));
+				theDocument.add(new StringField(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getValue(), Field.Store.YES));
 
 				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
 					if (isNotBlank(next.getDisplay())) {
-						theDocument.add(new StringField("PROP" + next.getKey(), next.getDisplay(), Field.Store.YES));
+						theDocument.add(new StringField(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getDisplay(), Field.Store.YES));
 					}
-//					theLuceneOptions.addFieldToDocument("PROPmyProperties", next.getKey() + "=" + next.getDisplay(), theDocument);
 				}
-
 			}
 		}
 	}
