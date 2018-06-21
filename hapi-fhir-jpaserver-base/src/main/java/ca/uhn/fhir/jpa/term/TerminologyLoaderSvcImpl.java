@@ -79,6 +79,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_IMAGING_DOCUMENT_CODES_FILE = "ImagingDocumentCodes.csv";
 	private static final int LOG_INCREMENT = 100000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
+
 	@Autowired
 	private IHapiTerminologySvc myTermSvc;
 	@Autowired(required = false)
