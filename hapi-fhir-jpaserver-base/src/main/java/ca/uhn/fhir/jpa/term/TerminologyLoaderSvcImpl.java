@@ -171,10 +171,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles);
 		List<String> mandatoryFilenameFragments = Arrays.asList(
 			LOINC_FILE,
-			LOINC_HIERARCHY_FILE);
-		descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
-
-		List<String> optionalFilenameFragments = Arrays.asList(
+			LOINC_HIERARCHY_FILE,
 			LOINC_UPLOAD_PROPERTIES_FILE,
 			LOINC_ANSWERLIST_FILE,
 			LOINC_ANSWERLIST_LINK_FILE,
@@ -188,6 +185,10 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
 			LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV,
 			LOINC_IMAGING_DOCUMENT_CODES_FILE
+		);
+		descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
+
+		List<String> optionalFilenameFragments = Arrays.asList(
 		);
 		descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
 
