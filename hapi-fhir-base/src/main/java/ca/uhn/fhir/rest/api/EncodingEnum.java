@@ -171,6 +171,9 @@ public enum EncodingEnum {
 	 * @see #forContentType(String)
 	 */
 	public static EncodingEnum forContentTypeStrict(String theContentType) {
+		if (theContentType == null) {
+			return null;
+		}
 		String[] contentTypeSplitted = theContentType.split(";");
 		return ourContentTypeToEncodingStrict.get(contentTypeSplitted[0]);
 	}

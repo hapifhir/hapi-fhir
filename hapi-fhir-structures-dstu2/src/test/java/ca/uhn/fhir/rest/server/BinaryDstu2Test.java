@@ -96,9 +96,9 @@ public class BinaryDstu2Test {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 	}
 
-	
+	// posts Binary directly
 	@Test
-	public void testCreate() throws Exception {
+	public void testPostBinary() throws Exception {
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
 		http.setEntity(new ByteArrayEntity(new byte[] { 1, 2, 3, 4 }, ContentType.create("foo/bar", "UTF-8")));
 
@@ -110,8 +110,9 @@ public class BinaryDstu2Test {
 
 	}
 
+	// posts Binary as FHIR Resource
 	@Test
-	public void testCreateWrongType() throws Exception {
+	public void testPostFhirBinary() throws Exception {
 		Binary res = new Binary();
 		res.setContent(new byte[] { 1, 2, 3, 4 });
 		res.setContentType("text/plain");
@@ -123,7 +124,7 @@ public class BinaryDstu2Test {
 		HttpResponse status = ourClient.execute(http);
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertEquals("application/json+fhir;charset=utf-8", ourLast.getContentType().replace(" ","").toLowerCase());
+		assertEquals("text/plain", ourLast.getContentType().replace(" ","").toLowerCase());
 
 	}
 
@@ -213,11 +214,11 @@ public class BinaryDstu2Test {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
-		ResourceProvider patientProvider = new ResourceProvider();
+		ResourceProvider binaryProvider = new ResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider);
+		servlet.setResourceProviders(binaryProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
