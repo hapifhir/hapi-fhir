@@ -321,18 +321,18 @@ public class SearchCoordinatorSvcImplTest {
 					// ignore
 				}
 
-				when(mySearchResultDao.findWithSearchUuid(any(Search.class), any(Pageable.class))).thenAnswer(new Answer<Page<SearchResult>>() {
+				when(mySearchResultDao.findWithSearchUuid(any(Search.class), any(Pageable.class))).thenAnswer(new Answer<Page<Long>>() {
 					@Override
-					public Page<SearchResult> answer(InvocationOnMock theInvocation) throws Throwable {
+					public Page<Long> answer(InvocationOnMock theInvocation) throws Throwable {
 						Pageable page = (Pageable) theInvocation.getArguments()[1];
 
-						ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+						ArrayList<Long> results = new ArrayList<Long>();
 						int max = (page.getPageNumber() * page.getPageSize()) + page.getPageSize();
 						for (long i = page.getOffset(); i < max; i++) {
-							results.add(new SearchResult().setResourcePid(i + 10L));
+							results.add(i + 10L);
 						}
 
-						return new PageImpl<SearchResult>(results);
+						return new PageImpl<Long>(results);
 					}
 				});
 				search.setStatus(SearchStatusEnum.FINISHED);
