@@ -78,7 +78,7 @@ public class TermConcept implements Serializable {
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = true)
-	@Field
+	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
 

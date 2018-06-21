@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -341,19 +341,19 @@ public class TerminologyLoaderSvcLoincTest {
 			mySvc.loadLoinc(myFiles.getFiles(), details);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find the following mandatory files in input: [loinc.csv, MULTI-AXIAL_HIERARCHY.CSV]", e.getMessage());
+			assertEquals("Could not find the following mandatory files in input: [Loinc.csv, MultiAxialHierarchy.csv]", e.getMessage());
 		}
 	}
 
 
 	static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", "loinc.csv", TerminologyLoaderSvcImpl.LOINC_FILE);
-		theFiles.addFileZip("/loinc/", "hierarchy.csv", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
+		theFiles.addFileZip("/loinc/", "Loinc.csv", TerminologyLoaderSvcImpl.LOINC_FILE);
+		theFiles.addFileZip("/loinc/", "MultiAxialHierarchy.csv", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
 	}
 
 	static void addLoincOptionalFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
 		theFiles.addFileZip("/loinc/", "loincupload.properties");
-		theFiles.addFileZip("/loinc/", "AnswerList_Beta_1.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
+		theFiles.addFileZip("/loinc/", "AnswerList.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
@@ -368,8 +368,8 @@ public class TerminologyLoaderSvcLoincTest {
 		 * Top 2000 files have versions in the filename so don't use the
 		 * constant.. that way this is a better test
 		 */
-		theFiles.addFilePlain("/loinc/", "LOINC_1.6_Top2000CommonLabResultsSI.csv");
-		theFiles.addFilePlain("/loinc/", "LOINC_1.6_Top2000CommonLabResultsUS.csv");
+		theFiles.addFilePlain("/loinc/", "Top2000CommonLabResultsSi.csv");
+		theFiles.addFilePlain("/loinc/", "Top2000CommonLabResultsUs.csv");
 	}
 
 	@AfterClass

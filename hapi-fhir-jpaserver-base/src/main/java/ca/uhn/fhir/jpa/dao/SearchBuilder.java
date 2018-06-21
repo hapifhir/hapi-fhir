@@ -110,12 +110,17 @@ public class SearchBuilder implements ISearchBuilder {
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
 
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	protected IResourceTagDao myResourceTagDao;
+	
 	/**
 	 * Constructor
 	 */
-	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager, IFulltextSearchSvc theFulltextSearchSvc,
-								BaseHapiFhirDao<?> theDao,
-								IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao, IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager,
+			IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
+			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
+			IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
+			IResourceHistoryTableDao theResourceHistoryTableDao, IResourceTagDao theResourceTagDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myFulltextSearchSvc = theFulltextSearchSvc;
@@ -124,6 +129,8 @@ public class SearchBuilder implements ISearchBuilder {
 		myForcedIdDao = theForcedIdDao;
 		myTerminologySvc = theTerminologySvc;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
+		myResourceTagDao = theResourceTagDao;
 	}
 
 	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1597,9 +1604,15 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourceTable> resultList = q.getResultList();
 
+		//-- Issue #963: Load resource histories based on pids once to improve the performance
+		Map<Long, ResourceHistoryTable> historyMap = getResourceHistoryMap(pids);
+		
+		//-- preload all tags with tag definition if any
+		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resultList);
+		
 		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
+			IBaseResource resource = theDao.toResource(resourceType, next, historyMap.get(next.getId()), tagMap.get(next.getId()), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
@@ -1626,6 +1639,62 @@ public class SearchBuilder implements ISearchBuilder {
 
 			theResourceListToPopulate.set(index, resource);
 		}
+	}
+
+	//-- load all history in to the map
+	private Map<Long, ResourceHistoryTable> getResourceHistoryMap(Collection<Long> pids) {
+
+		Map<Long, ResourceHistoryTable> historyMap = new HashMap<Long, ResourceHistoryTable>();
+
+		if (pids.size() == 0)
+			return historyMap;
+
+		Collection<ResourceHistoryTable> historyList = myResourceHistoryTableDao.findByResourceIds(pids);
+
+		for (ResourceHistoryTable history : historyList) {
+
+			historyMap.put(history.getResourceId(), history);
+		}
+
+		return historyMap;
+	}
+	
+	private Map<Long, Collection<ResourceTag>> getResourceTagMap(List<ResourceTable> resourceList) {		
+		
+		List<Long> idList = new ArrayList<Long>(resourceList.size());
+		
+		//-- find all resource has tags
+		for (ResourceTable resource: resourceList) {			
+			if (resource.isHasTags())
+				idList.add(resource.getId());
+		}
+		
+		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<Long, Collection<ResourceTag>>();
+		
+		//-- no tags
+		if (idList.size() == 0)
+			return tagMap;
+		
+		//-- get all tags for the idList
+		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
+	
+		//-- build the map, key = resourceId, value = list of ResourceTag
+		Long resourceId;
+		Collection<ResourceTag> tagCol;
+		for (ResourceTag tag : tagList) {
+			
+			resourceId = tag.getResourceId();
+			tagCol = tagMap.get(resourceId);
+			if (tagCol == null) {
+				tagCol = new ArrayList<ResourceTag>();
+				tagCol.add(tag);
+				tagMap.put(resourceId, tagCol);
+			} else {
+				tagCol.add(tag);
+			}
+		}
+
+		return tagMap;		
 	}
 
 	@Override

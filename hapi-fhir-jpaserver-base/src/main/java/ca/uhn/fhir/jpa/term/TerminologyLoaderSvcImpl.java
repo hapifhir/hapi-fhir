@@ -62,18 +62,18 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
-	public static final String LOINC_ANSWERLIST_FILE = "AnswerList_Beta_1.csv";
-	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink_Beta_1.csv";
+	public static final String LOINC_ANSWERLIST_FILE = "AnswerList.csv";
+	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
 	public static final String LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
-	public static final String LOINC_FILE = "loinc.csv";
-	public static final String LOINC_HIERARCHY_FILE = "MULTI-AXIAL_HIERARCHY.CSV";
-	public static final String LOINC_PART_FILE = "Part_Beta_1.csv";
-	public static final String LOINC_PART_LINK_FILE = "LoincPartLink_Beta_1.csv";
-	public static final String LOINC_PART_RELATED_CODE_MAPPING_FILE = "PartRelatedCodeMapping_Beta_1.csv";
+	public static final String LOINC_FILE = "Loinc.csv";
+	public static final String LOINC_HIERARCHY_FILE = "MultiAxialHierarchy.csv";
+	public static final String LOINC_PART_FILE = "Part.csv";
+	public static final String LOINC_PART_LINK_FILE = "LoincPartLink.csv";
+	public static final String LOINC_PART_RELATED_CODE_MAPPING_FILE = "PartRelatedCodeMapping.csv";
 	public static final String LOINC_RSNA_PLAYBOOK_FILE = "LoincRsnaRadiologyPlaybook.csv";
-	public static final String LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE = "Top2000CommonLabResultsUS.csv";
-	public static final String LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE = "Top2000CommonLabResultsSI.csv";
+	public static final String LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE = "Top2000CommonLabResultsUs.csv";
+	public static final String LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE = "Top2000CommonLabResultsSi.csv";
 	public static final String LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE = "LoincUniversalLabOrdersValueSet.csv";
 	public static final String LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV = "LoincIeeeMedicalDeviceCodeMappingTable.csv";
 	public static final String LOINC_IMAGING_DOCUMENT_CODES_FILE = "ImagingDocumentCodes.csv";
@@ -275,7 +275,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		iterateOverZipFile(theDescriptors, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Part related code mapping
-		handler = new LoincPartRelatedCodeMappingHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, uploadProperties);
+		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_PART_RELATED_CODE_MAPPING_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Document Ontology File

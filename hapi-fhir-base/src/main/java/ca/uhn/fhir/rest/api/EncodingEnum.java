@@ -23,7 +23,6 @@ package ca.uhn.fhir.rest.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.lang3.ObjectUtils;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -170,7 +169,11 @@ public enum EncodingEnum {
 	 * @see #forContentType(String)
 	 */
 	public static EncodingEnum forContentTypeStrict(String theContentType) {
-		return ourContentTypeToEncodingStrict.get(theContentType);
+		if (theContentType == null) {
+			return null;
+		}
+		String[] contentTypeSplitted = theContentType.split(";");
+		return ourContentTypeToEncodingStrict.get(contentTypeSplitted[0]);
 	}
 
 	/**

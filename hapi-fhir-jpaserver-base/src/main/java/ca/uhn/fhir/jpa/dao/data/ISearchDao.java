@@ -36,19 +36,19 @@ import ca.uhn.fhir.jpa.entity.Search;
 public interface ISearchDao extends JpaRepository<Search, Long> {
 
 	@Query("SELECT s FROM Search s WHERE s.myUuid = :uuid")
-	public Search findByUuid(@Param("uuid") String theUuid);
+	Search findByUuid(@Param("uuid") String theUuid);
 
 	@Query("SELECT s.myId FROM Search s WHERE s.mySearchLastReturned < :cutoff")
-	public Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, Pageable thePage);
+	Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, Pageable thePage);
 
 //	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
 //	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
 	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND s.myCreated > :cutoff")
-	public Collection<Search> find(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
+	Collection<Search> find(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
 
 	@Modifying
 	@Query("UPDATE Search s SET s.mySearchLastReturned = :last WHERE s.myId = :pid")
-	public void updateSearchLastReturned(@Param("pid") long thePid, @Param("last") Date theDate);
+	void updateSearchLastReturned(@Param("pid") long thePid, @Param("last") Date theDate);
 
 }
