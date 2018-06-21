@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,13 +36,15 @@ import java.util.Date;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
-	/** Don't change this without careful consideration. You will break existing hashes! */
-	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
-	/** Don't make this public 'cause nobody better be able to modify it! */
-	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
-
 	static final int MAX_SP_NAME = 100;
-
+	/**
+	 * Don't change this without careful consideration. You will break existing hashes!
+	 */
+	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
+	/**
+	 * Don't make this public 'cause nobody better be able to modify it!
+	 */
+	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 	private static final long serialVersionUID = 1L;
 
 	// TODO: make this nullable=false and a primitive (written may 2017)
@@ -71,6 +73,13 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
+	/**
+	 * Subclasses may override
+	 */
+	protected void clearHashes() {
+		// nothing
+	}
+
 	protected abstract Long getId();
 
 	public String getParamName() {
@@ -80,13 +89,6 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	public void setParamName(String theName) {
 		clearHashes();
 		myParamName = theName;
-	}
-
-	/**
-	 * Subclasses may override
-	 */
-	protected void clearHashes() {
-		// nothing
 	}
 
 	public ResourceTable getResource() {
@@ -127,6 +129,10 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	public abstract IQueryParameterType toQueryParameterType();
 
+	public static long calculateHashIdentity(String theResourceType, String theParamName) {
+		return hash(theResourceType, theParamName);
+	}
+
 	/**
 	 * Applies a fast and consistent hashing algorithm to a set of strings
 	 */
@@ -147,6 +153,5 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		HashCode hashCode = hasher.hash();
 		return hashCode.asLong();
 	}
-
 
 }

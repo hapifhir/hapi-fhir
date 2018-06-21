@@ -79,6 +79,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		// nothing
 	}
 
+
 	public ResourceIndexedSearchParamQuantity(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		setParamName(theParamName);
 		setSystem(theSystem);
