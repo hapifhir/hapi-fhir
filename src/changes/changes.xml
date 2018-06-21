@@ -71,6 +71,11 @@
 				loading a large number of results in a page, or when loading multiple
 				search results with tags. Thanks to Frank Tao for the pull request!
 			</action>
+			<action type="add" issue="1000">
+				LOINC uploader has been updated to support the new LOINC filename
+				scheme introduced in LOINC 2.64. Thanks to Rob Hausam for the 
+				pull request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
