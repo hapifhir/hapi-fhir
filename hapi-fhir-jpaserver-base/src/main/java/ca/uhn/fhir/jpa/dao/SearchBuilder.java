@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -53,7 +55,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -71,7 +72,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
@@ -117,10 +117,10 @@ public class SearchBuilder implements ISearchBuilder {
 	 * Constructor
 	 */
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager,
-			IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
-			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
-			IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
-			IResourceHistoryTableDao theResourceHistoryTableDao, IResourceTagDao theResourceTagDao) {
+								IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
+								IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
+								IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
+								IResourceHistoryTableDao theResourceHistoryTableDao, IResourceTagDao theResourceTagDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myFulltextSearchSvc = theFulltextSearchSvc;
