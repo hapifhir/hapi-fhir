@@ -42,6 +42,9 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);

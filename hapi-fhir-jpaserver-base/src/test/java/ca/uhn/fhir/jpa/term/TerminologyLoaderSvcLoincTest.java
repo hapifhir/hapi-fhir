@@ -93,7 +93,6 @@ public class TerminologyLoaderSvcLoincTest {
 	@Test
 	public void testLoadLoinc() throws Exception {
 		addLoincMandatoryFilesToZip(myFiles);
-		addLoincOptionalFilesToZip(myFiles);
 
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), details);
@@ -287,7 +286,7 @@ public class TerminologyLoaderSvcLoincTest {
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
-		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
 		assertEquals(1, conceptMap.getGroup().size());
@@ -309,6 +308,25 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("11525-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("US Pelvis Fetus for pregnancy", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+
+		// Group - Parent
+		vs = valueSets.get("LG100-4");
+		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
+		assertEquals("http://loinc.org/fhir/loinc-group-LG100-4", vs.getUrl());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(1, vs.getCompose().getInclude().get(0).getValueSet().size());
+		assertEquals("http://loinc.org/fhir/loinc-group-LG1695-8", vs.getCompose().getInclude().get(0).getValueSet().get(0).getValueAsString());
+
+		// Group - Child
+		vs = valueSets.get("LG1695-8");
+		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		assertEquals("1,4-Dichlorobenzene|MCnc|Pt|ANYBldSerPl", vs.getName());
+		assertEquals("http://loinc.org/fhir/loinc-group-LG1695-8", vs.getUrl());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
+		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
 	}
 
 	@Test
@@ -336,7 +354,8 @@ public class TerminologyLoaderSvcLoincTest {
 
 	@Test
 	public void testLoadLoincMissingMandatoryFiles() throws IOException {
-		addLoincOptionalFilesToZip(myFiles);
+		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
+		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
 
 		// Actually do the load
 		try {
@@ -349,13 +368,13 @@ public class TerminologyLoaderSvcLoincTest {
 
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", "Loinc.csv", TerminologyLoaderSvcImpl.LOINC_FILE);
-		theFiles.addFileZip("/loinc/", "MultiAxialHierarchy.csv", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
-	}
-
-	public static void addLoincOptionalFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", "loincupload.properties");
-		theFiles.addFileZip("/loinc/", "AnswerList.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_FILE, TerminologyLoaderSvcImpl.LOINC_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
@@ -365,13 +384,8 @@ public class TerminologyLoaderSvcLoincTest {
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IMAGING_DOCUMENT_CODES_FILE);
-
-		/*
-		 * Top 2000 files have versions in the filename so don't use the
-		 * constant.. that way this is a better test
-		 */
-		theFiles.addFilePlain("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
-		theFiles.addFilePlain("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
 	}
 
 	@AfterClass

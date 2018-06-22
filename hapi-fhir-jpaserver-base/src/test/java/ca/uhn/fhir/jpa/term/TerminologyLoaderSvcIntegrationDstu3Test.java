@@ -67,7 +67,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testExpandWithPropertyCoding() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
-		TerminologyLoaderSvcLoincTest.addLoincOptionalFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		// Search by code
@@ -121,7 +120,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testExpandWithPropertyString() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
-		TerminologyLoaderSvcLoincTest.addLoincOptionalFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		ValueSet input = new ValueSet();
@@ -144,7 +142,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testLookupWithProperties() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
-		TerminologyLoaderSvcLoincTest.addLoincOptionalFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
@@ -176,7 +173,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	public void testLookupWithPropertiesExplicit() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
-		TerminologyLoaderSvcLoincTest.addLoincOptionalFilesToZip(files);
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IFhirResourceDaoCodeSystem.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);

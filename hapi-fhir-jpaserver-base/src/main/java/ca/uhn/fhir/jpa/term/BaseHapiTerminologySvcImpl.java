@@ -1081,6 +1081,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				throw new InternalErrorException(fe);
 			}
 			myConceptMapDao.save(termConceptMap);
+			int codesSaved = 0;
 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
@@ -1116,7 +1117,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 									termConceptMapGroupElementTarget.setCode(target.getCode());
 									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
 									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
-									myConceptMapGroupElementTargetDao.saveAndFlush(termConceptMapGroupElementTarget);
+									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
+
+									if (codesSaved++ % 250 == 0) {
+										ourLog.info("Have saved {} codes in conceptmap", codesSaved);
+										myConceptMapGroupElementTargetDao.flush();
+									}
 								}
 							}
 						}

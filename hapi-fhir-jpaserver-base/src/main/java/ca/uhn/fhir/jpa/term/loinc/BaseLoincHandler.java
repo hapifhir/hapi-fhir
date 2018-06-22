@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term.loinc;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,8 +52,10 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		myValueSets = theValueSets;
+		myValueSets.forEach(t -> myIdToValueSet.put(t.getId(), t));
 		myCode2Concept = theCode2Concept;
 		myConceptMaps = theConceptMaps;
+		myConceptMaps.forEach(t -> myIdToConceptMaps.put(t.getId(), t));
 		myUploadProperties = theUploadProperties;
 	}
 
@@ -192,7 +194,6 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 			vs.setUrl(theValueSetUri);
 			vs.setId(theValueSetId);
 			vs.setVersion(version);
-			vs.setName(theValueSetName);
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			vs.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			vs.addContact()
@@ -206,6 +207,11 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		} else {
 			vs = myIdToValueSet.get(theValueSetId);
 		}
+
+		if (isBlank(vs.getName()) && isNotBlank(theValueSetName)) {
+			vs.setName(theValueSetName);
+		}
+
 		return vs;
 	}
 

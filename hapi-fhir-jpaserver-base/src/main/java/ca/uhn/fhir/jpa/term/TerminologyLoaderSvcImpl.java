@@ -77,6 +77,9 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE = "LoincUniversalLabOrdersValueSet.csv";
 	public static final String LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV = "LoincIeeeMedicalDeviceCodeMappingTable.csv";
 	public static final String LOINC_IMAGING_DOCUMENT_CODES_FILE = "ImagingDocumentCodes.csv";
+	public static final String LOINC_GROUP_FILE = "Group.csv";
+	public static final String LOINC_GROUP_TERMS_FILE = "GroupLoincTerms.csv";
+	public static final String LOINC_PARENT_GROUP_FILE = "ParentGroup.csv";
 	private static final int LOG_INCREMENT = 100000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
 
@@ -124,7 +127,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
 			String nextFilename = nextZipBytes.getFilename();
-			if (nextFilename.contains(theFileNamePart)) {
+			if (nextFilename.endsWith("/" + theFileNamePart)) {
 				ourLog.info("Processing file {}", nextFilename);
 
 				Reader reader;
@@ -307,6 +310,18 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		// Imaging Document Codes
 		handler = new LoincImagingDocumentCodeHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_IMAGING_DOCUMENT_CODES_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Group File
+		handler = new LoincGroupFileHandler(code2concept, valueSets, conceptMaps, uploadProperties);
+		iterateOverZipFile(theDescriptors, LOINC_GROUP_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Group Terms File
+		handler = new LoincGroupTermsFileHandler(code2concept, valueSets, conceptMaps, uploadProperties);
+		iterateOverZipFile(theDescriptors, LOINC_GROUP_TERMS_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+
+		// Parent Group File
+		handler = new LoincParentGroupFileHandler(code2concept, valueSets, conceptMaps, uploadProperties);
+		iterateOverZipFile(theDescriptors, LOINC_PARENT_GROUP_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		IOUtils.closeQuietly(theDescriptors);
 
