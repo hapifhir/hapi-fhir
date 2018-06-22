@@ -94,10 +94,9 @@ public class Search implements Serializable {
 	@OneToMany(mappedBy="mySearch")
 	private Collection<SearchResult> myResults;
 
-	// TODO: change nullable to false after 2.5
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="SEARCH_LAST_RETURNED", nullable=true, updatable=false) 
+	@Column(name="SEARCH_LAST_RETURNED", nullable=false, updatable=false)
 	private Date mySearchLastReturned;
 
 	@Lob()

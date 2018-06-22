@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
+import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
 import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionRegistryBuilder;
 import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionProvider;
 
@@ -57,5 +58,8 @@ public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefini
 		builder.analyzer("exactAnalyzer").withTokenizer("standard");
 
 		builder.analyzer("conceptParentPidsAnalyzer").withTokenizer("whitespace");
+
+		builder.analyzer("termConceptPropertyAnalyzer").withTokenizer("whitespace");
+
 	}
 }

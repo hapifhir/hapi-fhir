@@ -3,14 +3,12 @@ package org.hl7.fhir.r4.utils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -22,6 +20,23 @@ public class FhirPathEngineR4Test {
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static FHIRPathEngine ourEngine;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
+
+	@Test
+	public void testCrossResourceBoundaries() throws FHIRException {
+		Specimen specimen = new Specimen();
+		specimen.setId("#FOO");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+		Observation o = new Observation();
+		o.getContained().add(specimen);
+
+		o.setId("O1");
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setSpecimen(new Reference("#FOO"));
+
+		List<Base> value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
+		assertEquals(1, value.size());
+		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
+	}
 
 	@Test
 	public void testAs() throws Exception {

@@ -275,7 +275,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		iterateOverZipFile(theDescriptors, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Part related code mapping
-		handler = new LoincPartRelatedCodeMappingHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, uploadProperties);
+		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_PART_RELATED_CODE_MAPPING_FILE, handler, ',', QuoteMode.NON_NUMERIC);
 
 		// Document Ontology File
