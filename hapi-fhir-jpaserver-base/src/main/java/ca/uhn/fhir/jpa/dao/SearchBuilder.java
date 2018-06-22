@@ -87,6 +87,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
@@ -1688,8 +1689,19 @@ public class SearchBuilder implements ISearchBuilder {
 		//-- preload all tags with tag definition if any
 		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resultList);
 		
+		//-- pre-load all forcedId
+		Map<Long, ForcedId> forcedIdMap = getForcedIdMap(pids);
+				
+		ForcedId forcedId = null;
+		Long resourceId = null;
 		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
+			
+			resourceId = next.getId();
+			forcedId = forcedIdMap.get(resourceId);
+			if (forcedId != null)
+				next.setForcedId(forcedId);
+			
 			IBaseResource resource = theDao.toResource(resourceType, next, historyMap.get(next.getId()), tagMap.get(next.getId()), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
@@ -1775,6 +1787,23 @@ public class SearchBuilder implements ISearchBuilder {
 		return tagMap;		
 	}
 
+	//-- load all forcedId in to the map
+	private Map<Long, ForcedId> getForcedIdMap(Collection<Long> pids) {
+
+		Map<Long, ForcedId> forceIdMap = new HashMap<Long, ForcedId>();
+
+		if (pids.size() == 0)
+			return forceIdMap;
+
+		Collection<ForcedId> forceIdList = myForcedIdDao.findByResourcePids(pids);
+
+		for (ForcedId forcedId : forceIdList) {
+
+			forceIdMap.put(forcedId.getResourcePid(), forcedId);
+		}
+
+		return forceIdMap;
+	}
 	@Override
 	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
