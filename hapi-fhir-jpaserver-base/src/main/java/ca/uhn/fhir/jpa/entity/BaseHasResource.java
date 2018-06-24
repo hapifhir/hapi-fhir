@@ -42,7 +42,7 @@ public abstract class BaseHasResource {
 	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
 
-	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false)
+	@OneToOne(optional = true, fetch = FetchType.LAZY, cascade = {}, orphanRemoval = false)
 	@JoinColumn(name = "FORCED_ID_PID")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;

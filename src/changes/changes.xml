@@ -76,6 +76,19 @@
 				scheme introduced in LOINC 2.64. Thanks to Rob Hausam for the 
 				pull request!
 			</action>
+			<action type="add">
+				In the JPA server, it is now possible for a custom search parameter
+				to use the
+				<![CDATA[<code>resolve()</code>]]> function in its path to descend into
+				contained resources and index fields within them.
+			</action>
+			<action type="fix" issue="1010">
+				Resource loading logic for the JPA server has been optimized to
+				reduce the number of database round trips required when loading
+				search results where many of the entries have a "forced ID" (an alphanumeric
+				client-assigned reosurce ID). Thanks to Frank Tao for the pull
+				request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
