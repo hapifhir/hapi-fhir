@@ -98,6 +98,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append(getResource(), obj.getResource());
 		b.append(getLatitude(), obj.getLatitude());
 		b.append(getLongitude(), obj.getLongitude());
+		b.append(myHashIdentity, obj.myHashIdentity);
 		return b.isEquals();
 	}
 

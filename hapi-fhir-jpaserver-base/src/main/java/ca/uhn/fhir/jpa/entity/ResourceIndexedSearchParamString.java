@@ -184,6 +184,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName(), obj.getParamName());
 		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
+		b.append(myHashExact, obj.myHashExact);
+		b.append(myHashNormalizedPrefix, obj.myHashNormalizedPrefix);
 		return b.isEquals();
 	}
 
