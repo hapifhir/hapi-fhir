@@ -170,6 +170,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
+	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	protected IForcedIdDao myForcedIdDao;
+	@Autowired
 	@Qualifier("myCoverageDaoR4")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
 	@Autowired
@@ -187,10 +193,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	protected Object myResourceProviders;
-	@Autowired
-	protected IResourceTableDao myResourceTableDao;
-	@Autowired
-	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -284,7 +286,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	public void beforeFlushFT() {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
 			ftem.purgeAll(ResourceTable.class);
 			ftem.purgeAll(ResourceIndexedSearchParamString.class);
@@ -315,6 +317,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
+
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
 		if (stream == null) {
@@ -323,11 +330,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		String string = IOUtils.toString(stream, "UTF-8");
 		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
 		return newJsonParser.parseResource(type, string);
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
 	}
 
 	@AfterClass

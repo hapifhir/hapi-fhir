@@ -95,6 +95,19 @@
 				performance improvement on servers that are validating or executing FHIRPath repeatedly
 				under load. This module is used by default in the JPA server.
 			</action>
+			<action type="fix">
+				An index in the JPA server on the HFJ_FORCED_ID table was incorrectly
+				not marked as unique. This meant that under heavy load it was possible to
+				create two resources with the same client-assigned ID.
+			</action>
+			<action type="fix">
+				The JPA server 
+				<![CDATA[<code>$expunge</code>]]>
+				operation deleted components of an individual resource record in 
+				separate database transactions, meaning that if an operation failed 
+				unexpectedly resources could be left in a weird state. This has been
+				corrected.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

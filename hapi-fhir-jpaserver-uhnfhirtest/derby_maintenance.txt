@@ -144,3 +144,5 @@ drop index IDX_SP_TOKEN_UNQUAL;
 
    16919 | public             | hfj_spidx_token             |   5.5205e+07 | 24763842560 | 17233928192 |        8192 |  7529906176 | 23 GB      | 16 GB      | 8192 bytes | 7181 MB
 
+drop index IDX_FORCEDID_TYPE_FORCEDID;
+create index IDX_FORCEDID_TYPE_FID;
