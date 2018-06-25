@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.term.snomedct.SctHandlerRelationship;
 import ca.uhn.fhir.jpa.util.Counter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -123,12 +124,20 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 	}
 
-	private void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode) {
+	private void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
 
+		boolean foundMatch = false;
 		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
 			String nextFilename = nextZipBytes.getFilename();
-			if (nextFilename.endsWith("/" + theFileNamePart)) {
+			boolean matches;
+			if (theIsPartialFilename) {
+				matches = nextFilename.contains(theFileNamePart);
+			} else {
+				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
+			}
+			if (matches) {
 				ourLog.info("Processing file {}", nextFilename);
+				foundMatch = true;
 
 				Reader reader;
 				CSVParser parsed;
@@ -166,6 +175,10 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				}
 			}
 
+		}
+
+		if (!foundMatch) {
+			throw new InvalidRequestException("Did not find file matching " + theFileNamePart);
 		}
 
 	}
@@ -256,72 +269,72 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 		// Part file
 		handler = new LoincPartHandler(codeSystemVersion, code2concept);
-		iterateOverZipFile(theDescriptors, LOINC_PART_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_PART_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 		Map<PartTypeAndPartName, String> partTypeAndPartNameToPartNumber = ((LoincPartHandler) handler).getPartTypeAndPartNameToPartNumber();
 
 		// Loinc Codes
 		handler = new LoincHandler(codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
-		iterateOverZipFile(theDescriptors, LOINC_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Loinc Hierarchy
 		handler = new LoincHierarchyHandler(codeSystemVersion, code2concept);
-		iterateOverZipFile(theDescriptors, LOINC_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer lists (ValueSets of potential answers/values for loinc "questions")
 		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer list links (connects loinc observation codes to answerlist codes)
 		handler = new LoincAnswerListLinkHandler(code2concept, valueSets);
-		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Part link file
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept);
-		iterateOverZipFile(theDescriptors, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Part related code mapping
 		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_PART_RELATED_CODE_MAPPING_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_PART_RELATED_CODE_MAPPING_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Document Ontology File
 		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_DOCUMENT_ONTOLOGY_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_DOCUMENT_ONTOLOGY_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// RSNA Playbook file
 		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 Codes - US
 		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 Codes - SI
 		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Universal Lab Order ValueSet
 		handler = new LoincUniversalOrderSetHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// IEEE Medical Device Codes
 		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Imaging Document Codes
 		handler = new LoincImagingDocumentCodeHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_IMAGING_DOCUMENT_CODES_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_IMAGING_DOCUMENT_CODES_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Group File
 		handler = new LoincGroupFileHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_GROUP_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_GROUP_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Group Terms File
 		handler = new LoincGroupTermsFileHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_GROUP_TERMS_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_GROUP_TERMS_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Parent Group File
 		handler = new LoincParentGroupFileHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_PARENT_GROUP_FILE, handler, ',', QuoteMode.NON_NUMERIC);
+		iterateOverZipFile(theDescriptors, LOINC_PARENT_GROUP_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		IOUtils.closeQuietly(theDescriptors);
 
@@ -349,18 +362,18 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		final Set<String> validConceptIds = new HashSet<>();
 
 		IRecordHandler handler = new SctHandlerConcept(validConceptIds);
-		iterateOverZipFile(theDescriptors, SCT_FILE_CONCEPT, handler, '\t', null);
+		iterateOverZipFile(theDescriptors, SCT_FILE_CONCEPT, handler, '\t', null, true);
 
 		ourLog.info("Have {} valid concept IDs", validConceptIds.size());
 
 		handler = new SctHandlerDescription(validConceptIds, code2concept, id2concept, codeSystemVersion);
-		iterateOverZipFile(theDescriptors, SCT_FILE_DESCRIPTION, handler, '\t', null);
+		iterateOverZipFile(theDescriptors, SCT_FILE_DESCRIPTION, handler, '\t', null, true);
 
 		ourLog.info("Got {} concepts, cloning map", code2concept.size());
 		final HashMap<String, TermConcept> rootConcepts = new HashMap<>(code2concept);
 
 		handler = new SctHandlerRelationship(codeSystemVersion, rootConcepts, code2concept);
-		iterateOverZipFile(theDescriptors, SCT_FILE_RELATIONSHIP, handler, '\t', null);
+		iterateOverZipFile(theDescriptors, SCT_FILE_RELATIONSHIP, handler, '\t', null, true);
 
 		IOUtils.closeQuietly(theDescriptors);
 

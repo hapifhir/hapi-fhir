@@ -38,6 +38,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
 		addFile(zos, "loincupload.properties");
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
@@ -45,7 +46,6 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
 		addFile(zos, TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
@@ -166,7 +166,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void testUploadPackageMissingUrl() throws Exception {
+	public void testUploadPackageMissingUrl() {
 		try {
 			ourClient
 				.operation()

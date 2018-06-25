@@ -305,7 +305,8 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 							final IBaseResource resource = toResource(resourceTable, false);
 
-							@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDaoOrThrowException(resource.getClass());
+							Class<? extends IBaseResource> resourceClass = getContext().getResourceDefinition(resourceTable.getResourceType()).getImplementingClass();
+							@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDaoOrThrowException(resourceClass);
 							dao.reindex(resource, resourceTable);
 							return null;
 

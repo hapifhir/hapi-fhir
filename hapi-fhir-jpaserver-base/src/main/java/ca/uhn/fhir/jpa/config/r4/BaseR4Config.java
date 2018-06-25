@@ -21,6 +21,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
@@ -40,9 +41,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -91,6 +92,11 @@ public class BaseR4Config extends BaseConfig {
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChainR4());
 		return val;
+	}
+
+	@Bean
+	public JpaValidationSupportChainR4 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainR4();
 	}
 
 	@Bean(name = "myJpaValidationSupportR4", autowire = Autowire.BY_NAME)
@@ -156,7 +162,7 @@ public class BaseR4Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IValidationSupport validationSupportChainR4() {
-		return new JpaValidationSupportChainR4();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

@@ -103,7 +103,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getResource(), obj.getResource());
 		b.append(getUri(), obj.getUri());
 		b.append(getHashUri(), obj.getHashUri());
-		b.append(myHashUri, obj.myHashUri);
 		return b.isEquals();
 	}
 

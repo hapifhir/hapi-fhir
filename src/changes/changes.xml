@@ -89,6 +89,12 @@
 				client-assigned reosurce ID). Thanks to Frank Tao for the pull
 				request!
 			</action>
+			<action type="add">
+				A new IValidationSupport implementation has been added, named CachingValidationSupport. This
+				module wraps another implementation and provides short-term caching. This can have a dramatic
+				performance improvement on servers that are validating or executing FHIRPath repeatedly
+				under load. This module is used by default in the JPA server.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

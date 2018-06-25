@@ -152,7 +152,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashNormalizedPrefix == null) {
+		if (myHashNormalizedPrefix == null && myDaoConfig != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			String valueNormalized = getValueNormalized();
@@ -184,8 +184,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName(), obj.getParamName());
 		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
-		b.append(myHashExact, obj.myHashExact);
-		b.append(myHashNormalizedPrefix, obj.myHashNormalizedPrefix);
+		b.append(getHashExact(), obj.getHashExact());
+		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		return b.isEquals();
 	}
 

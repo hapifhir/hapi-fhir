@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -362,7 +363,9 @@ public class TerminologyLoaderSvcLoincTest {
 			mySvc.loadLoinc(myFiles.getFiles(), details);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find the following mandatory files in input: [Loinc.csv, MultiAxialHierarchy.csv]", e.getMessage());
+			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));
+			assertThat(e.getMessage(), containsString("Loinc.csv"));
+			assertThat(e.getMessage(), containsString("MultiAxialHierarchy.csv"));
 		}
 	}
 

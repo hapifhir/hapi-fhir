@@ -83,6 +83,7 @@ public class SearchParamExtractorDstu3Test {
 		};
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new DaoConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();

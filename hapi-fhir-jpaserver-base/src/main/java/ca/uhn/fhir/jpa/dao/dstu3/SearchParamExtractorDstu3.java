@@ -26,12 +26,13 @@ import static org.apache.commons.lang3.StringUtils.trim;
 import java.math.BigDecimal;
 import java.util.*;
 
+import javax.annotation.PostConstruct;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
@@ -57,6 +58,13 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	@Autowired
 	private org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport myValidationSupport;
+
+	private HapiWorkerContext myWorkerContext;
+
+	@PostConstruct
+	public void start() {
+		myWorkerContext = new HapiWorkerContext(getContext(), myValidationSupport);
+	}
 
 	/**
 	 * Constructor
@@ -695,8 +703,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	 */
 	@Override
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
-		FHIRPathEngine fp = new FHIRPathEngine(worker);
+		FHIRPathEngine fp = new FHIRPathEngine(myWorkerContext);
 
 		List<Object> values = new ArrayList<>();
 		try {

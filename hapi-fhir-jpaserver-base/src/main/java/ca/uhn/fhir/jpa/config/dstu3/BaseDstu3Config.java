@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -37,9 +38,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -78,12 +79,16 @@ public class BaseDstu3Config extends BaseConfig {
 		return val;
 	}
 
+	@Bean
+	public JpaValidationSupportChainDstu3 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainDstu3();
+	}
+
 	@Bean(name = "myJpaValidationSupportDstu3", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
 		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
 		return retVal;
 	}
-
 
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
@@ -142,7 +147,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
 	public IValidationSupport validationSupportChainDstu3() {
-		return new JpaValidationSupportChainDstu3();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

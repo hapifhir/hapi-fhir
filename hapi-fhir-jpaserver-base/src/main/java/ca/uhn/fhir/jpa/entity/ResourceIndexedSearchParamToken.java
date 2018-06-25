@@ -145,10 +145,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getResource(), obj.getResource());
 		b.append(getSystem(), obj.getSystem());
 		b.append(getValue(), obj.getValue());
-		b.append(myHashIdentity, obj.myHashIdentity);
-		b.append(myHashSystem, obj.myHashSystem);
-		b.append(myHashSystemAndValue, obj.myHashSystemAndValue);
-		b.append(myHashValue, obj.myHashValue);
+		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getHashSystem(), obj.getHashSystem());
+		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
+		b.append(getHashValue(), obj.getHashValue());
 		return b.isEquals();
 	}
 
