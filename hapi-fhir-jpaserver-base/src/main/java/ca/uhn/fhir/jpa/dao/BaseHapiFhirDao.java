@@ -1486,6 +1486,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
 	 *
 	 * @param theEntity   The resource
+	 */
+	protected void postDelete(ResourceTable theEntity) {
+		// nothing
+	}
+
+	/**
+	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
+	 *
+	 * @param theEntity   The resource
 	 * @param theResource The resource being persisted
 	 */
 	protected void postUpdate(ResourceTable theEntity, T theResource) {
@@ -2026,6 +2035,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 
 			postPersist(theEntity, (T) theResource);
+
+		} else if (theEntity.getDeleted() != null) {
+
+			postDelete(theEntity);
 
 		} else {
 			theEntity = myEntityManager.merge(theEntity);
