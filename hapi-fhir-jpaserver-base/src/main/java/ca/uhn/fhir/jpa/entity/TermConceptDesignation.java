@@ -54,7 +54,7 @@ public class TermConceptDesignation implements Serializable {
 	 * @since 3.5.0
 	 */
 	@ManyToOne
-	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
+	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
 
 	public String getLanguage() {
