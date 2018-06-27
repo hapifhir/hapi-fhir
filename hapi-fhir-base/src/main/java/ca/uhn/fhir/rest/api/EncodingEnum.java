@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.lang3.ObjectUtils;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -155,7 +156,12 @@ public enum EncodingEnum {
 	 * </p>
 	 */
 	public static EncodingEnum forContentType(String theContentType) {
-		return ourContentTypeToEncoding.get(theContentType);
+		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
+		if (contentTypeSplitted == null) {
+			return null;
+		} else {
+			return ourContentTypeToEncoding.get(contentTypeSplitted );
+		}
 	}
 
 
@@ -169,18 +175,33 @@ public enum EncodingEnum {
 	 * @see #forContentType(String)
 	 */
 	public static EncodingEnum forContentTypeStrict(String theContentType) {
+		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
+		if (contentTypeSplitted == null) {
+			return null;
+		} else {
+			return ourContentTypeToEncodingStrict.get(contentTypeSplitted);
+		}
+	}
+
+	private static String getTypeWithoutCharset(String theContentType) {
 		if (theContentType == null) {
 			return null;
+		} else {
+			String[] contentTypeSplitted = theContentType.split(";");
+			return contentTypeSplitted[0];
 		}
-		String[] contentTypeSplitted = theContentType.split(";");
-		return ourContentTypeToEncodingStrict.get(contentTypeSplitted[0]);
 	}
 
 	/**
 	 * Is the given type a FHIR legacy (pre-DSTU3) content type?
 	 */
-	public static boolean isLegacy(String theFormat) {
-		return ourContentTypeToEncodingLegacy.containsKey(theFormat);
+	public static boolean isLegacy(String theContentType) {
+		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
+		if (contentTypeSplitted == null) {
+			return false;
+		} else {
+			return ourContentTypeToEncodingLegacy.containsKey(contentTypeSplitted);
+		}
 	}
 
 
