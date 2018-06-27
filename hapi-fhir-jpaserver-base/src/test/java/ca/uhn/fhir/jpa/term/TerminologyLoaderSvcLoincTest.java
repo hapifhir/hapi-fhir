@@ -314,16 +314,16 @@ public class TerminologyLoaderSvcLoincTest {
 		vs = valueSets.get("LG100-4");
 		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
-		assertEquals("http://loinc.org/fhir/loinc-group-LG100-4", vs.getUrl());
+		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(1, vs.getCompose().getInclude().get(0).getValueSet().size());
-		assertEquals("http://loinc.org/fhir/loinc-group-LG1695-8", vs.getCompose().getInclude().get(0).getValueSet().get(0).getValueAsString());
+		assertEquals("http://loinc.org/vs/LG1695-8", vs.getCompose().getInclude().get(0).getValueSet().get(0).getValueAsString());
 
 		// Group - Child
 		vs = valueSets.get("LG1695-8");
 		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		assertEquals("1,4-Dichlorobenzene|MCnc|Pt|ANYBldSerPl", vs.getName());
-		assertEquals("http://loinc.org/fhir/loinc-group-LG1695-8", vs.getUrl());
+		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());

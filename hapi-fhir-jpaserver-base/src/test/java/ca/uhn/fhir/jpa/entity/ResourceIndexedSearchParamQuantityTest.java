@@ -20,7 +20,7 @@ public class ResourceIndexedSearchParamQuantityTest {
 
 		// Make sure our hashing function gives consistent results
 		assertEquals(834432764963581074L, token.getHashIdentity().longValue());
-		assertEquals(3029184989308001259L, token.getHashIdentityAndUnits().longValue());
+		assertEquals(-1970227166134682431L, token.getHashIdentityAndUnits().longValue());
 	}
 
 
