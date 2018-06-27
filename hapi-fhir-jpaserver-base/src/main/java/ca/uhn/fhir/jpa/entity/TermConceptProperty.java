@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,6 +38,14 @@ public class TermConceptProperty implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
+	/**
+	 * TODO: Make this non-null
+	 *
+	 * @since 3.5.0
+	 */
+	@ManyToOne
+	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
+	private TermCodeSystemVersion myCodeSystemVersion;
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PROP_PID", sequenceName = "SEQ_CONCEPT_PROP_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PROP_PID")
@@ -122,6 +130,11 @@ public class TermConceptProperty implements Serializable {
 	 */
 	public void setValue(String theValue) {
 		myValue = theValue;
+	}
+
+	public TermConceptProperty setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystemVersion = theCodeSystemVersion;
+		return this;
 	}
 
 	public void setConcept(TermConcept theConcept) {

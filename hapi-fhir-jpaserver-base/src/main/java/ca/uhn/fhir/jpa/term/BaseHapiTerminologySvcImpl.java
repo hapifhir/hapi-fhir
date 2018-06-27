@@ -65,6 +65,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -272,21 +273,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		int i = 0;
 		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
-			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
-			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
-				myConceptPropertyDao.deleteAll(nextConcept.getProperties());
-				myConceptDesignationDao.deleteAll(nextConcept.getDesignations());
-				myConceptDao.delete(nextConcept);
-			}
-			if (next.getCodeSystem().getCurrentVersion() == next) {
-				next.getCodeSystem().setCurrentVersion(null);
-				myCodeSystemDao.save(next.getCodeSystem());
-			}
-			myCodeSystemVersionDao.delete(next);
-
-			if (i++ % 1000 == 0) {
-				myEntityManager.flush();
-			}
+			deleteCodeSystemVersion(next.getPid());
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
 		myCodeSystemDao.delete(theCodeSystem);
@@ -909,20 +896,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		ourLog.info("Deleting old code system versions");
 		for (TermCodeSystemVersion next : existing) {
-			ourLog.info(" * Deleting code system version {}", next.getPid());
-			myConceptParentChildLinkDao.deleteByCodeSystemVersion(next.getPid());
-			for (TermConcept nextConcept : myConceptDao.findByCodeSystemVersion(next.getPid())) {
-				myConceptPropertyDao.deleteAll(nextConcept.getProperties());
-				myConceptDao.delete(nextConcept);
-			}
+			Long codeSystemVersionPid = next.getPid();
+			deleteCodeSystemVersion(codeSystemVersionPid);
 		}
 
 		ourLog.info("Flushing...");
-
-		myConceptParentChildLinkDao.flush();
-		myConceptPropertyDao.flush();
 		myConceptDao.flush();
-
 		ourLog.info("Done flushing");
 
 		/*
@@ -990,6 +969,94 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		if (myDeferredConcepts.size() > 0 || myConceptLinksToSaveLater.size() > 0) {
 			ourLog.info("Note that some concept saving was deferred - still have {} concepts and {} relationships", myDeferredConcepts.size(), myConceptLinksToSaveLater.size());
 		}
+	}
+
+	public void deleteCodeSystemVersion(Long theCodeSystemVersionPid) {
+		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
+
+		PageRequest page = PageRequest.of(0, 1000);
+		int count;
+
+		// Parent/Child links
+		ourLog.info(" * Deleting parent/child links");
+		count = 0;
+		while (true) {
+			Slice<TermConceptParentChildLink> link = myConceptParentChildLinkDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptParentChildLinkDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} parent/child links deleted", count);
+		}
+		myConceptParentChildLinkDao.flush();
+
+		// Properties
+		ourLog.info(" * Deleting properties");
+		count = 0;
+		while (true) {
+			Slice<TermConceptProperty> link = myConceptPropertyDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptPropertyDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} concept properties deleted", count);
+		}
+		myConceptPropertyDao.flush();
+
+		// Properties
+		ourLog.info(" * Deleting designations");
+		count = 0;
+		while (true) {
+			Slice<TermConceptDesignation> link = myConceptDesignationDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptDesignationDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} concept designations deleted", count);
+		}
+		myConceptDesignationDao.flush();
+
+		// Concepts
+		ourLog.info(" * Deleting concepts");
+		count = 0;
+		while (true) {
+			Slice<TermConcept> link = myConceptDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			for (TermConcept nextConcept : link) {
+				myConceptPropertyDao.deleteAll(nextConcept.getProperties());
+			}
+
+
+			myConceptDao.deleteInBatch(link);
+			myConceptDao.flush();
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} concepts deleted", count);
+		}
+
+		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+		if (codeSystemOpt.isPresent()) {
+			TermCodeSystem codeSystem = codeSystemOpt.get();
+			ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
+			codeSystem.setCurrentVersion(null);
+			myCodeSystemDao.save(codeSystem);
+		}
+
+		ourLog.info(" * Deleting code system version");
+		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+
 	}
 
 	@Override

@@ -26,6 +26,8 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 
+import java.util.Optional;
+
 public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long> {
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCodeSystemUri = :code_system_uri")
@@ -33,5 +35,8 @@ public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long>
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myResourcePid = :resource_pid")
 	TermCodeSystem findByResourcePid(@Param("resource_pid") Long theReourcePid);
+
+	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCurrentVersion.myId = :csv_pid")
+	Optional<TermCodeSystem> findWithCodeSystemVersionAsCurrentVersion(@Param("csv_pid") Long theCodeSystemVersionPid);
 
 }

@@ -130,6 +130,7 @@ public class TermConcept implements Serializable {
 	public TermConceptDesignation addDesignation() {
 		TermConceptDesignation designation = new TermConceptDesignation();
 		designation.setConcept(this);
+		designation.setCodeSystemVersion(myCodeSystem);
 		getDesignations().add(designation);
 		return designation;
 	}
@@ -139,6 +140,7 @@ public class TermConcept implements Serializable {
 
 		TermConceptProperty property = new TermConceptProperty();
 		property.setConcept(this);
+		property.setCodeSystemVersion(myCodeSystem);
 		property.setType(thePropertyType);
 		property.setKey(thePropertyName);
 		property.setValue(thePropertyValue);
