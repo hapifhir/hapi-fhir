@@ -82,10 +82,9 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 			String displayName = theDisplayName;
 			if (isBlank(displayName)) {
-				for (TermConcept next : myCode2Concept.values()) {
-					if (next.getCode().equals(theCode)) {
-						displayName = next.getDisplay();
-					}
+				TermConcept concept = myCode2Concept.get(theCode);
+				if (concept != null) {
+					displayName = concept.getDisplay();
 				}
 			}
 

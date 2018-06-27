@@ -81,7 +81,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_GROUP_FILE = "Group.csv";
 	public static final String LOINC_GROUP_TERMS_FILE = "GroupLoincTerms.csv";
 	public static final String LOINC_PARENT_GROUP_FILE = "ParentGroup.csv";
-	private static final int LOG_INCREMENT = 100000;
+	private static final int LOG_INCREMENT = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
 
 	@Autowired
