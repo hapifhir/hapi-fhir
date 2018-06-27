@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincGroupFileHandler extends BaseLoincHandler implements IRecordHandler {
 
-	public static final String VS_URI_PREFIX = "http://loinc.org/fhir/loinc-group-";
+	public static final String VS_URI_PREFIX = "http://loinc.org/vs/";
 
 	public LoincGroupFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
