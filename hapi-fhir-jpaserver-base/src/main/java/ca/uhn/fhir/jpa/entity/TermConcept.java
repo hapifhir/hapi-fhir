@@ -77,12 +77,12 @@ public class TermConcept implements Serializable {
 	})
 	private String myDisplay;
 
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = true)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
 	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
 
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = true)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
 	private Collection<TermConceptDesignation> myDesignations;
 
 	@Id()
