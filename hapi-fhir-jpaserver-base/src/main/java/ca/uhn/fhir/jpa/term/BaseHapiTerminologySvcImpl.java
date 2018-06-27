@@ -1035,11 +1035,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			}
 
-			for (TermConcept nextConcept : link) {
-				myConceptPropertyDao.deleteAll(nextConcept.getProperties());
-			}
-
-
 			myConceptDao.deleteInBatch(link);
 			myConceptDao.flush();
 
