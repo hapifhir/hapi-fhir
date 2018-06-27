@@ -37,7 +37,8 @@ import java.util.Date;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_DATE", indexes = {
-	@Index(name = "IDX_SP_DATE", columnList = "RES_TYPE,SP_NAME,SP_VALUE_LOW,SP_VALUE_HIGH"),
+//	@Index(name = "IDX_SP_DATE", columnList = "RES_TYPE,SP_NAME,SP_VALUE_LOW,SP_VALUE_HIGH"),
+	@Index(name = "IDX_SP_DATE_HASH", columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH"),
 	@Index(name = "IDX_SP_DATE_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID")
 })

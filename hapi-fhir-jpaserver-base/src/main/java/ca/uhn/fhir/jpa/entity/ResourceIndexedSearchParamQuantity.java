@@ -38,7 +38,9 @@ import java.math.BigDecimal;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY", indexes = {
-	@Index(name = "IDX_SP_QUANTITY", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_UNITS,SP_VALUE"),
+//	@Index(name = "IDX_SP_QUANTITY", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_UNITS,SP_VALUE"),
+	@Index(name = "IDX_SP_QUANTITY_HASH", columnList = "HASH_IDENTITY,SP_VALUE"),
+	@Index(name = "IDX_SP_QUANTITY_HASH_UN", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE"),
 	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID")
 })
@@ -72,6 +74,11 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	/**
 	 * @since 3.5.0 - At some point this should be made not-null
 	 */
+	@Column(name = "HASH_IDENTITY_SYS_UNITS", nullable = true)
+	private Long myHashIdentitySystemAndUnits;
+	/**
+	 * @since 3.5.0 - At some point this should be made not-null
+	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
@@ -90,8 +97,13 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null) {
-			setHashIdentity(hash(getResourceType(), getParamName()));
-			setHashIdentityAndUnits(hash(getResourceType(), getParamName(), getSystem(), getUnits()));
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			String units = getUnits();
+			String system = getSystem();
+			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentityAndUnits(calculateHashUnits(resourceType, paramName, units));
+			setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(resourceType, paramName, system, units));
 		}
 	}
 
@@ -120,6 +132,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
 		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
 		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
 		return b.isEquals();
 	}
@@ -140,6 +153,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	public void setHashIdentityAndUnits(Long theHashIdentityAndUnits) {
 		myHashIdentityAndUnits = theHashIdentityAndUnits;
+	}
+
+	private Long getHashIdentitySystemAndUnits() {
+		return myHashIdentitySystemAndUnits;
+	}
+
+	public void setHashIdentitySystemAndUnits(Long theHashIdentitySystemAndUnits) {
+		myHashIdentitySystemAndUnits = theHashIdentitySystemAndUnits;
 	}
 
 	@Override
@@ -200,7 +221,16 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append("units", getUnits());
 		b.append("value", getValue());
 		b.append("missing", isMissing());
+		b.append("hashIdentitySystemAndUnits", myHashIdentitySystemAndUnits);
 		return b.build();
+	}
+
+	public static long calculateHashSystemAndUnits(String theResourceType, String theParamName, String theSystem, String theUnits) {
+		return hash(theResourceType, theParamName, theSystem, theUnits);
+	}
+
+	public static long calculateHashUnits(String theResourceType, String theParamName, String theUnits) {
+		return hash(theResourceType, theParamName, theUnits);
 	}
 
 }

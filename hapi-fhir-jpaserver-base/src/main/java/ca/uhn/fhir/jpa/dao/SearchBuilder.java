@@ -266,7 +266,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
@@ -282,8 +282,9 @@ public class SearchBuilder implements ISearchBuilder {
 				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
 				String invalidMessageName = "invalidNumberPrefix";
 
-				Predicate num = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
-				codePredicates.add(num);
+				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
+				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric );
+				codePredicates.add(predicateOuter);
 
 			} else {
 				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
@@ -318,7 +319,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theParamName, myBuilder, join);
@@ -341,7 +342,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Join<ResourceTable, ResourceLink> join = createOrReuseJoin(JoinEnum.REFERENCE, theParamName);
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : theList) {
 
@@ -438,7 +439,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					} else {
 						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
-						resourceTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+						resourceTypes = new ArrayList<>(1);
 						resourceTypes.add(resDef.getImplementingClass());
 						resourceId = ref.getIdPart();
 					}
@@ -483,7 +484,7 @@ public class SearchBuilder implements ISearchBuilder {
 						IQueryParameterType chainValue;
 						if (remainingChain != null) {
 							if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", new Object[] {nextType.getSimpleName(), chain, remainingChain});
+								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
 								continue;
 							}
 
@@ -504,7 +505,7 @@ public class SearchBuilder implements ISearchBuilder {
 						Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
 						subQ.select(subQfrom.get("myId").as(Long.class));
 
-						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<List<? extends IQueryParameterType>>();
+						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
 						andOrParams.add(Collections.singletonList(chainValue));
 
 						/*
@@ -555,7 +556,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
-			Set<Long> orPids = new HashSet<Long>();
+			Set<Long> orPids = new HashSet<>();
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(myContext);
 				if (value != null && value.startsWith("|")) {
@@ -605,8 +606,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType theParameter = nextOr;
-			Predicate singleCode = createPredicateString(theParameter, theResourceName, theParamName, myBuilder, join);
+			Predicate singleCode = createPredicateString(nextOr, theResourceName, theParamName, myBuilder, join);
 			codePredicates.add(singleCode);
 		}
 
@@ -794,7 +794,6 @@ public class SearchBuilder implements ISearchBuilder {
 					continue;
 				}
 
-				Predicate predicate;
 				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
 
 					/*
@@ -823,14 +822,24 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					predicate = join.get("myUri").as(String.class).in(toFind);
+					Predicate uriPredicate = join.get("myUri").as(String.class).in(toFind);
+					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate);
+					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
-					predicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
+
+					Predicate uriPredicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
+					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate);
+					codePredicates.add(hashAndUriPredicate);
+
 				} else {
-					predicate = myBuilder.equal(join.get("myUri").as(String.class), value);
+
+					long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(theResourceName, theParamName, value);
+					Predicate hashPredicate = myBuilder.equal(join.get("myHashUri"), hashUri);
+					codePredicates.add(hashPredicate);
+
 				}
-				codePredicates.add(predicate);
+
 			} else {
 				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
 			}
@@ -848,16 +857,13 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		Predicate orPredicate = myBuilder.or(toArray(codePredicates));
-
-		Predicate outerPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicate);
-		myPredicates.add(outerPredicate);
+		myPredicates.add(orPredicate);
 	}
 
 	private Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
-		Predicate resourceTypePredicate = myBuilder.equal(theFrom.get("myResourceType"), theResourceName);
-		Predicate paramNamePredicate = myBuilder.equal(theFrom.get("myParamName"), theParamName);
-		Predicate outerPredicate = myBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
-		return outerPredicate;
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
+		Predicate hashIdentityPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
+		return myBuilder.and(hashIdentityPredicate, thePredicate);
 	}
 
 	private Predicate createCompositeParamPart(String theResourceName, Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue) {
@@ -1037,7 +1043,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theParamName == null) {
 			return num;
 		}
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num);
+		return num;
 	}
 
 	private Predicate createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
@@ -1063,34 +1069,25 @@ public class SearchBuilder implements ISearchBuilder {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
 		}
 
-		Predicate system = null;
-		if (!isBlank(systemValue)) {
-			system = theBuilder.equal(theFrom.get("mySystem"), systemValue);
-		}
-
-		Predicate code = null;
-		if (!isBlank(unitsValue)) {
-			code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
+		Predicate hashPredicate;
+		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(theResourceName, theParamName, systemValue, unitsValue);
+			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentitySystemAndUnits"), hash);
+		} else if (!isBlank(unitsValue)) {
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(theResourceName, theParamName, unitsValue);
+			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentityAndUnits"), hash);
+		} else {
+			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
+			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 
 		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
-		Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName);
+		Predicate numericPredicate = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName);
 
-		Predicate singleCode;
-		if (system == null && code == null) {
-			singleCode = num;
-		} else if (system == null) {
-			singleCode = theBuilder.and(code, num);
-		} else if (code == null) {
-			singleCode = theBuilder.and(system, num);
-		} else {
-			singleCode = theBuilder.and(system, code, num);
-		}
-
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		return theBuilder.and(hashPredicate, numericPredicate);
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
@@ -1256,7 +1253,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate predicate = hashField.in(values);
 		if (modifier == TokenParamModifier.NOT) {
-			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), ResourceIndexedSearchParamToken.calculateHashIdentity(theResourceName, theParamName));
+			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName));
 			Predicate disjunctionPredicate = theBuilder.not(predicate);
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
 		}
@@ -1365,8 +1362,8 @@ public class SearchBuilder implements ISearchBuilder {
 		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
 
-			if (myParams.get(BaseResource.SP_RES_ID) != null) {
-				StringParam idParm = (StringParam) myParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
@@ -1456,7 +1453,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return false;
 		}
 
-		if (BaseResource.SP_RES_ID.equals(theSort.getParamName())) {
+		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 			From<?, ?> forcedIdJoin = theFrom.join("myForcedId", JoinType.LEFT);
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
 				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
@@ -1613,8 +1610,8 @@ public class SearchBuilder implements ISearchBuilder {
 		//-- pre-load all forcedId
 		Map<Long, ForcedId> forcedIdMap = getForcedIdMap(pids);
 				
-		ForcedId forcedId = null;
-		Long resourceId = null;
+		ForcedId forcedId;
+		Long resourceId;
 		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
 			
@@ -1655,7 +1652,7 @@ public class SearchBuilder implements ISearchBuilder {
 	//-- load all history in to the map
 	private Map<Long, ResourceHistoryTable> getResourceHistoryMap(Collection<Long> pids) {
 
-		Map<Long, ResourceHistoryTable> historyMap = new HashMap<Long, ResourceHistoryTable>();
+		Map<Long, ResourceHistoryTable> historyMap = new HashMap<>();
 
 		if (pids.size() == 0)
 			return historyMap;
@@ -1672,7 +1669,7 @@ public class SearchBuilder implements ISearchBuilder {
 	
 	private Map<Long, Collection<ResourceTag>> getResourceTagMap(List<ResourceTable> resourceList) {		
 		
-		List<Long> idList = new ArrayList<Long>(resourceList.size());
+		List<Long> idList = new ArrayList<>(resourceList.size());
 		
 		//-- find all resource has tags
 		for (ResourceTable resource: resourceList) {			
@@ -1680,7 +1677,7 @@ public class SearchBuilder implements ISearchBuilder {
 				idList.add(resource.getId());
 		}
 		
-		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<Long, Collection<ResourceTag>>();
+		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
 		
 		//-- no tags
 		if (idList.size() == 0)
@@ -1697,7 +1694,7 @@ public class SearchBuilder implements ISearchBuilder {
 			resourceId = tag.getResourceId();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
-				tagCol = new ArrayList<ResourceTag>();
+				tagCol = new ArrayList<>();
 				tagCol.add(tag);
 				tagMap.put(resourceId, tagCol);
 			} else {
@@ -1711,7 +1708,7 @@ public class SearchBuilder implements ISearchBuilder {
 	//-- load all forcedId in to the map
 	private Map<Long, ForcedId> getForcedIdMap(Collection<Long> pids) {
 
-		Map<Long, ForcedId> forceIdMap = new HashMap<Long, ForcedId>();
+		Map<Long, ForcedId> forceIdMap = new HashMap<>();
 
 		if (pids.size() == 0)
 			return forceIdMap;
@@ -1761,18 +1758,16 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	/**
-	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
-	 *
-	 * @param theLastUpdated
+	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later (so it can't be Collections.emptySet())
 	 */
 	@Override
 	public HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
 														  boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
-			return new HashSet<Long>();
+			return new HashSet<>();
 		}
 		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
-			return new HashSet<Long>();
+			return new HashSet<>();
 		}
 		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
 
@@ -1813,7 +1808,7 @@ public class SearchBuilder implements ISearchBuilder {
 				} else {
 
 					List<String> paths;
-					RuntimeSearchParam param = null;
+					RuntimeSearchParam param;
 					String resType = nextInclude.getParamType();
 					if (isBlank(resType)) {
 						continue;
