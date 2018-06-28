@@ -119,6 +119,10 @@
 				could cause an error about the incorrect FHIR version. Thanks to 
 				Rob Hausam for the pull request!
 			</action>
+			<action type="fix">
+				A crash was fixed when deleting a ConceptMap resource in the
+				JPA server. This crash was a regression in HAPI FHIR 3.4.0.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

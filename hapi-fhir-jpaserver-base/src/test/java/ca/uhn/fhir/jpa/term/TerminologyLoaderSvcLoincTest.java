@@ -240,17 +240,17 @@ public class TerminologyLoaderSvcLoincTest {
 		// RSNA Playbook - LOINC Term -> RadLex RPID Mappings
 		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_ID);
 		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_URI, conceptMap.getUrl());
-		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_URI, conceptMap.getName());
+		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, group.getSource());
 		assertEquals(LoincRsnaPlaybookHandler.RPID_CS_URI, group.getTarget());
-		assertEquals("24531-6", group.getElement().get(0).getCode());
-		assertEquals("US Retroperitoneum", group.getElement().get(0).getDisplay());
+		assertEquals("LP199995-4", group.getElement().get(0).getCode());
+		assertEquals("Neck", group.getElement().get(0).getDisplay());
 		assertEquals(1, group.getElement().get(0).getTarget().size());
-		assertEquals("RPID2142", group.getElement().get(0).getTarget().get(0).getCode());
-		assertEquals("US Retroperitoneum", group.getElement().get(0).getTarget().get(0).getDisplay());
+		assertEquals("RID7488", group.getElement().get(0).getTarget().get(0).getCode());
+		assertEquals("neck", group.getElement().get(0).getTarget().get(0).getDisplay());
 		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
 
 		// TOP 2000 - US
