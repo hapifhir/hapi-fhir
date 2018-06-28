@@ -222,9 +222,9 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("NM", code.getCodingProperties(propertyName).get(0).getDisplay());
 
 		// RSNA Playbook - LOINC Part -> RadLex RID Mappings
-		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RID_MAPPING_CM_ID);
-		assertEquals(LoincRsnaPlaybookHandler.RID_MAPPING_CM_URI, conceptMap.getUrl());
-		assertEquals(LoincRsnaPlaybookHandler.RID_MAPPING_CM_NAME, conceptMap.getName());
+		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_ID);
+		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_URI, conceptMap.getUrl());
+		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
@@ -238,9 +238,9 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
 
 		// RSNA Playbook - LOINC Term -> RadLex RPID Mappings
-		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RPID_MAPPING_CM_ID);
-		assertEquals(LoincRsnaPlaybookHandler.RPID_MAPPING_CM_URI, conceptMap.getUrl());
-		assertEquals(LoincRsnaPlaybookHandler.RPID_MAPPING_CM_NAME, conceptMap.getName());
+		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_ID);
+		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_URI, conceptMap.getUrl());
+		assertEquals(LoincRsnaPlaybookHandler.RADLEX_MAPPING_CM_URI, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null

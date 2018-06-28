@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term.loinc;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,13 +40,13 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 
 	public static final String LOINC_SCT_PART_MAP_ID = "loinc-parts-to-snomed-ct";
 	public static final String LOINC_SCT_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-snomed-ct";
+	static final String LOINC_RADLEX_PART_MAP_ID = "loinc-parts-to-radlex";
+	static final String LOINC_RADLEX_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-radlex";
+	static final String LOINC_RADLEX_PART_MAP_NAME = "LOINC Part Map to RADLEX";
 	private static final String LOINC_SCT_PART_MAP_NAME = "LOINC Part Map to SNOMED CT";
 	private static final String LOINC_RXNORM_PART_MAP_ID = "loinc-parts-to-rxnorm";
 	private static final String LOINC_RXNORM_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-rxnorm";
 	private static final String LOINC_RXNORM_PART_MAP_NAME = "LOINC Part Map to RxNORM";
-	private static final String LOINC_RADLEX_PART_MAP_ID = "loinc-parts-to-radlex";
-	private static final String LOINC_RADLEX_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-radlex";
-	private static final String LOINC_RADLEX_PART_MAP_NAME = "LOINC Part Map to RADLEX";
 	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.";
 	private static final String LOINC_PUBCHEM_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-pubchem";
 	private static final String LOINC_PUBCHEM_PART_MAP_ID = "loinc-parts-to-pubchem";

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -162,14 +162,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	private void removeCodeFromExpansion(String theCodeSystem, String theCode, ValueSet.ValueSetExpansionComponent theExpansionComponent) {
-		theExpansionComponent
-			.getContains()
-			.removeIf(t ->
-				theCodeSystem.equals(t.getSystem()) &&
-					theCode.equals(t.getCode()));
-	}
-
 	private void addConceptsToList(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
 			if (theAdd && theAddedCodes.add(next.getCode())) {
@@ -281,6 +273,130 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myEntityManager.flush();
 	}
 
+	public void deleteCodeSystemVersion(Long theCodeSystemVersionPid) {
+		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
+
+		PageRequest page = PageRequest.of(0, 1000);
+		int count;
+
+		// Parent/Child links
+		ourLog.info(" * Deleting parent/child links");
+		count = 0;
+		while (true) {
+			Slice<TermConceptParentChildLink> link = myConceptParentChildLinkDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptParentChildLinkDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} parent/child links deleted", count);
+		}
+		myConceptParentChildLinkDao.flush();
+
+		// Properties
+		ourLog.info(" * Deleting properties");
+		count = 0;
+		while (true) {
+			Slice<TermConceptProperty> link = myConceptPropertyDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptPropertyDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} concept properties deleted", count);
+		}
+		myConceptPropertyDao.flush();
+
+		// Properties
+		ourLog.info(" * Deleting designations");
+		count = 0;
+		while (true) {
+			Slice<TermConceptDesignation> link = myConceptDesignationDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptDesignationDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} concept designations deleted", count);
+		}
+		myConceptDesignationDao.flush();
+
+		// Concepts
+		ourLog.info(" * Deleting concepts");
+		count = 0;
+		while (true) {
+			Slice<TermConcept> link = myConceptDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			myConceptDao.deleteInBatch(link);
+			myConceptDao.flush();
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} concepts deleted", count);
+		}
+
+		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+		if (codeSystemOpt.isPresent()) {
+			TermCodeSystem codeSystem = codeSystemOpt.get();
+			ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
+			codeSystem.setCurrentVersion(null);
+			myCodeSystemDao.save(codeSystem);
+		}
+
+		ourLog.info(" * Deleting code system version");
+		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
+
+	}
+
+	public void deleteConceptMap(ResourceTable theResourceTable) {
+		// Get existing entity so it can be deleted.
+		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
+
+		if (optionalExistingTermConceptMapById.isPresent()) {
+			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();
+
+			ourLog.info("Deleting existing TermConceptMap {} and its children...", existingTermConceptMap.getId());
+			for (TermConceptMapGroup group : existingTermConceptMap.getConceptMapGroups()) {
+
+				for (TermConceptMapGroupElement element : group.getConceptMapGroupElements()) {
+
+					for (TermConceptMapGroupElementTarget target : element.getConceptMapGroupElementTargets()) {
+
+						myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(target.getId());
+					}
+
+					myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(element.getId());
+				}
+
+				myConceptMapGroupDao.deleteTermConceptMapGroupById(group.getId());
+			}
+
+			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
+			ourLog.info("Done deleting existing TermConceptMap {} and its children.", existingTermConceptMap.getId());
+
+			ourLog.info("Flushing...");
+			myConceptMapGroupElementTargetDao.flush();
+			myConceptMapGroupElementDao.flush();
+			myConceptMapGroupDao.flush();
+			myConceptMapDao.flush();
+			ourLog.info("Done flushing.");
+		}
+	}
+
+	@Override
+	@Transactional
+	public void deleteConceptMapAndChildren(ResourceTable theResourceTable) {
+		deleteConceptMap(theResourceTable);
+	}
+
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
 		ourLog.trace("Checking {} parents", theParents.size());
 		int retVal = 0;
@@ -321,6 +437,19 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValueSet valueSet = new ValueSet();
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
+	}
+
+	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4) {
+		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSet(theValueSetToExpandR4).getExpansion();
+
+		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
+		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
+			retVal.add(
+				new VersionIndependentConcept()
+					.setSystem(nextContains.getSystem())
+					.setCode(nextContains.getCode()));
+		}
+		return retVal;
 	}
 
 	public void expandValueSetHandleIncludeOrExclude(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent include, boolean theAdd) {
@@ -477,19 +606,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 			}
 		}
-	}
-
-	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4) {
-		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSet(theValueSetToExpandR4).getExpansion();
-
-		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
-			retVal.add(
-				new VersionIndependentConcept()
-					.setSystem(nextContains.getSystem())
-					.setCode(nextContains.getCode()));
-		}
-		return retVal;
 	}
 
 	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
@@ -794,6 +910,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	}
 
+	private void removeCodeFromExpansion(String theCodeSystem, String theCode, ValueSet.ValueSetExpansionComponent theExpansionComponent) {
+		theExpansionComponent
+			.getContains()
+			.removeIf(t ->
+				theCodeSystem.equals(t.getSystem()) &&
+					theCode.equals(t.getCode()));
+	}
+
 	private int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
 
@@ -841,7 +965,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		if(!myDeferredConcepts.isEmpty() || !myConceptLinksToSaveLater.isEmpty()) {
+		if (!myDeferredConcepts.isEmpty() || !myConceptLinksToSaveLater.isEmpty()) {
 			tt.execute(t -> {
 				processDeferredConcepts();
 				return null;
@@ -972,89 +1096,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	public void deleteCodeSystemVersion(Long theCodeSystemVersionPid) {
-		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
-
-		PageRequest page = PageRequest.of(0, 1000);
-		int count;
-
-		// Parent/Child links
-		ourLog.info(" * Deleting parent/child links");
-		count = 0;
-		while (true) {
-			Slice<TermConceptParentChildLink> link = myConceptParentChildLinkDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptParentChildLinkDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} parent/child links deleted", count);
-		}
-		myConceptParentChildLinkDao.flush();
-
-		// Properties
-		ourLog.info(" * Deleting properties");
-		count = 0;
-		while (true) {
-			Slice<TermConceptProperty> link = myConceptPropertyDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptPropertyDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concept properties deleted", count);
-		}
-		myConceptPropertyDao.flush();
-
-		// Properties
-		ourLog.info(" * Deleting designations");
-		count = 0;
-		while (true) {
-			Slice<TermConceptDesignation> link = myConceptDesignationDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptDesignationDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concept designations deleted", count);
-		}
-		myConceptDesignationDao.flush();
-
-		// Concepts
-		ourLog.info(" * Deleting concepts");
-		count = 0;
-		while (true) {
-			Slice<TermConcept> link = myConceptDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptDao.deleteInBatch(link);
-			myConceptDao.flush();
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concepts deleted", count);
-		}
-
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-			codeSystem.setCurrentVersion(null);
-			myCodeSystemDao.save(codeSystem);
-		}
-
-		ourLog.info(" * Deleting code system version");
-		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
-
-	}
-
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -1088,42 +1129,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
 
-		// Get existing entity so it can be deleted.
-		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
-
 		/*
 		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
 		 */
-
-		if (optionalExistingTermConceptMapById.isPresent()) {
-			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();
-
-			ourLog.info("Deleting existing TermConceptMap {} and its children...", existingTermConceptMap.getId());
-			for (TermConceptMapGroup group : existingTermConceptMap.getConceptMapGroups()) {
-
-				for (TermConceptMapGroupElement element : group.getConceptMapGroupElements()) {
-
-					for (TermConceptMapGroupElementTarget target : element.getConceptMapGroupElementTargets()) {
-
-						myConceptMapGroupElementTargetDao.deleteTermConceptMapGroupElementTargetById(target.getId());
-					}
-
-					myConceptMapGroupElementDao.deleteTermConceptMapGroupElementById(element.getId());
-				}
-
-				myConceptMapGroupDao.deleteTermConceptMapGroupById(group.getId());
-			}
-
-			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
-			ourLog.info("Done deleting existing TermConceptMap {} and its children.", existingTermConceptMap.getId());
-
-			ourLog.info("Flushing...");
-			myConceptMapGroupElementTargetDao.flush();
-			myConceptMapGroupElementDao.flush();
-			myConceptMapGroupDao.flush();
-			myConceptMapDao.flush();
-			ourLog.info("Done flushing.");
-		}
+		deleteConceptMap(theResourceTable);
 
 		/*
 		 * Do the upload.

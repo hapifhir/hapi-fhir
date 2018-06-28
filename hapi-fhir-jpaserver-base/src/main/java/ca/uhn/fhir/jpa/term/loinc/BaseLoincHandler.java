@@ -26,6 +26,8 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +37,9 @@ import java.util.Properties;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseLoincHandler implements IRecordHandler {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseLoincHandler.class);
 	public static final String LOINC_COPYRIGHT_STATEMENT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/";
+
 	/**
 	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
 	 * the website URL to LOINC.
@@ -177,6 +180,8 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 				.setCode(theMapping.getTargetCode())
 				.setDisplay(theMapping.getTargetDisplay())
 				.setEquivalence(theMapping.getEquivalence());
+		} else {
+			ourLog.info("Not going to add a mapping from [{}/{}] to [{}/{}] because one already exists", theMapping.getSourceCodeSystem(), theMapping.getSourceCode(), theMapping.getTargetCodeSystem(), theMapping.getTargetCode());
 		}
 	}
 

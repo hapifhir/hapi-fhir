@@ -288,6 +288,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		handler = new LoincAnswerListLinkHandler(code2concept, valueSets);
 		iterateOverZipFile(theDescriptors, LOINC_ANSWERLIST_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
+		// RSNA Playbook file
+		// Note that this should come before the "Part Related Code Mapping"
+		// file because there are some duplicate mappings between these
+		// two files, and the RSNA Playbook file has more metadata
+		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, uploadProperties);
+		iterateOverZipFile(theDescriptors, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
+
 		// Part link file
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept);
 		iterateOverZipFile(theDescriptors, LOINC_PART_LINK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
@@ -299,10 +306,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		// Document Ontology File
 		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, uploadProperties);
 		iterateOverZipFile(theDescriptors, LOINC_DOCUMENT_ONTOLOGY_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
-
-		// RSNA Playbook file
-		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, uploadProperties);
-		iterateOverZipFile(theDescriptors, LOINC_RSNA_PLAYBOOK_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 Codes - US
 		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, uploadProperties);
