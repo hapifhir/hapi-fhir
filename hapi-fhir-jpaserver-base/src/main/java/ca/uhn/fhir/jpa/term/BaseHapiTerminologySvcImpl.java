@@ -1081,7 +1081,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			} catch (FHIRException fe) {
 				throw new InternalErrorException(fe);
 			}
-			myConceptMapDao.save(termConceptMap);
+			termConceptMap = myConceptMapDao.save(termConceptMap);
 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
@@ -1098,7 +1098,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					termConceptMapGroup.setSourceVersion(group.getSourceVersion());
 					termConceptMapGroup.setTarget(group.getTarget());
 					termConceptMapGroup.setTargetVersion(group.getTargetVersion());
-					myConceptMapGroupDao.save(termConceptMapGroup);
+					termConceptMapGroup = myConceptMapGroupDao.save(termConceptMapGroup);
 
 					if (group.hasElement()) {
 						TermConceptMapGroupElement termConceptMapGroupElement;
@@ -1107,7 +1107,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
 							termConceptMapGroupElement.setCode(element.getCode());
 							termConceptMapGroupElement.setDisplay(element.getDisplay());
-							myConceptMapGroupElementDao.save(termConceptMapGroupElement);
+							termConceptMapGroupElement = myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
