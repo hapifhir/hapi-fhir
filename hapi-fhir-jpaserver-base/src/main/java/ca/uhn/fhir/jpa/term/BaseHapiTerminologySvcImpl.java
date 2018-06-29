@@ -1085,6 +1085,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
+				int groupElementTargetCounter = 0;
 				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 					if (isBlank(group.getSource())) {
 						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
@@ -1117,11 +1118,20 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 									termConceptMapGroupElementTarget.setCode(target.getCode());
 									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
 									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
-									myConceptMapGroupElementTargetDao.saveAndFlush(termConceptMapGroupElementTarget);
+									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
+
+									groupElementTargetCounter++;
+									if(groupElementTargetCounter >= 1000) {
+										myConceptMapGroupElementTargetDao.flush();
+										groupElementTargetCounter = 0;
+									}
 								}
 							}
 						}
 					}
+				}
+				if(groupElementTargetCounter > 0) {
+					myConceptMapGroupElementTargetDao.flush();
 				}
 			}
 		} else {
