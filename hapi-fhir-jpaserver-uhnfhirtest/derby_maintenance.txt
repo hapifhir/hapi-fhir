@@ -156,3 +156,8 @@ drop index IDX_FORCEDID_TYPE_FORCEDID;
 create index IDX_FORCEDID_TYPE_FID;
 drop index IDX_SP_NUMBER;
 create index IDX_SP_NUMBER_HASH_VAL;
+
+drop column SP_ID from table HFJ_RES_PARAM_PRESENT;
+drop index IDX_SEARCHPARM_RESTYPE_SPNAME;
+drop index IDX_RESPARMPRESENT_SPID_RESID;
+drop table HFJ_SEARCH_PARM;

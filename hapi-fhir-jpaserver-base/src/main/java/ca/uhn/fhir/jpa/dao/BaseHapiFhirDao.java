@@ -326,7 +326,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		});
 		txTemplate.execute(t -> {
 			doExpungeEverythingQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + SearchParam.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + ForcedId.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d");
 			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d");

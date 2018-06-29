@@ -297,11 +297,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
-		Join<SearchParamPresent, SearchParam> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
 
-		myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
-		myPredicates.add(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
-		myPredicates.add(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
+		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
+		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
+		myPredicates.add(myBuilder.equal(hashPresence, hash));
 	}
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
