@@ -66,8 +66,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
-	protected ISearchParamDao mySearchParamDao;
-	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
