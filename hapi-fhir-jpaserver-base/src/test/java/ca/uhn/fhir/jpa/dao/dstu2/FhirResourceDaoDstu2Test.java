@@ -2908,10 +2908,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens");
 		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves");
 
-		System.out.println("patientId = " + patientId);
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		System.out.println("published = " + published);
 		sort(published);
 		assertEquals(3, published.size());
 		assertEquals(published.toString(), "Dog", published.get(0).getTerm());
