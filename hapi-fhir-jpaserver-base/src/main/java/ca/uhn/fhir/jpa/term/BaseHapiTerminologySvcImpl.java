@@ -1081,10 +1081,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			} catch (FHIRException fe) {
 				throw new InternalErrorException(fe);
 			}
-			myConceptMapDao.save(termConceptMap);
+			termConceptMap = myConceptMapDao.save(termConceptMap);
 
 			if (theConceptMap.hasGroup()) {
 				TermConceptMapGroup termConceptMapGroup;
+				int groupElementTargetCounter = 0;
 				for (ConceptMap.ConceptMapGroupComponent group : theConceptMap.getGroup()) {
 					if (isBlank(group.getSource())) {
 						throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
@@ -1098,7 +1099,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					termConceptMapGroup.setSourceVersion(group.getSourceVersion());
 					termConceptMapGroup.setTarget(group.getTarget());
 					termConceptMapGroup.setTargetVersion(group.getTargetVersion());
-					myConceptMapGroupDao.save(termConceptMapGroup);
+					termConceptMapGroup = myConceptMapGroupDao.save(termConceptMapGroup);
 
 					if (group.hasElement()) {
 						TermConceptMapGroupElement termConceptMapGroupElement;
@@ -1107,7 +1108,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
 							termConceptMapGroupElement.setCode(element.getCode());
 							termConceptMapGroupElement.setDisplay(element.getDisplay());
-							myConceptMapGroupElementDao.save(termConceptMapGroupElement);
+							termConceptMapGroupElement = myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
@@ -1117,11 +1118,20 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 									termConceptMapGroupElementTarget.setCode(target.getCode());
 									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
 									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
-									myConceptMapGroupElementTargetDao.saveAndFlush(termConceptMapGroupElementTarget);
+									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
+
+									groupElementTargetCounter++;
+									if(groupElementTargetCounter >= 1000) {
+										myConceptMapGroupElementTargetDao.flush();
+										groupElementTargetCounter = 0;
+									}
 								}
 							}
 						}
 					}
+				}
+				if(groupElementTargetCounter > 0) {
+					myConceptMapGroupElementTargetDao.flush();
 				}
 			}
 		} else {
