@@ -85,6 +85,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.ForcedId;
@@ -98,6 +99,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.SearchParam;
 import ca.uhn.fhir.jpa.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
@@ -174,8 +176,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
 
-	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	protected IResourceTagDao myResourceTagDao;
+	protected IResourceSearchViewDao myResourceSearchViewDao;
 	
 	/**
 	 * Constructor
@@ -184,7 +186,7 @@ public class SearchBuilder implements ISearchBuilder {
 			IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
 			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
 			IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
-			IResourceHistoryTableDao theResourceHistoryTableDao, IResourceTagDao theResourceTagDao) {
+			IResourceTagDao theResourceTagDao, IResourceSearchViewDao theResourceViewDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myFulltextSearchSvc = theFulltextSearchSvc;
@@ -193,8 +195,8 @@ public class SearchBuilder implements ISearchBuilder {
 		myForcedIdDao = theForcedIdDao;
 		myTerminologySvc = theTerminologySvc;
 		mySearchParamRegistry = theSearchParamRegistry;
-		myResourceHistoryTableDao = theResourceHistoryTableDao;
 		myResourceTagDao = theResourceTagDao;
+		myResourceSearchViewDao = theResourceViewDao;
 	}
 
 	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1675,52 +1677,39 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
 									Map<Long, Integer> position, Collection<Long> pids) {
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(from.get("myId").in(pids));
-		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
-		List<ResourceTable> resultList = q.getResultList();
-
-		//-- Issue #963: Load resource histories based on pids once to improve the performance
-		Map<Long, ResourceHistoryTable> historyMap = getResourceHistoryMap(pids);
+		// -- get the resource from the searchView
+		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(pids);
 		
 		//-- preload all tags with tag definition if any
-		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resultList);
+		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
 		
-		//-- pre-load all forcedId
-		Map<Long, ForcedId> forcedIdMap = getForcedIdMap(pids);
-				
-		ForcedId forcedId = null;
 		Long resourceId = null;
-		for (ResourceTable next : resultList) {
+		for (ResourceSearchView next : resourceSearchViewList) {
+			
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
 			
 			resourceId = next.getId();
-			forcedId = forcedIdMap.get(resourceId);
-			if (forcedId != null)
-				next.setForcedId(forcedId);
 			
-			IBaseResource resource = theDao.toResource(resourceType, next, historyMap.get(next.getId()), tagMap.get(next.getId()), theForHistoryOperation);
+			IBaseResource resource = theDao.toResource(resourceType, next, tagMap.get(resourceId), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
 			}
-			Integer index = position.get(next.getId());
+			Integer index = position.get(resourceId);
 			if (index == null) {
-				ourLog.warn("Got back unexpected resource PID {}", next.getId());
+				ourLog.warn("Got back unexpected resource PID {}", resourceId);
 				continue;
 			}
 
 			if (resource instanceof IResource) {
-				if (theRevIncludedPids.contains(next.getId())) {
+				if (theRevIncludedPids.contains(resourceId)) {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
 				} else {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
 				}
 			} else {
-				if (theRevIncludedPids.contains(next.getId())) {
+				if (theRevIncludedPids.contains(resourceId)) {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
 				} else {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
@@ -1731,30 +1720,12 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	//-- load all history in to the map
-	private Map<Long, ResourceHistoryTable> getResourceHistoryMap(Collection<Long> pids) {
-
-		Map<Long, ResourceHistoryTable> historyMap = new HashMap<Long, ResourceHistoryTable>();
-
-		if (pids.size() == 0)
-			return historyMap;
-
-		Collection<ResourceHistoryTable> historyList = myResourceHistoryTableDao.findByResourceIds(pids);
-
-		for (ResourceHistoryTable history : historyList) {
-
-			historyMap.put(history.getResourceId(), history);
-		}
-
-		return historyMap;
-	}
-	
-	private Map<Long, Collection<ResourceTag>> getResourceTagMap(List<ResourceTable> resourceList) {		
+	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {		
 		
-		List<Long> idList = new ArrayList<Long>(resourceList.size());
+		List<Long> idList = new ArrayList<Long>(theResourceSearchViewList.size());
 		
 		//-- find all resource has tags
-		for (ResourceTable resource: resourceList) {			
+		for (ResourceSearchView resource: theResourceSearchViewList) {			
 			if (resource.isHasTags())
 				idList.add(resource.getId());
 		}
@@ -1787,23 +1758,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return tagMap;		
 	}
 
-	//-- load all forcedId in to the map
-	private Map<Long, ForcedId> getForcedIdMap(Collection<Long> pids) {
-
-		Map<Long, ForcedId> forceIdMap = new HashMap<Long, ForcedId>();
-
-		if (pids.size() == 0)
-			return forceIdMap;
-
-		Collection<ForcedId> forceIdList = myForcedIdDao.findByResourcePids(pids);
-
-		for (ForcedId forcedId : forceIdList) {
-
-			forceIdMap.put(forcedId.getResourcePid(), forcedId);
-		}
-
-		return forceIdMap;
-	}
 	@Override
 	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
