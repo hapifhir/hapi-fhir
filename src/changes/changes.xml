@@ -89,6 +89,17 @@
 				client-assigned reosurce ID). Thanks to Frank Tao for the pull
 				request!
 			</action>
+			<action type="fix" issue="1015">
+				A bug was fixed in the JPA terminology uploader, where it was possible
+				in some cases for some ValueSets and ConceptMaps to not be saved because
+				of a premature short circuit during deferred uploading. Thanks to 
+				Joel Schneider for the pull request!
+			</action>
+			<action type="fix" issue="969">
+				A bug in the HAPI FHIR CLI was fixed, where uploading terminology for R4
+				could cause an error about the incorrect FHIR version. Thanks to 
+				Rob Hausam for the pull request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

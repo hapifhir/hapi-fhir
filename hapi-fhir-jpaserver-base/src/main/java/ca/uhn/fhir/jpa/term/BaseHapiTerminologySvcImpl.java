@@ -850,15 +850,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			return;
 		} else if (myDeferredConcepts.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
 			processReindexing();
-			return;
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		tt.execute(t -> {
-			processDeferredConcepts();
-			return null;
-		});
+		if(!myDeferredConcepts.isEmpty() || !myConceptLinksToSaveLater.isEmpty()) {
+			tt.execute(t -> {
+				processDeferredConcepts();
+				return null;
+			});
+		}
 
 		if (myDeferredValueSets.size() > 0) {
 			tt.execute(t -> {
