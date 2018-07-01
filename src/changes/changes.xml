@@ -100,6 +100,12 @@
 				could cause an error about the incorrect FHIR version. Thanks to 
 				Rob Hausam for the pull request!
 			</action>
+			<action type="add">
+				A new method has been added to AuthorizationInterceptor that can be used to
+				create rules allowing FHIR patch operations. See
+				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html#Authorizing_Patch_Operations">Authorizing Patch Operations</a>]]>
+				for more information.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

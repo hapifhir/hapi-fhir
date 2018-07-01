@@ -215,6 +215,29 @@
 				
 			</subsection>
 
+			<subsection name="Authorizing Patch Operations">
+				<p>
+					The FHIR <a href="http://hl7.org/fhir/http.html#patch">patch</a> operation
+					presents a challenge for authorization, as the incoming request often contains
+					very little detail about what is being modified.
+				</p>
+				<p>
+					In order to properly enforce authorization on a server that
+					allows the patch operation, a rule may be added that allows all
+					patch requests, as shown below.
+				</p>
+				<p>
+					This should be combined with server support for
+					<a href="http://hapifhir.io/doc_rest_server_security.html#Authorizing_Sub-Operations">Authorizing Sub-Operations</a>
+					as shown above.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="patchAll" />
+					<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+				</macro>
+
+			</subsection>
+
 			<subsection name="Authorizing Multitenant Servers">
 
 				<p>

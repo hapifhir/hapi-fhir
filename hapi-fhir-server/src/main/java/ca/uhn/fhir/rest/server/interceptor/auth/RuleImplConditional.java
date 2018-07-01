@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,6 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	private AppliesTypeEnum myAppliesTo;
 	private Set<?> myAppliesToTypes;
 	private RestOperationTypeEnum myOperationType;
-	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 
 	RuleImplConditional(String theRuleName) {
 		super(theRuleName);
@@ -42,6 +41,10 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
+
+		if (isOtherTenant(theRequestDetails)) {
+			return null;
+		}
 
 		if (theInputResourceId != null) {
 			return null;
@@ -63,8 +66,8 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 				return null;
 			}
 
-			if (myTenantApplicabilityChecker != null) {
-				if (!myTenantApplicabilityChecker.applies(theRequestDetails)) {
+			if (getTenantApplicabilityChecker() != null) {
+				if (!getTenantApplicabilityChecker().applies(theRequestDetails)) {
 					return null;
 				}
 			}
@@ -89,10 +92,6 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	void setOperationType(RestOperationTypeEnum theOperationType) {
 		myOperationType = theOperationType;
-	}
-
-	public void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
 	}
 
 }

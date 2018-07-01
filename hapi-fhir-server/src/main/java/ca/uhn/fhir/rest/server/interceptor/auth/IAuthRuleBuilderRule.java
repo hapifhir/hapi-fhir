@@ -70,6 +70,11 @@ public interface IAuthRuleBuilderRule {
 	IAuthRuleBuilderOperation operation();
 
 	/**
+	 * This rule applies to a FHIR patch operation
+	 */
+	IAuthRuleBuilderPatch patch();
+
+	/**
 	 * This rule applies to any FHIR operation involving reading, including
 	 * <code>read</code>, <code>vread</code>, <code>search</code>, and
 	 * <code>history</code>
