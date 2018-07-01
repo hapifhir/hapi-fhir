@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,45 +20,43 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Pattern;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.util.FhirTerser;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.util.FhirTerser;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
-	
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
-	public static final Pattern SPLIT = Pattern.compile("\\||( or )");
 
+	public static final Pattern SPLIT = Pattern.compile("\\||( or )");
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 	@Autowired
 	private FhirContext myContext;
-	
+	@Autowired
+	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	
 	public BaseSearchParamExtractor() {
 		super();
 	}
 
-	public BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	public BaseSearchParamExtractor(DaoConfig theDaoConfig, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myDaoConfig = theDaoConfig;
 	}
-	
+
 	@Override
 	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
 		List<PathAndRef> refs = new ArrayList<PathAndRef>();
@@ -95,20 +93,24 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				}
 			} catch (Exception e) {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: {}", new Object[] { nextPathTrimmed, def.getName(), e.toString(), e } );
+				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: {}", new Object[] {nextPathTrimmed, def.getName(), e.toString(), e});
 			}
 		}
 		return values;
 	}
-	
+
 	protected FhirContext getContext() {
 		return myContext;
+	}
+
+	public DaoConfig getDaoConfig() {
+		return myDaoConfig;
 	}
 
 	public Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		Collection<RuntimeSearchParam> retVal = mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
-		List<RuntimeSearchParam> defaultList= Collections.emptyList();
+		List<RuntimeSearchParam> defaultList = Collections.emptyList();
 		retVal = ObjectUtils.defaultIfNull(retVal, defaultList);
 		return retVal;
 	}

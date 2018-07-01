@@ -46,7 +46,6 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamDao.findAll(), empty());
 		assertThat(mySearchParamPresentDao.findAll(), empty());
 		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
 		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());

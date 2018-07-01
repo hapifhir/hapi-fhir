@@ -1,58 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.AbstractQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaBuilder.In;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.query.Query;
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -72,48 +19,19 @@ import com.google.common.collect.Sets;
  * limitations under the License.
  * #L%
  */
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.entity.ForcedId;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.entity.ResourceLink;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
-import ca.uhn.fhir.jpa.entity.SearchParam;
-import ca.uhn.fhir.jpa.entity.SearchParamPresent;
-import ca.uhn.fhir.jpa.entity.TagDefinition;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
@@ -125,25 +43,41 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
+import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
+import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -332,7 +266,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
@@ -348,8 +282,9 @@ public class SearchBuilder implements ISearchBuilder {
 				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
 				String invalidMessageName = "invalidNumberPrefix";
 
-				Predicate num = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
-				codePredicates.add(num);
+				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
+				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric );
+				codePredicates.add(predicateOuter);
 
 			} else {
 				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
@@ -362,11 +297,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
-		Join<SearchParamPresent, SearchParam> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
 
-		myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
-		myPredicates.add(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
-		myPredicates.add(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
+		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
+		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
+		myPredicates.add(myBuilder.equal(hashPresence, hash));
 	}
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
@@ -384,7 +318,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theParamName, myBuilder, join);
@@ -407,7 +341,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Join<ResourceTable, ResourceLink> join = createOrReuseJoin(JoinEnum.REFERENCE, theParamName);
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : theList) {
 
@@ -504,7 +438,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					} else {
 						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
-						resourceTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+						resourceTypes = new ArrayList<>(1);
 						resourceTypes.add(resDef.getImplementingClass());
 						resourceId = ref.getIdPart();
 					}
@@ -549,7 +483,7 @@ public class SearchBuilder implements ISearchBuilder {
 						IQueryParameterType chainValue;
 						if (remainingChain != null) {
 							if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", new Object[] {nextType.getSimpleName(), chain, remainingChain});
+								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
 								continue;
 							}
 
@@ -570,7 +504,7 @@ public class SearchBuilder implements ISearchBuilder {
 						Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
 						subQ.select(subQfrom.get("myId").as(Long.class));
 
-						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<List<? extends IQueryParameterType>>();
+						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
 						andOrParams.add(Collections.singletonList(chainValue));
 
 						/*
@@ -621,7 +555,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
-			Set<Long> orPids = new HashSet<Long>();
+			Set<Long> orPids = new HashSet<>();
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(myContext);
 				if (value != null && value.startsWith("|")) {
@@ -669,10 +603,9 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
-			IQueryParameterType theParameter = nextOr;
-			Predicate singleCode = createPredicateString(theParameter, theResourceName, theParamName, myBuilder, join);
+			Predicate singleCode = createPredicateString(nextOr, theResourceName, theParamName, myBuilder, join);
 			codePredicates.add(singleCode);
 		}
 
@@ -817,7 +750,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof TokenParam) {
@@ -860,7 +793,6 @@ public class SearchBuilder implements ISearchBuilder {
 					continue;
 				}
 
-				Predicate predicate;
 				if (param.getQualifier() == UriParamQualifierEnum.ABOVE) {
 
 					/*
@@ -889,14 +821,24 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					predicate = join.get("myUri").as(String.class).in(toFind);
+					Predicate uriPredicate = join.get("myUri").as(String.class).in(toFind);
+					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate);
+					codePredicates.add(hashAndUriPredicate);
 
 				} else if (param.getQualifier() == UriParamQualifierEnum.BELOW) {
-					predicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
+
+					Predicate uriPredicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
+					Predicate hashAndUriPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, uriPredicate);
+					codePredicates.add(hashAndUriPredicate);
+
 				} else {
-					predicate = myBuilder.equal(join.get("myUri").as(String.class), value);
+
+					long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(theResourceName, theParamName, value);
+					Predicate hashPredicate = myBuilder.equal(join.get("myHashUri"), hashUri);
+					codePredicates.add(hashPredicate);
+
 				}
-				codePredicates.add(predicate);
+
 			} else {
 				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
 			}
@@ -914,16 +856,13 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		Predicate orPredicate = myBuilder.or(toArray(codePredicates));
-
-		Predicate outerPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, orPredicate);
-		myPredicates.add(outerPredicate);
+		myPredicates.add(orPredicate);
 	}
 
 	private Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
-		Predicate resourceTypePredicate = myBuilder.equal(theFrom.get("myResourceType"), theResourceName);
-		Predicate paramNamePredicate = myBuilder.equal(theFrom.get("myParamName"), theParamName);
-		Predicate outerPredicate = myBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
-		return outerPredicate;
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
+		Predicate hashIdentityPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
+		return myBuilder.and(hashIdentityPredicate, thePredicate);
 	}
 
 	private Predicate createCompositeParamPart(String theResourceName, Root<ResourceTable> theRoot, RuntimeSearchParam theParam, IQueryParameterType leftValue) {
@@ -1103,7 +1042,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theParamName == null) {
 			return num;
 		}
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num);
+		return num;
 	}
 
 	private Predicate createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
@@ -1129,39 +1068,31 @@ public class SearchBuilder implements ISearchBuilder {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
 		}
 
-		Predicate system = null;
-		if (!isBlank(systemValue)) {
-			system = theBuilder.equal(theFrom.get("mySystem"), systemValue);
-		}
-
-		Predicate code = null;
-		if (!isBlank(unitsValue)) {
-			code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
+		Predicate hashPredicate;
+		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(theResourceName, theParamName, systemValue, unitsValue);
+			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentitySystemAndUnits"), hash);
+		} else if (!isBlank(unitsValue)) {
+			long hash = ResourceIndexedSearchParamQuantity.calculateHashUnits(theResourceName, theParamName, unitsValue);
+			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentityAndUnits"), hash);
+		} else {
+			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
+			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 
 		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
-		Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName);
+		Predicate numericPredicate = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName);
 
-		Predicate singleCode;
-		if (system == null && code == null) {
-			singleCode = num;
-		} else if (system == null) {
-			singleCode = theBuilder.and(code, num);
-		} else if (code == null) {
-			singleCode = theBuilder.and(system, num);
-		} else {
-			singleCode = theBuilder.and(system, code, num);
-		}
-
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		return theBuilder.and(hashPredicate, numericPredicate);
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
+		DaoConfig daoConfig = myCallingDao.getConfig();
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
 			if (!id.isText()) {
@@ -1172,7 +1103,7 @@ public class SearchBuilder implements ISearchBuilder {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
 			if (id.isContains()) {
-				if (!myCallingDao.getConfig().isAllowContainsSearches()) {
+				if (!daoConfig.isAllowContainsSearches()) {
 					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
 				}
 			}
@@ -1188,22 +1119,34 @@ public class SearchBuilder implements ISearchBuilder {
 				+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
-		String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-		if (theParameter instanceof StringParam &&
-			((StringParam) theParameter).isContains() &&
-			myCallingDao.getConfig().isAllowContainsSearches()) {
-			likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
+		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
+		if (exactMatch) {
+
+			// Exact match
+
+			Long hash = ResourceIndexedSearchParamString.calculateHashExact(theResourceName, theParamName, rawSearchTerm);
+			return theBuilder.equal(theFrom.get("myHashExact").as(Long.class), hash);
+
 		} else {
-			likeExpression = createLeftMatchLikeExpression(likeExpression);
-		}
 
-		Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
-		if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
-			Predicate exactCode = theBuilder.equal(theFrom.get("myValueExact"), rawSearchTerm);
-			singleCode = theBuilder.and(singleCode, exactCode);
-		}
+			// Normalized Match
 
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+			String normalizedString = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String likeExpression;
+			if (theParameter instanceof StringParam &&
+				((StringParam) theParameter).isContains() &&
+				daoConfig.isAllowContainsSearches()) {
+				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
+			} else {
+				likeExpression = createLeftMatchLikeExpression(normalizedString);
+			}
+
+			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(daoConfig, theResourceName, theParamName, normalizedString);
+			Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
+			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+			return theBuilder.and(hashCode, singleCode);
+
+		}
 	}
 
 	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
@@ -1258,7 +1201,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * Process token modifiers (:in, :below, :above)
 		 */
 
-		List<VersionIndependentConcept> codes = null;
+		List<VersionIndependentConcept> codes;
 		if (modifier == TokenParamModifier.IN) {
 			codes = myTerminologySvc.expandValueSet(code);
 		} else if (modifier == TokenParamModifier.ABOVE) {
@@ -1267,81 +1210,53 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (modifier == TokenParamModifier.BELOW) {
 			system = determineSystemIfMissing(theParamName, code, system);
 			codes = myTerminologySvc.findCodesBelow(system, code);
-		}
-
-		ArrayList<Predicate> singleCodePredicates = new ArrayList<>();
-		if (codes != null) {
-
-			if (codes.isEmpty()) {
-
-				// This will never match anything
-				Predicate codePredicate = theBuilder.isNull(theFrom.get("myMissing"));
-				singleCodePredicates.add(codePredicate);
-
-			} else {
-				List<Predicate> orPredicates = new ArrayList<Predicate>();
-				Map<String, List<VersionIndependentConcept>> map = new HashMap<String, List<VersionIndependentConcept>>();
-				for (VersionIndependentConcept nextCode : codes) {
-					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
-					if (null == systemCodes) {
-						systemCodes = new ArrayList<>();
-						map.put(nextCode.getSystem(), systemCodes);
-					}
-					systemCodes.add(nextCode);
-				}
-				// Use "in" in case of large numbers of codes due to param modifiers
-				final Path<String> systemExpression = theFrom.get("mySystem");
-				final Path<String> valueExpression = theFrom.get("myValue");
-				for (Map.Entry<String, List<VersionIndependentConcept>> entry : map.entrySet()) {
-					Predicate systemPredicate = theBuilder.equal(systemExpression, entry.getKey());
-					In<String> codePredicate = theBuilder.in(valueExpression);
-					for (VersionIndependentConcept nextCode : entry.getValue()) {
-						codePredicate.value(nextCode.getCode());
-					}
-					orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
-				}
-
-				singleCodePredicates.add(theBuilder.or(orPredicates.toArray(new Predicate[orPredicates.size()])));
-			}
-
 		} else {
+			codes = Collections.singletonList(new VersionIndependentConcept(system, code));
+		}
 
-			/*
-			 * Ok, this is a normal query
-			 */
+		if (codes.isEmpty()) {
+			// This will never match anything
+			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false);
+		}
 
-			if (StringUtils.isNotBlank(system)) {
-				if (modifier != null && modifier == TokenParamModifier.NOT) {
-					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
-				} else {
-					singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
-				}
-			} else if (system == null) {
-				// don't check the system
+		/*
+		 * Note: A null system value means "match any system", but
+		 * an empty-string system value means "match values that
+		 * explicitly have no system".
+		 */
+		boolean haveSystem = codes.get(0).getSystem() != null;
+		boolean haveCode = isNotBlank(codes.get(0).getCode());
+		Expression<Long> hashField;
+		if (!haveSystem && !haveCode) {
+			// If we have neither, this isn't actually an expression so
+			// just return 1=1
+			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, true);
+		} else if (haveSystem && haveCode) {
+			hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
+		} else if (haveSystem) {
+			hashField = theFrom.get("myHashSystem").as(Long.class);
+		} else {
+			hashField = theFrom.get("myHashValue").as(Long.class);
+		}
+
+		List<Long> values = new ArrayList<>(codes.size());
+		for (VersionIndependentConcept next : codes) {
+			if (haveSystem && haveCode) {
+				values.add(ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, next.getSystem(), next.getCode()));
+			} else if (haveSystem) {
+				values.add(ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, next.getSystem()));
 			} else {
-				// If the system is "", we only match on null systems
-				singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
-			}
-
-			if (StringUtils.isNotBlank(code)) {
-				if (modifier != null && modifier == TokenParamModifier.NOT) {
-					singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
-				} else {
-					singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
-				}
-			} else {
-				/*
-				 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
-				 * match all tokens with the given value.
-				 *
-				 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
-				 */
-				// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
+				values.add(ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, next.getCode()));
 			}
 		}
 
-		Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
-		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		Predicate predicate = hashField.in(values);
+		if (modifier == TokenParamModifier.NOT) {
+			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName));
+			Predicate disjunctionPredicate = theBuilder.not(predicate);
+			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
+		}
+		return predicate;
 	}
 
 	@Override
@@ -1446,8 +1361,8 @@ public class SearchBuilder implements ISearchBuilder {
 		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
 
-			if (myParams.get(BaseResource.SP_RES_ID) != null) {
-				StringParam idParm = (StringParam) myParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
 				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
@@ -1537,7 +1452,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return false;
 		}
 
-		if (BaseResource.SP_RES_ID.equals(theSort.getParamName())) {
+		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 			From<?, ?> forcedIdJoin = theFrom.join("myForcedId", JoinType.LEFT);
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
 				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
@@ -1730,7 +1645,7 @@ public class SearchBuilder implements ISearchBuilder {
 				idList.add(resource.getId());
 		}
 		
-		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<Long, Collection<ResourceTag>>();
+		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
 		
 		//-- no tags
 		if (idList.size() == 0)
@@ -1747,7 +1662,7 @@ public class SearchBuilder implements ISearchBuilder {
 			resourceId = tag.getResourceId();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
-				tagCol = new ArrayList<ResourceTag>();
+				tagCol = new ArrayList<>();
 				tagCol.add(tag);
 				tagMap.put(resourceId, tagCol);
 			} else {
@@ -1794,18 +1709,16 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	/**
-	 * THIS SHOULD RETURN HASHSET and not jsut Set because we add to it later (so it can't be Collections.emptySet())
-	 *
-	 * @param theLastUpdated
+	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later (so it can't be Collections.emptySet())
 	 */
 	@Override
 	public HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
 														  boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
-			return new HashSet<Long>();
+			return new HashSet<>();
 		}
 		if (theRevIncludes == null || theRevIncludes.isEmpty()) {
-			return new HashSet<Long>();
+			return new HashSet<>();
 		}
 		String searchFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
 
@@ -1846,7 +1759,7 @@ public class SearchBuilder implements ISearchBuilder {
 				} else {
 
 					List<String> paths;
-					RuntimeSearchParam param = null;
+					RuntimeSearchParam param;
 					String resType = nextInclude.getParamType();
 					if (isBlank(resType)) {
 						continue;

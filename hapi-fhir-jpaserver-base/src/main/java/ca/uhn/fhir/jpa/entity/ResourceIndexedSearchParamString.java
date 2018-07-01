@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +39,14 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_STRING", indexes = {
-	@Index(name = "IDX_SP_STRING", columnList = "RES_TYPE,SP_NAME,SP_VALUE_NORMALIZED"),
+	/*
+	 * Note: We previously had indexes with the following names,
+	 * do not reuse these names:
+	 * IDX_SP_STRING
+	 */
+	@Index(name = "IDX_SP_STRING_HASH_NRM", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED"),
+	@Index(name = "IDX_SP_STRING_HASH_EXCT", columnList = "HASH_EXACT"),
+
 	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
@@ -127,13 +135,16 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_EXACT", nullable = true)
 	private Long myHashExact;
+	@Transient
+	private transient DaoConfig myDaoConfig;
 
 	public ResourceIndexedSearchParamString() {
 		super();
 	}
 
 
-	public ResourceIndexedSearchParamString(String theName, String theValueNormalized, String theValueExact) {
+	public ResourceIndexedSearchParamString(DaoConfig theDaoConfig, String theName, String theValueNormalized, String theValueExact) {
+		setDaoConfig(theDaoConfig);
 		setParamName(theName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
@@ -141,9 +152,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashNormalizedPrefix == null) {
-			setHashNormalizedPrefix(hash(getResourceType(), getParamName(), left(getValueNormalized(), HASH_PREFIX_LENGTH)));
-			setHashExact(hash(getResourceType(), getParamName(), getValueExact()));
+		if (myHashNormalizedPrefix == null && myDaoConfig != null) {
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			String valueNormalized = getValueNormalized();
+			String valueExact = getValueExact();
+			setHashNormalizedPrefix(calculateHashNormalized(myDaoConfig, resourceType, paramName, valueNormalized));
+			setHashExact(calculateHashExact(resourceType, paramName, valueExact));
 		}
 	}
 
@@ -169,8 +184,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName(), obj.getParamName());
 		b.append(getResource(), obj.getResource());
 		b.append(getValueExact(), obj.getValueExact());
-		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		b.append(getHashExact(), obj.getHashExact());
+		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		return b.isEquals();
 	}
 
@@ -225,9 +240,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getParamName());
 		b.append(getResource());
 		b.append(getValueExact());
-		b.append(getHashNormalizedPrefix());
-		b.append(getHashExact());
 		return b.toHashCode();
+	}
+
+	public BaseResourceIndexedSearchParam setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+		return this;
 	}
 
 	@Override
@@ -242,6 +260,25 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append("resourceId", getResourcePid());
 		b.append("value", getValueNormalized());
 		return b.build();
+	}
+
+	public static long calculateHashExact(String theResourceType, String theParamName, String theValueExact) {
+		return hash(theResourceType, theParamName, theValueExact);
+	}
+
+	public static long calculateHashNormalized(DaoConfig theDaoConfig, String theResourceType, String theParamName, String theValueNormalized) {
+		/*
+		 * If we're not allowing contained searches, we'll add the first
+		 * bit of the normalized value to the hash. This helps to
+		 * make the hash even more unique, which will be good for
+		 * performance.
+		 */
+		int hashPrefixLength = HASH_PREFIX_LENGTH;
+		if (theDaoConfig.isAllowContainsSearches()) {
+			hashPrefixLength = 0;
+		}
+
+		return hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
 	}
 
 }

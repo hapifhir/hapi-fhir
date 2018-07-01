@@ -66,14 +66,12 @@ public class ResourceLink implements Serializable {
 
 	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey=@ForeignKey(name="FK_RESLINK_SOURCE"))
-//	@ContainedIn()
 	private ResourceTable mySourceResource;
 
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
 	@Column(name = "SOURCE_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
-	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
 	@Field()
 	private String mySourceResourceType;
 
@@ -86,7 +84,6 @@ public class ResourceLink implements Serializable {
 	private Long myTargetResourcePid;
 
 	@Column(name = "TARGET_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
-	@ColumnDefault("''") // TODO: remove this (it's only here for simplifying upgrades of 1.3 -> 1.4)
 	@Field()
 	private String myTargetResourceType;
 

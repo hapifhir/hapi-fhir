@@ -48,7 +48,6 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myRequestValidatingInterceptor.addValidatorModule(module);
 	}
 
-
 	@Test
 	public void testMultithreadedSearch() throws Exception {
 		Bundle input = new Bundle();

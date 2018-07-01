@@ -89,6 +89,25 @@
 				client-assigned reosurce ID). Thanks to Frank Tao for the pull
 				request!
 			</action>
+			<action type="add">
+				A new IValidationSupport implementation has been added, named CachingValidationSupport. This
+				module wraps another implementation and provides short-term caching. This can have a dramatic
+				performance improvement on servers that are validating or executing FHIRPath repeatedly
+				under load. This module is used by default in the JPA server.
+			</action>
+			<action type="fix">
+				An index in the JPA server on the HFJ_FORCED_ID table was incorrectly
+				not marked as unique. This meant that under heavy load it was possible to
+				create two resources with the same client-assigned ID.
+			</action>
+			<action type="fix">
+				The JPA server 
+				<![CDATA[<code>$expunge</code>]]>
+				operation deleted components of an individual resource record in 
+				separate database transactions, meaning that if an operation failed 
+				unexpectedly resources could be left in a weird state. This has been
+				corrected.
+			</action>
 			<action type="fix" issue="1015">
 				A bug was fixed in the JPA terminology uploader, where it was possible
 				in some cases for some ValueSets and ConceptMaps to not be saved because
@@ -110,6 +129,10 @@
 				A new view has been added to the JPA server, reducing the number of database
 				calls required when reading resources back. This causes an improvement in performance.
 				Thanks to Frank Tao for the pull request!
+			</action>
+			<action type="fix">
+				A crash was fixed when deleting a ConceptMap resource in the
+				JPA server. This crash was a regression in HAPI FHIR 3.4.0.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">

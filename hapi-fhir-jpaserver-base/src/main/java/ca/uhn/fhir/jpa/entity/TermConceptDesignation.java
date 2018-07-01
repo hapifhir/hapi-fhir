@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,6 +48,14 @@ public class TermConceptDesignation implements Serializable {
 	private String myUseDisplay;
 	@Column(name = "VAL", length = 500, nullable = false)
 	private String myValue;
+	/**
+	 * TODO: Make this non-null
+	 *
+	 * @since 3.5.0
+	 */
+	@ManyToOne
+	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CSV"))
+	private TermCodeSystemVersion myCodeSystemVersion;
 
 	public String getLanguage() {
 		return myLanguage;
@@ -91,6 +99,11 @@ public class TermConceptDesignation implements Serializable {
 
 	public TermConceptDesignation setValue(String theValue) {
 		myValue = theValue;
+		return this;
+	}
+
+	public TermConceptDesignation setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystemVersion = theCodeSystemVersion;
 		return this;
 	}
 

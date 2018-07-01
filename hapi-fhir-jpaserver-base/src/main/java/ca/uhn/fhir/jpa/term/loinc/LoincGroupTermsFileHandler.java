@@ -27,28 +27,26 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincGroupTermsFileHandler extends BaseLoincHandler implements IRecordHandler {
 
-	public static final String VS_ID = "loinc-universal-order-set-vs";
-	public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
-	public static final String VS_NAME = "LOINC Universal Order Set";
-
-	public LoincUniversalOrderSetHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+	public LoincGroupTermsFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
 	}
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		String loincNumber = trim(theRecord.get("LOINC_NUM"));
-		String displayName = trim(theRecord.get("LONG_COMMON_NAME"));
-		String orderObs = trim(theRecord.get("ORDER_OBS"));
+		//"Category","GroupId","Archetype","LoincNumber","LongCommonName"
+		String groupId = trim(theRecord.get("GroupId"));
+		String loincNumber = trim(theRecord.get("LoincNumber"));
 
-		ValueSet valueSet = getValueSet(VS_ID, VS_URI, VS_NAME, null);
-		addCodeAsIncludeToValueSet(valueSet, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, displayName);
+		ValueSet valueSet = getValueSet(groupId, LoincGroupFileHandler.VS_URI_PREFIX + groupId, null, null);
+		addCodeAsIncludeToValueSet(valueSet, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, null);
 	}
 
 

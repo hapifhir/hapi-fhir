@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
 	public static final String LOINC_IEEE_CM_ID = "LOINC-IEEE-MEDICAL-DEVICE-CM";
-	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/fhir/loinc-ieee-device-code-mappings";
+	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/cm/loinc-to-ieee-device-codes";
 	public static final String LOINC_IEEE_CM_NAME = "LOINC/IEEE Device Code Mappings";
 	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC/IEEE Medical Device Code Mapping Table contains content from IEEE (http://ieee.org), copyright © 2017 IEEE.";
 

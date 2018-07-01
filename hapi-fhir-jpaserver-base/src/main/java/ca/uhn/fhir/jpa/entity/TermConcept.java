@@ -77,12 +77,12 @@ public class TermConcept implements Serializable {
 	})
 	private String myDisplay;
 
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = true)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
 	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
 
-	@OneToMany(mappedBy = "myConcept", orphanRemoval = true)
+	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
 	private Collection<TermConceptDesignation> myDesignations;
 
 	@Id()
@@ -130,6 +130,7 @@ public class TermConcept implements Serializable {
 	public TermConceptDesignation addDesignation() {
 		TermConceptDesignation designation = new TermConceptDesignation();
 		designation.setConcept(this);
+		designation.setCodeSystemVersion(myCodeSystem);
 		getDesignations().add(designation);
 		return designation;
 	}
@@ -139,6 +140,7 @@ public class TermConcept implements Serializable {
 
 		TermConceptProperty property = new TermConceptProperty();
 		property.setConcept(this);
+		property.setCodeSystemVersion(myCodeSystem);
 		property.setType(thePropertyType);
 		property.setKey(thePropertyName);
 		property.setValue(thePropertyValue);

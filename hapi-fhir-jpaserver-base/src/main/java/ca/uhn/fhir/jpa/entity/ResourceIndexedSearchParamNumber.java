@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,15 +34,14 @@ import org.hibernate.search.annotations.NumericField;
 import javax.persistence.*;
 import java.math.BigDecimal;
 
-//@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER", indexes = {
-	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+//	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	@Index(name = "IDX_SP_NUMBER_HASH_VAL", columnList = "HASH_IDENTITY,SP_VALUE"),
 	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID")
 })
-//@formatter:on
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
@@ -56,6 +55,11 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
 	@Column(name = "SP_ID")
 	private Long myId;
+	/**
+	 * @since 3.5.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
 
 	public ResourceIndexedSearchParamNumber() {
 	}
@@ -63,6 +67,20 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamNumber(String theParamName, BigDecimal theValue) {
 		setParamName(theParamName);
 		setValue(theValue);
+	}
+
+	@PrePersist
+	public void calculateHashes() {
+		if (myHashIdentity == null) {
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+		}
+	}
+
+	@Override
+	protected void clearHashes() {
+		myHashIdentity = null;
 	}
 
 	@Override
@@ -82,7 +100,16 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getResource(), obj.getResource());
 		b.append(getValue(), obj.getValue());
 		b.append(isMissing(), obj.isMissing());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		return b.isEquals();
+	}
+
+	public Long getHashIdentity() {
+		return myHashIdentity;
+	}
+
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
 	}
 
 	@Override
