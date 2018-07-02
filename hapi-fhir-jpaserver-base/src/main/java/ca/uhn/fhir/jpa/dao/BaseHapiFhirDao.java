@@ -1772,7 +1772,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+		Validate.notNull(theEntity);
+		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[{}] or a deleted timestamp[{}] for resource PID[{}]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getId());
+
 		ourLog.debug("Starting entity update");
+
 
 		/*
 		 * This should be the very first thing..
@@ -1863,6 +1867,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			theEntity.setNarrativeTextParsedIntoWords(null);
 			theEntity.setContentTextParsedIntoWords(null);
 			theEntity.setHashSha256(null);
+			theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 			changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
 		} else {

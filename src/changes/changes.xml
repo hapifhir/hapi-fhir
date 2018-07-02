@@ -134,6 +134,10 @@
 				A crash was fixed when deleting a ConceptMap resource in the
 				JPA server. This crash was a regression in HAPI FHIR 3.4.0.
 			</action>
+			<action type="fix">
+				A crash in the JPA server when performing a manual reindex of a deleted resource
+				was fixed.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
