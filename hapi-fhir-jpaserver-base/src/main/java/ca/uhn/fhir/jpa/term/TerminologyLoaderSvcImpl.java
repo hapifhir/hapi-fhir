@@ -162,6 +162,9 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 					int nextLoggedCount = 0;
 					while (iter.hasNext()) {
 						CSVRecord nextRecord = iter.next();
+						if (nextRecord.isConsistent()==false) {
+							continue;
+						}
 						theHandler.accept(nextRecord);
 						count++;
 						if (count >= nextLoggedCount) {

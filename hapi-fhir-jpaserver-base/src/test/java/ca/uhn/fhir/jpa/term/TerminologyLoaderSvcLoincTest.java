@@ -246,11 +246,11 @@ public class TerminologyLoaderSvcLoincTest {
 		// all entries have the same source and target so these should be null
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, group.getSource());
 		assertEquals(LoincRsnaPlaybookHandler.RPID_CS_URI, group.getTarget());
-		assertEquals("LP199995-4", group.getElement().get(0).getCode());
-		assertEquals("Neck", group.getElement().get(0).getDisplay());
+		assertEquals("24531-6", group.getElement().get(0).getCode());
+		assertEquals("US Retroperitoneum", group.getElement().get(0).getDisplay());
 		assertEquals(1, group.getElement().get(0).getTarget().size());
-		assertEquals("RID7488", group.getElement().get(0).getTarget().get(0).getCode());
-		assertEquals("neck", group.getElement().get(0).getTarget().get(0).getDisplay());
+		assertEquals("RPID2142", group.getElement().get(0).getTarget().get(0).getCode());
+		assertEquals("US Retroperitoneum", group.getElement().get(0).getTarget().get(0).getDisplay());
 		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
 
 		// TOP 2000 - US
