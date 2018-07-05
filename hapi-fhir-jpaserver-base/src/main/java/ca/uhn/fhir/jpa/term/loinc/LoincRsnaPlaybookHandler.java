@@ -39,9 +39,6 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 	public static final String RSNA_CODES_VS_ID = "loinc-rsna-radiology-playbook";
 	public static final String RSNA_CODES_VS_URI = "http://loinc.org/vs/loinc-rsna-radiology-playbook";
 	public static final String RSNA_CODES_VS_NAME = "LOINC/RSNA Radiology Playbook";
-	public static final String RADLEX_MAPPING_CM_ID = LoincPartRelatedCodeMappingHandler.LOINC_RADLEX_PART_MAP_ID;
-	public static final String RADLEX_MAPPING_CM_URI = LoincPartRelatedCodeMappingHandler.LOINC_RADLEX_PART_MAP_URI;
-	public static final String RADLEX_MAPPING_CM_NAME = LoincPartRelatedCodeMappingHandler.LOINC_RADLEX_PART_MAP_NAME;
 	public static final String RID_CS_URI = "http://www.radlex.org";
 	/*
 	 * About these being the same - Per Dan Vreeman:
@@ -177,9 +174,9 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(RADLEX_MAPPING_CM_ID)
-					.setConceptMapUri(RADLEX_MAPPING_CM_URI)
-					.setConceptMapName(RADLEX_MAPPING_CM_NAME)
+					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID)
+					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
+					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
 					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 					.setSourceCode(partNumber)
 					.setSourceDisplay(partName)
@@ -194,9 +191,9 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(RADLEX_MAPPING_CM_ID)
-					.setConceptMapUri(RADLEX_MAPPING_CM_URI)
-					.setConceptMapName(RADLEX_MAPPING_CM_NAME)
+					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID)
+					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
+					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
 					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 					.setSourceCode(loincNumber)
 					.setSourceDisplay(longCommonName)
