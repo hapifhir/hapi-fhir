@@ -260,15 +260,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- This plugin is just a part of the HAPI internal build process, you do not need to incude it in your own projects -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-
 			<!-- This is to run the integration tests -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
