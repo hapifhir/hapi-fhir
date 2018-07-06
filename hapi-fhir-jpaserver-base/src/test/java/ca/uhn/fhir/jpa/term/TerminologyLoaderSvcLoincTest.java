@@ -117,6 +117,13 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
 
+		// Code with component that has a divisor
+		code = concepts.get("17788-1");
+		assertEquals("17788-1", code.getCode());
+		assertEquals(1, code.getCodingProperties("COMPONENT").size());
+		assertEquals("http://loinc.org", code.getCodingProperties("COMPONENT").get(0).getSystem());
+		assertEquals("LP19258-0", code.getCodingProperties("COMPONENT").get(0).getCode());
+
 		// Loinc code with answer
 		code = concepts.get("61438-8");
 		assertThat(code.getStringProperties("answer-list"), contains("LL1000-0"));
