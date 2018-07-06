@@ -122,7 +122,7 @@ public class LoincHandler implements IRecordHandler {
 							} else {
 								String msg = "Unable to find part code with TYPE[" + key.getPartType() + "] and NAME[" + nextPropertyValue + "] (using name " + propertyValue + ")";
 								ourLog.warn(msg);
-								throw new InternalErrorException(msg);
+//								throw new InternalErrorException(msg);
 							}
 							break;
 						case DECIMAL:
