@@ -8,11 +8,11 @@ import javax.sql.DataSource;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -28,8 +28,12 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
  * This is the primary configuration file for the example server
  */
 @Configuration
+@PropertySource("classpath:server-config.properties")
 @EnableTransactionManagement()
 public class FhirServerConfig extends BaseJavaConfigDstu3 {
+
+	@Value("${cache.timeout}")
+	Long cacheTimeout;
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
@@ -38,6 +42,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setAllowMultipleDelete(true);
+		retVal.setReuseCachedSearchResultsForMillis(cacheTimeout);
 		return retVal;
 	}
 
