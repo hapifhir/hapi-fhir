@@ -48,7 +48,7 @@ import java.util.Set;
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE);
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	private boolean myReturnVoid;
 
@@ -91,11 +91,11 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				return Constants.STATUS_HTTP_200_OK;
 
 			case UPDATE:
+			case PATCH:
 				if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
 					return Constants.STATUS_HTTP_200_OK;
 				}
 				return Constants.STATUS_HTTP_201_CREATED;
-
 			case VALIDATE:
 			case DELETE:
 			default:
