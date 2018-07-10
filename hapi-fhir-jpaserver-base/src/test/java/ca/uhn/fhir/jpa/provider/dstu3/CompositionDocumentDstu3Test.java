@@ -99,22 +99,6 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	}
 
 	@Test
-	public void testDocumentBundleMultipleCompositions() throws Exception {
-		String theUrl = ourServerBase + "/Composition?patient=" + patId + "/$document?_format=json";
-		System.out.println(theUrl);
-
-		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
-
-		assertNull(bundle.getLink("next"));
-
-		Set<String> actual = new HashSet<>();
-		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
-			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		}
-
-	}
-
-	@Test
 	public void testDocumentBundleReturnedCorrect() throws IOException {
 	//	myDaoConfig.setEverythingIncludesFetchPageSize(1);
 
