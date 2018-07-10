@@ -66,6 +66,78 @@
 				<![CDATA[<code>setFlags(flags)</code>]]>
 				can be used to maintain the previous behaviour.
 			</action>
+			<action type="974">
+				JPA server loading logic has been improved to enhance performance when
+				loading a large number of results in a page, or when loading multiple
+				search results with tags. Thanks to Frank Tao for the pull request!
+			</action>
+			<action type="add" issue="1000">
+				LOINC uploader has been updated to support the new LOINC filename
+				scheme introduced in LOINC 2.64. Thanks to Rob Hausam for the 
+				pull request!
+			</action>
+			<action type="add">
+				In the JPA server, it is now possible for a custom search parameter
+				to use the
+				<![CDATA[<code>resolve()</code>]]> function in its path to descend into
+				contained resources and index fields within them.
+			</action>
+			<action type="fix" issue="1010">
+				Resource loading logic for the JPA server has been optimized to
+				reduce the number of database round trips required when loading
+				search results where many of the entries have a "forced ID" (an alphanumeric
+				client-assigned reosurce ID). Thanks to Frank Tao for the pull
+				request!
+			</action>
+			<action type="add">
+				A new IValidationSupport implementation has been added, named CachingValidationSupport. This
+				module wraps another implementation and provides short-term caching. This can have a dramatic
+				performance improvement on servers that are validating or executing FHIRPath repeatedly
+				under load. This module is used by default in the JPA server.
+			</action>
+			<action type="fix">
+				An index in the JPA server on the HFJ_FORCED_ID table was incorrectly
+				not marked as unique. This meant that under heavy load it was possible to
+				create two resources with the same client-assigned ID.
+			</action>
+			<action type="fix">
+				The JPA server 
+				<![CDATA[<code>$expunge</code>]]>
+				operation deleted components of an individual resource record in 
+				separate database transactions, meaning that if an operation failed 
+				unexpectedly resources could be left in a weird state. This has been
+				corrected.
+			</action>
+			<action type="fix" issue="1015">
+				A bug was fixed in the JPA terminology uploader, where it was possible
+				in some cases for some ValueSets and ConceptMaps to not be saved because
+				of a premature short circuit during deferred uploading. Thanks to 
+				Joel Schneider for the pull request!
+			</action>
+			<action type="fix" issue="969">
+				A bug in the HAPI FHIR CLI was fixed, where uploading terminology for R4
+				could cause an error about the incorrect FHIR version. Thanks to 
+				Rob Hausam for the pull request!
+			</action>
+			<action type="add">
+				A new method has been added to AuthorizationInterceptor that can be used to
+				create rules allowing FHIR patch operations. See
+				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html#Authorizing_Patch_Operations">Authorizing Patch Operations</a>]]>
+				for more information.
+			</action>
+			<action type="add" issue="1018">
+				A new view has been added to the JPA server, reducing the number of database
+				calls required when reading resources back. This causes an improvement in performance.
+				Thanks to Frank Tao for the pull request!
+			</action>
+			<action type="fix">
+				A crash was fixed when deleting a ConceptMap resource in the
+				JPA server. This crash was a regression in HAPI FHIR 3.4.0.
+			</action>
+			<action type="fix">
+				A crash in the JPA server when performing a manual reindex of a deleted resource
+				was fixed.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

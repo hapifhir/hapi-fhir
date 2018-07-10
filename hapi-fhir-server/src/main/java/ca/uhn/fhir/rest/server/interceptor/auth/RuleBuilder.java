@@ -33,7 +33,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class RuleBuilder implements IAuthRuleBuilder {
 
-	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private ArrayList<IAuthRule> myRules;
 
 	public RuleBuilder() {
@@ -95,19 +95,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished, IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId {
 
-		private final RuleImplOp myOpRule;
-		private final OperationRule myOperationRule;
-		protected ITenantApplicabilityChecker myTenantApplicabilityChecker;
+		private final BaseRule myOpRule;
+		ITenantApplicabilityChecker myTenantApplicabilityChecker;
 		private List<IAuthRuleTester> myTesters;
 
-		RuleBuilderFinished(RuleImplOp theRule) {
+		RuleBuilderFinished(BaseRule theRule) {
 			myOpRule = theRule;
-			myOperationRule = null;
-		}
-
-		public RuleBuilderFinished(OperationRule theRule) {
-			myOpRule = null;
-			myOperationRule = theRule;
 		}
 
 		@Override
@@ -136,16 +129,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId forTenantIds(final Collection<String> theTenantIds) {
-			setTenantApplicabilityChecker(new ITenantApplicabilityChecker() {
-				@Override
-				public boolean applies(RequestDetails theRequest) {
-					return theTenantIds.contains(theRequest.getTenantId());
-				}
-			});
+			setTenantApplicabilityChecker(theRequest -> theTenantIds.contains(theRequest.getTenantId()));
 			return this;
 		}
 
-		public List<IAuthRuleTester> getTesters() {
+		List<IAuthRuleTester> getTesters() {
 			if (myTesters == null) {
 				return Collections.emptyList();
 			}
@@ -159,23 +147,13 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId notForTenantIds(final Collection<String> theTenantIds) {
-			setTenantApplicabilityChecker(new ITenantApplicabilityChecker() {
-				@Override
-				public boolean applies(RequestDetails theRequest) {
-					return !theTenantIds.contains(theRequest.getTenantId());
-				}
-			});
+			setTenantApplicabilityChecker(theRequest -> !theTenantIds.contains(theRequest.getTenantId()));
 			return this;
 		}
 
 		private void setTenantApplicabilityChecker(ITenantApplicabilityChecker theTenantApplicabilityChecker) {
 			myTenantApplicabilityChecker = theTenantApplicabilityChecker;
-			if (myOpRule != null) {
 				myOpRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
-			}
-			if (myOperationRule != null) {
-				myOperationRule.setTenantApplicabilityChecker(myTenantApplicabilityChecker);
-			}
 		}
 
 		@Override
@@ -184,12 +162,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				myTesters = new ArrayList<>();
 			}
 			myTesters.add(theTester);
-			if (myOperationRule != null) {
-				myOperationRule.addTester(theTester);
-			}
-			if (myOpRule != null) {
-				myOpRule.addTester(theTester);
-			}
+			myOpRule.addTester(theTester);
 
 			return this;
 		}
@@ -234,6 +207,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		@Override
 		public IAuthRuleBuilderOperation operation() {
 			return new RuleBuilderRuleOperation();
+		}
+
+		@Override
+		public IAuthRuleBuilderPatch patch() {
+			myRuleOp = RuleOpEnum.PATCH;
+			return new PatchBuilder();
 		}
 
 		@Override
@@ -286,8 +265,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			public class RuleBuilderRuleConditionalClassifier extends RuleBuilderFinished implements IAuthRuleBuilderRuleConditionalClassifier {
 
-				public RuleBuilderRuleConditionalClassifier() {
-					super((RuleImplOp) null);
+				RuleBuilderRuleConditionalClassifier() {
+					super(null);
 				}
 
 				@Override
@@ -329,7 +308,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				Validate.notBlank(theId.getValue(), "theId.getValue() must not be null or empty");
 				Validate.notBlank(theId.getIdPart(), "theId must contain an ID part");
 
-				return new RuleBuilderRuleOpClassifier(Arrays.asList(theId)).finished();
+				return new RuleBuilderRuleOpClassifier(Collections.singletonList(theId)).finished();
 			}
 
 			@Override
@@ -435,7 +414,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 				private String myOperationName;
 
-				public RuleBuilderRuleOperationNamed(String theOperationName) {
+				RuleBuilderRuleOperationNamed(String theOperationName) {
 					if (theOperationName != null && !theOperationName.startsWith("$")) {
 						myOperationName = '$' + theOperationName;
 					} else {
@@ -553,6 +532,17 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		}
 
+		private class PatchBuilder implements IAuthRuleBuilderPatch {
+
+			@Override
+			public IAuthRuleFinished allRequests() {
+				BaseRule rule = new RuleImplPatch(myRuleName)
+					.setAllRequests(true)
+					.setMode(myRuleMode);
+				myRules.add(rule);
+				return new RuleBuilderFinished(rule);
+			}
+		}
 	}
 
 }

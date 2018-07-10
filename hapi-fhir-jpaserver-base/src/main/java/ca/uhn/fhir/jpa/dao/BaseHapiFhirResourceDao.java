@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.lang.NonNull;
@@ -207,7 +208,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		StopWatch w = new StopWatch();
 
-		T resourceToDelete = toResource(myResourceType, entity, false);
+		T resourceToDelete = toResource(myResourceType, entity, null, false);
 
 		// Notify IServerOperationInterceptors about pre-action call
 		if (theReques != null) {
@@ -289,7 +290,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 			deletedResources.add(entity);
 
-			T resourceToDelete = toResource(myResourceType, entity, false);
+			T resourceToDelete = toResource(myResourceType, entity, null, false);
 
 			// Notify IServerOperationInterceptors about pre-action call
 			if (theRequest != null) {
@@ -517,6 +518,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions) {
 		BaseHasResource entity = readEntity(theId);
 		if (theId.hasVersionIdPart()) {
@@ -532,6 +534,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
@@ -854,16 +857,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		BaseHasResource entity = readEntity(theId);
 		validateResourceType(entity);
 
-		T retVal = toResource(myResourceType, entity, false);
+		T retVal = toResource(myResourceType, entity, null, false);
 
-		IPrimitiveType<Date> deleted;
-		if (retVal instanceof IResource) {
-			deleted = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) retVal);
-		} else {
-			deleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) retVal);
-		}
-		if (deleted != null && !deleted.isEmpty()) {
-			throw new ResourceGoneException("Resource was deleted at " + deleted.getValueAsString());
+		if (entity.getDeleted() != null) {
+			throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.getDeleted()).getValueAsString());
 		}
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
@@ -930,10 +927,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public void reindex(T theResource, ResourceTable theEntity) {
-		ourLog.debug("Indexing resource {} - PID {}", theResource.getIdElement().getValue(), theEntity.getId());
-		CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
-		updateEntity(null, theResource, theEntity, null, true, false, theEntity.getUpdatedDate(), true, false);
-		CURRENTLY_REINDEXING.put(theResource, null);
+		ourLog.debug("Indexing resource {} - PID {}", theEntity.getIdDt().getValue(), theEntity.getId());
+		if (theResource != null) {
+			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
+		}
+		updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, theEntity.getUpdatedDate(), true, false);
+		if (theResource != null) {
+			CURRENTLY_REINDEXING.put(theResource, null);
+		}
 	}
 
 	@Override
@@ -1063,6 +1064,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
+	}
+
+	@PostConstruct
+	public void start() {
+		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
@@ -1334,11 +1340,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
 			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
-	}
-
-	@PostConstruct
-	public void start() {
-		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 	}
 
 }

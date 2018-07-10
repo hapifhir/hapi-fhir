@@ -20,14 +20,12 @@ package ca.uhn.fhir.jpa.sp;
  * #L%
  */
 
-import java.util.Map;
-
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+
+import java.util.Map;
 
 public interface ISearchParamPresenceSvc {
 
 	void updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence);
-
-	void flushCachesForUnitTest();
 
 }

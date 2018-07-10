@@ -679,6 +679,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
 		QueryCountHolder.clear();
 
+		ourLog.info("** About to update");
+
 		pt.setId(id);
 		pt.getNameFirstRep().addGiven("GIVEN1C");
 		myPatientDao.update(pt);

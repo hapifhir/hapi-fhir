@@ -136,3 +136,28 @@ drop table cdr_audit_evt_target_user cascade constraints;
 drop table cdr_xact_log_step cascade constraints;
 drop table cdr_xact_log cascade constraints;
 
+
+Upgrading
+drop index IDX_SP_STRING;
+create index IDX_SP_STRING_HASH_NRM;
+create index IDX_SP_STRING_HASH_EXCT;
+drop index IDX_SP_TOKEN;
+drop index IDX_SP_TOKEN_UNQUAL;
+create index IDX_SP_TOKEN_HASH;
+create index IDX_SP_TOKEN_HASH_S;
+create index IDX_SP_TOKEN_HASH_SV;
+create index IDX_SP_TOKEN_HASH_V;
+drop index IDX_SP_DATE;
+create index IDX_SP_DATE_HASH;
+drop index IDX_SP_QUANTITY;
+create index IDX_SP_QUANTITY_HASH;
+create index IDX_SP_QUANTITY_HASH_UN;
+drop index IDX_FORCEDID_TYPE_FORCEDID;
+create index IDX_FORCEDID_TYPE_FID;
+drop index IDX_SP_NUMBER;
+create index IDX_SP_NUMBER_HASH_VAL;
+
+drop column SP_ID from table HFJ_RES_PARAM_PRESENT;
+drop index IDX_SEARCHPARM_RESTYPE_SPNAME;
+drop index IDX_RESPARMPRESENT_SPID_RESID;
+drop table HFJ_SEARCH_PARM;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.Collection;
 import java.util.List;
 
 /*
@@ -38,5 +39,7 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
 
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
 	public ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
-	
+
+	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid in (:pids)")
+	Collection<ForcedId> findByResourcePids(@Param("pids") Collection<Long> pids);
 }

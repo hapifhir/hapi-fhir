@@ -21,6 +21,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
@@ -93,6 +94,11 @@ public class BaseR4Config extends BaseConfig {
 		return val;
 	}
 
+	@Bean
+	public JpaValidationSupportChainR4 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainR4();
+	}
+
 	@Bean(name = "myJpaValidationSupportR4", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 jpaValidationSupportR4() {
 		ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4 retVal = new ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4();
@@ -156,7 +162,7 @@ public class BaseR4Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IValidationSupport validationSupportChainR4() {
-		return new JpaValidationSupportChainR4();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

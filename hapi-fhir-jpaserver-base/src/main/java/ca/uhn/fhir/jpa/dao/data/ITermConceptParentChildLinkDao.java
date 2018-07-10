@@ -1,5 +1,12 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.Collection;
 
 /*
@@ -22,20 +29,12 @@ import java.util.Collection;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-
 public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long> {
-
-	@Query("DELETE FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
-	@Modifying
-	void deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
-	
+
+	@Query("SELECT t FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
+	Slice<TermConceptParentChildLink> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+
 }

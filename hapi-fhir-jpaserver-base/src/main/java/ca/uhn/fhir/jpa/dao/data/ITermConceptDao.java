@@ -1,9 +1,16 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.List;
-
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 /*
  * #%L
@@ -25,14 +32,6 @@ import org.springframework.data.domain.Pageable;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-
 public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
@@ -42,14 +41,13 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
-	@Modifying
-	List<TermConcept> findByCodeSystemVersion(@Param("cs_pid") Long thePid);
+	Slice<TermConcept> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+
+	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
+	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
 
 	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
 	@Modifying
 	int markAllForReindexing();
-
-	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
-	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
 
 }

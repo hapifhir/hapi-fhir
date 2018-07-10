@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.data;
+package ca.uhn.fhir.jpa.entity;
 
 /*
  * #%L
@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,16 +19,23 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
+import java.util.Date;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 
-import ca.uhn.fhir.jpa.entity.SearchParam;
+public interface IBaseResourceEntity {
 
-public interface ISearchParamDao extends JpaRepository<SearchParam, Long> {
-
-	@Query("SELECT s FROM SearchParam s WHERE s.myResourceName = :resname AND s.myParamName = :parmname")
-	public SearchParam findForResource(@Param("resname") String theResourceType, @Param("parmname") String theParamName);
-
+	Date getDeleted();
+	FhirVersionEnum getFhirVersion();
+	Long getId();
+	IdDt getIdDt();
+	InstantDt getPublished();
+	Long getResourceId();
+	String getResourceType();
+	InstantDt getUpdated();
+	Date getUpdatedDate();
+	long getVersion();
+	boolean isHasTags();
 }

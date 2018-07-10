@@ -59,7 +59,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
 
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}
@@ -68,7 +68,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}

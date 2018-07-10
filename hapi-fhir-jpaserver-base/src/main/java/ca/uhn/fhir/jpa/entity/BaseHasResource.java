@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource {
+public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -42,7 +42,7 @@ public abstract class BaseHasResource {
 	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
 
-	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false)
+	@OneToOne(optional = true, fetch = FetchType.LAZY, cascade = {}, orphanRemoval = false)
 	@JoinColumn(name = "FORCED_ID_PID")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;

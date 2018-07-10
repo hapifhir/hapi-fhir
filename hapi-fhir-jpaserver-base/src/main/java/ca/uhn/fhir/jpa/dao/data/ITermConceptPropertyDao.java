@@ -1,16 +1,11 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 /*
  * #%L
@@ -33,5 +28,8 @@ import java.util.List;
  */
 
 public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProperty, Long> {
-	// nothing
+
+	@Query("SELECT t FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
+	Slice<TermConceptProperty> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+
 }

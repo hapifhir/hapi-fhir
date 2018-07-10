@@ -66,7 +66,8 @@ public class LuceneSearchMappingFactory {
 			.analyzerDef("standardAnalyzer", StandardTokenizerFactory.class)
 				.filter(LowerCaseFilterFactory.class)
 			.analyzerDef("exactAnalyzer", StandardTokenizerFactory.class)
-			.analyzerDef("conceptParentPidsAnalyzer", WhitespaceTokenizerFactory.class);
+			.analyzerDef("conceptParentPidsAnalyzer", WhitespaceTokenizerFactory.class)
+			.analyzerDef("termConceptPropertyAnalyzer", WhitespaceTokenizerFactory.class);
 
 		return mapping;
 	}

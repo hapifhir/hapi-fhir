@@ -8,10 +8,10 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.instance.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -81,13 +81,20 @@ public class BaseDstu2Config extends BaseConfig {
 	public IValidatorModule instanceValidatorDstu2() {
 		FhirInstanceValidator retVal = new FhirInstanceValidator();
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
-		retVal.setValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2()));
+		retVal.setValidationSupport(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2())));
 		return retVal;
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu2", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.IJpaValidationSupportDstu2 jpaValidationSupportDstu2() {
 		ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2 retVal = new ca.uhn.fhir.jpa.dao.JpaValidationSupportDstu2();
+		return retVal;
+	}
+
+	@Bean(name = "myResourceCountsCache")
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu2().getResourceCounts());
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 
@@ -118,13 +125,6 @@ public class BaseDstu2Config extends BaseConfig {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
 		retVal.setDao(systemDaoDstu2());
 		retVal.setContext(fhirContextDstu2());
-		return retVal;
-	}
-
-	@Bean(name = "myResourceCountsCache")
-	public ResourceCountCache resourceCountsCache() {
-		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu2().getResourceCounts());
-		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 

@@ -41,64 +41,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 	}
 
 	/**
-	 * See #778
-	 */
-	@Test
-	public void testReadingObservationAccessRight() {
-		Practitioner practitioner1 = new Practitioner();
-		final IIdType practitionerId1 = myClient.create().resource(practitioner1).execute().getId().toUnqualifiedVersionless();
-
-		Practitioner practitioner2 = new Practitioner();
-		final IIdType practitionerId2 = myClient.create().resource(practitioner2).execute().getId().toUnqualifiedVersionless();
-
-		Patient patient = new Patient();
-		patient.setActive(true);
-		final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				// allow write all Observation resource
-				// allow read only Observation resource in which it has a practitioner1 or practitioner2 compartment
-				return new RuleBuilder().allow()
-					.write()
-					.resourcesOfType(Observation.class)
-					.withAnyId()
-					.andThen()
-					.allow()
-					.read()
-					.resourcesOfType(Observation.class)
-					.inCompartment("Practitioner", Arrays.asList(practitionerId1, practitionerId2))
-					.andThen()
-					.denyAll()
-					.build();
-			}
-		});
-
-		Observation obs1 = new Observation();
-		obs1.setStatus(ObservationStatus.FINAL);
-		obs1.setPerformer(
-			Arrays.asList(new Reference(practitionerId1), new Reference(practitionerId2)));
-		IIdType oid1 = myClient.create().resource(obs1).execute().getId().toUnqualified();
-
-		// Observation with practitioner1 and practitioner1 as the Performer -> should have the read access
-		myClient.read().resource(Observation.class).withId(oid1).execute();
-
-		Observation obs2 = new Observation();
-		obs2.setStatus(ObservationStatus.FINAL);
-		obs2.setSubject(new Reference(patientId));
-		IIdType oid2 = myClient.create().resource(obs2).execute().getId().toUnqualified();
-
-		// Observation with patient as the subject -> read access should be blocked
-		try {
-			myClient.read().resource(Observation.class).withId(oid2).execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
-	}
-
-	/**
 	 * See #667
 	 */
 	@Test
@@ -455,11 +397,9 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		});
 
 
-
 		// Create a bundle that will be used as a transaction
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-
 
 
 		String encounterId = "123-123";
@@ -523,8 +463,117 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
+	@Test
+	public void testPatchWithinCompartment() {
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		final IIdType pid1 = myClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setSubject(new Reference(pid1));
+		IIdType oid1 = myClient.create().resource(obs1).execute().getId().toUnqualified();
+
+		Patient pt2 = new Patient();
+		pt2.setActive(false);
+		final IIdType pid2 = myClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setSubject(new Reference(pid2));
+		IIdType oid2 = myClient.create().resource(obs2).execute().getId().toUnqualified();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().patch().allRequests().andThen()
+					.allow().write().allResources().inCompartment("Patient", pid1).andThen()
+					.allow().read().allResources().withAnyId().andThen()
+					.build();
+			}
+		});
+
+		String patchBody = "[\n" +
+			"     { \"op\": \"replace\", \"path\": \"Observation/status\", \"value\": \"amended\" }\n" +
+			"     ]";
+
+		// Allowed
+		myClient.patch().withBody(patchBody).withId(oid1).execute();
+		obs1 = myClient.read().resource(Observation.class).withId(oid1.toUnqualifiedVersionless()).execute();
+		assertEquals(ObservationStatus.AMENDED, obs1.getStatus());
+
+		// Denied
+		try {
+			myClient.patch().withBody(patchBody).withId(oid2).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+		obs2 = myClient.read().resource(Observation.class).withId(oid2.toUnqualifiedVersionless()).execute();
+		assertEquals(ObservationStatus.FINAL, obs2.getStatus());
+	}
+
+	/**
+	 * See #778
+	 */
+	@Test
+	public void testReadingObservationAccessRight() {
+		Practitioner practitioner1 = new Practitioner();
+		final IIdType practitionerId1 = myClient.create().resource(practitioner1).execute().getId().toUnqualifiedVersionless();
+
+		Practitioner practitioner2 = new Practitioner();
+		final IIdType practitionerId2 = myClient.create().resource(practitioner2).execute().getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				// allow write all Observation resource
+				// allow read only Observation resource in which it has a practitioner1 or practitioner2 compartment
+				return new RuleBuilder().allow()
+					.write()
+					.resourcesOfType(Observation.class)
+					.withAnyId()
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType(Observation.class)
+					.inCompartment("Practitioner", Arrays.asList(practitionerId1, practitionerId2))
+					.andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setPerformer(
+			Arrays.asList(new Reference(practitionerId1), new Reference(practitionerId2)));
+		IIdType oid1 = myClient.create().resource(obs1).execute().getId().toUnqualified();
+
+		// Observation with practitioner1 and practitioner1 as the Performer -> should have the read access
+		myClient.read().resource(Observation.class).withId(oid1).execute();
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setSubject(new Reference(patientId));
+		IIdType oid2 = myClient.create().resource(obs2).execute().getId().toUnqualified();
+
+		// Observation with patient as the subject -> read access should be blocked
+		try {
+			myClient.read().resource(Observation.class).withId(oid2).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
 	private void unregisterInterceptors() {
-		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourRestServer.getInterceptors())) {
+		for (IServerInterceptor next : new ArrayList<>(ourRestServer.getInterceptors())) {
 			if (next instanceof AuthorizationInterceptor) {
 				ourRestServer.unregisterInterceptor(next);
 			}

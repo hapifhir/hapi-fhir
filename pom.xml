@@ -459,6 +459,11 @@
 			<id>Romanow88</id>
 			<name>Roman Doboni</name>
 		</developer>
+		<developer>
+			<id>franktao2008</id>
+			<name>Frank Tao</name>
+			<organization>Smile CDR</organization>
+		</developer>
 	</developers>
 
 	<licenses>
