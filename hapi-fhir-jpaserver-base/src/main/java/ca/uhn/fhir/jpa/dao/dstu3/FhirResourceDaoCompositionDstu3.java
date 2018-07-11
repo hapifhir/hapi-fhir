@@ -39,9 +39,6 @@ import java.util.Collections;
 
 public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Composition> implements IFhirResourceDaoComposition<Composition> {
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();

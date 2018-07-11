@@ -22,24 +22,37 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Composition;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 
 public class FhirResourceDaoCompositionR4 extends FhirResourceDaoR4<Composition>implements IFhirResourceDaoComposition<Composition> {
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
-		return null;
+		SearchParameterMap paramMap = new SearchParameterMap();
+		if (theCount != null) {
+			paramMap.setCount(theCount.getValue());
+		}
+		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+		paramMap.setSort(theSort);
+		paramMap.setLastUpdated(theLastUpdate);
+		if (theId != null) {
+			paramMap.add("_id", new StringParam(theId.getIdPart()));
+		}
+		IBundleProvider bundleProvider = search(paramMap);
+		return bundleProvider;
 	}
 }
+

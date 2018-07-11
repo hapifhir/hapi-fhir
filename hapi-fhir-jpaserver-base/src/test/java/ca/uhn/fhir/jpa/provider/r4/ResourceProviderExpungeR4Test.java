@@ -139,7 +139,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient
+		Parameters output = ourClient
 			.operation()
 			.onInstance(myTwoVersionPatientId)
 			.named("expunge")
@@ -179,7 +179,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setValue(new BooleanType(true));
 
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onInstance(myTwoVersionPatientId)
 				.named("expunge")
@@ -212,7 +212,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient
+		Parameters output = ourClient
 			.operation()
 			.onServer()
 			.named("expunge")
@@ -251,7 +251,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient
+		Parameters output = ourClient
 			.operation()
 			.onType(Patient.class)
 			.named("expunge")
@@ -297,7 +297,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		Parameters output = myClient
+		Parameters output = ourClient
 			.operation()
 			.onInstanceVersion(myTwoVersionPatientId.withVersion("1"))
 			.named("expunge")

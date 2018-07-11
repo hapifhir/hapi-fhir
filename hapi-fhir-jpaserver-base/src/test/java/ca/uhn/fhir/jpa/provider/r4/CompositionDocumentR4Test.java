@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -9,21 +9,29 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Encounter.EncounterStatus;
-import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.junit.*;
+
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.EncounterStatus;
+import org.hl7.fhir.r4.model.codesystems.ObservationStatus;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
-public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test {
+public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompositionDocumentDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompositionDocumentR4Test.class);
 	private String orgId;
 	private String patId;
 	private List<String> myObsIds;
@@ -61,7 +69,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc = new Encounter();
-		enc.setStatus(EncounterStatus.ARRIVED);
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
 		enc.getSubject().setReference(patId);
 		enc.getServiceProvider().setReference(orgId);
 		encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
@@ -73,7 +81,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		for (int i = 0; i < 5; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
-			obs.setStatus(ObservationStatus.FINAL);
+			obs.setStatus(Observation.ObservationStatus.FINAL);
 			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
 			listResource.addEntry(new ListResource.ListEntryComponent().setItem(new Reference(obs)));
 			myObs.add(obs);
@@ -104,11 +112,12 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new HashSet<>();
-		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
 		ourLog.info("Found IDs: {}", actual);
+		assertThat(actual, hasItem(compId));
 		assertThat(actual, hasItem(patId));
 		assertThat(actual, hasItem(orgId));
 		assertThat(actual, hasItem(encId));

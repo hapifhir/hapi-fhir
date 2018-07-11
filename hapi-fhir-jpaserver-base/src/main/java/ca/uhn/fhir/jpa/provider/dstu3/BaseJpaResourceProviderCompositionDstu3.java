@@ -80,14 +80,7 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 			boolean foundCompositionResource = false;
 			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
 			for (IBaseResource resource : resourceList) {
-								bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
-								if (((Resource) resource).getResourceType() == ResourceType.Composition) {
-									if (foundCompositionResource == true) {
-										OperationOutcome operationOutcome = new OperationOutcome().addIssue(new OperationOutcome.OperationOutcomeIssueComponent().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.PROCESSING));
-										throw new InvalidRequestException("$document can only be applied to a single Composition Resource", operationOutcome);
-									}
-									foundCompositionResource = true;
-								}
+				bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
 			}
 			return bundle;
 		} finally {

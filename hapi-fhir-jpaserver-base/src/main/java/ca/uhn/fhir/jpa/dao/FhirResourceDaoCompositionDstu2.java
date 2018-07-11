@@ -34,11 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 
 public class FhirResourceDaoCompositionDstu2 extends FhirResourceDaoDstu2<Composition>implements IFhirResourceDaoComposition<Composition> {
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
-		throw new NotImplementedOperationException("$document in DSTU2 is not implemented ");
+		throw new NotImplementedOperationException("$document not implemented in DSTU2");
 	}
 }

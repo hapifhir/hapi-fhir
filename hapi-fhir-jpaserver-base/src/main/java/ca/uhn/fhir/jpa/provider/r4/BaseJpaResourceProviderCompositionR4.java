@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaResourceProviderDstu3;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -14,9 +13,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
+
+import java.util.List;
 
 
 /*
@@ -43,36 +43,44 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 	/**
 	 * Composition/123/$document
+	 *
 	 * @param theRequestDetails
 	 */
 	//@formatter:off
-	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.DOCUMENT)
 	public IBaseBundle getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
 			@IdParam
 			IdType theId,
-			
-			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
+
+			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 			@OperationParam(name = Constants.PARAM_COUNT)
 			UnsignedIntType theCount,
-			
+
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
-			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
+			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1)
 			DateRangeParam theLastUpdated,
 
 			@Sort
-			SortSpec theSortSpec, 
-			
+			SortSpec theSortSpec,
+
 			RequestDetails theRequestDetails
 			) {
 		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
-			((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
-			return  null;
+			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+
+			boolean foundCompositionResource = false;
+			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
+			for (IBaseResource resource : resourceList) {
+				bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+			}
+			return bundle;
 		} finally {
 			endRequest(theServletRequest);
 		}

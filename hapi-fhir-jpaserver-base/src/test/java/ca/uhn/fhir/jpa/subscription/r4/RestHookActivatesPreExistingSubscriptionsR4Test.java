@@ -66,7 +66,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
 
-		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 
 		waitForQueueToDrain();
@@ -83,7 +83,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);

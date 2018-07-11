@@ -241,7 +241,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		Organization org = new Organization();
 		org.setName("orgName");
-		IIdType orgId = myClient.create().resource(org).execute().getId().toUnqualified();
+		IIdType orgId = ourClient.create().resource(org).execute().getId().toUnqualified();
 		assertNotNull(orgId.getVersionIdPartAsLong());
 
 		resetServerInterceptor();
