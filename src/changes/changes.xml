@@ -138,6 +138,12 @@
 				A crash in the JPA server when performing a manual reindex of a deleted resource
 				was fixed.
 			</action>
+			<action type="fix">
+				Using the generic/fluent client, it is now possible to
+				invoke the $process-message method using a standard
+				client.operation() call. Previously this caused a strange
+				NullPointerException.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

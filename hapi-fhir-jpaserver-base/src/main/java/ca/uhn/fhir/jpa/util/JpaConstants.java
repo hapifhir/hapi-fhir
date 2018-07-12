@@ -151,6 +151,11 @@ public class JpaConstants {
 	public static final String OPERATION_EVERYTHING = "$everything";
 
 	/**
+	 * Operation name for the $process-message operation
+	 */
+	public static final String OPERATION_PROCESS_MESSAGE = "$process-message";
+
+	/**
 	 * Operation name for the $meta-delete operation
 	 */
 	public static final String OPERATION_META_DELETE = "$meta-delete";

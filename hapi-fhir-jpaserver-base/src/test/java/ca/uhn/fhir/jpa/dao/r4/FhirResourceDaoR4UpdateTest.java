@@ -25,7 +25,11 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import org.springframework.test.context.TestPropertySource;
 
+@TestPropertySource(properties = {
+	"scheduling_disabled=true"
+})
 public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4UpdateTest.class);
 
@@ -33,6 +37,35 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+	}
+
+	@Test
+	public void testOneRowPerUpdate(){
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		QueryCountHolder.clear();
+		Patient p = new Patient();
+		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2011")); // non-indexed field
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		assertEquals(2, QueryCountHolder.getGrandTotal().getInsert());
+		runInTransaction(()->{
+			assertEquals(1, myResourceTableDao.count());
+			assertEquals(1, myResourceHistoryTableDao.count());
+		});
+
+		QueryCountHolder.clear();
+		p = new Patient();
+		p.setId(id);
+		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2012")); // non-indexed field
+		myPatientDao.update(p).getId().toUnqualifiedVersionless();
+
+		assertEquals(2, QueryCountHolder.getGrandTotal().getInsert());
+		runInTransaction(()->{
+			assertEquals(1, myResourceTableDao.count());
+			assertEquals(2, myResourceHistoryTableDao.count());
+		});
+
 	}
 
 	@Test
