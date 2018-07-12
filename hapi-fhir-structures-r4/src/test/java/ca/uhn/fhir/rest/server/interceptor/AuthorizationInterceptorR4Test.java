@@ -1587,6 +1587,46 @@ public class AuthorizationInterceptorR4Test {
 		assertFalse(ourHitMethod);
 	}
 
+
+	@Test
+	public void testOperationTypeLevelDifferentBodyType() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("process-message").onType(MessageHeader.class).andThen()
+					.build();
+			}
+		});
+
+		HttpPost httpPost;
+		HttpResponse status;
+		String response;
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.MESSAGE);
+		String inputString = ourCtx.newJsonParser().encodeResourceToString(input);
+
+		// With body
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/MessageHeader/$process-message");
+		httpPost.setEntity(new StringEntity(inputString, ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// With body
+		ourHitMethod = false;
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MessageHeader/$process-message");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
 	@Test
 	public void testOperationWithTester() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -2946,12 +2986,13 @@ public class AuthorizationInterceptorR4Test {
 		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
 		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
 		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
 		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
 		ourServlet.setPlainProviders(plainProvider);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
@@ -3021,6 +3062,22 @@ public class AuthorizationInterceptorR4Test {
 		 */
 		@Operation(name = "opName", idempotent = true)
 		public Parameters operation0(@IdParam(optional = true) IdType theId) {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+
+	}
+
+	public static class DummyMessageHeaderResourceProvider implements IResourceProvider {
+
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return MessageHeader.class;
+		}
+
+		@Operation(name = "process-message", idempotent = true)
+		public Parameters operation0(@OperationParam(name="content") Bundle theInput) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}

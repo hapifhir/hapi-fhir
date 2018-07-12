@@ -186,7 +186,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		assertTrue(propertyValue.isPresent());
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP19258-0", propertyValue.get().getCode());
-		assertEquals("Qn", propertyValue.get().getDisplay());
+		assertEquals("Large unstained cells/100 leukocytes", propertyValue.get().getDisplay());
 	}
 
 
