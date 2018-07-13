@@ -27,7 +27,6 @@ import javax.persistence.*;
 @Entity()
 @Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
-	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_RESID", columnNames = {"RESOURCE_TYPE", "RESOURCE_PID"}),
 	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_FID", columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
 	/*

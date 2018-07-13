@@ -1303,13 +1303,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 			// Don't keep duplicate tags
 			Set<TagDefinition> allDefsPresent = new HashSet<>();
-			theEntity.getTags().removeIf(theResourceTag -> !allDefsPresent.add(theResourceTag.getTag()));
+			Collection<ResourceTag> tags;
+			allTagsOld.removeIf(theResourceTag -> !allDefsPresent.add(theResourceTag.getTag()));
 
 			// Remove any tags that have been removed
 			for (ResourceTag next : allTagsOld) {
 				if (!allDefs.contains(next)) {
 					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, next)) {
-						theEntity.getTags().remove(next);
+						allTagsOld.remove(next);
 					}
 				}
 			}
@@ -2046,6 +2047,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			postPersist(theEntity, (T) theResource);
 
 		} else if (theEntity.getDeleted() != null) {
+			theEntity = myEntityManager.merge(theEntity);
 
 			postDelete(theEntity);
 
@@ -2195,11 +2197,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		} // if thePerformIndexing
 
-		theEntity = myEntityManager.merge(theEntity);
+		// FIXME: needed?
+		//theEntity = myEntityManager.merge(theEntity);
+		myEntityManager.flush();
 
 		if (theResource != null) {
 			populateResourceIdFromEntity(theEntity, theResource);
 		}
+
+
 
 		return theEntity;
 	}

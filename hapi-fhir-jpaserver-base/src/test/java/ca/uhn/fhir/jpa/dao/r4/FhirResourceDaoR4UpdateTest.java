@@ -40,35 +40,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testOneRowPerUpdate(){
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-
-		QueryCountHolder.clear();
-		Patient p = new Patient();
-		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2011")); // non-indexed field
-		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		assertEquals(3, QueryCountHolder.getGrandTotal().getInsert());
-		runInTransaction(()->{
-			assertEquals(1, myResourceTableDao.count());
-			assertEquals(1, myResourceHistoryTableDao.count());
-		});
-
-		QueryCountHolder.clear();
-		p = new Patient();
-		p.setId(id);
-		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2012")); // non-indexed field
-		myPatientDao.update(p).getId().toUnqualifiedVersionless();
-
-		assertEquals(1, QueryCountHolder.getGrandTotal().getInsert());
-		runInTransaction(()->{
-			assertEquals(1, myResourceTableDao.count());
-			assertEquals(2, myResourceHistoryTableDao.count());
-		});
-
-	}
-
-	@Test
 	public void testCreateAndUpdateWithoutRequest() {
 		String methodName = "testUpdateByUrl";
 
