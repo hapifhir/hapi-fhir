@@ -45,7 +45,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Table(name = "TRM_CONCEPT", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODE"})
 }, indexes = {
-	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS")
+	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
+	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
 	protected static final int MAX_DESC_LENGTH = 400;
@@ -59,15 +60,15 @@ public class TermConcept implements Serializable {
 	@Column(name = "CODE", length = 100, nullable = false)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
 	private String myCode;
-
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CONCEPT_UPDATED", nullable = true)
+	private Date myUpdated;
 	@ManyToOne()
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
-
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
 	@Fields({@Field(name = "myCodeSystemVersionPid")})
 	private long myCodeSystemVersionPid;
-
 	@Column(name = "DISPLAY", length = MAX_DESC_LENGTH, nullable = true)
 	@Fields({
 		@Field(name = "myDisplay", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
@@ -76,15 +77,12 @@ public class TermConcept implements Serializable {
 		@Field(name = "myDisplayPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
 	})
 	private String myDisplay;
-
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
 	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
 	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
 	private Collection<TermConceptProperty> myProperties;
-
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false)
 	private Collection<TermConceptDesignation> myDesignations;
-
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
@@ -92,18 +90,17 @@ public class TermConcept implements Serializable {
 	private Long myId;
 	@Column(name = "INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
-	@Transient
 	@Field(name = "myParentPids", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "conceptParentPidsAnalyzer"))
+	@Lob
+	@Column(name="PARENT_PIDS", nullable = true)
 	private String myParentPids;
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
 	private Collection<TermConceptParentChildLink> myParents;
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
-
 	public TermConcept() {
 		super();
 	}
-
 	public TermConcept(TermCodeSystemVersion theCs, String theCode) {
 		setCodeSystemVersion(theCs);
 		setCode(theCode);
@@ -294,6 +291,14 @@ public class TermConcept implements Serializable {
 			return properties.get(0);
 		}
 		return null;
+	}
+
+	public Date getUpdated() {
+		return myUpdated;
+	}
+
+	public void setUpdated(Date theUpdated) {
+		myUpdated = theUpdated;
 	}
 
 	@Override

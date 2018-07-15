@@ -327,26 +327,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	}
 
-	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
-		int count;
-		ourLog.info(" * Deleting {}", theDescriptor);
-		int totalCount = theCounter.get();
-		StopWatch sw = new StopWatch();
-		count = 0;
-		while (true) {
-			Slice<T> link = theLoader.get();
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			theDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
-		}
-		theDao.flush();
-	}
-
 	public void deleteConceptMap(ResourceTable theResourceTable) {
 		// Get existing entity so it can be deleted.
 		Optional<TermConceptMap> optionalExistingTermConceptMapById = myConceptMapDao.findTermConceptMapByResourcePid(theResourceTable.getId());
@@ -388,6 +368,26 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		deleteConceptMap(theResourceTable);
 	}
 
+	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
+		int count;
+		ourLog.info(" * Deleting {}", theDescriptor);
+		int totalCount = theCounter.get();
+		StopWatch sw = new StopWatch();
+		count = 0;
+		while (true) {
+			Slice<T> link = theLoader.get();
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			theDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+		}
+		theDao.flush();
+	}
+
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
 		ourLog.trace("Checking {} parents", theParents.size());
 		int retVal = 0;
@@ -397,6 +397,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				TermConcept nextParent = nextLink.getParent();
 				retVal += ensureParentsSaved(nextParent.getParents());
 				if (nextParent.getId() == null) {
+					nextParent.setUpdated(new Date());
 					myConceptDao.saveAndFlush(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
@@ -887,9 +888,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 				for (TermConcept nextConcept : concepts) {
 
-					StringBuilder parentsBuilder = new StringBuilder();
-					createParentsString(parentsBuilder, nextConcept.getId());
-					nextConcept.setParentPids(parentsBuilder.toString());
+					if (isBlank(nextConcept.getParentPidsAsString())) {
+						StringBuilder parentsBuilder = new StringBuilder();
+						createParentsString(parentsBuilder, nextConcept.getId());
+						nextConcept.setParentPids(parentsBuilder.toString());
+					}
 
 					saveConcept(nextConcept);
 					count++;
@@ -923,6 +926,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+			theConcept.setUpdated(new Date());
 			myConceptDao.save(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {

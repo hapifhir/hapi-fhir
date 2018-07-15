@@ -104,6 +104,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myConceptMapDaoR4")
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Autowired
+	protected ITermConceptDao myTermConceptDao;
+	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
