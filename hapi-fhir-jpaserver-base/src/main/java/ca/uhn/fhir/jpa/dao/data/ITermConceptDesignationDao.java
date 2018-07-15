@@ -32,4 +32,7 @@ public interface ITermConceptDesignationDao extends JpaRepository<TermConceptDes
 	@Query("SELECT t FROM TermConceptDesignation t WHERE t.myCodeSystemVersion.myId = :csv_pid")
 	Slice<TermConceptDesignation> findByCodeSystemVersion(Pageable thePage, @Param("csv_pid") Long thePid);
 
+	@Query("SELECT COUNT(t) FROM TermConceptDesignation t WHERE t.myCodeSystemVersion.myId = :csv_pid")
+	Integer countByCodeSystemVersion(@Param("csv_pid") Long thePid);
+
 }

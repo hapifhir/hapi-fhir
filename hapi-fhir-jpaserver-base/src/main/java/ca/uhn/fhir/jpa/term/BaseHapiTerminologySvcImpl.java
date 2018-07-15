@@ -66,6 +66,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -82,6 +83,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -273,74 +275,43 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myEntityManager.flush();
 	}
 
-	public void deleteCodeSystemVersion(Long theCodeSystemVersionPid) {
+	public void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
 		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
 
-		PageRequest page = PageRequest.of(0, 1000);
-		int count;
+		PageRequest page1000 = PageRequest.of(0, 1000);
 
 		// Parent/Child links
-		ourLog.info(" * Deleting parent/child links");
-		count = 0;
-		while (true) {
-			Slice<TermConceptParentChildLink> link = myConceptParentChildLinkDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptParentChildLinkDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} parent/child links deleted", count);
+		{
+			String descriptor = "parent/child links";
+			Supplier<Slice<TermConceptParentChildLink>> loader = () -> myConceptParentChildLinkDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptParentChildLinkDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptParentChildLinkDao);
 		}
-		myConceptParentChildLinkDao.flush();
 
 		// Properties
-		ourLog.info(" * Deleting properties");
-		count = 0;
-		while (true) {
-			Slice<TermConceptProperty> link = myConceptPropertyDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptPropertyDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concept properties deleted", count);
+		{
+			String descriptor = "concept properties";
+			Supplier<Slice<TermConceptProperty>> loader = () -> myConceptPropertyDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptPropertyDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptPropertyDao);
 		}
-		myConceptPropertyDao.flush();
 
-		// Properties
-		ourLog.info(" * Deleting designations");
-		count = 0;
-		while (true) {
-			Slice<TermConceptDesignation> link = myConceptDesignationDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptDesignationDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concept designations deleted", count);
+		// Designations
+		{
+			String descriptor = "concept designations";
+			Supplier<Slice<TermConceptDesignation>> loader = () -> myConceptDesignationDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptDesignationDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptDesignationDao);
 		}
-		myConceptDesignationDao.flush();
 
 		// Concepts
-		ourLog.info(" * Deleting concepts");
-		count = 0;
-		while (true) {
-			Slice<TermConcept> link = myConceptDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptDao.deleteInBatch(link);
-			myConceptDao.flush();
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concepts deleted", count);
+		{
+			String descriptor = "concepts";
+			// For some reason, concepts are much slower to delete, so use a smaller batch size
+			PageRequest page100 = PageRequest.of(0, 100);
+			Supplier<Slice<TermConcept>> loader = () -> myConceptDao.findByCodeSystemVersion(page100, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptDao);
 		}
 
 		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
@@ -354,6 +325,26 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info(" * Deleting code system version");
 		myCodeSystemVersionDao.deleteById(theCodeSystemVersionPid);
 
+	}
+
+	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
+		int count;
+		ourLog.info(" * Deleting {}", theDescriptor);
+		int totalCount = theCounter.get();
+		StopWatch sw = new StopWatch();
+		count = 0;
+		while (true) {
+			Slice<T> link = theLoader.get();
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			theDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+		}
+		theDao.flush();
 	}
 
 	public void deleteConceptMap(ResourceTable theResourceTable) {

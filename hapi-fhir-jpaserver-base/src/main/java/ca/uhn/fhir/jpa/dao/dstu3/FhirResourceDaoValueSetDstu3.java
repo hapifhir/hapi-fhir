@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -35,6 +36,8 @@ import org.hl7.fhir.dstu3.model.ValueSet.*;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -223,6 +226,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		if (vs != null) {
 			ValueSet expansion = doExpand(vs);
 			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
+
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {
 				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
@@ -237,6 +241,9 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		return new ValidateCodeResult(false, "Code not found", null);
 
 	}
+
+
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoValueSetDstu3.class);
 
 	private String toStringOrNull(IPrimitiveType<String> thePrimitive) {
 		return thePrimitive != null ? thePrimitive.getValue() : null;
