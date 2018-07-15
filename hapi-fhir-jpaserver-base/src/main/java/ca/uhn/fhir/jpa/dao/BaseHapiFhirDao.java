@@ -92,9 +92,9 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1167,7 +1167,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public SearchBuilder newSearchBuilder() {
 		SearchBuilder builder = new SearchBuilder(
 			getContext(), myEntityManager, myFulltextSearchSvc, this, myResourceIndexedSearchParamUriDao,
-			myForcedIdDao,	myTerminologySvc, mySerarchParamRegistry, myResourceTagDao, myResourceViewDao);
+			myForcedIdDao, myTerminologySvc, mySerarchParamRegistry, myResourceTagDao, myResourceViewDao);
 		return builder;
 	}
 
@@ -1301,20 +1301,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				}
 			}
 
-			// Don't keep duplicate tags
+			Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
 			Set<TagDefinition> allDefsPresent = new HashSet<>();
-			theEntity.getTags().removeIf(theResourceTag -> !allDefsPresent.add(theResourceTag.getTag()));
+			allTagsNew.forEach(tag -> {
 
-			// Remove any tags that have been removed
-			for (ResourceTag next : allTagsOld) {
-				if (!allDefs.contains(next)) {
-					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, next)) {
-						theEntity.getTags().remove(next);
+				// Don't keep duplicate tags
+				if (!allDefsPresent.add(tag.getTag())) {
+					theEntity.getTags().remove(tag);
+				}
+
+				// Drop any tags that have been removed
+				if (!allDefs.contains(tag)) {
+					if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
+						theEntity.getTags().remove(tag);
 					}
 				}
-			}
 
-			Set<ResourceTag> allTagsNew = getAllTagDefinitions(theEntity);
+			});
+
 			if (!allTagsOld.equals(allTagsNew)) {
 				changed = true;
 			}
@@ -1474,21 +1478,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	/**
+	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
+	 *
+	 * @param theEntity The resource
+	 */
+	protected void postDelete(ResourceTable theEntity) {
+		// nothing
+	}
+
+	/**
 	 * Subclasses may override to provide behaviour. Called when a resource has been inserted into the database for the first time.
 	 *
 	 * @param theEntity   The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
 	 * @param theResource The resource being persisted
 	 */
 	protected void postPersist(ResourceTable theEntity, T theResource) {
-		// nothing
-	}
-
-	/**
-	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
-	 *
-	 * @param theEntity   The resource
-	 */
-	protected void postDelete(ResourceTable theEntity) {
 		// nothing
 	}
 
@@ -1626,20 +1630,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation) {
-		
+
 		// 1. get resource, it's encoding and the tags if any
 		byte[] resourceBytes = null;
 		ResourceEncodingEnum resourceEncoding = null;
 		Collection<? extends BaseTag> myTagList = null;
-		
+
 		if (theEntity instanceof ResourceHistoryTable) {
 			ResourceHistoryTable history = (ResourceHistoryTable) theEntity;
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			myTagList = history.getTags();
 		} else if (theEntity instanceof ResourceTable) {
-			ResourceTable resource = (ResourceTable)theEntity;
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());	
+			ResourceTable resource = (ResourceTable) theEntity;
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 			if (history == null) {
 				return null;
 			}
@@ -1648,7 +1652,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			myTagList = resource.getTags();
 		} else if (theEntity instanceof ResourceSearchView) {
 			// This is the search View
-			ResourceSearchView myView = (ResourceSearchView)theEntity;
+			ResourceSearchView myView = (ResourceSearchView) theEntity;
 			resourceBytes = myView.getResource();
 			resourceEncoding = myView.getEncoding();
 			if (theTagList == null)
@@ -1663,7 +1667,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		// 2. get The text		
 		String resourceText = null;
 		switch (resourceEncoding) {
-			case JSON:			
+			case JSON:
 				try {
 					resourceText = new String(resourceBytes, "UTF-8");
 				} catch (UnsupportedEncodingException e) {
@@ -1676,7 +1680,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			case DEL:
 				break;
 		}
-	
+
 		// 3. Use the appropriate custom type if one is specified in the context
 		Class<R> resourceType = theResourceType;
 		if (myContext.hasDefaultTypeForProfile()) {
@@ -2046,6 +2050,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			postPersist(theEntity, (T) theResource);
 
 		} else if (theEntity.getDeleted() != null) {
+			theEntity = myEntityManager.merge(theEntity);
 
 			postDelete(theEntity);
 
@@ -2191,11 +2196,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		} // if thePerformIndexing
 
-		theEntity = myEntityManager.merge(theEntity);
-
 		if (theResource != null) {
 			populateResourceIdFromEntity(theEntity, theResource);
 		}
+
 
 		return theEntity;
 	}
