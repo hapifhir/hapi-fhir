@@ -63,6 +63,7 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public abstract BaseTag addTag(TagDefinition theDef);
 
+	@Override
 	public Date getDeleted() {
 		return myDeleted;
 	}
@@ -72,6 +73,7 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	}
 
 
+	@Override
 	public FhirVersionEnum getFhirVersion() {
 		return myFhirVersion;
 	}
@@ -88,10 +90,13 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myForcedId = theForcedId;
 	}
 
+	@Override
 	public abstract Long getId();
 
+	@Override
 	public abstract IdDt getIdDt();
 
+	@Override
 	public InstantDt getPublished() {
 		if (myPublished != null) {
 			return new InstantDt(myPublished);
@@ -104,12 +109,15 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myPublished = thePublished;
 	}
 
+	@Override
 	public abstract Long getResourceId();
 
+	@Override
 	public abstract String getResourceType();
 
 	public abstract Collection<? extends BaseTag> getTags();
 
+	@Override
 	public InstantDt getUpdated() {
 		return new InstantDt(myUpdated);
 	}
@@ -118,12 +126,15 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myUpdated = theUpdated;
 	}
 
+	@Override
 	public Date getUpdatedDate() {
 		return myUpdated;
 	}
 
+	@Override
 	public abstract long getVersion();
 
+	@Override
 	public boolean isHasTags() {
 		return myHasTags;
 	}
