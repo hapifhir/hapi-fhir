@@ -27,10 +27,10 @@ import org.hl7.fhir.r4.model.ValueSet.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -442,6 +442,56 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "childAB", "childAAB", "ParentC", "childBA", "childCA"));
+	}
+
+	@Test
+	public void testExpandWithIncludeContainingDashesInInclude() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept concept;
+		concept = new TermConcept(cs, "LA1111-2");
+		cs.getConcepts().add(concept);
+		concept = new TermConcept(cs, "LA2222-2");
+		cs.getConcepts().add(concept);
+		concept = new TermConcept(cs, "LA3333-2");
+		cs.getConcepts().add(concept);
+		concept = new TermConcept(cs, "LA1122-2");
+		cs.getConcepts().add(concept);
+		concept = new TermConcept(cs, "LA1133-2");
+		cs.getConcepts().add(concept);
+		concept = new TermConcept(cs, "LA4444-2");
+		cs.getConcepts().add(concept);
+		concept = new TermConcept(cs, "LA9999-7");
+		cs.getConcepts().add(concept);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("LA2222-2"))
+			.addConcept(new ConceptReferenceComponent().setCode("LA1122-2"));
+		IIdType vsid = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+
+		ValueSet expansion = myValueSetDao.expand(vsid, null, null);
+		Set<String> codes = expansion
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(t -> t.getCode())
+			.collect(Collectors.toSet());
+		ourLog.info("Codes: {}", codes);
+		assertThat(codes, containsInAnyOrder("LA2222-2", "LA1122-2"));
 	}
 
 	@Test

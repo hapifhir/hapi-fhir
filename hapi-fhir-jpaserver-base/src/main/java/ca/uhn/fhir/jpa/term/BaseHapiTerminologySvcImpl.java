@@ -45,14 +45,15 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.TermsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RegexpQuery;
+import org.apache.lucene.search.*;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.query.dsl.TermMatchingContext;
+import org.hibernate.search.query.dsl.TermTermination;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -459,21 +460,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
 
 				/*
-				 * Include Concepts
-				 */
-
-				String codes = include
-					.getConcept()
-					.stream()
-					.filter(Objects::nonNull)
-					.map(ValueSet.ConceptReferenceComponent::getCode)
-					.filter(StringUtils::isNotBlank)
-					.collect(Collectors.joining(" "));
-				if (isNotBlank(codes)) {
-					bool.must(qb.keyword().onField("myCode").matching(codes).createQuery());
-				}
-
-				/*
 				 * Filters
 				 */
 
@@ -551,6 +537,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 
 				Query luceneQuery = bool.createQuery();
+
+				/*
+				 * Include Concepts
+				 */
+
+				List<Term> codes = include
+					.getConcept()
+					.stream()
+					.filter(Objects::nonNull)
+					.map(ValueSet.ConceptReferenceComponent::getCode)
+					.filter(StringUtils::isNotBlank)
+					.map(t->new Term("myCode", t))
+					.collect(Collectors.toList());
+				if (codes.size() > 0) {
+					MultiPhraseQuery query = new MultiPhraseQuery();
+					query.add(codes.toArray(new Term[0]));
+					luceneQuery = new BooleanQuery.Builder()
+						.add(luceneQuery, BooleanClause.Occur.MUST)
+						.add(query, BooleanClause.Occur.MUST)
+						.build();
+				}
+
+				/*
+				 * Execute the query
+				 */
+
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
 				jpaQuery.setMaxResults(1000);
 
