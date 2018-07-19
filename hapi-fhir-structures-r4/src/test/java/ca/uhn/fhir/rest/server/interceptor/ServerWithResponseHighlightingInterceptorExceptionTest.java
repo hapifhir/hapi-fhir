@@ -1,13 +1,22 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -15,28 +24,22 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.*;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
 	private static CloseableHttpClient ourClient;
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
 	private static int ourPort;
 	private static Server ourServer;
@@ -67,6 +70,38 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		assertThat(responseContent, containsString("<diagnostics value=\"Failed to call access method: java.lang.Error: AAABBB\"/>"));
 	}
 
+	@Test
+	public void testPreventHtmlInjectionViaInvalidResourceType() throws Exception {
+	// XML
+		HttpGet httpGet = new HttpGet(
+			"http://localhost:" +
+				ourPort +
+				"/AA" +
+				UrlUtil.escapeUrlParam("<script>"));
+		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML+", " +Constants.CT_FHIR_XML_NEW);
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(responseContent);
+
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, not(containsString("<script>>")));
+		}
+
+		// JSON
+		httpGet = new HttpGet(
+			"http://localhost:" +
+				ourPort +
+				"/AA" +
+				UrlUtil.escapeUrlParam("<script>"));
+		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML+", " +Constants.CT_FHIR_JSON_NEW);
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(responseContent);
+
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, not(containsString("<script>>")));
+		}
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -102,12 +137,12 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<? extends Patient> getResourceType() {
 			return Patient.class;
 		}
 
 		@Read
-		public Patient read(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdType theId) {
 			throw new InvalidRequestException("AAABBB");
 		}
 
@@ -115,6 +150,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		public Patient search(@RequiredParam(name="identifier") TokenParam theToken) {
 			throw new Error("AAABBB");
 		}
+
 
 	}
 
