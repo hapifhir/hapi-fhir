@@ -21,9 +21,9 @@ import java.util.List;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,14 +34,17 @@ import java.util.List;
 
 public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 
+	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
+	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
 	TermConcept findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
 
-	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
-	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
-
 	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Slice<TermConcept> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+
+	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
+	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);

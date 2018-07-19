@@ -45,14 +45,15 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.TermsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RegexpQuery;
+import org.apache.lucene.search.*;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.query.dsl.TermMatchingContext;
+import org.hibernate.search.query.dsl.TermTermination;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -66,6 +67,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -82,6 +84,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -273,74 +276,43 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myEntityManager.flush();
 	}
 
-	public void deleteCodeSystemVersion(Long theCodeSystemVersionPid) {
+	public void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
 		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
 
-		PageRequest page = PageRequest.of(0, 1000);
-		int count;
+		PageRequest page1000 = PageRequest.of(0, 1000);
 
 		// Parent/Child links
-		ourLog.info(" * Deleting parent/child links");
-		count = 0;
-		while (true) {
-			Slice<TermConceptParentChildLink> link = myConceptParentChildLinkDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptParentChildLinkDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} parent/child links deleted", count);
+		{
+			String descriptor = "parent/child links";
+			Supplier<Slice<TermConceptParentChildLink>> loader = () -> myConceptParentChildLinkDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptParentChildLinkDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptParentChildLinkDao);
 		}
-		myConceptParentChildLinkDao.flush();
 
 		// Properties
-		ourLog.info(" * Deleting properties");
-		count = 0;
-		while (true) {
-			Slice<TermConceptProperty> link = myConceptPropertyDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptPropertyDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concept properties deleted", count);
+		{
+			String descriptor = "concept properties";
+			Supplier<Slice<TermConceptProperty>> loader = () -> myConceptPropertyDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptPropertyDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptPropertyDao);
 		}
-		myConceptPropertyDao.flush();
 
-		// Properties
-		ourLog.info(" * Deleting designations");
-		count = 0;
-		while (true) {
-			Slice<TermConceptDesignation> link = myConceptDesignationDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptDesignationDao.deleteInBatch(link);
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concept designations deleted", count);
+		// Designations
+		{
+			String descriptor = "concept designations";
+			Supplier<Slice<TermConceptDesignation>> loader = () -> myConceptDesignationDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptDesignationDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptDesignationDao);
 		}
-		myConceptDesignationDao.flush();
 
 		// Concepts
-		ourLog.info(" * Deleting concepts");
-		count = 0;
-		while (true) {
-			Slice<TermConcept> link = myConceptDao.findByCodeSystemVersion(page, theCodeSystemVersionPid);
-			if (link.hasContent() == false) {
-				break;
-			}
-
-			myConceptDao.deleteInBatch(link);
-			myConceptDao.flush();
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} concepts deleted", count);
+		{
+			String descriptor = "concepts";
+			// For some reason, concepts are much slower to delete, so use a smaller batch size
+			PageRequest page100 = PageRequest.of(0, 100);
+			Supplier<Slice<TermConcept>> loader = () -> myConceptDao.findByCodeSystemVersion(page100, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptDao);
 		}
 
 		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
@@ -397,6 +369,26 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		deleteConceptMap(theResourceTable);
 	}
 
+	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
+		int count;
+		ourLog.info(" * Deleting {}", theDescriptor);
+		int totalCount = theCounter.get();
+		StopWatch sw = new StopWatch();
+		count = 0;
+		while (true) {
+			Slice<T> link = theLoader.get();
+			if (link.hasContent() == false) {
+				break;
+			}
+
+			theDao.deleteInBatch(link);
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+		}
+		theDao.flush();
+	}
+
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
 		ourLog.trace("Checking {} parents", theParents.size());
 		int retVal = 0;
@@ -406,6 +398,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				TermConcept nextParent = nextLink.getParent();
 				retVal += ensureParentsSaved(nextParent.getParents());
 				if (nextParent.getId() == null) {
+					nextParent.setUpdated(new Date());
 					myConceptDao.saveAndFlush(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
@@ -465,21 +458,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				BooleanJunction<?> bool = qb.bool();
 
 				bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
-
-				/*
-				 * Include Concepts
-				 */
-
-				String codes = include
-					.getConcept()
-					.stream()
-					.filter(Objects::nonNull)
-					.map(ValueSet.ConceptReferenceComponent::getCode)
-					.filter(StringUtils::isNotBlank)
-					.collect(Collectors.joining(" "));
-				if (isNotBlank(codes)) {
-					bool.must(qb.keyword().onField("myCode").matching(codes).createQuery());
-				}
 
 				/*
 				 * Filters
@@ -559,6 +537,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 
 				Query luceneQuery = bool.createQuery();
+
+				/*
+				 * Include Concepts
+				 */
+
+				List<Term> codes = include
+					.getConcept()
+					.stream()
+					.filter(Objects::nonNull)
+					.map(ValueSet.ConceptReferenceComponent::getCode)
+					.filter(StringUtils::isNotBlank)
+					.map(t->new Term("myCode", t))
+					.collect(Collectors.toList());
+				if (codes.size() > 0) {
+					MultiPhraseQuery query = new MultiPhraseQuery();
+					query.add(codes.toArray(new Term[0]));
+					luceneQuery = new BooleanQuery.Builder()
+						.add(luceneQuery, BooleanClause.Occur.MUST)
+						.add(query, BooleanClause.Occur.MUST)
+						.build();
+				}
+
+				/*
+				 * Execute the query
+				 */
+
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
 				jpaQuery.setMaxResults(1000);
 
@@ -896,9 +900,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 				for (TermConcept nextConcept : concepts) {
 
-					StringBuilder parentsBuilder = new StringBuilder();
-					createParentsString(parentsBuilder, nextConcept.getId());
-					nextConcept.setParentPids(parentsBuilder.toString());
+					if (isBlank(nextConcept.getParentPidsAsString())) {
+						StringBuilder parentsBuilder = new StringBuilder();
+						createParentsString(parentsBuilder, nextConcept.getId());
+						nextConcept.setParentPids(parentsBuilder.toString());
+					}
 
 					saveConcept(nextConcept);
 					count++;
@@ -932,6 +938,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+			theConcept.setUpdated(new Date());
 			myConceptDao.save(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {

@@ -62,7 +62,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public String mySystem;
 	@Field()
 	@Column(name = "SP_VALUE", nullable = true, length = MAX_LENGTH)
-	public String myValue;
+	private String myValue;
+	@SuppressWarnings("unused")
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_TOKEN", sequenceName = "SEQ_SPIDX_TOKEN")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
@@ -152,40 +153,40 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return b.isEquals();
 	}
 
-	public Long getHashSystem() {
+	Long getHashSystem() {
 		calculateHashes();
 		return myHashSystem;
 	}
 
-	public Long getHashIdentity() {
+	private Long getHashIdentity() {
 		calculateHashes();
 		return myHashIdentity;
 	}
 
-	public void setHashIdentity(Long theHashIdentity) {
+	private void setHashIdentity(Long theHashIdentity) {
 		myHashIdentity = theHashIdentity;
 	}
 
-	public void setHashSystem(Long theHashSystem) {
+	private void setHashSystem(Long theHashSystem) {
 		myHashSystem = theHashSystem;
 	}
 
-	public Long getHashSystemAndValue() {
+	Long getHashSystemAndValue() {
 		calculateHashes();
 		return myHashSystemAndValue;
 	}
 
-	public void setHashSystemAndValue(Long theHashSystemAndValue) {
+	private void setHashSystemAndValue(Long theHashSystemAndValue) {
 		calculateHashes();
 		myHashSystemAndValue = theHashSystemAndValue;
 	}
 
-	public Long getHashValue() {
+	Long getHashValue() {
 		calculateHashes();
 		return myHashValue;
 	}
 
-	public void setHashValue(Long theHashValue) {
+	private void setHashValue(Long theHashValue) {
 		myHashValue = theHashValue;
 	}
 

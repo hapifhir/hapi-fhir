@@ -24,16 +24,18 @@ import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
-//@formatter:off
 @Entity()
 @Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
-	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_RESID", columnNames = {"RESOURCE_TYPE", "RESOURCE_PID"}),
 	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_FID", columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
-	@Index(name = "IDX_FORCEDID_TYPE_FORCEDID", columnList = "RESOURCE_TYPE,FORCED_ID"),
+	/*
+	 * NB: We previously had indexes named
+	 * - IDX_FORCEDID_TYPE_FORCEDID
+	 * - IDX_FORCEDID_TYPE_RESID
+	 * so don't reuse these names
+	 */
 })
-//@formatter:on
 public class ForcedId {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;

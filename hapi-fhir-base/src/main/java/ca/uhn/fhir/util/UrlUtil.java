@@ -25,9 +25,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,7 +70,7 @@ public class UrlUtil {
 			return theExtensionUrl;
 		}
 		if (theExtensionUrl == null) {
-			return theExtensionUrl;
+			return null;
 		}
 
 		int parentLastSlashIdx = theParentExtensionUrl.lastIndexOf('/');
@@ -119,6 +119,18 @@ public class UrlUtil {
 		return value.startsWith("http://") || value.startsWith("https://");
 	}
 
+	public static boolean isNeedsSanitization(String theString) {
+		if (theString != null) {
+			for (int i = 0; i < theString.length(); i++) {
+				char nextChar = theString.charAt(i);
+				if (nextChar == '<' || nextChar == '"') {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static boolean isValid(String theUrl) {
 		if (theUrl == null || theUrl.length() < 8) {
 			return false;
@@ -164,7 +176,7 @@ public class UrlUtil {
 	}
 
 	public static Map<String, String[]> parseQueryString(String theQueryString) {
-		HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+		HashMap<String, List<String>> map = new HashMap<>();
 		parseQueryString(theQueryString, map);
 		return toQueryStringMap(map);
 	}
@@ -197,17 +209,13 @@ public class UrlUtil {
 			nextKey = unescape(nextKey);
 			nextValue = unescape(nextValue);
 
-			List<String> list = map.get(nextKey);
-			if (list == null) {
-				list = new ArrayList<>();
-				map.put(nextKey, list);
-			}
+			List<String> list = map.computeIfAbsent(nextKey, k -> new ArrayList<>());
 			list.add(nextValue);
 		}
 	}
 
 	public static Map<String, String[]> parseQueryStrings(String... theQueryString) {
-		HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+		HashMap<String, List<String>> map = new HashMap<>();
 		for (String next : theQueryString) {
 			parseQueryString(next, map);
 		}
@@ -222,7 +230,6 @@ public class UrlUtil {
 	 * <li>[Resource Type]/[Resource ID]/_history/[Version ID]
 	 * </ul>
 	 */
-	//@formatter:on
 	public static UrlParts parseUrl(String theUrl) {
 		String url = theUrl;
 		UrlParts retVal = new UrlParts();
@@ -243,7 +250,7 @@ public class UrlUtil {
 			retVal.setVersionId(id.getVersionIdPart());
 			return retVal;
 		}
-		if (url.matches("\\/[a-zA-Z]+\\?.*")) {
+		if (url.matches("/[a-zA-Z]+\\?.*")) {
 			url = url.substring(1);
 		}
 		int nextStart = 0;
@@ -282,12 +289,47 @@ public class UrlUtil {
 
 	}
 
-	//@formatter:off
+	/**
+	 * This method specifically HTML-encodes the &quot; and
+	 * &lt; characters in order to prevent injection attacks
+	 */
+	public static String sanitizeUrlPart(String theString) {
+		if (theString == null) {
+			return null;
+		}
+
+		boolean needsSanitization = isNeedsSanitization(theString);
+
+		if (needsSanitization) {
+			// Ok, we're sanitizing
+			StringBuilder buffer = new StringBuilder(theString.length() + 10);
+			for (int j = 0; j < theString.length(); j++) {
+
+				char nextChar = theString.charAt(j);
+				switch (nextChar) {
+					case '"':
+						buffer.append("&quot;");
+						break;
+					case '<':
+						buffer.append("&lt;");
+						break;
+					default:
+						buffer.append(nextChar);
+						break;
+				}
+
+			} // for build escaped string
+
+			return buffer.toString();
+		}
+
+		return theString;
+	}
 
 	private static Map<String, String[]> toQueryStringMap(HashMap<String, List<String>> map) {
-		HashMap<String, String[]> retVal = new HashMap<String, String[]>();
+		HashMap<String, String[]> retVal = new HashMap<>();
 		for (Entry<String, List<String>> nextEntry : map.entrySet()) {
-			retVal.put(nextEntry.getKey(), nextEntry.getValue().toArray(new String[nextEntry.getValue().size()]));
+			retVal.put(nextEntry.getKey(), nextEntry.getValue().toArray(new String[0]));
 		}
 		return retVal;
 	}

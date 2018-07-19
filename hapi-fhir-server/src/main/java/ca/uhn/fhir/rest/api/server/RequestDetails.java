@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,6 +20,8 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -184,6 +187,21 @@ public abstract class RequestDetails {
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
 		myUnqualifiedToQualifiedNames = null;
+
+		// Sanitize keys if necessary to prevent injection attacks
+		boolean needsSanitization = false;
+		for (String nextKey : theParams.keySet()) {
+			if (UrlUtil.isNeedsSanitization(nextKey)) {
+				needsSanitization = true;
+				break;
+			}
+		}
+		if (needsSanitization) {
+			myParameters = myParameters
+				.entrySet()
+				.stream()
+				.collect(Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry) t).getKey()), t -> (String[]) ((Map.Entry) t).getValue()));
+		}
 	}
 
 	/**

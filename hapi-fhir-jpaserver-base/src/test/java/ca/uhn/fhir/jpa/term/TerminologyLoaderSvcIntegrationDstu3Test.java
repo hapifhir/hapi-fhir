@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -49,17 +50,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 			.filter(t -> t.getName().equals("property"))
 			.filter(t -> ((PrimitiveType<?>) t.getPart().get(0).getValue()).getValueAsString().equals(thePropertyName))
 			.map(t -> (T) t.getPart().get(1).getValue())
-			.findFirst();
-	}
-
-	private <T extends Type> Optional<T> getPropertyPart(Parameters theParameters, String thePropName, String thePart) {
-		return theParameters
-			.getParameter()
-			.stream()
-			.filter(t -> t.getName().equals(thePropName))
-			.flatMap(t -> t.getPart().stream())
-			.filter(t -> t.getName().equals(thePart))
-			.map(t -> (T) t.getValue())
 			.findFirst();
 	}
 
@@ -169,7 +159,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-
 	@Test
 	public void testLookupWithProperties2() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
@@ -186,9 +175,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		assertTrue(propertyValue.isPresent());
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
 		assertEquals("LP19258-0", propertyValue.get().getCode());
-		assertEquals("Qn", propertyValue.get().getDisplay());
+		assertEquals("Large unstained cells/100 leukocytes", propertyValue.get().getDisplay());
 	}
-
 
 	@Test
 	public void testLookupWithPropertiesExplicit() throws Exception {
@@ -212,6 +200,30 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		propertyValueCoding = findProperty(parameters, "COMPONENT");
 		assertFalse(propertyValueCoding.isPresent());
 
+	}
+
+	@Test
+	public void testValidateCodeFound() throws Exception {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, null, null, mySrd);
+
+		assertTrue(result.isResult());
+		assertEquals("Found code", result.getMessage());
+	}
+
+	@Test
+	public void testValidateCodeNotFound() throws Exception {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		IFhirResourceDaoValueSet.ValidateCodeResult result = myValueSetDao.validateCode(null, null, new StringType("10013-1-9999999999"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, null, null, mySrd);
+
+		assertFalse(result.isResult());
+		assertEquals("Code not found", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

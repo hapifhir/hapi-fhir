@@ -6,14 +6,9 @@ import ca.uhn.fhir.jpa.subscription.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -22,13 +17,11 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -193,24 +186,5 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-
-	public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
-
-		private final Environment myEnvironment;
-
-		public UnregisterScheduledProcessor(Environment theEnv) {
-			myEnvironment = theEnv;
-		}
-
-		@Override
-		public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
-			String schedulingDisabled = myEnvironment.getProperty("scheduling_disabled");
-			if ("true".equals(schedulingDisabled)) {
-				for (String beanName : beanFactory.getBeanNamesForType(ScheduledAnnotationBeanPostProcessor.class)) {
-					((DefaultListableBeanFactory) beanFactory).removeBeanDefinition(beanName);
-				}
-			}
-		}
-	}
 
 }

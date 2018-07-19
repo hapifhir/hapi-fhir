@@ -31,6 +31,9 @@ import java.util.Collection;
 
 public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConceptParentChildLink, Long> {
 
+	@Query("SELECT COUNT(t) FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
+	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
+
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
 

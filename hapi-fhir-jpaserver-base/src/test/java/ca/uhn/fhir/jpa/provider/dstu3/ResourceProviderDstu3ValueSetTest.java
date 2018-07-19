@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -10,8 +11,11 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -109,6 +113,16 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
+	private void createLocalVsWithIncludeConcept() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("AA");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	}
+
 	private void createLocalVsWithUnknownCode(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
@@ -172,7 +186,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 * $expand?identifier=foo is legacy.. It's actually not valid in FHIR as of STU3
 	 * but we supported it for longer than we should have so I don't want to delete
 	 * it right now.
-	 *
+	 * <p>
 	 * https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
 	 */
 	@Test
@@ -460,6 +474,29 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+	}
+
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
+		createLocalCsAndVs();
+		createLocalVsWithIncludeConcept();
+
+		String url = ourServerBase +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM) +
+			"&code=AA";
+
+		ourLog.info("* Requesting: {}", url);
+
+		HttpGet request = new HttpGet(url);
+		request.addHeader("Accept", "application/fhir+json");
+		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
+			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+
+			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		}
 	}
 
 	@Test

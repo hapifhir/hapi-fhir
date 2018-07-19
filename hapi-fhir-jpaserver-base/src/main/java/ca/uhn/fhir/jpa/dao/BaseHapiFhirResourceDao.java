@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -395,16 +395,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
 			}
 			createForcedIdIfNeeded(entity, theResource.getIdElement());
-
-			if (entity.getForcedId() != null) {
-				try {
-					translateForcedIdToPid(getResourceName(), theResource.getIdElement().getIdPart());
-					throw new UnprocessableEntityException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "duplicateCreateForcedId", theResource.getIdElement().getIdPart()));
-				} catch (ResourceNotFoundException e) {
-					// good, this ID doesn't exist so we can create it
-				}
-			}
-
 		}
 
 		// Notify interceptors
@@ -1211,7 +1201,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		} else {
 			/*
-			 * Note: resourcdeId will not be null or empty here, because we check it and reject requests in BaseOutcomeReturningMethodBindingWithResourceParam
+			 * Note: resourceId will not be null or empty here, because we
+			 * check it and reject requests in
+			 * BaseOutcomeReturningMethodBindingWithResourceParam
 			 */
 			resourceId = theResource.getIdElement();
 
