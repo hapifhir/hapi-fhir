@@ -5,18 +5,14 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -33,14 +29,12 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
-	private static CloseableHttpClient ourClient;
-
-	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
+	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
@@ -52,7 +46,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		
+
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<diagnostics value=\"AAABBB\"/>"));
 	}
@@ -65,42 +59,9 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		
+
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("<diagnostics value=\"Failed to call access method: java.lang.Error: AAABBB\"/>"));
-	}
-
-	@Test
-	public void testPreventHtmlInjectionViaInvalidResourceType() throws Exception {
-	// XML
-		HttpGet httpGet = new HttpGet(
-			"http://localhost:" +
-				ourPort +
-				"/AA" +
-				UrlUtil.escapeUrlParam("<script>"));
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML+", " +Constants.CT_FHIR_XML_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>>")));
-		}
-
-		// JSON
-		httpGet = new HttpGet(
-			"http://localhost:" +
-				ourPort +
-				"/AA" +
-				UrlUtil.escapeUrlParam("<script>"));
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML+", " +Constants.CT_FHIR_JSON_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, not(containsString("<script>>")));
-		}
 	}
 
 	@AfterClass
@@ -147,7 +108,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		}
 
 		@Search
-		public Patient search(@RequiredParam(name="identifier") TokenParam theToken) {
+		public Patient search(@RequiredParam(name = "identifier") TokenParam theToken) {
 			throw new Error("AAABBB");
 		}
 

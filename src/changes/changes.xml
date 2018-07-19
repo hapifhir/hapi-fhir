@@ -144,6 +144,12 @@
 				client.operation() call. Previously this caused a strange
 				NullPointerException.
 			</action>
+			<action type="fix">
+				The REST Server now sanitizes URL path components and query parameter
+				names to escape several reserved characters (e.g. &quot; and &lt;)
+				in order to prevent HTML injection attacks via maliciously
+				crafted URLs.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

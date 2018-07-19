@@ -1246,7 +1246,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		String operation = null;
 		String compartment = null;
 		if (tok.hasMoreTokens()) {
-			resourceName = tok.nextToken();
+			resourceName = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(resourceName)) {
 				operation = resourceName;
 				resourceName = null;
@@ -1255,7 +1255,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theRequestDetails.setResourceName(resourceName);
 
 		if (tok.hasMoreTokens()) {
-			String nextString = tok.nextToken();
+			String nextString = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(nextString)) {
 				operation = nextString;
 			} else {
@@ -1265,10 +1265,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 
 		if (tok.hasMoreTokens()) {
-			String nextString = tok.nextToken();
+			String nextString = tok.nextTokenUnescapedAndSanitized();
 			if (nextString.equals(Constants.PARAM_HISTORY)) {
 				if (tok.hasMoreTokens()) {
-					String versionString = tok.nextToken();
+					String versionString = tok.nextTokenUnescapedAndSanitized();
 					if (id == null) {
 						throw new InvalidRequestException("Don't know how to handle request path: " + theRequestPath);
 					}
@@ -1290,7 +1290,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		String secondaryOperation = null;
 
 		while (tok.hasMoreTokens()) {
-			String nextString = tok.nextToken();
+			String nextString = tok.nextTokenUnescapedAndSanitized();
 			if (operation == null) {
 				operation = nextString;
 			} else if (secondaryOperation == null) {

@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Date;
 import java.util.List;
 
 /*
@@ -22,9 +21,9 @@ import java.util.List;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,20 +37,6 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
-	/**
-	 * Used in Smile CDR - Do not delete
-	 */
-	@SuppressWarnings("unused")
-	@Query("SELECT COUNT(*) FROM TermConcept t WHERE t.myUpdated > :cutoff")
-	long countUpdatedAfter(@Param("cutoff") Date theFullTextIndexedUntil);
-
-	/**
-	 * Used in Smile CDR - Do not delete
-	 */
-	@SuppressWarnings("unused")
-	@Query("SELECT t FROM TermConcept t ORDER BY t.myUpdated ASC")
-	Slice<TermConcept> findAllOrderedByLastUpdated(Pageable thePage);
-
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
 	TermConcept findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
 
@@ -63,13 +48,6 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
-
-	/**
-	 * Used in Smile CDR - Do not delete
-	 */
-	@SuppressWarnings("unused")
-	@Query("SELECT t FROM TermConcept t WHERE t.myUpdated > :cutoff ORDER BY t.myUpdated ASC")
-	Slice<TermConcept> findUpdatedAfterOrderedByLastUpdated(Pageable thePage, @Param("cutoff") Date theFullTextIndexedUntil);
 
 	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
 	@Modifying
