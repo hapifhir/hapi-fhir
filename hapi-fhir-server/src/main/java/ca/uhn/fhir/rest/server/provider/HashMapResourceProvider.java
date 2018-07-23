@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,9 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -29,13 +31,16 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * This class is a simple implementation of the resource provider
@@ -59,6 +64,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
 	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new HashMap<>();
+	protected Map<String, LinkedList<T>> myIdToHistory = new HashMap<>();
+	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	private long myNextId;
 	private AtomicLong myDeleteCount = new AtomicLong(0);
 	private AtomicLong mySearchCount = new AtomicLong(0);
@@ -86,6 +93,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public void clear() {
 		myNextId = 1;
 		myIdToVersionToResourceMap.clear();
+		myIdToHistory.clear();
+		myTypeHistory.clear();
 	}
 
 	/**
@@ -183,6 +192,21 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return myIdToVersionToResourceMap.get(theIdPart);
 	}
 
+	@History
+	public List<T> historyInstance(@IdParam IIdType theId) {
+		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
+		if (retVal == null) {
+			throw new ResourceNotFoundException(theId);
+		}
+
+		return retVal;
+	}
+
+	@History
+	public List<T> historyType() {
+		return myTypeHistory;
+	}
+
 	@Read(version = true)
 	public IBaseResource read(@IdParam IIdType theId) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
@@ -252,16 +276,52 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart) {
 		IIdType id = myFhirContext.getVersion().newIdType();
-		id.setParts(null, myResourceName, theIdPart, Long.toString(theVersionIdPart));
+		String versionIdPart = Long.toString(theVersionIdPart);
+		id.setParts(null, myResourceName, theIdPart, versionIdPart);
 		if (theResource != null) {
 			theResource.setId(id);
 		}
 
-		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
-		versionToResource.put(theVersionIdPart, theResource);
+		/*
+		 * This is a bit of magic to make sure that the versionId attribute
+		 * in the resource being stored accurately represents the version
+		 * that was assigned by this provider
+		 */
+		if (theResource != null) {
+			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+				ResourceMetadataKeyEnum.VERSION.put((IResource) theResource, versionIdPart);
+			} else {
+				BaseRuntimeChildDefinition metaChild = myFhirContext.getResourceDefinition(myResourceType).getChildByName("meta");
+				List<IBase> metaValues = metaChild.getAccessor().getValues(theResource);
+				if (metaValues.size() > 0) {
+					IBase meta = metaValues.get(0);
+					BaseRuntimeElementCompositeDefinition<?> metaDef = (BaseRuntimeElementCompositeDefinition<?>) myFhirContext.getElementDefinition(meta.getClass());
+					BaseRuntimeChildDefinition versionIdDef = metaDef.getChildByName("versionId");
+					List<IBase> versionIdValues = versionIdDef.getAccessor().getValues(meta);
+					if (versionIdValues.size() > 0) {
+						IPrimitiveType<?> versionId = (IPrimitiveType<?>) versionIdValues.get(0);
+						versionId.setValueAsString(versionIdPart);
+					}
+				}
+			}
+		}
 
 		ourLog.info("Storing resource with ID: {}", id.getValue());
 
+		// Store to ID->version->resource map
+		TreeMap<Long, T> versionToResource = getVersionToResource(theIdPart);
+		versionToResource.put(theVersionIdPart, theResource);
+
+		// Store to type history map
+		myTypeHistory.addFirst(theResource);
+
+		// Store to ID history map
+		if (!myIdToHistory.containsKey(theIdPart)) {
+			myIdToHistory.put(theIdPart, new LinkedList<>());
+		}
+		myIdToHistory.get(theIdPart).addFirst(theResource);
+
+		// Return the newly assigned ID including the version ID
 		return id;
 	}
 

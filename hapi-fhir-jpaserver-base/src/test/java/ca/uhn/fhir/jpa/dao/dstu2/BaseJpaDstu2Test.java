@@ -62,6 +62,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("mySearchParameterDaoDstu2")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
+	@Qualifier("myCommunicationDaoDstu2")
+	protected IFhirResourceDao<Communication> myCommunicationDao;
+	@Autowired
 	@Qualifier("myBundleDaoDstu2")
 	protected IFhirResourceDao<Bundle> myBundleDao;
 	@Autowired

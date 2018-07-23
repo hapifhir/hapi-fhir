@@ -47,8 +47,8 @@ public class SearchParameter extends BaseQueryParameter {
 	static final String QUALIFIER_ANY_TYPE = ":*";
 
 	static {
-		ourParamTypes = new HashMap<Class<?>, RestSearchParameterTypeEnum>();
-		ourParamQualifiers = new HashMap<RestSearchParameterTypeEnum, Set<String>>();
+		ourParamTypes = new HashMap<>();
+		ourParamQualifiers = new HashMap<>();
 
 		ourParamTypes.put(StringParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringOrListParam.class, RestSearchParameterTypeEnum.STRING);
@@ -124,7 +124,7 @@ public class SearchParameter extends BaseQueryParameter {
 	 */
 	@Override
 	public List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException {
-		ArrayList<QualifiedParamList> retVal = new ArrayList<QualifiedParamList>();
+		ArrayList<QualifiedParamList> retVal = new ArrayList<>();
 
 		// TODO: declaring method should probably have a generic type..
 		@SuppressWarnings("rawtypes")
@@ -197,7 +197,7 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 
 	public void setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {
-		myQualifierWhitelist = new HashSet<String>(theChainWhitelist.length);
+		myQualifierWhitelist = new HashSet<>(theChainWhitelist.length);
 		myQualifierWhitelist.add(QUALIFIER_ANY_TYPE);
 
 		for (int i = 0; i < theChainWhitelist.length; i++) {
@@ -211,7 +211,7 @@ public class SearchParameter extends BaseQueryParameter {
 		}
 
 		if (theChainBlacklist.length > 0) {
-			myQualifierBlacklist = new HashSet<String>(theChainBlacklist.length);
+			myQualifierBlacklist = new HashSet<>(theChainBlacklist.length);
 			for (String next : theChainBlacklist) {
 				if (next.equals(EMPTY_STRING)) {
 					myQualifierBlacklist.add(EMPTY_STRING);
@@ -282,7 +282,7 @@ public class SearchParameter extends BaseQueryParameter {
 			Set<String> builtInQualifiers = ourParamQualifiers.get(typeEnum);
 			if (builtInQualifiers != null) {
 				if (myQualifierWhitelist != null) {
-					HashSet<String> qualifierWhitelist = new HashSet<String>();
+					HashSet<String> qualifierWhitelist = new HashSet<>();
 					qualifierWhitelist.addAll(myQualifierWhitelist);
 					qualifierWhitelist.addAll(builtInQualifiers);
 					myQualifierWhitelist = qualifierWhitelist;

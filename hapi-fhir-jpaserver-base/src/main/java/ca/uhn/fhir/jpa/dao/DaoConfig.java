@@ -20,9 +20,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -144,6 +144,7 @@ public class DaoConfig {
 	private boolean myExpungeEnabled;
 	private int myReindexThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
+	private boolean myValidateSearchParameterExpressionsOnSave = true;
 
 	/**
 	 * Constructor
@@ -786,7 +787,6 @@ public class DaoConfig {
 		this.myAllowContainsSearches = theAllowContainsSearches;
 	}
 
-
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
 	 * resources to have references to external servers. For example if this server is
@@ -1186,6 +1186,34 @@ public class DaoConfig {
 	 */
 	public void setUniqueIndexesEnabled(boolean theUniqueIndexesEnabled) {
 		myUniqueIndexesEnabled = theUniqueIndexesEnabled;
+	}
+
+	/**
+	 * If <code>true</code> (default is <code>true</code>), before allowing a
+	 * SearchParameter resource to be stored (create, update, etc.) the
+	 * expression will be performed against an empty resource to ensure that
+	 * the FHIRPath executor is able to process it.
+	 * <p>
+	 * This should proabably always be set to true, but is configurable
+	 * in order to support some unit tests.
+	 * </p>
+	 */
+	public boolean isValidateSearchParameterExpressionsOnSave() {
+		return myValidateSearchParameterExpressionsOnSave;
+	}
+
+	/**
+	 * If <code>true</code> (default is <code>true</code>), before allowing a
+	 * SearchParameter resource to be stored (create, update, etc.) the
+	 * expression will be performed against an empty resource to ensure that
+	 * the FHIRPath executor is able to process it.
+	 * <p>
+	 * This should proabably always be set to true, but is configurable
+	 * in order to support some unit tests.
+	 * </p>
+	 */
+	public void setValidateSearchParameterExpressionsOnSave(boolean theValidateSearchParameterExpressionsOnSave) {
+		myValidateSearchParameterExpressionsOnSave = theValidateSearchParameterExpressionsOnSave;
 	}
 
 	/**

@@ -1,13 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,10 +80,10 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 		FhirContext context = getContext();
 		Enum<?> type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
+		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context, getConfig());
 	}
 
-	public static void validateSearchParam(Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext) {
+	public static void validateSearchParam(Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
 		if (theStatus == null) {
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
@@ -116,6 +120,17 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
 				}
 
+				if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+					if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
+						IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
+						try {
+							theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
+						} catch (Exception e) {
+							String msg = theContext.getLocalizer().getMessage(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
+							throw new UnprocessableEntityException(msg);
+						}
+					}
+				}
 			}
 
 		} // if have expression

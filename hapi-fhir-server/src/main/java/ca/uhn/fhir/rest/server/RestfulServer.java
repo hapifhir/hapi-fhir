@@ -122,7 +122,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	private String myServerVersion = createPoweredByHeaderProductVersion();
 	private boolean myStarted;
-	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<>();
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
@@ -376,7 +375,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		try {
 			count += findResourceMethods(theProvider, clazz);
 		} catch (ConfigurationException e) {
-			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage());
+			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
 		if (count == 0) {
 			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
@@ -1365,14 +1364,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 						throw new NullPointerException("getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
 					}
 					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
-					if (myTypeToProvider.containsKey(resourceName)) {
-						throw new ConfigurationException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName()
-							+ "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
-					}
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
 					}
-					myTypeToProvider.put(resourceName, rsrcProvider);
 					providedResourceScanner.scanForProvidedResources(rsrcProvider);
 					newResourceProviders.add(rsrcProvider);
 				} else {
@@ -1384,7 +1378,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			}
 			if (!newResourceProviders.isEmpty()) {
-				ourLog.info("Added {} resource provider(s). Total {}", newResourceProviders.size(), myTypeToProvider.size());
+				ourLog.info("Added {} resource provider(s). Total {}", newResourceProviders.size(), myResourceProviders.size());
 				for (IResourceProvider provider : newResourceProviders) {
 					assertProviderIsValid(provider);
 					findResourceMethods(provider);
@@ -1594,7 +1588,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					IResourceProvider rsrcProvider = (IResourceProvider) provider;
 					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
 					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
-					myTypeToProvider.remove(resourceName);
 					providedResourceScanner.removeProvidedResources(rsrcProvider);
 				} else {
 					myPlainProviders.remove(provider);

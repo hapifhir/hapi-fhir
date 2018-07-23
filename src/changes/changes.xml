@@ -86,7 +86,7 @@
 				Resource loading logic for the JPA server has been optimized to
 				reduce the number of database round trips required when loading
 				search results where many of the entries have a "forced ID" (an alphanumeric
-				client-assigned reosurce ID). Thanks to Frank Tao for the pull
+				client-assigned resource ID). Thanks to Frank Tao for the pull
 				request!
 			</action>
 			<action type="add">
@@ -149,6 +149,39 @@
 				names to escape several reserved characters (e.g. &quot; and &lt;)
 				in order to prevent HTML injection attacks via maliciously
 				crafted URLs.
+			</action>
+			<action type="add">
+				The REST Server module now allows more than one Resource Provider
+				(i.e. more than one implementation of IResourceProvider) to be registered
+				to the RestfulServer for the same resource type. Previous versions of
+				HAPI FHIR have always limited support to a single resource provider, but
+				this limitation did not serve any purpose so it has been removed.
+			</action>
+			<action type="add">
+				The HashMapResourceProvider now supports the type and
+				instance history operations.
+			</action>
+			<action type="fix">
+				Fixed a bug when creating a custom search parameter in the JPA
+				server: if the	SearchParameter resource contained an invalid
+				expression, create/update operations for the given resource would
+				fail with a cryptic error. SearchParameter expressions are now
+				validated upon storage, and the SearchParameter will be rejected
+				if the expression can not be processed.
+			</action>
+			<action type="add">
+				The generic client history operations (history-instance, history-type,
+				and history-server) now support the
+				<![CDATA[<code>_at</code>]]> parameter.
+			</action>
+			<action type="add">
+				In the plain server, many resource provider method parameters may now
+				use a generic
+				<![CDATA[<code>IPrimitiveType&lt;String&gt;</code>]]>
+				or
+				<![CDATA[<code>IPrimitiveType&lt;Date&gt;</code>]]> at the
+				parameter type. This is handy if you are trying to write code
+				that works across versions of FHIR.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
