@@ -237,8 +237,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public List<IBaseResource> search(
-		@OptionalParam(name = "_id") TokenAndListParam theIds) {
+	public List<IBaseResource> searchById(
+		@RequiredParam(name = "_id") TokenAndListParam theIds) {
 
 		List<IBaseResource> retVal = new ArrayList<>();
 

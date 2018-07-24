@@ -108,7 +108,7 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
-		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
+		retVal.setCacheMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		return retVal;
 	}
 

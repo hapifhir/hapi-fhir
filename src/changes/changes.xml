@@ -159,7 +159,12 @@
 			</action>
 			<action type="add">
 				The HashMapResourceProvider now supports the type and
-				instance history operations.
+				instance history operations. In addition, the search method
+				for the
+				<![CDATA[<code>_id</code>]]> search parameter now has the
+				search parameter marked as "required". This means that additional
+				search methods can be added in subclasses without their intended
+				searches being routed to the searchById method.
 			</action>
 			<action type="fix">
 				Fixed a bug when creating a custom search parameter in the JPA
@@ -182,6 +187,25 @@
 				<![CDATA[<code>IPrimitiveType&lt;Date&gt;</code>]]> at the
 				parameter type. This is handy if you are trying to write code
 				that works across versions of FHIR.
+			</action>
+			<action type="add">
+				Several convenience methods have been added to the fluent/generic
+				client interfaces. These methods allow the adding of a sort via a
+				SortSpec object, as well as specifying search parameters via a plain
+				Map of Strings.
+			</action>
+			<action type="add">
+				A new client interceptor called ThreadLocalCapturingInterceptor has been
+				added. This interceptor works the same way as CapturingInterceptor in that
+				it captures requests and responses for later processing, but it uses
+				a ThreadLocal object to store them in order to facilitate
+				use in multithreaded environments.
+			</action>
+			<action type="add">
+				A new constructor has been added to the client BasicAuthInterceptor
+				allowing credentials to be specified in the form
+				"username:password" as an alternate to specifying them as two
+				discrete strings.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">

@@ -10,9 +10,7 @@ import ca.uhn.fhir.parser.CustomTypeR4Test;
 import ca.uhn.fhir.parser.CustomTypeR4Test.MyCustomPatient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -1811,6 +1809,44 @@ public class GenericClientR4Test {
 		idx++;
 	}
 
+	@Test
+	public void testSearchWithParameterMap() throws Exception {
+
+		final Bundle resp1 = new Bundle();
+		resp1.setTotal(0);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
+			@Override
+			public Header[] answer(InvocationOnMock theInvocation) {
+				return new Header[0];
+			}
+		});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> {
+			IParser p = ourCtx.newXmlParser();
+			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Map<String, List<String>> rawMap = new HashMap<>();
+		rawMap.put("param1", Arrays.asList("val1a,val1b", "<html>"));
+
+		Bundle outcome = client
+			.search()
+			.forResource(Patient.class)
+			.whereMap(rawMap)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, outcome.getTotal());
+		assertEquals("http://example.com/fhir/Patient?param1=val1a%2Cval1b&param1=%3Chtml%3E", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals("http://example.com/fhir/Patient?param1=val1a,val1b&param1=<html>", UrlUtil.unescape(capt.getAllValues().get(0).getURI().toASCIIString()));
+	}
+
 	/**
 	 * See #371
 	 */
@@ -1862,6 +1898,50 @@ public class GenericClientR4Test {
 			.execute();
 		assertEquals("http://example.com/fhir/Patient?_sort=-address%2Cname%2C-birthdate", capt.getAllValues().get(idx++).getURI().toASCIIString());
 
+	}
+
+	@Test
+	public void testSortUsingSortSpec() throws Exception {
+
+		final Bundle resp1 = new Bundle();
+		resp1.setTotal(0);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
+			@Override
+			public Header[] answer(InvocationOnMock theInvocation) {
+				return new Header[0];
+			}
+		});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> {
+			IParser p = ourCtx.newXmlParser();
+			return new ReaderInputStream(new StringReader(p.encodeResourceToString(resp1)), Charset.forName("UTF-8"));
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		SortSpec sortSpec = new SortSpec();
+		sortSpec.setParamName("BDESC");
+		sortSpec.setOrder(SortOrderEnum.DESC);
+		sortSpec.setChain(new SortSpec());
+		sortSpec.getChain().setParamName("CASC");
+		sortSpec.getChain().setOrder(SortOrderEnum.ASC);
+
+		Bundle outcome = client
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.sort().ascending("AASC")
+			.sort(sortSpec)
+			.sort().defaultOrder("DDEF")
+			.execute();
+
+		assertEquals(0, outcome.getTotal());
+		assertEquals("http://example.com/fhir/Patient?_sort=AASC%2C-BDESC%2CCASC%2CDDEF", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals("http://example.com/fhir/Patient?_sort=AASC,-BDESC,CASC,DDEF", UrlUtil.unescape(capt.getAllValues().get(0).getURI().toASCIIString()));
 	}
 
 	@Test

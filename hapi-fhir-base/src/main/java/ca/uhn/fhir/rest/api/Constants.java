@@ -189,9 +189,11 @@ public class Constants {
 	public static final String HEADER_X_CACHE = "X-Cache";
 	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
 	public static final String POWERED_BY_HEADER = "X-Powered-By";
+	public static final Charset CHARSET_US_ASCII;
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
+		CHARSET_US_ASCII = Charset.forName("ISO-8859-1");
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
 		statusNames.put(200, "OK");
