@@ -20,7 +20,10 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.annotation.*;
@@ -40,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * This class is a simple implementation of the resource provider
@@ -233,6 +235,21 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		myReadCount.incrementAndGet();
 
+		return retVal;
+	}
+
+	@Search
+	public List<IBaseResource> searchAll() {
+		List<IBaseResource> retVal = new ArrayList<>();
+
+		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
+			if (next.isEmpty() == false) {
+				T nextResource = next.lastEntry().getValue();
+				retVal.add(nextResource);
+			}
+		}
+
+		mySearchCount.incrementAndGet();
 		return retVal;
 	}
 

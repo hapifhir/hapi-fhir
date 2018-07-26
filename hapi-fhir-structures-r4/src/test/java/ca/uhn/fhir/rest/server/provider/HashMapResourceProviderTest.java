@@ -202,7 +202,11 @@ public class HashMapResourceProviderTest {
 		}
 
 		// Search
-		Bundle resp = ourClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle resp = ourClient
+			.search()
+			.forResource("Patient")
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(100, resp.getTotal());
 		assertEquals(100, resp.getEntry().size());
 

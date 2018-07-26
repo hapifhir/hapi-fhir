@@ -28,10 +28,7 @@ import ca.uhn.fhir.util.StopWatch;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A Http Request based on JaxRs. This is an adapter around the class
@@ -41,7 +38,7 @@ import java.util.Map;
  */
 public class JaxRsHttpRequest implements IHttpRequest {
 
-	private final Map<String, List<String>> myHeaders = new HashMap<String, List<String>>();
+	private final Map<String, List<String>> myHeaders = new HashMap<>();
 	private Invocation.Builder myRequest;
 	private RequestTypeEnum myRequestType;
 	private Entity<?> myEntity;
@@ -55,7 +52,7 @@ public class JaxRsHttpRequest implements IHttpRequest {
 	@Override
 	public void addHeader(String theName, String theValue) {
 		if (!myHeaders.containsKey(theName)) {
-			myHeaders.put(theName, new LinkedList<String>());
+			myHeaders.put(theName, new LinkedList<>());
 		}
 		myHeaders.get(theName).add(theValue);
 		getRequest().header(theName, theValue);
@@ -71,7 +68,7 @@ public class JaxRsHttpRequest implements IHttpRequest {
 
 	@Override
 	public Map<String, List<String>> getAllHeaders() {
-		return this.myHeaders;
+		return Collections.unmodifiableMap(this.myHeaders);
 	}
 
 	/**

@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
@@ -150,36 +151,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 				.setIfNoneExist("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2017-09-03T11:13:00-04:00");
 		}
 		return input;
-	}
-
-	@Test
-	public void testTransactionUpdateTwoResourcesWithSameId() {
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("DDD");
-		p.setId("Patient/ABC");
-		request.addEntry()
-			.setResource(p)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient/ABC");
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("DDD");
-		p.setId("Patient/ABC");
-		request.addEntry()
-			.setResource(p)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient/ABC");
-
-		try {
-			mySystemDao.transaction(mySrd, request);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Transaction bundle contains multiple resources with ID: Patient/ABC"));
-		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -468,6 +439,17 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
+	}
+
+	/**
+	 * See #1044
+	 */
+	@Test
+	public void testStructureDefinitionInBundle() throws IOException {
+		String input = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream("/bug1044-bundle.xml"), Charsets.UTF_8);
+		Bundle inputBundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+
+		mySystemDao.transaction(mySrd, inputBundle);
 	}
 
 	@Test
@@ -2254,6 +2236,36 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		o = myObservationDao.read(new IdType(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 
+	}
+
+	@Test
+	public void testTransactionUpdateTwoResourcesWithSameId() {
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("DDD");
+		p.setId("Patient/ABC");
+		request.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/ABC");
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("DDD");
+		p.setId("Patient/ABC");
+		request.addEntry()
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/ABC");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Transaction bundle contains multiple resources with ID: Patient/ABC"));
+		}
 	}
 
 	@Test
