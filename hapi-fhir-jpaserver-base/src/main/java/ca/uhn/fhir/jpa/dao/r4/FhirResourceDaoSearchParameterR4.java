@@ -127,7 +127,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 							theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
 						} catch (Exception e) {
 							String msg = theContext.getLocalizer().getMessage(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-							throw new UnprocessableEntityException(msg);
+							throw new UnprocessableEntityException(msg, e);
 						}
 					}
 				}
