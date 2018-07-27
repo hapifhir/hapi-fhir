@@ -20,9 +20,29 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -32,18 +52,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
@@ -183,13 +191,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	private Object returnResponse(IRestfulServer<?> theServer, RequestDetails theRequest, MethodOutcome response, IBaseResource originalOutcome, IBaseResource resource) throws IOException {
 		boolean allowPrefer = false;
 		int operationStatus = getOperationStatus(response);
-		IBaseResource outcome = resource;
+		IBaseResource outcome = originalOutcome;
 
 		if (ourOperationsWhichAllowPreferHeader.contains(getRestOperationType())) {
 			allowPrefer = true;
 		}
 
 		if (allowPrefer) {
+			outcome = resource;
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
 			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
 			if (preferReturn != null) {
@@ -201,7 +210,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 						outcome = originalOutcome;
 					}
 				}				
-			}
+			} 
 		}
 
 		ResponseDetails responseDetails = new ResponseDetails();
