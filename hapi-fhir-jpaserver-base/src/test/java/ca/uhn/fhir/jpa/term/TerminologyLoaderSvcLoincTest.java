@@ -13,12 +13,13 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,9 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -92,7 +94,6 @@ public class TerminologyLoaderSvcLoincTest {
 	@Test
 	public void testLoadLoinc() throws Exception {
 		addLoincMandatoryFilesToZip(myFiles);
-		addLoincOptionalFilesToZip(myFiles);
 
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), details);
@@ -115,6 +116,13 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
 		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
 		assertEquals("R' wave amplitude in lead I", code.getDisplay());
+
+		// Code with component that has a divisor
+		code = concepts.get("17788-1");
+		assertEquals("17788-1", code.getCode());
+		assertEquals(1, code.getCodingProperties("COMPONENT").size());
+		assertEquals("http://loinc.org", code.getCodingProperties("COMPONENT").get(0).getSystem());
+		assertEquals("LP19258-0", code.getCodingProperties("COMPONENT").get(0).getCode());
 
 		// Loinc code with answer
 		code = concepts.get("61438-8");
@@ -221,9 +229,9 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("NM", code.getCodingProperties(propertyName).get(0).getDisplay());
 
 		// RSNA Playbook - LOINC Part -> RadLex RID Mappings
-		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RID_MAPPING_CM_ID);
-		assertEquals(LoincRsnaPlaybookHandler.RID_MAPPING_CM_URI, conceptMap.getUrl());
-		assertEquals(LoincRsnaPlaybookHandler.RID_MAPPING_CM_NAME, conceptMap.getName());
+		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID);
+		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
@@ -237,9 +245,9 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, group.getElement().get(0).getTarget().get(0).getEquivalence());
 
 		// RSNA Playbook - LOINC Term -> RadLex RPID Mappings
-		conceptMap = conceptMaps.get(LoincRsnaPlaybookHandler.RPID_MAPPING_CM_ID);
-		assertEquals(LoincRsnaPlaybookHandler.RPID_MAPPING_CM_URI, conceptMap.getUrl());
-		assertEquals(LoincRsnaPlaybookHandler.RPID_MAPPING_CM_NAME, conceptMap.getName());
+		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID);
+		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI, conceptMap.getUrl());
+		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME, conceptMap.getName());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
@@ -286,7 +294,7 @@ public class TerminologyLoaderSvcLoincTest {
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
-		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
 		assertEquals(1, conceptMap.getGroup().size());
@@ -308,9 +316,29 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("11525-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("US Pelvis Fetus for pregnancy", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+
+		// Group - Parent
+		vs = valueSets.get("LG100-4");
+		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		assertEquals("Chem_DrugTox_Chal_Sero_Allergy<SAME:Comp|Prop|Tm|Syst (except intravascular and urine)><ANYBldSerPlas,ANYUrineUrineSed><ROLLUP:Method>", vs.getName());
+		assertEquals("http://loinc.org/vs/LG100-4", vs.getUrl());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(1, vs.getCompose().getInclude().get(0).getValueSet().size());
+		assertEquals("http://loinc.org/vs/LG1695-8", vs.getCompose().getInclude().get(0).getValueSet().get(0).getValueAsString());
+
+		// Group - Child
+		vs = valueSets.get("LG1695-8");
+		ourLog.info(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		assertEquals("1,4-Dichlorobenzene|MCnc|Pt|ANYBldSerPl", vs.getName());
+		assertEquals("http://loinc.org/vs/LG1695-8", vs.getUrl());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(2, vs.getCompose().getInclude().get(0).getConcept().size());
+		assertEquals("17424-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
+		assertEquals("13006-2", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
 	}
 
 	@Test
+	@Ignore
 	public void testLoadLoincMandatoryFilesOnly() throws IOException {
 		addLoincMandatoryFilesToZip(myFiles);
 
@@ -334,26 +362,29 @@ public class TerminologyLoaderSvcLoincTest {
 
 	@Test
 	public void testLoadLoincMissingMandatoryFiles() throws IOException {
-		addLoincOptionalFilesToZip(myFiles);
+		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
+		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
 
 		// Actually do the load
 		try {
 			mySvc.loadLoinc(myFiles.getFiles(), details);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find the following mandatory files in input: [loinc.csv, MULTI-AXIAL_HIERARCHY.CSV]", e.getMessage());
+			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));
+			assertThat(e.getMessage(), containsString("Loinc.csv"));
+			assertThat(e.getMessage(), containsString("MultiAxialHierarchy.csv"));
 		}
 	}
 
 
-	static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", "loinc.csv", TerminologyLoaderSvcImpl.LOINC_FILE);
-		theFiles.addFileZip("/loinc/", "hierarchy.csv", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
-	}
-
-	static void addLoincOptionalFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", "loincupload.properties");
-		theFiles.addFileZip("/loinc/", "AnswerList_Beta_1.csv", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
+	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_FILE, TerminologyLoaderSvcImpl.LOINC_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
@@ -363,13 +394,8 @@ public class TerminologyLoaderSvcLoincTest {
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV);
 		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IMAGING_DOCUMENT_CODES_FILE);
-
-		/*
-		 * Top 2000 files have versions in the filename so don't use the
-		 * constant.. that way this is a better test
-		 */
-		theFiles.addFilePlain("/loinc/", "LOINC_1.6_Top2000CommonLabResultsSI.csv");
-		theFiles.addFilePlain("/loinc/", "LOINC_1.6_Top2000CommonLabResultsUS.csv");
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
+		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
 	}
 
 	@AfterClass

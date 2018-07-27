@@ -61,6 +61,7 @@ import com.google.common.base.Charsets;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -115,6 +116,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -124,6 +126,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -162,11 +165,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
-	private void checkParamMissing(String paramName) throws IOException, ClientProtocolException {
+	private void checkParamMissing(String paramName) throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		IOUtils.closeQuietly(resp.getEntity().getContent());
-		assertEquals(200, resp.getStatusLine().getStatusCode());
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
 	}
 
 	/**
@@ -261,7 +264,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testCountParam() throws Exception {
+	public void testCountParam() {
 		// NB this does not get used- The paging provider has its own limits built in
 		myDaoConfig.setHardSearchLimit(100);
 
@@ -299,7 +302,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See #438
 	 */
 	@Test
-	public void testCreateAndUpdateBinary() throws ClientProtocolException, Exception {
+	public void testCreateAndUpdateBinary() throws Exception {
 		byte[] arr = {1, 21, 74, 123, -44};
 		Binary binary = new Binary();
 		binary.setContent(arr);
@@ -364,7 +367,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
+	public void testCreateQuestionnaireResponseWithValidation() {
 		ValueSet options = new ValueSet();
 		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
 		IIdType optId = ourClient.create().resource(options).execute().getId();
@@ -517,6 +520,27 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 	}
 
+	@Test
+	public void testCreateResourceWithNumericId() throws IOException {
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/2");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
+				oo.getIssue().get(0).getDiagnostics());
+		} finally {
+			response.getEntity().getContent().close();
+			response.close();
+		}
+	}
+
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
 	// Bundle resources;
 	// do {
@@ -543,28 +567,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	// }
 
 	@Test
-	public void testCreateResourceWithNumericId() throws IOException {
-		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/2");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseString);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
-				oo.getIssue().get(0).getDiagnostics());
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
-		}
-	}
-
-	@Test
-	public void testCreateWithForcedId() throws IOException {
+	public void testCreateWithForcedId() {
 		String methodName = "testCreateWithForcedId";
 
 		Patient p = new Patient();
@@ -726,7 +729,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * Based on email from Rene Spronk
 	 */
 	@Test
-	public void testDeleteResourceConditional2() throws IOException, Exception {
+	public void testDeleteResourceConditional2() throws Exception {
 		String methodName = "testDeleteResourceConditional2";
 
 		Patient pt = new Patient();
@@ -793,7 +796,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See issue #52
 	 */
 	@Test
-	public void testDiagnosticOrderResources() throws Exception {
+	public void testDiagnosticOrderResources() {
 		IGenericClient client = ourClient;
 
 		int initialSize = client
@@ -885,7 +888,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testEverythingEncounterInstance() throws Exception {
+	public void testEverythingEncounterInstance() {
 		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
@@ -949,7 +952,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testEverythingEncounterType() throws Exception {
+	public void testEverythingEncounterType() {
 		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
@@ -1049,7 +1052,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		List<IIdType> actual;
 		StringAndListParam param;
 
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -1072,7 +1075,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See #147
 	 */
 	@Test
-	public void testEverythingPatientDoesntRepeatPatient() throws Exception {
+	public void testEverythingPatientDoesntRepeatPatient() {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b;
 		b = myFhirCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
 
@@ -1131,7 +1134,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * Test for #226
 	 */
 	@Test
-	public void testEverythingPatientIncludesBackReferences() throws Exception {
+	public void testEverythingPatientIncludesBackReferences() {
 		String methodName = "testEverythingIncludesBackReferences";
 
 		Medication med = new Medication();
@@ -1158,7 +1161,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See #148
 	 */
 	@Test
-	public void testEverythingPatientIncludesCondition() throws Exception {
+	public void testEverythingPatientIncludesCondition() {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		Patient p = new Patient();
 		p.setId("1");
@@ -1190,7 +1193,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testEverythingPatientOperation() throws Exception {
+	public void testEverythingPatientOperation() {
 		String methodName = "testEverythingOperation";
 
 		Organization org1parent = new Organization();
@@ -1235,7 +1238,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testEverythingPatientType() throws Exception {
+	public void testEverythingPatientType() {
 		String methodName = "testEverythingPatientType";
 
 		Organization o1 = new Organization();
@@ -1549,7 +1552,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testMetaOperations() throws Exception {
+	public void testMetaOperations() {
 		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
@@ -1585,7 +1588,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			response.close();
 		}
 	}
-
 
 	@Test
 	public void testPagingOverEverythingSet() throws InterruptedException {
@@ -1641,7 +1643,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testPagingOverEverythingSetWithNoPagingProvider() throws InterruptedException {
+	public void testPagingOverEverythingSetWithNoPagingProvider() {
 		ourRestServer.setPagingProvider(null);
 
 		Patient p = new Patient();
@@ -1674,11 +1676,30 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
+	@Test
+	public void testProcessMessage() {
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleTypeEnum.MESSAGE);
+
+		Parameters parameters = new Parameters();
+		parameters.addParameter()
+			.setName("content")
+			.setResource(bundle);
+		try {
+			ourClient.operation().onType(MessageHeader.class).named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
+			fail();
+		} catch (NotImplementedOperationException e) {
+			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
+		}
+
+	}
+
 	/**
 	 * Test for issue #60
 	 */
 	@Test
-	public void testReadAllInstancesOfType() throws Exception {
+	public void testReadAllInstancesOfType() {
 		Patient pat;
 
 		pat = new Patient();
@@ -2058,7 +2079,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-	private void testSearchReturnsResults(String search) throws IOException, ClientProtocolException {
+	private void testSearchReturnsResults(String search) throws IOException {
 		int matches;
 		HttpGet get = new HttpGet(ourServerBase + search);
 		CloseableHttpResponse response = ourHttpClient.execute(get);
@@ -2099,7 +2120,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithInclude() throws Exception {
+	public void testSearchWithInclude() {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
 		IdDt orgId = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
@@ -2127,7 +2148,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test(expected = InvalidRequestException.class)
-	public void testSearchWithInvalidSort() throws Exception {
+	public void testSearchWithInvalidSort() {
 		Observation o = new Observation();
 		o.getCode().setText("testSearchWithInvalidSort");
 		myObservationDao.create(o, mySrd);
@@ -2140,7 +2161,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithMissing() throws Exception {
+	public void testSearchWithMissing() {
 		ourLog.info("Starting testSearchWithMissing");
 
 		String methodName = "testSearchWithMissing";
@@ -2384,7 +2405,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * Test for issue #60
 	 */
 	@Test
-	public void testStoreUtf8Characters() throws Exception {
+	public void testStoreUtf8Characters() {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
@@ -2438,7 +2459,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testUpdateInvalidUrl() throws IOException, Exception {
+	public void testUpdateInvalidUrl() throws Exception {
 		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
@@ -2460,7 +2481,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
+	public void testUpdateRejectsInvalidTypes() {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
@@ -2565,7 +2586,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testUpdateResourceWithPrefer() throws IOException, Exception {
+	public void testUpdateResourceWithPrefer() throws Exception {
 		String methodName = "testUpdateResourceWithPrefer";
 
 		Patient pt = new Patient();
@@ -2778,7 +2799,6 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));
-		;
 		patient.setBirthDate(new DateDt("2011-02-02"));
 
 		Parameters input = new Parameters();

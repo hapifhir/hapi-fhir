@@ -64,8 +64,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		super();
 	}
 
-	public SearchParamExtractorR4(FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+	public SearchParamExtractorR4(DaoConfig theDaoConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+		super(theDaoConfig, theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -77,7 +77,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
 
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}
@@ -86,7 +86,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}
@@ -104,7 +104,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<ResourceIndexedSearchParamDate>();
+		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -187,7 +187,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	public HashSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamNumber> retVal = new HashSet<ResourceIndexedSearchParamNumber>();
+		HashSet<ResourceIndexedSearchParamNumber> retVal = new HashSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -290,7 +290,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamQuantity> retVal = new HashSet<ResourceIndexedSearchParamQuantity>();
+		HashSet<ResourceIndexedSearchParamQuantity> retVal = new HashSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -354,7 +354,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<ResourceIndexedSearchParamString>();
+		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<>();
 
 		String resourceName = getContext().getResourceDefinition(theResource).getName();
 
@@ -397,7 +397,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					addSearchTerm(theEntity, retVal, nextSpName, searchTerm);
 				} else {
 					if (nextObject instanceof HumanName) {
-						ArrayList<StringType> allNames = new ArrayList<StringType>();
+						ArrayList<StringType> allNames = new ArrayList<>();
 						HumanName nextHumanName = (HumanName) nextObject;
 						if (isNotBlank(nextHumanName.getFamily())) {
 							allNames.add(nextHumanName.getFamilyElement());
@@ -407,7 +407,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 							addSearchTerm(theEntity, retVal, nextSpName, nextName.getValue());
 						}
 					} else if (nextObject instanceof Address) {
-						ArrayList<StringType> allNames = new ArrayList<StringType>();
+						ArrayList<StringType> allNames = new ArrayList<>();
 						Address nextAddress = (Address) nextObject;
 						allNames.addAll(nextAddress.getLine());
 						allNames.add(nextAddress.getCityElement());
@@ -573,7 +573,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 			assert systems.size() == codes.size() : "Systems contains " + systems + ", codes contains: " + codes;
 
-			Set<Pair<String, String>> haveValues = new HashSet<Pair<String, String>>();
+			Set<Pair<String, String>> haveValues = new HashSet<>();
 			for (int i = 0; i < systems.size(); i++) {
 				String system = systems.get(i);
 				String code = codes.get(i);
@@ -608,7 +608,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	@Override
 	public Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamUri> retVal = new HashSet<ResourceIndexedSearchParamUri>();
+		HashSet<ResourceIndexedSearchParamUri> retVal = new HashSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -690,7 +690,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		IWorkerContext worker = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
 		FHIRPathEngine fp = new FHIRPathEngine(worker);
 
-		List<Object> values = new ArrayList<Object>();
+		List<Object> values = new ArrayList<>();
 		try {
 			String[] nextPathsSplit = SPLIT.split(thePaths);
 			for (String nextPath : nextPathsSplit) {
@@ -717,7 +717,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	@Override
 	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
-		ArrayList<PathAndRef> retVal = new ArrayList<PathAndRef>();
+		ArrayList<PathAndRef> retVal = new ArrayList<>();
 
 		String[] nextPathsSplit = SPLIT.split(theNextSpDef.getPath());
 		for (String path : nextPathsSplit) {

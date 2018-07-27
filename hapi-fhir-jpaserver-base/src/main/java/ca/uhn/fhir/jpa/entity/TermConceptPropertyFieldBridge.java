@@ -21,18 +21,22 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
 import org.hibernate.search.bridge.StringBridge;
 
 import java.util.Collection;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Allows hibernate search to index individual concepts' properties
  */
 public class TermConceptPropertyFieldBridge implements FieldBridge, StringBridge {
 
-	public static final String PROP_PREFIX = "PROP__";
+	public static final String CONCEPT_FIELD_PROPERTY_PREFIX = "PROP";
 
 	/**
 	 * Constructor
@@ -48,15 +52,17 @@ public class TermConceptPropertyFieldBridge implements FieldBridge, StringBridge
 
 	@Override
 	public void set(String theName, Object theValue, Document theDocument, LuceneOptions theLuceneOptions) {
+		@SuppressWarnings("unchecked")
 		Collection<TermConceptProperty> properties = (Collection<TermConceptProperty>) theValue;
+
 		if (properties != null) {
 			for (TermConceptProperty next : properties) {
-				String propValue = next.getKey() + "=" + next.getValue();
-				theLuceneOptions.addFieldToDocument(theName, propValue, theDocument);
+				theDocument.add(new StringField(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getValue(), Field.Store.YES));
 
 				if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
-					propValue = next.getKey() + "=" + next.getDisplay();
-					theLuceneOptions.addFieldToDocument(theName, propValue, theDocument);
+					if (isNotBlank(next.getDisplay())) {
+						theDocument.add(new StringField(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getDisplay(), Field.Store.YES));
+					}
 				}
 			}
 		}

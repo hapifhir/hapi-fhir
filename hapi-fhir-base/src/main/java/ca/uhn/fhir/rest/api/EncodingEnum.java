@@ -156,7 +156,12 @@ public enum EncodingEnum {
 	 * </p>
 	 */
 	public static EncodingEnum forContentType(String theContentType) {
-		return ourContentTypeToEncoding.get(theContentType);
+		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
+		if (contentTypeSplitted == null) {
+			return null;
+		} else {
+			return ourContentTypeToEncoding.get(contentTypeSplitted );
+		}
 	}
 
 
@@ -170,14 +175,33 @@ public enum EncodingEnum {
 	 * @see #forContentType(String)
 	 */
 	public static EncodingEnum forContentTypeStrict(String theContentType) {
-		return ourContentTypeToEncodingStrict.get(theContentType);
+		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
+		if (contentTypeSplitted == null) {
+			return null;
+		} else {
+			return ourContentTypeToEncodingStrict.get(contentTypeSplitted);
+		}
+	}
+
+	private static String getTypeWithoutCharset(String theContentType) {
+		if (theContentType == null) {
+			return null;
+		} else {
+			String[] contentTypeSplitted = theContentType.split(";");
+			return contentTypeSplitted[0];
+		}
 	}
 
 	/**
 	 * Is the given type a FHIR legacy (pre-DSTU3) content type?
 	 */
-	public static boolean isLegacy(String theFormat) {
-		return ourContentTypeToEncodingLegacy.containsKey(theFormat);
+	public static boolean isLegacy(String theContentType) {
+		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
+		if (contentTypeSplitted == null) {
+			return false;
+		} else {
+			return ourContentTypeToEncodingLegacy.containsKey(contentTypeSplitted);
+		}
 	}
 
 

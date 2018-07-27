@@ -28,9 +28,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -82,10 +79,17 @@ public class UploadTerminologyCommand extends BaseCommand {
 		IGenericClient client = super.newClient(theCommandLine);
 		IBaseParameters inputParameters;
 		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-			Parameters p = new Parameters();
-			p.addParameter().setName("url").setValue(new UriType(termUrl));
+			org.hl7.fhir.dstu3.model.Parameters p = new org.hl7.fhir.dstu3.model.Parameters();
+			p.addParameter().setName("url").setValue(new org.hl7.fhir.dstu3.model.UriType(termUrl));
 			for (String next : datafile) {
-				p.addParameter().setName("localfile").setValue(new StringType(next));
+				p.addParameter().setName("localfile").setValue(new org.hl7.fhir.dstu3.model.StringType(next));
+			}
+			inputParameters = p;
+		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
+			org.hl7.fhir.r4.model.Parameters p = new org.hl7.fhir.r4.model.Parameters();
+			p.addParameter().setName("url").setValue(new org.hl7.fhir.r4.model.UriType(termUrl));
+			for (String next : datafile) {
+				p.addParameter().setName("localfile").setValue(new org.hl7.fhir.r4.model.StringType(next));
 			}
 			inputParameters = p;
 		} else {

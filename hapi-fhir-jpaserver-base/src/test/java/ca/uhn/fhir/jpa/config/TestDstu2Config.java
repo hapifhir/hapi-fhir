@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -42,11 +43,6 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	private Exception myLastStackTrace;
 	private String myLastStackTraceThreadName;
-
-	@Bean(name="maxDatabaseThreadsForTest")
-	public Integer getMaxThread(){
-		return ourMaxThreads;
-	}
 
 	@Bean()
 	public DaoConfig daoConfig() {
@@ -131,6 +127,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
+	@Bean(name = "maxDatabaseThreadsForTest")
+	public Integer getMaxThread() {
+		return ourMaxThreads;
+	}
+
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "true");
@@ -163,6 +164,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
+	}
+
+	@Bean
+	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
+		return new UnregisterScheduledProcessor(theEnv);
 	}
 
 }

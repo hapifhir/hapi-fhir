@@ -7,15 +7,13 @@ import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.orm.hibernate5.HibernateExceptionTranslator;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
@@ -107,7 +105,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 			.countQuery(new ThreadQueryCountHolder())
 			.build();
@@ -161,6 +159,11 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
+	}
+
+	@Bean
+	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
+		return new UnregisterScheduledProcessor(theEnv);
 	}
 
 	public static int getMaxThreads() {

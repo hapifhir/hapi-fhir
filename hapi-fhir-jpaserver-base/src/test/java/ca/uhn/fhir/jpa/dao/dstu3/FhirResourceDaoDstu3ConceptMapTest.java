@@ -24,15 +24,31 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 	private IIdType myConceptMapId;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Before
 	@Transactional
 	public void before02() {
 		myConceptMapId = myConceptMapDao.create(createConceptMap(), mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Test
+	public void testDeleteConceptMap() {
+		myConceptMapDao.delete(myConceptMapId);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL)
+					.setCode("12345");
+				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+
+				TranslationResult translationResult = myConceptMapDao.translate(translationRequest, null);
+
+				assertFalse(translationResult.getResult().booleanValue());
+			}
+		});
+
 	}
 
 	@Test
@@ -80,5 +96,10 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				// </editor-fold>
 			}
 		});
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 }

@@ -331,7 +331,6 @@ public abstract class BaseJpaTest {
 		theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
 		theDaoConfig.setExpungeEnabled(expungeEnabled);
 
-		theSearchParamPresenceSvc.flushCachesForUnitTest();
 		theSearchParamRegistry.forceRefresh();
 	}
 

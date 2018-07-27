@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.model.*;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,33 +20,44 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.IntegerType;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.*;
 
 public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderDstu3Test.class);
 
-	private byte[] createLoincZip() throws IOException {
+	private static void addFile(ZipOutputStream theZos, String theFileName) throws IOException {
+		theZos.putNextEntry(new ZipEntry(theFileName));
+		theZos.write(IOUtils.toByteArray(TerminologyUploaderProviderDstu3Test.class.getResourceAsStream("/loinc/" + theFileName)));
+	}
+
+	public static byte[] createLoincZip() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
-		zos.putNextEntry(new ZipEntry("loinc.csv"));
-		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/loinc.csv")));
-		zos.putNextEntry(new ZipEntry("LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV"));
-		zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/loinc/LOINC_2.54_MULTI-AXIAL_HIERARCHY.CSV")));
+		addFile(zos, "loincupload.properties");
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_RSNA_PLAYBOOK_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_IMAGING_DOCUMENT_CODES_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
+		addFile(zos, TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
+
 		zos.close();
+
 
 		byte[] packageBytes = bos.toByteArray();
 		return packageBytes;
@@ -51,7 +67,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
-		List<String> inputNames = Arrays.asList("sct2_Concept_Full_INT_20160131.txt","sct2_Concept_Full-en_INT_20160131.txt","sct2_Description_Full-en_INT_20160131.txt","sct2_Identifier_Full_INT_20160131.txt","sct2_Relationship_Full_INT_20160131.txt","sct2_StatedRelationship_Full_INT_20160131.txt","sct2_TextDefinition_Full-en_INT_20160131.txt");
+		List<String> inputNames = Arrays.asList("sct2_Concept_Full_INT_20160131.txt", "sct2_Concept_Full-en_INT_20160131.txt", "sct2_Description_Full-en_INT_20160131.txt", "sct2_Identifier_Full_INT_20160131.txt", "sct2_Relationship_Full_INT_20160131.txt", "sct2_StatedRelationship_Full_INT_20160131.txt", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 		for (String nextName : inputNames) {
 			zos.putNextEntry(new ZipEntry("SnomedCT_Release_INT_20160131_Full/Terminology/" + nextName));
 			byte[] b = IOUtils.toByteArray(getClass().getResourceAsStream("/sct/" + nextName));
@@ -95,7 +111,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
 
 		/*
 		 * Try uploading a second time
@@ -150,7 +166,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void testUploadPackageMissingUrl() throws Exception {
+	public void testUploadPackageMissingUrl() {
 		try {
 			ourClient
 				.operation()
@@ -179,7 +195,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
 	}
 
 	@Test
@@ -205,7 +221,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType)respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
 	}
 
 	@AfterClass

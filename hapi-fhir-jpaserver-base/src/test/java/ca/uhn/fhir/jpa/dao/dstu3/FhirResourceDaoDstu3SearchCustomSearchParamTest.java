@@ -64,7 +64,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		}
 	}
 
-
 	@Test
 	public void testCreateInvalidParamNoPath() {
 		SearchParameter fooSp = new SearchParameter();
@@ -856,6 +855,49 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		IBundleProvider results = myMedicationStatementDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(results), contains(id1));
 
+	}
+
+	@Test
+	public void testSearchParameterDescendsIntoContainedResource() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Observation");
+		sp.setCode("specimencollectedtime");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setTitle("Observation Specimen Collected Time");
+		sp.setExpression("Observation.specimen.resolve().receivedTime");
+		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Specimen specimen = new Specimen();
+		specimen.setId("#FOO");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+		Observation o = new Observation();
+		o.setId("O1");
+		o.getContained().add(specimen);
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setSpecimen(new Reference("#FOO"));
+		myObservationDao.update(o);
+
+		specimen = new Specimen();
+		specimen.setId("#FOO");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-03"));
+		o = new Observation();
+		o.setId("O2");
+		o.getContained().add(specimen);
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setSpecimen(new Reference("#FOO"));
+		myObservationDao.update(o);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("specimencollectedtime", new DateParam("2011-01-01"));
+		IBundleProvider outcome = myObservationDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, contains("Observation/O1"));
 	}
 
 	@Test

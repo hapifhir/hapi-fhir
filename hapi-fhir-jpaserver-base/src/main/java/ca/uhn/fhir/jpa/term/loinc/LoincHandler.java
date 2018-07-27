@@ -39,6 +39,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincHandler implements IRecordHandler {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private final Map<String, CodeSystem.PropertyType> myPropertyNames;
@@ -86,7 +87,17 @@ public class LoincHandler implements IRecordHandler {
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
 							break;
 						case CODING:
-							PartTypeAndPartName key = new PartTypeAndPartName(nextPropertyName, nextPropertyValue);
+							// FIXME: handle "Ser/Plas^Donor"
+							String propertyValue = nextPropertyValue;
+							if (nextPropertyName.equals("COMPONENT")) {
+								if (propertyValue.contains("^")) {
+									propertyValue = propertyValue.substring(0, propertyValue.indexOf("^"));
+								} else if (propertyValue.contains("/")) {
+									propertyValue = propertyValue.substring(0, propertyValue.indexOf("/"));
+								}
+							}
+
+							PartTypeAndPartName key = new PartTypeAndPartName(nextPropertyName, propertyValue);
 							String partNumber = myPartTypeAndPartNameToPartNumber.get(key);
 
 							if (partNumber == null && nextPropertyName.equals("TIME_ASPCT")) {
@@ -106,11 +117,12 @@ public class LoincHandler implements IRecordHandler {
 								continue;
 							}
 
-//							Validate.notBlank(partNumber, "Unknown part: " + key);
 							if (isNotBlank(partNumber)) {
 								concept.addPropertyCoding(nextPropertyName, IHapiTerminologyLoaderSvc.LOINC_URI, partNumber, nextPropertyValue);
 							} else {
-								ourLog.warn("Unable to find part code with TYPE[{}] and NAME[{}]", key.getPartType(), key.getPartName());
+								String msg = "Unable to find part code with TYPE[" + key.getPartType() + "] and NAME[" + nextPropertyValue + "] (using name " + propertyValue + ")";
+								ourLog.warn(msg);
+//								throw new InternalErrorException(msg);
 							}
 							break;
 						case DECIMAL:
@@ -129,5 +141,4 @@ public class LoincHandler implements IRecordHandler {
 			myCode2Concept.put(code, concept);
 		}
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
 }

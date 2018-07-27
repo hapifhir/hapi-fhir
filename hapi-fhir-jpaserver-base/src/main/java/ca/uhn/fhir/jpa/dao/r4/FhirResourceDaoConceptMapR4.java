@@ -156,9 +156,12 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		ConceptMap conceptMap = (ConceptMap) theResource;
-
-		myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
+		if (retVal.getDeleted() == null) {
+			ConceptMap conceptMap = (ConceptMap) theResource;
+			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, conceptMap);
+		} else {
+			myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
+		}
 
 		return retVal;
 	}

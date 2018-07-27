@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -21,9 +23,15 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long> {
-	// nothing
+	@Query("" + 
+			   "SELECT t FROM ResourceTag t " + 
+			   "INNER JOIN TagDefinition td ON (td.myId = t.myTagId) " + 
+			   "WHERE t.myResourceId in (:pids)")
+	Collection<ResourceTag> findByResourceIds(@Param("pids") Collection<Long> pids);
 }

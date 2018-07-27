@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseHasResource {
+public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -42,7 +42,7 @@ public abstract class BaseHasResource {
 	@OptimisticLock(excluded = true)
 	private FhirVersionEnum myFhirVersion;
 
-	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false)
+	@OneToOne(optional = true, fetch = FetchType.LAZY, cascade = {}, orphanRemoval = false)
 	@JoinColumn(name = "FORCED_ID_PID")
 	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
@@ -63,6 +63,7 @@ public abstract class BaseHasResource {
 
 	public abstract BaseTag addTag(TagDefinition theDef);
 
+	@Override
 	public Date getDeleted() {
 		return myDeleted;
 	}
@@ -72,6 +73,7 @@ public abstract class BaseHasResource {
 	}
 
 
+	@Override
 	public FhirVersionEnum getFhirVersion() {
 		return myFhirVersion;
 	}
@@ -88,10 +90,13 @@ public abstract class BaseHasResource {
 		myForcedId = theForcedId;
 	}
 
+	@Override
 	public abstract Long getId();
 
+	@Override
 	public abstract IdDt getIdDt();
 
+	@Override
 	public InstantDt getPublished() {
 		if (myPublished != null) {
 			return new InstantDt(myPublished);
@@ -104,12 +109,15 @@ public abstract class BaseHasResource {
 		myPublished = thePublished;
 	}
 
+	@Override
 	public abstract Long getResourceId();
 
+	@Override
 	public abstract String getResourceType();
 
 	public abstract Collection<? extends BaseTag> getTags();
 
+	@Override
 	public InstantDt getUpdated() {
 		return new InstantDt(myUpdated);
 	}
@@ -118,12 +126,15 @@ public abstract class BaseHasResource {
 		myUpdated = theUpdated;
 	}
 
+	@Override
 	public Date getUpdatedDate() {
 		return myUpdated;
 	}
 
+	@Override
 	public abstract long getVersion();
 
+	@Override
 	public boolean isHasTags() {
 		return myHasTags;
 	}

@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -78,12 +79,16 @@ public class BaseDstu3Config extends BaseConfig {
 		return val;
 	}
 
+	@Bean
+	public JpaValidationSupportChainDstu3 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainDstu3();
+	}
+
 	@Bean(name = "myJpaValidationSupportDstu3", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
 		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
 		return retVal;
 	}
-
 
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
@@ -142,7 +147,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
 	public IValidationSupport validationSupportChainDstu3() {
-		return new JpaValidationSupportChainDstu3();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

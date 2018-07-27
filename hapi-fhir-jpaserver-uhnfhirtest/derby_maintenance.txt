@@ -136,3 +136,62 @@ drop table cdr_audit_evt_target_user cascade constraints;
 drop table cdr_xact_log_step cascade constraints;
 drop table cdr_xact_log cascade constraints;
 
+
+
+drop table hfj_history_tag cascade;
+drop table hfj_forced_id cascade;
+drop table hfj_res_link cascade;
+drop table hfj_spidx_coords cascade;
+drop table hfj_spidx_date cascade;
+drop table hfj_spidx_number cascade;
+drop table hfj_spidx_quantity cascade;
+drop table hfj_spidx_string cascade;
+drop table hfj_spidx_token cascade;
+drop table hfj_spidx_uri cascade;
+drop table hfj_res_tag cascade;
+drop table hfj_search_result cascade;
+drop table hfj_search_include cascade;
+drop table hfj_search cascade;
+drop table hfj_res_param_present cascade;
+drop table hfj_idx_cmp_string_uniq cascade;
+drop table hfj_subscription_stats cascade;
+drop table trm_concept_property cascade;
+drop table trm_concept_pc_link cascade;
+drop table trm_concept cascade;
+drop table trm_codesystem_ver cascade;
+drop table trm_codesystem cascade;
+DROP TABLE hfj_resource cascade;
+DROP TABLE hfj_res_ver cascade;
+drop table hfj_search_parm cascade;
+drop table hfj_tag_def cascade;
+
+drop index IDX_FORCEDID_TYPE_FORCEDID;
+alter table hfj_forced_id drop constraint idx_forcedid_type_resid;
+
+
+
+Upgrading
+drop index IDX_SP_STRING;
+create index IDX_SP_STRING_HASH_NRM;
+create index IDX_SP_STRING_HASH_EXCT;
+drop index IDX_SP_TOKEN;
+drop index IDX_SP_TOKEN_UNQUAL;
+create index IDX_SP_TOKEN_HASH;
+create index IDX_SP_TOKEN_HASH_S;
+create index IDX_SP_TOKEN_HASH_SV;
+create index IDX_SP_TOKEN_HASH_V;
+drop index IDX_SP_DATE;
+create index IDX_SP_DATE_HASH;
+drop index IDX_SP_QUANTITY;
+create index IDX_SP_QUANTITY_HASH;
+create index IDX_SP_QUANTITY_HASH_UN;
+drop index IDX_FORCEDID_TYPE_FORCEDID;
+alter table hfj_forced_id drop constraint idx_forcedid_type_resid;
+create index IDX_FORCEDID_TYPE_FID;
+drop index IDX_SP_NUMBER;
+create index IDX_SP_NUMBER_HASH_VAL;
+
+drop column SP_ID from table HFJ_RES_PARAM_PRESENT;
+drop index IDX_SEARCHPARM_RESTYPE_SPNAME;
+drop index IDX_RESPARMPRESENT_SPID_RESID;
+drop table HFJ_SEARCH_PARM;
