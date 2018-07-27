@@ -207,6 +207,10 @@
 				"username:password" as an alternate to specifying them as two
 				discrete strings.
 			</action>
+			<action type="add">
+				SimpleBundleProvider has been modified to optionally allow calling
+				code to specify a search UUID
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

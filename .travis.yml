@@ -26,4 +26,6 @@ before_script:
 script:
 #  - mvn -e -B clean install && cd hapi-fhir-ra && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean test jacoco:report coveralls:report
 #  - mvn -Dci=true -e -B -P ALLMODULES,NOPARALLEL,ERRORPRONE clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
-  - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,ERRORPRONE,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report
+  - sudo chmod -R 777 "$HOME/.m2/repository";
+  - sudo chown -R travis:travis "$HOME/.m2/repository";
+  - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,ERRORPRONE,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report;

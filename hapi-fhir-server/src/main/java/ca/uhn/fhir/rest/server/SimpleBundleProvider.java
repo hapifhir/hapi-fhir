@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,24 +20,25 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-
 public class SimpleBundleProvider implements IBundleProvider {
 
-	private List<IBaseResource> myList;
-	
+	private final List<IBaseResource> myList;
+	private final String myUuid;
+
 	public SimpleBundleProvider(List<IBaseResource> theList) {
-		myList = theList;
+		this(theList, null);
 	}
 
 	public SimpleBundleProvider(IBaseResource theResource) {
 		myList = Collections.singletonList(theResource);
+		myUuid = null;
 	}
 
 	/**
@@ -45,16 +46,12 @@ public class SimpleBundleProvider implements IBundleProvider {
 	 */
 	public SimpleBundleProvider() {
 		myList = Collections.emptyList();
+		myUuid = null;
 	}
 
-	@Override
-	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
-	}
-
-	@Override
-	public Integer size() {
-		return myList.size();
+	public SimpleBundleProvider(List<IBaseResource> theList, String theUuid) {
+		myList = theList;
+		myUuid = theUuid;
 	}
 
 	@Override
@@ -63,13 +60,23 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	@Override
+	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		return myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
+	}
+
+	@Override
+	public String getUuid() {
+		return myUuid;
+	}
+
+	@Override
 	public Integer preferredPageSize() {
 		return null;
 	}
 
 	@Override
-	public String getUuid() {
-		return null;
+	public Integer size() {
+		return myList.size();
 	}
-	
+
 }
