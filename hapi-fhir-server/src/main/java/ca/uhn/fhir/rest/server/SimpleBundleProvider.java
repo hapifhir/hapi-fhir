@@ -31,6 +31,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 
 	private final List<IBaseResource> myList;
 	private final String myUuid;
+	private Integer myPreferredPageSize;
 
 	public SimpleBundleProvider(List<IBaseResource> theList) {
 		this(theList, null);
@@ -69,9 +70,20 @@ public class SimpleBundleProvider implements IBundleProvider {
 		return myUuid;
 	}
 
+	/**
+	 * Defaults to null
+	 */
 	@Override
 	public Integer preferredPageSize() {
-		return null;
+		return myPreferredPageSize;
+	}
+
+	/**
+	 * Sets the preferred page size to be returned by {@link #preferredPageSize()}.
+	 * Default is <code>null</code>.
+	 */
+	public void setPreferredPageSize(Integer thePreferredPageSize) {
+		myPreferredPageSize = thePreferredPageSize;
 	}
 
 	@Override

@@ -61,6 +61,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.concurrent.*;
@@ -408,7 +409,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myManagedTxManager = theTxManager;
 	}
 
-	static Pageable toPage(final int theFromIndex, int theToIndex) {
+	/**
+	 * Creates a {@link Pageable} using a start and end index
+	 */
+	@SuppressWarnings("WeakerAccess")
+	public static @Nullable	Pageable toPage(final int theFromIndex, int theToIndex) {
 		int pageSize = theToIndex - theFromIndex;
 		if (pageSize < 1) {
 			return null;

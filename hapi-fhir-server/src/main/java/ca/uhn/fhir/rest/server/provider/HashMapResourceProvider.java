@@ -65,8 +65,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
-	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new HashMap<>();
-	protected Map<String, LinkedList<T>> myIdToHistory = new HashMap<>();
+	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new LinkedHashMap<>();
+	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	private long myNextId;
 	private AtomicLong myDeleteCount = new AtomicLong(0);

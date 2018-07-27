@@ -19,13 +19,14 @@ cache:
 
 install: /bin/true
 
-# This seems to be required to get travis to set Xmx4g, per https://github.com/travis-ci/travis-ci/issues/3893
 before_script:
+# This seems to be required to get travis to set Xmx4g, per https://github.com/travis-ci/travis-ci/issues/3893
   - export MAVEN_SKIP_RC=true
+# Sometimes things get restored from the cache with bad permissions. See https://github.com/travis-ci/travis-ci/issues/9630
+  - sudo chmod -R 777 "$HOME/.m2/repository";
+  - sudo chown -R travis:travis "$HOME/.m2/repository";
 
 script:
 #  - mvn -e -B clean install && cd hapi-fhir-ra && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean test jacoco:report coveralls:report
 #  - mvn -Dci=true -e -B -P ALLMODULES,NOPARALLEL,ERRORPRONE clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
-  - sudo chmod -R 777 "$HOME/.m2/repository";
-  - sudo chown -R travis:travis "$HOME/.m2/repository";
   - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,ERRORPRONE,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report;

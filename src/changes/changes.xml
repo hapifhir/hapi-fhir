@@ -164,7 +164,9 @@
 				<![CDATA[<code>_id</code>]]> search parameter now has the
 				search parameter marked as "required". This means that additional
 				search methods can be added in subclasses without their intended
-				searches being routed to the searchById method.
+				searches being routed to the searchById method. Also, the resource
+				map now uses a LinkedHashMap, so searches return a predictable
+				order for unit tests.
 			</action>
 			<action type="fix">
 				Fixed a bug when creating a custom search parameter in the JPA
@@ -209,7 +211,8 @@
 			</action>
 			<action type="add">
 				SimpleBundleProvider has been modified to optionally allow calling
-				code to specify a search UUID
+				code to specify a search UUID, and a field to allow the preferred
+				page size to be configured.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
