@@ -98,12 +98,16 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (pageId != null) {
+			// This is a page request by Search ID and Page ID
 
 			resultList = pagingProvider.retrieveResultList(thePagingAction, pageId);
+			validateHaveBundleProvider(thePagingAction, resultList);
 
 		} else {
+			// This is a page request by Search ID and Offset
 
 			resultList = pagingProvider.retrieveResultList(thePagingAction);
+			validateHaveBundleProvider(thePagingAction, resultList);
 
 			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 			if (offsetI == null || offsetI < 0) {
@@ -115,13 +119,6 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			if (totalNum != null) {
 				start = Math.min(start, totalNum - 1);
 			}
-		}
-
-		// Return an HTTP 409 if the search is not known
-		if (resultList == null) {
-			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
-			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
-			throw new ResourceGoneException(msg);
 		}
 
 		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
@@ -158,6 +155,15 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, resultList, start, bundleType, encodingEnum, thePagingAction);
+	}
+
+	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
+		// Return an HTTP 410 if the search is not known
+		if (theBundleProvider == null) {
+			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
+			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
+			throw new ResourceGoneException(msg);
+		}
 	}
 
 	@Override
