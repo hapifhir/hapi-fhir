@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,8 +23,10 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class SimpleBundleProvider implements IBundleProvider {
@@ -32,32 +34,48 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private final List<IBaseResource> myList;
 	private final String myUuid;
 	private Integer myPreferredPageSize;
-
+	private Integer mySize;
+	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
 	public SimpleBundleProvider(List<IBaseResource> theList) {
 		this(theList, null);
 	}
 
 	public SimpleBundleProvider(IBaseResource theResource) {
-		myList = Collections.singletonList(theResource);
-		myUuid = null;
+		this(Collections.singletonList(theResource));
 	}
 
 	/**
 	 * Create an empty bundle
 	 */
 	public SimpleBundleProvider() {
-		myList = Collections.emptyList();
-		myUuid = null;
+		this(Collections.emptyList());
 	}
 
 	public SimpleBundleProvider(List<IBaseResource> theList, String theUuid) {
 		myList = theList;
 		myUuid = theUuid;
+		setSize(theList.size());
+	}
+
+	/**
+	 * Returns the results stored in this provider
+	 */
+	protected List<IBaseResource> getList() {
+		return myList;
 	}
 
 	@Override
-	public InstantDt getPublished() {
-		return InstantDt.withCurrentTime();
+	public IPrimitiveType<Date> getPublished() {
+		return myPublished;
+	}
+
+	/**
+	 * By default this class uses the object creation date/time (for this object)
+	 * to determine {@link #getPublished() the published date} but this
+	 * method may be used to specify an alternate date/time
+	 */
+	public void setPublished(IPrimitiveType<Date> thePublished) {
+		myPublished = thePublished;
 	}
 
 	@Override
@@ -86,9 +104,18 @@ public class SimpleBundleProvider implements IBundleProvider {
 		myPreferredPageSize = thePreferredPageSize;
 	}
 
+	/**
+	 * Sets the total number of results, if this provider
+	 * corresponds to a single page within a larger search result
+	 */
+	public SimpleBundleProvider setSize(Integer theSize) {
+		mySize = theSize;
+		return this;
+	}
+
 	@Override
 	public Integer size() {
-		return myList.size();
+		return mySize;
 	}
 
 }

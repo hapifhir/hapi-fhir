@@ -214,6 +214,18 @@
 				code to specify a search UUID, and a field to allow the preferred
 				page size to be configured.
 			</action>
+			<action type="add">
+				The JPA server search UUID column has been reduced in length from
+				40 chars to 36, in order to align with the actual length of the
+				generated UUIDs.
+			</action>
+			<action type="add">
+				Plain servers using paging may now specify an ID/name for
+				individual pages being returned, avoiding the need to
+				respond to arbitrary offset/index requests from the server.
+				In this mode, page links in search result bundles simply
+				include the ID to the next page.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

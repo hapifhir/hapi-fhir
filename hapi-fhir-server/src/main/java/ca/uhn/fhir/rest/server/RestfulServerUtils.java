@@ -130,6 +130,18 @@ public class RestfulServerUtils {
 
 	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 													  BundleTypeEnum theBundleType) {
+		return createPagingLink(theIncludes, theServerBase, theSearchId, theOffset, theCount, theRequestParameters, thePrettyPrint,
+			theBundleType, null);
+	}
+
+	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+													  BundleTypeEnum theBundleType) {
+		return createPagingLink(theIncludes, theServerBase, theSearchId, null, null, theRequestParameters, thePrettyPrint,
+			theBundleType, thePageId);
+	}
+
+	private static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+														BundleTypeEnum theBundleType, String thePageId) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
 		b.append('?');
@@ -137,14 +149,24 @@ public class RestfulServerUtils {
 		b.append('=');
 		b.append(UrlUtil.escapeUrlParam(theSearchId));
 
-		b.append('&');
-		b.append(Constants.PARAM_PAGINGOFFSET);
-		b.append('=');
-		b.append(theOffset);
-		b.append('&');
-		b.append(Constants.PARAM_COUNT);
-		b.append('=');
-		b.append(theCount);
+		if (theOffset != null) {
+			b.append('&');
+			b.append(Constants.PARAM_PAGINGOFFSET);
+			b.append('=');
+			b.append(theOffset);
+		}
+		if (theCount != null) {
+			b.append('&');
+			b.append(Constants.PARAM_COUNT);
+			b.append('=');
+			b.append(theCount);
+		}
+		if (isNotBlank(thePageId)) {
+			b.append('&');
+			b.append(Constants.PARAM_PAGEID);
+			b.append('=');
+			b.append(UrlUtil.escapeUrlParam(thePageId));
+		}
 		String[] strings = theRequestParameters.get(Constants.PARAM_FORMAT);
 		if (strings != null && strings.length > 0) {
 			b.append('&');
@@ -442,6 +464,18 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
+	private static FhirContext getContextForVersion(FhirContext theContext, FhirVersionEnum theForVersion) {
+		FhirContext context = theContext;
+		if (context.getVersion().getVersion() != theForVersion) {
+			context = myFhirContextMap.get(theForVersion);
+			if (context == null) {
+				context = theForVersion.newContext();
+				myFhirContextMap.put(theForVersion, context);
+			}
+		}
+		return context;
+	}
+
 	private static ResponseEncoding getEncodingForContentType(FhirContext theFhirContext, boolean theStrict, String theContentType) {
 		EncodingEnum encoding;
 		if (theStrict) {
@@ -474,18 +508,6 @@ public class RestfulServerUtils {
 		configureResponseParser(theRequestDetails, parser);
 
 		return parser;
-	}
-
-	private static FhirContext getContextForVersion(FhirContext theContext, FhirVersionEnum theForVersion) {
-		FhirContext context = theContext;
-		if (context.getVersion().getVersion() != theForVersion) {
-			context = myFhirContextMap.get(theForVersion);
-			if (context == null) {
-				context = theForVersion.newContext();
-				myFhirContextMap.put(theForVersion, context);
-			}
-		}
-		return context;
 	}
 
 	public static Set<String> parseAcceptHeaderAndReturnHighestRankedOptions(HttpServletRequest theRequest) {
@@ -725,7 +747,7 @@ public class RestfulServerUtils {
 		try {
 			return Integer.parseInt(retVal[0]);
 		} catch (NumberFormatException e) {
-			ourLog.debug("Failed to parse {} value '{}': {}", new Object[]{theParamName, retVal[0], e});
+			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] {theParamName, retVal[0], e});
 			return null;
 		}
 	}
