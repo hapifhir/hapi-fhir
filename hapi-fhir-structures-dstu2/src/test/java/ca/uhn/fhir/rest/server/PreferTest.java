@@ -21,14 +21,20 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
@@ -54,6 +60,10 @@ public class PreferTest {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
+		
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setDiagnostics("DIAG");
+		ourReturnOperationOutcome = oo;
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
@@ -76,7 +86,7 @@ public class PreferTest {
 	}
 
 	@Test
-	public void testCreatePreferMinimalWithOperationOutcome() throws Exception {
+	public void testCreatePreferOperationOutcomeWithOperationOutcome() throws Exception {
 
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("DIAG");
@@ -86,7 +96,7 @@ public class PreferTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -123,7 +133,7 @@ public class PreferTest {
 
 		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
 		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), containsString(Constants.CT_FHIR_XML));
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta></Patient>", responseContent);
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
@@ -186,9 +196,8 @@ public class PreferTest {
 			IdDt id = new IdDt("Patient/001/_history/002");
 			MethodOutcome retVal = new MethodOutcome(id);
 
-			Patient pt = new Patient();
-			pt.setId(id);
-			retVal.setResource(pt);
+			thePatient.setId(id);
+			retVal.setResource(thePatient);
 
 			retVal.setOperationOutcome(ourReturnOperationOutcome);
 
@@ -205,9 +214,8 @@ public class PreferTest {
 			IdDt id = new IdDt("Patient/001/_history/002");
 			MethodOutcome retVal = new MethodOutcome(id);
 
-			Patient pt = new Patient();
-			pt.setId(id);
-			retVal.setResource(pt);
+			thePatient.setId(id);
+			retVal.setResource(thePatient);
 
 			return retVal;
 		}
