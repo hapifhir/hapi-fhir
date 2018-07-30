@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +50,7 @@ public class PagingUsingNamedPagesR4Test {
 
 	private static Server ourServer;
 	private static RestfulServer servlet;
+	private static IBundleProvider ourNextBundleProvider;
 	private IPagingProvider myPagingProvider;
 
 	@Before
@@ -56,6 +58,17 @@ public class PagingUsingNamedPagesR4Test {
 		myPagingProvider = mock(IPagingProvider.class);
 		servlet.setPagingProvider(myPagingProvider);
 		ourNextBundleProvider = null;
+	}
+
+	private List<IBaseResource> createPatients(int theLow, int theHigh) {
+		List<IBaseResource> patients = new ArrayList<>();
+		for (int id = theLow; id <= theHigh; id++) {
+			Patient pt = new Patient();
+			pt.setId("Patient/" + id);
+			pt.addName().setFamily("FAM" + id);
+			patients.add(pt);
+		}
+		return patients;
 	}
 
 	private Bundle executeAndReturnBundle(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
@@ -72,32 +85,6 @@ public class PagingUsingNamedPagesR4Test {
 		}
 		return bundle;
 	}
-
-
-	@Test
-	public void testPagingLinksSanitizeBundleType() throws Exception {
-
-		List<IBaseResource> patients0 = createPatients(0, 9);
-		BundleProviderWithNamedPages provider0 = new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
-		provider0.setNextPageId("PAGEID1");
-		when(myPagingProvider.retrieveResultList(eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
-
-		// Initial search
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertThat(responseContent, not(containsString("FOO\"")));
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assert ct != null;
-			Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);
-			assertEquals(10, bundle.getEntry().size());
-		}
-
-	}
-
-
 
 	@Test
 	public void testPaging() throws Exception {
@@ -130,43 +117,79 @@ public class PagingUsingNamedPagesR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=xml");
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertEquals("http://localhost:"+ourPort+"/Patient?_format=xml", linkSelf);
+		assertEquals("http://localhost:" + ourPort + "/Patient?_format=xml", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertEquals("http://localhost:"+ourPort+"?_getpages=SEARCHID0&pageId=PAGEID1&_format=xml&_bundletype=searchset", linkNext);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkNext);
 		assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertEquals("http://localhost:"+ourPort+"?_getpages=SEARCHID0&pageId=PAGEID1&_format=xml&_bundletype=searchset", linkSelf);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertEquals("http://localhost:"+ourPort+"?_getpages=SEARCHID0&pageId=PAGEID2&_format=xml&_bundletype=searchset", linkNext);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkNext);
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
-		assertEquals("http://localhost:"+ourPort+"?_getpages=SEARCHID0&pageId=PAGEID0&_format=xml&_bundletype=searchset", linkPrev);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=searchset", linkPrev);
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertEquals("http://localhost:"+ourPort+"?_getpages=SEARCHID0&pageId=PAGEID2&_format=xml&_bundletype=searchset", linkSelf);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkSelf);
 		assertNull(bundle.getLink(Constants.LINK_NEXT));
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
-		assertEquals("http://localhost:"+ourPort+"?_getpages=SEARCHID0&pageId=PAGEID1&_format=xml&_bundletype=searchset", linkPrev);
+		assertEquals("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkPrev);
 	}
 
-	private List<IBaseResource> createPatients(int theLow, int theHigh) {
-		List<IBaseResource> patients = new ArrayList<>();
-		for (int id = theLow; id <= theHigh; id++) {
-			Patient pt = new Patient();
-			pt.setId("Patient/" + id);
-			pt.addName().setFamily("FAM" + id);
-			patients.add(pt);
+	@Test
+	public void testPagingLinkUnknownPage() throws Exception {
+
+		when(myPagingProvider.retrieveResultList(nullable(String.class))).thenReturn(null);
+		when(myPagingProvider.retrieveResultList(nullable(String.class), nullable(String.class))).thenReturn(null);
+
+		// With ID
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertThat(responseContent, not(containsString("FOO\"")));
+			assertEquals(410, status.getStatusLine().getStatusCode());
 		}
-		return patients;
+
+		// Without ID
+		httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertThat(responseContent, not(containsString("FOO\"")));
+			assertEquals(410, status.getStatusLine().getStatusCode());
+		}
+
 	}
 
+	@Test
+	public void testPagingLinksSanitizeBundleType() throws Exception {
 
+		List<IBaseResource> patients0 = createPatients(0, 9);
+		BundleProviderWithNamedPages provider0 = new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
+		provider0.setNextPageId("PAGEID1");
+		when(myPagingProvider.retrieveResultList(eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
+
+		// Initial search
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertThat(responseContent, not(containsString("FOO\"")));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
+			assert ct != null;
+			Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+			assertEquals(10, bundle.getEntry().size());
+		}
+
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -200,7 +223,6 @@ public class PagingUsingNamedPagesR4Test {
 
 	}
 
-	private static IBundleProvider ourNextBundleProvider;
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 
@@ -219,7 +241,6 @@ public class PagingUsingNamedPagesR4Test {
 		}
 
 	}
-
 
 
 }
