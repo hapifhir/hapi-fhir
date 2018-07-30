@@ -1,10 +1,6 @@
 {
   "resourceType": "PlanDefinition",
   "id": "apply-example",
-  "text": {
-    "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">General PlanDefinition $apply example resource</div>"
-  },
   "identifier": [
     {
       "use": "official",
