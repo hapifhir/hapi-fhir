@@ -20,11 +20,11 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import java.util.Arrays;
 import java.util.List;
-
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.api.Constants;
 
 /**
  * 
@@ -83,7 +83,7 @@ public class StringClientParam extends BaseClientParam implements IParam {
 		/**
 		 * Requests that resources be returned which match the given value
 		 */
-		ICriterion<StringClientParam> value(StringDt theValue);
+		ICriterion<StringClientParam> value(IPrimitiveType<String> theValue);
 
 		/**
 		 * Requests that resources be returned which match ANY of the given values (this is an OR search, not an AND search). Note that to
@@ -97,17 +97,17 @@ public class StringClientParam extends BaseClientParam implements IParam {
 	private class StringExactly implements IStringMatch {
 		@Override
 		public ICriterion<StringClientParam> value(String theValue) {
-			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
 		}
 
 		@Override
-		public ICriterion<StringClientParam> value(StringDt theValue) {
-			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
+		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
 		}
 
 		@Override
 		public ICriterion<StringClientParam> values(List<String> theValue) {
-			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
 		}
 
 		@Override
@@ -119,17 +119,17 @@ public class StringClientParam extends BaseClientParam implements IParam {
 	private class StringContains implements IStringMatch {
 		@Override
 		public ICriterion<StringClientParam> value(String theValue) {
-			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
 		}
 
 		@Override
-		public ICriterion<StringClientParam> value(StringDt theValue) {
-			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
+		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue.getValue());
 		}
 
 		@Override
 		public ICriterion<StringClientParam> values(List<String> theValue) {
-			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
+			return new StringCriterion<>(getParamName() + Constants.PARAMQUALIFIER_STRING_CONTAINS, theValue);
 		}
 
 		@Override
@@ -141,17 +141,17 @@ public class StringClientParam extends BaseClientParam implements IParam {
 	private class StringMatches implements IStringMatch {
 		@Override
 		public ICriterion<StringClientParam> value(String theValue) {
-			return new StringCriterion<StringClientParam>(getParamName(), theValue);
+			return new StringCriterion<>(getParamName(), theValue);
 		}
 
 		@Override
-		public ICriterion<StringClientParam> value(StringDt theValue) {
-			return new StringCriterion<StringClientParam>(getParamName(), theValue.getValue());
+		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
+			return new StringCriterion<>(getParamName(), theValue.getValue());
 		}
 
 		@Override
 		public ICriterion<StringClientParam> values(List<String> theValue) {
-			return new StringCriterion<StringClientParam>(getParamName(), theValue);
+			return new StringCriterion<>(getParamName(), theValue);
 		}
 
 		@Override

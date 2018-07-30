@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
@@ -1057,6 +1058,49 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/Patient?name=" + UrlUtil.escapeUrlParam("AAA,BBB,C\\,C"), capt.getAllValues().get(1).getURI().toString());
 
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchByStringContains() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t-> new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Bundle response = client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("FOO"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO", capt.getValue().getURI().toString());
+
+		response = client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().values("FOO", "BAR"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO%2CBAR", capt.getValue().getURI().toString());
+
+		response = client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().values(Arrays.asList("FOO", "BAR")))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO%2CBAR", capt.getValue().getURI().toString());
+
+		response = client.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value(new StringType("FOO")))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO", capt.getValue().getURI().toString());
 	}
 
 	@SuppressWarnings("unused")

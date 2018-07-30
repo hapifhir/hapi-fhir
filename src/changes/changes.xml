@@ -150,6 +150,11 @@
 				in order to prevent HTML injection attacks via maliciously
 				crafted URLs.
 			</action>
+			<action type="add" issue="912">
+				The generic/fluent client now supports the :contains modifier on
+				string search params. Thanks to Clayton Bodendein for the pull
+				request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
