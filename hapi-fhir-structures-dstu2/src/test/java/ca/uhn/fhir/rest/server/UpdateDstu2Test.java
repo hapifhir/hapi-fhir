@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.text.IsEmptyString.emptyString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -22,14 +24,24 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
@@ -113,7 +125,7 @@ public class UpdateDstu2Test {
 		patient.setId("123");
 		patient.addIdentifier().setValue("002");
 		ourSetLastUpdated = new InstantDt("2002-04-22T11:22:33.022Z");
-		
+				
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/123");
 		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -125,7 +137,12 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 		ourLog.info("Response was:\n{}", status);
 		
-		assertThat(responseContent, blankOrNullString());
+		assertThat(responseContent, is(not(emptyString())));
+		
+		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
+		assertEquals(patient.getId().getIdPart(), actualPatient.getId().getIdPart());
+		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
+		
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(null, status.getFirstHeader("location"));
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());

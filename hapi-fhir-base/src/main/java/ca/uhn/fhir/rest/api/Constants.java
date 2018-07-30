@@ -21,7 +21,12 @@ package ca.uhn.fhir.rest.api;
  */
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Constants {
 
@@ -109,6 +114,7 @@ public class Constants {
 	public static final String HEADER_PREFER_RETURN = "return";
 	public static final String HEADER_PREFER_RETURN_MINIMAL = "minimal";
 	public static final String HEADER_PREFER_RETURN_REPRESENTATION = "representation";
+	public static final String HEADER_PREFER_RETURN_OPERATION_OUTCOME = "OperationOutcome";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
