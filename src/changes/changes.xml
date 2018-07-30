@@ -239,6 +239,11 @@
 				In this mode, page links in search result bundles simply
 				include the ID to the next page.
 			</action>
+			<action type="fix" issue="965">
+				An issue was fixed in BundleUtil#toListOfEntries, where sometimes
+				a resource could be associated with the wrong entry in the response.
+				Thanks to GitHub user @jbalbien for the pull request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

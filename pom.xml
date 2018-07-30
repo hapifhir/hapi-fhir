@@ -468,6 +468,9 @@
 			<id>anamariaradu10</id>
 			<name>Ana Maria Radu</name>
 		</developer>
+		<developer>
+			<id>jbalbien</id>
+		</developer>
 	</developers>
 
 	<licenses>
