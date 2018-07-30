@@ -1,5 +1,5 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
-			xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd" metadata-complete="true">
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -13,7 +13,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			ca.uhn.fhir.jpa.cds.example.FhirServerConfig
+			org.opencds.cqf.config.FhirServerConfigDstu3
 		</param-value>
 	</context-param>
 
@@ -34,17 +34,17 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>ca.uhn.fhir.jpa.cds.example.FhirTesterConfig</param-value>
+			<param-value>org.opencds.cqf.config.FhirTesterConfigDstu3</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 
 	<servlet>
-		<servlet-name>fhirServlet</servlet-name>
+		<servlet-name>cdsServerExample</servlet-name>
 		<servlet-class>ca.uhn.fhir.jpa.cds.example.CdsServerExample</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>FHIR JPA Server</param-value>
+			<param-value>FHIR CQF Ruler-of-All-Knowledge JPA Server</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
@@ -52,6 +52,16 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>cdsServerExample</servlet-name>
+		<url-pattern>/baseDstu3/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/tester/*</url-pattern>
+	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>cdsServicesServlet</servlet-name>
@@ -62,18 +72,6 @@
 		<servlet-name>cdsServicesServlet</servlet-name>
 		<url-pattern>/cds-services/*</url-pattern>
 	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>fhirServlet</servlet-name>
-		<url-pattern>/baseDstu3/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>spring</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
-
-
 
 	<!-- This filters provide support for Cross Origin Resource Sharing (CORS) -->
 	<filter>
@@ -92,7 +90,7 @@
 		<init-param>
 			<description>A comma separated list of allowed headers when making a non simple CORS request.</description>
 			<param-name>cors.allowed.headers</param-name>
-			<param-value>X-FHIR-Starter,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Prefer</param-value>
+			<param-value>X-FHIR-Starter,Origin,Accept,Authorization,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers</param-value>
 		</init-param>
 		<init-param>
 			<description>A comma separated list non-standard response headers that will be exposed to XHR2 object.</description>
@@ -119,6 +117,5 @@
 		<filter-name>CORS Filter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-
 
 </web-app>
