@@ -51,6 +51,7 @@ public class Search implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public static final int MAX_SEARCH_QUERY_STRING = 10000;
+	public static final int UUID_COLUMN_LENGTH = 36;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="CREATED", nullable=false, updatable=false)
@@ -118,7 +119,7 @@ public class Search implements Serializable {
 	@Column(name="TOTAL_COUNT", nullable=true)
 	private Integer myTotalCount;
 	
-	@Column(name="SEARCH_UUID", length=40, nullable=false, updatable=false)
+	@Column(name="SEARCH_UUID", length= UUID_COLUMN_LENGTH, nullable=false, updatable=false)
 	private String myUuid;
 	
 	/**

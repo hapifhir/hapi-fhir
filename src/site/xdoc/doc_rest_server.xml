@@ -336,7 +336,34 @@
 				</macro>
 			
 			</subsection>
-			
+
+			<subsection name="Using Named Pages">
+
+				<p>
+					By default, the paging system uses parameters that are embedded into the
+					page links for the start index and the page size. This is useful for servers that
+					can retrieve arbitrary offsets within a search result. For example,
+					if a given search can easily retrieve "items 5-10 from the given search", then
+					the mechanism above works well.
+				</p>
+				<p>
+					Another option is to use "named pages", meaning that each
+					page is simply assigned an ID by the server, and the next/previous
+					page is requested using this ID.
+				</p>
+				<p>
+					In order to support named pages, the IPagingProvider must
+					implement the
+					<code>retrieveResultList(String theSearchId, String thePageId)</code>
+					method.
+				</p>
+				<p>
+					Then, individual search/history methods may return a
+					<code>BundleProviderWithNamedPages</code> instead of a simple
+					<code>IBundleProvider</code>.
+				</p>
+			</subsection>
+
 		</section>
 			
 

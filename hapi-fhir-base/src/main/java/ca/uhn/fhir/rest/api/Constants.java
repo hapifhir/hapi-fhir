@@ -130,7 +130,7 @@ public class Constants {
 	/**
 	 * Used in paging links
 	 */
-	public static final Object PARAM_BUNDLETYPE = "_bundletype";
+	public static final String PARAM_BUNDLETYPE = "_bundletype";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -140,7 +140,7 @@ public class Constants {
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
-	public static final String PARAM_INCLUDE_RECURSE = "_include"+PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
@@ -152,7 +152,7 @@ public class Constants {
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
-	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE+PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_RECURSE;
 	public static final String PARAM_SEARCH = "_search";
 	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
@@ -160,9 +160,9 @@ public class Constants {
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
 	public static final String PARAM_SUMMARY = "_summary";
-        public static final String PARAM_TAG = "_tag";
-        public static final String PARAM_TAGS = "_tags";
-        public static final String PARAM_TEXT = "_text";
+	public static final String PARAM_TAG = "_tag";
+	public static final String PARAM_TAGS = "_tags";
+	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
@@ -177,7 +177,7 @@ public class Constants {
 	public static final int STATUS_HTTP_400_BAD_REQUEST = 400;
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
 	public static final int STATUS_HTTP_403_FORBIDDEN = 403;
-	
+
 	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
 	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
@@ -195,9 +195,12 @@ public class Constants {
 	public static final String HEADER_X_CACHE = "X-Cache";
 	public static final String HEADER_X_SECURITY_CONTEXT = "X-Security-Context";
 	public static final String POWERED_BY_HEADER = "X-Powered-By";
+	public static final Charset CHARSET_US_ASCII;
+	public static final String PARAM_PAGEID = "_pageId";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
+		CHARSET_US_ASCII = Charset.forName("ISO-8859-1");
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
 		statusNames.put(200, "OK");
@@ -263,7 +266,7 @@ public class Constants {
 		statusNames.put(510, "Not Extended");
 		statusNames.put(511, "Network Authentication Required");
 		HTTP_STATUS_NAMES = Collections.unmodifiableMap(statusNames);
-		
+
 		Set<String> formatsHtml = new HashSet<>();
 		formatsHtml.add(CT_HTML);
 		formatsHtml.add(FORMAT_HTML);

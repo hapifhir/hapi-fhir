@@ -34,36 +34,35 @@ public interface IHttpRequest {
 	 * @param theName the header name
 	 * @param theValue the header value
 	 */
-	public void addHeader(String theName, String theValue);    
+	void addHeader(String theName, String theValue);
 
 	/**
 	 * Execute the request
 	 * @return the response
-	 * @throws IOException
 	 */
-	public IHttpResponse execute() throws IOException;
+	IHttpResponse execute() throws IOException;
 
 	/**
-	 * @return all request headers in lower case
+	 * @return all request headers in lower case. Note that this method
+	 * returns an <b>immutable</b> Map
 	 */
-	public Map<String, List<String>> getAllHeaders();
+	Map<String, List<String>> getAllHeaders();
 
 	/**
-	 * Return the requestbody as a string.
+	 * Return the request body as a string.
 	 * If this is not supported by the underlying technology, null is returned 
 	 * @return a string representation of the request or null if not supported or empty.
-	 * @throws IOException 
 	 */
-	public String getRequestBodyFromStream() throws IOException;
+	String getRequestBodyFromStream() throws IOException;
 
 	/**
 	 * Return the request URI, or null
 	 */
-	public String getUri();
+	String getUri();
 	
 	/**
 	 * Return the HTTP verb (e.g. "GET")
 	 */
-	public String getHttpVerbName();
+	String getHttpVerbName();
 	
 }

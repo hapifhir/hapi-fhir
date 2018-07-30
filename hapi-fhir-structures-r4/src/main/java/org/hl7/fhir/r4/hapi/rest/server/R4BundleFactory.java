@@ -9,9 +9,9 @@ package org.hl7.fhir.r4.hapi.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -123,9 +123,9 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       }
     }
 
-		/*
-       * Actually add the resources to the bundle
-		 */
+    /*
+     * Actually add the resources to the bundle
+     */
     for (IBaseResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
       entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
@@ -195,7 +195,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         includedResources.addAll(addedResourcesThisPass);
 
         // Linked resources may themselves have linked resources
-        references = new ArrayList<ResourceReferenceInfo>();
+        references = new ArrayList<>();
         for (IAnyResource iResource : addedResourcesThisPass) {
           List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
           references.addAll(newReferences);
@@ -219,9 +219,9 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       }
     }
 
-		/*
-		 * Actually add the resources to the bundle
-		 */
+    /*
+     * Actually add the resources to the bundle
+     */
     for (IAnyResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
       entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);

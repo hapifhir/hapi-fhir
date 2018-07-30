@@ -86,7 +86,7 @@
 				Resource loading logic for the JPA server has been optimized to
 				reduce the number of database round trips required when loading
 				search results where many of the entries have a "forced ID" (an alphanumeric
-				client-assigned reosurce ID). Thanks to Frank Tao for the pull
+				client-assigned resource ID). Thanks to Frank Tao for the pull
 				request!
 			</action>
 			<action type="add">
@@ -162,6 +162,82 @@
 				that one may be requested via a Prefer header, using the newly implemented
 				"Repreentation: OperationOutcome" value.
 				Thanks to Ana Maria Radu for the pul request!
+			</action>
+			<action type="add">
+				The REST Server module now allows more than one Resource Provider
+				(i.e. more than one implementation of IResourceProvider) to be registered
+				to the RestfulServer for the same resource type. Previous versions of
+				HAPI FHIR have always limited support to a single resource provider, but
+				this limitation did not serve any purpose so it has been removed.
+			</action>
+			<action type="add">
+				The HashMapResourceProvider now supports the type and
+				instance history operations. In addition, the search method
+				for the
+				<![CDATA[<code>_id</code>]]> search parameter now has the
+				search parameter marked as "required". This means that additional
+				search methods can be added in subclasses without their intended
+				searches being routed to the searchById method. Also, the resource
+				map now uses a LinkedHashMap, so searches return a predictable
+				order for unit tests.
+			</action>
+			<action type="fix">
+				Fixed a bug when creating a custom search parameter in the JPA
+				server: if the	SearchParameter resource contained an invalid
+				expression, create/update operations for the given resource would
+				fail with a cryptic error. SearchParameter expressions are now
+				validated upon storage, and the SearchParameter will be rejected
+				if the expression can not be processed.
+			</action>
+			<action type="add">
+				The generic client history operations (history-instance, history-type,
+				and history-server) now support the
+				<![CDATA[<code>_at</code>]]> parameter.
+			</action>
+			<action type="add">
+				In the plain server, many resource provider method parameters may now
+				use a generic
+				<![CDATA[<code>IPrimitiveType&lt;String&gt;</code>]]>
+				or
+				<![CDATA[<code>IPrimitiveType&lt;Date&gt;</code>]]> at the
+				parameter type. This is handy if you are trying to write code
+				that works across versions of FHIR.
+			</action>
+			<action type="add">
+				Several convenience methods have been added to the fluent/generic
+				client interfaces. These methods allow the adding of a sort via a
+				SortSpec object, as well as specifying search parameters via a plain
+				Map of Strings.
+			</action>
+			<action type="add">
+				A new client interceptor called ThreadLocalCapturingInterceptor has been
+				added. This interceptor works the same way as CapturingInterceptor in that
+				it captures requests and responses for later processing, but it uses
+				a ThreadLocal object to store them in order to facilitate
+				use in multithreaded environments.
+			</action>
+			<action type="add">
+				A new constructor has been added to the client BasicAuthInterceptor
+				allowing credentials to be specified in the form
+				"username:password" as an alternate to specifying them as two
+				discrete strings.
+			</action>
+			<action type="add">
+				SimpleBundleProvider has been modified to optionally allow calling
+				code to specify a search UUID, and a field to allow the preferred
+				page size to be configured.
+			</action>
+			<action type="add">
+				The JPA server search UUID column has been reduced in length from
+				40 chars to 36, in order to align with the actual length of the
+				generated UUIDs.
+			</action>
+			<action type="add">
+				Plain servers using paging may now specify an ID/name for
+				individual pages being returned, avoiding the need to
+				respond to arbitrary offset/index requests from the server.
+				In this mode, page links in search result bundles simply
+				include the ID to the next page.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">

@@ -1,6 +1,10 @@
 package ca.uhn.fhir.rest.api.server;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import java.util.Date;
+import java.util.List;
 
 /*
  * #%L
@@ -22,50 +26,88 @@ import java.util.Date;
  * #L%
  */
 
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 
 public interface IBundleProvider {
+
+	/**
+	 * If this method is implemented, provides an ID for the current
+	 * page of results. This ID should be unique (at least within
+	 * the current search as identified by {@link #getUuid()})
+	 * so that it can be used to look up a specific page of results.
+	 * <p>
+	 * This can be used in order to allow the
+	 * server paging mechanism to work using completely
+	 * opaque links (links that do not encode any index/offset
+	 * information), which can be useful on some servers.
+	 * </p>
+	 *
+	 * @since 3.5.0
+	 */
+	default String getCurrentPageId() {
+		return null;
+	}
+
+	/**
+	 * If this method is implemented, provides an ID for the next
+	 * page of results. This ID should be unique (at least within
+	 * the current search as identified by {@link #getUuid()})
+	 * so that it can be used to look up a specific page of results.
+	 * <p>
+	 * This can be used in order to allow the
+	 * server paging mechanism to work using completely
+	 * opaque links (links that do not encode any index/offset
+	 * information), which can be useful on some servers.
+	 * </p>
+	 *
+	 * @since 3.5.0
+	 */
+	default String getNextPageId() {
+		return null;
+	}
+
+	/**
+	 * If this method is implemented, provides an ID for the previous
+	 * page of results. This ID should be unique (at least within
+	 * the current search as identified by {@link #getUuid()})
+	 * so that it can be used to look up a specific page of results.
+	 * <p>
+	 * This can be used in order to allow the
+	 * server paging mechanism to work using completely
+	 * opaque links (links that do not encode any index/offset
+	 * information), which can be useful on some servers.
+	 * </p>
+	 *
+	 * @since 3.5.0
+	 */
+	default String getPreviousPageId() {
+		return null;
+	}
+
+	/**
+	 * Returns the instant as of which this result was created. The
+	 * result of this value is used to populate the <code>lastUpdated</code>
+	 * value on search result/history result bundles.
+	 */
+	IPrimitiveType<Date> getPublished();
 
 	/**
 	 * Load the given collection of resources by index, plus any additional resources per the
 	 * server's processing rules (e.g. _include'd resources, OperationOutcome, etc.). For example,
 	 * if the method is invoked with index 0,10 the method might return 10 search results, plus an
 	 * additional 20 resources which matched a client's _include specification.
-	 * 
-	 * @param theFromIndex
-	 *           The low index (inclusive) to return
-	 * @param theToIndex
-	 *           The high index (exclusive) to return
+	 * <p>
+	 * Note that if this bundle provider was loaded using a
+	 * page ID (i.e. via {@link ca.uhn.fhir.rest.server.IPagingProvider#retrieveResultList(String, String)}
+	 * because {@link #getNextPageId()} provided a value on the
+	 * previous page, then the indexes should be ignored and the
+	 * whole page returned.
+	 * </p>
+	 *
+	 * @param theFromIndex The low index (inclusive) to return
+	 * @param theToIndex   The high index (exclusive) to return
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
-
-	/**
-	 * Optionally may be used to signal a preferred page size to the server, e.g. because
-	 * the implementing code recognizes that the resources which will be returned by this
-	 * implementation are expensive to load so a smaller page size should be used. The value
-	 * returned by this method will only be used if the client has not explicitly requested
-	 * a page size.
-	 * 
-	 * @return Returns the preferred page size or <code>null</code>
-	 */
-	Integer preferredPageSize();
-
-	/**
-	 * Returns the total number of results which match the given query (exclusive of any
-	 * _include's or OperationOutcome). May return {@literal null} if the total size is not
-	 * known or would be too expensive to calculate.
-	 */
-	Integer size();
-
-	/**
-	 * Returns the instant as of which this result was valid
-	 */
-	IPrimitiveType<Date> getPublished();
 
 	/**
 	 * Returns the UUID associated with this search. Note that this
@@ -79,7 +121,29 @@ public interface IBundleProvider {
 	 * IPagingProvider implementation you might use this method to communicate
 	 * the search ID back to the provider.
 	 * </p>
+	 * <p>
+	 * Note that the UUID returned by this method corresponds to
+	 * the search, and not to the individual page.
+	 * </p>
 	 */
-	public String getUuid();
+	String getUuid();
+
+	/**
+	 * Optionally may be used to signal a preferred page size to the server, e.g. because
+	 * the implementing code recognizes that the resources which will be returned by this
+	 * implementation are expensive to load so a smaller page size should be used. The value
+	 * returned by this method will only be used if the client has not explicitly requested
+	 * a page size.
+	 *
+	 * @return Returns the preferred page size or <code>null</code>
+	 */
+	Integer preferredPageSize();
+
+	/**
+	 * Returns the total number of results which match the given query (exclusive of any
+	 * _include's or OperationOutcome). May return {@literal null} if the total size is not
+	 * known or would be too expensive to calculate.
+	 */
+	Integer size();
 
 }

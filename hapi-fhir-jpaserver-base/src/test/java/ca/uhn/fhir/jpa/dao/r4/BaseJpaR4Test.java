@@ -92,6 +92,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myBundleDaoR4")
 	protected IFhirResourceDao<Bundle> myBundleDao;
 	@Autowired
+	@Qualifier("myCommunicationDaoR4")
+	protected IFhirResourceDao<Communication> myCommunicationDao;
+	@Autowired
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired

@@ -74,7 +74,6 @@ import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 import java.io.CharArrayWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
@@ -92,9 +91,9 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1250,25 +1249,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (theEntity.getDeleted() == null) {
 
 			encoding = myConfig.getResourceEncoding();
-			IParser parser = encoding.newParser(myContext);
-			parser.setDontEncodeElements(EXCLUDE_ELEMENTS_IN_ENCODED);
-			String encoded = parser.encodeResourceToString(theResource);
-
+			Set<String> excludeElements = EXCLUDE_ELEMENTS_IN_ENCODED;
 			theEntity.setFhirVersion(myContext.getVersion().getVersion());
-			switch (encoding) {
-				case JSON:
-					bytes = encoded.getBytes(Charsets.UTF_8);
-					break;
-				case JSONC:
-					bytes = GZipUtil.compress(encoded);
-					break;
-				default:
-				case DEL:
-					bytes = new byte[0];
-					break;
-			}
 
-			ourLog.debug("Encoded {} chars of resource body as {} bytes", encoded.length(), bytes.length);
+			bytes = encodeResource(theResource, encoding, excludeElements, myContext);
 
 			if (theUpdateHash) {
 				HashFunction sha256 = Hashing.sha256();
@@ -1664,22 +1648,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			return null;
 		}
 
-		// 2. get The text		
-		String resourceText = null;
-		switch (resourceEncoding) {
-			case JSON:
-				try {
-					resourceText = new String(resourceBytes, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					throw new Error("Should not happen", e);
-				}
-				break;
-			case JSONC:
-				resourceText = GZipUtil.decompress(resourceBytes);
-				break;
-			case DEL:
-				break;
-		}
+		// 2. get The text
+		String resourceText = decodeResource(resourceBytes, resourceEncoding);
 
 		// 3. Use the appropriate custom type if one is specified in the context
 		Class<R> resourceType = theResourceType;
@@ -2391,6 +2361,45 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		validateMetaCount(totalMetaCount);
 
+	}
+
+	public static String decodeResource(byte[] theResourceBytes, ResourceEncodingEnum theResourceEncoding) {
+		String resourceText = null;
+		switch (theResourceEncoding) {
+			case JSON:
+				resourceText = new String(theResourceBytes, Charsets.UTF_8);
+				break;
+			case JSONC:
+				resourceText = GZipUtil.decompress(theResourceBytes);
+				break;
+			case DEL:
+				break;
+		}
+		return resourceText;
+	}
+
+	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, Set<String> theExcludeElements, FhirContext theContext) {
+		byte[] bytes;
+		IParser parser = theEncoding.newParser(theContext);
+		parser.setDontEncodeElements(theExcludeElements);
+		String encoded = parser.encodeResourceToString(theResource);
+
+
+		switch (theEncoding) {
+			case JSON:
+				bytes = encoded.getBytes(Charsets.UTF_8);
+				break;
+			case JSONC:
+				bytes = GZipUtil.compress(encoded);
+				break;
+			default:
+			case DEL:
+				bytes = new byte[0];
+				break;
+		}
+
+		ourLog.debug("Encoded {} chars of resource body as {} bytes", encoded.length(), bytes.length);
+		return bytes;
 	}
 
 	/**

@@ -259,12 +259,14 @@ public class CreateR4Test {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
-		PatientProvider patientProvider = new PatientProvider();
+		PatientProviderCreate patientProviderCreate = new PatientProviderCreate();
+		PatientProviderRead patientProviderRead = new PatientProviderRead();
+		PatientProviderSearch patientProviderSearch = new PatientProviderSearch();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 
-		servlet.setResourceProviders(patientProvider);
+		servlet.setResourceProviders(patientProviderCreate, patientProviderRead, patientProviderSearch);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -276,21 +278,7 @@ public class CreateR4Test {
 		ourClient = builder.build();
 
 	}
-
-	public static class PatientProvider implements IResourceProvider {
-
-		@Create()
-		public MethodOutcome create(@ResourceParam Patient theIdParam) {
-			assertNull(theIdParam.getIdElement().getIdPart());
-			theIdParam.setId("1");
-			theIdParam.getMeta().setVersionId("1");
-			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo).setResource(theIdParam);
-		}
-
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
+	public static class PatientProviderRead implements IResourceProvider {
 
 		@Read()
 		public MyPatientWithExtensions read(@IdParam IdType theIdParam) {
@@ -299,6 +287,35 @@ public class CreateR4Test {
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
 		}
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+	}
+
+	public static class PatientProviderCreate implements IResourceProvider {
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+		@Create()
+		public MethodOutcome create(@ResourceParam Patient theIdParam) {
+			assertNull(theIdParam.getIdElement().getIdPart());
+			theIdParam.setId("1");
+			theIdParam.getMeta().setVersionId("1");
+			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo).setResource(theIdParam);
+		}
+	}
+
+	public static class PatientProviderSearch implements IResourceProvider {
+
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
 
 		@Search
 		public List<IBaseResource> search() {

@@ -123,8 +123,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	}
 
-	protected IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
-																			 IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
+	IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
+																IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 
 		int numToReturn;
@@ -152,7 +152,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
 			}
 
-			if (numToReturn > 0) {
+			if (numToReturn > 0 || theResult.getCurrentPageId() != null) {
 				resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
 			} else {
 				resourceList = Collections.emptyList();
@@ -166,6 +166,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					searchId = pagingProvider.storeResultList(theResult);
 					if (isBlank(searchId)) {
 						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
+						searchId = null;
 					}
 				}
 			}
@@ -183,11 +184,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 		if (hasNull) {
-			for (Iterator<IBaseResource> iter = resourceList.iterator(); iter.hasNext(); ) {
-				if (iter.next() == null) {
-					iter.remove();
-				}
-			}
+			resourceList.removeIf(Objects::isNull);
 		}
 
 		/*
@@ -207,7 +204,18 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		String linkPrev = null;
 		String linkNext = null;
-		if (searchId != null) {
+
+		if (isNotBlank(theResult.getCurrentPageId())) {
+			// We're doing named pages
+			searchId = theResult.getUuid();
+			if (isNotBlank(theResult.getNextPageId())) {
+				linkNext = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+			}
+			if (isNotBlank(theResult.getPreviousPageId())) {
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+			}
+		} else if (searchId != null) {
+			// We're doing offset pages
 			if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
 				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
 			}

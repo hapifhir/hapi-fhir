@@ -1,8 +1,18 @@
 package ca.uhn.fhir.rest.param;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -25,20 +35,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private DateParam myLowerBound;
 	private DateParam myUpperBound;
 
@@ -52,15 +53,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	/**
 	 * Constructor which takes two Dates representing the lower and upper bounds of the range (inclusive on both ends)
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(Date theLowerBound, Date theUpperBound) {
 		this();
@@ -84,37 +83,35 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
 		} else {
 			switch (theDateParam.getPrefix()) {
-			case EQUAL:
-				setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
-				break;
-			case STARTS_AFTER:
-			case GREATERTHAN:
-			case GREATERTHAN_OR_EQUALS:
-				validateAndSet(theDateParam, null);
-				break;
-			case ENDS_BEFORE:
-			case LESSTHAN:
-			case LESSTHAN_OR_EQUALS:
-				validateAndSet(null, theDateParam);
-				break;
-			default:
-				// Should not happen
-				throw new InvalidRequestException("Invalid comparator for date range parameter:" + theDateParam.getPrefix() + ". This is a bug.");
+				case EQUAL:
+					setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
+					break;
+				case STARTS_AFTER:
+				case GREATERTHAN:
+				case GREATERTHAN_OR_EQUALS:
+					validateAndSet(theDateParam, null);
+					break;
+				case ENDS_BEFORE:
+				case LESSTHAN:
+				case LESSTHAN_OR_EQUALS:
+					validateAndSet(null, theDateParam);
+					break;
+				default:
+					// Should not happen
+					throw new InvalidRequestException("Invalid comparator for date range parameter:" + theDateParam.getPrefix() + ". This is a bug.");
 			}
 		}
 	}
 
 	/**
 	 * Constructor which takes two Dates representing the lower and upper bounds of the range (inclusive on both ends)
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(DateParam theLowerBound, DateParam theUpperBound) {
 		this();
@@ -123,15 +120,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	/**
 	 * Constructor which takes two Dates representing the lower and upper bounds of the range (inclusive on both ends)
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(IPrimitiveType<Date> theLowerBound, IPrimitiveType<Date> theUpperBound) {
 		this();
@@ -140,15 +135,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	/**
 	 * Constructor which takes two strings representing the lower and upper bounds of the range (inclusive on both ends)
-	 * 
-	 * @param theLowerBound
-	 *           An unqualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Either theLowerBound or theUpperBound may both be populated, or
-	 *           one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           An unqualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Either theLowerBound or theUpperBound may both be populated, or
-	 *           one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound An unqualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Either theLowerBound or theUpperBound may both be populated, or
+	 *                      one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound An unqualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Either theLowerBound or theUpperBound may both be populated, or
+	 *                      one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(String theLowerBound, String theUpperBound) {
 		this();
@@ -168,33 +161,51 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				myLowerBound = new DateParam(EQUAL, theParsed.getValueAsString());
 				myUpperBound = new DateParam(EQUAL, theParsed.getValueAsString());
 			}
-			
+
 		} else {
 
 			switch (theParsed.getPrefix()) {
-			case GREATERTHAN:
-			case GREATERTHAN_OR_EQUALS:
-				if (myLowerBound != null) {
-					throw new InvalidRequestException("Can not have multiple date range parameters for the same param that specify a lower bound");
-				}
-				myLowerBound = theParsed;
-				break;
-			case LESSTHAN:
-			case LESSTHAN_OR_EQUALS:
-				if (myUpperBound != null) {
-					throw new InvalidRequestException("Can not have multiple date range parameters for the same param that specify an upper bound");
-				}
-				myUpperBound = theParsed;
-				break;
-			default:
-				throw new InvalidRequestException("Unknown comparator: " + theParsed.getPrefix());
+				case GREATERTHAN:
+				case GREATERTHAN_OR_EQUALS:
+					if (myLowerBound != null) {
+						throw new InvalidRequestException("Can not have multiple date range parameters for the same param that specify a lower bound");
+					}
+					myLowerBound = theParsed;
+					break;
+				case LESSTHAN:
+				case LESSTHAN_OR_EQUALS:
+					if (myUpperBound != null) {
+						throw new InvalidRequestException("Can not have multiple date range parameters for the same param that specify an upper bound");
+					}
+					myUpperBound = theParsed;
+					break;
+				default:
+					throw new InvalidRequestException("Unknown comparator: " + theParsed.getPrefix());
 			}
 
 		}
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof DateRangeParam)) {
+			return false;
+		}
+		DateRangeParam other = (DateRangeParam) obj;
+		return Objects.equals(myLowerBound, other.myLowerBound) &&
+			Objects.equals(myUpperBound, other.myUpperBound);
+	}
+
 	public DateParam getLowerBound() {
 		return myLowerBound;
+	}
+
+	public DateRangeParam setLowerBound(DateParam theLowerBound) {
+		validateAndSet(theLowerBound, myUpperBound);
+		return this;
 	}
 
 	public Date getLowerBoundAsInstant() {
@@ -204,19 +215,19 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myLowerBound.getValue();
 		if (myLowerBound.getPrefix() != null) {
 			switch (myLowerBound.getPrefix()) {
-			case GREATERTHAN:
-			case STARTS_AFTER:
-				retVal = myLowerBound.getPrecision().add(retVal, 1);
-				break;
-			case EQUAL:
-			case GREATERTHAN_OR_EQUALS:
-				break;
-			case LESSTHAN:
-			case APPROXIMATE:
-			case LESSTHAN_OR_EQUALS:
-			case ENDS_BEFORE:
-			case NOT_EQUAL:
-				throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
+				case GREATERTHAN:
+				case STARTS_AFTER:
+					retVal = myLowerBound.getPrecision().add(retVal, 1);
+					break;
+				case EQUAL:
+				case GREATERTHAN_OR_EQUALS:
+					break;
+				case LESSTHAN:
+				case APPROXIMATE:
+				case LESSTHAN_OR_EQUALS:
+				case ENDS_BEFORE:
+				case NOT_EQUAL:
+					throw new IllegalStateException("Unvalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -226,6 +237,11 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return myUpperBound;
 	}
 
+	public DateRangeParam setUpperBound(DateParam theUpperBound) {
+		validateAndSet(myLowerBound, theUpperBound);
+		return this;
+	}
+
 	public Date getUpperBoundAsInstant() {
 		if (myUpperBound == null) {
 			return null;
@@ -233,21 +249,21 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		Date retVal = myUpperBound.getValue();
 		if (myUpperBound.getPrefix() != null) {
 			switch (myUpperBound.getPrefix()) {
-			case LESSTHAN:
-			case ENDS_BEFORE:
-				retVal = new Date(retVal.getTime() - 1L);
-				break;
-			case EQUAL:
-			case LESSTHAN_OR_EQUALS:
-				retVal = myUpperBound.getPrecision().add(retVal, 1);
-				retVal = new Date(retVal.getTime() - 1L);
-				break;
-			case GREATERTHAN_OR_EQUALS:
-			case GREATERTHAN:
-			case APPROXIMATE:
-			case NOT_EQUAL:
-			case STARTS_AFTER:
-				throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());
+				case LESSTHAN:
+				case ENDS_BEFORE:
+					retVal = new Date(retVal.getTime() - 1L);
+					break;
+				case EQUAL:
+				case LESSTHAN_OR_EQUALS:
+					retVal = myUpperBound.getPrecision().add(retVal, 1);
+					retVal = new Date(retVal.getTime() - 1L);
+					break;
+				case GREATERTHAN_OR_EQUALS:
+				case GREATERTHAN:
+				case APPROXIMATE:
+				case NOT_EQUAL:
+				case STARTS_AFTER:
+					throw new IllegalStateException("Unvalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
 		}
 		return retVal;
@@ -273,46 +289,55 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return bound != null && !bound.isEmpty();
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(myLowerBound, myUpperBound);
+	}
+
 	public boolean isEmpty() {
 		return (getLowerBoundAsInstant() == null) && (getUpperBoundAsInstant() == null);
 	}
 
-	public DateRangeParam setLowerBound(DateParam theLowerBound) {
-		validateAndSet(theLowerBound, myUpperBound);
+	/**
+	 * Sets the lower bound using a string that is compliant with
+	 * FHIR dateTime format (ISO-8601).
+	 * <p>
+	 * This lower bound is assumed to have a <code>ge</code>
+	 * (greater than or equals) modifier.
+	 * </p>
+	 */
+	public DateRangeParam setLowerBound(String theLowerBound) {
+		setLowerBound(new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound));
 		return this;
 	}
 
 	/**
 	 * Sets the range from a pair of dates, inclusive on both ends
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(Date theLowerBound, Date theUpperBound) {
 		DateParam lowerBound = theLowerBound != null
-				? new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound) : null;
+			? new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound) : null;
 		DateParam upperBound = theUpperBound != null
-				? new DateParam(LESSTHAN_OR_EQUALS, theUpperBound) : null;
+			? new DateParam(LESSTHAN_OR_EQUALS, theUpperBound) : null;
 		validateAndSet(lowerBound, upperBound);
 	}
 
 	/**
 	 * Sets the range from a pair of dates, inclusive on both ends
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(DateParam theLowerBound, DateParam theUpperBound) {
 		validateAndSet(theLowerBound, theUpperBound);
@@ -322,15 +347,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * Sets the range from a pair of dates, inclusive on both ends. Note that if
 	 * theLowerBound is after theUpperBound, thie method will automatically reverse
 	 * the order of the arguments in order to create an inclusive range.
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(IPrimitiveType<Date> theLowerBound, IPrimitiveType<Date> theUpperBound) {
 		IPrimitiveType<Date> lowerBound = theLowerBound;
@@ -349,23 +372,21 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	/**
 	 * Sets the range from a pair of dates, inclusive on both ends
-	 * 
-	 * @param theLowerBound
-	 *           A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
-	 * @param theUpperBound
-	 *           A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *           "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
-	 *           theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 *
+	 * @param theLowerBound A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *                      "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or
+	 *                      theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
 		DateParam lowerBound = theLowerBound != null
-				? new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound)
-				: null;
+			? new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound)
+			: null;
 		DateParam upperBound = theUpperBound != null
-				? new DateParam(LESSTHAN_OR_EQUALS, theUpperBound)
-				: null;
+			? new DateParam(LESSTHAN_OR_EQUALS, theUpperBound)
+			: null;
 		if (isNotBlank(theLowerBound) && isNotBlank(theUpperBound) && theLowerBound.equals(theUpperBound)) {
 			lowerBound.setPrefix(EQUAL);
 			upperBound.setPrefix(EQUAL);
@@ -373,14 +394,22 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		validateAndSet(lowerBound, upperBound);
 	}
 
-	public DateRangeParam setUpperBound(DateParam theUpperBound) {
-		validateAndSet(myLowerBound, theUpperBound);
+	/**
+	 * Sets the upper bound using a string that is compliant with
+	 * FHIR dateTime format (ISO-8601).
+	 * <p>
+	 * This upper bound is assumed to have a <code>le</code>
+	 * (less than or equals) modifier.
+	 * </p>
+	 */
+	public DateRangeParam setUpperBound(String theUpperBound) {
+		setUpperBound(new DateParam(LESSTHAN_OR_EQUALS, theUpperBound));
 		return this;
 	}
 
 	@Override
 	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters)
-	throws InvalidRequestException {
+		throws InvalidRequestException {
 
 		boolean haveHadUnqualifiedParameter = false;
 		for (QualifiedParamList paramList : theParameters) {
@@ -391,13 +420,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				throw new InvalidRequestException("DateRange parameter does not suppport OR queries");
 			}
 			String param = paramList.get(0);
-			
+
 			/*
 			 * Since ' ' is escaped as '+' we'll be nice to anyone might have accidentally not
 			 * escaped theirs
 			 */
 			param = param.replace(' ', '+');
-			
+
 			DateParam parsed = new DateParam();
 			parsed.setValueAsQueryToken(theContext, theParamName, paramList.getQualifier(), param);
 			addParam(parsed);
@@ -411,24 +440,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		}
 
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!(obj instanceof DateRangeParam)) {
-			return false;
-		}
-		DateRangeParam other = (DateRangeParam) obj;
-		return	Objects.equals(myLowerBound, other.myLowerBound) &&
-					Objects.equals(myUpperBound, other.myUpperBound);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(myLowerBound, myUpperBound);
 	}
 
 	@Override
@@ -463,8 +474,8 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (hasBound(lowerBound) && hasBound(upperBound)) {
 			if (lowerBound.getValue().getTime() > upperBound.getValue().getTime()) {
 				throw new DataFormatException(format(
-						"Lower bound of %s is after upper bound of %s",
-						lowerBound.getValueAsString(), upperBound.getValueAsString()));
+					"Lower bound of %s is after upper bound of %s",
+					lowerBound.getValueAsString(), upperBound.getValueAsString()));
 			}
 		}
 
@@ -473,13 +484,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				lowerBound.setPrefix(GREATERTHAN_OR_EQUALS);
 			}
 			switch (lowerBound.getPrefix()) {
-			case GREATERTHAN:
-			case GREATERTHAN_OR_EQUALS:
-			default:
-				break;
-			case LESSTHAN:
-			case LESSTHAN_OR_EQUALS:
-				throw new DataFormatException("Lower bound comparator must be > or >=, can not be " + lowerBound.getPrefix().getValue());
+				case GREATERTHAN:
+				case GREATERTHAN_OR_EQUALS:
+				default:
+					break;
+				case LESSTHAN:
+				case LESSTHAN_OR_EQUALS:
+					throw new DataFormatException("Lower bound comparator must be > or >=, can not be " + lowerBound.getPrefix().getValue());
 			}
 		}
 
@@ -488,13 +499,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				upperBound.setPrefix(LESSTHAN_OR_EQUALS);
 			}
 			switch (upperBound.getPrefix()) {
-			case LESSTHAN:
-			case LESSTHAN_OR_EQUALS:
-			default:
-				break;
-			case GREATERTHAN:
-			case GREATERTHAN_OR_EQUALS:
-				throw new DataFormatException("Upper bound comparator must be < or <=, can not be " + upperBound.getPrefix().getValue());
+				case LESSTHAN:
+				case LESSTHAN_OR_EQUALS:
+				default:
+					break;
+				case GREATERTHAN:
+				case GREATERTHAN_OR_EQUALS:
+					throw new DataFormatException("Upper bound comparator must be < or <=, can not be " + upperBound.getPrefix().getValue());
 			}
 		}
 
