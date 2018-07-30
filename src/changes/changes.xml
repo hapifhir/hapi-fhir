@@ -155,6 +155,14 @@
 				string search params. Thanks to Clayton Bodendein for the pull
 				request!
 			</action>
+			<action type="fix" issue="996">
+				The HAPI FHIR Server has been updated to correctly reflect the current
+				FHIR specification behaviour for the Prefer header. This means that
+				the server will no longer return an OperationOutcome by default, but
+				that one may be requested via a Prefer header, using the newly implemented
+				"Repreentation: OperationOutcome" value.
+				Thanks to Ana Maria Radu for the pul request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
