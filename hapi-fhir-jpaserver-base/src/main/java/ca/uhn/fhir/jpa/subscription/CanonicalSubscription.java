@@ -22,12 +22,10 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.EventDefinition;
@@ -59,10 +57,6 @@ public class CanonicalSubscription implements Serializable {
 	private Subscription.SubscriptionChannelType myChannelType;
 	@JsonProperty("status")
 	private Subscription.SubscriptionStatus myStatus;
-	@JsonIgnore
-	private transient IBaseResource myBackingSubscription;
-	@JsonProperty("backingSubscription")
-	private String myBackingSubscriptionString;
 	@JsonProperty("triggerDefinition")
 	private CanonicalEventDefinition myTrigger;
 	@JsonProperty("emailDetails")
@@ -89,13 +83,6 @@ public class CanonicalSubscription implements Serializable {
 		return new EqualsBuilder()
 			.append(getIdElementString(), that.getIdElementString())
 			.isEquals();
-	}
-
-	public IBaseResource getBackingSubscription(FhirContext theCtx) {
-		if (myBackingSubscription == null && myBackingSubscriptionString != null) {
-			myBackingSubscription = theCtx.newJsonParser().parseResource(myBackingSubscriptionString);
-		}
-		return myBackingSubscription;
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
@@ -188,14 +175,6 @@ public class CanonicalSubscription implements Serializable {
 		return new HashCodeBuilder(17, 37)
 			.append(getIdElementString())
 			.toHashCode();
-	}
-
-	public void setBackingSubscription(FhirContext theCtx, IBaseResource theBackingSubscription) {
-		myBackingSubscription = theBackingSubscription;
-		myBackingSubscriptionString = null;
-		if (myBackingSubscription != null) {
-			myBackingSubscriptionString = theCtx.newJsonParser().encodeResourceToString(myBackingSubscription);
-		}
 	}
 
 	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {

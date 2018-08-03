@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNullApi;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -51,13 +50,13 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
 			subscriptionId = msg.getSubscription().getIdElement(getContext()).getValue();
 
-			if (!subscriptionTypeApplies(getContext(), msg.getSubscription().getBackingSubscription(getContext()))) {
-				return;
-			}
-
 			CanonicalSubscription updatedSubscription = (CanonicalSubscription) getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
 			if (updatedSubscription != null) {
 				msg.setSubscription(updatedSubscription);
+			}
+
+			if (!subscriptionTypeApplies(msg.getSubscription())) {
+				return;
 			}
 
 			// Load the resource
