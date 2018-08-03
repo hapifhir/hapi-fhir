@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,8 +65,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
-	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new LinkedHashMap<>();
-	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
+	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = Collections.synchronizedMap(new LinkedHashMap<>());
+	protected Map<String, LinkedList<T>> myIdToHistory = Collections.synchronizedMap(new LinkedHashMap<>());
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	private long myNextId;
 	private AtomicLong myDeleteCount = new AtomicLong(0);
@@ -188,9 +188,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	private synchronized TreeMap<Long, T> getVersionToResource(String theIdPart) {
-		if (!myIdToVersionToResourceMap.containsKey(theIdPart)) {
-			myIdToVersionToResourceMap.put(theIdPart, new TreeMap<>());
-		}
+		myIdToVersionToResourceMap.computeIfAbsent(theIdPart, t -> new TreeMap<>());
 		return myIdToVersionToResourceMap.get(theIdPart);
 	}
 
@@ -333,9 +331,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		myTypeHistory.addFirst(theResource);
 
 		// Store to ID history map
-		if (!myIdToHistory.containsKey(theIdPart)) {
-			myIdToHistory.put(theIdPart, new LinkedList<>());
-		}
+		myIdToHistory.computeIfAbsent(theIdPart, t -> new LinkedList<>());
 		myIdToHistory.get(theIdPart).addFirst(theResource);
 
 		// Return the newly assigned ID including the version ID
