@@ -2424,7 +2424,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     if (elements.size() > 1)
       rule(errors, IssueType.INVALID, elements.get(1).line(), elements.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response item with this linkId allowed");
     for (Element element : elements) {
-      NodeStack ns = stack.push(element, -1, null, null);
+      NodeStack ns = stack.push(element, element.getIndex()+1, null, null);
       validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress);
     }
   }
@@ -2451,7 +2451,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           QuestionnaireItemComponent qItem = findQuestionnaireItem(qsrc, linkId);
           if (qItem != null) {
             rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index > -1, "Structural Error: item is in the wrong place");
-            NodeStack ns = stack.push(item, -1, null, null);
+            NodeStack ns = stack.push(item, element.getIndex()+1, null, null);
             validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress);
           }
           else
@@ -2532,7 +2532,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	  rule(errors, IssueType.STRUCTURE, value.line(), value.col(), stack.getLiteralPath(), found, "The code "+system+"::"+code+" is not a valid option");
 	}*/
 
-  private void validateAnswerCode(List<ValidationMessage> errors, Element value, NodeStack stack, Questionnaire qSrc, Reference ref, boolean theOpenChoice) {
+  private void validateAnswerCode(List<ValidationMessage> errors, Element value, NodeStack stack, Questionnaire qSrc, String linkId, Reference ref, boolean theOpenChoice) {
     ValueSet vs = resolveBindingReference(qSrc, ref, qSrc.getUrl());
     if (warning(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), vs != null, "ValueSet " + describeReference(ref) + " not found"))  {
       try {
@@ -2547,7 +2547,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         ValidationResult res = context.validateCode(c, vs);
         txTime = txTime + (System.nanoTime() - t);
         if (!res.isOk())
-          rule(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "The value provided ("+c.getSystem()+"::"+c.getCode()+") is not in the options value set in the questionnaire");
+          rule(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "The value provided ("+(c.getSystem()==null?"":c.getSystem()+"::")+c.getCode()+") for '" + linkId + "' is not in the options value set in the questionnaire");
       } catch (Exception e) {
         warning(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "Error " + e.getMessage() + " validating Coding against Questionnaire Options");
       }
@@ -2561,7 +2561,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       checkCodingOption(errors, answer, stack, qSrc, qItem, theOpenChoice);
     //	    validateAnswerCode(errors, v, stack, qItem.getOption());
     else if (qItem.hasOptions())
-      validateAnswerCode(errors, v, stack, qSrc, qItem.getOptions(), theOpenChoice);
+      validateAnswerCode(errors, v, stack, qSrc, qItem.getLinkId(), qItem.getOptions(), theOpenChoice);
     else
       hint(errors, IssueType.STRUCTURE, v.line(), v.col(), stack.getLiteralPath(), false, "Cannot validate options because no option or options are provided");
   }
