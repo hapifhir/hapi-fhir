@@ -351,12 +351,16 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected abstract void registerDeliverySubscriber();
 
-	public void registerSubscription(IIdType theId, S theSubscription) {
+	@SuppressWarnings("UnusedReturnValue")
+	public CanonicalSubscription registerSubscription(IIdType theId, S theSubscription) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
 		Validate.notNull(theSubscription);
 
-		myIdToSubscription.put(theId.getIdPart(), canonicalize(theSubscription));
+		CanonicalSubscription canonicalized = canonicalize(theSubscription);
+		myIdToSubscription.put(theId.getIdPart(), canonicalized);
+
+		return canonicalized;
 	}
 
 	protected void registerSubscriptionCheckingSubscriber() {
@@ -525,11 +529,12 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected abstract void unregisterDeliverySubscriber();
 
-	public void unregisterSubscription(IIdType theId) {
+	@SuppressWarnings("UnusedReturnValue")
+	public CanonicalSubscription unregisterSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
 
-		myIdToSubscription.remove(theId.getIdPart());
+		return myIdToSubscription.remove(theId.getIdPart());
 	}
 
 
