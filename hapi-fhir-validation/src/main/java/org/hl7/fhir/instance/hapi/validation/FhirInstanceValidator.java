@@ -1,6 +1,12 @@
 package org.hl7.fhir.instance.hapi.validation;
 
-import ca.uhn.fhir.context.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -10,6 +16,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -20,7 +28,12 @@ import org.hl7.fhir.convertors.VersionConvertorAdvisor40;
 import org.hl7.fhir.convertors.VersionConvertor_10_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
-import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.CodeableConcept;
+import org.hl7.fhir.instance.model.Coding;
+import org.hl7.fhir.instance.model.Questionnaire;
+import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.StructureDefinition;
+import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.formats.ParserType;
@@ -40,15 +53,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
@@ -126,6 +142,28 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 		root = theDocument.getDocumentElement();
 		return root.getLocalName();
+	}
+
+	private ArrayList<String> determineIfProfilesSpecified(Document theDocument)
+	{
+		ArrayList<String> profileNames = new ArrayList<String>();
+		NodeList list = theDocument.getChildNodes().item(0).getChildNodes();
+		for (int i = 0; i < list.getLength(); i++) {
+			if (list.item(i).getNodeName().compareToIgnoreCase("meta") == 0)
+			{
+				NodeList metaList = list.item(i).getChildNodes();
+				for (int j = 0; j < metaList.getLength(); j++)
+				{
+					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0)
+					{
+						String[] components = metaList.item(j).getAttributes().item(0).getNodeValue().split("/");
+						profileNames.add(components[components.length - 1]);
+					}
+				}
+				break;
+			}
+		}
+		return profileNames;
 	}
 
 	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
@@ -257,27 +295,49 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				return Collections.singletonList(m);
 			}
 
-			String resourceName = determineResourceName(document);
-			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
-			if (profile != null) {
-				try {
-					v.validate(null, messages, document, profile.getUrl());
-				} catch (Exception e) {
-					ourLog.error("Failure during validation", e);
-					throw new InternalErrorException("Unexpected failure while validating resource", e);
+			// Determine if meta/profiles are present...
+			ArrayList<String> resourceNames = determineIfProfilesSpecified(document);
+			if (resourceNames.isEmpty())
+			{
+				resourceNames.add(determineResourceName(document));
+			}
+
+			for (String resourceName : resourceNames) {
+				StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
+				if (profile != null) {
+					try {
+						v.validate(null, messages, document, profile.getUrl());
+					} catch (Exception e) {
+						ourLog.error("Failure during validation", e);
+						throw new InternalErrorException("Unexpected failure while validating resource", e);
+					}
 				}
 			}
 		} else if (theEncoding == EncodingEnum.JSON) {
 			Gson gson = new GsonBuilder().create();
 			JsonObject json = gson.fromJson(theInput, JsonObject.class);
 
-			String resourceName = json.get("resourceType").getAsString();
-			StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
-			if (profile != null) {
-				try {
-					v.validate(null, messages, json, profile.getUrl());
-				} catch (Exception e) {
-					throw new InternalErrorException("Unexpected failure while validating resource", e);
+			ArrayList<String> resourceNames = new ArrayList<String>();
+			JsonArray profiles = null;
+			try {
+				profiles = json.getAsJsonObject("meta").getAsJsonArray("profile");
+				for (JsonElement element : profiles)
+				{
+					String[] components = element.getAsString().split("/");
+					resourceNames.add(components[components.length - 1]);
+				}
+			} catch (Exception e) {
+				resourceNames.add(json.get("resourceType").getAsString());
+			}
+
+			for (String resourceName : resourceNames) {
+				StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
+				if (profile != null) {
+					try {
+						v.validate(null, messages, json, profile.getUrl());
+					} catch (Exception e) {
+						throw new InternalErrorException("Unexpected failure while validating resource", e);
+					}
 				}
 			}
 		} else {
