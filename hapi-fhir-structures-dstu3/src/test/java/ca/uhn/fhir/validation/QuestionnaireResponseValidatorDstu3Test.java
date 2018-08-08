@@ -146,8 +146,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) for 'link0' is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -156,8 +156,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system2::code3) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system2::code3) for 'link0' is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 	}
 
@@ -271,8 +271,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) for 'link0' is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 		// Partial code
 
@@ -283,8 +283,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("The value provided (code1) for 'link0' is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -293,8 +293,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("The value provided (code1) for 'link0' is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 		qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -302,8 +302,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://system").setCode(null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://system::null) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("The value provided (http://system::null) for 'link0' is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 		// Wrong type
 
@@ -314,7 +314,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("Cannot validate integer answer option because no option list is provided"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[1].answer"));
 
 		// String answer
 
