@@ -55,6 +55,28 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		}
 	}
 	
+	@Test	
+	public void testHeadJsonWithInvalidPatient() throws Exception {	
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");	
+		HttpResponse status = ourClient.execute(httpGet);	
+		assertEquals(null, status.getEntity());	
+ 		ourLog.info(status.toString());	
+			
+		assertEquals(404, status.getStatusLine().getStatusCode());	
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+	}
+	
+	@Test	
+	public void testHeadJsonWithValidPatient() throws Exception {	
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/1");	
+		HttpResponse status = ourClient.execute(httpGet);	
+		assertEquals(null, status.getEntity());	
+ 		ourLog.info(status.toString());	
+			
+		assertEquals(200, status.getStatusLine().getStatusCode());	
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+	}
+	
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
 		HttpRequestBase req = new HttpRequestBase() {
