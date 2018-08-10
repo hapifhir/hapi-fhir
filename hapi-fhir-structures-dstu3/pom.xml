@@ -11,6 +11,7 @@
 
 	<artifactId>hapi-fhir-structures-dstu3</artifactId>
 	<packaging>jar</packaging>
+	<version>2.4.20180809</version>
 
 	<name>HAPI FHIR Structures - DSTU3</name>
 
@@ -18,12 +19,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>${project.version}</version>
+			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>${project.version}</version>
+			<version>2.4</version>
 			<scope>test</scope>
 		</dependency>
 
