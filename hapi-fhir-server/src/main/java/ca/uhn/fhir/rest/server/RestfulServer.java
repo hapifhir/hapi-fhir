@@ -300,7 +300,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		} else {
 			resourceBinding = myResourceNameToBinding.get(resourceName);
 			if (resourceBinding == null) {
-				throw new ResourceNotFoundException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+				throwUnknownResourceTypeException(resourceName);
 			}
 		}
 
@@ -316,7 +316,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			if (isBlank(requestPath)) {
 				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
 			}
-			throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", requestType.name(), requestPath, requestDetails.getParameters().keySet()));
+			throwUnknownFhirOperationException(requestDetails, requestPath, requestType);
 		}
 		return resourceMethod;
 	}
@@ -569,10 +569,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(IServerInterceptor... theList) {
+	public void setInterceptors(List<IServerInterceptor> theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(Arrays.asList(theList));
+			myInterceptors.addAll(theList);
 		}
 	}
 
@@ -602,11 +602,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Collection<Object> theProviders) {
-		myPlainProviders.clear();
-		if (theProviders != null) {
-			myPlainProviders.addAll(theProviders);
-		}
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
 	}
 
 	/**
@@ -636,10 +633,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
+	public void setResourceProviders(IResourceProvider... theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(theResourceProviders);
+			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
 		}
 	}
 
@@ -1512,10 +1509,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
+	public void setInterceptors(IServerInterceptor... theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(theList);
+			myInterceptors.addAll(Arrays.asList(theList));
 		}
 	}
 
@@ -1524,8 +1521,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Object... theProv) {
-		setPlainProviders(Arrays.asList(theProv));
+	public void setPlainProviders(Collection<Object> theProviders) {
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(theProviders);
+		}
 	}
 
 	/**
@@ -1543,10 +1543,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(IResourceProvider... theResourceProviders) {
+	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
+			myResourceProviders.addAll(theResourceProviders);
 		}
 	}
 
@@ -1557,6 +1557,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setTenantIdentificationStrategy(ITenantIdentificationStrategy theTenantIdentificationStrategy) {
 		myTenantIdentificationStrategy = theTenantIdentificationStrategy;
+	}
+
+	protected void throwUnknownFhirOperationException(RequestDetails requestDetails, String requestPath, RequestTypeEnum theRequestType) {
+		throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, requestDetails.getParameters().keySet()));
+	}
+
+	protected void throwUnknownResourceTypeException(String theResourceName) {
+		throw new ResourceNotFoundException("Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
 	}
 
 	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
