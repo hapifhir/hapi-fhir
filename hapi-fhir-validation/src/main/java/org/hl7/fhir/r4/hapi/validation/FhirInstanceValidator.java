@@ -31,6 +31,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,8 +99,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				{
 					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0)
 					{
-						String[] components = metaList.item(j).getAttributes().item(0).getNodeValue().split("/");
-						profileNames.add(components[components.length - 1]);
+						profileNames.add(metaList.item(j).getAttributes().item(0).getNodeValue());
 					}
 				}
 				break;
@@ -108,7 +109,26 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	private StructureDefinition findStructureDefinitionForResourceName(final FhirContext theCtx, String resourceName) {
-		String sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
+		String sdName = null;
+		try {
+			// Test if a URL was passed in specifying the structure definition and test if "StructureDefinition" is part of the URL
+			URL testIfUrl = new URL(resourceName);
+			if (resourceName.toLowerCase().contains("structuredefinition"))
+			{
+				sdName = resourceName;
+			}
+			else
+			{
+				ourLog.error(String.format("Structure definition URL must contain the text, \"StructureDefinition\", URL=%s",
+					resourceName));
+				throw new InternalErrorException(String.format("Structure definition URL must contain the text, \"StructureDefinition\", URL=%s",
+					resourceName));
+			}
+		}
+		catch (MalformedURLException e)
+		{
+			sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
+		}
 		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
 		return profile;
 	}
@@ -247,6 +267,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 						throw new InternalErrorException("Unexpected failure while validating resource", e);
 					}
 				}
+				else
+				{
+					profile = findStructureDefinitionForResourceName(theCtx, determineResourceName(document));
+					if (profile != null) {
+						try {
+							v.validate(null, messages, document, profile.getUrl());
+						} catch (Exception e) {
+							ourLog.error("Failure during validation", e);
+							throw new InternalErrorException("Unexpected failure while validating resource", e);
+						}
+					}
+				}
 			}
 		} else if (theEncoding == EncodingEnum.JSON) {
 			Gson gson = new GsonBuilder().create();
@@ -258,8 +290,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				profiles = json.getAsJsonObject("meta").getAsJsonArray("profile");
 				for (JsonElement element : profiles)
 				{
-					String[] components = element.getAsString().split("/");
-					resourceNames.add(components[components.length - 1]);
+					resourceNames.add(element.getAsString());
 				}
 			} catch (Exception e) {
 				resourceNames.add(json.get("resourceType").getAsString());
@@ -272,6 +303,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 						v.validate(null, messages, json, profile.getUrl());
 					} catch (Exception e) {
 						throw new InternalErrorException("Unexpected failure while validating resource", e);
+					}
+				}
+				else
+				{
+					profile = findStructureDefinitionForResourceName(theCtx, json.get("resourceType").getAsString());
+					if (profile != null) {
+						try {
+							v.validate(null, messages, json, profile.getUrl());
+						} catch (Exception e) {
+							ourLog.error("Failure during validation", e);
+							throw new InternalErrorException("Unexpected failure while validating resource", e);
+						}
 					}
 				}
 			}
