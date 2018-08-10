@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,6 +50,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -82,7 +83,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private ConcurrentHashMap<String, CanonicalSubscription> myIdToSubscription = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, SubscribableChannel> myIdToSubscribaleChannel = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, SubscribableChannel> mySubscribableChannel = new ConcurrentHashMap<>();
 	private Multimap<String, MessageHandler> myIdToDeliveryHandler = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
@@ -301,7 +302,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	protected MessageChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
-		return myIdToSubscribaleChannel.get(theSubscription.getIdElement(myCtx).getIdPart());
+		return mySubscribableChannel.get(theSubscription.getIdElement(myCtx).getIdPart());
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {
@@ -384,7 +385,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	public void registerHandler(String theSubscriptionId, MessageHandler theHandler) {
-		myIdToSubscribaleChannel.get(theSubscriptionId).subscribe(theHandler);
+		mySubscribableChannel.get(theSubscriptionId).subscribe(theHandler);
 		myIdToDeliveryHandler.put(theSubscriptionId, theHandler);
 	}
 
@@ -399,7 +400,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		SubscribableChannel deliveryChannel = createDeliveryChannel(canonicalized);
 		Optional<MessageHandler> deliveryHandler = createDeliveryHandler(canonicalized);
 
-		myIdToSubscribaleChannel.put(subscriptionId, deliveryChannel);
+		mySubscribableChannel.put(subscriptionId, deliveryChannel);
 		myIdToSubscription.put(subscriptionId, canonicalized);
 
 		deliveryHandler.ifPresent(handler -> registerHandler(subscriptionId, handler));
@@ -545,13 +546,20 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 	}
 
-	public void unregisterHandler(String theSubscriptionId, MessageHandler next) {
-		SubscribableChannel channel = myIdToSubscribaleChannel.get(theSubscriptionId);
+	public void unregisterHandler(String theSubscriptionId, MessageHandler theMessageHandler) {
+		SubscribableChannel channel = mySubscribableChannel.get(theSubscriptionId);
 		if (channel != null) {
-			channel.unsubscribe(next);
+			if (channel instanceof DisposableBean) {
+				try {
+					((DisposableBean) channel).destroy();
+				} catch (Exception e) {
+					ourLog.error("Failed to destroy channel bean", e);
+				}
+			}
+			channel.unsubscribe(theMessageHandler);
 		}
 
-		myIdToSubscribaleChannel.remove(theSubscriptionId, next);
+		mySubscribableChannel.remove(theSubscriptionId, theMessageHandler);
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
@@ -565,7 +573,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			unregisterHandler(subscriptionId, next);
 		}
 
-		myIdToSubscribaleChannel.remove(subscriptionId);
+		mySubscribableChannel.remove(subscriptionId);
 
 		return myIdToSubscription.remove(subscriptionId);
 	}

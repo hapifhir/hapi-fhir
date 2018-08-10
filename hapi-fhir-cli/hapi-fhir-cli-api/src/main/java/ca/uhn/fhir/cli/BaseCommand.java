@@ -108,7 +108,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			if (theOptions.getOption(theOpt) != null) {
 				throw new IllegalStateException("Duplicate option: " + theOpt);
 			}
-			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t-> theOpt.equals(t.getOpt()))) {
+			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t -> theOpt.equals(t.getOpt()))) {
 				throw new IllegalStateException("Duplicate option: " + theOpt);
 			}
 		}
@@ -116,7 +116,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			if (theOptions.getOption(theLongOpt) != null) {
 				throw new IllegalStateException("Duplicate option: " + theLongOpt);
 			}
-			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t-> theLongOpt.equals(t.getLongOpt()))) {
+			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t -> theLongOpt.equals(t.getLongOpt()))) {
 				throw new IllegalStateException("Duplicate option: " + theOpt);
 			}
 		}
@@ -362,8 +362,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
+		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName);
+	}
+
+	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName, String theBearerTokenOptionName) {
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(10 * 60 * 1000);
-		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(baseUrl);
+		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);
 		if (isNotBlank(basicAuthHeaderValue)) {
