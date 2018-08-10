@@ -126,15 +126,12 @@ public class SubscriptionActivatingSubscriber {
 				activateSubscription(activeStatus, theSubscription, requestedStatus);
 			}
 		} else if (activeStatus.equals(statusString)) {
-			if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
-				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-			}
-			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+			registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
 			if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
+				mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 			}
-			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 		}
 	}
 
@@ -145,7 +142,7 @@ public class SubscriptionActivatingSubscriber {
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
 			mySubscriptionDao.update(subscription);
-			mySubscriptionInterceptor.registerSubscription(subscription.getIdElement(), subscription);
+			registerSubscriptionUnlessAlreadyRegistered(subscription);
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myCtx, subscription, "error");
@@ -177,6 +174,13 @@ public class SubscriptionActivatingSubscriber {
 				break;
 		}
 
+	}
+
+	private void registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+		if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+		}
 	}
 
 	@VisibleForTesting
