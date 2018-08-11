@@ -249,6 +249,11 @@
 				queue (only the ID), which should reduce the memory/disk footprint of the queue
 				when it grows long.
 			</action>
+			<action type="fix" issue="1053">
+				A bug was fixed in JPA server searches: When performing a search with a _lastUpdate 
+				filter, the filter was applied to any _include values, which it should not have been.
+				Thanks to Deepak Garg for reporting!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

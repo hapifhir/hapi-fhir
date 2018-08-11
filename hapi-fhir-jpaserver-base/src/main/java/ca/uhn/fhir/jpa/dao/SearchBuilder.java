@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -112,7 +112,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	protected IResourceTagDao myResourceTagDao;
 	protected IResourceSearchViewDao myResourceSearchViewDao;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -1595,17 +1595,17 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// -- get the resource from the searchView
 		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(pids);
-		
+
 		//-- preload all tags with tag definition if any
 		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
-		
+
 		Long resourceId = null;
 		for (ResourceSearchView next : resourceSearchViewList) {
-			
+
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			
+
 			resourceId = next.getId();
-			
+
 			IBaseResource resource = theDao.toResource(resourceType, next, tagMap.get(resourceId), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
@@ -1635,30 +1635,30 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {		
-		
+	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {
+
 		List<Long> idList = new ArrayList<Long>(theResourceSearchViewList.size());
-		
+
 		//-- find all resource has tags
-		for (ResourceSearchView resource: theResourceSearchViewList) {			
+		for (ResourceSearchView resource: theResourceSearchViewList) {
 			if (resource.isHasTags())
 				idList.add(resource.getId());
 		}
-		
+
 		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
-		
+
 		//-- no tags
 		if (idList.size() == 0)
 			return tagMap;
-		
+
 		//-- get all tags for the idList
 		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
-	
+
 		//-- build the map, key = resourceId, value = list of ResourceTag
 		Long resourceId;
 		Collection<ResourceTag> tagCol;
 		for (ResourceTag tag : tagList) {
-			
+
 			resourceId = tag.getResourceId();
 			tagCol = tagMap.get(resourceId);
 			if (tagCol == null) {
@@ -1670,7 +1670,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		}
 
-		return tagMap;		
+		return tagMap;
 	}
 
 	@Override
@@ -1712,8 +1712,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later (so it can't be Collections.emptySet())
 	 */
 	@Override
-	public HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
-														  boolean theReverseMode, DateRangeParam theLastUpdated) {
+	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
+												 boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -1820,8 +1820,10 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
-			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-				pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+			if (theReverseMode) {
+				if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
+					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+				}
 			}
 			for (Long next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
@@ -2172,7 +2174,7 @@ public class SearchBuilder implements ISearchBuilder {
 					myCurrentOffset = end;
 					Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
 					Set<Include> includes = Collections.singleton(new Include("*", true));
-					Set<Long> newPids = loadReverseIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
+					Set<Long> newPids = loadIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
 					myCurrentIterator = newPids.iterator();
 				}
 

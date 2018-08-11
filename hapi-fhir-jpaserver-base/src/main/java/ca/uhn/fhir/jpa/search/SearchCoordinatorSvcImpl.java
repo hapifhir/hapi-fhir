@@ -258,8 +258,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					 * individually for pages as we return them to clients
 					 */
 					final Set<Long> includedPids = new HashSet<Long>();
-					includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated()));
-					includedPids.addAll(sb.loadReverseIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated()));
+					includedPids.addAll(sb.loadIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated()));
+					includedPids.addAll(sb.loadIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated()));
 
 					List<IBaseResource> resources = new ArrayList<IBaseResource>();
 					sb.loadResourcesByPid(pids, resources, includedPids, false, myEntityManager, myContext, theCallingDao);
@@ -336,10 +336,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		search.setSearchQueryStringHash(queryString.hashCode());
 
 		for (Include next : theParams.getIncludes()) {
-			search.getIncludes().add(new SearchInclude(search, next.getValue(), false, next.isRecurse()));
+			search.addInclude(new SearchInclude(search, next.getValue(), false, next.isRecurse()));
 		}
 		for (Include next : theParams.getRevIncludes()) {
-			search.getIncludes().add(new SearchInclude(search, next.getValue(), true, next.isRecurse()));
+			search.addInclude(new SearchInclude(search, next.getValue(), true, next.isRecurse()));
 		}
 
 		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, searchUuid);

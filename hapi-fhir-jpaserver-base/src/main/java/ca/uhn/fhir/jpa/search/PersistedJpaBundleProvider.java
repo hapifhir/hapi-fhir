@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -134,13 +135,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex);
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-		template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		return template.execute(new TransactionCallback<List<IBaseResource>>() {
-			@Override
-			public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-				return toResourceList(sb, pidsSubList);
-			}
-		});
+		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		return template.execute(theStatus -> toResourceList(sb, pidsSubList));
 	}
 
 	private void ensureDependenciesInjected() {
@@ -273,8 +269,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
 		Set<Long> includedPids = new HashSet<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			includedPids.addAll(sb.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
-			includedPids.addAll(sb.loadReverseIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+			includedPids.addAll(sb.loadIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
+			includedPids.addAll(sb.loadIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
 		}
 
 		// Execute the query and make sure we return distinct results
