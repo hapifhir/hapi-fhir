@@ -198,6 +198,71 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * See #1053
+	 *
+	 * Note that I don't know that _lastUpdate actually should apply to reverse includes. The
+	 * spec doesn't say one way or ther other, but it seems like sensible behaviour to me.
+	 *
+	 * Definitely the $everything operation depends on this behaviour, so if we change it
+	 * we need to account for the everything operation...
+	 */
+	@Test
+	public void testLastUpdateShouldApplyToReverseIncludes() {
+		SearchParameterMap map;
+		List<String> ids;
+
+		// This gets updated in a sec..
+		Organization org = new Organization();
+		org.setActive(false);
+		org.setId("O1");
+		myOrganizationDao.update(org);
+
+		Date beforeAll = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		p.setManagingOrganization(new Reference("Organization/O1"));
+		myPatientDao.update(p);
+
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Date beforeOrg = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		org = new Organization();
+		org.setActive(true);
+		org.setId("O1");
+		myOrganizationDao.update(org);
+
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		Date afterAll = new Date();
+
+		// Everything should come back
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(beforeAll));
+		map.addRevInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		assertThat(ids, contains("Organization/O1", "Patient/P1"));
+
+		// Search before everything
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(beforeOrg));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		assertThat(ids, contains("Organization/O1"));
+
+		// Search after everything
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(afterAll));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		assertThat(ids, empty());
+
+	}
+
 	@Test
 	public void testEverythingTimings() {
 		String methodName = "testEverythingTimings";

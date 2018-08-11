@@ -69,6 +69,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
@@ -1835,19 +1836,15 @@ public class SearchBuilder implements ISearchBuilder {
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
-		ourLog.info("Loaded {} {} in {} rounds and {} ms", new Object[] {allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart()});
+		ourLog.info("Loaded {} {} in {} rounds and {} ms", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart());
 
 		return allAdded;
 	}
 
-	private void searchForIdsWithAndOr(SearchParameterMap theParams) {
-		SearchParameterMap params = theParams;
-		if (params == null) {
-			params = new SearchParameterMap();
-		}
+	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams) {
 		myParams = theParams;
 
-		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
+		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
 			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams);
