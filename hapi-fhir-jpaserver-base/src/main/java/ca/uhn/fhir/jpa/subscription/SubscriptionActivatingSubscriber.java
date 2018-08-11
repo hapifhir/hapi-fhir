@@ -177,10 +177,13 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 	private void registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+		} else {
 			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
 		}
+		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
 	}
 
 	@VisibleForTesting

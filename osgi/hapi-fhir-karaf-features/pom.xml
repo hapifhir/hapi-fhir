@@ -17,8 +17,8 @@
 
 	<properties>
 		<features.file>features.xml</features.file>
-		<pax-logging-version>1.8.6</pax-logging-version>
-		<felix-framework-version>3.2.2</felix-framework-version>
+		<pax-logging-version>1.10.1</pax-logging-version>
+		<felix-framework-version>6.0.0</felix-framework-version>
 	</properties>
 
 	<dependencies>
