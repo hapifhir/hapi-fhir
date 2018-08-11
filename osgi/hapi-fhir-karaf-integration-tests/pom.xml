@@ -33,7 +33,7 @@
    </description>
 
    <properties>
-		<pax.exam.version>4.12.0</pax.exam.version>
+		<pax.exam.version>4.9.1</pax.exam.version>
    </properties>
 
    <dependencies>
