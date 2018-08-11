@@ -70,10 +70,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
-	static final String SUBSCRIPTION_CRITERIA = "Subscription.criteria";
-	static final String SUBSCRIPTION_ENDPOINT = "Subscription.channel.endpoint";
-	static final String SUBSCRIPTION_PAYLOAD = "Subscription.channel.payload";
-	static final String SUBSCRIPTION_HEADER = "Subscription.channel.header";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
 	private SubscribableChannel myProcessingChannel;
 	private SubscribableChannel myDeliveryChannel;
@@ -128,7 +124,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
-			retVal.setBackingSubscription(myCtx, theSubscription);
 			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -147,7 +142,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-			retVal.setBackingSubscription(myCtx, theSubscription);
 			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -193,7 +187,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
-		retVal.setBackingSubscription(myCtx, theSubscription);
 		retVal.setChannelType(subscription.getChannel().getType());
 		retVal.setCriteriaString(subscription.getCriteria());
 		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -204,7 +197,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
 			String from;
 			String subjectTemplate;
-			String bodyTemplate;
 			try {
 				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
@@ -260,8 +252,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			myResourceTypeToDao = theResourceTypeToDao;
 		}
 
-		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
-		return dao;
+		return (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
 	}
 
 	public SubscribableChannel getDeliveryChannel() {

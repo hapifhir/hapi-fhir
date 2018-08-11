@@ -244,6 +244,11 @@
 				a resource could be associated with the wrong entry in the response.
 				Thanks to GitHub user @jbalbien for the pull request!
 			</action>
+			<action type="add">
+				JPA subscription delivery queues no longer store the resource body in the
+				queue (only the ID), which should reduce the memory/disk footprint of the queue
+				when it grows long.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.messaging.MessageHandler;
 
@@ -62,19 +60,19 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	/**
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
-	protected boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription) {
+	protected boolean subscriptionTypeApplies(CanonicalSubscription theSubscription) {
 		Subscription.SubscriptionChannelType channelType = getChannelType();
-		return subscriptionTypeApplies(theCtx, theSubscription, channelType);
+		String subscriptionType = theSubscription.getChannelType().toCode();
+		return subscriptionTypeApplies(subscriptionType, channelType);
 	}
 
 	/**
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?
 	 */
-	static boolean subscriptionTypeApplies(FhirContext theCtx, IBaseResource theSubscription, Subscription.SubscriptionChannelType theChannelType) {
-		IPrimitiveType<?> subscriptionType = theCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class);
+	static boolean subscriptionTypeApplies(String theSubscriptionChannelTypeCode, Subscription.SubscriptionChannelType theChannelType) {
 		boolean subscriptionTypeApplies = false;
- 		if (subscriptionType != null) {
-			if (theChannelType.toCode().equals(subscriptionType.getValueAsString())) {
+ 		if (theSubscriptionChannelTypeCode != null) {
+			if (theChannelType.toCode().equals(theSubscriptionChannelTypeCode)) {
 				subscriptionTypeApplies = true;
 			}
 		}
