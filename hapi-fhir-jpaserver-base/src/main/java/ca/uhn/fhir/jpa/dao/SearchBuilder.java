@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -61,6 +63,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
+import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -106,6 +110,9 @@ public class SearchBuilder implements ISearchBuilder {
 	private String mySearchUuid;
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
+
+	protected IResourceTagDao myResourceTagDao;
+	protected IResourceSearchViewDao myResourceSearchViewDao;
 
 	/**
 	 * Constructor
@@ -1595,17 +1602,21 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
 									Map<Long, Integer> position, Collection<Long> pids) {
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(from.get("myId").in(pids));
-		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
-		List<ResourceTable> resultList = q.getResultList();
+		// -- get the resource from the searchView
+		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(pids);
 
-		for (ResourceTable next : resultList) {
+		//-- preload all tags with tag definition if any
+		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
+
+		Long resourceId = null;
+		for (ResourceSearchView next : resourceSearchViewList) {
+
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
+
+			resourceId = next.getId();
+
+			IBaseResource resource = theDao.toResource(resourceType, next, tagMap.get(resourceId), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
@@ -1632,6 +1643,44 @@ public class SearchBuilder implements ISearchBuilder {
 
 			theResourceListToPopulate.set(index, resource);
 		}
+	}
+
+	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {
+
+		List<Long> idList = new ArrayList<Long>(theResourceSearchViewList.size());
+
+		//-- find all resource has tags
+		for (ResourceSearchView resource: theResourceSearchViewList) {
+			if (resource.isHasTags())
+				idList.add(resource.getId());
+		}
+
+		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
+
+		//-- no tags
+		if (idList.size() == 0)
+			return tagMap;
+
+		//-- get all tags for the idList
+		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
+
+		//-- build the map, key = resourceId, value = list of ResourceTag
+		Long resourceId;
+		Collection<ResourceTag> tagCol;
+		for (ResourceTag tag : tagList) {
+
+			resourceId = tag.getResourceId();
+			tagCol = tagMap.get(resourceId);
+			if (tagCol == null) {
+				tagCol = new ArrayList<>();
+				tagCol.add(tag);
+				tagMap.put(resourceId, tagCol);
+			} else {
+				tagCol.add(tag);
+			}
+		}
+
+		return tagMap;
 	}
 
 	@Override
@@ -1675,8 +1724,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @param theLastUpdated
 	 */
 	@Override
-	public HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
-														  boolean theReverseMode, DateRangeParam theLastUpdated) {
+	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
+												 boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
 		}
@@ -1784,8 +1833,10 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
-			if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-				pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+			if (theReverseMode) {
+				if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
+					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+				}
 			}
 			for (Long next : pidsToInclude) {
 				if (original.contains(next) == false && allAdded.contains(next) == false) {
@@ -2132,7 +2183,7 @@ public class SearchBuilder implements ISearchBuilder {
 					myCurrentOffset = end;
 					Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
 					Set<Include> includes = Collections.singleton(new Include("*", true));
-					Set<Long> newPids = loadReverseIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
+					Set<Long> newPids = loadIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
 					myCurrentIterator = newPids.iterator();
 				}
 
