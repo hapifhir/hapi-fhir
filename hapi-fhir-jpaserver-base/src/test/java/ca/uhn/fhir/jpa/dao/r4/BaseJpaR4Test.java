@@ -395,6 +395,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		target.setDisplay("Target Code 45678");
 		target.setEquivalence(ConceptMapEquivalence.WIDER);
 
+		// Add a duplicate
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
 		group.setSourceVersion("Version 3");

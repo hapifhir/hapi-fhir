@@ -249,6 +249,10 @@
 				queue (only the ID), which should reduce the memory/disk footprint of the queue
 				when it grows long.
 			</action>
+			<action type="add">
+				When performing a ConceptMap/$translate operation with reverse="true" in the arguments,
+				the equivalency flag is now set on the response just as it is for a non-reverse lookup.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
