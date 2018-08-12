@@ -1687,7 +1687,7 @@ public class AuthorizationInterceptorR4Test {
 		patch.setEntity(new StringEntity(patchBody, ContentType.create(Constants.CT_JSON_PATCH, Charsets.UTF_8)));
 		CloseableHttpResponse status = ourClient.execute(patch);
 		extractResponseAndClose(status);
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
@@ -2964,7 +2964,7 @@ public class AuthorizationInterceptorR4Test {
 		httpPost.setEntity(new StringEntity(input, ContentType.parse("application/json-patch+json")));
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
