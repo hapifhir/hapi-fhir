@@ -468,6 +468,10 @@
 		<developer>
 			<id>jbalbien</id>
 		</developer>
+		<developer>
+			<id>alinleonard</id>
+			<name>Alin Leonard</name>
+		</developer>
 	</developers>
 
 	<licenses>
