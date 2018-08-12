@@ -1,31 +1,5 @@
 package ca.uhn.fhir.rest.param;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.APPROXIMATE;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import com.google.common.testing.EqualsTester;
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -33,16 +7,55 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.testing.EqualsTester;
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
+import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class DateRangeParamTest {
 
-	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final SimpleDateFormat ourFmt;
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateRangeParamTest.class);
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 
 	static {
 		ourFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS");
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	private static DateRangeParam create(String theLower, String theUpper) throws InvalidRequestException {
+		DateRangeParam p = new DateRangeParam();
+		List<QualifiedParamList> tokens = new ArrayList<QualifiedParamList>();
+		tokens.add(QualifiedParamList.singleton(null, theLower));
+		if (theUpper != null) {
+			tokens.add(QualifiedParamList.singleton(null, theUpper));
+		}
+		p.setValuesAsQueryTokens(ourCtx, null, tokens);
+		return p;
+	}
+
+	public static Date parse(String theString) throws ParseException {
+		return ourFmt.parse(theString);
+	}
+
+	public static Date parseM1(String theString) throws ParseException {
+		return new Date(ourFmt.parse(theString).getTime() - 1L);
 	}
 
 	private DateRangeParam create(String theString) {
@@ -85,7 +98,7 @@ public class DateRangeParamTest {
 		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create(">=2011-01-01", "<2011-01-02").getUpperBoundAsInstant());
 		assertEquals(parse("2011-01-02 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-03 00:00:00.0000"), create(">2011-01-01", "<=2011-01-02").getUpperBoundAsInstant());
-		
+
 		assertEquals(parse("2011-01-01 00:00:00.0000"), create("ge2011-01-01", "lt2011-01-02").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("ge2011-01-01", "lt2011-01-02").getUpperBoundAsInstant());
 		assertEquals(parse("2011-01-02 00:00:00.0000"), create("gt2011-01-01", "le2011-01-02").getLowerBoundAsInstant());
@@ -117,6 +130,26 @@ public class DateRangeParamTest {
 	public void testOnlyOneParam() throws Exception {
 		assertEquals(parse("2011-01-01 00:00:00.0000"), create("2011-01-01").getLowerBoundAsInstant());
 		assertEquals(parseM1("2011-01-02 00:00:00.0000"), create("2011-01-01").getUpperBoundAsInstant());
+	}
+
+	@Test
+	public void testSetBoundsWithDatesInclusive() {
+		DateRangeParam range = new DateRangeParam();
+		range.setLowerBoundInclusive(new Date());
+		range.setUpperBoundInclusive(new Date());
+
+		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, range.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, range.getUpperBound().getPrefix());
+	}
+
+	@Test
+	public void testSetBoundsWithDatesExclusive() {
+		DateRangeParam range = new DateRangeParam();
+		range.setLowerBoundExclusive(new Date());
+		range.setUpperBoundExclusive(new Date());
+
+		assertEquals(ParamPrefixEnum.GREATERTHAN, range.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN, range.getUpperBound().getPrefix());
 	}
 
 	@Test
@@ -195,46 +228,22 @@ public class DateRangeParamTest {
 		assertEquals(parseM1("2014-01-01 00:00:00.0000"), create("gt2011", "le2013").getUpperBoundAsInstant());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Test()
 	public void testEqualsAndHashCode() {
 		Date lowerBound = new Date(currentTimeMillis());
 		Date upperBound = new Date(lowerBound.getTime() + SECONDS.toMillis(1));
 		new EqualsTester()
 			.addEqualityGroup(new DateRangeParam(),
-				               new DateRangeParam((Date) null, (Date) null))
+				new DateRangeParam((Date) null, (Date) null))
 			.addEqualityGroup(new DateRangeParam(lowerBound, upperBound),
-								   new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), new DateParam(LESSTHAN_OR_EQUALS, upperBound)))
+				new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), new DateParam(LESSTHAN_OR_EQUALS, upperBound)))
 			.addEqualityGroup(new DateRangeParam(new DateParam(EQUAL, lowerBound)),
-				               new DateRangeParam(new DateParam(null, lowerBound)),
-								   new DateRangeParam(new DateParam(EQUAL, lowerBound), new DateParam(EQUAL, lowerBound)))
+				new DateRangeParam(new DateParam(null, lowerBound)),
+				new DateRangeParam(new DateParam(EQUAL, lowerBound), new DateParam(EQUAL, lowerBound)))
 			.addEqualityGroup(new DateRangeParam(lowerBound, null),
-				               new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), null))
+				new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, lowerBound), null))
 			.addEqualityGroup(new DateRangeParam(null, upperBound),
-				               new DateRangeParam(null, new DateParam(LESSTHAN_OR_EQUALS, upperBound)))
+				new DateRangeParam(null, new DateParam(LESSTHAN_OR_EQUALS, upperBound)))
 			.testEquals();
-	}
-
-	private static DateRangeParam create(String theLower, String theUpper) throws InvalidRequestException {
-		DateRangeParam p = new DateRangeParam();
-		List<QualifiedParamList> tokens = new ArrayList<QualifiedParamList>();
-		tokens.add(QualifiedParamList.singleton(null, theLower));
-		if (theUpper != null) {
-			tokens.add(QualifiedParamList.singleton(null, theUpper));
-		}
-		p.setValuesAsQueryTokens(ourCtx, null, tokens);
-		return p;
-	}
-
-	public static Date parse(String theString) throws ParseException {
-		return ourFmt.parse(theString);
-	}
-
-	public static Date parseM1(String theString) throws ParseException {
-		return new Date(ourFmt.parse(theString).getTime() - 1L);
 	}
 }
