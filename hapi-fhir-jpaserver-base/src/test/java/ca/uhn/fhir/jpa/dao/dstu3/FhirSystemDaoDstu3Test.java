@@ -1410,26 +1410,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	}
 
 	@Test
-	public void testTransactionDoesNotAllowDanglingTemporaryIds() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/cdr-bundle.json"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
-
-		BundleEntryComponent entry = bundle.addEntry();
-		Patient p = new Patient();
-		p.getManagingOrganization().setReference("urn:uuid:30ce60cf-f7cb-4196-961f-cadafa8b7ff5");
-		entry.setResource(p);
-		entry.getRequest().setMethod(HTTPVerb.POST);
-		entry.getRequest().setUrl("Patient");
-
-		try {
-			mySystemDao.transaction(mySrd, bundle);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Unable to satisfy placeholder ID: urn:uuid:30ce60cf-f7cb-4196-961f-cadafa8b7ff5", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testTransactionDoesNotLeavePlaceholderIds() throws Exception {
 		String input;
 		try {
