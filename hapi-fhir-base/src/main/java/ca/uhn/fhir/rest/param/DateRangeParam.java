@@ -25,9 +25,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
+@SuppressWarnings("UnusedReturnValue")
 public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	private static final long serialVersionUID = 1L;
@@ -208,6 +209,52 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		return this;
 	}
 
+	/**
+	 * Sets the lower bound using a string that is compliant with
+	 * FHIR dateTime format (ISO-8601).
+	 * <p>
+	 * This lower bound is assumed to have a <code>ge</code>
+	 * (greater than or equals) modifier.
+	 * </p>
+	 */
+	public DateRangeParam setLowerBound(String theLowerBound) {
+		setLowerBound(new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound));
+		return this;
+	}
+
+	/**
+	 * Sets the lower bound to be greaterthan or equal to the given date
+	 */
+	public DateRangeParam setLowerBoundInclusive(Date theLowerBound) {
+		validateAndSet(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, theLowerBound), myUpperBound);
+		return this;
+	}
+
+	/**
+	 * Sets the upper bound to be greaterthan or equal to the given date
+	 */
+	public DateRangeParam setUpperBoundInclusive(Date theUpperBound) {
+		validateAndSet(myLowerBound, new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, theUpperBound));
+		return this;
+	}
+
+
+	/**
+	 * Sets the lower bound to be greaterthan to the given date
+	 */
+	public DateRangeParam setLowerBoundExclusive(Date theLowerBound) {
+		validateAndSet(new DateParam(ParamPrefixEnum.GREATERTHAN, theLowerBound), myUpperBound);
+		return this;
+	}
+
+	/**
+	 * Sets the upper bound to be greaterthan to the given date
+	 */
+	public DateRangeParam setUpperBoundExclusive(Date theUpperBound) {
+		validateAndSet(myLowerBound, new DateParam(ParamPrefixEnum.LESSTHAN, theUpperBound));
+		return this;
+	}
+
 	public Date getLowerBoundAsInstant() {
 		if (myLowerBound == null) {
 			return null;
@@ -235,6 +282,19 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	public DateParam getUpperBound() {
 		return myUpperBound;
+	}
+
+	/**
+	 * Sets the upper bound using a string that is compliant with
+	 * FHIR dateTime format (ISO-8601).
+	 * <p>
+	 * This upper bound is assumed to have a <code>le</code>
+	 * (less than or equals) modifier.
+	 * </p>
+	 */
+	public DateRangeParam setUpperBound(String theUpperBound) {
+		setUpperBound(new DateParam(LESSTHAN_OR_EQUALS, theUpperBound));
+		return this;
 	}
 
 	public DateRangeParam setUpperBound(DateParam theUpperBound) {
@@ -296,19 +356,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	public boolean isEmpty() {
 		return (getLowerBoundAsInstant() == null) && (getUpperBoundAsInstant() == null);
-	}
-
-	/**
-	 * Sets the lower bound using a string that is compliant with
-	 * FHIR dateTime format (ISO-8601).
-	 * <p>
-	 * This lower bound is assumed to have a <code>ge</code>
-	 * (greater than or equals) modifier.
-	 * </p>
-	 */
-	public DateRangeParam setLowerBound(String theLowerBound) {
-		setLowerBound(new DateParam(GREATERTHAN_OR_EQUALS, theLowerBound));
-		return this;
 	}
 
 	/**
@@ -392,19 +439,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			upperBound.setPrefix(EQUAL);
 		}
 		validateAndSet(lowerBound, upperBound);
-	}
-
-	/**
-	 * Sets the upper bound using a string that is compliant with
-	 * FHIR dateTime format (ISO-8601).
-	 * <p>
-	 * This upper bound is assumed to have a <code>le</code>
-	 * (less than or equals) modifier.
-	 * </p>
-	 */
-	public DateRangeParam setUpperBound(String theUpperBound) {
-		setUpperBound(new DateParam(LESSTHAN_OR_EQUALS, theUpperBound));
-		return this;
 	}
 
 	@Override
@@ -512,4 +546,5 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		myLowerBound = lowerBound;
 		myUpperBound = upperBound;
 	}
+
 }
