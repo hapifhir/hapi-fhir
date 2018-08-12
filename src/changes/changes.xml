@@ -262,6 +262,10 @@
 				/ R4 (and future) versions of FHIR. This should greatly improve maintainability
 				and consistency for transaction processing.
 			</action>
+			<action type="add">
+				ResponseHighlighterInterceptor now displays the total size of the output and
+				an estimate of the transfer time at the bottom of the response.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
