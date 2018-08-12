@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -43,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class is a simple implementation of the resource provider
@@ -65,8 +68,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
-	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new LinkedHashMap<>();
-	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
+	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = Collections.synchronizedMap(new LinkedHashMap<>());
+	protected Map<String, LinkedList<T>> myIdToHistory = Collections.synchronizedMap(new LinkedHashMap<>());
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	private long myNextId;
 	private AtomicLong myDeleteCount = new AtomicLong(0);
@@ -188,9 +191,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	private synchronized TreeMap<Long, T> getVersionToResource(String theIdPart) {
-		if (!myIdToVersionToResourceMap.containsKey(theIdPart)) {
-			myIdToVersionToResourceMap.put(theIdPart, new TreeMap<>());
-		}
+		myIdToVersionToResourceMap.computeIfAbsent(theIdPart, t -> new TreeMap<>());
 		return myIdToVersionToResourceMap.get(theIdPart);
 	}
 
@@ -333,17 +334,22 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		myTypeHistory.addFirst(theResource);
 
 		// Store to ID history map
-		if (!myIdToHistory.containsKey(theIdPart)) {
-			myIdToHistory.put(theIdPart, new LinkedList<>());
-		}
+		myIdToHistory.computeIfAbsent(theIdPart, t -> new LinkedList<>());
 		myIdToHistory.get(theIdPart).addFirst(theResource);
 
 		// Return the newly assigned ID including the version ID
 		return id;
 	}
 
+	/**
+	 * @param theConditional This is provided only so that subclasses can implement if they want
+	 */
 	@Update
-	public MethodOutcome update(@ResourceParam T theResource) {
+	public MethodOutcome update(
+		@ResourceParam T theResource,
+		@ConditionalUrlParam String theConditional) {
+
+		ValidateUtil.isTrueOrThrowInvalidRequest(isBlank(theConditional), "This server doesn't support conditional update");
 
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);

@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
 
 import java.util.List;
@@ -117,7 +118,12 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			deliveryMsg.setPayloadId(msg.getId(getContext()));
 
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-			getSubscriptionInterceptor().getDeliveryChannel().send(wrappedMsg);
+			MessageChannel deliveryChannel = getSubscriptionInterceptor().getDeliveryChannel(nextSubscription);
+			if (deliveryChannel != null) {
+				deliveryChannel.send(wrappedMsg);
+			} else {
+				ourLog.warn("Do not have deliovery channel for subscription {}", nextSubscription.getIdElement(getContext()));
+			}
 		}
 
 

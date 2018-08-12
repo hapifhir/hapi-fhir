@@ -1343,14 +1343,18 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				predicates = new ArrayList<>();
 
 				coding = translationQuery.getCoding();
+				String targetCode = null;
+				String targetCodeSystem = null;
 				if (coding.hasCode()) {
 					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
+					targetCode = coding.getCode();
 				} else {
 					throw new InvalidRequestException("A code must be provided for translation to occur.");
 				}
 
 				if (coding.hasSystem()) {
 					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), coding.getSystem()));
+					targetCodeSystem = coding.getSystem();
 				}
 
 				if (coding.hasVersion()) {
@@ -1384,7 +1388,24 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
 
 				while (scrollableResultsIterator.hasNext()) {
-					elements.add(scrollableResultsIterator.next());
+					TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
+					nextElement.getConceptMapGroupElementTargets().size();
+					myEntityManager.detach(nextElement);
+
+					if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
+						for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
+							TermConceptMapGroupElementTarget next = iter.next();
+							if (targetCodeSystem.equals(next.getSystem())) {
+								if (targetCode.equals(next.getCode())) {
+									continue;
+								}
+							}
+
+							iter.remove();
+						}
+					}
+
+					elements.add(nextElement);
 				}
 
 				ourLastResultsFromTranslationWithReverseCache = false; // For testing.

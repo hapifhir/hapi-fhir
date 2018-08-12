@@ -235,6 +235,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		return retVal;
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();

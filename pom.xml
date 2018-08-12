@@ -468,6 +468,10 @@
 		<developer>
 			<id>jbalbien</id>
 		</developer>
+		<developer>
+			<id>alinleonard</id>
+			<name>Alin Leonard</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -489,7 +493,7 @@
 
 		<!-- Dependency Versions -->
 		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.2.0</apache_karaf_version>
+		<apache_karaf_version>4.1.4</apache_karaf_version>
 		<aries_spifly_version>1.0.10</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
@@ -818,7 +822,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
-				<version>2.1.1</version>
+				<version>2.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>

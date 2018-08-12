@@ -143,6 +143,10 @@ public class FhirResourceDaoConceptMapR4 extends FhirResourceDaoR4<ConceptMap> i
 
 					translationMatch.setSource(new UriType(element.getConceptMapUrl()));
 
+					if (element.getConceptMapGroupElementTargets().size() == 1) {
+						translationMatch.setEquivalence(new CodeType(element.getConceptMapGroupElementTargets().get(0).getEquivalence().toCode()));
+					}
+
 					retVal.addMatch(translationMatch);
 				}
 			}

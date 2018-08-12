@@ -91,6 +91,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
+	private static String ourLastHandlerThreadForUnitTest;
+	private static boolean ourTrackHandlersForUnitTest;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -1296,8 +1298,11 @@ public class SearchBuilder implements ISearchBuilder {
 									}
 
 									Set<String> uniqueQueryStrings = BaseHapiFhirDao.extractCompositeStringUniquesValueChains(myResourceName, params);
-									ourLastHandlerParamsForUnitTest = theParams;
-									ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
+									if (ourTrackHandlersForUnitTest) {
+										ourLastHandlerParamsForUnitTest = theParams;
+										ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
+										ourLastHandlerThreadForUnitTest = Thread.currentThread().getName();
+									}
 									return new UniqueIndexIterator(uniqueQueryStrings);
 
 								}
@@ -1308,8 +1313,11 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		}
 
-		ourLastHandlerParamsForUnitTest = theParams;
-		ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.STANDARD_QUERY;
+		if (ourTrackHandlersForUnitTest) {
+			ourLastHandlerParamsForUnitTest = theParams;
+			ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.STANDARD_QUERY;
+			ourLastHandlerThreadForUnitTest = Thread.currentThread().getName();
+		}
 		return new QueryIterator();
 	}
 
@@ -1746,7 +1754,7 @@ public class SearchBuilder implements ISearchBuilder {
 				boolean matchAll = "*".equals(nextInclude.getValue());
 				if (matchAll) {
 					String sql;
-					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids)";
+					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
 					TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 					q.setParameter("target_pids", nextRoundMatches);
 					List<ResourceLink> results = q.getResultList();
@@ -2107,14 +2115,16 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@VisibleForTesting
-	public static SearchParameterMap getLastHandlerParamsForUnitTest() {
-		return ourLastHandlerParamsForUnitTest;
+	public static String getLastHandlerParamsForUnitTest() {
+		return ourLastHandlerParamsForUnitTest.toString() + " on thread [" + ourLastHandlerThreadForUnitTest +"]";
 	}
 
 	@VisibleForTesting
 	public static void resetLastHandlerMechanismForUnitTest() {
 		ourLastHandlerMechanismForUnitTest = null;
 		ourLastHandlerParamsForUnitTest = null;
+		ourLastHandlerThreadForUnitTest = null;
+		ourTrackHandlersForUnitTest = true;
 	}
 
 	static Predicate[] toArray(List<Predicate> thePredicates) {
