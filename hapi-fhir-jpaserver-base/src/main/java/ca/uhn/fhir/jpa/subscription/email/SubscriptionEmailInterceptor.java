@@ -21,13 +21,14 @@ package ca.uhn.fhir.jpa.subscription.email;
  */
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageHandler;
 
-import javax.annotation.PostConstruct;
+import java.util.Optional;
 
 public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
-	private SubscriptionDeliveringEmailSubscriber mySubscriptionDeliverySubscriber;
 
 	/**
 	 * This is set to autowired=false just so that implementors can supply this
@@ -36,6 +37,11 @@ public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 	@Autowired(required = false)
 	private IEmailSender myEmailSender;
 	private String myDefaultFromAddress = "noreply@unknown.com";
+
+	@Override
+	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
+		return Optional.of(new SubscriptionDeliveringEmailSubscriber(getSubscriptionDao(), getChannelType(), this));
+	}
 
 	@Override
 	public org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType getChannelType() {
@@ -69,23 +75,5 @@ public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 		myEmailSender = theEmailSender;
 	}
 
-	@Override
-	protected void registerDeliverySubscriber() {
-		if (mySubscriptionDeliverySubscriber == null) {
-			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringEmailSubscriber(getSubscriptionDao(), getChannelType(), this);
-		}
-		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
-	}
 
-//	@PostConstruct
-//	public void start() {
-//		Validate.notNull(myEmailSender, "emailSender has not been configured");
-//
-//		super.start();
-//	}
-
-	@Override
-	protected void unregisterDeliverySubscriber() {
-		getDeliveryChannel().unsubscribe(mySubscriptionDeliverySubscriber);
-	}
 }

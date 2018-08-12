@@ -206,7 +206,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private ApplicationContext myApplicationContext;
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
-	protected void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+	public static void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
 		}
@@ -1156,7 +1156,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return false;
 	}
 
-	protected void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+	public static void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
 		}
@@ -1170,7 +1170,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return builder;
 	}
 
-	protected void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
+	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
 		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
 			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
 				throw new InternalErrorException(
@@ -2288,7 +2288,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-	protected void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
+	public void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
 		if (theDeleteConflicts.isEmpty()) {
 			return;
 		}

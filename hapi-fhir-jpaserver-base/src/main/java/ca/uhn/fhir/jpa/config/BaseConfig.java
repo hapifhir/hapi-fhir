@@ -50,6 +50,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Configuration
 @EnableScheduling
@@ -100,10 +101,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean()
-	public ScheduledExecutorFactoryBean scheduledExecutorService() {
+	public ScheduledExecutorService scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
-		return b;
+		b.afterPropertiesSet();
+		return b.getObject();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -147,8 +149,8 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
+		retVal.setConcurrentExecutor(scheduledExecutorService());
+		retVal.setScheduledExecutor(scheduledExecutorService());
 		return retVal;
 	}
 

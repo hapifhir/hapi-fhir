@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -43,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class is a simple implementation of the resource provider
@@ -338,8 +341,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		return id;
 	}
 
+	/**
+	 * @param theConditional This is provided only so that subclasses can implement if they want
+	 */
 	@Update
-	public MethodOutcome update(@ResourceParam T theResource) {
+	public MethodOutcome update(
+		@ResourceParam T theResource,
+		@ConditionalUrlParam String theConditional) {
+
+		ValidateUtil.isTrueOrThrowInvalidRequest(isBlank(theConditional), "This server doesn't support conditional update");
 
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);

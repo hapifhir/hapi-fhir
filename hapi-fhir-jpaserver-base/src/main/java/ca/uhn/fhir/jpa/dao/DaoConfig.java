@@ -706,9 +706,9 @@ public class DaoConfig {
 	 * references instead of being treated as real references.
 	 * <p>
 	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
+	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
 	 * a description of logical references. For example, the valueset
-	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
+	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
 	 * reference.
 	 * </p>
 	 * <p>
@@ -731,9 +731,9 @@ public class DaoConfig {
 	 * references instead of being treated as real references.
 	 * <p>
 	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
+	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
 	 * a description of logical references. For example, the valueset
-	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
+	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
 	 * reference.
 	 * </p>
 	 * <p>
