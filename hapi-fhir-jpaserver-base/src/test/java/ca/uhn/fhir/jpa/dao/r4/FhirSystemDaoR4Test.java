@@ -16,6 +16,8 @@ import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -42,6 +44,7 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -2130,6 +2133,30 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		nextEntry = resp.getEntry().get(2);
 		assertEquals("304 Not Modified", nextEntry.getResponse().getStatus());
 		assertNull(nextEntry.getResource());
+	}
+
+
+	@Test
+	public void testTransactionWithUnknownTemnporaryIdReference() {
+		String methodName = "testTransactionWithUnknownTemnporaryIdReference";
+
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(IdType.newRandomUuid().getValue());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+ 			assertThat(e.getMessage(), Matchers.matchesPattern("Unable to satisfy placeholder ID urn:uuid:[0-9a-z-]+ found in element named 'managingOrganization' within resource of type: Patient"));
+		}
 	}
 
 	@Test

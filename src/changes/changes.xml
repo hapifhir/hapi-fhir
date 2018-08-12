@@ -253,6 +253,15 @@
 				When performing a ConceptMap/$translate operation with reverse="true" in the arguments,
 				the equivalency flag is now set on the response just as it is for a non-reverse lookup.
 			</action>
+			<action type="add">
+				When executing a FHIR transaction in JPA server, if the request bundle contains
+				placeholder IDs references (i.e. "urn:uuid:*" references) that can not be resolved
+				anywhere else in the bundle, a user friendly error is now returned. Previously,
+				a cryptic error containing only the UUID was returned. As a part of this change,
+				transaction processing has now been consolidated into a single codebase for DSTU3
+				/ R4 (and future) versions of FHIR. This should greatly improve maintainability
+				and consistency for transaction processing.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

@@ -3,12 +3,10 @@ package ca.uhn.fhir.jpa.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
@@ -23,6 +21,7 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -71,6 +70,16 @@ public class BaseR4Config extends BaseConfig {
 		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 
 		return retVal;
+	}
+
+	@Bean
+	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterR4();
+	}
+
+	@Bean
+	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
+		return new TransactionProcessor<>();
 	}
 
 	@Bean(name = "myGraphQLProvider")
