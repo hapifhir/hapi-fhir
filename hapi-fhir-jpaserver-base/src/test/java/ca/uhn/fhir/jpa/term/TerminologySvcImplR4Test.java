@@ -190,12 +190,22 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("Version 1", element.getSystemVersion());
 				assertEquals(VS_URL, element.getValueSet());
 				assertEquals(CM_URL, element.getConceptMapUrl());
-				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+
+				assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
-
 				ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
+				assertEquals("45678", target.getCode());
+				assertEquals("Target Code 45678", target.getDisplay());
+				assertEquals(CS_URL_2, target.getSystem());
+				assertEquals("Version 2", target.getSystemVersion());
+				assertEquals(ConceptMapEquivalence.WIDER, target.getEquivalence());
+				assertEquals(VS_URL_2, target.getValueSet());
+				assertEquals(CM_URL, target.getConceptMapUrl());
 
+				// We had deliberately added a duplicate, and here it is...
+				target = element.getConceptMapGroupElementTargets().get(1);
+				ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
 				assertEquals("45678", target.getCode());
 				assertEquals("Target Code 45678", target.getDisplay());
 				assertEquals(CS_URL_2, target.getSystem());

@@ -3,10 +3,8 @@ package ca.uhn.fhir.jpa.config.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
@@ -21,6 +19,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -38,9 +37,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -68,6 +67,16 @@ public class BaseDstu3Config extends BaseConfig {
 		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
 
 		return retVal;
+	}
+
+	@Bean
+	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterDstu3();
+	}
+
+	@Bean
+	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
+		return new TransactionProcessor<>();
 	}
 
 	@Bean(name = "myInstanceValidatorDstu3")
