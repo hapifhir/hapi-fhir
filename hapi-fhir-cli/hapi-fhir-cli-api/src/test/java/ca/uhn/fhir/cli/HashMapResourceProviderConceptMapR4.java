@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.provider.AbstractHashMapResourceProvider;
+import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import com.google.common.base.Charsets;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This is a subclass to implement FHIR operations specific to R4 ConceptMap
- * resources. Its superclass, {@link AbstractHashMapResourceProvider}, is a simple
+ * resources. Its superclass, {@link HashMapResourceProvider}, is a simple
  * implementation of the resource provider interface that uses a HashMap to
  * store all resources in memory.
  * <p>
@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <li>Conditional update for R4 ConceptMap resources by ConceptMap.url</li>
  * </ul>
  */
-public class HashMapResourceProviderConceptMapR4 extends AbstractHashMapResourceProvider<ConceptMap> {
+public class HashMapResourceProviderConceptMapR4 extends HashMapResourceProvider<ConceptMap> {
 	@SuppressWarnings("unchecked")
 	public HashMapResourceProviderConceptMapR4(FhirContext theFhirContext) {
 		super(theFhirContext, ConceptMap.class);
@@ -84,16 +84,15 @@ public class HashMapResourceProviderConceptMapR4 extends AbstractHashMapResource
 		return retVal;
 	}
 
+	@Override
 	@Update
-	public MethodOutcome updateConceptMapConditional(
+	public MethodOutcome update(
 		@ResourceParam ConceptMap theConceptMap,
-		@IdParam IdType theId,
 		@ConditionalUrlParam String theConditional) {
 
 		MethodOutcome methodOutcome = new MethodOutcome();
 
 		if (theConditional != null) {
-
 			String url = null;
 
 			try {
@@ -112,14 +111,14 @@ public class HashMapResourceProviderConceptMapR4 extends AbstractHashMapResource
 				List<ConceptMap> conceptMaps = searchByUrl(url);
 
 				if (!conceptMaps.isEmpty()) {
-					methodOutcome = update(conceptMaps.get(0));
+					methodOutcome = super.update(conceptMaps.get(0), null);
 				} else {
 					methodOutcome = create(theConceptMap);
 				}
 			}
 
 		} else {
-			methodOutcome = update(theConceptMap);
+			methodOutcome = super.update(theConceptMap, null);
 		}
 
 		return methodOutcome;

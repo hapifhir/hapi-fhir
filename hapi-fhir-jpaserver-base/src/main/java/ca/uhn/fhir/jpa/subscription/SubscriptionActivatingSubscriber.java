@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessagingException;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -43,7 +42,6 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -73,7 +71,14 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 	public void activateAndRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
-		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(myCtx, theSubscription, myChannelType);
+
+		// Grab the value for "Subscription.channel.type" so we can see if this
+		// subscriber applies..
+		String subscriptionChannelType = myCtx
+			.newTerser()
+			.getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class)
+			.getValueAsString();
+		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(subscriptionChannelType, myChannelType);
 		if (subscriptionTypeApplies == false) {
 			return;
 		}
@@ -121,15 +126,12 @@ public class SubscriptionActivatingSubscriber {
 				activateSubscription(activeStatus, theSubscription, requestedStatus);
 			}
 		} else if (activeStatus.equals(statusString)) {
-			if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
-				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-			}
-			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+			registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
 			if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
 				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
+				mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 			}
-			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 		}
 	}
 
@@ -140,7 +142,7 @@ public class SubscriptionActivatingSubscriber {
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
 			mySubscriptionDao.update(subscription);
-			mySubscriptionInterceptor.registerSubscription(subscription.getIdElement(), subscription);
+			registerSubscriptionUnlessAlreadyRegistered(subscription);
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myCtx, subscription, "error");
@@ -172,6 +174,16 @@ public class SubscriptionActivatingSubscriber {
 				break;
 		}
 
+	}
+
+	private void registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+		} else {
+			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+		}
+		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
 	}
 
 	@VisibleForTesting

@@ -154,11 +154,11 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition urlChild = requestElem.getChildByName("url");
 		BaseRuntimeChildDefinition methodChild = requestElem.getChildByName("method");
 		
-		IBaseResource resource = null;
-		String url = null;
-		RequestTypeEnum requestType = null;
-		
 		for (IBase nextEntry : entries) {
+			IBaseResource resource = null;
+			String url = null;
+			RequestTypeEnum requestType = null;
+
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
 				resource = (IBaseResource) next;
 			}

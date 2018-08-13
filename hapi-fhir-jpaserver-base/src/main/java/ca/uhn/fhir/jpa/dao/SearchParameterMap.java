@@ -1,5 +1,24 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.*;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -11,9 +30,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,20 +40,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.util.ObjectUtil;
-import ca.uhn.fhir.util.UrlUtil;
 
 public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
 
@@ -48,7 +53,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -130,7 +135,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	private void addUrlIncludeParams(StringBuilder b, String paramName, Set<Include> theList) {
 		ArrayList<Include> list = new ArrayList<Include>(theList);
-		
+
 		Collections.sort(list, new IncludeComparator());
 		for (Include nextInclude : list) {
 			addUrlParamSeparator(b);
@@ -158,8 +163,16 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myCount;
 	}
 
+	public void setCount(Integer theCount) {
+		myCount = theCount;
+	}
+
 	public EverythingModeEnum getEverythingMode() {
 		return myEverythingMode;
+	}
+
+	public void setEverythingMode(EverythingModeEnum theConsolidateMatches) {
+		myEverythingMode = theConsolidateMatches;
 	}
 
 	public Set<Include> getIncludes() {
@@ -167,6 +180,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			myIncludes = new HashSet<Include>();
 		}
 		return myIncludes;
+	}
+
+	public void setIncludes(Set<Include> theIncludes) {
+		myIncludes = theIncludes;
 	}
 
 	/**
@@ -179,6 +196,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			}
 		}
 		return myLastUpdated;
+	}
+
+	public void setLastUpdated(DateRangeParam theLastUpdated) {
+		myLastUpdated = theLastUpdated;
 	}
 
 	/**
@@ -199,6 +220,19 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myLoadSynchronousUpTo;
 	}
 
+	/**
+	 * If set, tells the server to load these results synchronously, and not to load
+	 * more than X results. Note that setting this to a value will also set
+	 * {@link #setLoadSynchronous(boolean)} to true
+	 */
+	public SearchParameterMap setLoadSynchronousUpTo(Integer theLoadSynchronousUpTo) {
+		myLoadSynchronousUpTo = theLoadSynchronousUpTo;
+		if (myLoadSynchronousUpTo != null) {
+			setLoadSynchronous(true);
+		}
+		return this;
+	}
+
 	public Set<Include> getRevIncludes() {
 		if (myRevIncludes == null) {
 			myRevIncludes = new HashSet<>();
@@ -206,8 +240,16 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myRevIncludes;
 	}
 
+	public void setRevIncludes(Set<Include> theRevIncludes) {
+		myRevIncludes = theRevIncludes;
+	}
+
 	public SortSpec getSort() {
 		return mySort;
+	}
+
+	public void setSort(SortSpec theSort) {
+		mySort = theSort;
 	}
 
 	/**
@@ -234,22 +276,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return myLoadSynchronous;
 	}
 
-	public void setCount(Integer theCount) {
-		myCount = theCount;
-	}
-
-	public void setEverythingMode(EverythingModeEnum theConsolidateMatches) {
-		myEverythingMode = theConsolidateMatches;
-	}
-
-	public void setIncludes(Set<Include> theIncludes) {
-		myIncludes = theIncludes;
-	}
-
-	public void setLastUpdated(DateRangeParam theLastUpdated) {
-		myLastUpdated = theLastUpdated;
-	}
-
 	/**
 	 * If set, tells the server to load these results synchronously, and not to load
 	 * more than X results
@@ -257,27 +283,6 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	public SearchParameterMap setLoadSynchronous(boolean theLoadSynchronous) {
 		myLoadSynchronous = theLoadSynchronous;
 		return this;
-	}
-
-	/**
-	 * If set, tells the server to load these results synchronously, and not to load
-	 * more than X results. Note that setting this to a value will also set
-	 * {@link #setLoadSynchronous(boolean)} to true
-	 */
-	public SearchParameterMap setLoadSynchronousUpTo(Integer theLoadSynchronousUpTo) {
-		myLoadSynchronousUpTo = theLoadSynchronousUpTo;
-		if (myLoadSynchronousUpTo != null) {
-			setLoadSynchronous(true);
-		}
-		return this;
-	}
-
-	public void setRevIncludes(Set<Include> theRevIncludes) {
-		myRevIncludes = theRevIncludes;
-	}
-
-	public void setSort(SortSpec theSort) {
-		mySort = theSort;
 	}
 
 	public String toNormalizedQueryString(FhirContext theCtx) {
@@ -298,7 +303,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 						nextValuesOrsOut.add(nextValueOrIn);
 					}
 				}
-				
+
 				Collections.sort(nextValuesOrsOut, new QueryParameterTypeComparator(theCtx));
 
 				if (nextValuesOrsOut.size() > 0) {
@@ -308,7 +313,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			} // for AND
 
 			Collections.sort(nextValuesAndsOut, new QueryParameterOrComparator(theCtx));
-			
+
 			for (List<IQueryParameterType> nextValuesAnd : nextValuesAndsOut) {
 				addUrlParamSeparator(b);
 				IQueryParameterType firstValue = nextValuesAnd.get(0);
@@ -319,18 +324,18 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 					b.append('=');
 					if (firstValue.getMissing()) {
 						b.append(Constants.PARAMQUALIFIER_MISSING_TRUE);
-					}else {
+					} else {
 						b.append(Constants.PARAMQUALIFIER_MISSING_FALSE);
 					}
 					continue;
 				}
-				
-				if (isNotBlank(firstValue.getQueryParameterQualifier())){
+
+				if (isNotBlank(firstValue.getQueryParameterQualifier())) {
 					b.append(firstValue.getQueryParameterQualifier());
 				}
-				
+
 				b.append('=');
-				
+
 				for (int i = 0; i < nextValuesAnd.size(); i++) {
 					IQueryParameterType nextValueOr = nextValuesAnd.get(i);
 					if (i > 0) {
@@ -341,13 +346,13 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
 				}
 			}
-			
+
 		} // for keys
-		
+
 		SortSpec sort = getSort();
 		boolean first = true;
 		while (sort != null) {
-			
+
 			if (isNotBlank(sort.getParamName())) {
 				if (first) {
 					addUrlParamSeparator(b);
@@ -362,32 +367,32 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 				}
 				b.append(sort.getParamName());
 			}
-			
+
 			Validate.isTrue(sort != sort.getChain()); // just in case, shouldn't happen
 			sort = sort.getChain();
 		}
-		
+
 		addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
-		
+
 		if (getLastUpdated() != null) {
 			DateParam lb = getLastUpdated().getLowerBound();
 			addLastUpdateParam(b, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
 			addLastUpdateParam(b, ub);
 		}
-		
+
 		if (getCount() != null) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_COUNT);
 			b.append('=');
 			b.append(getCount());
 		}
-		
+
 		if (b.length() == 0) {
 			b.append('?');
 		}
-		
+
 		return b.toString();
 	}
 
@@ -439,7 +444,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		/*
 		 * Don't reorder! We rely on the ordinals
 		 */
-		ENCOUNTER_INSTANCE(false, true, true), ENCOUNTER_TYPE(false, true, false), PATIENT_INSTANCE(true, false, true), PATIENT_TYPE(true, false, false);
+		ENCOUNTER_INSTANCE(false, true, true),
+		ENCOUNTER_TYPE(false, true, false),
+		PATIENT_INSTANCE(true, false, true),
+		PATIENT_TYPE(true, false, false);
 
 		private final boolean myEncounter;
 
@@ -447,7 +455,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 		private final boolean myPatient;
 
-		private EverythingModeEnum(boolean thePatient, boolean theEncounter, boolean theInstance) {
+		EverythingModeEnum(boolean thePatient, boolean theEncounter, boolean theInstance) {
 			assert thePatient ^ theEncounter;
 			myPatient = thePatient;
 			myEncounter = theEncounter;

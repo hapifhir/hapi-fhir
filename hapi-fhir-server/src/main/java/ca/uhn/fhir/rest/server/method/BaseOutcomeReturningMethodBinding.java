@@ -20,9 +20,29 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -32,23 +52,11 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE);
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	private boolean myReturnVoid;
 
@@ -91,11 +99,11 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				return Constants.STATUS_HTTP_200_OK;
 
 			case UPDATE:
+			case PATCH:
 				if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
 					return Constants.STATUS_HTTP_200_OK;
 				}
 				return Constants.STATUS_HTTP_201_CREATED;
-
 			case VALIDATE:
 			case DELETE:
 			default:
@@ -189,14 +197,20 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			allowPrefer = true;
 		}
 
-		if (resource != null && allowPrefer) {
+		if (allowPrefer) {
+			outcome = resource;
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
 			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
 			if (preferReturn != null) {
-				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
-					outcome = resource;
+				if (preferReturn == PreferReturnEnum.MINIMAL) {
+					outcome = null;
 				}
-			}
+				else {
+					if (preferReturn == PreferReturnEnum.OPERATION_OUTCOME) {
+						outcome = originalOutcome;
+					}
+				}				
+			} 
 		}
 
 		ResponseDetails responseDetails = new ResponseDetails();

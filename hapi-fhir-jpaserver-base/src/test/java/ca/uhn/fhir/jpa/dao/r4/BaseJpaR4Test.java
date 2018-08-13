@@ -92,6 +92,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myBundleDaoR4")
 	protected IFhirResourceDao<Bundle> myBundleDao;
 	@Autowired
+	@Qualifier("myCommunicationDaoR4")
+	protected IFhirResourceDao<Communication> myCommunicationDao;
+	@Autowired
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
@@ -387,6 +390,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		element.setCode("23456");
 		element.setDisplay("Source Code 23456");
 
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		// Add a duplicate
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");

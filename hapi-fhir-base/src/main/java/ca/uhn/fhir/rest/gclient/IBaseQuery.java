@@ -1,8 +1,9 @@
 package ca.uhn.fhir.rest.gclient;
 
-import java.util.*;
-
 import ca.uhn.fhir.model.api.IQueryParameterType;
+
+import java.util.List;
+import java.util.Map;
 
 /*
  * #%L
@@ -26,10 +27,32 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 
 public interface IBaseQuery<T extends IBaseQuery<?>> {
 
-    T where(ICriterion<?> theCriterion);
+	/**
+	 * Add a search parameter to the query.
+	 * <p>
+	 * Note that this method is a synonym for {@link #where(ICriterion)}, and is only
+	 * here to make fluent queries read more naturally.
+	 * </p>
+	 */
+	T and(ICriterion<?> theCriterion);
 
-    T where(Map<String, List<IQueryParameterType>> theCriterion);
+	/**
+	 * Add a set of search parameters to the query.
+	 */
+	T where(Map<String, List<IQueryParameterType>> theCriterion);
 
-    T and(ICriterion<?> theCriterion);
+	/**
+	 * Add a search parameter to the query.
+	 */
+	T where(ICriterion<?> theCriterion);
+
+	/**
+	 * Add a set of search parameters to the query.
+	 * <p>
+	 * Values will be treated semi-literally. No FHIR escaping will be performed
+	 * on the values, but regular URL escaping will be.
+	 * </p>
+	 */
+	T whereMap(Map<String, List<String>> theRawMap);
 
 }

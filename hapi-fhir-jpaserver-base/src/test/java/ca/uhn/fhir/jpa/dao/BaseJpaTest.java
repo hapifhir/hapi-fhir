@@ -34,7 +34,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mockito;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -49,6 +48,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
 import static org.junit.Assert.*;
@@ -77,16 +77,6 @@ public abstract class BaseJpaTest {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
 	}
 
-	@Before
-	public void beforeCreateSrd() {
-		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
-		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
-		myServerInterceptorList = new ArrayList<>();
-		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
-		when(mySrd.getUserData()).thenReturn(new HashMap<>());
-		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
-	}
-
 	@After
 	public void afterValidateNoTransaction() {
 		PlatformTransactionManager txManager = getTxManager();
@@ -103,6 +93,7 @@ public abstract class BaseJpaTest {
 			if (currentSession != null) {
 				currentSession.doWork(new Work() {
 
+					@Override
 					public void execute(Connection connection) throws SQLException {
 						isReadOnly.set(connection.isReadOnly());
 					}
@@ -111,6 +102,16 @@ public abstract class BaseJpaTest {
 				assertFalse(isReadOnly.get());
 			}
 		}
+	}
+
+	@Before
+	public void beforeCreateSrd() {
+		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
+		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
+		myServerInterceptorList = new ArrayList<>();
+		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
+		when(mySrd.getUserData()).thenReturn(new HashMap<>());
+		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 	}
 
 	@Before
@@ -299,6 +300,7 @@ public abstract class BaseJpaTest {
 		return retVal.toArray(new String[retVal.size()]);
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();
@@ -360,7 +362,19 @@ public abstract class BaseJpaTest {
 			}
 		}
 		if (sw.getMillis() >= 15000) {
-			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + theList.toString());
+			String describeResults = theList
+				.stream()
+				.map(t -> {
+					if (t == null) {
+						return "null";
+					}
+					if (t instanceof IBaseResource) {
+						return ((IBaseResource)t).getIdElement().getValue();
+					}
+					return t.toString();
+				})
+				.collect(Collectors.joining(", "));
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
 		}
 	}
 

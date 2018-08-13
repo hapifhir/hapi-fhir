@@ -1,39 +1,58 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -44,36 +63,111 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.*;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Basic;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ImagingStudy;
+import org.hl7.fhir.r4.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.junit.*;
+import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -407,6 +501,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		interceptor.setFailOnSeverity(null);
 
 		ourRestServer.registerInterceptor(interceptor);
+		myClient.registerInterceptor(new IClientInterceptor() {
+			@Override
+			public void interceptRequest(IHttpRequest theRequest) {
+				theRequest.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);					
+			}
+			@Override
+			public void interceptResponse(IHttpResponse theResponse) throws IOException {					// TODO Auto-generated method stu					
+			}
+			
+		});
 		try {
 			// Missing status, which is mandatory
 			Observation obs = new Observation();
@@ -548,11 +652,33 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCreateResourceReturnsOperationOutcomeByDefault() throws IOException {
+	public void testCreateResourceReturnsRepresentationByDefault() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(response.toString());
+			ourLog.info(respString);
+			assertThat(respString, startsWith("<Patient xmlns=\"http://hl7.org/fhir\">"));
+			assertThat(respString, endsWith("</Patient>"));
+		} finally {
+			response.getEntity().getContent().close();
+			response.close();
+		}
+	}
+	
+	@Test
+	public void testCreateResourceReturnsOperationOutcome() throws IOException {
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -1377,7 +1503,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(output);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(pId, cId));
+			assertThat(ids, containsInAnyOrder(pId, cId, oId));
 		} finally {
 			response.close();
 		}
@@ -1392,7 +1518,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(output);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
-			assertThat(ids, containsInAnyOrder(pId, cId));
+			assertThat(ids, containsInAnyOrder(pId, cId, oId));
 		} finally {
 			response.close();
 		}
@@ -2284,6 +2410,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		CloseableHttpResponse response = ourHttpClient.execute(patch);
@@ -2345,8 +2472,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
-		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.addHeader("If-Match", "W/\"1\"");
+		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		CloseableHttpResponse response = ourHttpClient.execute(patch);
 		try {
@@ -2377,6 +2505,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		CloseableHttpResponse response = ourHttpClient.execute(patch);

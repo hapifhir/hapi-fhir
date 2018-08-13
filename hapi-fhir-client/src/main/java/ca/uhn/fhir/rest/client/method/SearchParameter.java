@@ -53,7 +53,7 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(StringParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringOrListParam.class, RestSearchParameterTypeEnum.STRING);
 		ourParamTypes.put(StringAndListParam.class, RestSearchParameterTypeEnum.STRING);
-		ourParamQualifiers.put(RestSearchParameterTypeEnum.STRING, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
+		ourParamQualifiers.put(RestSearchParameterTypeEnum.STRING, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_STRING_CONTAINS, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(UriParam.class, RestSearchParameterTypeEnum.URI);
 		ourParamTypes.put(UriOrListParam.class, RestSearchParameterTypeEnum.URI);

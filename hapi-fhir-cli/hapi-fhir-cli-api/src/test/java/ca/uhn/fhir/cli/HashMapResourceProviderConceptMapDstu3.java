@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.provider.AbstractHashMapResourceProvider;
+import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import com.google.common.base.Charsets;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This is a subclass to implement FHIR operations specific to DSTU3 ConceptMap
- * resources. Its superclass, {@link AbstractHashMapResourceProvider}, is a simple
+ * resources. Its superclass, {@link HashMapResourceProvider}, is a simple
  * implementation of the resource provider interface that uses a HashMap to
  * store all resources in memory.
  * <p>
@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <li>Conditional update for DSTU3 ConceptMap resources by ConceptMap.url</li>
  * </ul>
  */
-public class HashMapResourceProviderConceptMapDstu3 extends AbstractHashMapResourceProvider<ConceptMap> {
+public class HashMapResourceProviderConceptMapDstu3 extends HashMapResourceProvider<ConceptMap> {
 	@SuppressWarnings("unchecked")
 	public HashMapResourceProviderConceptMapDstu3(FhirContext theFhirContext) {
 		super(theFhirContext, ConceptMap.class);
@@ -84,10 +84,10 @@ public class HashMapResourceProviderConceptMapDstu3 extends AbstractHashMapResou
 		return retVal;
 	}
 
+	@Override
 	@Update
-	public MethodOutcome updateConceptMapConditional(
+	public MethodOutcome update(
 		@ResourceParam ConceptMap theConceptMap,
-		@IdParam IdType theId,
 		@ConditionalUrlParam String theConditional) {
 
 		MethodOutcome methodOutcome = new MethodOutcome();
@@ -112,14 +112,14 @@ public class HashMapResourceProviderConceptMapDstu3 extends AbstractHashMapResou
 				List<ConceptMap> conceptMaps = searchByUrl(url);
 
 				if (!conceptMaps.isEmpty()) {
-					methodOutcome = update(conceptMaps.get(0));
+					methodOutcome = super.update(conceptMaps.get(0), null);
 				} else {
 					methodOutcome = create(theConceptMap);
 				}
 			}
 
 		} else {
-			methodOutcome = update(theConceptMap);
+			methodOutcome = super.update(theConceptMap, null);
 		}
 
 		return methodOutcome;

@@ -988,9 +988,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1069,9 +1069,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1083,9 +1083,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1135,9 +1135,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1149,9 +1149,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1205,9 +1205,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(4, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1219,9 +1219,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1247,9 +1247,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(3);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1298,9 +1298,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1312,9 +1312,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1365,9 +1365,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1379,9 +1379,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1432,9 +1432,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1485,9 +1485,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1536,9 +1536,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1550,9 +1550,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1601,9 +1601,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1615,9 +1615,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());
@@ -1659,9 +1659,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
 
 		param = getParametersByName(respParams, "match").get(0);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("equal", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
 		assertEquals("12345", coding.getCode());
@@ -1673,9 +1673,9 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 
 		param = getParametersByName(respParams, "match").get(1);
-		assertEquals(2, param.getPart().size());
+		assertEquals(3, param.getPart().size());
 		part = getPartByName(param, "equivalence");
-		assertFalse(part.hasValue());
+		assertEquals("narrower", ((CodeType)part.getValue()).getCode());
 		part = getPartByName(param, "concept");
 		coding = (Coding) part.getValue();
 		assertEquals("78901", coding.getCode());

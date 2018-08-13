@@ -25,17 +25,24 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 public interface IPagingProvider {
 
 	int getDefaultPageSize();
-		
+
 	int getMaximumPageSize();
-	
-	/**
-	 * Stores a result list and returns an ID with which that list can be returned
-	 */
-	public String storeResultList(IBundleProvider theList);
-	
+
 	/**
 	 * Retrieve a result list by ID
 	 */
-	public IBundleProvider retrieveResultList(String theId);
-	
+	IBundleProvider retrieveResultList(String theSearchId);
+
+	/**
+	 * Retrieve a result list by ID
+	 */
+	default IBundleProvider retrieveResultList(String theSearchId, String thePageId) {
+		return null;
+	}
+
+	/**
+	 * Stores a result list and returns an ID with which that list can be returned
+	 */
+	String storeResultList(IBundleProvider theList);
+
 }

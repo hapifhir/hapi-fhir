@@ -52,6 +52,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@Before
 	public void beforeSetSubscriptionActivatingInterceptor() {
 		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
+		getRestHookSubscriptionInterceptor().initSubscriptions();
 	}
 
 
@@ -101,8 +102,6 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 
 		createSubscription(criteria1, payload, ourListenerServerBase);
 		createSubscription(criteria2, payload, ourListenerServerBase);
-
-		assertFalse(hasRestHookSubscriptionInterceptor());
 
 		ourRestServer.registerInterceptor(getRestHookSubscriptionInterceptor());
 		getRestHookSubscriptionInterceptor().initSubscriptions();

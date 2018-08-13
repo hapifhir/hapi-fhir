@@ -86,7 +86,7 @@ public class ReflectionUtil {
 	public static Class<?> getGenericCollectionTypeOfMethodParameter(Method theMethod, int theParamIndex) {
 		Class<?> type;
 		Type genericParameterType = theMethod.getGenericParameterTypes()[theParamIndex];
-		if (Class.class.equals(genericParameterType)) {
+		if (Class.class.equals(genericParameterType) || Class.class.equals(genericParameterType.getClass())) {
 			return null;
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericParameterType;

@@ -21,16 +21,16 @@ package ca.uhn.fhir.jpa.subscription.resthook;
  */
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import org.springframework.messaging.MessageHandler;
+
+import java.util.Optional;
 
 public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor {
-	private SubscriptionDeliveringRestHookSubscriber mySubscriptionDeliverySubscriber;
 
 	@Override
-	protected void registerDeliverySubscriber() {
-		if (mySubscriptionDeliverySubscriber == null) {
-			mySubscriptionDeliverySubscriber = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getChannelType(), this);
-		}
-		getDeliveryChannel().subscribe(mySubscriptionDeliverySubscriber);
+	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
+		return Optional.of(new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getChannelType(), this));
 	}
 
 	@Override
@@ -38,8 +38,4 @@ public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor
 		return org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.RESTHOOK;
 	}
 
-	@Override
-	protected void unregisterDeliverySubscriber() {
-		getDeliveryChannel().unsubscribe(mySubscriptionDeliverySubscriber);
-	}
 }

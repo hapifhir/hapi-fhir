@@ -354,6 +354,53 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
+
+	@Test
+	public void testUpdateSubscriptionToMatchLater() throws Exception {
+		String payload = "application/xml";
+
+		String code = "1000000050";
+		String criteriaBad = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		ourLog.info("** About to create non-matching subscription");
+
+		Subscription subscription2 = createSubscription(criteriaBad, payload, ourListenerServerBase);
+
+		ourLog.info("** About to send observation that wont match");
+
+		Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+		// Criteria didn't match, shouldn't see any updates
+		waitForQueueToDrain();
+		Thread.sleep(1000);
+		assertEquals(0, ourUpdatedObservations.size());
+
+		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
+		Assert.assertNotNull(subscriptionTemp);
+		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		subscriptionTemp.setCriteria(criteriaGood);
+		ourLog.info("** About to update subscription");
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		waitForQueueToDrain();
+
+		ourLog.info("** About to send Observation 2");
+		Observation observation2 = sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		// Should see a subscription notification this time
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+
+		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+
+		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+
+		// No more matches
+		Thread.sleep(1000);
+		assertEquals(1, ourUpdatedObservations.size());
+	}
+
+
 	@Test
 	public void testRestHookSubscriptionApplicationXmlJson() throws Exception {
 		String payload = "application/fhir+xml";

@@ -20,16 +20,23 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import java.util.Date;
-
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>  {
+import java.util.Date;
+
+public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T> {
 
 	/**
-	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
+	 * Request that the server return only the history elements between the
+	 * specific range
 	 */
-	IHistoryTyped<T> since(Date theCutoff);
+	IHistoryTyped<T> at(DateRangeParam theDateRangeParam);
+
+	/**
+	 * Request that the server return only up to <code>theCount</code> number of resources
+	 */
+	IHistoryTyped<T> count(Integer theCount);
 
 	/**
 	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
@@ -41,9 +48,9 @@ public interface IHistoryTyped<T> extends IClientExecutable<IHistoryTyped<T>, T>
 	IHistoryTyped<T> since(IPrimitiveType<Date> theCutoff);
 
 	/**
-	 * Request that the server return only up to <code>theCount</code> number of resources
+	 * Request that the server return only resource versions that were created at or after the given time (inclusive)
 	 */
-	IHistoryTyped<T> count(Integer theCount);
-	
-	
+	IHistoryTyped<T> since(Date theCutoff);
+
+
 }

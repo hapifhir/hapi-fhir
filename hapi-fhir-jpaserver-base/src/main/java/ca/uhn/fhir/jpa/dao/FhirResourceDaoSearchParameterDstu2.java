@@ -29,14 +29,8 @@ import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -83,7 +77,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<Se
 		FhirContext context = getContext();
 		SearchParamTypeEnum type = theResource.getTypeElement().getValueAsEnum();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
+		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context, getConfig());
 	}
 
 

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
@@ -47,6 +48,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+
 	public BaseSearchParamExtractor() {
 		super();
 	}
@@ -73,31 +75,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return refs;
 	}
 
-	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		List<Object> values = new ArrayList<Object>();
-		String[] nextPathsSplit = SPLIT.split(thePaths);
-		FhirTerser t = myContext.newTerser();
-		for (String nextPath : nextPathsSplit) {
-			String nextPathTrimmed = nextPath.trim();
-			try {
-				List<Object> allValues = t.getValues(theResource, nextPathTrimmed);
-				for (Object next : allValues) {
-					if (next instanceof IBaseExtension) {
-						IBaseDatatype value = ((IBaseExtension) next).getValue();
-						if (value != null) {
-							values.add(value);
-						}
-					} else {
-						values.add(next);
-					}
-				}
-			} catch (Exception e) {
-				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: {}", new Object[] {nextPathTrimmed, def.getName(), e.toString(), e});
-			}
-		}
-		return values;
-	}
+	protected abstract List<Object> extractValues(String thePaths, IBaseResource theResource);
 
 	protected FhirContext getContext() {
 		return myContext;

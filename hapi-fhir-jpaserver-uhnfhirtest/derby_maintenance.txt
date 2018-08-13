@@ -195,3 +195,38 @@ drop column SP_ID from table HFJ_RES_PARAM_PRESENT;
 drop index IDX_SEARCHPARM_RESTYPE_SPNAME;
 drop index IDX_RESPARMPRESENT_SPID_RESID;
 drop table HFJ_SEARCH_PARM;
+
+
+
+# Delete everything
+update hfj_res_ver set forced_id_pid = null where res_id in (select res_id from hfj_resource);
+update hfj_resource set forced_id_pid = null where res_id in (select res_id from hfj_resource);
+delete from hfj_history_tag where res_id in (select res_id from hfj_resource);
+delete from hfj_res_ver where res_id in (select res_id from hfj_resource);
+delete from hfj_forced_id where resource_pid in (select res_id from hfj_resource);
+delete from hfj_res_link where src_resource_id in (select res_id from hfj_resource);
+delete from hfj_res_link where target_resource_id in (select res_id from hfj_resource);
+delete from hfj_spidx_coords;
+delete from hfj_spidx_date;
+delete from hfj_spidx_number;
+delete from hfj_spidx_quantity;
+delete from hfj_spidx_string;
+delete from hfj_spidx_token;
+delete from hfj_spidx_uri;
+delete from hfj_res_tag;
+delete from hfj_search_result;
+delete from hfj_res_param_present;
+delete from hfj_idx_cmp_string_uniq;
+delete from hfj_subscription_stats;
+DELETE FROM TRM_CONCEPT_MAP_GRP_ELM_TGT;
+DELETE FROM TRM_CONCEPT_MAP_GRP_ELEMENT;
+DELETE FROM TRM_CONCEPT_MAP_GROUP;
+DELETE FROM TRM_CONCEPT_MAP;
+DELETE FROM TRM_CONCEPT_DESIG;
+DELETE FROM TRM_CONCEPT_PC_LINK;
+DELETE FROM TRM_CONCEPT_PROPERTY;
+DELETE FROM TRM_CONCEPT;
+DELETE FROM TRM_CODESYSTEM_VER;
+DELETE FROM TRM_CODESYSTEM;
+delete from hfj_resource;
+
