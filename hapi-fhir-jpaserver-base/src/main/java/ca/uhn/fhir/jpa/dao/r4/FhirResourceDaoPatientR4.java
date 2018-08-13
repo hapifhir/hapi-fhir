@@ -41,9 +41,6 @@ import ca.uhn.fhir.rest.param.*;
 
 public class FhirResourceDaoPatientR4 extends FhirResourceDaoR4<Patient>implements IFhirResourceDaoPatient<Patient> {
 
-	@Autowired
-	private ISearchParamRegistry mySerarchParamRegistry;
-
 	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {

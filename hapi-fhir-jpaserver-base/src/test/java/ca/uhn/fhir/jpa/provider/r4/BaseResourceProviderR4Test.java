@@ -60,7 +60,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
 	private static Server ourServer;
-	protected IGenericClient myClient;
+	protected IGenericClient ourClient;
 	protected ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
@@ -233,9 +233,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
 
-		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
-			myClient.registerInterceptor(new LoggingInterceptor());
+			ourClient.registerInterceptor(new LoggingInterceptor());
 		}
 	}
 
@@ -257,7 +257,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
