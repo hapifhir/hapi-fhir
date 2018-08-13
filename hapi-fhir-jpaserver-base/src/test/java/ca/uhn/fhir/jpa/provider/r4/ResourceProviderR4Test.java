@@ -2410,6 +2410,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		CloseableHttpResponse response = ourHttpClient.execute(patch);
@@ -2471,8 +2472,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
-		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.addHeader("If-Match", "W/\"1\"");
+		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		CloseableHttpResponse response = ourHttpClient.execute(patch);
 		try {
@@ -2503,6 +2505,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
+		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		CloseableHttpResponse response = ourHttpClient.execute(patch);
