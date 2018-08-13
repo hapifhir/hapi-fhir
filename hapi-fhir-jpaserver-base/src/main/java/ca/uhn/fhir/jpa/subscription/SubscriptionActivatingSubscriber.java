@@ -70,8 +70,7 @@ public class SubscriptionActivatingSubscriber {
 		Validate.notNull(theTaskExecutor);
 	}
 
-	public void activateAndRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
-
+	public synchronized void activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		String subscriptionChannelType = myCtx
@@ -128,21 +127,25 @@ public class SubscriptionActivatingSubscriber {
 		} else if (activeStatus.equals(statusString)) {
 			registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
-			if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
-				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
-				mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
-			}
+			// Status isn't "active" or "requested"
+			unregisterSubscriptionIfRegistered(theSubscription, statusString);
+		}
+	}
+
+	protected void unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
+		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
+			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 		}
 	}
 
 	private void activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
 
-		ourLog.info("Activating and registering subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
+		ourLog.info("Activating and subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
 			mySubscriptionDao.update(subscription);
-			registerSubscriptionUnlessAlreadyRegistered(subscription);
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myCtx, subscription, "error");
@@ -151,6 +154,7 @@ public class SubscriptionActivatingSubscriber {
 		}
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public void handleMessage(RestOperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
 
 		switch (theOperationType) {
@@ -162,18 +166,22 @@ public class SubscriptionActivatingSubscriber {
 				if (!theId.getResourceType().equals("Subscription")) {
 					return;
 				}
-				TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-				txTemplate.execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus status) {
-						activateAndRegisterSubscriptionIfRequired(theSubscription);
-					}
-				});
+				activateAndRegisterSubscriptionIfRequiredInTransaction(theSubscription);
 				break;
 			default:
 				break;
 		}
 
+	}
+
+	private synchronized void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				activateOrRegisterSubscriptionIfRequired(theSubscription);
+			}
+		});
 	}
 
 	private void registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {

@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -378,7 +377,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			for (IBaseResource resource : resourceList) {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
-				mySubscriptionActivatingSubscriber.activateAndRegisterSubscriptionIfRequired(resource);
+				mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
 			}
 
 			unregisterAllSubscriptionsNotInCollection(allIds);
