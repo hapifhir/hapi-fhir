@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -45,7 +46,7 @@ public class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProvider
 	 * Composition/123/$document
 	 */
 	//@formatter:off
-	@Operation(name = "document", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_DOCUMENT, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 	public IBaseBundle getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest) {
