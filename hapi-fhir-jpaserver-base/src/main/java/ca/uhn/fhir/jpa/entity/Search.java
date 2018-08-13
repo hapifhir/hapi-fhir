@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 public class Search implements Serializable {
 
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
-	private static final int UUID_COLUMN_LENGTH = 36;
+	public static final int UUID_COLUMN_LENGTH = 36;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	@Temporal(TemporalType.TIMESTAMP)
