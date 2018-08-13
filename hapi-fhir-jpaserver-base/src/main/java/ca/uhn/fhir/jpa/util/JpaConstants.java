@@ -169,4 +169,9 @@ public class JpaConstants {
 	 * Operation name for the $translate operation
 	 */
 	public static final String OPERATION_TRANSLATE = "$translate";
+
+	/**
+	 * Operation name for the $document operation
+	 */
+	public static final String OPERATION_DOCUMENT = "$document";
 }

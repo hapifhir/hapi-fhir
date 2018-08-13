@@ -34,7 +34,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	public void testStoreExistingTermConceptMapAndChildren() {
 		ConceptMap conceptMap = createConceptMap();
 
-		MethodOutcome methodOutcome = myClient
+		MethodOutcome methodOutcome = ourClient
 			.update()
 			.resource(conceptMap)
 			.conditional()
@@ -50,7 +50,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		ConceptMap conceptMap = createConceptMap();
 		conceptMap.getGroupFirstRep().getElementFirstRep().setCode("UPDATED_CODE");
 
-		MethodOutcome methodOutcome = myClient
+		MethodOutcome methodOutcome = ourClient
 			.update()
 			.resource(conceptMap)
 			.conditional()
@@ -74,7 +74,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -132,7 +132,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -177,7 +177,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -210,7 +210,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -288,7 +288,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -341,7 +341,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -432,7 +432,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -511,7 +511,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -562,7 +562,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -627,7 +627,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -678,7 +678,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -741,7 +741,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -818,7 +818,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -889,7 +889,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onInstance(myConceptMapId)
 			.named("translate")
@@ -970,7 +970,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1016,7 +1016,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1051,7 +1051,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1117,7 +1117,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1187,7 +1187,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1280,7 +1280,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1347,7 +1347,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1414,7 +1414,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1467,7 +1467,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1518,7 +1518,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1583,7 +1583,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onType(ConceptMap.class)
 			.named("translate")
@@ -1641,7 +1641,7 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
-		Parameters respParams = myClient
+		Parameters respParams = ourClient
 			.operation()
 			.onInstance(myConceptMapId)
 			.named("translate")

@@ -32,10 +32,11 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		composition.setTitle("Visit Summary");
 		bundle.addEntry().setFullUrl("http://foo").setResource(composition);
 
-		IIdType id = myClient.create().resource(bundle).execute().getId();
+		IIdType id = ourClient.create().resource(bundle).execute().getId();
 
-		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
+		Bundle retBundle = ourClient.read().resource(Bundle.class).withId(id).execute();
+
+    ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
 		assertEquals("http://foo", bundle.getEntry().get(0).getFullUrl());
 	}
@@ -51,7 +52,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			.setName("content")
 			.setResource(bundle);
 		try {
-			myClient.operation().onType(MessageHeader.class).named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
+			ourClient.operation().onType(MessageHeader.class).named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));

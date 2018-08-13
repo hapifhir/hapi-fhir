@@ -130,7 +130,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	@Test
 	public void testExpandById() {
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -161,7 +161,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testExpandByIdWithFilter() {
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -179,7 +179,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByUrl() {
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -199,7 +199,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -222,7 +222,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -244,7 +244,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		myLocalVs.setId("");
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -266,7 +266,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testExpandInvalidParams() throws IOException {
 		//@formatter:off
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -281,7 +281,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case-r4.xml");
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -297,7 +297,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case.xml");
-			myClient
+			ourClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -318,7 +318,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -339,7 +339,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -363,7 +363,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -388,7 +388,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 		//@formatter:off
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onInstance(myLocalValueSetId)
 				.named("expand")
@@ -424,7 +424,8 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() {
-		Parameters respParam = myClient
+		//@formatter:off
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
@@ -483,7 +484,8 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemType() {
-		Parameters respParam = myClient
+		//@formatter:off
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
@@ -499,7 +501,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testValiedateCodeAgainstBuiltInSystem() {
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")

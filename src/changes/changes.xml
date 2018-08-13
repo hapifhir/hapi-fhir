@@ -274,6 +274,10 @@
 				The Prefer header is now honoured for HTTP PATCH requests. Thanks to
 				Alin Leonard for the Pull Request!
 			</action>
+			<action type="add">
+				The <![CDATA[<code>Composition</code>]]> operation <![CDATA[<code>$document</code>]]> has been
+				implemented. Thanks to Patrick Werner for the Pull Request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
