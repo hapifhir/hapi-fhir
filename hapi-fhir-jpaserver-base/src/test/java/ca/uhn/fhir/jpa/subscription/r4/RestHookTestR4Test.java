@@ -375,12 +375,12 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		Thread.sleep(1000);
 		assertEquals(0, ourUpdatedObservations.size());
 
-		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
+		Subscription subscriptionTemp = ourClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
 		Assert.assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		subscriptionTemp.setCriteria(criteriaGood);
 		ourLog.info("** About to update subscription");
-		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		ourLog.info("** About to send Observation 2");
@@ -391,7 +391,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
