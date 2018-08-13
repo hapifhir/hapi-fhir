@@ -501,7 +501,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		interceptor.setFailOnSeverity(null);
 
 		ourRestServer.registerInterceptor(interceptor);
-		myClient.registerInterceptor(new IClientInterceptor() {
+		ourClient.registerInterceptor(new IClientInterceptor() {
 			@Override
 			public void interceptRequest(IHttpRequest theRequest) {
 				theRequest.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);					
