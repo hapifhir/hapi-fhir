@@ -138,7 +138,7 @@ public class SubscriptionActivatingSubscriber {
 	private void activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
 
-		ourLog.info("Activating and registering subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
+		ourLog.info("Activating and registering subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
 			mySubscriptionDao.update(subscription);
