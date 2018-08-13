@@ -70,7 +70,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		String resourceType = id.getResourceType();
 		String resourceId = id.getIdPart();
 
-		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getSubscriptions();
+		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getRegisteredSubscriptions();
 
 		ourLog.trace("Testing {} subscriptions for applicability");
 

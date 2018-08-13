@@ -142,16 +142,18 @@ public class SubscriptionActivatingSubscriber {
 	private void activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
 
-		ourLog.info("Activating and subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
+		ourLog.info("Activating subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
-			mySubscriptionDao.update(subscription);
+			subscription = mySubscriptionDao.update(subscription).getResource();
+			mySubscriptionInterceptor.submitResourceModifiedForUpdate(subscription);
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myCtx, subscription, "error");
 			SubscriptionUtil.setReason(myCtx, subscription, e.getMessage());
 			mySubscriptionDao.update(subscription);
 		}
+
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")

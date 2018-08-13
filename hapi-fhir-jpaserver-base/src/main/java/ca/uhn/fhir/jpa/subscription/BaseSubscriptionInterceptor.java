@@ -335,7 +335,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		return mySubscriptionDao;
 	}
 
-	public List<CanonicalSubscription> getSubscriptions() {
+	public List<CanonicalSubscription> getRegisteredSubscriptions() {
 		return new ArrayList<>(myIdToSubscription.values());
 	}
 
@@ -444,6 +444,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		submitResourceModifiedForUpdate(theNewResource);
+	}
+
+	void submitResourceModifiedForUpdate(IBaseResource theNewResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theNewResource.getIdElement());
 		msg.setOperationType(RestOperationTypeEnum.UPDATE);
@@ -457,13 +461,18 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		/*
 		 * We only actually submit this item work working after the
 		 */
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCommit() {
-				ourLog.trace("Sending resource modified message to processing channel");
-				getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
-			}
-		});
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void afterCommit() {
+					ourLog.trace("Sending resource modified message to processing channel");
+					getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
+				}
+			});
+		} else {
+			ourLog.trace("Sending resource modified message to processing channel");
+			getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
+		}
 	}
 
 	@VisibleForTesting
