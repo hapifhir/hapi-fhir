@@ -62,78 +62,13 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private static Server ourServer;
 	protected IGenericClient ourClient;
 	protected ResourceCountCache ourResourceCountsCache;
+	protected static SubscriptionRestHookInterceptor ourReskHookSubscriptionInterceptor;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	public BaseResourceProviderR4Test() {
 		super();
-	}
-
-	@AfterClass
-	public static void afterClassClearContextBaseResourceProviderR4Test() throws Exception {
-		ourServer.stop();
-		ourHttpClient.close();
-		ourServer = null;
-		ourHttpClient = null;
-		myValidationSupport.flush();
-		myValidationSupport = null;
-		ourWebApplicationContext.close();
-		ourWebApplicationContext = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {
-		int retVal = 0;
-
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				retVal++;
-			}
-		}
-
-		return retVal;
-	}
-
-	public static ParametersParameterComponent getParameterByName(Parameters theParameters, String theName) {
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				return param;
-			}
-		}
-
-		return new ParametersParameterComponent();
-	}
-
-	public static List<ParametersParameterComponent> getParametersByName(Parameters theParameters, String theName) {
-		List<ParametersParameterComponent> params = new ArrayList<>();
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				params.add(param);
-			}
-		}
-
-		return params;
-	}
-
-	public static ParametersParameterComponent getPartByName(ParametersParameterComponent theParameter, String theName) {
-		for (ParametersParameterComponent part : theParameter.getPart()) {
-			if (part.getName().equals(theName)) {
-				return part;
-			}
-		}
-
-		return new ParametersParameterComponent();
-	}
-
-	public static boolean hasParameterByName(Parameters theParameters, String theName) {
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	@After
@@ -219,6 +154,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
+			ourReskHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
@@ -272,6 +208,72 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		SubscriptionRestHookInterceptor interceptor = getRestHookSubscriptionInterceptor();
 		TestUtil.waitForSize(theSize, () -> interceptor.getRegisteredSubscriptions().size());
 		Thread.sleep(500);
+	}
+
+	@AfterClass
+	public static void afterClassClearContextBaseResourceProviderR4Test() throws Exception {
+		ourServer.stop();
+		ourHttpClient.close();
+		ourServer = null;
+		ourHttpClient = null;
+		myValidationSupport.flush();
+		myValidationSupport = null;
+		ourWebApplicationContext.close();
+		ourWebApplicationContext = null;
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {
+		int retVal = 0;
+
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				retVal++;
+			}
+		}
+
+		return retVal;
+	}
+
+	public static ParametersParameterComponent getParameterByName(Parameters theParameters, String theName) {
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				return param;
+			}
+		}
+
+		return new ParametersParameterComponent();
+	}
+
+	public static List<ParametersParameterComponent> getParametersByName(Parameters theParameters, String theName) {
+		List<ParametersParameterComponent> params = new ArrayList<>();
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				params.add(param);
+			}
+		}
+
+		return params;
+	}
+
+	public static ParametersParameterComponent getPartByName(ParametersParameterComponent theParameter, String theName) {
+		for (ParametersParameterComponent part : theParameter.getPart()) {
+			if (part.getName().equals(theName)) {
+				return part;
+			}
+		}
+
+		return new ParametersParameterComponent();
+	}
+
+	public static boolean hasParameterByName(Parameters theParameters, String theName) {
+		for (ParametersParameterComponent param : theParameters.getParameter()) {
+			if (param.getName().equals(theName)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,7 +70,7 @@ public class SubscriptionActivatingSubscriber {
 		Validate.notNull(theTaskExecutor);
 	}
 
-	public synchronized void activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
+	public synchronized boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		String subscriptionChannelType = myCtx
@@ -79,7 +79,7 @@ public class SubscriptionActivatingSubscriber {
 			.getValueAsString();
 		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(subscriptionChannelType, myChannelType);
 		if (subscriptionTypeApplies == false) {
-			return;
+			return false;
 		}
 
 		final IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
@@ -121,25 +121,28 @@ public class SubscriptionActivatingSubscriber {
 						}
 					}
 				});
+				return true;
 			} else {
-				activateSubscription(activeStatus, theSubscription, requestedStatus);
+				return activateSubscription(activeStatus, theSubscription, requestedStatus);
 			}
 		} else if (activeStatus.equals(statusString)) {
-			registerSubscriptionUnlessAlreadyRegistered(theSubscription);
+			return registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
 			// Status isn't "active" or "requested"
-			unregisterSubscriptionIfRegistered(theSubscription, statusString);
+			return unregisterSubscriptionIfRegistered(theSubscription, statusString);
 		}
 	}
 
-	protected void unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
-		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+	protected boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
+		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement()) != null) {
 			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
 			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+			return true;
 		}
+		return false;
 	}
 
-	private void activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
+	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
 
 		ourLog.info("Activating subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
@@ -147,11 +150,13 @@ public class SubscriptionActivatingSubscriber {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
 			subscription = mySubscriptionDao.update(subscription).getResource();
 			mySubscriptionInterceptor.submitResourceModifiedForUpdate(subscription);
+			return true;
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myCtx, subscription, "error");
 			SubscriptionUtil.setReason(myCtx, subscription, e.getMessage());
 			mySubscriptionDao.update(subscription);
+			return false;
 		}
 
 	}
@@ -186,14 +191,25 @@ public class SubscriptionActivatingSubscriber {
 		});
 	}
 
-	private void registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
+	protected boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+		CanonicalSubscription existingSubscription = mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement());
+		CanonicalSubscription newSubscription = mySubscriptionInterceptor.canonicalize(theSubscription);
+
+		if (existingSubscription != null) {
+			if (newSubscription.equals(existingSubscription)) {
+				// No changes
+				return false;
+			}
+		}
+
+		if (existingSubscription != null) {
 			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
 		} else {
 			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		}
 		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+		return true;
 	}
 
 	@VisibleForTesting

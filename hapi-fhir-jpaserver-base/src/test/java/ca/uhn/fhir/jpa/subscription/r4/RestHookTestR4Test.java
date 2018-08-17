@@ -52,33 +52,6 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 	private CountingInterceptor myCountingInterceptor;
 
-	@BeforeClass
-	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
-
-		ourListenerServer = new Server(ourListenerPort);
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourListenerRestServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-
-		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
-	}
-
-	@AfterClass
-	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
-	}
-
 	@After
 	public void afterUnregisterRestHookListener() {
 		for (IIdType next : mySubscriptionIds) {
@@ -181,6 +154,19 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testActiveSubscriptionShouldntReActivate() throws Exception {
+		String criteria = "Observation?code=111111111&_format=xml";
+		String payload = "application/fhir+json";
+		createSubscription(criteria, payload, ourListenerServerBase);
+
+		waitForRegisteredSubscriptionCount(1);
+		for (int i = 0; i < 5; i++) {
+			Integer changes = ourReskHookSubscriptionInterceptor.doInitSubscriptions();
+			assertEquals(0, changes.intValue());
+		}
+	}
+
+	@Test
 	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
 		String payload = "application/fhir+json";
 
@@ -233,7 +219,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 		ourClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 1, ()->myCountingInterceptor.getSentCount());
+		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());
 
 		ourLog.info("** About to send observation");
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -399,7 +385,6 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		Assert.assertFalse(observation1.getId().isEmpty());
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
-
 
 	@Test
 	public void testUpdateSubscriptionToMatchLater() throws Exception {
@@ -584,6 +569,33 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
+	}
+
+	@BeforeClass
+	public static void startListenerServer() throws Exception {
+		ourListenerPort = PortUtil.findFreePort();
+		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+
+		ObservationListener obsListener = new ObservationListener();
+		ourListenerRestServer.setResourceProviders(obsListener);
+
+		ourListenerServer = new Server(ourListenerPort);
+
+		ServletContextHandler proxyHandler = new ServletContextHandler();
+		proxyHandler.setContextPath("/");
+
+		ServletHolder servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourListenerRestServer);
+		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+
+		ourListenerServer.setHandler(proxyHandler);
+		ourListenerServer.start();
+	}
+
+	@AfterClass
+	public static void stopListenerServer() throws Exception {
+		ourListenerServer.stop();
 	}
 
 }

@@ -339,52 +339,62 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		return new ArrayList<>(myIdToSubscription.values());
 	}
 
-	public boolean hasSubscription(IIdType theId) {
+	public CanonicalSubscription hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
-		return myIdToSubscription.containsKey(theId.getIdPart());
+		return myIdToSubscription.get(theId.getIdPart());
 	}
 
 	/**
 	 * Read the existing subscriptions from the database
 	 */
 	@SuppressWarnings("unused")
-	@Scheduled(fixedDelay = 10000)
+	@Scheduled(fixedDelay = 60000)
 	public void initSubscriptions() {
 		if (!myInitSubscriptionsSemaphore.tryAcquire()) {
 			return;
 		}
 		try {
-			ourLog.debug("Starting init subscriptions");
-			SearchParameterMap map = new SearchParameterMap();
-			map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
-			map.add(Subscription.SP_STATUS, new TokenOrListParam()
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
-			map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
-
-			RequestDetails req = new ServletSubRequestDetails();
-			req.setSubRequest(true);
-
-			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
-			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
-			}
-
-			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
-
-			Set<String> allIds = new HashSet<>();
-			for (IBaseResource resource : resourceList) {
-				String nextId = resource.getIdElement().getIdPart();
-				allIds.add(nextId);
-				mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
-			}
-
-			unregisterAllSubscriptionsNotInCollection(allIds);
-			ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
+			doInitSubscriptions();
 		} finally {
 			myInitSubscriptionsSemaphore.release();
 		}
+	}
+
+	public Integer doInitSubscriptions() {
+		ourLog.debug("Starting init subscriptions");
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
+		map.add(Subscription.SP_STATUS, new TokenOrListParam()
+			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+		map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
+
+		RequestDetails req = new ServletSubRequestDetails();
+		req.setSubRequest(true);
+
+		IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
+		if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
+			ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
+		}
+
+		List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
+
+		Set<String> allIds = new HashSet<>();
+		int changesCount = 0;
+		for (IBaseResource resource : resourceList) {
+			String nextId = resource.getIdElement().getIdPart();
+			allIds.add(nextId);
+			boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
+			if (changed) {
+				changesCount++;
+			}
+		}
+
+		unregisterAllSubscriptionsNotInCollection(allIds);
+		ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
+
+		return changesCount;
 	}
 
 	@SuppressWarnings("unused")

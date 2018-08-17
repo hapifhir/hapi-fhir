@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -72,18 +72,6 @@ public class CanonicalSubscription implements Serializable {
 		myTrigger = theTrigger;
 	}
 
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		CanonicalSubscription that = (CanonicalSubscription) theO;
-
-		return new EqualsBuilder()
-			.append(getIdElementString(), that.getIdElementString())
-			.isEquals();
-	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
 		return myChannelType;
@@ -118,6 +106,15 @@ public class CanonicalSubscription implements Serializable {
 
 	public List<String> getHeaders() {
 		return myHeaders;
+	}
+
+	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
+		myHeaders = new ArrayList<>();
+		for (IPrimitiveType<String> next : theHeader) {
+			if (isNotBlank(next.getValueAsString())) {
+				myHeaders.add(next.getValueAsString());
+			}
+		}
 	}
 
 	public void setHeaders(String theHeaders) {
@@ -171,19 +168,41 @@ public class CanonicalSubscription implements Serializable {
 	}
 
 	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getIdElementString())
-			.toHashCode();
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		CanonicalSubscription that = (CanonicalSubscription) theO;
+
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myIdElement, that.myIdElement);
+		b.append(myCriteriaString, that.myCriteriaString);
+		b.append(myEndpointUrl, that.myEndpointUrl);
+		b.append(myPayloadString, that.myPayloadString);
+		b.append(myHeaders, that.myHeaders);
+		b.append(myChannelType, that.myChannelType);
+		b.append(myStatus, that.myStatus);
+		b.append(myTrigger, that.myTrigger);
+		b.append(myEmailDetails, that.myEmailDetails);
+		b.append(myRestHookDetails, that.myRestHookDetails);
+		return b.isEquals();
 	}
 
-	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
-		myHeaders = new ArrayList<>();
-		for (IPrimitiveType<String> next : theHeader) {
-			if (isNotBlank(next.getValueAsString())) {
-				myHeaders.add(next.getValueAsString());
-			}
-		}
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myIdElement)
+			.append(myCriteriaString)
+			.append(myEndpointUrl)
+			.append(myPayloadString)
+			.append(myHeaders)
+			.append(myChannelType)
+			.append(myStatus)
+			.append(myTrigger)
+			.append(myEmailDetails)
+			.append(myRestHookDetails)
+			.toHashCode();
 	}
 
 	public void setIdElement(IIdType theIdElement) {
@@ -232,6 +251,28 @@ public class CanonicalSubscription implements Serializable {
 
 		public void setDeliverLatestVersion(boolean theDeliverLatestVersion) {
 			myDeliverLatestVersion = theDeliverLatestVersion;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (theO == null || getClass() != theO.getClass()) return false;
+
+			RestHookDetails that = (RestHookDetails) theO;
+
+			return new EqualsBuilder()
+				.append(myStripVersionId, that.myStripVersionId)
+				.append(myDeliverLatestVersion, that.myDeliverLatestVersion)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myStripVersionId)
+				.append(myDeliverLatestVersion)
+				.toHashCode();
 		}
 
 		public boolean isStripVersionId() {
