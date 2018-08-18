@@ -43,15 +43,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.*;
+import static org.fusesource.jansi.Ansi.ansi;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String BASE_URL_PARAM = "t";
@@ -89,6 +87,25 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		addOptionalOption(theOptions, null, BEARER_TOKEN_PARAM_LONGOPT, BEARER_TOKEN_PARAM_NAME, BEARER_TOKEN_PARAM_DESC);
 	}
 
+	protected String promptUser(String thePrompt) throws ParseException {
+		System.out.print(ansi().bold().fgBrightDefault());
+		System.out.print(thePrompt);
+		System.out.print(ansi().bold().fgBrightGreen());
+		System.out.flush();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		String retVal;
+		try {
+			retVal = reader.readLine();
+		} catch (IOException e) {
+			throw new ParseException("Failed to read input from user: "+ e.toString());
+		}
+
+		System.out.print(ansi().boldOff().fgDefault());
+
+		return retVal;
+	}
+
 	protected void addFhirVersionOption(Options theOptions) {
 		String versions = Arrays.stream(FhirVersionEnum.values())
 			.filter(t -> t != FhirVersionEnum.DSTU2_1 && t != FhirVersionEnum.DSTU2_HL7ORG)
@@ -97,6 +114,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			.collect(Collectors.joining(", "));
 		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
 	}
+
+
 
 	private void addOption(Options theOptions, OptionGroup theOptionGroup, boolean theRequired, String theOpt, String theLongOpt, boolean theHasArgument, String theArgumentName, String theDescription) {
 		Option option = createOption(theRequired, theOpt, theLongOpt, theHasArgument, theDescription);
@@ -195,7 +214,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 				buffer.write(data, 0, nRead);
 				long fileSize = FileUtils.sizeOf(localFile);
 				if (fileSize > nextLog) {
-					System.err.print("\r" + Ansi.ansi().eraseLine());
+					System.err.print("\r" + ansi().eraseLine());
 					System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
 					if (maxLength > 0) {
 						System.err.print(" [");
