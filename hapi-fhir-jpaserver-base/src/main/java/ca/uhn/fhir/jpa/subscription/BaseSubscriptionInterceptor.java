@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -76,6 +76,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
+	private final Object myInitSubscriptionsLock = new Object();
 	private SubscribableChannel myProcessingChannel;
 	private Map<String, SubscribableChannel> myDeliveryChannel;
 	private ExecutorService myProcessingExecutor;
@@ -362,39 +363,41 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	public Integer doInitSubscriptions() {
-		ourLog.debug("Starting init subscriptions");
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
-		map.add(Subscription.SP_STATUS, new TokenOrListParam()
-			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
-		map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
+		synchronized (myInitSubscriptionsLock) {
+			ourLog.debug("Starting init subscriptions");
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
+			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+			map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
 
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
+			RequestDetails req = new ServletSubRequestDetails();
+			req.setSubRequest(true);
 
-		IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
-		if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
-			ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
-		}
-
-		List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
-
-		Set<String> allIds = new HashSet<>();
-		int changesCount = 0;
-		for (IBaseResource resource : resourceList) {
-			String nextId = resource.getIdElement().getIdPart();
-			allIds.add(nextId);
-			boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
-			if (changed) {
-				changesCount++;
+			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
+			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
+				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
+
+			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
+
+			Set<String> allIds = new HashSet<>();
+			int changesCount = 0;
+			for (IBaseResource resource : resourceList) {
+				String nextId = resource.getIdElement().getIdPart();
+				allIds.add(nextId);
+				boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
+				if (changed) {
+					changesCount++;
+				}
+			}
+
+			unregisterAllSubscriptionsNotInCollection(allIds);
+			ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
+
+			return changesCount;
 		}
-
-		unregisterAllSubscriptionsNotInCollection(allIds);
-		ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
-
-		return changesCount;
 	}
 
 	@SuppressWarnings("unused")

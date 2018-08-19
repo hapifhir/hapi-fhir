@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
@@ -205,6 +207,18 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	protected void waitForRegisteredSubscriptionCount(int theSize) throws Exception {
+		for (int i = 0; i++;) {
+			if (i == 10) {
+				fail("Failed to init subscriptions");
+			}
+			try {
+				getRestHookSubscriptionInterceptor().doInitSubscriptions();
+				break;
+			} catch (ResourceVersionConflictException e) {
+				Thread.sleep(250);
+			}
+		}
+
 		SubscriptionRestHookInterceptor interceptor = getRestHookSubscriptionInterceptor();
 		TestUtil.waitForSize(theSize, () -> interceptor.getRegisteredSubscriptions().size());
 		Thread.sleep(500);

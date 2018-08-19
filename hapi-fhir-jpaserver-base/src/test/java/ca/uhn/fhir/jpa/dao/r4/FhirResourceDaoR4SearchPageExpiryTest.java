@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -32,6 +33,7 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
+@SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchPageExpiryTest.class);
 
@@ -404,7 +406,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				Search search = null;
 				for (int i = 0; i < 20 && search == null; i++) {
 					search = theSearchEntityDao.findByUuid(theUuid);
-					if (search == null) {
+					if (search == null || search.getStatus() == SearchStatusEnum.LOADING) {
 						sleepAtLeast(100);
 					}
 				}
