@@ -278,6 +278,11 @@
 				The <![CDATA[<code>Composition</code>]]> operation <![CDATA[<code>$document</code>]]> has been
 				implemented. Thanks to Patrick Werner for the Pull Request!
 			</action>
+			<action type="add">
+				HAPI FHIR CLI commands that allow Basic Auth credentials or a Bearer Token may now use 
+				a value of "PROMPT" to cause the CLI to prompt the user for credentials using an
+				interactive prompt.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

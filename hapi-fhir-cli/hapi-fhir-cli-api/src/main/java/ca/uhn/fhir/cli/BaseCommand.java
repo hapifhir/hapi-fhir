@@ -43,15 +43,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.*;
+import static org.fusesource.jansi.Ansi.ansi;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String BASE_URL_PARAM = "t";
@@ -61,10 +59,10 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String BASIC_AUTH_PARAM = "b";
 	protected static final String BASIC_AUTH_PARAM_LONGOPT = "basic-auth";
 	protected static final String BASIC_AUTH_PARAM_NAME = "basic-auth";
-	protected static final String BASIC_AUTH_PARAM_DESC = "If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header.";
+	protected static final String BASIC_AUTH_PARAM_DESC = "If specified, this parameter supplies a username and password (in the format \"username:password\") to include in an HTTP Basic Auth header. The value \"PROMPT\" may also be used to specify that an interactive prompt should request credentials from the user.";
 	protected static final String BEARER_TOKEN_PARAM_LONGOPT = "bearer-token";
 	protected static final String BEARER_TOKEN_PARAM_NAME = "bearer-token";
-	protected static final String BEARER_TOKEN_PARAM_DESC = "If specified, this parameter supplies a Bearer Token to supply with the request.";
+	protected static final String BEARER_TOKEN_PARAM_DESC = "If specified, this parameter supplies a Bearer Token to supply with the request. The value \"PROMPT\" may also be used to specify that an interactive prompt should request a Bearer Token from the user.";
 	protected static final String FHIR_VERSION_PARAM = "v";
 	protected static final String FHIR_VERSION_PARAM_LONGOPT = "fhir-version";
 	protected static final String FHIR_VERSION_PARAM_NAME = "version";
@@ -74,6 +72,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String VERBOSE_LOGGING_PARAM_DESC = "If specified, verbose logging will be used.";
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseCommand.class);
+	public static final String PROMPT = "PROMPT";
 	protected FhirContext myFhirCtx;
 
 	public BaseCommand() {
@@ -89,6 +88,25 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		addOptionalOption(theOptions, null, BEARER_TOKEN_PARAM_LONGOPT, BEARER_TOKEN_PARAM_NAME, BEARER_TOKEN_PARAM_DESC);
 	}
 
+	protected String promptUser(String thePrompt) throws ParseException {
+		System.out.print(ansi().bold().fgBrightDefault());
+		System.out.print(thePrompt);
+		System.out.print(ansi().bold().fgBrightGreen());
+		System.out.flush();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		String retVal;
+		try {
+			retVal = reader.readLine();
+		} catch (IOException e) {
+			throw new ParseException("Failed to read input from user: "+ e.toString());
+		}
+
+		System.out.print(ansi().boldOff().fgDefault());
+
+		return retVal;
+	}
+
 	protected void addFhirVersionOption(Options theOptions) {
 		String versions = Arrays.stream(FhirVersionEnum.values())
 			.filter(t -> t != FhirVersionEnum.DSTU2_1 && t != FhirVersionEnum.DSTU2_HL7ORG)
@@ -97,6 +115,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			.collect(Collectors.joining(", "));
 		addRequiredOption(theOptions, FHIR_VERSION_PARAM, FHIR_VERSION_PARAM_LONGOPT, FHIR_VERSION_PARAM_NAME, FHIR_VERSION_PARAM_DESC + versions);
 	}
+
+
 
 	private void addOption(Options theOptions, OptionGroup theOptionGroup, boolean theRequired, String theOpt, String theLongOpt, boolean theHasArgument, String theArgumentName, String theDescription) {
 		Option option = createOption(theRequired, theOpt, theLongOpt, theHasArgument, theDescription);
@@ -195,7 +215,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 				buffer.write(data, 0, nRead);
 				long fileSize = FileUtils.sizeOf(localFile);
 				if (fileSize > nextLog) {
-					System.err.print("\r" + Ansi.ansi().eraseLine());
+					System.err.print("\r" + ansi().eraseLine());
 					System.err.print(FileUtils.byteCountToDisplaySize(fileSize));
 					if (maxLength > 0) {
 						System.err.print(" [");
@@ -224,17 +244,22 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	/**
 	 * @return Returns the complete authorization header value using the "-b" option
 	 */
-	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine) {
+	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine) throws ParseException {
 		return getAndParseOptionBasicAuthHeader(theCommandLine, BASIC_AUTH_PARAM);
 	}
 
 	/**
 	 * @return Returns the complete authorization header value using an arbitrary option
 	 */
-	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine, String theOptionName) {
+	protected String getAndParseOptionBasicAuthHeader(CommandLine theCommandLine, String theOptionName) throws ParseException {
 		String basicAuthHeaderValue = null;
 		if (theCommandLine.hasOption(theOptionName)) {
-			byte[] basicAuth = theCommandLine.getOptionValue(theOptionName).getBytes();
+			String optionValue = theCommandLine.getOptionValue(theOptionName);
+			if (PROMPT.equals(optionValue)) {
+				promptUser("Enter Basic Auth Credentials (format is \"username:password\"): ");
+			}
+
+			byte[] basicAuth = optionValue.getBytes();
 			String base64EncodedBasicAuth = Base64Utils.encodeToString(basicAuth);
 			basicAuthHeaderValue = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + base64EncodedBasicAuth;
 		} else {
@@ -365,7 +390,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName);
 	}
 
-	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName, String theBearerTokenOptionName) {
+	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(10 * 60 * 1000);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
@@ -375,13 +400,21 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		}
 
 		if (isNotBlank(theBearerTokenOptionName)) {
-			String bearerToken = theCommandLine.getOptionValue(theBearerTokenOptionName);
+			String bearerToken = getAndParseBearerTokenAuthHeader(theCommandLine, theBearerTokenOptionName);
 			if (isNotBlank(bearerToken)) {
 				retVal.registerInterceptor(new SimpleRequestHeaderInterceptor(Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + bearerToken));
 			}
 		}
 
 		return retVal;
+	}
+
+	private String getAndParseBearerTokenAuthHeader(CommandLine theCommandLine, String theBearerTokenOptionName) throws ParseException {
+		String value = theCommandLine.getOptionValue(theBearerTokenOptionName);
+		if (PROMPT.equals(value)) {
+			return promptUser("Enter Bearer Token: ");
+		}
+		return value;
 	}
 
 	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
