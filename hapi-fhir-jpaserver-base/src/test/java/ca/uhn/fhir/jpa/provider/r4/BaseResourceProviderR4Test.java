@@ -61,10 +61,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
+	protected static SubscriptionRestHookInterceptor ourReskHookSubscriptionInterceptor;
 	private static Server ourServer;
 	protected IGenericClient ourClient;
 	protected ResourceCountCache ourResourceCountsCache;
-	protected static SubscriptionRestHookInterceptor ourReskHookSubscriptionInterceptor;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
@@ -207,7 +207,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	protected void waitForRegisteredSubscriptionCount(int theSize) throws Exception {
-		for (int i = 0; i++;) {
+		for (int i = 0; ; i++) {
 			if (i == 10) {
 				fail("Failed to init subscriptions");
 			}
