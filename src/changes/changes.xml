@@ -283,6 +283,12 @@
 				a value of "PROMPT" to cause the CLI to prompt the user for credentials using an
 				interactive prompt.
 			</action>
+			<action type="remove">
+				The experimental "dynamic mode" for search parameter registration has been removed. This
+				mode was never published or documented and was labelled as experimental, so I am hoping it
+				was never depended on by anyone. Please post on the HAPI FHIR mailing list if this
+				change affects you.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

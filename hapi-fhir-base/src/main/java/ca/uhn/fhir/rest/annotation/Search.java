@@ -79,11 +79,6 @@ public @interface Search {
 	Class<? extends IBaseResource> type() default IBaseResource.class;
 
 	/**
-	 * This is an experimental option - Use with caution
-	 */
-	boolean dynamic() default false;
-	
-	/**
 	 * In a REST server, should this method be invoked even if it does not have method parameters 
 	 * which correspond to all of the URL parameters passed in by the client (default is <code>false</code>).
 	 * <p>

@@ -475,10 +475,6 @@ public abstract class BaseMethodBinding<T> {
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			if (search.dynamic()) {
-				IDynamicSearchResourceProvider provider = (IDynamicSearchResourceProvider) theProvider;
-				return new DynamicSearchMethodBinding(returnType, theMethod, theContext, provider);
-			}
 			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
