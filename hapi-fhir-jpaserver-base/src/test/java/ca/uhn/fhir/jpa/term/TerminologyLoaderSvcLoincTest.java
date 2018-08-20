@@ -156,6 +156,10 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("LA6270-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Never", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
+		// External AnswerList
+		vs = valueSets.get("LL1892-0");
+		assertEquals(0, vs.getCompose().getIncludeFirstRep().getConcept().size());
+
 		// Part
 		code = concepts.get("LP101394-7");
 		assertEquals("LP101394-7", code.getCode());
