@@ -56,6 +56,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private Integer myIdParamIndex;
 	private String myQueryName;
 	private boolean myAllowUnknownParams;
+  private final String myResourceProviderResourceName;
 
 	static {
 		HashSet<String> specialSearchParams = new HashSet<>();
@@ -64,7 +65,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		SPECIAL_SEARCH_PARAMS = Collections.unmodifiableSet(specialSearchParams);
 	}
 
-	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Class<? extends IBaseResource> theResourceProviderResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
@@ -89,10 +90,24 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new ConfigurationException(msg);
 		}
 
+    if (theResourceProviderResourceType != null) {
+      this.myResourceProviderResourceName = theContext.getResourceDefinition(theResourceProviderResourceType).getName();
+    } else {
+      this.myResourceProviderResourceName = null;
+    }
+
 	}
 
 	public String getDescription() {
 		return myDescription;
+	}
+
+	public String getQueryName() {
+		return myQueryName;
+	}
+
+  public String getResourceProviderResourceName() {
+    return myResourceProviderResourceName;
 	}
 
 	@Nonnull
