@@ -23,8 +23,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -63,8 +61,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
-import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
-import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPredicate;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -110,9 +106,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private String mySearchUuid;
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
-
-	protected IResourceTagDao myResourceTagDao;
-	protected IResourceSearchViewDao myResourceSearchViewDao;
 
 	/**
 	 * Constructor
@@ -1602,21 +1595,17 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
 									Map<Long, Integer> position, Collection<Long> pids) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.where(from.get("myId").in(pids));
+		TypedQuery<ResourceTable> q = entityManager.createQuery(cq);
 
-		// -- get the resource from the searchView
-		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(pids);
+		List<ResourceTable> resultList = q.getResultList();
 
-		//-- preload all tags with tag definition if any
-		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
-
-		Long resourceId = null;
-		for (ResourceSearchView next : resourceSearchViewList) {
-
+		for (ResourceTable next : resultList) {
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
-
-			resourceId = next.getId();
-
-			IBaseResource resource = theDao.toResource(resourceType, next, tagMap.get(resourceId), theForHistoryOperation);
+			IBaseResource resource = theDao.toResource(resourceType, next, theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
@@ -1643,44 +1632,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 			theResourceListToPopulate.set(index, resource);
 		}
-	}
-
-	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {
-
-		List<Long> idList = new ArrayList<Long>(theResourceSearchViewList.size());
-
-		//-- find all resource has tags
-		for (ResourceSearchView resource: theResourceSearchViewList) {
-			if (resource.isHasTags())
-				idList.add(resource.getId());
-		}
-
-		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
-
-		//-- no tags
-		if (idList.size() == 0)
-			return tagMap;
-
-		//-- get all tags for the idList
-		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
-
-		//-- build the map, key = resourceId, value = list of ResourceTag
-		Long resourceId;
-		Collection<ResourceTag> tagCol;
-		for (ResourceTag tag : tagList) {
-
-			resourceId = tag.getResourceId();
-			tagCol = tagMap.get(resourceId);
-			if (tagCol == null) {
-				tagCol = new ArrayList<>();
-				tagCol.add(tag);
-				tagMap.put(resourceId, tagCol);
-			} else {
-				tagCol.add(tag);
-			}
-		}
-
-		return tagMap;
 	}
 
 	@Override
