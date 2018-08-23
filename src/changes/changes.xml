@@ -289,6 +289,10 @@
 				was never depended on by anyone. Please post on the HAPI FHIR mailing list if this
 				change affects you.
 			</action>
+			<action type="fix">
+				A crash was fixed when using the ConceptMap/$translate operation to translate a mapping
+				where the equivalence was not specified.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">
