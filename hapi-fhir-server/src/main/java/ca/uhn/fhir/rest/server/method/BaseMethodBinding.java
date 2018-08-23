@@ -446,8 +446,7 @@ public abstract class BaseMethodBinding<T> {
 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
-				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					//FIXME potential null access on retunrTypeFromMethod
+				if (returnTypeFromMethod != null && !returnTypeFromRp.isAssignableFrom(returnTypeFromMethod)) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type "
 							+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
@@ -475,7 +474,7 @@ public abstract class BaseMethodBinding<T> {
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
+			return new SearchMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {

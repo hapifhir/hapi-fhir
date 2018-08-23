@@ -56,7 +56,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final boolean myIdempotent;
 	private final Integer myIdParamIndex;
 	private final String myName;
-	private final RestOperationTypeEnum myOtherOperatiopnType;
+	private final RestOperationTypeEnum myOtherOperationType;
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
 
@@ -67,16 +67,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-		if (myIdParamIndex != null) {
-			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
-				if (next instanceof IdParam) {
-					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
-				}
-			}
-		} else {
-			myCanOperateAtTypeLevel = true;
-		}
 
 		Description description = theMethod.getAnnotation(Description.class);
 		if (description != null) {
@@ -98,15 +88,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		myName = theOperationName;
 
-		if (theReturnTypeFromRp != null) {
+    if (theReturnTypeFromRp != null) {
 			setResourceName(theContext.getResourceDefinition(theReturnTypeFromRp).getName());
-		} else {
-			if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
-				setResourceName(theContext.getResourceDefinition(theOperationType).getName());
-			} else {
-				setResourceName(null);
-			}
-		}
+		} else if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+      setResourceName(theContext.getResourceDefinition(theOperationType).getName());
+    } else {
+      setResourceName(null);
+    }
 
 		if (theMethod.getReturnType().equals(IBundleProvider.class)) {
 			myReturnType = ReturnTypeEnum.BUNDLE;
@@ -114,13 +102,25 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myReturnType = ReturnTypeEnum.RESOURCE;
 		}
 
+    myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (getResourceName() == null) {
-			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+      myCanOperateAtServerLevel = true;
+      if (myIdParamIndex != null) {
+        myCanOperateAtInstanceLevel = true;
+      }
 		} else if (myIdParamIndex == null) {
-			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+      myCanOperateAtTypeLevel = true;
 		} else {
-			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
-		}
+			myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+      myCanOperateAtInstanceLevel = true;
+      for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
+        if (next instanceof IdParam) {
+          myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
+        }
+      }
+    }
 
 		myReturnParams = new ArrayList<>();
 		if (theReturnParams != null) {
@@ -141,14 +141,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				myReturnParams.add(type);
 			}
 		}
-
-		if (myIdParamIndex != null) {
-			myCanOperateAtInstanceLevel = true;
-		}
-		if (getResourceName() == null) {
-			myCanOperateAtServerLevel = true;
-		}
-
 	}
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
@@ -175,7 +167,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
-		return myOtherOperatiopnType;
+		return myOtherOperationType;
 	}
 
 	public List<ReturnType> getReturnParams() {
