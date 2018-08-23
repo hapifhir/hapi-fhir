@@ -351,7 +351,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	 */
 	@SuppressWarnings("unused")
 	@Scheduled(fixedDelay = 60000)
-	@PostConstruct
 	public void initSubscriptions() {
 		if (!myInitSubscriptionsSemaphore.tryAcquire()) {
 			return;
