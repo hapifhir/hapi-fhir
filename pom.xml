@@ -1015,6 +1015,11 @@
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>5.1.4</version>
+			</dependency>
+			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
 				<version>1.16</version>
@@ -2149,6 +2154,7 @@
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-elasticsearch</module>
 				<module>hapi-fhir-jpaserver-example</module>
+				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
 				<module>hapi-fhir-testpage-overlay</module>
