@@ -293,6 +293,10 @@
 				A crash was fixed when using the ConceptMap/$translate operation to translate a mapping
 				where the equivalence was not specified.
 			</action>
+			<action type="add">
+				The maximum length for codes in the JPA server terminology service have been increased
+				to 500 in order to better accomodate code systems with very long codes.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

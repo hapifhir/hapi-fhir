@@ -49,6 +49,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
+	public static final int CODE_LENGTH = 500;
 	protected static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 
@@ -57,7 +58,7 @@ public class TermConcept implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
 	private Collection<TermConceptParentChildLink> myChildren;
 
-	@Column(name = "CODE", length = 100, nullable = false)
+	@Column(name = "CODE", length = CODE_LENGTH, nullable = false)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
 	private String myCode;
 	@Temporal(TemporalType.TIMESTAMP)
