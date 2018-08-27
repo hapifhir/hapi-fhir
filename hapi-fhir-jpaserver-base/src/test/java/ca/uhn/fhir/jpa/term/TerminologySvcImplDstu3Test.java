@@ -129,6 +129,12 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 			code = new TermConcept(cs, "43343-3");
 			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-1");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-4");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-2");
 			cs.getConcepts().add(code);
 
 			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
@@ -284,6 +290,33 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeUsingOr() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("HELLO")
+			.setOp(ValueSet.FilterOperator.REGEX)
+			.setValue("12345-1|12345-2");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
 	}
 
 	@Test
