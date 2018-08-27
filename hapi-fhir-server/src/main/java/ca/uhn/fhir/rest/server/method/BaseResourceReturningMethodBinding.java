@@ -77,7 +77,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
-	private Class<? extends IBaseResource> myResourceType;
 
 	@SuppressWarnings("unchecked")
 	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
@@ -115,8 +114,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				if (Modifier.isAbstract(theReturnResourceType.getModifiers()) || Modifier.isInterface(theReturnResourceType.getModifiers())) {
 					// If we're returning an abstract type, that's ok
 				} else {
-					myResourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = theContext.getResourceDefinition(myResourceType).getName();
+          Class<? extends IResource> methodReturnTypeResourceType = (Class<? extends IResource>) theReturnResourceType;
+					myResourceName = theContext.getResourceDefinition(methodReturnTypeResourceType).getName();
 				}
 			}
 		}
@@ -369,7 +368,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	/**
 	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
 	 */
-	protected abstract BundleTypeEnum getResponseBundleType();
+  protected abstract BundleTypeEnum getResponseBundleType();
 
 	public abstract ReturnTypeEnum getReturnType();
 

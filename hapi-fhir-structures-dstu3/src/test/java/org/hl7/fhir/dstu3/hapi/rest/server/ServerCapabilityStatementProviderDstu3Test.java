@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.*;
@@ -37,6 +38,14 @@ import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 
 public class ServerCapabilityStatementProviderDstu3Test {
 
@@ -124,6 +133,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"));
 		validate(opDef);
 		assertEquals("everything", opDef.getCode());
+    assertThat(opDef.getSystem(), is(false));
+    assertThat(opDef.getType(), is(false));
+    assertThat(opDef.getInstance(), is(true));
 	}
 
 	@Test
@@ -344,6 +356,10 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
 		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
 		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
+    
+    assertThat(opDef.getSystem(), is(true));
+    assertThat(opDef.getType(), is(false));
+    assertThat(opDef.getInstance(), is(true));
 	}
 
 	@Test
@@ -620,6 +636,114 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
 		assertTrue(result.getMessages().toString(), result.isSuccessful());
+	}
+  
+  @Test
+  public void testSystemLevelNamedQueryWithParameters() throws Exception {
+    RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new NamedQueryPlainProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+    
+    CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
+    CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
+    assertThat(operationComponent.getName(), is(NamedQueryPlainProvider.QUERY_NAME));
+    
+    String operationReference = operationComponent.getDefinition().getReference();
+    assertThat(operationReference, not(nullValue()));
+    
+    OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference));
+    ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+    validate(operationDefinition);
+    assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
+    assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), is(NamedQueryPlainProvider.DESCRIPTION));
+    assertThat(operationDefinition.getStatus(), is(PublicationStatus.ACTIVE));
+    assertThat(operationDefinition.getKind(), is(OperationKind.QUERY));
+    assertThat(operationDefinition.getDescription(), is(NamedQueryPlainProvider.DESCRIPTION));
+    assertThat(operationDefinition.getIdempotent(), is(true));
+    assertThat("A system level search has no target resources", operationDefinition.getResource(), is(empty()));
+    assertThat(operationDefinition.getSystem(), is(true));
+    assertThat(operationDefinition.getType(), is(false));
+    assertThat(operationDefinition.getInstance(), is(false));
+    List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
+    assertThat(parameters.size(), is(1));
+    OperationDefinitionParameterComponent param = parameters.get(0);
+    assertThat(param.getName(), is(NamedQueryPlainProvider.SP_QUANTITY));
+    assertThat(param.getType(), is("string"));
+    assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.QUANTITY.getCode()));
+    assertThat(param.getMin(), is(1));
+    assertThat(param.getMax(), is("1"));
+    assertThat(param.getUse(), is(OperationParameterUse.IN));
+  }
+  
+  @Test
+  public void testResourceLevelNamedQueryWithParameters() throws Exception {
+    RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new NamedQueryResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+    
+    CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
+    CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
+    String operationReference = operationComponent.getDefinition().getReference();
+    assertThat(operationReference, not(nullValue()));
+    
+    OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference));
+    ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+    validate(operationDefinition);
+    assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is(NamedQueryResourceProvider.QUERY_NAME));
+    assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is("Patient"));
+    assertThat(operationDefinition.getSystem(), is(false));
+    assertThat(operationDefinition.getType(), is(true));
+    assertThat(operationDefinition.getInstance(), is(false));
+    List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
+    assertThat(parameters.size(), is(1));
+    OperationDefinitionParameterComponent param = parameters.get(0);
+    assertThat(param.getName(), is(NamedQueryResourceProvider.SP_PARAM));
+    assertThat(param.getType(), is("string"));
+    assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.STRING.getCode()));
+    assertThat(param.getMin(), is(0));
+    assertThat(param.getMax(), is("1"));
+    assertThat(param.getUse(), is(OperationParameterUse.IN));
+  }
+  
+  @Test
+	public void testExtendedOperationAtTypeLevel() throws Exception {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new TypeLevelOperationProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+    List<CapabilityStatementRestOperationComponent> operations = conformance.getRest().get(0).getOperation();
+		assertThat(operations.size(), is(1));
+		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
+
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType(operations.get(0).getDefinition().getReference()));
+		validate(opDef);
+		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
+    assertThat(opDef.getSystem(), is(false));
+    assertThat(opDef.getType(), is(true));
+    assertThat(opDef.getInstance(), is(false));
 	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {
@@ -933,5 +1057,51 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 	}
+  
+  public static class TypeLevelOperationProvider implements IResourceProvider {
+    
+    public static final String OPERATION_NAME = "op";
+    
+    @Operation(name = OPERATION_NAME, idempotent = true)
+		public IBundleProvider op() {
+			return null;
+		}
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Patient.class;
+    }
+    
+  }
+  
+  public static class NamedQueryPlainProvider {
+    
+    public static final String QUERY_NAME = "testQuery";
+    public static final String DESCRIPTION = "A query description";
+    public static final String SP_QUANTITY = "quantity";
+    
+    @Search(queryName = QUERY_NAME)
+    @Description(formalDefinition = DESCRIPTION)
+    public Bundle findAllGivenParameter(@RequiredParam(name = SP_QUANTITY) QuantityParam quantity) {
+      return null;
+    }
+  }
+  
+  public static class NamedQueryResourceProvider implements IResourceProvider {
+
+    public static final String QUERY_NAME = "testQuery";
+    public static final String SP_PARAM = "param";
+    
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return Patient.class;
+    }
+    
+    @Search(queryName = QUERY_NAME)
+    public Bundle findAllGivenParameter(@OptionalParam(name = SP_PARAM) StringParam param) {
+      return null;
+    }
+    
+  }
 
 }
