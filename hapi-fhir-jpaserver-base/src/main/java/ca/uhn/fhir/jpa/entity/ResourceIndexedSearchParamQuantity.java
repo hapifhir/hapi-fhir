@@ -44,7 +44,6 @@ import java.math.BigDecimal;
 	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID")
 })
-//@formatter:on
 public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParam {
 
 	private static final int MAX_LENGTH = 200;

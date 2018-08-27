@@ -32,7 +32,7 @@ import javax.persistence.*;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_COORDS", indexes = {
-	@Index(name = "IDX_SP_COORDS", columnList = "RES_TYPE,SP_NAME,SP_LATITUDE,SP_LONGITUDE"),
+	@Index(name = "IDX_SP_COORDS_HASH", columnList = "HASH_IDENTITY,SP_VALUE,SP_LATITUDE,SP_LONGITUDE"),
 	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 })

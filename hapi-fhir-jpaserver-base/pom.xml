@@ -236,7 +236,12 @@
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- 
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-catalina</artifactId>
