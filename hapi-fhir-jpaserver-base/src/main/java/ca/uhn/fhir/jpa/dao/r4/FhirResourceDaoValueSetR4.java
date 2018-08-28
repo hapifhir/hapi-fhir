@@ -63,8 +63,25 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 
 	private ValueSet doExpand(ValueSet theSource) {
 
-		validateIncludes("include", theSource.getCompose().getInclude());
-		validateIncludes("exclude", theSource.getCompose().getExclude());
+		/*
+		 * If all of the code systems are supported by the HAPI FHIR terminology service, let's
+		 * use that as it's more efficient.
+		 */
+
+		boolean allSystemsAreSuppportedByTerminologyService = true;
+		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
+			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+				allSystemsAreSuppportedByTerminologyService = false;
+			}
+		}
+		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
+			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+				allSystemsAreSuppportedByTerminologyService = false;
+			}
+		}
+		if (allSystemsAreSuppportedByTerminologyService) {
+			return myTerminologySvc.expandValueSet(theSource);
+		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
 

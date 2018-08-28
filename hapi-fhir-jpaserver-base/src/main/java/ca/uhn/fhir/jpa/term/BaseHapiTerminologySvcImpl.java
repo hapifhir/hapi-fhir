@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,8 +52,6 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
-import org.hibernate.search.query.dsl.TermMatchingContext;
-import org.hibernate.search.query.dsl.TermTermination;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -84,6 +82,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -141,8 +140,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	/**
 	 * @param theAdd If true, add the code. If false, remove the code.
+	 * @param theCodeCounter
 	 */
-	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd) {
+	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
 		String code = theConcept.getCode();
 		if (theAdd && theAddedCodes.add(code)) {
 			ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
@@ -158,10 +158,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					.setCode(nextDesignation.getUseCode())
 					.setDisplay(nextDesignation.getUseDisplay());
 			}
+
+			theCodeCounter.incrementAndGet();
 		}
 
 		if (!theAdd && theAddedCodes.remove(code)) {
 			removeCodeFromExpansion(theCodeSystem, code, theExpansionComponent);
+			theCodeCounter.decrementAndGet();
 		}
 	}
 
@@ -412,22 +415,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ValueSet expandValueSet(ValueSet theValueSetToExpand) {
+
 		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
+		expansionComponent.setIdentifier(UUID.randomUUID().toString());
+		expansionComponent.setTimestamp(new Date());
+
 		Set<String> addedCodes = new HashSet<>();
+		AtomicInteger codeCounter = new AtomicInteger(0);
 
 		// Handle includes
+		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
 			boolean add = true;
-			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add);
+			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add, codeCounter);
 		}
 
 		// Handle excludes
+		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getExclude()) {
 			boolean add = false;
-			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add);
+			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add, codeCounter);
 		}
 
+		expansionComponent.setTotal(codeCounter.get());
+
 		ValueSet valueSet = new ValueSet();
+		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
 	}
@@ -445,10 +458,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return retVal;
 	}
 
-	public void expandValueSetHandleIncludeOrExclude(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent include, boolean theAdd) {
-		String system = include.getSystem();
+	public void expandValueSetHandleIncludeOrExclude(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter) {
+		String system = theInclude.getSystem();
+		ourLog.info("Starting {} expansion around code system: {}", (theAdd ? "inclusion" : "exclusion"), system);
 		if (isNotBlank(system)) {
-			ourLog.info("Starting expansion around code system: {}", system);
 
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
@@ -463,9 +476,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				 * Filters
 				 */
 
-				if (include.getFilter().size() > 0) {
+				if (theInclude.getFilter().size() > 0) {
 
-					for (ValueSet.ConceptSetFilterComponent nextFilter : include.getFilter()) {
+					for (ValueSet.ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
 						if (isBlank(nextFilter.getValue()) && nextFilter.getOp() == null && isBlank(nextFilter.getProperty())) {
 							continue;
 						}
@@ -542,13 +555,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				 * Include Concepts
 				 */
 
-				List<Term> codes = include
+				List<Term> codes = theInclude
 					.getConcept()
 					.stream()
 					.filter(Objects::nonNull)
 					.map(ValueSet.ConceptReferenceComponent::getCode)
 					.filter(StringUtils::isNotBlank)
-					.map(t->new Term("myCode", t))
+					.map(t -> new Term("myCode", t))
 					.collect(Collectors.toList());
 				if (codes.size() > 0) {
 					MultiPhraseQuery query = new MultiPhraseQuery();
@@ -564,18 +577,24 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				 */
 
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
-				jpaQuery.setMaxResults(1000);
+				int maxResult = 50000;
+				jpaQuery.setMaxResults(maxResult);
 
 				StopWatch sw = new StopWatch();
+				AtomicInteger count = new AtomicInteger(0);
 
-				@SuppressWarnings("unchecked")
-				List<TermConcept> result = jpaQuery.getResultList();
-
-				ourLog.info("Expansion completed in {}ms", sw.getMillis());
-
-				for (TermConcept nextConcept : result) {
-					addCodeIfNotAlreadyAdded(system, theExpansionComponent, theAddedCodes, nextConcept, theAdd);
+				for (Object next : jpaQuery.getResultList()) {
+					count.incrementAndGet();
+					TermConcept concept = (TermConcept) next;
+					addCodeIfNotAlreadyAdded(system, theExpansionComponent, theAddedCodes, concept, theAdd, theCodeCounter);
 				}
+
+
+				if (maxResult == count.get()) {
+					throw new InternalErrorException("Expansion fragment produced too many (>= " + maxResult + ") results");
+				}
+
+				ourLog.info("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
 
 			} else {
 				// No codesystem matching the URL found in the database
@@ -585,8 +604,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					throw new InvalidRequestException("Unknown code system: " + system);
 				}
 
-				if (include.getConcept().isEmpty() == false) {
-					for (ValueSet.ConceptReferenceComponent next : include.getConcept()) {
+				if (theInclude.getConcept().isEmpty() == false) {
+					for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (isNotBlank(nextCode) && !theAddedCodes.contains(nextCode)) {
 							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);

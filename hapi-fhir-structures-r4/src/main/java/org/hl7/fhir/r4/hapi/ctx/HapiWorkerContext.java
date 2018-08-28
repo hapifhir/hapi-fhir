@@ -1,10 +1,11 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -28,13 +29,14 @@ import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
   private final FhirContext myCtx;
-  private Map<String, Resource> myFetchedResourceCache = new HashMap<String, Resource>();
+  private final Cache<String, Resource> myFetchedResourceCache;
   private IValidationSupport myValidationSupport;
   private ExpansionProfile myExpansionProfile;
 
@@ -43,6 +45,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
     myCtx = theCtx;
     myValidationSupport = theValidationSupport;
+    myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
   }
 
   @Override
@@ -206,9 +209,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
     ValueSetExpansionOutcome expandedValueSet = null;
 
-		/*
-       * The following valueset is a special case, since the BCP codesystem is very difficult to expand
-		 */
+    /*
+     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
+     */
     if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
       ValueSet expansion = new ValueSet();
       for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
@@ -338,13 +341,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       return null;
     } else {
       @SuppressWarnings("unchecked")
-      T retVal = (T) myFetchedResourceCache.get(theUri);
-      if (retVal == null) {
-        retVal = myValidationSupport.fetchResource(myCtx, theClass, theUri);
-        if (retVal != null) {
-          myFetchedResourceCache.put(theUri, (Resource) retVal);
-        }
-      }
+      T retVal = (T) myFetchedResourceCache.get(theUri, t -> {
+        return myValidationSupport.fetchResource(myCtx, theClass, theUri);
+      });
       return retVal;
     }
   }

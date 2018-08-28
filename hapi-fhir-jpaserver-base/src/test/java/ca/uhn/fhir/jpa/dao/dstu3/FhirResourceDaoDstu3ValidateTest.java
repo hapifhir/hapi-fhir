@@ -29,6 +29,48 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testValidateChangedQuestionnaire() {
+		Questionnaire q = new Questionnaire();
+		q.setId("QUEST");
+		q.addItem().setLinkId("A").setType(Questionnaire.QuestionnaireItemType.STRING).setRequired(true);
+		myQuestionnaireDao.update(q);
+
+		try {
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+			qr.getQuestionnaire().setReference("Questionnaire/QUEST");
+			qr.addItem().setLinkId("A").addAnswer().setValue(new StringType("AAA"));
+
+			MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(e.toString());
+		}
+
+
+		q = new Questionnaire();
+		q.setId("QUEST");
+		q.addItem().setLinkId("B").setType(Questionnaire.QuestionnaireItemType.STRING).setRequired(true);
+		myQuestionnaireDao.update(q);
+
+		try {
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+			qr.getQuestionnaire().setReference("Questionnaire/QUEST");
+			qr.addItem().setLinkId("A").addAnswer().setValue(new StringType("AAA"));
+
+			MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
+			fail();
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			// good
+		}
+
+	}
+
+	@Test
 	public void testValidateStructureDefinition() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/sd-david-dhtest7.json"), StandardCharsets.UTF_8);
 		StructureDefinition sd = myFhirCtx.newJsonParser().parseResource(StructureDefinition.class, input);
