@@ -3620,7 +3620,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     if (rule(errors, IssueType.INVALID, messageHeader.line(), messageHeader.col(), stack.getLiteralPath(), messageHeader.getType().equals("MessageHeader"),
         "The first entry in a message must be a MessageHeader")) {
       // the composition subject and section references must resolve in the bundle
-      List<Element> elements = messageHeader.getChildren("data");
+      List<Element> elements = messageHeader.getChildren("focus");
       for (Element elem: elements)
         validateBundleReference(errors, entries, elem, "MessageHeader Data", stack.push(elem, -1, null, null), fullUrl, "MessageHeader", id);
     }
