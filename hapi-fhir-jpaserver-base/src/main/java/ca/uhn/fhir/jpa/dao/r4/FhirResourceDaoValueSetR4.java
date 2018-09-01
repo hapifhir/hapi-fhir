@@ -70,12 +70,12 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 
 		boolean allSystemsAreSuppportedByTerminologyService = true;
 		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
 				allSystemsAreSuppportedByTerminologyService = false;
 			}
 		}
 		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
-			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
 				allSystemsAreSuppportedByTerminologyService = false;
 			}
 		}

@@ -54,10 +54,7 @@ import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -139,7 +136,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private ApplicationContext myApplicationContext;
 
 	/**
-	 * @param theAdd If true, add the code. If false, remove the code.
+	 * @param theAdd         If true, add the code. If false, remove the code.
 	 * @param theCodeCounter
 	 */
 	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
@@ -440,6 +437,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		expansionComponent.setTotal(codeCounter.get());
 
 		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
@@ -628,6 +626,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 
 			}
+		} else {
+			throw new InvalidRequestException("ValueSet contains " + (theAdd ? "include" : "exclude") + " criteria with no system defined");
 		}
 	}
 
