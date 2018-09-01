@@ -139,12 +139,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	 * @param theAdd         If true, add the code. If false, remove the code.
 	 * @param theCodeCounter
 	 */
-	private void addCodeIfNotAlreadyAdded(String theCodeSystem, ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
+	private void addCodeIfNotAlreadyAdded(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
 		String code = theConcept.getCode();
 		if (theAdd && theAddedCodes.add(code)) {
+			String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
 			ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
 			contains.setCode(code);
-			contains.setSystem(theCodeSystem);
+			contains.setSystem(codeSystem);
 			contains.setDisplay(theConcept.getDisplay());
 			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
 				contains
@@ -160,7 +161,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (!theAdd && theAddedCodes.remove(code)) {
-			removeCodeFromExpansion(theCodeSystem, code, theExpansionComponent);
+			String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
+			removeCodeFromExpansion(codeSystem, code, theExpansionComponent);
 			theCodeCounter.decrementAndGet();
 		}
 	}
@@ -458,8 +460,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	public void expandValueSetHandleIncludeOrExclude(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter) {
 		String system = theInclude.getSystem();
-		ourLog.info("Starting {} expansion around code system: {}", (theAdd ? "inclusion" : "exclusion"), system);
-		if (isNotBlank(system)) {
+		boolean hasSystem = isNotBlank(system);
+		boolean hasValueSet = theInclude.getValueSet().size() > 0;
+
+		if (hasSystem) {
+			ourLog.info("Starting {} expansion around code system: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
@@ -584,7 +589,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				for (Object next : jpaQuery.getResultList()) {
 					count.incrementAndGet();
 					TermConcept concept = (TermConcept) next;
-					addCodeIfNotAlreadyAdded(system, theExpansionComponent, theAddedCodes, concept, theAdd, theCodeCounter);
+					addCodeIfNotAlreadyAdded(theExpansionComponent, theAddedCodes, concept, theAdd, theCodeCounter);
 				}
 
 
@@ -626,6 +631,23 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 
 			}
+		} else if (hasValueSet) {
+			for (CanonicalType nextValueSet : theInclude.getValueSet()) {
+				ourLog.info("Starting {} expansion around ValueSet URI: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
+
+				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
+				for (VersionIndependentConcept nextConcept : expanded) {
+					if (theAdd) {
+						TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
+						TermConcept concept = myConceptDao.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode());
+						addCodeIfNotAlreadyAdded(theExpansionComponent, theAddedCodes, concept, theAdd, theCodeCounter);
+					}
+					if (!theAdd && theAddedCodes.remove(nextConcept.getCode())) {
+						removeCodeFromExpansion(nextConcept.getSystem(), nextConcept.getCode(), theExpansionComponent);
+					}
+				}
+
+			}
 		} else {
 			throw new InvalidRequestException("ValueSet contains " + (theAdd ? "include" : "exclude") + " criteria with no system defined");
 		}
@@ -659,7 +681,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCode.equals(next.getCode())) {
 				return next;
 			}
-			findCode(next.getConcept(), theCode);
+			CodeSystem.ConceptDefinitionComponent val = findCode(next.getConcept(), theCode);
+			if (val != null) {
+				return val;
+			}
 		}
 		return null;
 	}
