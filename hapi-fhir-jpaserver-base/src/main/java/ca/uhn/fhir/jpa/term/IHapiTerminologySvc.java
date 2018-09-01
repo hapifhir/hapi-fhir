@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -34,6 +35,11 @@ public interface IHapiTerminologySvc {
 	void deleteCodeSystem(TermCodeSystem thePersCs);
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
+
+	/**
+	 * Version independent
+	 */
+	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
 
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 

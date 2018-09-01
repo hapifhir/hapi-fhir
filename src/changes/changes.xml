@@ -289,6 +289,19 @@
 				was never depended on by anyone. Please post on the HAPI FHIR mailing list if this
 				change affects you.
 			</action>
+			<action type="fix">
+				A crash was fixed when using the ConceptMap/$translate operation to translate a mapping
+				where the equivalence was not specified.
+			</action>
+			<action type="add">
+				The maximum length for codes in the JPA server terminology service have been increased
+				to 500 in order to better accomodate code systems with very long codes.
+			</action>
+			<action type="fix">
+				A bug in the DSTU3 validator was fixed where validation resources such as StructureDefinitions
+				and Questionnaires were cached in a cache that never expired, leading to validations against
+				stale versions of resources.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

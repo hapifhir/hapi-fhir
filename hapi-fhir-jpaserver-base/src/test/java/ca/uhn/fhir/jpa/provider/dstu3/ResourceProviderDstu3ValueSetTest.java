@@ -32,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
@@ -96,6 +98,39 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVs(codeSystem);
 	}
 
+
+	public void createLoincSystemWithSomeCodes() {
+		runInTransaction(() -> {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CS_URL);
+			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+			TermCodeSystemVersion cs = new TermCodeSystemVersion();
+			cs.setResource(table);
+
+			TermConcept code;
+			code = new TermConcept(cs, "50015-7");
+			code.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-3");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-1");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-4");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-2");
+			cs.getConcepts().add(code);
+
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+		});
+	}
+
+
 	private void createLocalVs(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
@@ -131,6 +166,71 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeUsingOr() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("HELLO")
+			.setOp(ValueSet.FilterOperator.REGEX)
+			.setValue("12345-1|12345-2");
+
+		IIdType vsId = ourClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		ourLog.info("** Got codes: {}", codes);
+		assertThat(codes, containsInAnyOrder("50015-7"));
+
+
+		assertEquals(1, outcome.getCompose().getInclude().size());
+		assertEquals(1, outcome.getCompose().getExclude().size());
+		assertEquals(1, outcome.getExpansion().getTotal());
+
+	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeNoFilter() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+
+		IIdType vsId = ourClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, empty());
+	}
+
 
 	@Test
 	public void testExpandById() throws IOException {
@@ -609,6 +709,17 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
 		return codeSystem;
+	}
+
+
+	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> retVal = new ArrayList<>();
+
+		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
+			retVal.add(next.getCode());
+		}
+
+		return retVal;
 	}
 
 }

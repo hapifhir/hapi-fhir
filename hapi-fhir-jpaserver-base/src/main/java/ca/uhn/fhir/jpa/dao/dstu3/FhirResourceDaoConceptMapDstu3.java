@@ -87,7 +87,9 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 				if (targetsToReturn.add(target)) {
 					translationMatch = new TranslationMatch();
 
-					translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
+					if (target.getEquivalence() != null) {
+						translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
+					}
 
 					translationMatch.setConcept(
 						new Coding()
