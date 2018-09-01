@@ -32,7 +32,7 @@ import javax.persistence.*;
 })
 public class ResourceIndexedCompositeStringUnique implements Comparable<ResourceIndexedCompositeStringUnique> {
 
-	public static final int MAX_STRING_LENGTH = 150;
+	public static final int MAX_STRING_LENGTH = 200;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
 	public static final String IDX_IDXCMPSTRUNIQ_RESOURCE = "IDX_IDXCMPSTRUNIQ_RESOURCE";
 

@@ -591,7 +591,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
-	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
 		List<String> retVal = new ArrayList<>();
 
 		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {

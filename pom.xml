@@ -466,11 +466,12 @@
 			<organization>Cerner Corporation</organization>
 		</developer>
 		<developer>
-			<id>jbalbien</id>
-		</developer>
-		<developer>
 			<id>alinleonard</id>
 			<name>Alin Leonard</name>
+			<organization>Cerner Corporation</organization>
+		</developer>
+		<developer>
+			<id>jbalbien</id>
 		</developer>
 	</developers>
 
