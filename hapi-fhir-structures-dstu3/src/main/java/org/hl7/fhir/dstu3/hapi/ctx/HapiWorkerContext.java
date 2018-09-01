@@ -1,12 +1,14 @@
 package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.formats.IParser;
 import org.hl7.fhir.dstu3.formats.ParserType;
@@ -41,7 +43,12 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
     myCtx = theCtx;
     myValidationSupport = theValidationSupport;
-    myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
+
+    long timeoutMillis = 10 * DateUtils.MILLIS_PER_SECOND;
+    if (System.getProperties().containsKey(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS)) {
+      timeoutMillis = Long.parseLong(System.getProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS));
+    }
+    myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
   }
 
   @Override
