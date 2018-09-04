@@ -8,57 +8,73 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class DropIndexTask extends BaseTask<DropIndexTask> {
+public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
-	private String myTableName;
 
 	@Override
 	public void validate() {
+		super.validate();
 		Validate.notBlank(myIndexName, "The index name must not be blank");
-		Validate.notBlank(myTableName, "The table name must not be blank");
 
 		if (getDescription() == null) {
-			setDescription("Drop index " + myIndexName + " on table " + myTableName);
+			setDescription("Drop index " + myIndexName + " on table " + getTableName());
 		}
 	}
 
 	@Override
 	public void execute() throws SQLException {
-		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), myTableName);
+		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 
 		if (!indexNames.contains(myIndexName)) {
-			ourLog.info("Index {} does not exist on table {} - No action needed", myIndexName, myTableName);
+			ourLog.info("Index {} does not exist on table {} - No action needed", myIndexName, getTableName());
 			return;
 		}
 
-		ourLog.info("Dropping index {} on table {}", myIndexName, myTableName);
+		boolean isUnique = JdbcUtils.isIndexUnique(getConnectionProperties(), getTableName(), myIndexName);
+		String uniquenessString = isUnique ? "unique" : "non-unique";
+		ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
 
 		String sql = null;
-		switch (getDriverType()) {
-			case MYSQL_5_7:
-			case MARIADB_10_1:
-				sql = "ALTER TABLE " + myTableName + " DROP INDEX " + myIndexName;
-				break;
-			case POSTGRES_9_4:
-			case DERBY_EMBEDDED:
-			case ORACLE_12C:
-				sql = "DROP INDEX " + myIndexName;
-				break;
-			case MSSQL_2012:
-				sql = "DROP INDEX " + myTableName + "." + myIndexName;
-				break;
+
+		if (isUnique) {
+			// Drop constraint
+			switch (getDriverType()) {
+				case MYSQL_5_7:
+				case MARIADB_10_1:
+					sql = "ALTER TABLE " + getTableName() + " DROP INDEX " + myIndexName;
+					break;
+				case DERBY_EMBEDDED:
+					sql = "DROP INDEX " + myIndexName;
+					break;
+				case POSTGRES_9_4:
+				case ORACLE_12C:
+				case MSSQL_2012:
+					sql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
+					break;
+			}
+		} else {
+			// Drop index
+			switch (getDriverType()) {
+				case MYSQL_5_7:
+				case MARIADB_10_1:
+					sql = "ALTER TABLE " + getTableName() + " DROP INDEX " + myIndexName;
+					break;
+				case POSTGRES_9_4:
+				case DERBY_EMBEDDED:
+				case ORACLE_12C:
+					sql = "DROP INDEX " + myIndexName;
+					break;
+				case MSSQL_2012:
+					sql = "DROP INDEX " + getTableName() + "." + myIndexName;
+					break;
+			}
 		}
 		executeSql(sql);
 
 	}
 
-
-	public DropIndexTask setTableName(String theTableName) {
-		myTableName = theTableName;
-		return this;
-	}
 
 	public DropIndexTask setIndexName(String theIndexName) {
 		myIndexName = theIndexName;

@@ -9,5 +9,4 @@ public class HapiFhirJpaMigrationTasksTest {
 		new HapiFhirJpaMigrationTasks();
 	}
 
-
 }

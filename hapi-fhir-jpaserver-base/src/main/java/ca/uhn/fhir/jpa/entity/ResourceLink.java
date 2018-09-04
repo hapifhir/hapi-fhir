@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,36 +20,21 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+
 @Entity
-@Table(name = "HFJ_RES_LINK" , indexes= {
-	@Index(name="IDX_RL_TPATHRES", columnList= "SRC_PATH,TARGET_RESOURCE_ID"), 
-	@Index(name="IDX_RL_SRC", columnList= "SRC_RESOURCE_ID"), 
-	@Index(name="IDX_RL_DEST", columnList= "TARGET_RESOURCE_ID")
+@Table(name = "HFJ_RES_LINK", indexes = {
+	@Index(name = "IDX_RL_TPATHRES", columnList = "SRC_PATH,TARGET_RESOURCE_ID"),
+	@Index(name = "IDX_RL_SRC", columnList = "SRC_RESOURCE_ID"),
+	@Index(name = "IDX_RL_DEST", columnList = "TARGET_RESOURCE_ID")
 })
 public class ResourceLink implements Serializable {
 
@@ -64,30 +49,30 @@ public class ResourceLink implements Serializable {
 	@Column(name = "SRC_PATH", length = 100, nullable = false)
 	private String mySourcePath;
 
-	@ManyToOne(optional = false, fetch=FetchType.LAZY)
-	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey=@ForeignKey(name="FK_RESLINK_SOURCE"))
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESLINK_SOURCE"))
 	private ResourceTable mySourceResource;
 
 	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable = false)
 	private Long mySourceResourcePid;
 
-	@Column(name = "SOURCE_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
+	@Column(name = "SOURCE_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@Field()
 	private String mySourceResourceType;
 
-	@ManyToOne(optional = true, fetch=FetchType.LAZY)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, foreignKey=@ForeignKey(name="FK_RESLINK_TARGET"))
+	@ManyToOne(optional = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName = "RES_ID", nullable = true, foreignKey = @ForeignKey(name = "FK_RESLINK_TARGET"))
 	private ResourceTable myTargetResource;
 
 	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false, nullable = true)
 	@Field()
 	private Long myTargetResourcePid;
 
-	@Column(name = "TARGET_RESOURCE_TYPE", nullable=false, length=ResourceTable.RESTYPE_LEN)
+	@Column(name = "TARGET_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
 	@Field()
 	private String myTargetResourceType;
 
-	@Column(name = "TARGET_RESOURCE_URL", length=200, nullable = true)
+	@Column(name = "TARGET_RESOURCE_URL", length = 200, nullable = true)
 	@Field()
 	private String myTargetResourceUrl;
 

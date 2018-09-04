@@ -5,6 +5,10 @@ import ca.uhn.fhir.jpa.migrate.Migrator;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
 import org.junit.Before;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+
+import java.util.List;
+import java.util.Map;
 
 public class BaseTest {
 
@@ -22,10 +26,16 @@ public class BaseTest {
 	}
 
 
-	protected void executeSql(@Language("SQL") String theSql) {
+	protected void executeSql(@Language("SQL") String theSql, Object... theArgs) {
 		myConnectionProperties.getTxTemplate().execute(t -> {
-			myConnectionProperties.newJdbcTemplate().execute(theSql);
+			myConnectionProperties.newJdbcTemplate().update(theSql, theArgs);
 			return null;
+		});
+	}
+
+	protected List<Map<String, Object>> executeQuery(@Language("SQL") String theSql, Object... theArgs) {
+		return myConnectionProperties.getTxTemplate().execute(t -> {
+			return myConnectionProperties.newJdbcTemplate().query(theSql, theArgs, new ColumnMapRowMapper());
 		});
 	}
 

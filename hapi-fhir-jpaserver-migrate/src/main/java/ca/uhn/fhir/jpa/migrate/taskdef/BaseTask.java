@@ -34,7 +34,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			ourLog.info("SQL {} returned {}", theSql, changesCount);
+			ourLog.info("SQL \"{}\" returned {}", theSql, changesCount);
 			return changesCount;
 		});
 
