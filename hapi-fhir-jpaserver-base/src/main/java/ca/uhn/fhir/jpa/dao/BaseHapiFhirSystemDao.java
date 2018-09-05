@@ -256,6 +256,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public Integer performReindexingPass(final Integer theCount) {
+		if (getConfig().isStatusBasedReindexingDisabled()) {
+			return -1;
+		}
 		if (!myReindexLock.tryLock()) {
 			return -1;
 		}

@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class DaoConfigTest {
 
@@ -29,6 +30,14 @@ public class DaoConfigTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals("Base URL wildcard character (*) can only appear at the end of the string: http://foo**", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testDisableStatusBasedReindexUsingSystemProperty() {
+		assertEquals(false, new DaoConfig().isStatusBasedReindexingDisabled());
+		System.setProperty(DaoConfig.DISABLE_STATUS_BASED_REINDEX, "true");
+		assertEquals(true, new DaoConfig().isStatusBasedReindexingDisabled());
+		System.clearProperty(DaoConfig.DISABLE_STATUS_BASED_REINDEX);
 	}
 
 }
