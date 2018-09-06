@@ -106,7 +106,10 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	private ResponseBuilder buildResponse(int statusCode) {
 		ResponseBuilder response = Response.status(statusCode);
 		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
-			response.header(header.getKey(), header.getValue());
+			final String key = header.getKey();
+			for (String value : header.getValue()) {
+				response.header(key, value);
+			}
 		}
 		return response;
 	}
