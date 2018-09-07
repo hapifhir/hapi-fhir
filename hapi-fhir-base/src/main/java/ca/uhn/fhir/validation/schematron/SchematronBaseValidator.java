@@ -9,9 +9,9 @@ package ca.uhn.fhir.validation.schematron;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,12 +30,14 @@ import com.helger.commons.error.list.IErrorList;
 import com.helger.schematron.ISchematronResource;
 import com.helger.schematron.SchematronHelper;
 import com.helger.schematron.xslt.SchematronResourceSCH;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -49,9 +51,13 @@ import java.util.Map;
  */
 public class SchematronBaseValidator implements IValidatorModule {
 
-	private Map<Class<? extends IBaseResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IBaseResource>, ISchematronResource>();
+	private static final Logger ourLog = LoggerFactory.getLogger(SchematronBaseValidator.class);
+	private final Map<Class<? extends IBaseResource>, ISchematronResource> myClassToSchematron = new HashMap<>();
 	private FhirContext myCtx;
 
+	/**
+	 * Constructor
+	 */
 	public SchematronBaseValidator(FhirContext theContext) {
 		myCtx = theContext;
 	}
@@ -66,7 +72,7 @@ public class SchematronBaseValidator implements IValidatorModule {
 				validateResource(ValidationContext.subContext(theCtx, nextSubResource));
 			}
 		}
-		
+
 		ISchematronResource sch = getSchematron(theCtx);
 		String resourceAsString;
 		if (theCtx.getResourceAsStringEncoding() == EncodingEnum.XML) {
@@ -127,15 +133,14 @@ public class SchematronBaseValidator implements IValidatorModule {
 			}
 
 			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
-					+ ".sch";
-			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
-			try {
+				+ ".sch";
+			try (InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase)) {
 				if (baseIs == null) {
 					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. "
-							+ SchemaBaseValidator.RESOURCES_JAR_NOTE);
+						+ SchemaBaseValidator.RESOURCES_JAR_NOTE);
 				}
-			} finally {
-				IOUtils.closeQuietly(baseIs);
+			} catch (IOException e) {
+				ourLog.error("Failed to close stream", e);
 			}
 
 			retVal = SchematronResourceSCH.fromClassPath(pathToBase);
@@ -143,5 +148,4 @@ public class SchematronBaseValidator implements IValidatorModule {
 			return retVal;
 		}
 	}
-
 }

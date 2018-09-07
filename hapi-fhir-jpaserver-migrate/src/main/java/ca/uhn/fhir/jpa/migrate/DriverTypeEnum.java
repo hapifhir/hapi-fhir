@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.annotation.Nonnull;
 
 /*-
  * #%L
@@ -57,32 +61,47 @@ public enum DriverTypeEnum {
 
 		TransactionTemplate txTemplate = new TransactionTemplate();
 		txTemplate.setTransactionManager(transactionManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.afterPropertiesSet();
 
-		return new ConnectionProperties(dataSource, txTemplate);
+		return new ConnectionProperties(dataSource, txTemplate, this);
 	}
 
 	public static class ConnectionProperties {
 
+		private final DriverTypeEnum myDriverType;
 		private final SingleConnectionDataSource myDataSource;
 		private final TransactionTemplate myTxTemplate;
+		/**
+		 * Constructor
+		 */
+		public ConnectionProperties(SingleConnectionDataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
+			Validate.notNull(theDataSource);
+			Validate.notNull(theTxTemplate);
+			Validate.notNull(theDriverType);
 
-		public ConnectionProperties(SingleConnectionDataSource theDataSource, TransactionTemplate theTxTemplate) {
 			myDataSource = theDataSource;
 			myTxTemplate = theTxTemplate;
+			myDriverType = theDriverType;
 		}
 
+		public DriverTypeEnum getDriverType() {
+			return myDriverType;
+		}
+
+		@Nonnull
 		public SingleConnectionDataSource getDataSource() {
 			return myDataSource;
 		}
 
+		@Nonnull
 		public JdbcTemplate newJdbcTemplate() {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate();
 			jdbcTemplate.setDataSource(myDataSource);
 			return jdbcTemplate;
 		}
 
+		@Nonnull
 		public TransactionTemplate getTxTemplate() {
 			return myTxTemplate;
 		}

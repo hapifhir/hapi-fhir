@@ -27,7 +27,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.LoggerFactory;
@@ -77,11 +77,6 @@ public abstract class BaseApp {
 	}
 
 	private void logCommandUsageNoHeader(BaseCommand theCommand) {
-		System.out.println("Usage:");
-		System.out.println("  " + provideCommandName() + " " + theCommand.getCommandName() + " [options]");
-		System.out.println();
-		System.out.println("Options:");
-
 		// This is passed in from the launch script
 		String columnsString = System.getProperty("columns");
 		int columns;
@@ -93,11 +88,34 @@ public abstract class BaseApp {
 			columns = 80;
 		}
 
+		// Usage
+		System.out.println("Usage:");
+		System.out.println("  " + provideCommandName() + " " + theCommand.getCommandName() + " [options]");
+		System.out.println();
+
+		// Description
+		String wrapped = WordUtils.wrap(theCommand.getCommandDescription(), columns);
+		System.out.println(wrapped);
+		System.out.println();
+
+		// Usage Notes
+		List<String> usageNotes = theCommand.provideUsageNotes();
+		for (String next : usageNotes) {
+			wrapped = WordUtils.wrap(next, columns);
+			System.out.println(wrapped);
+			System.out.println();
+		}
+
+		// Options
+		System.out.println("Options:");
 		HelpFormatter fmt = new HelpFormatter();
 		PrintWriter pw = new PrintWriter(System.out);
 		fmt.printOptions(pw, columns, theCommand.getOptions(), 2, 2);
 		pw.flush();
 		pw.close();
+
+		// That's it!
+		System.out.println();
 	}
 
 	private void logUsage() {
@@ -139,6 +157,7 @@ public abstract class BaseApp {
 		commands.add(new IgPackUploader());
 		commands.add(new ExportConceptMapToCsvCommand());
 		commands.add(new ImportCsvToConceptMapCommand());
+		commands.add(new BaseMigrateDatabaseCommand());
 		return commands;
 	}
 

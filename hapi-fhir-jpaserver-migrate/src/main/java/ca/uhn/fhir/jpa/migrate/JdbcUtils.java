@@ -134,4 +134,32 @@ public class JdbcUtils {
 
 	}
 
+	public static Set<String> getTableNames(DriverTypeEnum.ConnectionProperties theConnectionProperties) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		Connection connection = dataSource.getConnection();
+		return theConnectionProperties.getTxTemplate().execute(t -> {
+			DatabaseMetaData metadata;
+			try {
+				metadata = connection.getMetaData();
+				ResultSet tables = metadata.getTables(null, null, null, null);
+
+				Set<String> columnNames = new HashSet<>();
+				while (tables.next()) {
+					String tableName = tables.getString("TABLE_NAME");
+					tableName = StringUtils.toUpperCase(tableName, Locale.US);
+
+					String tableType = tables.getString("TABLE_TYPE");
+					if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
+						continue;
+					}
+
+					columnNames.add(tableName);
+				}
+
+				return columnNames;
+			} catch (SQLException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+	}
 }

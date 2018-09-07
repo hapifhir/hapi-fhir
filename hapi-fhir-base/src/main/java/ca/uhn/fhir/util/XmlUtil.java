@@ -27,7 +27,7 @@ import ca.uhn.fhir.util.jar.DependencyLogFactory;
 import ca.uhn.fhir.util.jar.IDependencyLog;
 import com.ctc.wstx.api.WstxInputProperties;
 import com.ctc.wstx.stax.WstxOutputFactory;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 
@@ -54,7 +54,7 @@ public class XmlUtil {
 	private static volatile XMLOutputFactory ourOutputFactory;
 
 	static {
-		HashMap<String, Integer> validEntityNames = new HashMap<String, Integer>(1448);
+		HashMap<String, Integer> validEntityNames = new HashMap<>(1448);
 		validEntityNames.put("AElig", 0x000C6);
 		validEntityNames.put("Aacute", 0x000C1);
 		validEntityNames.put("Abreve", 0x00102);

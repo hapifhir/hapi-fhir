@@ -12,6 +12,7 @@ public class ContextHolder {
 	private static boolean ourDisableReferentialIntegrity;
 	private static String ourPath;
 	private static Long ourReuseSearchResultsMillis;
+	private static String ourDatabaseUrl;
 
 	static {
 		ourReuseSearchResultsMillis = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
@@ -27,12 +28,15 @@ public class ContextHolder {
 			case DSTU2:
 				ourPath = "/baseDstu2/";
 				break;
+			case DSTU2_1:
+				break;
 			case DSTU3:
 				ourPath = "/baseDstu3/";
 				break;
 			case R4:
 				ourPath = "/baseR4/";
 				break;
+			case DSTU2_HL7ORG:
 			default:
 				throw new ParseException("FHIR version not supported by this command: " + theCtx.getVersion().getVersion());
 		}
@@ -67,5 +71,13 @@ public class ContextHolder {
 
 	public static void setDisableReferentialIntegrity(boolean theDisableReferentialIntegrity) {
 		ourDisableReferentialIntegrity = theDisableReferentialIntegrity;
+	}
+
+	public static String getDatabaseUrl() {
+		return ourDatabaseUrl;
+	}
+
+	public static void setDatabaseUrl(String theDatabaseUrl) {
+		ourDatabaseUrl = theDatabaseUrl;
 	}
 }

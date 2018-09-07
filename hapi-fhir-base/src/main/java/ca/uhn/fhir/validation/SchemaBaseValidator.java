@@ -212,7 +212,6 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 				InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 				if (baseIs == null) {
-					IOUtils.closeQuietly(baseIs);
 					throw new InternalErrorException("Schema file not found: " + pathToBase);
 				}
 

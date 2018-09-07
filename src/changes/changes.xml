@@ -17,15 +17,25 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
-						<li>Spring Framework (JPA): 5.0.3.RELEASE -&gt; 5.0.6.RELEASE</li>
-						<li>Hibernate OR (JPA): 5.2.16.Final -&gt; 5.3.1.Final</li>
-						<li>Hibernate Search (JPA): 5.7.1.Final -&gt; 5.10.1.Final</li>
-						<li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.10.v20180503</li>
+						<li>Gson (JSON Parser): 2.8.1 -&gt; 2.8.5</li>
+						<li>Spring Framework (JPA): 5.0.3.RELEASE -&gt; 5.0.8.RELEASE</li>
+						<li>Hibernate ORM (JPA): 5.2.16.Final -&gt; 5.3.6.Final</li>
+						<li>Hibernate Search (JPA): 5.7.1.Final -&gt; 5.10.3.Final</li>
+						<li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.12.v20180830</li>
 						<li>Commons-Codec (All): 1.10 -&gt; 1.11</li>
+						<li>Commons-Lang (All): 3.7 -&gt; 3.8</li>
 						<li>Commons-IO (All): 2.5 -&gt; 2.6</li>
 						<li>Spring-Data (JPA): 1.11.6.RELEASE -&gt; 2.0.7.RELEASE</li>
 					</ul>
 				]]>
+			</action>
+			<action type="add">
+				A new mnandatory library depdendency has been added to hapi-fhir-base, meaning that all
+				applications using HAPI FHIR must import ti: commons-text. This library has been added as
+				a few utility methods used by HAPI FHIR that were formerly in the commons-lang3
+				project have been moved into commons-text. This library has been added as a non-optional
+				dependency in the hapi-fhir-base POM, so Maven/Gradle users should not have to make
+				any changes.
 			</action>
 			<action type="add">
 				The JPA server now has a configuration item in the DaoConfig to specify which bundle types
