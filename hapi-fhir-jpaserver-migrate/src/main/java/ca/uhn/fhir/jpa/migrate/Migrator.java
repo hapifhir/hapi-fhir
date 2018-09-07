@@ -19,6 +19,7 @@ public class Migrator {
 	private List<BaseTask> myTasks = new ArrayList<>();
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private int myChangesCount;
+	private boolean myDryRun;
 
 	public int getChangesCount() {
 		return myChangesCount;
@@ -44,14 +45,19 @@ public class Migrator {
 		myTasks.add(theTask);
 	}
 
+	public void setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+	}
+
 	public void migrate() {
 		ourLog.info("Starting migration with {} tasks", myTasks.size());
 
-		myConnectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newJdbcTemplate(myConnectionUrl, myUsername, myPassword);
+		myConnectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(myConnectionUrl, myUsername, myPassword);
 		try {
 			for (BaseTask next : myTasks) {
 				next.setDriverType(myDriverType);
 				next.setConnectionProperties(myConnectionProperties);
+				next.setDryRun(myDryRun);
 				try {
 					next.execute();
 				} catch (SQLException e) {

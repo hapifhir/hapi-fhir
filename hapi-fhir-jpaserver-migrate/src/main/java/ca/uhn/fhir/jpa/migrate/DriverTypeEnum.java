@@ -47,13 +47,14 @@ public enum DriverTypeEnum {
 	}
 
 
-	public ConnectionProperties newJdbcTemplate(String theUrl, String theUsername, String thePassword) {
+	public ConnectionProperties newConnectionProperties(String theUrl, String theUsername, String thePassword) {
 		SingleConnectionDataSource dataSource = new SingleConnectionDataSource();
 		dataSource.setAutoCommit(false);
 		dataSource.setDriverClassName(myDriverClassName);
 		dataSource.setUrl(theUrl);
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
+		dataSource.setSuppressClose(true);
 
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
 		transactionManager.setDataSource(dataSource);

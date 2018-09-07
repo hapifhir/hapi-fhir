@@ -16,11 +16,21 @@ public abstract class BaseTask<T extends BaseTask> {
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
 	private int myChangesCount;
+	private boolean myDryRun;
+
+	public boolean isDryRun() {
+		return myDryRun;
+	}
+
+	public void setDryRun(boolean theDryRun) {
+		myDryRun = theDryRun;
+	}
 
 	public String getDescription() {
 		return myDescription;
 	}
 
+	@SuppressWarnings("unchecked")
 	public T setDescription(String theDescription) {
 		myDescription = theDescription;
 		return (T) this;
@@ -31,6 +41,11 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public void executeSql(@Language("SQL") String theSql, Object... theArguments) {
+		if (isDryRun()) {
+			logDryRunSql(theSql);
+			return;
+		}
+
 		Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
@@ -40,6 +55,10 @@ public abstract class BaseTask<T extends BaseTask> {
 
 		myChangesCount += changes;
 
+	}
+
+	protected void logDryRunSql(@Language("SQL") String theSql) {
+		ourLog.info("WOULD EXECUTE SQL: {}", theSql);
 	}
 
 	public DriverTypeEnum.ConnectionProperties getConnectionProperties() {

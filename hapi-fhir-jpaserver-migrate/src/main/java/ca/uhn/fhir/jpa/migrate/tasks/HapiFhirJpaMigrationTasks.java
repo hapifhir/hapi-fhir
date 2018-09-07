@@ -3,24 +3,29 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.taskdef.*;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
+import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
-import org.intellij.lang.annotations.Language;
 
-@SuppressWarnings("UnstableApiUsage")
-public class HapiFhirJpaMigrationTasks {
-
-	private Multimap<VersionEnum, BaseTask<?>> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
+@SuppressWarnings({"UnstableApiUsage", "SqlNoDataSourceInspection", "SpellCheckingInspection"})
+public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks {
 
 	/**
 	 * Constructor
 	 */
 	public HapiFhirJpaMigrationTasks() {
+		init350();
+	}
+
+	private void init350() {
+		Builder version = forVersion(VersionEnum.V3_5_0);
 
 		// Forced ID changes
-		Builder.BuilderWithTableName forcedId = forVersion(VersionEnum.V3_5_0).onTable("HFJ_FORCED_ID");
+		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		version.startSectionWithMessage("Starting work on table: " + forcedId.getTableName());
 		forcedId
 			.dropIndex("IDX_FORCEDID_TYPE_FORCEDID");
 		forcedId
@@ -31,9 +36,10 @@ public class HapiFhirJpaMigrationTasks {
 			.withColumns("RESOURCE_TYPE", "FORCED_ID");
 
 		// Indexes - Coords
-		Builder.BuilderWithTableName spidxCoords = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_COORDS");
+		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
+		version.startSectionWithMessage("Starting work on table: " + spidxCoords.getTableName());
 		spidxCoords
-			.dropIndex("IDX_SP_COORDS_HASH");
+			.dropIndex("IDX_SP_COORDS");
 		spidxCoords
 			.addColumn("HASH_IDENTITY")
 			.nullable()
@@ -41,7 +47,7 @@ public class HapiFhirJpaMigrationTasks {
 		spidxCoords
 			.addIndex("IDX_SP_COORDS_HASH")
 			.unique(false)
-			.withColumns("HASH_IDENTITY", "SP_VALUE", "SP_LATITUDE", "SP_LONGITUDE");
+			.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE");
 		spidxCoords
 			.addTask(new CalculateHashesTask()
 				.setColumnName("HASH_IDENTITY")
@@ -49,7 +55,8 @@ public class HapiFhirJpaMigrationTasks {
 			);
 
 		// Indexes - Date
-		Builder.BuilderWithTableName spidxDate = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_DATE");
+		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
+		version.startSectionWithMessage("Starting work on table: " + spidxDate.getTableName());
 		spidxDate
 			.dropIndex("IDX_SP_TOKEN");
 		spidxDate
@@ -67,7 +74,8 @@ public class HapiFhirJpaMigrationTasks {
 			);
 
 		// Indexes - Number
-		Builder.BuilderWithTableName spidxNumber = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_NUMBER");
+		Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
+		version.startSectionWithMessage("Starting work on table: " + spidxNumber.getTableName());
 		spidxNumber
 			.dropIndex("IDX_SP_NUMBER");
 		spidxNumber
@@ -85,7 +93,8 @@ public class HapiFhirJpaMigrationTasks {
 			);
 
 		// Indexes - Quantity
-		Builder.BuilderWithTableName spidxQuantity = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_QUANTITY");
+		Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
+		version.startSectionWithMessage("Starting work on table: " + spidxQuantity.getTableName());
 		spidxQuantity
 			.dropIndex("IDX_SP_QUANTITY");
 		spidxQuantity
@@ -121,15 +130,12 @@ public class HapiFhirJpaMigrationTasks {
 			);
 
 		// Indexes - String
-		Builder.BuilderWithTableName spidxString = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_STRING");
+		Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
+		version.startSectionWithMessage("Starting work on table: " + spidxString.getTableName());
 		spidxString
 			.dropIndex("IDX_SP_STRING");
 		spidxString
 			.addColumn("HASH_NORM_PREFIX")
-			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxString
-			.addColumn("HASH_NORM")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
 		spidxString
@@ -142,13 +148,14 @@ public class HapiFhirJpaMigrationTasks {
 			.withColumns("HASH_EXACT");
 		spidxString
 			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("IDX_SP_STRING_HASH_NRM", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new DaoConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
-				.addCalculator("IDX_SP_STRING_HASH_EXCT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
+				.setColumnName("HASH_NORM_PREFIX")
+				.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new DaoConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+				.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 			);
 
 		// Indexes - Token
-		Builder.BuilderWithTableName spidxToken = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_TOKEN");
+		Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
+		version.startSectionWithMessage("Starting work on table: " + spidxToken.getTableName());
 		spidxToken
 			.dropIndex("IDX_SP_TOKEN");
 		spidxToken
@@ -195,7 +202,8 @@ public class HapiFhirJpaMigrationTasks {
 			);
 
 		// Indexes - URI
-		Builder.BuilderWithTableName spidxUri = forVersion(VersionEnum.V3_5_0).onTable("HFJ_SPIDX_URI");
+		Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
+		version.startSectionWithMessage("Starting work on table: " + spidxUri.getTableName());
 		spidxUri
 			.addColumn("HASH_IDENTITY")
 			.nullable()
@@ -216,7 +224,8 @@ public class HapiFhirJpaMigrationTasks {
 			);
 
 		// Search Parameter Presence
-		Builder.BuilderWithTableName spp = forVersion(VersionEnum.V3_5_0).onTable("HFJ_RES_PARAM_PRESENT");
+		Builder.BuilderWithTableName spp = version.onTable("HFJ_RES_PARAM_PRESENT");
+		version.startSectionWithMessage("Starting work on table: " + spp.getTableName());
 		spp.dropIndex("IDX_RESPARMPRESENT_SPID_RESID");
 		spp
 			.addColumn("HASH_PRESENCE")
@@ -230,22 +239,27 @@ public class HapiFhirJpaMigrationTasks {
 		consolidateSearchParamPresenceIndexesTask.setBatchSize(1);
 		String sql = "SELECT " +
 			"HFJ_SEARCH_PARM.RES_TYPE RES_TYPE, HFJ_SEARCH_PARM.PARAM_NAME PARAM_NAME, " +
-			"HFJ_RES_PARAM_PRESENT.PID PID, HFJ_RES_PARAM_PRESENT.SP_ID SP_ID, HFJ_RES_PARAM_PRESENT.SP_PRESENT SP_PRESENT, HFJ_RES_PARAM_PRESENT.HASH_PRESENT HASH_PRESENT " +
+			"HFJ_RES_PARAM_PRESENT.PID PID, HFJ_RES_PARAM_PRESENT.SP_ID SP_ID, HFJ_RES_PARAM_PRESENT.SP_PRESENT SP_PRESENT, HFJ_RES_PARAM_PRESENT.HASH_PRESENCE HASH_PRESENCE " +
 			"from HFJ_RES_PARAM_PRESENT " +
 			"join HFJ_SEARCH_PARM ON (HFJ_SEARCH_PARM.PID = HFJ_RES_PARAM_PRESENT.SP_ID) " +
-			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENT is null";
+			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENCE is null";
 		consolidateSearchParamPresenceIndexesTask.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
 			Long pid = (Long) t.get("PID");
-			Boolean present = (Boolean) t.get("SP_PRESENT");
+			Boolean present = (Boolean) t.get("HASH_PRESENCE");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
 			consolidateSearchParamPresenceIndexesTask.executeSql("update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
-		forVersion(VersionEnum.V3_5_0).addTask(consolidateSearchParamPresenceIndexesTask);
+		version.addTask(consolidateSearchParamPresenceIndexesTask);
 
 		// Concept
-		Builder.BuilderWithTableName trmConcept = forVersion(VersionEnum.V3_5_0).onTable("TRM_CONCEPT");
+		Builder.BuilderWithTableName trmConcept = version.onTable("TRM_CONCEPT");
+		version.startSectionWithMessage("Starting work on table: " + trmConcept.getTableName());
+		trmConcept
+			.addColumn("CONCEPT_UPDATED")
+			.nullable()
+			.type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMPT);
 		trmConcept
 			.addIndex("IDX_CONCEPT_UPDATED")
 			.unique(false)
@@ -256,7 +270,8 @@ public class HapiFhirJpaMigrationTasks {
 			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
 
 		// Concept Designation
-		forVersion(VersionEnum.V3_5_0)
+		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_DESIG");
+		version
 			.addTable("TRM_CONCEPT_DESIG")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_DESIG (PID bigint not null, LANG varchar(500), USE_CODE varchar(500), USE_DISPLAY varchar(500), USE_SYSTEM varchar(500), VAL varchar(500) not null, CS_VER_PID bigint, CONCEPT_PID bigint, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_DESIG add constraint FK_CONCEPTDESIG_CSV foreign key (CS_VER_PID) references TRM_CODESYSTEM_VER")
@@ -278,8 +293,9 @@ public class HapiFhirJpaMigrationTasks {
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_DESIG add constraint FK_CONCEPTDESIG_CONCEPT foreign key (CONCEPT_PID) references TRM_CONCEPT");
 
 		// Concept Property
-		forVersion(VersionEnum.V3_5_0)
-			.addTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_PROPERTY");
+		version
+			.addTable("TRM_CONCEPT_PROPERTY")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_PROPERTY (PID bigint not null, PROP_CODESYSTEM varchar(500), PROP_DISPLAY varchar(500), PROP_KEY varchar(500) not null, PROP_TYPE integer not null, PROP_VAL varchar(500), CS_VER_PID bigint, CONCEPT_PID bigint, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_PROPERTY add constraint FK_CONCEPTPROP_CSV foreign key (CS_VER_PID) references TRM_CODESYSTEM_VER")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_PROPERTY add constraint FK_CONCEPTPROP_CONCEPT foreign key (CONCEPT_PID) references TRM_CONCEPT")
@@ -300,7 +316,8 @@ public class HapiFhirJpaMigrationTasks {
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_PROPERTY add constraint FK_CONCEPTPROP_CONCEPT foreign key (CONCEPT_PID) references TRM_CONCEPT");
 
 		// Concept Map - Map
-		forVersion(VersionEnum.V3_5_0)
+		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP");
+		version
 			.addTable("TRM_CONCEPT_MAP")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP (PID bigint not null, RES_ID bigint, SOURCE_URL varchar(200), TARGET_URL varchar(200), URL varchar(200) not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP add constraint FK_TRMCONCEPTMAP_RES foreign key (RES_ID) references HFJ_RESOURCE")
@@ -321,7 +338,8 @@ public class HapiFhirJpaMigrationTasks {
 			.addSql(DriverTypeEnum.MARIADB_10_1, "alter table TRM_CONCEPT_MAP add constraint IDX_CONCEPT_MAP_URL unique (URL)");
 
 		// Concept Map - Group
-		forVersion(VersionEnum.V3_5_0)
+		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP_GROUP");
+		version
 			.addTable("TRM_CONCEPT_MAP_GROUP")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP_GROUP (PID bigint not null, myConceptMapUrl varchar(255), SOURCE_URL varchar(200) not null, mySourceValueSet varchar(255), SOURCE_VERSION varchar(100), TARGET_URL varchar(200) not null, myTargetValueSet varchar(255), TARGET_VERSION varchar(100), CONCEPT_MAP_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP_GROUP add constraint FK_TCMGROUP_CONCEPTMAP foreign key (CONCEPT_MAP_PID) references TRM_CONCEPT_MAP")
@@ -338,7 +356,8 @@ public class HapiFhirJpaMigrationTasks {
 			.addSql(DriverTypeEnum.POSTGRES_9_4, "alter table TRM_CONCEPT_MAP_GROUP add constraint FK_TCMGROUP_CONCEPTMAP foreign key (CONCEPT_MAP_PID) references TRM_CONCEPT_MAP");
 
 		// Concept Map - Group Element
-		forVersion(VersionEnum.V3_5_0)
+		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP_GRP_ELEMENT");
+		version
 			.addTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP_GRP_ELEMENT (PID bigint not null, SOURCE_CODE varchar(500) not null, myConceptMapUrl varchar(255), SOURCE_DISPLAY varchar(400), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GROUP_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP_GRP_ELEMENT add constraint FK_TCMGELEMENT_GROUP foreign key (CONCEPT_MAP_GROUP_PID) references TRM_CONCEPT_MAP_GROUP")
@@ -360,7 +379,8 @@ public class HapiFhirJpaMigrationTasks {
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELEMENT add constraint FK_TCMGELEMENT_GROUP foreign key (CONCEPT_MAP_GROUP_PID) references TRM_CONCEPT_MAP_GROUP");
 
 		// Concept Map - Group Element Target
-		forVersion(VersionEnum.V3_5_0)
+		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP_GRP_ELM_TGT");
+		version
 			.addTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(500) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT")
@@ -380,156 +400,7 @@ public class HapiFhirJpaMigrationTasks {
 			.addSql(DriverTypeEnum.MSSQL_2012, "create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(500) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.MSSQL_2012, "create index IDX_CNCPT_MP_GRP_ELM_TGT_CD on TRM_CONCEPT_MAP_GRP_ELM_TGT (TARGET_CODE)")
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT");
-
 	}
 
-	private Builder forVersion(VersionEnum theVersion) {
-		return new Builder(theVersion);
-	}
-
-
-	private class Builder {
-
-		private final VersionEnum myVersion;
-		private String myTableName;
-
-		public Builder(VersionEnum theVersion) {
-			myVersion = theVersion;
-		}
-
-		public BuilderWithTableName onTable(String theTableName) {
-			myTableName = theTableName;
-			return new BuilderWithTableName();
-		}
-
-		private void addTask(BaseTask theTask) {
-			theTask.validate();
-			myTasks.put(myVersion, theTask);
-		}
-
-		public BuilderAddTable addTable(String theTableName) {
-			myTableName = theTableName;
-			return new BuilderAddTable();
-		}
-
-		private class BuilderWithTableName {
-			private String myIndexName;
-			private String myColumnName;
-
-			void dropIndex(String theIndexName) {
-				DropIndexTask task = new DropIndexTask();
-				task.setIndexName(theIndexName);
-				task.setTableName(myTableName);
-				addTask(task);
-			}
-
-			public BuilderAddIndexWithName addIndex(String theIndexName) {
-				myIndexName = theIndexName;
-				return new BuilderAddIndexWithName();
-			}
-
-			public BuilderAddColumnWithName addColumn(String theColumnName) {
-				myColumnName = theColumnName;
-				return new BuilderAddColumnWithName();
-			}
-
-			public void addTask(BaseTableTask<?> theTask) {
-				theTask.setTableName(myTableName);
-				Builder.this.addTask(theTask);
-			}
-
-			public BuilderModifyColumnWithName modifyColumn(String theColumnName) {
-				myColumnName = theColumnName;
-				return new BuilderModifyColumnWithName();
-			}
-
-			private class BuilderAddIndexWithName {
-				private boolean myUnique;
-
-				public BuilderAddIndexUnique unique(boolean theUnique) {
-					myUnique = theUnique;
-					return new BuilderAddIndexUnique();
-				}
-
-				private class BuilderAddIndexUnique {
-					public void withColumns(String... theColumnNames) {
-						AddIndexTask task = new AddIndexTask();
-						task.setTableName(myTableName);
-						task.setIndexName(myIndexName);
-						task.setUnique(myUnique);
-						task.setColumns(theColumnNames);
-						addTask(task);
-					}
-				}
-			}
-
-			private class BuilderAddColumnWithName {
-				private boolean myNullable;
-
-				public BuilderAddColumnWithNameNullable nullable() {
-					myNullable = true;
-					return new BuilderAddColumnWithNameNullable();
-				}
-
-				private class BuilderAddColumnWithNameNullable {
-					public void type(AddColumnTask.ColumnTypeEnum theColumnType) {
-						AddColumnTask task = new AddColumnTask();
-						task.setColumnName(myColumnName);
-						task.setNullable(myNullable);
-						task.setColumnType(theColumnType);
-						addTask(task);
-					}
-				}
-			}
-
-			private class BuilderModifyColumnWithName {
-
-				private boolean myNullable;
-
-				public BuilderModifyColumnWithNameAndNullable nullable() {
-					myNullable = true;
-					return new BuilderModifyColumnWithNameAndNullable();
-				}
-
-				public BuilderModifyColumnWithNameAndNullable nonNullable() {
-					myNullable = false;
-					return new BuilderModifyColumnWithNameAndNullable();
-				}
-
-				private class BuilderModifyColumnWithNameAndNullable {
-
-					public void withType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, int theLength) {
-						if (theColumnType == BaseTableColumnTypeTask.ColumnTypeEnum.STRING) {
-							ModifyColumnTask task = new ModifyColumnTask();
-							task.setColumnName(myColumnName);
-							task.setTableName(myTableName);
-							task.setColumnLength(theLength);
-							task.setNullable(myNullable);
-							addTask(task);
-						} else {
-							throw new IllegalArgumentException("Can not specify length for column of type " + theColumnType);
-						}
-					}
-
-				}
-			}
-		}
-
-		private class BuilderAddTable {
-
-			private final AddTableTask myTask;
-
-			private BuilderAddTable() {
-				myTask = new AddTableTask();
-				myTask.setTableName(myTableName);
-			}
-
-
-			public BuilderAddTable addSql(DriverTypeEnum theDriverTypeEnum, @Language("SQL") String theSql) {
-				myTask.addSql(theDriverTypeEnum, theSql);
-				return this;
-			}
-		}
-	}
 
 }

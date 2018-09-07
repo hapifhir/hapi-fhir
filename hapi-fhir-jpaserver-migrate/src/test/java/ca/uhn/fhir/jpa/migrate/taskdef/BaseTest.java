@@ -52,7 +52,7 @@ public class BaseTest {
 	public void before() {
 		myUrl = "jdbc:derby:memory:database " + (ourDatabaseUrl++) + ";create=true";
 
-		myConnectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newJdbcTemplate(myUrl, "SA", "SA");
+		myConnectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
 
 		myMigrator = new Migrator();
 		myMigrator.setConnectionUrl(myUrl);

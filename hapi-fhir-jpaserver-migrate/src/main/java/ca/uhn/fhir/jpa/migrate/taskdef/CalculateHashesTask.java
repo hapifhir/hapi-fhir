@@ -27,6 +27,10 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 
 	@Override
 	public void execute() {
+		if (isDryRun()) {
+			return;
+		}
+
 		List<Map<String, Object>> rows;
 		do {
 			rows = getTxTemplate().execute(t -> {

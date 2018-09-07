@@ -13,6 +13,20 @@
 				in order to build or use HAPI FHIR.
 			</action>
 			<action type="add">
+				A new command has been added to the HAPI FHIR CLI tool: "migrate-database". This
+				command performs the schema modifications required when upgrading HAPI FHIR JPA
+				to a new version (previously this was a manual process involving running scripts and
+				reindexing everything).
+				<![CDATA[
+				<br/><br>
+				See the
+				<a href="http://hapifhir.io/doc_cli.html#migrate-database">command documentation</a>
+				for more information on how to use this tool. Please post in the HAPI FHIR
+				Google Group if you run into issues, as this is a brand new framework and we still need
+				lots of help with testing.
+				]]>
+			</action>
+			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
@@ -53,8 +67,8 @@
 				(from version 1.11.6). Thanks to Roman Doboni for the pull request!
 			</action>
 			<action type="fix">
-				A crash in the validator was fixed: Validating a Bundle that did not have fullUrl entries
-				in a required spot caused a NullPointerException.
+				A crash in the validator was fixed: Validating a Bundle that did not have Bundle.fullUrl
+				populated could cause a NullPointerException.
 			</action>
 			<action type="add">
 				AuthorizationInterceptor now examines requests more closely in order
@@ -80,6 +94,17 @@
 				JPA server loading logic has been improved to enhance performance when
 				loading a large number of results in a page, or when loading multiple
 				search results with tags. Thanks to Frank Tao for the pull request!
+				This change was introduced as a part of a collaboration between
+				HAPI FHIR and the US National Institiutes for Health (NIH).
+			</action>
+			<action type="fix" issue="1010">
+				Resource loading logic for the JPA server has been optimized to
+				reduce the number of database round trips required when loading
+				search results where many of the entries have a "forced ID" (an alphanumeric
+				client-assigned resource ID). Thanks to Frank Tao for the pull
+				request!
+				This change was introduced as a part of a collaboration between
+				HAPI FHIR and the US National Institiutes for Health (NIH).
 			</action>
 			<action type="add" issue="1000">
 				LOINC uploader has been updated to support the new LOINC filename
@@ -91,13 +116,6 @@
 				to use the
 				<![CDATA[<code>resolve()</code>]]> function in its path to descend into
 				contained resources and index fields within them.
-			</action>
-			<action type="fix" issue="1010">
-				Resource loading logic for the JPA server has been optimized to
-				reduce the number of database round trips required when loading
-				search results where many of the entries have a "forced ID" (an alphanumeric
-				client-assigned resource ID). Thanks to Frank Tao for the pull
-				request!
 			</action>
 			<action type="add">
 				A new IValidationSupport implementation has been added, named CachingValidationSupport. This

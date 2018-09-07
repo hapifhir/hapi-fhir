@@ -67,6 +67,11 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 		@Override
 		public void execute() {
+			if (isDryRun()) {
+				logDryRunSql(mySql);
+				return;
+			}
+
 			List<Map<String, Object>> rows;
 			do {
 				ourLog.info("Querying for up to {} rows", myBatchSize);

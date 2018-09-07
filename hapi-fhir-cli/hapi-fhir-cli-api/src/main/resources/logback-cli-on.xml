@@ -38,6 +38,12 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
+	<!--
+	Always log the migrator
+	-->
+	<logger name="ca.uhn.fhir.jpa.migrate" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
 
 	<root level="warn">
 		<appender-ref ref="STDOUT" />

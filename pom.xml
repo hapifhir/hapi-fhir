@@ -737,6 +737,11 @@
 				<version>${gson_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.microsoft.sqlserver</groupId>
+				<artifactId>mssql-jdbc</artifactId>
+				<version>6.2.2.jre8</version>
+			</dependency>
+			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-core</artifactId>
 				<version>${jaxb_core_version}</version>
@@ -780,6 +785,11 @@
 				<groupId>lt.velykis.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>6.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>net.riotopsys</groupId>
@@ -1123,9 +1133,19 @@
 				<version>3.22.0-GA</version>
 			</dependency>
 			<dependency>
+				<groupId>org.mariadb.jdbc</groupId>
+				<artifactId>mariadb-java-client</artifactId>
+				<version>1.5.2</version>
+			</dependency>
+			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>2.18.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.2.2.jre7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
