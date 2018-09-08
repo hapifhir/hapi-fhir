@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -13,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,11 @@ import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchCustomSearchParamTest.class);
+
+	@After
+	public void after() {
+		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
+	}
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -70,7 +77,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			assertEquals("Invalid SearchParameter.expression value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 	}
-
 
 	@Test
 	public void testCreateInvalidParamNoPath() {
@@ -176,48 +182,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	public void testSearchParameterDescendsIntoContainedResource() {
-		SearchParameter sp = new SearchParameter();
-		sp.addBase("Observation");
-		sp.setCode("specimencollectedtime");
-		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setTitle("Observation Specimen Collected Time");
-		sp.setExpression("Observation.specimen.resolve().receivedTime");
-		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		mySearchParameterDao.create(sp);
-
-		mySearchParamRegsitry.forceRefresh();
-
-		Specimen specimen = new Specimen();
-		specimen.setId("#FOO");
-		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
-		Observation o = new Observation();
-		o.setId("O1");
-		o.getContained().add(specimen);
-		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSpecimen(new Reference("#FOO"));
-		myObservationDao.update(o);
-
-		specimen = new Specimen();
-		specimen.setId("#FOO");
-		specimen.setReceivedTimeElement(new DateTimeType("2011-01-03"));
-		o = new Observation();
-		o.setId("O2");
-		o.getContained().add(specimen);
-		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSpecimen(new Reference("#FOO"));
-		myObservationDao.update(o);
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.add("specimencollectedtime", new DateParam("2011-01-01"));
-		IBundleProvider outcome = myObservationDao.search(params);
-		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
-		ourLog.info("IDS: " + ids);
-		assertThat(ids, contains("Observation/O1"));
-	}
-
-	@Test
 	public void testExtensionWithNoValueIndexesWithoutFailure() {
 		SearchParameter eyeColourSp = new SearchParameter();
 		eyeColourSp.addBase("Patient");
@@ -277,6 +241,30 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
 
+	}
+
+	@Test
+	public void testIndexFailsIfInvalidSearchParameterExists() {
+		myDaoConfig.setValidateSearchParameterExpressionsOnSave(false);
+
+		SearchParameter threadIdSp = new SearchParameter();
+		threadIdSp.addBase("Communication");
+		threadIdSp.setCode("has-attachments");
+		threadIdSp.setType(Enumerations.SearchParamType.REFERENCE);
+		threadIdSp.setExpression("Communication.payload[1].contentAttachment is not null");
+		threadIdSp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		threadIdSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(threadIdSp, mySrd);
+		mySearchParamRegsitry.forceRefresh();
+
+		Communication com = new Communication();
+		com.setStatus(Communication.CommunicationStatus.INPROGRESS);
+		try {
+			myCommunicationDao.create(com, mySrd);
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), startsWith("Failed to extract values from resource using FHIRPath \"Communication.payload[1].contentAttachment is not null\": org.hl7.fhir"));
+		}
 	}
 
 	@Test
@@ -397,7 +385,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		assertThat(results, contains(mrId));
 	}
 
-
 	/**
 	 * See #863
 	 */
@@ -428,6 +415,23 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("reason", new TokenParam("foo", "bar"));
 		List<String> results = toUnqualifiedVersionlessIdValues(myMedicationRequestDao.search(map));
 		assertThat(results, contains(mrId));
+	}
+
+	@Test
+	public void testRejectSearchParamWithInvalidExpression() {
+		SearchParameter threadIdSp = new SearchParameter();
+		threadIdSp.addBase("Communication");
+		threadIdSp.setCode("has-attachments");
+		threadIdSp.setType(Enumerations.SearchParamType.REFERENCE);
+		threadIdSp.setExpression("Communication.payload[1].contentAttachment is not null");
+		threadIdSp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		threadIdSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		try {
+			mySearchParameterDao.create(threadIdSp, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), startsWith("The expression \"Communication.payload[1].contentAttachment is not null\" can not be evaluated and may be invalid: "));
+		}
 	}
 
 	@Test
@@ -751,6 +755,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				mySearchParameterDao.create(siblingSp, mySrd);
+			}
+		});
+
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				mySearchParamRegsitry.forceRefresh();
 			}
 		});
@@ -1072,6 +1082,48 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, empty());
 
+	}
+
+	@Test
+	public void testSearchParameterDescendsIntoContainedResource() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Observation");
+		sp.setCode("specimencollectedtime");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setTitle("Observation Specimen Collected Time");
+		sp.setExpression("Observation.specimen.resolve().receivedTime");
+		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegsitry.forceRefresh();
+
+		Specimen specimen = new Specimen();
+		specimen.setId("#FOO");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
+		Observation o = new Observation();
+		o.setId("O1");
+		o.getContained().add(specimen);
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setSpecimen(new Reference("#FOO"));
+		myObservationDao.update(o);
+
+		specimen = new Specimen();
+		specimen.setId("#FOO");
+		specimen.setReceivedTimeElement(new DateTimeType("2011-01-03"));
+		o = new Observation();
+		o.setId("O2");
+		o.getContained().add(specimen);
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		o.setSpecimen(new Reference("#FOO"));
+		myObservationDao.update(o);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("specimencollectedtime", new DateParam("2011-01-01"));
+		IBundleProvider outcome = myObservationDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, contains("Observation/O1"));
 	}
 
 	@Test

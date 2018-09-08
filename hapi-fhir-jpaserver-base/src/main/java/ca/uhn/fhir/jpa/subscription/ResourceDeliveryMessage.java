@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.*;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -41,8 +42,6 @@ public class ResourceDeliveryMessage {
 	private String mySubscriptionString;
 	@JsonIgnore
 	private transient IBaseResource myPayload;
-	@JsonProperty("payload")
-	private String myPayoadString;
 	@JsonProperty("payloadId")
 	private String myPayloadId;
 	@JsonProperty("operationType")
@@ -57,9 +56,7 @@ public class ResourceDeliveryMessage {
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
-		if (myPayload == null && myPayoadString != null) {
-			myPayload = theCtx.newJsonParser().parseResource(myPayoadString);
-		}
+		Validate.notNull(myPayload);
 		return myPayload;
 	}
 
@@ -87,7 +84,6 @@ public class ResourceDeliveryMessage {
 
 	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
 		myPayload = thePayload;
-		myPayoadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
 	}
 
 	public void setPayloadId(IIdType thePayloadId) {

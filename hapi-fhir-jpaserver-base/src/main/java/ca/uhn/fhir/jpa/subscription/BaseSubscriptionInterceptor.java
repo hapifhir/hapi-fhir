@@ -38,6 +38,9 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -47,9 +50,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -70,22 +75,20 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
-	static final String SUBSCRIPTION_CRITERIA = "Subscription.criteria";
-	static final String SUBSCRIPTION_ENDPOINT = "Subscription.channel.endpoint";
-	static final String SUBSCRIPTION_PAYLOAD = "Subscription.channel.payload";
-	static final String SUBSCRIPTION_HEADER = "Subscription.channel.header";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
+	private final Object myInitSubscriptionsLock = new Object();
 	private SubscribableChannel myProcessingChannel;
-	private SubscribableChannel myDeliveryChannel;
+	private Map<String, SubscribableChannel> myDeliveryChannel;
 	private ExecutorService myProcessingExecutor;
 	private int myExecutorThreadCount;
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private ConcurrentHashMap<String, CanonicalSubscription> myIdToSubscription = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, SubscribableChannel> mySubscribableChannel = new ConcurrentHashMap<>();
+	private Multimap<String, MessageHandler> myIdToDeliveryHandler = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
-	private LinkedBlockingQueue<Runnable> myDeliveryExecutorQueue;
 	private IFhirResourceDao<?> mySubscriptionDao;
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
@@ -100,6 +103,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
 	 * Constructor
@@ -128,7 +132,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
-			retVal.setBackingSubscription(myCtx, theSubscription);
 			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -147,7 +150,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-			retVal.setBackingSubscription(myCtx, theSubscription);
 			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -193,7 +195,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
-		retVal.setBackingSubscription(myCtx, theSubscription);
 		retVal.setChannelType(subscription.getChannel().getType());
 		retVal.setCriteriaString(subscription.getCriteria());
 		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -204,7 +205,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
 			String from;
 			String subjectTemplate;
-			String bodyTemplate;
 			try {
 				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
@@ -242,6 +242,46 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		return retVal;
 	}
 
+	protected SubscribableChannel createDeliveryChannel(CanonicalSubscription theSubscription) {
+		String subscriptionId = theSubscription.getIdElement(myCtx).getIdPart();
+
+		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
+		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
+			.namingPattern("subscription-delivery-" + subscriptionId + "-%d")
+			.daemon(false)
+			.priority(Thread.NORM_PRIORITY)
+			.build();
+		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
+			@Override
+			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
+				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+				StopWatch sw = new StopWatch();
+				try {
+					executorQueue.put(theRunnable);
+				} catch (InterruptedException theE) {
+					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+						" rejected from " + theE.toString());
+				}
+				ourLog.info("Slot become available after {}ms", sw.getMillis());
+			}
+		};
+		ThreadPoolExecutor deliveryExecutor = new ThreadPoolExecutor(
+			1,
+			getExecutorThreadCount(),
+			0L,
+			TimeUnit.MILLISECONDS,
+			executorQueue,
+			threadFactory,
+			rejectedExecutionHandler);
+
+		return new ExecutorSubscribableChannel(deliveryExecutor);
+	}
+
+	/**
+	 * Returns an empty handler if the interceptor will manually handle registration and unregistration
+	 */
+	protected abstract Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription);
+
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
 	@SuppressWarnings("unchecked")
@@ -260,20 +300,15 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			myResourceTypeToDao = theResourceTypeToDao;
 		}
 
-		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
-		return dao;
+		return (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
 	}
 
-	public SubscribableChannel getDeliveryChannel() {
-		return myDeliveryChannel;
-	}
-
-	public void setDeliveryChannel(SubscribableChannel theDeliveryChannel) {
-		myDeliveryChannel = theDeliveryChannel;
+	protected MessageChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
+		return mySubscribableChannel.get(theSubscription.getIdElement(myCtx).getIdPart());
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {
-		return myProcessingExecutorQueue.size() + myDeliveryExecutorQueue.size();
+		return myProcessingExecutorQueue.size();
 	}
 
 	public int getExecutorThreadCount() {
@@ -301,52 +336,67 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		return mySubscriptionDao;
 	}
 
-	public List<CanonicalSubscription> getSubscriptions() {
+	public List<CanonicalSubscription> getRegisteredSubscriptions() {
 		return new ArrayList<>(myIdToSubscription.values());
 	}
 
-	public boolean hasSubscription(IIdType theId) {
+	public CanonicalSubscription hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
-		return myIdToSubscription.containsKey(theId.getIdPart());
+		return myIdToSubscription.get(theId.getIdPart());
 	}
 
 	/**
 	 * Read the existing subscriptions from the database
 	 */
 	@SuppressWarnings("unused")
-	@Scheduled(fixedDelay = 10000)
+	@Scheduled(fixedDelay = 60000)
 	public void initSubscriptions() {
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
-		map.add(Subscription.SP_STATUS, new TokenOrListParam()
-			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-			.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
-		map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
-
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
-
-		IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
-		if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
-			ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
+		if (!myInitSubscriptionsSemaphore.tryAcquire()) {
+			return;
 		}
-
-		List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
-
-		Set<String> allIds = new HashSet<>();
-		for (IBaseResource resource : resourceList) {
-			String nextId = resource.getIdElement().getIdPart();
-			allIds.add(nextId);
-			mySubscriptionActivatingSubscriber.activateAndRegisterSubscriptionIfRequired(resource);
+		try {
+			doInitSubscriptions();
+		} finally {
+			myInitSubscriptionsSemaphore.release();
 		}
+	}
 
-		for (Enumeration<String> keyEnum = myIdToSubscription.keys(); keyEnum.hasMoreElements(); ) {
-			String next = keyEnum.nextElement();
-			if (!allIds.contains(next)) {
-				ourLog.info("Unregistering Subscription/{} as it no longer exists", next);
-				myIdToSubscription.remove(next);
+	public Integer doInitSubscriptions() {
+		synchronized (myInitSubscriptionsLock) {
+			ourLog.debug("Starting init subscriptions");
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
+			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+			map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
+
+			RequestDetails req = new ServletSubRequestDetails();
+			req.setSubRequest(true);
+
+			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
+			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
+				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
+
+			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
+
+			Set<String> allIds = new HashSet<>();
+			int changesCount = 0;
+			for (IBaseResource resource : resourceList) {
+				String nextId = resource.getIdElement().getIdPart();
+				allIds.add(nextId);
+				boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
+				if (changed) {
+					changesCount++;
+				}
+			}
+
+			unregisterAllSubscriptionsNotInCollection(allIds);
+			ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
+
+			return changesCount;
 		}
 	}
 
@@ -354,18 +404,31 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@PreDestroy
 	public void preDestroy() {
 		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
-
-		unregisterDeliverySubscriber();
+		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
-	protected abstract void registerDeliverySubscriber();
+	public void registerHandler(String theSubscriptionId, MessageHandler theHandler) {
+		mySubscribableChannel.get(theSubscriptionId).subscribe(theHandler);
+		myIdToDeliveryHandler.put(theSubscriptionId, theHandler);
+	}
 
-	public void registerSubscription(IIdType theId, S theSubscription) {
+	@SuppressWarnings("UnusedReturnValue")
+	public CanonicalSubscription registerSubscription(IIdType theId, S theSubscription) {
 		Validate.notNull(theId);
-		Validate.notBlank(theId.getIdPart());
+		String subscriptionId = theId.getIdPart();
+		Validate.notBlank(subscriptionId);
 		Validate.notNull(theSubscription);
 
-		myIdToSubscription.put(theId.getIdPart(), canonicalize(theSubscription));
+		CanonicalSubscription canonicalized = canonicalize(theSubscription);
+		SubscribableChannel deliveryChannel = createDeliveryChannel(canonicalized);
+		Optional<MessageHandler> deliveryHandler = createDeliveryHandler(canonicalized);
+
+		mySubscribableChannel.put(subscriptionId, deliveryChannel);
+		myIdToSubscription.put(subscriptionId, canonicalized);
+
+		deliveryHandler.ifPresent(handler -> registerHandler(subscriptionId, handler));
+
+		return canonicalized;
 	}
 
 	protected void registerSubscriptionCheckingSubscriber() {
@@ -394,6 +457,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+		submitResourceModifiedForUpdate(theNewResource);
+	}
+
+	void submitResourceModifiedForUpdate(IBaseResource theNewResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theNewResource.getIdElement());
 		msg.setOperationType(RestOperationTypeEnum.UPDATE);
@@ -407,13 +474,18 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		/*
 		 * We only actually submit this item work working after the
 		 */
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCommit() {
-				ourLog.trace("Sending resource modified message to processing channel");
-				getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
-			}
-		});
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void afterCommit() {
+					ourLog.trace("Sending resource modified message to processing channel");
+					getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
+				}
+			});
+		} else {
+			ourLog.trace("Sending resource modified message to processing channel");
+			getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
+		}
 	}
 
 	@VisibleForTesting
@@ -449,19 +521,16 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 		if (getProcessingChannel() == null) {
 			myProcessingExecutorQueue = new LinkedBlockingQueue<>(1000);
-			RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
-				@Override
-				public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-					ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myProcessingExecutorQueue.size());
-					StopWatch sw = new StopWatch();
-					try {
-						myProcessingExecutorQueue.put(theRunnable);
-					} catch (InterruptedException theE) {
-						throw new RejectedExecutionException("Task " + theRunnable.toString() +
-							" rejected from " + theE.toString());
-					}
-					ourLog.info("Slot become available after {}ms", sw.getMillis());
+			RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
+				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myProcessingExecutorQueue.size());
+				StopWatch sw = new StopWatch();
+				try {
+					myProcessingExecutorQueue.put(theRunnable);
+				} catch (InterruptedException theE) {
+					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+						" rejected from " + theE.toString());
 				}
+				ourLog.info("Slot become available after {}ms", sw.getMillis());
 			};
 			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 				.namingPattern("subscription-proc-%d")
@@ -479,44 +548,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
 		}
 
-		if (getDeliveryChannel() == null) {
-			myDeliveryExecutorQueue = new LinkedBlockingQueue<>(1000);
-			BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-				.namingPattern("subscription-delivery-%d")
-				.daemon(false)
-				.priority(Thread.NORM_PRIORITY)
-				.build();
-			RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
-				@Override
-				public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-					ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myDeliveryExecutorQueue.size());
-					StopWatch sw = new StopWatch();
-					try {
-						myDeliveryExecutorQueue.put(theRunnable);
-					} catch (InterruptedException theE) {
-						throw new RejectedExecutionException("Task " + theRunnable.toString() +
-							" rejected from " + theE.toString());
-					}
-					ourLog.info("Slot become available after {}ms", sw.getMillis());
-				}
-			};
-			myDeliveryExecutor = new ThreadPoolExecutor(
-				1,
-				getExecutorThreadCount(),
-				0L,
-				TimeUnit.MILLISECONDS,
-				myDeliveryExecutorQueue,
-				threadFactory,
-				rejectedExecutionHandler);
-			setDeliveryChannel(new ExecutorSubscribableChannel(myDeliveryExecutor));
-		}
-
 		if (mySubscriptionActivatingSubscriber == null) {
 			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
 		registerSubscriptionCheckingSubscriber();
-		registerDeliverySubscriber();
 
 		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -532,13 +568,46 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		sendToProcessingChannel(theMsg);
 	}
 
-	protected abstract void unregisterDeliverySubscriber();
+	private void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+		for (String next : new ArrayList<>(myIdToSubscription.keySet())) {
+			if (!theAllIds.contains(next)) {
+				ourLog.info("Unregistering Subscription/{}", next);
+				CanonicalSubscription subscription = myIdToSubscription.get(next);
+				unregisterSubscription(subscription.getIdElement(myCtx));
+			}
+		}
+	}
 
-	public void unregisterSubscription(IIdType theId) {
+	public void unregisterHandler(String theSubscriptionId, MessageHandler theMessageHandler) {
+		SubscribableChannel channel = mySubscribableChannel.get(theSubscriptionId);
+		if (channel != null) {
+			channel.unsubscribe(theMessageHandler);
+			if (channel instanceof DisposableBean) {
+				try {
+					((DisposableBean) channel).destroy();
+				} catch (Exception e) {
+					ourLog.error("Failed to destroy channel bean", e);
+				}
+			}
+		}
+
+		mySubscribableChannel.remove(theSubscriptionId);
+	}
+
+	@SuppressWarnings("UnusedReturnValue")
+	public CanonicalSubscription unregisterSubscription(IIdType theId) {
 		Validate.notNull(theId);
-		Validate.notBlank(theId.getIdPart());
 
-		myIdToSubscription.remove(theId.getIdPart());
+		String subscriptionId = theId.getIdPart();
+		Validate.notBlank(subscriptionId);
+
+		for (MessageHandler next : new ArrayList<>(myIdToDeliveryHandler.get(subscriptionId))) {
+			unregisterHandler(subscriptionId, next);
+		}
+
+		mySubscribableChannel.remove(subscriptionId);
+
+		return myIdToSubscription.remove(subscriptionId);
 	}
 
 

@@ -35,6 +35,7 @@ abstract class BaseRule implements IAuthRule {
 	private String myName;
 	private PolicyEnum myMode;
 	private List<IAuthRuleTester> myTesters;
+	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 
 	BaseRule(String theRuleName) {
 		myName = theRuleName;
@@ -51,7 +52,7 @@ abstract class BaseRule implements IAuthRule {
 	public void addTesters(List<IAuthRuleTester> theTesters) {
 		theTesters.forEach(this::addTester);
 	}
-	
+
 	boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource) {
 		boolean retVal = true;
 		if (theOutputResource == null) {
@@ -69,8 +70,9 @@ abstract class BaseRule implements IAuthRule {
 		return myMode;
 	}
 
-	void setMode(PolicyEnum theRuleMode) {
+	BaseRule setMode(PolicyEnum theRuleMode) {
 		myMode = theRuleMode;
+		return this;
 	}
 
 	@Override
@@ -78,11 +80,29 @@ abstract class BaseRule implements IAuthRule {
 		return myName;
 	}
 
+	public RuleBuilder.ITenantApplicabilityChecker getTenantApplicabilityChecker() {
+		return myTenantApplicabilityChecker;
+	}
+
+	public final void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
+		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
+	}
+
 	public List<IAuthRuleTester> getTesters() {
 		if (myTesters == null) {
 			return Collections.emptyList();
 		}
 		return Collections.unmodifiableList(myTesters);
+	}
+
+	public boolean isOtherTenant(RequestDetails theRequestDetails) {
+		boolean otherTenant = false;
+		if (getTenantApplicabilityChecker() != null) {
+			if (!getTenantApplicabilityChecker().applies(theRequestDetails)) {
+				otherTenant = true;
+			}
+		}
+		return otherTenant;
 	}
 
 	Verdict newVerdict() {

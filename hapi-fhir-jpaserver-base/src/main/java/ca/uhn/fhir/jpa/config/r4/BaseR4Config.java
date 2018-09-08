@@ -3,12 +3,10 @@ package ca.uhn.fhir.jpa.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
@@ -21,7 +19,9 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -72,6 +72,16 @@ public class BaseR4Config extends BaseConfig {
 		return retVal;
 	}
 
+	@Bean
+	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterR4();
+	}
+
+	@Bean
+	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
+		return new TransactionProcessor<>();
+	}
+
 	@Bean(name = "myGraphQLProvider")
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
@@ -93,6 +103,11 @@ public class BaseR4Config extends BaseConfig {
 		return val;
 	}
 
+	@Bean
+	public JpaValidationSupportChainR4 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainR4();
+	}
+
 	@Bean(name = "myJpaValidationSupportR4", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 jpaValidationSupportR4() {
 		ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4 retVal = new ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4();
@@ -102,7 +117,7 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
-		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
+		retVal.setCacheMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		return retVal;
 	}
 
@@ -156,7 +171,7 @@ public class BaseR4Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IValidationSupport validationSupportChainR4() {
-		return new JpaValidationSupportChainR4();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

@@ -57,7 +57,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 	private List<IIdType> myAppliesToInstances;
-	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 
 	/**
 	 * Constructor
@@ -70,10 +69,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
 
-		if (myTenantApplicabilityChecker != null) {
-			if (!myTenantApplicabilityChecker.applies(theRequestDetails)) {
-				return null;
-			}
+		if (isOtherTenant(theRequestDetails)) {
+			return null;
 		}
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
@@ -161,7 +158,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					case DELETE_TAGS:
 					case META_ADD:
 					case META_DELETE:
-					case PATCH:
 						appliesToResource = theInputResource;
 						appliesToResourceId = theInputResourceId;
 						break;
@@ -454,6 +450,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		IBaseBundle request = (IBaseBundle) theInputResource;
 		String bundleType = BundleUtil.getBundleType(theContext, request);
+
+		//noinspection EnumSwitchStatementWhichMissesCases
 		switch (theOp) {
 			case TRANSACTION:
 				return "transaction".equals(bundleType);
@@ -493,9 +491,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return this;
 	}
 
-	public void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
-	}
 
 	@Override
 	public String toString() {
@@ -504,7 +499,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
 		builder.append("appliesTo", myAppliesTo);
 		builder.append("appliesToTypes", myAppliesToTypes);
-		builder.append("appliesToTenant", myTenantApplicabilityChecker);
+		builder.append("appliesToTenant", getTenantApplicabilityChecker());
 		builder.append("classifierCompartmentName", myClassifierCompartmentName);
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);

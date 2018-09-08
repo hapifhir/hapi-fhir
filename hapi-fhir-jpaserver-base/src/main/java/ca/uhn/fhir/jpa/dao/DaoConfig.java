@@ -8,6 +8,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -20,9 +22,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,6 +61,10 @@ public class DaoConfig {
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
 	/**
+	 * See {@link #setStatusBasedReindexingDisabled(boolean)}
+	 */
+	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
+	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
@@ -77,6 +83,7 @@ public class DaoConfig {
 		Bundle.BundleType.DOCUMENT.toCode(),
 		Bundle.BundleType.MESSAGE.toCode()
 	)));
+	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * update setter javadoc if default changes
@@ -89,8 +96,7 @@ public class DaoConfig {
 	/**
 	 * update setter javadoc if default changes
 	 */
-	private boolean myAllowContainsSearches = true;
-
+	private boolean myAllowContainsSearches = false;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -139,11 +145,13 @@ public class DaoConfig {
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
+	private boolean myStatusBasedReindexingDisabled;
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
 	private int myReindexThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
+	private boolean myValidateSearchParameterExpressionsOnSave = true;
 
 	/**
 	 * Constructor
@@ -155,6 +163,38 @@ public class DaoConfig {
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
+
+
+		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
+			ourLog.info("Status based reindexing is DISABLED");
+			setStatusBasedReindexingDisabled(true);
+		}
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the reindexing of search parameters
+	 * using a query on the HFJ_RESOURCE.SP_INDEX_STATUS column will be disabled completely.
+	 * This query is just not efficient on Oracle and bogs the system down when there are
+	 * a lot of resources. A more efficient way of doing this will be introduced
+	 * in the next release of HAPI FHIR.
+	 *
+	 * @since 3.5.0
+	 */
+	public boolean isStatusBasedReindexingDisabled() {
+		return myStatusBasedReindexingDisabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the reindexing of search parameters
+	 * using a query on the HFJ_RESOURCE.SP_INDEX_STATUS column will be disabled completely.
+	 * This query is just not efficient on Oracle and bogs the system down when there are
+	 * a lot of resources. A more efficient way of doing this will be introduced
+	 * in the next release of HAPI FHIR.
+	 *
+	 * @since 3.5.0
+	 */
+	public void setStatusBasedReindexingDisabled(boolean theStatusBasedReindexingDisabled) {
+		myStatusBasedReindexingDisabled = theStatusBasedReindexingDisabled;
 	}
 
 	/**
@@ -461,6 +501,16 @@ public class DaoConfig {
 	}
 
 	/**
+	 * This may be used to optionally register server interceptors directly against the DAOs.
+	 */
+	public void setInterceptors(IServerInterceptor... theInterceptor) {
+		setInterceptors(new ArrayList<IServerInterceptor>());
+		if (theInterceptor != null && theInterceptor.length != 0) {
+			getInterceptors().addAll(Arrays.asList(theInterceptor));
+		}
+	}
+
+	/**
 	 * See {@link #setMaximumExpansionSize(int)}
 	 */
 	public int getMaximumExpansionSize() {
@@ -705,9 +755,9 @@ public class DaoConfig {
 	 * references instead of being treated as real references.
 	 * <p>
 	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
+	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
 	 * a description of logical references. For example, the valueset
-	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
+	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
 	 * reference.
 	 * </p>
 	 * <p>
@@ -730,9 +780,9 @@ public class DaoConfig {
 	 * references instead of being treated as real references.
 	 * <p>
 	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See {@link "http://hl7.org/fhir/references.html"} for
+	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
 	 * a description of logical references. For example, the valueset
-	 * {@link "http://hl7.org/fhir/valueset-quantity-comparator.html"} is a logical
+	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
 	 * reference.
 	 * </p>
 	 * <p>
@@ -754,7 +804,15 @@ public class DaoConfig {
 	 * If enabled, the server will support the use of :contains searches,
 	 * which are helpful but can have adverse effects on performance.
 	 * <p>
-	 * Default is <code>true</code>
+	 * Default is <code>false</code> (Note that prior to HAPI FHIR
+	 * 3.5.0 the default was <code>true</code>)
+	 * </p>
+	 * <p>
+	 * Note: If you change this value after data already has
+	 * already been stored in the database, you must for a reindexing
+	 * of all data in the database or resources may not be
+	 * searchable.
+	 * </p>
 	 */
 	public boolean isAllowContainsSearches() {
 		return myAllowContainsSearches;
@@ -764,7 +822,15 @@ public class DaoConfig {
 	 * If enabled, the server will support the use of :contains searches,
 	 * which are helpful but can have adverse effects on performance.
 	 * <p>
-	 * Default is <code>true</code>
+	 * Default is <code>false</code> (Note that prior to HAPI FHIR
+	 * 3.5.0 the default was <code>true</code>)
+	 * </p>
+	 * <p>
+	 * Note: If you change this value after data already has
+	 * already been stored in the database, you must for a reindexing
+	 * of all data in the database or resources may not be
+	 * searchable.
+	 * </p>
 	 */
 	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
 		this.myAllowContainsSearches = theAllowContainsSearches;
@@ -1172,6 +1238,34 @@ public class DaoConfig {
 	}
 
 	/**
+	 * If <code>true</code> (default is <code>true</code>), before allowing a
+	 * SearchParameter resource to be stored (create, update, etc.) the
+	 * expression will be performed against an empty resource to ensure that
+	 * the FHIRPath executor is able to process it.
+	 * <p>
+	 * This should proabably always be set to true, but is configurable
+	 * in order to support some unit tests.
+	 * </p>
+	 */
+	public boolean isValidateSearchParameterExpressionsOnSave() {
+		return myValidateSearchParameterExpressionsOnSave;
+	}
+
+	/**
+	 * If <code>true</code> (default is <code>true</code>), before allowing a
+	 * SearchParameter resource to be stored (create, update, etc.) the
+	 * expression will be performed against an empty resource to ensure that
+	 * the FHIRPath executor is able to process it.
+	 * <p>
+	 * This should proabably always be set to true, but is configurable
+	 * in order to support some unit tests.
+	 * </p>
+	 */
+	public void setValidateSearchParameterExpressionsOnSave(boolean theValidateSearchParameterExpressionsOnSave) {
+		myValidateSearchParameterExpressionsOnSave = theValidateSearchParameterExpressionsOnSave;
+	}
+
+	/**
 	 * Do not call this method, it exists only for legacy reasons. It
 	 * will be removed in a future version. Configure the page size on your
 	 * paging provider instead.
@@ -1194,16 +1288,6 @@ public class DaoConfig {
 	@Deprecated
 	public void setIncludeLimit(@SuppressWarnings("unused") int theIncludeLimit) {
 		// nothing
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
 	}
 
 	/**
@@ -1237,18 +1321,6 @@ public class DaoConfig {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
 	}
 
-	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
-		Validate.notBlank(theUrl, "Base URL must not be null or empty");
-
-		int starIdx = theUrl.indexOf('*');
-		if (starIdx != -1) {
-			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
-			}
-		}
-
-	}
-
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
@@ -1264,6 +1336,18 @@ public class DaoConfig {
 		 * Each resource will receive a randomly generated UUID
 		 */
 		UUID
+	}
+
+	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
+		Validate.notBlank(theUrl, "Base URL must not be null or empty");
+
+		int starIdx = theUrl.indexOf('*');
+		if (starIdx != -1) {
+			if (starIdx != theUrl.length() - 1) {
+				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+			}
+		}
+
 	}
 
 }

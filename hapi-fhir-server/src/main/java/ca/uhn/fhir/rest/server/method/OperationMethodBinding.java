@@ -122,7 +122,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		}
 
-		myReturnParams = new ArrayList<OperationMethodBinding.ReturnType>();
+		myReturnParams = new ArrayList<>();
 		if (theReturnParams != null) {
 			for (OperationParam next : theReturnParams) {
 				ReturnType type = new ReturnType();

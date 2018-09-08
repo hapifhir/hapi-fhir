@@ -20,18 +20,16 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import java.io.Serializable;
-
-import javax.persistence.*;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.persistence.*;
+import java.io.Serializable;
+
 @Entity
 @Table(name = "HFJ_RES_PARAM_PRESENT", indexes = {
-		@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID")
-}, uniqueConstraints = {
-		@UniqueConstraint(name = "IDX_RESPARMPRESENT_SPID_RESID", columnNames = { "SP_ID", "RES_ID" })
+	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
+	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 })
 public class SearchParamPresent implements Serializable {
 
@@ -42,17 +40,15 @@ public class SearchParamPresent implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESPARMPRESENT_ID")
 	@Column(name = "PID")
 	private Long myId;
-
 	@Column(name = "SP_PRESENT", nullable = false)
 	private boolean myPresent;
-
 	@ManyToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
-
-	@ManyToOne()
-	@JoinColumn(name = "SP_ID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_SPID"))
-	private SearchParam mySearchParam;
+	@Transient
+	private transient String myParamName;
+	@Column(name = "HASH_PRESENCE")
+	private Long myHashPresence;
 
 	/**
 	 * Constructor
@@ -60,13 +56,40 @@ public class SearchParamPresent implements Serializable {
 	public SearchParamPresent() {
 		super();
 	}
-	
+
+	@SuppressWarnings("unused")
+	@PrePersist
+	public void calculateHashes() {
+		if (myHashPresence == null) {
+			String resourceType = getResource().getResourceType();
+			String paramName = getParamName();
+			boolean present = myPresent;
+			setHashPresence(calculateHashPresence(resourceType, paramName, present));
+		}
+	}
+
+	public Long getHashPresence() {
+		return myHashPresence;
+	}
+
+	public void setHashPresence(Long theHashPresence) {
+		myHashPresence = theHashPresence;
+	}
+
+	public String getParamName() {
+		return myParamName;
+	}
+
+	public void setParamName(String theParamName) {
+		myParamName = theParamName;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public SearchParam getSearchParam() {
-		return mySearchParam;
+	public void setResource(ResourceTable theResourceTable) {
+		myResource = theResourceTable;
 	}
 
 	public boolean isPresent() {
@@ -77,22 +100,18 @@ public class SearchParamPresent implements Serializable {
 		myPresent = thePresent;
 	}
 
-	public void setResource(ResourceTable theResourceTable) {
-		myResource = theResourceTable;
-	}
-
-	public void setSearchParam(SearchParam theSearchParam) {
-		mySearchParam = theSearchParam;
-	}
-
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		
-		b.append("res_pid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
-		b.append("param", mySearchParam.getParamName());
+
+		b.append("resPid", myResource.getIdDt().toUnqualifiedVersionless().getValue());
+		b.append("paramName", myParamName);
 		b.append("present", myPresent);
 		return b.build();
+	}
+
+	public static long calculateHashPresence(String theResourceType, String theParamName, boolean thePresent) {
+		return BaseResourceIndexedSearchParam.hash(theResourceType, theParamName, Boolean.toString(thePresent));
 	}
 
 }

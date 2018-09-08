@@ -146,7 +146,6 @@
 			<version>1.1</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>
@@ -168,6 +167,14 @@
 			<version>9.6.0-4</version>
 		</dependency>
 		-->
+
+		<!-- Used by the validator -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 
 		<!-- Testing -->
 		<dependency>

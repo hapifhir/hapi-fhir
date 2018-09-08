@@ -74,7 +74,7 @@ public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<Se
 		FhirContext context = getContext();
 		Enumerations.SearchParamType type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context);
+		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context, getConfig());
 	}
 
 }

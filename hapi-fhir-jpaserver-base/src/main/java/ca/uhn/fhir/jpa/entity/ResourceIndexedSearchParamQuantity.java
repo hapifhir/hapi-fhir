@@ -33,13 +33,14 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 //@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY", indexes = {
-	@Index(name = "IDX_SP_QUANTITY", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_UNITS,SP_VALUE"),
+//	@Index(name = "IDX_SP_QUANTITY", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_UNITS,SP_VALUE"),
+	@Index(name = "IDX_SP_QUANTITY_HASH", columnList = "HASH_IDENTITY,SP_VALUE"),
+	@Index(name = "IDX_SP_QUANTITY_HASH_UN", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE"),
 	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID")
 })
@@ -66,19 +67,25 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	@Column(name = "SP_ID")
 	private Long myId;
 	/**
-	 * @since 3.4.0 - At some point this should be made not-null
+	 * @since 3.5.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_UNITS_AND_VALPREFIX", nullable = true)
-	private Long myHashUnitsAndValPrefix;
+	@Column(name = "HASH_IDENTITY_AND_UNITS", nullable = true)
+	private Long myHashIdentityAndUnits;
 	/**
-	 * @since 3.4.0 - At some point this should be made not-null
+	 * @since 3.5.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_VALPREFIX", nullable = true)
-	private Long myHashValPrefix;
+	@Column(name = "HASH_IDENTITY_SYS_UNITS", nullable = true)
+	private Long myHashIdentitySystemAndUnits;
+	/**
+	 * @since 3.5.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
 
 	public ResourceIndexedSearchParamQuantity() {
 		// nothing
 	}
+
 
 	public ResourceIndexedSearchParamQuantity(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		setParamName(theParamName);
@@ -89,16 +96,21 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@PrePersist
 	public void calculateHashes() {
-		if (myHashUnitsAndValPrefix == null) {
-			setHashUnitsAndValPrefix(hash(getResourceType(), getParamName(), getSystem(), getUnits(), toTruncatedString(getValue())));
-			setHashValPrefix(hash(getResourceType(), getParamName(), toTruncatedString(getValue())));
+		if (myHashIdentity == null) {
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			String units = getUnits();
+			String system = getSystem();
+			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashIdentityAndUnits(calculateHashUnits(resourceType, paramName, units));
+			setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(resourceType, paramName, system, units));
 		}
 	}
 
 	@Override
 	protected void clearHashes() {
-		myHashUnitsAndValPrefix = null;
-		myHashValPrefix = null;
+		myHashIdentity = null;
+		myHashIdentityAndUnits = null;
 	}
 
 	@Override
@@ -119,27 +131,36 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getSystem(), obj.getSystem());
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
-		b.append(getHashUnitsAndValPrefix(), obj.getHashUnitsAndValPrefix());
-		b.append(getHashValPrefix(), obj.getHashValPrefix());
+		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
+		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
 		return b.isEquals();
 	}
 
-	public Long getHashUnitsAndValPrefix() {
+	public Long getHashIdentity() {
 		calculateHashes();
-		return myHashUnitsAndValPrefix;
+		return myHashIdentity;
 	}
 
-	public void setHashUnitsAndValPrefix(Long theHashUnitsAndValPrefix) {
-		myHashUnitsAndValPrefix = theHashUnitsAndValPrefix;
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
 	}
 
-	public Long getHashValPrefix() {
+	public Long getHashIdentityAndUnits() {
 		calculateHashes();
-		return myHashValPrefix;
+		return myHashIdentityAndUnits;
 	}
 
-	public void setHashValPrefix(Long theHashValPrefix) {
-		myHashValPrefix = theHashValPrefix;
+	public void setHashIdentityAndUnits(Long theHashIdentityAndUnits) {
+		myHashIdentityAndUnits = theHashIdentityAndUnits;
+	}
+
+	private Long getHashIdentitySystemAndUnits() {
+		return myHashIdentitySystemAndUnits;
+	}
+
+	public void setHashIdentitySystemAndUnits(Long theHashIdentitySystemAndUnits) {
+		myHashIdentitySystemAndUnits = theHashIdentitySystemAndUnits;
 	}
 
 	@Override
@@ -176,14 +197,13 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@Override
 	public int hashCode() {
+		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getSystem());
 		b.append(getUnits());
 		b.append(getValue());
-		b.append(getHashUnitsAndValPrefix());
-		b.append(getHashValPrefix());
 		return b.toHashCode();
 	}
 
@@ -201,14 +221,16 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append("units", getUnits());
 		b.append("value", getValue());
 		b.append("missing", isMissing());
+		b.append("hashIdentitySystemAndUnits", myHashIdentitySystemAndUnits);
 		return b.build();
 	}
 
-	private static String toTruncatedString(BigDecimal theValue) {
-		if (theValue == null) {
-			return null;
-		}
-		return theValue.setScale(0, RoundingMode.FLOOR).toPlainString();
+	public static long calculateHashSystemAndUnits(String theResourceType, String theParamName, String theSystem, String theUnits) {
+		return hash(theResourceType, theParamName, theSystem, theUnits);
+	}
+
+	public static long calculateHashUnits(String theResourceType, String theParamName, String theUnits) {
+		return hash(theResourceType, theParamName, theUnits);
 	}
 
 }

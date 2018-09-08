@@ -33,7 +33,6 @@ import java.util.Set;
 
 class OperationRule extends BaseRule implements IAuthRule {
 
-	private RuleBuilder.ITenantApplicabilityChecker myTenantApplicabilityChecker;
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -43,35 +42,35 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesToAnyInstance;
 	private boolean myAppliesAtAnyLevel;
 
-	public OperationRule(String theRuleName) {
+	OperationRule(String theRuleName) {
 		super(theRuleName);
 	}
 
-	public void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
+	void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
 		myAppliesAtAnyLevel = theAppliesAtAnyLevel;
 	}
 
-	public void appliesToAnyInstance() {
+	void appliesToAnyInstance() {
 		myAppliesToAnyInstance = true;
 	}
 
-	public void appliesToAnyType() {
+	void appliesToAnyType() {
 		myAppliesToAnyType = true;
 	}
 
-	public void appliesToInstances(List<IIdType> theAppliesToIds) {
+	void appliesToInstances(List<IIdType> theAppliesToIds) {
 		myAppliesToIds = theAppliesToIds;
 	}
 
-	public void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+	void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
 		myAppliesToInstancesOfType = theAppliesToTypes;
 	}
 
-	public void appliesToServer() {
+	void appliesToServer() {
 		myAppliesToServer = true;
 	}
 
-	public void appliesToTypes(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+	void appliesToTypes(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 
@@ -79,10 +78,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		if (myTenantApplicabilityChecker != null) {
-			if (!myTenantApplicabilityChecker.applies(theRequestDetails)) {
-				return null;
-			}
+		if (isOtherTenant(theRequestDetails)) {
+			return null;
 		}
 
 		boolean applies = false;
@@ -201,10 +198,6 @@ class OperationRule extends BaseRule implements IAuthRule {
 	 */
 	public void setOperationName(String theOperationName) {
 		myOperationName = theOperationName;
-	}
-
-	public void setTenantApplicabilityChecker(RuleBuilder.ITenantApplicabilityChecker theTenantApplicabilityChecker) {
-		myTenantApplicabilityChecker = theTenantApplicabilityChecker;
 	}
 
 }

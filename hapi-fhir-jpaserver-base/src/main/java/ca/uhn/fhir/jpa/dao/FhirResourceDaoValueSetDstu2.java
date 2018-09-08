@@ -28,6 +28,7 @@ import java.util.*;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.codec.binary.StringUtils;
+import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -62,7 +63,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	@Qualifier("myFhirContextDstu2Hl7Org")
 	private FhirContext myRiCtx;
 
-	private ValidationSupportChain myValidationSupport;
+	private CachingValidationSupport myValidationSupport;
 
 	private void addCompose(String theFilter, ValueSet theValueSetToPopulate, ValueSet theSourceValueSet, CodeSystemConcept theConcept) {
 		if (isBlank(theFilter)) {
@@ -252,7 +253,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	public void postConstruct() {
 		super.postConstruct();
 		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
-		myValidationSupport = new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport);
+		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport));
 	}
 
 	@Override

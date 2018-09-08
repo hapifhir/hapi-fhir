@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessagingException;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -43,7 +42,6 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -72,10 +70,16 @@ public class SubscriptionActivatingSubscriber {
 		Validate.notNull(theTaskExecutor);
 	}
 
-	public void activateAndRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
-		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(myCtx, theSubscription, myChannelType);
+	public synchronized boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
+		// Grab the value for "Subscription.channel.type" so we can see if this
+		// subscriber applies..
+		String subscriptionChannelType = myCtx
+			.newTerser()
+			.getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class)
+			.getValueAsString();
+		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(subscriptionChannelType, myChannelType);
 		if (subscriptionTypeApplies == false) {
-			return;
+			return false;
 		}
 
 		final IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
@@ -117,38 +121,47 @@ public class SubscriptionActivatingSubscriber {
 						}
 					}
 				});
+				return true;
 			} else {
-				activateSubscription(activeStatus, theSubscription, requestedStatus);
+				return activateSubscription(activeStatus, theSubscription, requestedStatus);
 			}
 		} else if (activeStatus.equals(statusString)) {
-			if (!mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
-				ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-			}
-			mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+			return registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
-			if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement())) {
-				ourLog.info("Removing {} subscription {}", statusString, theSubscription.getIdElement().toUnqualified().getValue());
-			}
-			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+			// Status isn't "active" or "requested"
+			return unregisterSubscriptionIfRegistered(theSubscription, statusString);
 		}
 	}
 
-	private void activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
+	protected boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
+		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement()) != null) {
+			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
+			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+			return true;
+		}
+		return false;
+	}
+
+	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
 
-		ourLog.info("Activating and registering subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
+		ourLog.info("Activating subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
-			mySubscriptionDao.update(subscription);
-			mySubscriptionInterceptor.registerSubscription(subscription.getIdElement(), subscription);
+			subscription = mySubscriptionDao.update(subscription).getResource();
+			mySubscriptionInterceptor.submitResourceModifiedForUpdate(subscription);
+			return true;
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myCtx, subscription, "error");
 			SubscriptionUtil.setReason(myCtx, subscription, e.getMessage());
 			mySubscriptionDao.update(subscription);
+			return false;
 		}
+
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public void handleMessage(RestOperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
 
 		switch (theOperationType) {
@@ -160,18 +173,43 @@ public class SubscriptionActivatingSubscriber {
 				if (!theId.getResourceType().equals("Subscription")) {
 					return;
 				}
-				TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-				txTemplate.execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus status) {
-						activateAndRegisterSubscriptionIfRequired(theSubscription);
-					}
-				});
+				activateAndRegisterSubscriptionIfRequiredInTransaction(theSubscription);
 				break;
 			default:
 				break;
 		}
 
+	}
+
+	private synchronized void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				activateOrRegisterSubscriptionIfRequired(theSubscription);
+			}
+		});
+	}
+
+	protected boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+		CanonicalSubscription existingSubscription = mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement());
+		CanonicalSubscription newSubscription = mySubscriptionInterceptor.canonicalize(theSubscription);
+
+		if (existingSubscription != null) {
+			if (newSubscription.equals(existingSubscription)) {
+				// No changes
+				return false;
+			}
+		}
+
+		if (existingSubscription != null) {
+			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+		} else {
+			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+		}
+		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+		return true;
 	}
 
 	@VisibleForTesting

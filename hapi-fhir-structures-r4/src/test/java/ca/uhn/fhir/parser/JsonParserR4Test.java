@@ -36,6 +36,20 @@ public class JsonParserR4Test {
 		return b;
 	}
 
+	@Test
+	public void testDontStripVersions() {
+		FhirContext ctx = FhirContext.forR4();
+		ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("QuestionnaireResponse.questionnaire");
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.getQuestionnaireElement().setValueAsString("Questionnaire/123/_history/456");
+
+		String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
+		ourLog.info(output);
+
+		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
+	}
+
 	/**
 	 * See #814
 	 */

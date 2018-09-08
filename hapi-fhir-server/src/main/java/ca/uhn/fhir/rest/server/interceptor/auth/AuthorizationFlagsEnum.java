@@ -50,6 +50,7 @@ public enum AuthorizationFlagsEnum {
 	 * version, this flag was the default and there was no ability to
 	 * proactively block compartment read access.
 	 */
-	NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS;
+	NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS,
 
+	ALLOW_PATCH_REQUEST_UNCHALLENGED;
 }

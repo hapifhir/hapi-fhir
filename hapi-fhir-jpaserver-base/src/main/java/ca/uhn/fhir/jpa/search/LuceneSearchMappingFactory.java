@@ -20,9 +20,7 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
-import org.apache.lucene.analysis.core.StopFilterFactory;
-import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
+import org.apache.lucene.analysis.core.*;
 import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
 import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
 import org.apache.lucene.analysis.ngram.NGramFilterFactory;
@@ -65,7 +63,7 @@ public class LuceneSearchMappingFactory {
 				.param("maxGramSize", "20")
 			.analyzerDef("standardAnalyzer", StandardTokenizerFactory.class)
 				.filter(LowerCaseFilterFactory.class)
-			.analyzerDef("exactAnalyzer", StandardTokenizerFactory.class)
+			.analyzerDef("exactAnalyzer", KeywordTokenizerFactory.class)
 			.analyzerDef("conceptParentPidsAnalyzer", WhitespaceTokenizerFactory.class)
 			.analyzerDef("termConceptPropertyAnalyzer", WhitespaceTokenizerFactory.class);
 

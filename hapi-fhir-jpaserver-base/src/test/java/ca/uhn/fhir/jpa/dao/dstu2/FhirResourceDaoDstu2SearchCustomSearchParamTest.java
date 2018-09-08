@@ -13,14 +13,12 @@ import ca.uhn.fhir.model.dstu2.valueset.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.internal.util.collections.ListUtil;
 
 import java.util.List;
@@ -37,6 +35,12 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
+	@After
+	public void after() {
+		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
+	}
+
+
 	@Test
 	public void testCreateInvalidNoBase() {
 		SearchParameter fooSp = new SearchParameter();
@@ -52,6 +56,31 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 			assertEquals("SearchParameter.base is missing", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testIndexFailsIfInvalidSearchParameterExists() {
+		myDaoConfig.setValidateSearchParameterExpressionsOnSave(false);
+
+		SearchParameter threadIdSp = new SearchParameter();
+		threadIdSp.setBase(ResourceTypeEnum.COMMUNICATION);
+		threadIdSp.setCode("has-attachments");
+		threadIdSp.setType(SearchParamTypeEnum.REFERENCE);
+		threadIdSp.setXpath("Communication.payload[1].contentAttachment is not null");
+		threadIdSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
+		threadIdSp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
+		mySearchParameterDao.create(threadIdSp, mySrd);
+		mySearchParamRegsitry.forceRefresh();
+
+		Communication com = new Communication();
+		com.setStatus(CommunicationStatusEnum.IN_PROGRESS);
+		try {
+			myCommunicationDao.create(com, mySrd);
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), startsWith("Failed to extract values from resource using FHIRPath \"Communication.payload[1].contentAttachment is not null\": ca.uhn"));
+		}
+	}
+
 
 	@Test
 	public void testCreateInvalidParamInvalidResourceName() {

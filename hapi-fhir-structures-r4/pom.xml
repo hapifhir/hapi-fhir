@@ -50,6 +50,13 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Used by the validator -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!--
 		Test dependencies on other optional parts of HAPI 
 		-->

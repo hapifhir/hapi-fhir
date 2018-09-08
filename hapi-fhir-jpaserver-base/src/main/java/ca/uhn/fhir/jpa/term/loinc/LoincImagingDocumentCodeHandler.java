@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class LoincImagingDocumentCodeHandler extends BaseLoincHandler implements IRecordHandler {
 
 	public static final String VS_ID = "loinc-imaging-document-codes";
-	public static final String VS_URI = "http://loinc.org/fhir/loinc-imaging-document-codes";
+	public static final String VS_URI = "http://loinc.org/vs/loinc-imaging-document-codes";
 	public static final String VS_NAME = "LOINC Imaging Document Codes";
 
 	public LoincImagingDocumentCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {

@@ -316,7 +316,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private static void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
 		if (!params.containsKey(parameterName)) {
-			params.put(parameterName, new ArrayList<String>());
+			params.put(parameterName, new ArrayList<>());
 		}
 		params.get(parameterName).add(parameterValue);
 	}
@@ -511,6 +511,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			String parameterValue = criterion.getParameterValue(myContext);
 			if (isNotBlank(parameterValue)) {
 				addParam(myParams, parameterName, parameterValue);
+			}
+
+			return (QUERY) this;
+		}
+
+		@Override
+		public QUERY whereMap(Map<String, List<String>> theRawMap) {
+			if (theRawMap != null) {
+				for (String nextKey : theRawMap.keySet()) {
+					for (String nextValue : theRawMap.get(nextKey)) {
+						addParam(myParams, nextKey, nextValue);
+					}
+				}
 			}
 
 			return (QUERY) this;
@@ -743,12 +756,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseBundle> myReturnType;
 		private IPrimitiveType mySince;
 		private Class<? extends IBaseResource> myType;
+		private DateRangeParam myAt;
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public IHistoryTyped andReturnBundle(Class theType) {
 			Validate.notNull(theType, "theType must not be null on method andReturnBundle(Class)");
 			myReturnType = theType;
+			return this;
+		}
+
+		@Override
+		public IHistoryTyped at(DateRangeParam theDateRangeParam) {
+			myAt = theDateRangeParam;
 			return this;
 		}
 
@@ -774,7 +794,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				id = null;
 			}
 
-			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount);
+			HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(myContext, resourceName, id, mySince, myCount, myAt);
 
 			IClientResponseHandler handler;
 			handler = new ResourceResponseHandler(myReturnType, getPreferResponseTypes(myType));
@@ -1103,7 +1123,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Object execute() {
-			if (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE)) {
+			if (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE) && myMsgBundle != null) {
 				Map<String, List<String>> urlParams = new LinkedHashMap<String, List<String>>();
 				// Set Url parameter Async and Response-Url
 				if (myIsAsync != null) {
@@ -1848,6 +1868,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IQuery sort(SortSpec theSortSpec) {
+			SortSpec sortSpec = theSortSpec;
+			while (sortSpec != null) {
+				mySort.add(new SortInternal(sortSpec));
+				sortSpec = sortSpec.getChain();
+			}
+			return this;
+		}
+
+		@Override
 		public IQuery usingStyle(SearchStyleEnum theStyle) {
 			mySearchStyle = theStyle;
 			return this;
@@ -2133,6 +2163,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myFor = theFor;
 		}
 
+		public SortInternal(SortSpec theSortSpec) {
+			if (theSortSpec.getOrder() == null) {
+				myParamName = Constants.PARAM_SORT;
+			} else if (theSortSpec.getOrder() == SortOrderEnum.ASC) {
+				myParamName = Constants.PARAM_SORT_ASC;
+			} else if (theSortSpec.getOrder() == SortOrderEnum.DESC) {
+				myParamName = Constants.PARAM_SORT_DESC;
+			}
+			myDirection = theSortSpec.getOrder();
+			myParamValue = theSortSpec.getParamName();
+		}
+
 		@Override
 		public IQuery ascending(IParam theParam) {
 			myParamName = Constants.PARAM_SORT_ASC;
@@ -2154,6 +2196,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myParamName = Constants.PARAM_SORT;
 			myDirection = null;
 			myParamValue = theParam.getParamName();
+			return myFor;
+		}
+
+		@Override
+		public IQuery defaultOrder(String theParam) {
+			myParamName = Constants.PARAM_SORT;
+			myDirection = null;
+			myParamValue = theParam;
 			return myFor;
 		}
 

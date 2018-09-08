@@ -1,6 +1,7 @@
 package ca.uhn.fhir.okhttp.client;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -74,11 +75,11 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public Map<String, List<String>> getAllHeaders() {
-        return myRequestBuilder.build().headers().toMultimap();
+        return Collections.unmodifiableMap(myRequestBuilder.build().headers().toMultimap());
     }
 
     @Override
-    public String getRequestBodyFromStream() throws IOException {
+    public String getRequestBodyFromStream() {
         // returning null to indicate this is not supported, as documented in IHttpRequest's contract
         return null;
     }

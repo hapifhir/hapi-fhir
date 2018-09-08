@@ -109,12 +109,14 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			mySession = theSession;
 			mySubscription = theSubscription;
 
-			mySubscriptionWebsocketInterceptor.getDeliveryChannel().subscribe(this);
+			String subscriptionId = mySubscription.getIdElement(myCtx).getIdPart();
+			mySubscriptionWebsocketInterceptor.registerHandler(subscriptionId, this);
 		}
 
 		@Override
 		public void closing() {
-			mySubscriptionWebsocketInterceptor.getDeliveryChannel().unsubscribe(this);
+			String subscriptionId = mySubscription.getIdElement(myCtx).getIdPart();
+			mySubscriptionWebsocketInterceptor.unregisterHandler(subscriptionId, this);
 		}
 
 		private void deliver() {

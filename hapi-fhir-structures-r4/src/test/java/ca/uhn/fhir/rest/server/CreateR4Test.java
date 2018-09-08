@@ -1,11 +1,17 @@
 package ca.uhn.fhir.rest.server;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -30,13 +36,17 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
 
 public class CreateR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateR4Test.class);
@@ -100,6 +110,7 @@ public class CreateR4Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"status\":\"active\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		HttpResponse status = ourClient.execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -110,6 +121,24 @@ public class CreateR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, containsString("DIAG"));
+	}
+	
+	@Test
+	public void testCreateReturnsRepresentation() throws Exception {
+		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
+		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"gender\":\"male\"}";
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", ContentType.parse("application/fhir+json; charset=utf-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -230,12 +259,14 @@ public class CreateR4Test {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
-		PatientProvider patientProvider = new PatientProvider();
+		PatientProviderCreate patientProviderCreate = new PatientProviderCreate();
+		PatientProviderRead patientProviderRead = new PatientProviderRead();
+		PatientProviderSearch patientProviderSearch = new PatientProviderSearch();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 
-		servlet.setResourceProviders(patientProvider);
+		servlet.setResourceProviders(patientProviderCreate, patientProviderRead, patientProviderSearch);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -247,19 +278,7 @@ public class CreateR4Test {
 		ourClient = builder.build();
 
 	}
-
-	public static class PatientProvider implements IResourceProvider {
-
-		@Create()
-		public MethodOutcome create(@ResourceParam Patient theIdParam) {
-			assertNull(theIdParam.getIdElement().getIdPart());
-			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo);
-		}
-
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
+	public static class PatientProviderRead implements IResourceProvider {
 
 		@Read()
 		public MyPatientWithExtensions read(@IdParam IdType theIdParam) {
@@ -268,6 +287,35 @@ public class CreateR4Test {
 			p0.setDateExt(new DateType("2011-01-01"));
 			return p0;
 		}
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+	}
+
+	public static class PatientProviderCreate implements IResourceProvider {
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+		@Create()
+		public MethodOutcome create(@ResourceParam Patient theIdParam) {
+			assertNull(theIdParam.getIdElement().getIdPart());
+			theIdParam.setId("1");
+			theIdParam.getMeta().setVersionId("1");
+			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo).setResource(theIdParam);
+		}
+	}
+
+	public static class PatientProviderSearch implements IResourceProvider {
+
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
 
 		@Search
 		public List<IBaseResource> search() {

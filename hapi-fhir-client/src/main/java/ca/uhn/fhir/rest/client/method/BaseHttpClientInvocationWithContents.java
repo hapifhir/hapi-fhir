@@ -57,17 +57,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private IIdType myForceResourceId;
 
 
-	
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
-		super(theContext);
-		myResource = theResource;
-		myUrlPath = StringUtils.join(theUrlPath, '/');
-		myResources = null;
-		myContents = null;
-		myParams = theParams;
-		myBundleType = null;
-	}
-
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, String theUrlPath) {
 		super(theContext);
 		myResource = theResource;
@@ -104,17 +93,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myContents = theContents;
 		myBundleType = null;
 	}
-
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
-		super(theContext);
-		myResource = null;
-		myUrlPath = StringUtils.join(theUrlPath, '/');
-		myResources = null;
-		myContents = theContents;
-		myParams = theParams;
-		myBundleType = null;
-	}
-
 
 	@Override
 	public IHttpRequest asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) throws DataFormatException {

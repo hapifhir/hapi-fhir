@@ -19,33 +19,40 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.math.BigDecimal;
-import java.util.*;
-
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.*;
-import ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
+import ca.uhn.fhir.model.dstu2.resource.Location;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Patient.Communication;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.RestfulSecurityServiceEnum;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
+import java.math.BigDecimal;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
@@ -59,7 +66,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
 
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}
@@ -68,7 +75,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}
@@ -81,13 +88,13 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamDates(ca.uhn.fhir.jpa.entity.ResourceTable,
 	 * ca.uhn.fhir.model.api.IResource)
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<ResourceIndexedSearchParamDate>();
+		HashSet<ResourceIndexedSearchParamDate> retVal = new HashSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -142,7 +149,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamNumber(ca.uhn.fhir.jpa.entity.ResourceTable,
 	 * ca.uhn.fhir.model.api.IResource)
 	 */
@@ -196,7 +203,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 							 * org.unitsofmeasurement.quantity.Quantity<?>>)
 							 * UCUMFormat.getCaseInsensitiveInstance().parse(nextValue.getCode().getValue(), null); if
 							 * (unit.isCompatible(UCUM.DAY)) {
-							 * 
+							 *
 							 * @SuppressWarnings("unchecked") PhysicsUnit<org.unitsofmeasurement.quantity.Time> timeUnit =
 							 * (PhysicsUnit<Time>) unit; UnitConverter conv = timeUnit.getConverterTo(UCUM.DAY); double
 							 * dayValue = conv.convert(nextValue.getValue().getValue().doubleValue()); DurationDt newValue =
@@ -251,7 +258,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamQuantity(ca.uhn.fhir.jpa.entity.ResourceTable,
 	 * ca.uhn.fhir.model.api.IResource)
 	 */
@@ -305,7 +312,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamStrings(ca.uhn.fhir.jpa.entity.ResourceTable,
 	 * ca.uhn.fhir.model.api.IResource)
 	 */
@@ -314,7 +321,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<ResourceIndexedSearchParamString>();
 
 		String resourceName = getContext().getResourceDefinition(theResource).getName();
-		
+
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.STRING) {
@@ -389,7 +396,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamTokens(ca.uhn.fhir.jpa.entity.ResourceTable,
 	 * ca.uhn.fhir.model.api.IResource)
 	 */
@@ -625,6 +632,35 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 		}
 	}
+
+	@Override
+	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
+		List<Object> values = new ArrayList<>();
+		String[] nextPathsSplit = SPLIT.split(thePaths);
+		FhirTerser t = getContext().newTerser();
+		for (String nextPath : nextPathsSplit) {
+			String nextPathTrimmed = nextPath.trim();
+			List<Object> allValues;
+			try {
+				allValues = t.getValues(theResource, nextPathTrimmed);
+			} catch (Exception e) {
+				String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
+				throw new InternalErrorException(msg, e);
+			}
+			for (Object next : allValues) {
+				if (next instanceof IBaseExtension) {
+					IBaseDatatype value = ((IBaseExtension) next).getValue();
+					if (value != null) {
+						values.add(value);
+					}
+				} else {
+					values.add(next);
+				}
+			}
+		}
+		return values;
+	}
+
 
 	private static <T extends Enum<?>> String extractSystem(BoundCodeDt<T> theBoundCode) {
 		if (theBoundCode.getValueAsEnum() != null) {

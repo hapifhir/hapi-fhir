@@ -109,7 +109,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
-		Session session = connection.get(2, TimeUnit.SECONDS);
+		Session session = connection.get(20, TimeUnit.SECONDS);
 
 		ourLog.info("Connected to WS: {}", session.isOpen());
 	}

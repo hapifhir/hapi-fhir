@@ -26,11 +26,20 @@ import ca.uhn.fhir.jpa.dao.*;
 @Configuration
 public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config${package_suffix}.Base${versionCapitalized}Config {
 
+	/**
+	 * Subclasses may override
+	 */
+	protected boolean isSupported(String theResourceType) {
+		return true;
+	}
+
 	@Bean(name="myResourceProviders${versionCapitalized}")
 	public List<IResourceProvider> resourceProviders${versionCapitalized}() {
 		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
 #foreach ( $res in $resources )
-		retVal.add(rp${res.declaringClassNameComplete}${versionCapitalized}());
+		if (isSupported("${res.name}")) {
+			retVal.add(rp${res.declaringClassNameComplete}${versionCapitalized}());
+		}
 #end
 		return retVal;
 	}
@@ -39,7 +48,9 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}() {
 		List<IFhirResourceDao<?>> retVal = new ArrayList<IFhirResourceDao<?>>();
 #foreach ( $res in $resources )
-		retVal.add(dao${res.declaringClassNameComplete}${versionCapitalized}());
+		if (isSupported("${res.name}")) {
+			retVal.add(dao${res.declaringClassNameComplete}${versionCapitalized}());
+		}
 #end
 		return retVal;
 	}
@@ -62,7 +73,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		IFhirResourceDaoConceptMap<org.hl7.fhir.dstu3.model.ConceptMap>
 #elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
 		IFhirResourceDaoConceptMap<org.hl7.fhir.r4.model.ConceptMap>
-#elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter'))
+#elseif ( ${versionCapitalized} != 'Dstu1' && (${res.name} == 'Composition' ||  ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'MessageHeader'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #else
 		IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>
@@ -72,7 +83,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #elseif ( ${versionCapitalized} == 'R4' && ${res.name} == 'ConceptMap' )
 		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
-#elseif ( ${versionCapitalized} != 'Dstu1' && ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'))
+#elseif ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition')
 		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #else
 		ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}> retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${versionCapitalized}<${resourcePackage}.${res.declaringClassNameComplete}>();

@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -19,17 +20,19 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class HashMapResourceProviderTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderTest.class);
 	private static MyRestfulServer ourRestServer;
 	private static Server ourListenerServer;
 	private static IGenericClient ourClient;
@@ -101,6 +104,93 @@ public class HashMapResourceProviderTest {
 	}
 
 	@Test
+	public void testHistoryInstance() {
+		// Create Res 1
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id1 = ourClient.create().resource(p).execute().getId();
+		assertThat(id1.getIdPart(), matchesPattern("[0-9]+"));
+		assertEquals("1", id1.getVersionIdPart());
+
+		// Create Res 2
+		p = new Patient();
+		p.setActive(true);
+		IIdType id2 = ourClient.create().resource(p).execute().getId();
+		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
+		assertEquals("1", id2.getVersionIdPart());
+
+		// Update Res 2
+		p = new Patient();
+		p.setId(id2);
+		p.setActive(false);
+		id2 = ourClient.update().resource(p).execute().getId();
+		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
+		assertEquals("2", id2.getVersionIdPart());
+
+		Bundle history = ourClient
+			.history()
+			.onInstance(id2.toUnqualifiedVersionless())
+			.andReturnBundle(Bundle.class)
+			.encodedJson()
+			.prettyPrint()
+			.execute();
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(history));
+		List<String> ids = history
+			.getEntry()
+			.stream()
+			.map(t -> t.getResource().getIdElement().toUnqualified().getValue())
+			.collect(Collectors.toList());
+		assertThat(ids, contains(
+			id2.toUnqualified().withVersion("2").getValue(),
+			id2.toUnqualified().withVersion("1").getValue()
+		));
+
+	}
+
+	@Test
+	public void testHistoryType() {
+		// Create Res 1
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id1 = ourClient.create().resource(p).execute().getId();
+		assertThat(id1.getIdPart(), matchesPattern("[0-9]+"));
+		assertEquals("1", id1.getVersionIdPart());
+
+		// Create Res 2
+		p = new Patient();
+		p.setActive(true);
+		IIdType id2 = ourClient.create().resource(p).execute().getId();
+		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
+		assertEquals("1", id2.getVersionIdPart());
+
+		// Update Res 2
+		p = new Patient();
+		p.setId(id2);
+		p.setActive(false);
+		id2 = ourClient.update().resource(p).execute().getId();
+		assertThat(id2.getIdPart(), matchesPattern("[0-9]+"));
+		assertEquals("2", id2.getVersionIdPart());
+
+		Bundle history = ourClient
+			.history()
+			.onType(Patient.class)
+			.andReturnBundle(Bundle.class)
+			.execute();
+		List<String> ids = history
+			.getEntry()
+			.stream()
+			.map(t -> t.getResource().getIdElement().toUnqualified().getValue())
+			.collect(Collectors.toList());
+		ourLog.info("Received IDs: {}", ids);
+		assertThat(ids, contains(
+			id2.toUnqualified().withVersion("2").getValue(),
+			id2.toUnqualified().withVersion("1").getValue(),
+			id1.toUnqualified().withVersion("1").getValue()
+		));
+
+	}
+
+	@Test
 	public void testSearchAll() {
 		// Create
 		for (int i = 0; i < 100; i++) {
@@ -112,7 +202,11 @@ public class HashMapResourceProviderTest {
 		}
 
 		// Search
-		Bundle resp = ourClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Bundle resp = ourClient
+			.search()
+			.forResource("Patient")
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(100, resp.getTotal());
 		assertEquals(100, resp.getEntry().size());
 

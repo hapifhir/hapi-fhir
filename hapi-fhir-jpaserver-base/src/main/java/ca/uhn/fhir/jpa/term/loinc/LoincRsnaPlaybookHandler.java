@@ -39,21 +39,16 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 	public static final String RSNA_CODES_VS_ID = "loinc-rsna-radiology-playbook";
 	public static final String RSNA_CODES_VS_URI = "http://loinc.org/vs/loinc-rsna-radiology-playbook";
 	public static final String RSNA_CODES_VS_NAME = "LOINC/RSNA Radiology Playbook";
-	public static final String RID_MAPPING_CM_ID = "LOINC-TO-RID-CODES-CM";
-	public static final String RID_MAPPING_CM_URI = "http://loinc.org/rid-codes";
-	public static final String RID_MAPPING_CM_NAME = "RSNA Playbook RID Codes Mapping";
 	public static final String RID_CS_URI = "http://www.radlex.org";
-	public static final String RPID_MAPPING_CM_ID = "LOINC-TO-RPID-CODES-CM";
-	public static final String RPID_MAPPING_CM_URI = "http://loinc.org/rpid-codes";
-	public static final String RPID_MAPPING_CM_NAME = "RSNA Playbook RPID Codes Mapping";
 	/*
-	 * About these being the same - Per Dan:
+	 * About these being the same - Per Dan Vreeman:
 	 * We had some discussion about this, and both
-	 * RIDs (RadLex clinical terms) and RPIDs  (Radlex Playbook Ids)
+	 * RIDs (RadLex clinical terms) and RPIDs (Radlex Playbook Ids)
 	 * belong to the same "code system" since they will never collide.
 	 * The codesystem uri is "http://www.radlex.org". FYI, that's
 	 * now listed on the FHIR page:
 	 * https://www.hl7.org/fhir/terminologies-systems.html
+	 * -ja
 	 */
 	public static final String RPID_CS_URI = RID_CS_URI;
 	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
@@ -179,9 +174,9 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(RID_MAPPING_CM_ID)
-					.setConceptMapUri(RID_MAPPING_CM_URI)
-					.setConceptMapName(RID_MAPPING_CM_NAME)
+					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID)
+					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
+					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
 					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 					.setSourceCode(partNumber)
 					.setSourceDisplay(partName)
@@ -196,9 +191,9 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		if (isNotBlank(rpid)) {
 			addConceptMapEntry(
 				new ConceptMapping()
-					.setConceptMapId(RPID_MAPPING_CM_ID)
-					.setConceptMapUri(RPID_MAPPING_CM_URI)
-					.setConceptMapName(RPID_MAPPING_CM_NAME)
+					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID)
+					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
+					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
 					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
 					.setSourceCode(loincNumber)
 					.setSourceDisplay(longCommonName)

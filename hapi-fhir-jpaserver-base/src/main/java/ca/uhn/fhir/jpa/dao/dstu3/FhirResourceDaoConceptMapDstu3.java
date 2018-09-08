@@ -87,7 +87,9 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 				if (targetsToReturn.add(target)) {
 					translationMatch = new TranslationMatch();
 
-					translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
+					if (target.getEquivalence() != null) {
+						translationMatch.setEquivalence(new CodeType(target.getEquivalence().toCode()));
+					}
 
 					translationMatch.setConcept(
 						new Coding()
@@ -160,13 +162,16 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		ConceptMap conceptMap = (ConceptMap) theResource;
-
-		// Convert from DSTU3 to R4
-		try {
-			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, VersionConvertor_30_40.convertConceptMap(conceptMap));
-		} catch (FHIRException fe) {
-			throw new InternalErrorException(fe);
+		if (retVal.getDeleted() == null) {
+			try {
+				ConceptMap conceptMap = (ConceptMap) theResource;
+				org.hl7.fhir.r4.model.ConceptMap converted = VersionConvertor_30_40.convertConceptMap(conceptMap);
+				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, converted);
+			} catch (FHIRException fe) {
+				throw new InternalErrorException(fe);
+			}
+		} else {
+			myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
 		}
 
 		return retVal;

@@ -1,0 +1,46 @@
+{
+	"resourceType": "Communication",
+	"meta": {
+		"lastUpdated": "2018-07-20T19:34:56.236+05:30",
+		"tag": [
+			{
+				"system": "systemDefined",
+				"code": "read"
+			}
+		]
+	},
+	"text": {
+		"status": "generated"
+	},
+	"extension": [
+		{
+			"url": "http://telus.com/fhir/StructureDefinition/ext-communication-msgOwner",
+			"valueString": "17427"
+		},
+		{
+			"url": "http://telus.com/fhir/StructureDefinition/ext-communication-priority",
+			"valueCode": "normal"
+		},
+		{
+			"url": "http://telus.com/fhir/StructureDefinition/ext-communication-topic",
+			"valueString": "dsads"
+		},
+		{
+			"url": "http://telus.com/fhir/StructureDefinition/ext-communication-state",
+			"valueCode": "draft"
+		},
+		{
+			"url": "http://telus.com/fhir/StructureDefinition/ext-communication-thread-id",
+			"valueString": "bd7bc833-953b-4379-b0b0-be3d898dee40"
+		}
+	],
+	"status": "in-progress",
+	"recipient": [
+		{
+			"reference": "RelatedPerson/17852"
+		}
+	],
+	"sender": {
+		"reference": "RelatedPerson/17427"
+	}
+}

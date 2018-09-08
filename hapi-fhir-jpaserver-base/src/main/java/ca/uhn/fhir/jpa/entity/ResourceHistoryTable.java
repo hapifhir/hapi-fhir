@@ -43,6 +43,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	private static final long serialVersionUID = 1L;
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
+	/**
+	 * @see ResourceEncodingEnum
+	 */
+	public static final int ENCODING_COL_LENGTH = 5;
 
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -67,7 +71,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	@Column(name = "RES_ENCODING", nullable = false, length = 5)
+	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;

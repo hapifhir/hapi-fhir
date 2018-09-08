@@ -31,11 +31,23 @@ import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.trim;
+
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_TOKEN", indexes = {
-	@Index(name = "IDX_SP_TOKEN", columnList = "RES_TYPE,SP_NAME,SP_SYSTEM,SP_VALUE"),
-	@Index(name = "IDX_SP_TOKEN_UNQUAL", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+	/*
+	 * Note: We previously had indexes with the following names,
+	 * do not reuse these names:
+	 * IDX_SP_TOKEN
+	 * IDX_SP_TOKEN_UNQUAL
+	 */
+	@Index(name = "IDX_SP_TOKEN_HASH", columnList = "HASH_IDENTITY"),
+	@Index(name = "IDX_SP_TOKEN_HASH_S", columnList = "HASH_SYS"),
+	@Index(name = "IDX_SP_TOKEN_HASH_SV", columnList = "HASH_SYS_AND_VALUE"),
+	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE"),
+
 	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_TOKEN_RESID", columnList = "RES_ID")
 })
@@ -50,12 +62,18 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public String mySystem;
 	@Field()
 	@Column(name = "SP_VALUE", nullable = true, length = MAX_LENGTH)
-	public String myValue;
+	private String myValue;
+	@SuppressWarnings("unused")
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_TOKEN", sequenceName = "SEQ_SPIDX_TOKEN")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_TOKEN")
 	@Column(name = "SP_ID")
 	private Long myId;
+	/**
+	 * @since 3.4.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
@@ -90,16 +108,19 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setValue(theValue);
 	}
 
-
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashSystem == null) {
-			setHashSystem(hash(getResourceType(), getParamName(), getSystem()));
-			setHashSystemAndValue(hash(getResourceType(), getParamName(), getSystem(), getValue()));
-			setHashValue(hash(getResourceType(), getParamName(), getValue()));
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			String system = getSystem();
+			String value = getValue();
+			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashSystem(calculateHashSystem(resourceType, paramName, system));
+			setHashSystemAndValue(calculateHashSystemAndValue(resourceType, paramName, system, value));
+			setHashValue(calculateHashValue(resourceType, paramName, value));
 		}
 	}
-
 
 	@Override
 	protected void clearHashes() {
@@ -125,37 +146,47 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append(getResource(), obj.getResource());
 		b.append(getSystem(), obj.getSystem());
 		b.append(getValue(), obj.getValue());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		b.append(getHashSystem(), obj.getHashSystem());
 		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
 		b.append(getHashValue(), obj.getHashValue());
 		return b.isEquals();
 	}
 
-	public Long getHashSystem() {
+	Long getHashSystem() {
 		calculateHashes();
 		return myHashSystem;
 	}
 
-	public void setHashSystem(Long theHashSystem) {
+	private Long getHashIdentity() {
+		calculateHashes();
+		return myHashIdentity;
+	}
+
+	private void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
+	}
+
+	private void setHashSystem(Long theHashSystem) {
 		myHashSystem = theHashSystem;
 	}
 
-	public Long getHashSystemAndValue() {
+	Long getHashSystemAndValue() {
 		calculateHashes();
 		return myHashSystemAndValue;
 	}
 
-	public void setHashSystemAndValue(Long theHashSystemAndValue) {
+	private void setHashSystemAndValue(Long theHashSystemAndValue) {
 		calculateHashes();
 		myHashSystemAndValue = theHashSystemAndValue;
 	}
 
-	public Long getHashValue() {
+	Long getHashValue() {
 		calculateHashes();
 		return myHashValue;
 	}
 
-	public void setHashValue(Long theHashValue) {
+	private void setHashValue(Long theHashValue) {
 		myHashValue = theHashValue;
 	}
 
@@ -184,17 +215,14 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	public int hashCode() {
+		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getParamName());
 		b.append(getResource());
 		b.append(getSystem());
 		b.append(getValue());
-		b.append(getHashSystem());
-		b.append(getHashSystemAndValue());
-		b.append(getHashValue());
 		return b.toHashCode();
 	}
-
 
 	@Override
 	public IQueryParameterType toQueryParameterType() {
@@ -209,5 +237,17 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("system", getSystem());
 		b.append("value", getValue());
 		return b.build();
+	}
+
+	public static long calculateHashSystem(String theResourceType, String theParamName, String theSystem) {
+		return hash(theResourceType, theParamName, trim(theSystem));
+	}
+
+	public static long calculateHashSystemAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
+		return hash(theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
+	}
+
+	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
+		return hash(theResourceType, theParamName, trim(theValue));
 	}
 }
