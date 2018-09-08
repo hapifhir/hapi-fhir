@@ -266,9 +266,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return basicAuthHeaderValue;
 	}
 
-	public <T extends Enum> T getAndParseOptionEnum(CommandLine theCommandLine, String theOption, Class<T> theEnumClass, T theDefault) throws ParseException {
+	public <T extends Enum> T getAndParseOptionEnum(CommandLine theCommandLine, String theOption, Class<T> theEnumClass, boolean theRequired, T theDefault) throws ParseException {
 		String val = theCommandLine.getOptionValue(theOption);
 		if (isBlank(val)) {
+			if (theRequired && theDefault == null) {
+				throw new ParseException("Missing required option -" + theOption);
+			}
 			return theDefault;
 		}
 		try {

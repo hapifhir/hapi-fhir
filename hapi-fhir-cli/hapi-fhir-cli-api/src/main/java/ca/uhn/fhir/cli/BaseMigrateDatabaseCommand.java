@@ -2,27 +2,38 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.Migrator;
-import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public abstract class BaseMigrateDatabaseCommand extends BaseCommand {
+public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
+
+	private static final String MIGRATE_DATABASE = "migrate-database";
+
 	@Override
 	public String getCommandDescription() {
 		return "This command migrates a HAPI FHIR JPA database from one version of HAPI FHIR to a newer version";
 	}
 
+	protected abstract List<T> provideAllowedVersions();
+
+	protected abstract Class<T> provideVersionEnumType();
+
 	@Override
 	public String getCommandName() {
-		return "migrate-database";
+		return MIGRATE_DATABASE;
+	}
+
+	@Override
+	public List<String> provideUsageNotes() {
+		String versions = "The following versions are supported: " +
+			provideAllowedVersions().stream().map(Enum::name).collect(Collectors.joining(", "));
+		return Collections.singletonList(versions);
 	}
 
 	@Override
@@ -31,12 +42,12 @@ public abstract class BaseMigrateDatabaseCommand extends BaseCommand {
 
 		addOptionalOption(retVal, "r", "dry-run", false, "Log the SQL statements that would be executed but to not actually make any changes");
 
-		addRequiredOption(retVal,"u", "url", "URL", "The JDBC database URL");
-		addRequiredOption(retVal,"n", "username", "Username", "The JDBC database username");
-		addRequiredOption(retVal,"p", "password", "Password", "The JDBC database password");
-		addRequiredOption(retVal,"f", "from", "Version", "The database schema version to migrate FROM");
-		addRequiredOption(retVal,"t", "to", "Version", "The database schema version to migrate TO");
-		addRequiredOption(retVal,"d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
+		addRequiredOption(retVal, "u", "url", "URL", "The JDBC database URL");
+		addRequiredOption(retVal, "n", "username", "Username", "The JDBC database username");
+		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
+		addRequiredOption(retVal, "f", "from", "Version", "The database schema version to migrate FROM");
+		addRequiredOption(retVal, "t", "to", "Version", "The database schema version to migrate TO");
+		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 
 		return retVal;
 	}
@@ -46,14 +57,7 @@ public abstract class BaseMigrateDatabaseCommand extends BaseCommand {
 	}
 
 	@Override
-	public List<String> provideUsageNotes() {
-		String versions = "The following versions are supported: " +
-			Arrays.stream(VersionEnum.values()).map(Enum::name).collect(Collectors.joining(", "));
-		return Collections.singletonList(versions);
-	}
-
-	@Override
-	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
+	public void run(CommandLine theCommandLine) throws ParseException {
 
 		String url = theCommandLine.getOptionValue("u");
 		String username = theCommandLine.getOptionValue("n");
@@ -66,8 +70,10 @@ public abstract class BaseMigrateDatabaseCommand extends BaseCommand {
 			throw new ParseException("Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
 		}
 
-		VersionEnum from = parseVersion(theCommandLine, "f", "from");
-		VersionEnum to = parseVersion(theCommandLine, "t", "to");
+		T from = getAndParseOptionEnum(theCommandLine, "f", provideVersionEnumType(), true, null);
+		validateVersionSupported(from);
+		T to = getAndParseOptionEnum(theCommandLine, "t", provideVersionEnumType(), true, null);
+		validateVersionSupported(to);
 
 		boolean dryRun = theCommandLine.hasOption("r");
 
@@ -82,17 +88,11 @@ public abstract class BaseMigrateDatabaseCommand extends BaseCommand {
 		migrator.migrate();
 	}
 
-	@NotNull
-	private VersionEnum parseVersion(CommandLine theCommandLine, String theOptionName, String theOptionDesc) throws ParseException {
-		VersionEnum from;
-		String optionValue = theCommandLine.getOptionValue(theOptionName);
-		try {
-			from = VersionEnum.valueOf(optionValue);
-		} catch (Exception e) {
-			throw new ParseException("Invalid " + theOptionDesc+ " value: " + optionValue);
+	private void validateVersionSupported(T theFrom) throws ParseException {
+		if (provideAllowedVersions().contains(theFrom) == false) {
+			throw new ParseException("The version " + theFrom + " is not supported for migration");
 		}
-		return from;
 	}
 
-	protected abstract void addTasks(Migrator theMigrator, VersionEnum theFrom, VersionEnum theTo);
+	protected abstract void addTasks(Migrator theMigrator, T theFrom, T theTo);
 }
