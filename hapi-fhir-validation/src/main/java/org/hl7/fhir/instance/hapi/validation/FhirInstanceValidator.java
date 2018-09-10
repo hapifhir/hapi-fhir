@@ -172,17 +172,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		try {
 			// Test if a URL was passed in specifying the structure definition and test if "StructureDefinition" is part of the URL
 			URL testIfUrl = new URL(resourceName);
-			if (resourceName.toLowerCase().contains("structuredefinition"))
-			{
 				sdName = resourceName;
-			}
-			else
-			{
-				ourLog.error(String.format("Structure definition URL must contain the text, \"StructureDefinition\", URL=%s",
-					resourceName));
-				throw new InternalErrorException(String.format("Structure definition URL must contain the text, \"StructureDefinition\", URL=%s",
-					resourceName));
-			}
 		}
 		catch (MalformedURLException e)
 		{

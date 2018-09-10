@@ -289,7 +289,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue(".*\\^Donor$");
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3"));
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
 	}
 
 	@Test
@@ -405,7 +405,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("^Ser$");
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3"));
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
 
 	}
 

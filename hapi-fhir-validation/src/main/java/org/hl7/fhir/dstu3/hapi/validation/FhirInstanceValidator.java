@@ -10,11 +10,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -23,12 +19,7 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -49,19 +40,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+@SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
@@ -108,18 +95,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		return root.getLocalName();
 	}
 
-	private ArrayList<String> determineIfProfilesSpecified(Document theDocument)
-	{
+	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
 		ArrayList<String> profileNames = new ArrayList<String>();
 		NodeList list = theDocument.getChildNodes().item(0).getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i).getNodeName().compareToIgnoreCase("meta") == 0)
-			{
+			if (list.item(i).getNodeName().compareToIgnoreCase("meta") == 0) {
 				NodeList metaList = list.item(i).getChildNodes();
-				for (int j = 0; j < metaList.getLength(); j++)
-				{
-					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0)
-					{
+				for (int j = 0; j < metaList.getLength(); j++) {
+					if (metaList.item(j).getNodeName().compareToIgnoreCase("profile") == 0) {
 						profileNames.add(metaList.item(j).getAttributes().item(0).getNodeValue());
 					}
 				}
@@ -134,20 +117,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		try {
 			// Test if a URL was passed in specifying the structure definition and test if "StructureDefinition" is part of the URL
 			URL testIfUrl = new URL(resourceName);
-			if (resourceName.toLowerCase().contains("structuredefinition"))
-			{
-				sdName = resourceName;
-			}
-			else
-			{
-				ourLog.error(String.format("Structure definition URL must contain the text, \"StructureDefinition\", URL=%s",
-					resourceName));
-				throw new InternalErrorException(String.format("Structure definition URL must contain the text, \"StructureDefinition\", URL=%s",
-					resourceName));
-			}
-		}
-		catch (MalformedURLException e)
-		{
+			sdName = resourceName;
+		} catch (MalformedURLException e) {
 			sdName = "http://hl7.org/fhir/StructureDefinition/" + resourceName;
 		}
 		StructureDefinition profile = myStructureDefintion != null ? myStructureDefintion : myValidationSupport.fetchStructureDefinition(theCtx, sdName);
@@ -283,8 +254,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 			// Determine if meta/profiles are present...
 			ArrayList<String> resourceNames = determineIfProfilesSpecified(document);
-			if (resourceNames.isEmpty())
-			{
+			if (resourceNames.isEmpty()) {
 				resourceNames.add(determineResourceName(document));
 			}
 
@@ -297,9 +267,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 						ourLog.error("Failure during validation", e);
 						throw new InternalErrorException("Unexpected failure while validating resource", e);
 					}
-				}
-				else
-				{
+				} else {
 					profile = findStructureDefinitionForResourceName(theCtx, determineResourceName(document));
 					if (profile != null) {
 						try {
@@ -319,8 +287,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			JsonArray profiles = null;
 			try {
 				profiles = json.getAsJsonObject("meta").getAsJsonArray("profile");
-				for (JsonElement element : profiles)
-				{
+				for (JsonElement element : profiles) {
 					resourceNames.add(element.getAsString());
 				}
 			} catch (Exception e) {
@@ -335,9 +302,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 					} catch (Exception e) {
 						throw new InternalErrorException("Unexpected failure while validating resource", e);
 					}
-				}
-				else
-				{
+				} else {
 					profile = findStructureDefinitionForResourceName(theCtx, json.get("resourceType").getAsString());
 					if (profile != null) {
 						try {
@@ -385,40 +350,40 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			}
 
 			myFetchResourceCache = Caffeine.newBuilder()
-			.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
-			.maximumSize(10000)
-			.build(new CacheLoader<ResourceKey, org.hl7.fhir.r4.model.Resource>() {
-				@Override
-				public org.hl7.fhir.r4.model.Resource load(ResourceKey key) throws Exception {
-					Resource fetched;
-					switch (key.getResourceName()) {
-						case "StructureDefinition":
-							fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
-							break;
-						case "ValueSet":
-							fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
-							break;
-						case "CodeSystem":
-							fetched = myWrap.fetchResource(CodeSystem.class, key.getUri());
-							break;
-						case "Questionnaire":
-							fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
-							break;
-						default:
-							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
-					}
+				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
+				.maximumSize(10000)
+				.build(new CacheLoader<ResourceKey, org.hl7.fhir.r4.model.Resource>() {
+					@Override
+					public org.hl7.fhir.r4.model.Resource load(ResourceKey key) throws Exception {
+						Resource fetched;
+						switch (key.getResourceName()) {
+							case "StructureDefinition":
+								fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
+								break;
+							case "ValueSet":
+								fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
+								break;
+							case "CodeSystem":
+								fetched = myWrap.fetchResource(CodeSystem.class, key.getUri());
+								break;
+							case "Questionnaire":
+								fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
+								break;
+							default:
+								throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
+						}
 
-					if (fetched == null) {
-						return null;
-					}
+						if (fetched == null) {
+							return null;
+						}
 
-					try {
-						return VersionConvertor_30_40.convertResource(fetched);
-					} catch (FHIRException e) {
-						throw new InternalErrorException(e);
+						try {
+							return VersionConvertor_30_40.convertResource(fetched);
+						} catch (FHIRException e) {
+							throw new InternalErrorException(e);
+						}
 					}
-				}
-			});
+				});
 		}
 
 		@Override

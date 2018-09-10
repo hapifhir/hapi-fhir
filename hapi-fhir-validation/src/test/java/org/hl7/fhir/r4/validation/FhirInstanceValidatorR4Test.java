@@ -34,8 +34,6 @@ import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.r4.hapi.ctx.PrePopulatedValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.ValidationSupportChain;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Base64BinaryType;
@@ -102,6 +100,7 @@ public class FhirInstanceValidatorR4Test {
 	private static FhirContext ourCtx = FhirContext.forR4();
 	@Rule
 	public TestRule watcher = new TestWatcher() {
+		@Override
 		protected void starting(Description description) {
 			ourLog.info("Starting test: " + description.getMethodName());
 		}
