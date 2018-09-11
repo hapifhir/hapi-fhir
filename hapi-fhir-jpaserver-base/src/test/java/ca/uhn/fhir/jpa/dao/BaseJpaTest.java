@@ -335,7 +335,20 @@ public abstract class BaseJpaTest {
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
 		theDaoConfig.setExpungeEnabled(true);
-		theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+
+		for (int count = 0;; count++) {
+			try {
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+				break;
+			} catch (Exception e) {
+				if (count >= 3) {
+					ourLog.error("Failed during expunge", e);
+					fail(e.toString());
+				} else {
+					Thread.sleep(1000);
+				}
+			}
+		}
 		theDaoConfig.setExpungeEnabled(expungeEnabled);
 
 		theSearchParamRegistry.forceRefresh();
