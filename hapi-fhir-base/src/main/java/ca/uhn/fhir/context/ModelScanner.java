@@ -178,7 +178,7 @@ class ModelScanner {
 	}
 
 	/**
-	 * There are two implementations of all of the annotations (e.g. {@link Child} and {@link org.hl7.fhir.instance.model.annotations.Child}) since the HL7.org ones will eventually replace the HAPI
+	 * There are two implementations of all of the annotations (e.g. {@link Child} since the HL7.org ones will eventually replace the HAPI
 	 * ones. Annotations can't extend each other or implement interfaces or anything like that, so rather than duplicate all of the annotation processing code this method just creates an interface
 	 * Proxy to simulate the HAPI annotations if the HL7.org ones are found instead.
 	 */
@@ -482,9 +482,8 @@ class ModelScanner {
 	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingElementDefinitions) {
 		Set<Class<? extends IBase>> retVal = new HashSet<Class<? extends IBase>>();
 
-		InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile();
-		Properties prop = new Properties();
-		try {
+		try (InputStream str = theVersion.getVersionImplementation().getFhirVersionPropertiesFile()) {
+			Properties prop = new Properties();
 			prop.load(str);
 			for (Entry<Object, Object> nextEntry : prop.entrySet()) {
 				String nextKey = nextEntry.getKey().toString();
@@ -542,8 +541,6 @@ class ModelScanner {
 			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
-		} finally {
-			IOUtils.closeQuietly(str);
 		}
 
 		return retVal;

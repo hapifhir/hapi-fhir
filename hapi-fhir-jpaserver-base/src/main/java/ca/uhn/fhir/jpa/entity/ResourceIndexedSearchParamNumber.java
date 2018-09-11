@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ import java.math.BigDecimal;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER", indexes = {
-//	@Index(name = "IDX_SP_NUMBER", columnList = "RES_TYPE,SP_NAME,SP_VALUE"),
+//	We used to have an index with name IDX_SP_NUMBER - Dont reuse
 	@Index(name = "IDX_SP_NUMBER_HASH_VAL", columnList = "HASH_IDENTITY,SP_VALUE"),
 	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID")

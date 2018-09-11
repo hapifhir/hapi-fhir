@@ -13,19 +13,43 @@
 				in order to build or use HAPI FHIR.
 			</action>
 			<action type="add">
+				A new command has been added to the HAPI FHIR CLI tool: "migrate-database". This
+				command performs the schema modifications required when upgrading HAPI FHIR JPA
+				to a new version (previously this was a manual process involving running scripts and
+				reindexing everything).
+				<![CDATA[
+				<br/><br>
+				See the
+				<a href="http://hapifhir.io/doc_cli.html#migrate-database">command documentation</a>
+				for more information on how to use this tool. Please post in the HAPI FHIR
+				Google Group if you run into issues, as this is a brand new framework and we still need
+				lots of help with testing.
+				]]>
+			</action>
+			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
-						<li>Spring Framework (JPA): 5.0.3.RELEASE -&gt; 5.0.6.RELEASE</li>
-						<li>Hibernate OR (JPA): 5.2.16.Final -&gt; 5.3.1.Final</li>
-						<li>Hibernate Search (JPA): 5.7.1.Final -&gt; 5.10.1.Final</li>
-						<li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.10.v20180503</li>
+						<li>Gson (JSON Parser): 2.8.1 -&gt; 2.8.5</li>
+						<li>Spring Framework (JPA): 5.0.3.RELEASE -&gt; 5.0.8.RELEASE</li>
+						<li>Hibernate ORM (JPA): 5.2.16.Final -&gt; 5.3.6.Final</li>
+						<li>Hibernate Search (JPA): 5.7.1.Final -&gt; 5.10.3.Final</li>
+						<li>Jetty (CLI): 9.4.8.v20171121 -&gt; 9.4.12.v20180830</li>
 						<li>Commons-Codec (All): 1.10 -&gt; 1.11</li>
+						<li>Commons-Lang (All): 3.7 -&gt; 3.8</li>
 						<li>Commons-IO (All): 2.5 -&gt; 2.6</li>
 						<li>Spring-Data (JPA): 1.11.6.RELEASE -&gt; 2.0.7.RELEASE</li>
 					</ul>
 				]]>
+			</action>
+			<action type="add">
+				A new mnandatory library depdendency has been added to hapi-fhir-base, meaning that all
+				applications using HAPI FHIR must import ti: commons-text. This library has been added as
+				a few utility methods used by HAPI FHIR that were formerly in the commons-lang3
+				project have been moved into commons-text. This library has been added as a non-optional
+				dependency in the hapi-fhir-base POM, so Maven/Gradle users should not have to make
+				any changes.
 			</action>
 			<action type="add">
 				The JPA server now has a configuration item in the DaoConfig to specify which bundle types
@@ -43,8 +67,8 @@
 				(from version 1.11.6). Thanks to Roman Doboni for the pull request!
 			</action>
 			<action type="fix">
-				A crash in the validator was fixed: Validating a Bundle that did not have fullUrl entries
-				in a required spot caused a NullPointerException.
+				A crash in the validator was fixed: Validating a Bundle that did not have Bundle.fullUrl
+				populated could cause a NullPointerException.
 			</action>
 			<action type="add">
 				AuthorizationInterceptor now examines requests more closely in order
@@ -70,6 +94,17 @@
 				JPA server loading logic has been improved to enhance performance when
 				loading a large number of results in a page, or when loading multiple
 				search results with tags. Thanks to Frank Tao for the pull request!
+				This change was introduced as a part of a collaboration between
+				HAPI FHIR and the US National Institiutes for Health (NIH).
+			</action>
+			<action type="fix" issue="1010">
+				Resource loading logic for the JPA server has been optimized to
+				reduce the number of database round trips required when loading
+				search results where many of the entries have a "forced ID" (an alphanumeric
+				client-assigned resource ID). Thanks to Frank Tao for the pull
+				request!
+				This change was introduced as a part of a collaboration between
+				HAPI FHIR and the US National Institiutes for Health (NIH).
 			</action>
 			<action type="add" issue="1000">
 				LOINC uploader has been updated to support the new LOINC filename
@@ -81,13 +116,6 @@
 				to use the
 				<![CDATA[<code>resolve()</code>]]> function in its path to descend into
 				contained resources and index fields within them.
-			</action>
-			<action type="fix" issue="1010">
-				Resource loading logic for the JPA server has been optimized to
-				reduce the number of database round trips required when loading
-				search results where many of the entries have a "forced ID" (an alphanumeric
-				client-assigned resource ID). Thanks to Frank Tao for the pull
-				request!
 			</action>
 			<action type="add">
 				A new IValidationSupport implementation has been added, named CachingValidationSupport. This

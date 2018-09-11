@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.demo.FhirServerConfig;
 import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
 import ca.uhn.fhir.jpa.demo.FhirServerConfigR4;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
@@ -71,6 +72,8 @@ public class RunServerCommand extends BaseCommand {
 		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
 		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
 
+		addOptionalOption(options, "u", "url", "Url", "If this option is set, specifies the JDBC URL to use for the database connection");
+
 		Long defaultReuseSearchResults = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 		String defaultReuseSearchResultsStr = defaultReuseSearchResults == null ? "off" : String.valueOf(defaultReuseSearchResults);
 		options.addOption(null, OPTION_REUSE_SEARCH_RESULTS_MILLIS, true, "The time in milliseconds within which the same results will be returned for multiple identical searches, or \"off\" (default is " + defaultReuseSearchResultsStr + ")");
@@ -105,6 +108,8 @@ public class RunServerCommand extends BaseCommand {
 			ourLog.info("Server is configured to not enforce referential integrity");
 			ContextHolder.setDisableReferentialIntegrity(true);
 		}
+
+		 ContextHolder.setDatabaseUrl(theCommandLine.getOptionValue("u"));
 
 		String reuseSearchResults = theCommandLine.getOptionValue(OPTION_REUSE_SEARCH_RESULTS_MILLIS);
 		if (reuseSearchResults != null) {

@@ -4,14 +4,38 @@ import java.util.Properties;
 
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+@SuppressWarnings("Duplicates")
 @Configuration
 public class FhirDbConfig {
 
-	
-	private boolean ourLowMemMode;
+	/**
+	 * The following bean configures the database connection. The 'url' property value of "jdbc:derby:directory:jpaserver_derby_files;create=true" indicates that the server should save resources in a
+	 * directory called "jpaserver_derby_files".
+	 *
+	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
+	 */
+	@Bean(destroyMethod = "close")
+	public DataSource dataSource() {
+		String url = "jdbc:derby:directory:target/jpaserver_derby_files;create=true";
+		if (isNotBlank(ContextHolder.getDatabaseUrl())) {
+			url = ContextHolder.getDatabaseUrl();
+		}
+
+		BasicDataSource retVal = new BasicDataSource();
+		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
+		retVal.setUrl(url);
+		retVal.setUsername("");
+		retVal.setPassword("");
+		return retVal;
+	}
 
 	@Bean()
 	public Properties jpaProperties() {

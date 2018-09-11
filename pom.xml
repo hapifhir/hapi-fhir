@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.5.0-SNAPSHOT</version>
+	<version>3.5.0</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -499,22 +499,22 @@
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
 		<commons_io_version>2.6</commons_io_version>
-		<commons_lang3_version>3.7</commons_lang3_version>
+		<commons_lang3_version>3.8</commons_lang3_version>
 		<derby_version>10.14.2.0</derby_version>
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
 		<guava_version>25.0-jre</guava_version>
-		<gson_version>2.8.1</gson_version>
+		<gson_version>2.8.5</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.0</jaxb_api_version>
 		<jaxb_core_version>2.3.0</jaxb_core_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.10.v20180503</jetty_version>
+		<jetty_version>9.4.12.v20180830</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.3.1.Final</hibernate_version>
+		<hibernate_version>5.3.6.Final</hibernate_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.10.1.Final</hibernate_search_version>
+		<hibernate_search_version>5.10.3.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
 		<lucene_version>5.5.5</lucene_version>
@@ -527,7 +527,7 @@
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.25</slf4j_version>
-		<spring_version>5.0.6.RELEASE</spring_version>
+		<spring_version>5.0.8.RELEASE</spring_version>
 		<spring_data_version>2.0.7.RELEASE</spring_data_version>
 
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
@@ -737,6 +737,11 @@
 				<version>${gson_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.microsoft.sqlserver</groupId>
+				<artifactId>mssql-jdbc</artifactId>
+				<version>6.2.2.jre8</version>
+			</dependency>
+			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-core</artifactId>
 				<version>${jaxb_core_version}</version>
@@ -780,6 +785,11 @@
 				<groupId>lt.velykis.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
 				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>6.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>net.riotopsys</groupId>
@@ -829,6 +839,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons_lang3_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.derby</groupId>
@@ -1016,6 +1031,11 @@
 				<version>${jetty_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>5.1.4</version>
+			</dependency>
+			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
 				<version>1.16</version>
@@ -1113,9 +1133,19 @@
 				<version>3.22.0-GA</version>
 			</dependency>
 			<dependency>
+				<groupId>org.mariadb.jdbc</groupId>
+				<artifactId>mariadb-java-client</artifactId>
+				<version>1.5.2</version>
+			</dependency>
+			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>2.18.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.2.2.jre7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -1150,6 +1180,11 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
 			<dependency>
@@ -1436,7 +1471,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.6-SNAPSHOT</version>
+					<version>2.6</version>
 					<configuration>
 						<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 					</configuration>
@@ -1458,7 +1493,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.1</version>
+					<version>0.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1634,7 +1669,7 @@
 						<configuration>
 							<rules>
 								<requireMavenVersion>
-									<version>3.3.1</version>
+									<version>3.3.9</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
 									<version>1.8</version>
@@ -2150,6 +2185,7 @@
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-elasticsearch</module>
 				<module>hapi-fhir-jpaserver-example</module>
+				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
 				<module>hapi-fhir-testpage-overlay</module>
