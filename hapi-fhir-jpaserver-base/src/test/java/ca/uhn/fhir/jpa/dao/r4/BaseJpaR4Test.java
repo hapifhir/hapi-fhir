@@ -302,7 +302,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	@Transactional()
-	public void beforePurgeDatabase() {
+	public void beforePurgeDatabase() throws InterruptedException {
 		final EntityManager entityManager = this.myEntityManager;
 		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}

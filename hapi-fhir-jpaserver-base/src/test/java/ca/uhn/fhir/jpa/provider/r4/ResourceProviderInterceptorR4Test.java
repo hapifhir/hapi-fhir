@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Test {

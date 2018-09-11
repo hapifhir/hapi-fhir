@@ -196,7 +196,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@Before
 	@Transactional()
-	public void beforePurgeDatabase() {
+	public void beforePurgeDatabase() throws InterruptedException {
 		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
