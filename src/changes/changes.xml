@@ -330,6 +330,11 @@
 				and Questionnaires were cached in a cache that never expired, leading to validations against
 				stale versions of resources.
 			</action>
+			<action type="fix">
+				In the REST server, if an incoming request has the Content-Encoding header, the server will
+				not try to read request parameters from the content stream. This avoids an incompatibility with
+				new versions of Jetty.
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

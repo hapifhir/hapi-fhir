@@ -228,6 +228,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
+	@Override
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
 		retVal.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
