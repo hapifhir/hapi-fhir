@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
@@ -182,7 +183,7 @@ public class UrlUtil {
 	}
 
 	private static void parseQueryString(String theQueryString, HashMap<String, List<String>> map) {
-		String query = theQueryString;
+		String query = defaultString(theQueryString);
 		if (query.startsWith("?")) {
 			query = query.substring(1);
 		}
