@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Migration
+ * %%
+ * Copyright (C) 2014 - 2018 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
 import org.springframework.util.Assert;
@@ -33,12 +53,12 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.ORACLE_12C, "varchar2(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.POSTGRES_9_4, "varchar(?)");
 
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.DERBY_EMBEDDED, "timestamp");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.MARIADB_10_1, "datetime(6)");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.MYSQL_5_7, "datetime(6)");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.MSSQL_2012, "datetime2");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.ORACLE_12C, "timestamp");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.POSTGRES_9_4, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.DERBY_EMBEDDED, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MARIADB_10_1, "datetime(6)");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MYSQL_5_7, "datetime(6)");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MSSQL_2012, "datetime2");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.ORACLE_12C, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.POSTGRES_9_4, "timestamp");
 	}
 
 	public ColumnTypeEnum getColumnType() {
@@ -93,7 +113,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	}
 
 	protected String getSqlNotNull() {
-		return isNullable() ? "" : " not null";
+		return isNullable() ? " null" : " not null";
 	}
 
 	public Long getColumnLength() {
@@ -121,7 +141,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 				return "varchar(" + theColumnLength + ")";
 			}
 		},
-		DATE_TIMESTAMPT{
+		DATE_TIMESTAMP {
 			@Override
 			public String getDescriptor(Long theColumnLength) {
 				Assert.isTrue(theColumnLength == null, "Must not supply a column length");

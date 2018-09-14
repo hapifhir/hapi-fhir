@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.migrate;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Migration
+ * %%
+ * Copyright (C) 2014 - 2018 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
@@ -94,7 +114,7 @@ public class JdbcUtils {
 						case Types.VARCHAR:
 							return BaseTableColumnTypeTask.ColumnTypeEnum.STRING.getDescriptor(length);
 						case Types.BIGINT:
-							return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(length);
+							return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(null);
 						default:
 							throw new IllegalArgumentException("Don't know how to handle datatype: " + dataType);
 					}
@@ -110,6 +130,32 @@ public class JdbcUtils {
 	/**
 	 * Retrieve all index names
 	 */
+	public static Set<String> getForeignKeys(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theForeignTable) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		Connection connection = dataSource.getConnection();
+		return theConnectionProperties.getTxTemplate().execute(t -> {
+			DatabaseMetaData metadata;
+			try {
+				metadata = connection.getMetaData();
+				ResultSet indexes = metadata.getCrossReference(null, null, theTableName, null, null, theForeignTable);
+
+				Set<String> columnNames = new HashSet<>();
+				while (indexes.next()) {
+					String fkName = indexes.getString("FK_NAME");
+					fkName = StringUtils.toUpperCase(fkName, Locale.US);
+					columnNames.add(fkName);
+				}
+
+				return columnNames;
+			} catch (SQLException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+	}
+
+		/**
+        * Retrieve all index names
+        */
 	public static Set<String> getColumnNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		Connection connection = dataSource.getConnection();
@@ -161,5 +207,36 @@ public class JdbcUtils {
 				throw new InternalErrorException(e);
 			}
 		});
+	}
+
+	public static boolean isColumnNullable(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theColumnName) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		Connection connection = dataSource.getConnection();
+		//noinspection ConstantConditions
+		return theConnectionProperties.getTxTemplate().execute(t -> {
+			DatabaseMetaData metadata;
+			try {
+				metadata = connection.getMetaData();
+				ResultSet tables = metadata.getColumns(null, null, theTableName, theColumnName);
+
+				while (tables.next()) {
+					if (theColumnName.equals(tables.getString("COLUMN_NAME"))) {
+						String nullable = tables.getString("IS_NULLABLE");
+						if ("YES".equals(nullable)) {
+							return true;
+						} else if ("NO".equals(nullable)) {
+							return false;
+						} else {
+							throw new IllegalStateException("Unknown nullable: " + nullable);
+						}
+					}
+				}
+
+				throw new IllegalStateException("Did not find column " + theColumnName);
+			} catch (SQLException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+
 	}
 }
