@@ -1,17 +1,18 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.DisposableBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.sql.Driver;
+import java.sql.DriverManager;
+import java.util.Enumeration;
 
 /*-
  * #%L
@@ -22,9 +23,9 @@ import java.sql.Driver;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,6 +50,7 @@ public enum DriverTypeEnum {
 
 	;
 
+	private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
 	private String myDriverClassName;
 	private boolean myDerby;
 
@@ -60,21 +62,15 @@ public enum DriverTypeEnum {
 		myDerby = theDerby;
 	}
 
-
 	public ConnectionProperties newConnectionProperties(String theUrl, String theUsername, String thePassword) {
 
-		Driver driver = null;
-		try {
-			driver = (Driver) Class.forName(myDriverClassName).newInstance();
-		} catch (Exception e) {
-			throw new ConfigurationException("Failed to initialize driver: " + myDriverClassName + ": " + e.toString());
-		}
-
-		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-		dataSource.setDriver(driver);
+		SingleConnectionDataSource dataSource = new SingleConnectionDataSource();
+		dataSource.setAutoCommit(false);
+		dataSource.setDriverClassName(myDriverClassName);
 		dataSource.setUrl(theUrl);
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
+		dataSource.setSuppressClose(true);
 
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
 		transactionManager.setDataSource(dataSource);
@@ -91,12 +87,13 @@ public enum DriverTypeEnum {
 	public static class ConnectionProperties {
 
 		private final DriverTypeEnum myDriverType;
-		private final DataSource myDataSource;
+		private final SingleConnectionDataSource myDataSource;
 		private final TransactionTemplate myTxTemplate;
+
 		/**
 		 * Constructor
 		 */
-		public ConnectionProperties(DataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
+		public ConnectionProperties(SingleConnectionDataSource theDataSource, TransactionTemplate theTxTemplate, DriverTypeEnum theDriverType) {
 			Validate.notNull(theDataSource);
 			Validate.notNull(theTxTemplate);
 			Validate.notNull(theDriverType);
@@ -111,7 +108,7 @@ public enum DriverTypeEnum {
 		}
 
 		@Nonnull
-		public DataSource getDataSource() {
+		public SingleConnectionDataSource getDataSource() {
 			return myDataSource;
 		}
 
@@ -128,13 +125,7 @@ public enum DriverTypeEnum {
 		}
 
 		public void close() {
-			if (myDataSource instanceof DisposableBean) {
-				try {
-					((DisposableBean) myDataSource).destroy();
-				} catch (Exception theE) {
-					// ignore
-				}
-			}
+			myDataSource.destroy();
 		}
 	}
 }
