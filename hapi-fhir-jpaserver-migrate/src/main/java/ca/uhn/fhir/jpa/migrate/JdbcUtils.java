@@ -42,6 +42,7 @@ public class JdbcUtils {
 	 * Retrieve all index names
 	 */
 	public static Set<String> getIndexNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
+
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		Connection connection = dataSource.getConnection();
 		return theConnectionProperties.getTxTemplate().execute(t -> {
@@ -80,7 +81,7 @@ public class JdbcUtils {
 
 				while (indexes.next()) {
 					String indexName = indexes.getString("INDEX_NAME");
-					if (indexName.equalsIgnoreCase(theIndexName)) {
+					if (theIndexName.equalsIgnoreCase(indexName)) {
 						boolean nonUnique = indexes.getBoolean("NON_UNIQUE");
 						return !nonUnique;
 					}
