@@ -80,7 +80,18 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (" + getColumnName() + ") references " + myForeignTableName;
 				break;
 		}
-		executeSql(sql);
+
+
+		try {
+			executeSql(sql);
+		} catch (Exception e) {
+			if (e.toString().contains("already exists")) {
+				ourLog.warn("Index {} already exists", myConstraintName);
+			} else {
+				throw e;
+			}
+		}
+
 	}
 
 }
