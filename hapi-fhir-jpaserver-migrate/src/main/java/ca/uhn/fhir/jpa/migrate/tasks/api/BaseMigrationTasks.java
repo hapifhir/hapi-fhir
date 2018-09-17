@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,14 +44,14 @@ public class BaseMigrationTasks<T extends Enum> {
 
 		List<BaseTask<?>> retVal = new ArrayList<>();
 		for (Object nextVersion : EnumUtils.getEnumList(theFrom.getClass())) {
-			if (((T)nextVersion).ordinal() <= theFrom.ordinal()) {
+			if (((T) nextVersion).ordinal() <= theFrom.ordinal()) {
 				continue;
 			}
-			if (((T)nextVersion).ordinal() > theTo.ordinal()) {
+			if (((T) nextVersion).ordinal() > theTo.ordinal()) {
 				continue;
 			}
 
-			Collection<BaseTask<?>> nextValues = myTasks.get((T)nextVersion);
+			Collection<BaseTask<?>> nextValues = myTasks.get((T) nextVersion);
 			if (nextValues != null) {
 				retVal.addAll(nextValues);
 			}
@@ -120,6 +120,14 @@ public class BaseMigrationTasks<T extends Enum> {
 				return new BuilderAddColumnWithName();
 			}
 
+			public void dropColumn(String theColumnName) {
+				Validate.notBlank(theColumnName);
+				DropColumnTask task = new DropColumnTask();
+				task.setTableName(myTableName);
+				task.setColumnName(theColumnName);
+				addTask(task);
+			}
+
 			public void addTask(BaseTableTask<?> theTask) {
 				theTask.setTableName(myTableName);
 				Builder.this.addTask(theTask);
@@ -165,10 +173,17 @@ public class BaseMigrationTasks<T extends Enum> {
 
 				public class BuilderAddColumnWithNameNullable {
 					public void type(AddColumnTask.ColumnTypeEnum theColumnType) {
+						type(theColumnType, null);
+					}
+
+					public void type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
 						AddColumnTask task = new AddColumnTask();
 						task.setColumnName(myColumnName);
 						task.setNullable(myNullable);
 						task.setColumnType(theColumnType);
+						if (theLength != null) {
+							task.setColumnLength(theLength);
+						}
 						addTask(task);
 					}
 				}
@@ -206,7 +221,7 @@ public class BaseMigrationTasks<T extends Enum> {
 							task.setNullable(myNullable);
 							task.setColumnType(theColumnType);
 							addTask(task);
-						} else if (theLength > 0){
+						} else if (theLength > 0) {
 							throw new IllegalArgumentException("Can not specify length for column of type " + theColumnType);
 						}
 					}
