@@ -24,6 +24,7 @@
 	  <bundle dependency='true'>mvn:com.google.code.gson/gson/${gson_version}</bundle>
 	  <bundle dependency='true'>mvn:org.apache.commons/commons-lang3/${commons_lang3_version}</bundle>
 	  <bundle dependency='true'>mvn:commons-codec/commons-codec/${commons_codec_version}</bundle>
+	  <bundle dependency='true'>mvn:org.apache.commons/commons-text/${commons_text_version}</bundle>
 	  <bundle dependency='true'>mvn:commons-io/commons-io/${commons_io_version}</bundle>
 	  <bundle dependency='true'>mvn:com.google.guava/guava/${guava_version}</bundle>
 	  <bundle dependency='true'>wrap:mvn:com.google.errorprone/error_prone_annotations/${error_prone_annotations_version}</bundle>
