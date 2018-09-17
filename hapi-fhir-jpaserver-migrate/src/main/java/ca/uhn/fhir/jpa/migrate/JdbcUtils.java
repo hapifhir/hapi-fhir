@@ -48,7 +48,7 @@ public class JdbcUtils {
 			DatabaseMetaData metadata;
 			try {
 				metadata = connection.getMetaData();
-				ResultSet indexes = metadata.getIndexInfo(null, null, theTableName, false, false);
+				ResultSet indexes = metadata.getIndexInfo(null, null, theTableName, false, true);
 
 				Set<String> indexNames = new HashSet<>();
 				while (indexes.next()) {

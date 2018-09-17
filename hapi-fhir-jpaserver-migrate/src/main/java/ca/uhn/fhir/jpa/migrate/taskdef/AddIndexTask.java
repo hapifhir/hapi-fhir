@@ -70,7 +70,16 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 		String unique = myUnique ? "UNIQUE " : "";
 		String columns = String.join(", ", myColumns);
 		String sql = "CREATE " + unique + " INDEX " + myIndexName + " ON " + getTableName() + "(" + columns + ")";
-		executeSql(sql);
+
+		try {
+			executeSql(sql);
+		} catch (Exception e) {
+			if (e.toString().contains("already exists")) {
+				ourLog.warn("Index {} already exists", myIndexName);
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	public void setColumns(String... theColumns) {
