@@ -113,7 +113,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	}
 
 	protected String getSqlNotNull() {
-		return isNullable() ? " null" : " not null";
+		return isNullable() ? " null " : " not null";
 	}
 
 	public Long getColumnLength() {

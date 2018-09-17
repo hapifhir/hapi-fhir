@@ -42,6 +42,10 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 
 		String type = getSqlType();
 		String nullable = getSqlNotNull();
+		if (isNullable()) {
+			nullable = "";
+		}
+
 		String sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + type + " " + nullable;
 		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), type, getTableName());
 		executeSql(sql);
