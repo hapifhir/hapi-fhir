@@ -76,7 +76,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 				}
 				if (!alreadyCorrectNullable) {
 					if (isNullable()) {
-						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set null";
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
 					} else {
 						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
 					}
