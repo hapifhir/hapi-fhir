@@ -82,6 +82,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
+		retVal.setDefaultQueryTimeout(20);
 		return retVal;
 	}
 

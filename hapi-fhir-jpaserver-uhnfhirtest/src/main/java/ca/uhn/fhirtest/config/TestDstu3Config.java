@@ -88,6 +88,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
+		retVal.setDefaultQueryTimeout(20);
 		return retVal;
 	}
 
