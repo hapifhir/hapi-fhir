@@ -36,39 +36,55 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 	public void execute() {
 
 		String existingType;
+		boolean nullable;
 		try {
 			existingType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
+			nullable = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), getColumnName());
 		} catch (SQLException e) {
 			throw new InternalErrorException(e);
 		}
 
 		String wantedType = getColumnType().getDescriptor(getColumnLength());
-		if (existingType.equals(wantedType)) {
-			ourLog.info("Column {} on table {} is already of type {} - No action performed", getColumnName(), getTableName(), wantedType);
+		boolean alreadyOfCorrectType = existingType.equals(wantedType);
+		boolean alreadyCorrectNullable = isNullable() == nullable;
+		if (alreadyOfCorrectType && alreadyCorrectNullable) {
+			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), wantedType, nullable);
 			return;
 		}
 
 		String type = getSqlType();
 		String notNull = getSqlNotNull();
 
-		String sql;
+		String sql = null;
 		String sqlNotNull = null;
 		switch (getDriverType()) {
 			case DERBY_EMBEDDED:
-				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " set data type " + type;
+				if (!alreadyOfCorrectType) {
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " set data type " + type;
+				}
+				if (!alreadyCorrectNullable) {
+					sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + notNull;
+				}
 				break;
 			case MARIADB_10_1:
 			case MYSQL_5_7:
 				sql = "alter table " + getTableName() + " modify column " + getColumnName() + " " + type + notNull;
 				break;
 			case POSTGRES_9_4:
-				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
-				if (isNullable() == false) {
-					sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+				if (!alreadyOfCorrectType) {
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
+				}
+				if (!alreadyCorrectNullable) {
+					if (isNullable()) {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set null";
+					} else {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+					}
 				}
 				break;
 			case ORACLE_12C:
-				sql = "alter table " + getTableName() + " modify " + getColumnName() + " " + type + notNull;
+				String oracleNullableStmt = !alreadyCorrectNullable ? notNull : "";
+				sql = "alter table " + getTableName() + " modify ( " + getColumnName() + " " + type + oracleNullableStmt + " )";
 				break;
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
@@ -78,7 +94,9 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 		}
 
 		ourLog.info("Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
-		executeSql(sql);
+		if (sql != null) {
+			executeSql(sql);
+		}
 
 		if (sqlNotNull != null) {
 			ourLog.info("Updating column {} on table {} to not null", getColumnName(), getTableName());

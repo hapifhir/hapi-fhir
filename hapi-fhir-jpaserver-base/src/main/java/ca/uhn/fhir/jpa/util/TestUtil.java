@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,45 +20,44 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
+import org.apache.commons.lang3.Validate;
 
+import javax.persistence.*;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
-
-import org.apache.commons.lang3.Validate;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
-
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TestUtil {
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 
-	/** non instantiable */
+	/**
+	 * non instantiable
+	 */
 	private TestUtil() {
 		super();
 	}
-	
+
 	/**
 	 * This is really only useful for unit tests, do not call otherwise
 	 */
 	public static void scanEntities(String packageName) throws IOException, ClassNotFoundException {
 		ImmutableSet<ClassInfo> classes = ClassPath.from(TestUtil.class.getClassLoader()).getTopLevelClasses(packageName);
 		Set<String> names = new HashSet<String>();
-		
+
 		if (classes.size() <= 1) {
 			throw new InternalErrorException("Found no classes");
 		}
-		
+
 		for (ClassInfo classInfo : classes) {
 			Class<?> clazz = Class.forName(classInfo.getName());
 			Entity entity = clazz.getAnnotation(Entity.class);
@@ -101,7 +100,7 @@ public class TestUtil {
 				Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
 			}
 		}
-		
+
 		JoinColumn joinColumn = ae.getAnnotation(JoinColumn.class);
 		if (joinColumn != null) {
 			assertNotADuplicateName(joinColumn.name(), null);
@@ -119,6 +118,7 @@ public class TestUtil {
 		Column column = ae.getAnnotation(Column.class);
 		if (column != null) {
 			assertNotADuplicateName(column.name(), null);
+			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + ae.toString());
 		}
 
 		GeneratedValue gen = ae.getAnnotation(GeneratedValue.class);

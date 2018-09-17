@@ -53,12 +53,12 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.ORACLE_12C, "varchar2(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.POSTGRES_9_4, "varchar(?)");
 
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.DERBY_EMBEDDED, "timestamp");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.MARIADB_10_1, "datetime(6)");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.MYSQL_5_7, "datetime(6)");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.MSSQL_2012, "datetime2");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.ORACLE_12C, "timestamp");
-		setColumnType(ColumnTypeEnum.DATE_TIMESTAMPT, DriverTypeEnum.POSTGRES_9_4, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.DERBY_EMBEDDED, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MARIADB_10_1, "datetime(6)");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MYSQL_5_7, "datetime(6)");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MSSQL_2012, "datetime2");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.ORACLE_12C, "timestamp");
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.POSTGRES_9_4, "timestamp");
 	}
 
 	public ColumnTypeEnum getColumnType() {
@@ -113,7 +113,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	}
 
 	protected String getSqlNotNull() {
-		return isNullable() ? "" : " not null";
+		return isNullable() ? " null" : " not null";
 	}
 
 	public Long getColumnLength() {
@@ -141,7 +141,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 				return "varchar(" + theColumnLength + ")";
 			}
 		},
-		DATE_TIMESTAMPT{
+		DATE_TIMESTAMP {
 			@Override
 			public String getDescriptor(Long theColumnLength) {
 				Assert.isTrue(theColumnLength == null, "Must not supply a column length");

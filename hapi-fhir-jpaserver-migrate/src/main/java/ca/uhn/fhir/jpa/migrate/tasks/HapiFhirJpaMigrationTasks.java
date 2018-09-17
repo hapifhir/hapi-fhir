@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 
 @SuppressWarnings({"UnstableApiUsage", "SqlNoDataSourceInspection", "SpellCheckingInspection"})
-public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks {
+public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	/**
 	 * Constructor
@@ -279,7 +279,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks {
 		trmConcept
 			.addColumn("CONCEPT_UPDATED")
 			.nullable()
-			.type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMPT);
+			.type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
 		trmConcept
 			.addIndex("IDX_CONCEPT_UPDATED")
 			.unique(false)

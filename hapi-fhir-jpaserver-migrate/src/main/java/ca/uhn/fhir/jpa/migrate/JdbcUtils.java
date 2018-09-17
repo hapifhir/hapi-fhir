@@ -114,7 +114,7 @@ public class JdbcUtils {
 						case Types.VARCHAR:
 							return BaseTableColumnTypeTask.ColumnTypeEnum.STRING.getDescriptor(length);
 						case Types.BIGINT:
-							return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(length);
+							return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(null);
 						default:
 							throw new IllegalArgumentException("Don't know how to handle datatype: " + dataType);
 					}
@@ -130,6 +130,32 @@ public class JdbcUtils {
 	/**
 	 * Retrieve all index names
 	 */
+	public static Set<String> getForeignKeys(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theForeignTable) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		Connection connection = dataSource.getConnection();
+		return theConnectionProperties.getTxTemplate().execute(t -> {
+			DatabaseMetaData metadata;
+			try {
+				metadata = connection.getMetaData();
+				ResultSet indexes = metadata.getCrossReference(null, null, theTableName, null, null, theForeignTable);
+
+				Set<String> columnNames = new HashSet<>();
+				while (indexes.next()) {
+					String fkName = indexes.getString("FK_NAME");
+					fkName = StringUtils.toUpperCase(fkName, Locale.US);
+					columnNames.add(fkName);
+				}
+
+				return columnNames;
+			} catch (SQLException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+	}
+
+		/**
+        * Retrieve all index names
+        */
 	public static Set<String> getColumnNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		Connection connection = dataSource.getConnection();
@@ -181,5 +207,36 @@ public class JdbcUtils {
 				throw new InternalErrorException(e);
 			}
 		});
+	}
+
+	public static boolean isColumnNullable(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theColumnName) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		Connection connection = dataSource.getConnection();
+		//noinspection ConstantConditions
+		return theConnectionProperties.getTxTemplate().execute(t -> {
+			DatabaseMetaData metadata;
+			try {
+				metadata = connection.getMetaData();
+				ResultSet tables = metadata.getColumns(null, null, theTableName, theColumnName);
+
+				while (tables.next()) {
+					if (theColumnName.equals(tables.getString("COLUMN_NAME"))) {
+						String nullable = tables.getString("IS_NULLABLE");
+						if ("YES".equals(nullable)) {
+							return true;
+						} else if ("NO".equals(nullable)) {
+							return false;
+						} else {
+							throw new IllegalStateException("Unknown nullable: " + nullable);
+						}
+					}
+				}
+
+				throw new IllegalStateException("Did not find column " + theColumnName);
+			} catch (SQLException e) {
+				throw new InternalErrorException(e);
+			}
+		});
+
 	}
 }
