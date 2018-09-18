@@ -27,7 +27,7 @@ under the License.
     <item>
       <title>File: 207,
              Errors: 0,
-             Warnings: 1239,
+             Warnings: 1340,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -444,7 +444,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  86
                 </td>
                 <td>
                   0
@@ -780,7 +780,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  12
                 </td>
                 <td>
                   0
@@ -878,7 +878,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  6
+                  4
                 </td>
                 <td>
                   0
@@ -962,7 +962,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  6
+                  7
                 </td>
                 <td>
                   0
@@ -1158,7 +1158,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  4
+                  6
                 </td>
                 <td>
                   0
@@ -1228,7 +1228,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  17
+                  23
                 </td>
                 <td>
                   0
@@ -1326,7 +1326,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  3
                 </td>
                 <td>
                   0
@@ -1354,7 +1354,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  1
+                  3
                 </td>
                 <td>
                   0
@@ -1382,7 +1382,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  4
                 </td>
                 <td>
                   0
@@ -2006,20 +2006,6 @@ under the License.
               </tr>
                           <tr>
                 <td>
-                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.gclient.IBaseQuery.java">ca/uhn/fhir/rest/gclient/IBaseQuery.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  3
-                </td>
-                <td>
-                  0
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.context.ParserOptions.java">ca/uhn/fhir/context/ParserOptions.java</a>
                 </td>
                 <td>
@@ -2166,7 +2152,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  7
+                  4
                 </td>
                 <td>
                   0
@@ -2426,6 +2412,20 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.validation.schematron.SchematronBaseValidator.java">ca/uhn/fhir/validation/schematron/SchematronBaseValidator.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.util.ObjectUtil.java">ca/uhn/fhir/util/ObjectUtil.java</a>
                 </td>
                 <td>
@@ -2460,7 +2460,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  1
                 </td>
                 <td>
                   0
@@ -2698,7 +2698,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  3
+                  4
                 </td>
                 <td>
                   0

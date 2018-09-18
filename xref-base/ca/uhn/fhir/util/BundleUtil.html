@@ -162,11 +162,11 @@
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 		BaseRuntimeChildDefinition urlChild = requestElem.getChildByName(<span class="jxr_string">"url"</span>);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 		BaseRuntimeChildDefinition methodChild = requestElem.getChildByName(<span class="jxr_string">"method"</span>);
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 		
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		IBaseResource resource = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		String url = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		RequestTypeEnum requestType = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		<strong class="jxr_keyword">for</strong> (IBase nextEntry : entries) {
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		<strong class="jxr_keyword">for</strong> (IBase nextEntry : entries) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			IBaseResource resource = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			String url = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			RequestTypeEnum requestType = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 			<strong class="jxr_keyword">for</strong> (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 				resource = (IBaseResource) next;
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 			}

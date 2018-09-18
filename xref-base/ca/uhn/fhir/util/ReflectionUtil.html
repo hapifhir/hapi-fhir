@@ -94,7 +94,7 @@
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Class&lt;?&gt; getGenericCollectionTypeOfMethodParameter(Method theMethod, <strong class="jxr_keyword">int</strong> theParamIndex) {
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		Class&lt;?&gt; type;
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  		Type genericParameterType = theMethod.getGenericParameterTypes()[theParamIndex];
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		<strong class="jxr_keyword">if</strong> (Class.<strong class="jxr_keyword">class</strong>.equals(genericParameterType)) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		<strong class="jxr_keyword">if</strong> (Class.<strong class="jxr_keyword">class</strong>.equals(genericParameterType) || Class.<strong class="jxr_keyword">class</strong>.equals(genericParameterType.getClass())) {
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  		}
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  		ParameterizedType collectionType = (ParameterizedType) genericParameterType;

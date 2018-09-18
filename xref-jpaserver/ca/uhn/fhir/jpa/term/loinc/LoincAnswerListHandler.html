@@ -71,45 +71,47 @@
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  		String extCodeSystem = trim(theRecord.get(<span class="jxr_string">"ExtCodeSystem"</span>));
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		String extCodeSystemVersion = trim(theRecord.get(<span class="jxr_string">"ExtCodeSystemVersion"</span>));
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		<strong class="jxr_keyword">if</strong> (isBlank(answerString)) {
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		}
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		<em class="jxr_comment">// Answer list code</em>
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		<strong class="jxr_keyword">if</strong> (!myCode2Concept.containsKey(answerListId)) {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			TermConcept concept = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermConcept.html">TermConcept</a>(myCodeSystemVersion, answerListId);
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  			concept.setDisplay(answerListName);
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			myCode2Concept.put(answerListId, concept);
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		}
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<em class="jxr_comment">// Answer code</em>
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">if</strong> (!myCode2Concept.containsKey(answerString)) {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			TermConcept concept = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermConcept.html">TermConcept</a>(myCodeSystemVersion, answerString);
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			concept.setDisplay(displayText);
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  			<strong class="jxr_keyword">if</strong> (isNotBlank(sequenceNumber) &amp;&amp; sequenceNumber.matches(<span class="jxr_string">"^[0-9]$"</span>)) {
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  				concept.setSequence(Integer.parseInt(sequenceNumber));
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			}
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			myCode2Concept.put(answerString, concept);
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		}
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<em class="jxr_comment">// Answer list ValueSet</em>
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		ValueSet vs = getValueSet(answerListId, <span class="jxr_string">"http://loinc.org/vs/"</span> + answerListId, answerListName, <span class="jxr_string">"answerlist.version"</span>);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		<strong class="jxr_keyword">if</strong> (vs.getIdentifier().isEmpty()) {
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			vs.addIdentifier()
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				.setSystem(<span class="jxr_string">"urn:ietf:rfc:3986"</span>)
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  				.setValue(<span class="jxr_string">"urn:oid:"</span> + answerListOid);
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		}
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		vs
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			.getCompose()
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			.getIncludeFirstRep()
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			.addConcept()
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			.setCode(answerString)
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			.setDisplay(displayText);
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	}
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		<em class="jxr_comment">// Answer list code</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		<strong class="jxr_keyword">if</strong> (!myCode2Concept.containsKey(answerListId)) {
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			TermConcept concept = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermConcept.html">TermConcept</a>(myCodeSystemVersion, answerListId);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			concept.setDisplay(answerListName);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			myCode2Concept.put(answerListId, concept);
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		}
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<em class="jxr_comment">// Answer list ValueSet</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		ValueSet vs = getValueSet(answerListId, <span class="jxr_string">"http://loinc.org/vs/"</span> + answerListId, answerListName, <span class="jxr_string">"answerlist.version"</span>);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<strong class="jxr_keyword">if</strong> (vs.getIdentifier().isEmpty()) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  			vs.addIdentifier()
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  				.setSystem(<span class="jxr_string">"urn:ietf:rfc:3986"</span>)
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  				.setValue(<span class="jxr_string">"urn:oid:"</span> + answerListOid);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		}
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		<strong class="jxr_keyword">if</strong> (isNotBlank(answerString)) {
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			<em class="jxr_comment">// Answer code</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			<strong class="jxr_keyword">if</strong> (!myCode2Concept.containsKey(answerString)) {
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  				TermConcept concept = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermConcept.html">TermConcept</a>(myCodeSystemVersion, answerString);
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  				concept.setDisplay(displayText);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  				<strong class="jxr_keyword">if</strong> (isNotBlank(sequenceNumber) &amp;&amp; sequenceNumber.matches(<span class="jxr_string">"^[0-9]$"</span>)) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  					concept.setSequence(Integer.parseInt(sequenceNumber));
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  				}
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				myCode2Concept.put(answerString, concept);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			}
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			vs
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  				.getCompose()
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  				.getIncludeFirstRep()
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  				.addConcept()
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  				.setCode(answerString)
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 				.setDisplay(displayText);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		}
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> }
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	}
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -35,7 +35,7 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.jar.IDependencyLog;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> com.ctc.wstx.api.WstxInputProperties;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> com.ctc.wstx.stax.WstxOutputFactory;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringEscapeUtils;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.text.StringEscapeUtils;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.codehaus.stax2.XMLOutputFactory2;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.codehaus.stax2.io.EscapingWriterFactory;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
@@ -62,7 +62,7 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">volatile</strong> XMLOutputFactory ourOutputFactory;
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">static</strong> {
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		HashMap&lt;String, Integer&gt; validEntityNames = <strong class="jxr_keyword">new</strong> HashMap&lt;String, Integer&gt;(1448);
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		HashMap&lt;String, Integer&gt; validEntityNames = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;(1448);
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  		validEntityNames.put(<span class="jxr_string">"AElig"</span>, 0x000C6);
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  		validEntityNames.put(<span class="jxr_string">"Aacute"</span>, 0x000C1);
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  		validEntityNames.put(<span class="jxr_string">"Abreve"</span>, 0x00102);
@@ -1765,8 +1765,8 @@
 <a class="jxr_linenumber" name="L1757" href="#L1757">1757</a> 
 <a class="jxr_linenumber" name="L1758" href="#L1758">1758</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> throwUnitTestExceptionIfConfiguredToDoSo() <strong class="jxr_keyword">throws</strong> FactoryConfigurationError, XMLStreamException {
 <a class="jxr_linenumber" name="L1759" href="#L1759">1759</a> 		<strong class="jxr_keyword">if</strong> (ourNextException != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1760" href="#L1760">1760</a> 			<strong class="jxr_keyword">if</strong> (ourNextException instanceof FactoryConfigurationError) {
-<a class="jxr_linenumber" name="L1761" href="#L1761">1761</a> 				<strong class="jxr_keyword">throw</strong> ((FactoryConfigurationError)ourNextException);
+<a class="jxr_linenumber" name="L1760" href="#L1760">1760</a> 			<strong class="jxr_keyword">if</strong> (ourNextException instanceof javax.xml.stream.FactoryConfigurationError) {
+<a class="jxr_linenumber" name="L1761" href="#L1761">1761</a> 				<strong class="jxr_keyword">throw</strong> ((javax.xml.stream.FactoryConfigurationError)ourNextException);
 <a class="jxr_linenumber" name="L1762" href="#L1762">1762</a> 			}
 <a class="jxr_linenumber" name="L1763" href="#L1763">1763</a> 			<strong class="jxr_keyword">throw</strong> (XMLStreamException)ourNextException;
 <a class="jxr_linenumber" name="L1764" href="#L1764">1764</a> 		}

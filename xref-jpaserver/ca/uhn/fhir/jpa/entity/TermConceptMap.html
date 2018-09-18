@@ -123,14 +123,15 @@
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.MULTI_LINE_STYLE)
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 			.append(<span class="jxr_string">"myId"</span>, myId)
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 			.append(<span class="jxr_string">"myResource"</span>, myResource.toString())
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			.append(<span class="jxr_string">"myResourcePid"</span>, myResourcePid)
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			.append(<span class="jxr_string">"mySource"</span>, mySource)
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			.append(<span class="jxr_string">"myTarget"</span>, myTarget)
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			.append(<span class="jxr_string">"myUrl"</span>, myUrl)
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			.append(<span class="jxr_string">"myConceptMapGroups - size"</span>, myConceptMapGroups.size())
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			.toString();
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	}
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> }
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			.append(myResource != <strong class="jxr_keyword">null</strong> ? (<span class="jxr_string">"myResource="</span> + myResource.toString()) : (<span class="jxr_string">"myResource=(null)"</span>))
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			.append(<span class="jxr_string">"myResourcePid"</span>, myResourcePid)
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			.append(<span class="jxr_string">"mySource"</span>, mySource)
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			.append(<span class="jxr_string">"myTarget"</span>, myTarget)
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			.append(<span class="jxr_string">"myUrl"</span>, myUrl)
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			.append(myConceptMapGroups != <strong class="jxr_keyword">null</strong> ? (<span class="jxr_string">"myConceptMapGroups - size="</span> + myConceptMapGroups.size()) : (<span class="jxr_string">"myConceptMapGroups=(null)"</span>))
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			.toString();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	}
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
