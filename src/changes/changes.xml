@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.5.0" date="TBD">
+		<release version="3.5.0" date="2018-09-17">
 			<action type="add">
 				HAPI FHIR now supports JDK 9 and JDK 10, both for building HAPI FHIR
 				as well as for use. JDK 8 remains supported and is the minimum requirement

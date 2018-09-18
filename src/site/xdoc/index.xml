@@ -68,7 +68,7 @@
 
 		<section name="Announcements">
 			<p>
-				<b>Sep 9, 2018 - HAPI FHIR 3.5.0 Released</b> -
+				<b>Sep 17, 2018 - HAPI FHIR 3.5.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
 			</p>
@@ -103,7 +103,7 @@
 					for more information.
 				</li>
 				<li>
-					The JPA server mechanism for indexing resources has been complertely reworked to
+					The JPA server mechanism for indexing resources has been completely reworked to
 					index based on complex hashes of data. This change should have no user-visible
 					effects, but it does reduce the total size of the database and improve search
 					performance in many cases. It also lays the groundwork for some other features we have
@@ -120,6 +120,15 @@
 					between HAPI FHIR and the Regenstrief Institute.
 				</li>
 			</ul>
+			<p>
+				Note that this version does <b>not</b> include an updated set of FHIR R4 resources. The
+				previous versions are still included. This is because the latest resources have a number 
+				of changes that break the HAPI FHIR build in fairly fundamental ways (e.g. compartment
+				definitions have changes to using a FHIRPath expression that requires a resource resolution,
+				a new validation rule has been added to require narratives across the board, etc.). Work is
+				ongoing on addressing these changes, but as a result we decided to not delay the
+				release any further. A point release should be available soon with updated definitions.
+			</p>
 			<p>
 				Thanks to everyone who contributed to this release!
 			</p>
