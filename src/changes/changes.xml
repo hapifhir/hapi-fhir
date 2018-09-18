@@ -281,6 +281,7 @@
 				A bug was fixed in JPA server searches: When performing a search with a _lastUpdate 
 				filter, the filter was applied to any _include values, which it should not have been.
 				Thanks to Deepak Garg for reporting!
+			</action>
 			<action type="add">
 				When performing a ConceptMap/$translate operation with reverse="true" in the arguments,
 				the equivalency flag is now set on the response just as it is for a non-reverse lookup.
