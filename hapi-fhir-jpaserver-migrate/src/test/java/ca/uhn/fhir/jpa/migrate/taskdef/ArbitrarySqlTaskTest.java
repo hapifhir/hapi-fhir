@@ -8,7 +8,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ArbitrarySqlTest extends BaseTest {
+public class ArbitrarySqlTaskTest extends BaseTest {
 
 	@Test
 	public void test350MigrateSearchParams() {
@@ -20,6 +20,7 @@ public class ArbitrarySqlTest extends BaseTest {
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (101, 2, true, null)");
 
 		ArbitrarySqlTask task = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
+		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 		task.setBatchSize(1);
 		String sql = "SELECT " +
 			"HFJ_SEARCH_PARM.RES_TYPE RES_TYPE, HFJ_SEARCH_PARM.PARAM_NAME PARAM_NAME, " +
@@ -50,4 +51,19 @@ public class ArbitrarySqlTest extends BaseTest {
 	}
 
 
+	@Test
+	public void testExecuteOnlyIfTableExists() {
+		ArbitrarySqlTask task = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
+		task.setBatchSize(1);
+		String sql = "SELECT * FROM HFJ_SEARCH_PARM";
+		task.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
+			task.executeSql("update HFJ_RES_PARAM_PRESENT set FOOFOOOFOO = null");
+		});
+		task.setExecuteOnlyIfTableExists("hfj_search_parm");
+
+		// No action should be performed
+		getMigrator().addTask(task);
+		getMigrator().migrate();
+
+	}
 }

@@ -6,6 +6,19 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.6.0" date="TBD">
+			<action type="fix">
+				A bug in the JPA migration tasks from 3.4.0 to 3.5.0 caused a failure if the HFJ_SEARCH_PARM
+				table did not exist. This table existed in previous versions of HAPI FHIR but was dropped
+				in 3.5.0, meaning that migrations would fail if the database was created using a snapshot
+				version of 3.5.0.
+			</action>
+			<action type="fix">
+				Automatic ID generation for contained resources (in cases where the user hasn't manually specified an ID) 
+				has been streamlined to generate more predictable IDs in some cases.
+			</action>
+		</release>
+
 		<release version="3.5.0" date="2018-09-17">
 			<action type="add">
 				HAPI FHIR now supports JDK 9 and JDK 10, both for building HAPI FHIR

@@ -18,6 +18,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
 import static org.junit.Assert.*;
 
+@SuppressWarnings("Duplicates")
 public class XmlParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -160,6 +161,31 @@ public class XmlParserR4Test {
 		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
 		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
 
+	}
+
+	@Test
+	public void testEncodeContainedIdsAreRenumbered() {
+
+
+		DiagnosticReport dr = new DiagnosticReport();
+
+		// Put a contained that isn't referenced anywhere
+		dr.getContained().add(new Specimen().setId("#1"));
+
+		// Add a specimen that is actually referenced
+		Specimen spec = new Specimen();
+		spec.addNote().setAuthor(new StringType("FOO"));
+		dr.addSpecimen().setResource(spec);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(dr);
+		ourLog.info(encoded);
+
+		assertThat(encoded, stringContainsInOrder(
+			"<contained>",
+			"<id value=\"1\"/>",
+			"</contained>",
+			"<reference value=\"#1\"/>"
+		));
 	}
 
 	/**

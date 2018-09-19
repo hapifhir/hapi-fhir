@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -29,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
@@ -37,6 +40,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	private final String myDescription;
 	private List<Task> myTask = new ArrayList<>();
 	private int myBatchSize = 1000;
+	private String myExecuteOnlyIfTableExists;
 
 	public ArbitrarySqlTask(String theDescription) {
 		myDescription = theDescription;
@@ -55,6 +59,14 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	public void execute() throws SQLException {
 		ourLog.info("Starting: {}", myDescription);
 
+		if (StringUtils.isNotBlank(myExecuteOnlyIfTableExists)) {
+			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+			if (!tableNames.contains(myExecuteOnlyIfTableExists.toUpperCase())) {
+				ourLog.info("Table {} does not exist - No action performed", myExecuteOnlyIfTableExists);
+				return;
+			}
+		}
+
 		for (Task next : myTask) {
 			next.execute();
 		}
@@ -63,6 +75,10 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	public void setBatchSize(int theBatchSize) {
 		myBatchSize = theBatchSize;
+	}
+
+	public void setExecuteOnlyIfTableExists(String theExecuteOnlyIfTableExists) {
+		myExecuteOnlyIfTableExists = theExecuteOnlyIfTableExists;
 	}
 
 	public enum QueryModeEnum {
