@@ -605,11 +605,7 @@ public abstract class BaseParser implements IParser {
 		}
 
 		dontStripVersionsFromReferencesAtPaths = myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
-		if (dontStripVersionsFromReferencesAtPaths.isEmpty() == false && theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths)) {
-			return false;
-		}
-
-		return true;
+		return dontStripVersionsFromReferencesAtPaths.isEmpty() != false || !theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths);
 	}
 
 	@Override
@@ -688,7 +684,7 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
 		StringReader reader = new StringReader(theMessageString);
-		return (T) parseResource(theResourceType, reader);
+		return parseResource(theResourceType, reader);
 	}
 
 	@Override
@@ -775,7 +771,7 @@ public abstract class BaseParser implements IParser {
 				if (!StringUtils.equals(refText, nextRef.getReferenceElement().getValue())) {
 
 					if (retVal == theValues) {
-						retVal = new ArrayList<IBase>(theValues);
+						retVal = new ArrayList<>(theValues);
 					}
 					IBaseReference newRef = (IBaseReference) myContext.getElementDefinition(nextRef.getClass()).newInstance();
 					myContext.newTerser().cloneInto(nextRef, newRef, true);
@@ -822,7 +818,7 @@ public abstract class BaseParser implements IParser {
 		} else if (thePaths instanceof HashSet) {
 			myDontStripVersionsFromReferencesAtPaths = (Set<String>) ((HashSet<String>) thePaths).clone();
 		} else {
-			myDontStripVersionsFromReferencesAtPaths = new HashSet<String>(thePaths);
+			myDontStripVersionsFromReferencesAtPaths = new HashSet<>(thePaths);
 		}
 		return this;
 	}
@@ -901,9 +897,7 @@ public abstract class BaseParser implements IParser {
 			String resourceName = myContext.getResourceDefinition(theResource).getName();
 			if (myDontEncodeElements.contains(resourceName + ".meta")) {
 				return false;
-			} else if (myDontEncodeElements.contains("*.meta")) {
-				return false;
-			}
+			} else return !myDontEncodeElements.contains("*.meta");
 		}
 		return true;
 	}
@@ -915,7 +909,7 @@ public abstract class BaseParser implements IParser {
 	protected void throwExceptionForUnknownChildType(BaseRuntimeChildDefinition nextChild, Class<? extends IBase> theType) {
 		if (nextChild instanceof BaseRuntimeDeclaredChildDefinition) {
 			StringBuilder b = new StringBuilder();
-			b.append(((BaseRuntimeDeclaredChildDefinition) nextChild).getElementName());
+			b.append(nextChild.getElementName());
 			b.append(" has type ");
 			b.append(theType.getName());
 			b.append(" but this is not a valid type for this element");
@@ -1054,10 +1048,7 @@ public abstract class BaseParser implements IParser {
 				if (theElements == null) {
 					return true;
 				}
-				if (theElements.contains(thePathBuilder.toString())) {
-					return true;
-				}
-				return false;
+				return theElements.contains(thePathBuilder.toString());
 			} else if (myParent != null) {
 				boolean parentCheck;
 				if (theCheckingForWhitelist) {
@@ -1138,20 +1129,19 @@ public abstract class BaseParser implements IParser {
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
-		private List<IBaseResource> myResources;
-		private IdentityHashMap<IBaseResource, IIdType> myResourceToId;
-		private Map<String, IBaseResource> myExistingIdToContainedResource;
+		private List<IBaseResource> myResourceList;
+		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
+		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
 
 		public Map<String, IBaseResource> getExistingIdToContainedResource() {
-			if (myExistingIdToContainedResource == null) {
-				myExistingIdToContainedResource = new HashMap<>();
+			if (myExistingIdToContainedResourceMap == null) {
+				myExistingIdToContainedResourceMap = new HashMap<>();
 			}
-			return myExistingIdToContainedResource;
+			return myExistingIdToContainedResourceMap;
 		}
 
 		public void addContained(IBaseResource theResource) {
-			initializeMapsIfNeeded();
-			if (myResourceToId.containsKey(theResource)) {
+			if (getResourceToIdMap().containsKey(theResource)) {
 				return;
 			}
 
@@ -1162,53 +1152,59 @@ public abstract class BaseParser implements IParser {
 				newId = null;
 			}
 
-			myResourceToId.put(theResource, newId);
-			myResources.add(theResource);
+			getResourceToIdMap().put(theResource, newId);
+			getResourceList().add(theResource);
 		}
 
 		public void addContained(IIdType theId, IBaseResource theResource) {
-			initializeMapsIfNeeded();
-			if (!myResourceToId.containsKey(theResource)) {
-				myResourceToId.put(theResource, theId);
-				myResources.add(theResource);
+			if (!getResourceToIdMap().containsKey(theResource)) {
+				getResourceToIdMap().put(theResource, theId);
+				getResourceList().add(theResource);
 			}
 		}
 
 		public List<IBaseResource> getContainedResources() {
-			if (myResources == null) {
+			if (getResourceToIdMap() == null) {
 				return Collections.emptyList();
 			}
-			return myResources;
+			return getResourceList();
 		}
 
 		public IIdType getResourceId(IBaseResource theNext) {
-			if (myResourceToId == null) {
+			if (getResourceToIdMap() == null) {
 				return null;
 			}
-			return myResourceToId.get(theNext);
+			return getResourceToIdMap().get(theNext);
 		}
 
-		private void initializeMapsIfNeeded() {
-			if (myResources == null) {
-				myResources = new ArrayList<>();
-				myResourceToId = new IdentityHashMap<>();
+		private List<IBaseResource> getResourceList() {
+			if (myResourceList == null) {
+				myResourceList = new ArrayList<>();
 			}
+			return myResourceList;
+		}
+
+		private IdentityHashMap<IBaseResource, IIdType> getResourceToIdMap() {
+			if (myResourceToIdMap == null) {
+				myResourceToIdMap = new IdentityHashMap<>();
+			}
+			return myResourceToIdMap;
 		}
 
 		public boolean isEmpty() {
-			if (myResourceToId == null) {
+			if (myResourceToIdMap == null) {
 				return true;
 			}
-			return myResourceToId.isEmpty();
+			return myResourceToIdMap.isEmpty();
 		}
 
 		public boolean hasExistingIdToContainedResource() {
-			return myExistingIdToContainedResource != null;
+			return myExistingIdToContainedResourceMap != null;
 		}
 
 		public void assignIdsToContainedResources() {
 
-			if (myResources != null) {
+			if (getResourceList() != null) {
 
 				/*
 				 * The idea with the code block below:
@@ -1224,24 +1220,24 @@ public abstract class BaseParser implements IParser {
 				Set<String> ids = new HashSet<>();
 
 				// Gather any user assigned IDs
-				for (IBaseResource nextResource : myResources) {
-					if (myResourceToId.get(nextResource) != null) {
-						ids.add(myResourceToId.get(nextResource).getValue());
+				for (IBaseResource nextResource : getResourceList()) {
+					if (getResourceToIdMap().get(nextResource) != null) {
+						ids.add(getResourceToIdMap().get(nextResource).getValue());
 						continue;
 					}
 				}
 
 				// Automatically assign IDs to the rest
-				for (IBaseResource nextResource : myResources) {
+				for (IBaseResource nextResource : getResourceList()) {
 
-					while (myResourceToId.get(nextResource) == null) {
+					while (getResourceToIdMap().get(nextResource) == null) {
 						String nextCandidate = "#" + myNextContainedId;
 						myNextContainedId++;
 						if (!ids.add(nextCandidate)) {
 							continue;
 						}
 
-						myResourceToId.put(nextResource, new IdDt(nextCandidate));
+						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
 					}
 
 				}
@@ -1274,9 +1270,7 @@ public abstract class BaseParser implements IParser {
 		}
 		if (theElement instanceof IBaseHasModifierExtensions) {
 			IBaseHasModifierExtensions res = (IBaseHasModifierExtensions) theElement;
-			if (res.hasModifierExtension()) {
-				return true;
-			}
+			return res.hasModifierExtension();
 		}
 		return false;
 	}
