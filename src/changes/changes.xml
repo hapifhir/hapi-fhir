@@ -17,6 +17,11 @@
 				Automatic ID generation for contained resources (in cases where the user hasn't manually specified an ID) 
 				has been streamlined to generate more predictable IDs in some cases.
 			</action>
+			<action type="fix">
+				An issue in the HAPI FHIR CLI database mogrator command has been resolved, where
+				some database drivers did not automatically register and had to be manually added to
+				the classpath.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
