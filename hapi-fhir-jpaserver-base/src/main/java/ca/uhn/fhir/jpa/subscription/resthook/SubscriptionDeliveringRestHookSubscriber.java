@@ -22,7 +22,10 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.*;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDeliverySubscriber;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -30,6 +33,7 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -38,10 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessagingException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -183,12 +184,28 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
 		FhirContext context= getContext();
 		Map<String, List<String>> params = new HashMap();
+
 		List<Header> headers = new ArrayList<>();
+		if (theMsg.getSubscription().getHeaders() != null) {
+			theMsg.getSubscription().getHeaders().stream().filter(Objects::nonNull).forEach(h -> {
+				final int sep = h.indexOf(':');
+				if (sep > 0) {
+					final String name = h.substring(0, sep);
+					final String value = h.substring(sep + 1);
+					if (StringUtils.isNotBlank(name)) {
+						headers.add(new Header(name.trim(), value.trim()));
+					}
+				}
+			});
+		}
+
 		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
 		IHttpClient client = context.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(context, params, null);
 		try {
 			IHttpResponse response = request.execute();
+			// close connection in order to return a possible cached connection to the connection pool
+			response.close();
 		} catch (IOException e) {
 			ourLog.error("Error trying to reach "+ theMsg.getSubscription().getEndpointUrl());
 			e.printStackTrace();

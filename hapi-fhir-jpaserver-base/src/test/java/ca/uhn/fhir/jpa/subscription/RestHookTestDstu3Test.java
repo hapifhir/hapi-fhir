@@ -24,6 +24,7 @@ import org.junit.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -40,6 +41,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
+	private static NotificationServlet ourNotificationServlet;
+	private static String ourNotificationListenerServer;
 	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
 	private static List<String> ourContentTypes = new ArrayList<>();
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
@@ -74,9 +77,15 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
+		ourNotificationServlet.reset();
 	}
 
-	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
+	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
+		return createSubscription(criteria, payload, endpoint, null);
+	}
+
+	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint,
+														 List<StringType> headers) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -86,6 +95,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
+		if (headers != null) {
+			channel.setHeader(headers);
+		}
 		subscription.setChannel(channel);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
@@ -113,6 +125,55 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		observation.setId(observationId);
 
 		return observation;
+	}
+
+	@Test
+	public void testRestHookSubscription() throws Exception {
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		createSubscription(criteria1, null, ourNotificationListenerServer,
+			Collections.singletonList(new StringType("Authorization: abc-def")));
+		createSubscription(criteria2, null, ourNotificationListenerServer);
+
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification with authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
+
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification with authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
+
+		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+
+		/// Should see 1 subscription notification with authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
+
+		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		CodeableConcept codeableConcept = new CodeableConcept();
+		observation3.setCode(codeableConcept);
+		Coding coding = codeableConcept.addCoding();
+		coding.setCode(code + "111");
+		coding.setSystem("SNOMED-CT");
+		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+
+		// Should see 2 subscription notifications with and without authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
 	}
 
 	@Test
@@ -355,11 +416,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourListenerPort = PortUtil.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
 		ourListenerServer = new Server(ourListenerPort);
+		ourNotificationServlet = new NotificationServlet();
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -367,6 +430,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ServletHolder servletHolder = new ServletHolder();
 		servletHolder.setServlet(ourListenerRestServer);
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+		servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourNotificationServlet);
+		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
 
 		ourListenerServer.setHandler(proxyHandler);
 		ourListenerServer.start();
