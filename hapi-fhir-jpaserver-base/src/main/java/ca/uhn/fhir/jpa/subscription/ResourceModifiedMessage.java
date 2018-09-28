@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -38,11 +37,25 @@ public class ResourceModifiedMessage {
 	@JsonProperty("resourceId")
 	private String myId;
 	@JsonProperty("operationType")
-	private RestOperationTypeEnum myOperationType;
+	private OperationTypeEnum myOperationType;
+	/**
+	 * This will only be set if the resource is being retriggered for a specific
+	 * subscription
+	 */
+	@JsonProperty(value = "subscriptionId", required = false)
+	private String mySubscriptionId;
 	@JsonProperty("newPayload")
 	private String myNewPayloadEncoded;
 	@JsonIgnore
 	private transient IBaseResource myNewPayload;
+
+	public String getSubscriptionId() {
+		return mySubscriptionId;
+	}
+
+	public void setSubscriptionId(String theSubscriptionId) {
+		mySubscriptionId = theSubscriptionId;
+	}
 
 	public IIdType getId(FhirContext theCtx) {
 		IIdType retVal = null;
@@ -59,11 +72,11 @@ public class ResourceModifiedMessage {
 		return myNewPayload;
 	}
 
-	public RestOperationTypeEnum getOperationType() {
+	public OperationTypeEnum getOperationType() {
 		return myOperationType;
 	}
 
-	public void setOperationType(RestOperationTypeEnum theOperationType) {
+	public void setOperationType(OperationTypeEnum theOperationType) {
 		myOperationType = theOperationType;
 	}
 
@@ -78,4 +91,14 @@ public class ResourceModifiedMessage {
 		myNewPayload = theNewPayload;
 		myNewPayloadEncoded = theCtx.newJsonParser().encodeResourceToString(theNewPayload);
 	}
+
+
+	public enum OperationTypeEnum {
+		CREATE,
+		UPDATE,
+		DELETE,
+		MANUALLY_RETRIGGERED;
+
+	}
+
 }

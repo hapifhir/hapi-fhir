@@ -56,6 +56,7 @@ import java.io.Reader;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -1152,6 +1153,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				version = null;
 			} else if (myId != null) {
 				resourceName = myId.getResourceType();
+				Validate.notBlank(defaultString(resourceName), "Can not invoke operation \"$%s\" on instance \"%s\" - No resource type specified", myOperationName, myId.getValue());
 				id = myId.getIdPart();
 				version = myId.getVersionIdPart();
 			} else {

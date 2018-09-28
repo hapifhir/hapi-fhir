@@ -39,6 +39,8 @@ import org.springframework.messaging.MessagingException;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
 
@@ -59,7 +61,9 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		switch (msg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
+			case MANUALLY_RETRIGGERED:
 				break;
+			case DELETE:
 			default:
 				ourLog.trace("Not processing modified message for {}", msg.getOperationType());
 				// ignore anything else
@@ -78,6 +82,13 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			String nextSubscriptionId = nextSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue();
 			String nextCriteriaString = nextSubscription.getCriteriaString();
+
+			if (isNotBlank(msg.getSubscriptionId())) {
+				if (!msg.getSubscriptionId().equals(nextSubscriptionId)) {
+					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, msg.getSubscriptionId());
+					continue;
+				}
+			}
 
 			if (StringUtils.isBlank(nextCriteriaString)) {
 				continue;

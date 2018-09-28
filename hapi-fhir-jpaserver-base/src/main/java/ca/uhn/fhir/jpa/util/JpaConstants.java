@@ -174,4 +174,9 @@ public class JpaConstants {
 	 * Operation name for the $document operation
 	 */
 	public static final String OPERATION_DOCUMENT = "$document";
+
+	/**
+	 * Retrigger a subscription manually for a given resource
+	 */
+	public static final String OPERATION_RETRIGGER_SUBSCRIPTION = "$retrigger-subscription";
 }

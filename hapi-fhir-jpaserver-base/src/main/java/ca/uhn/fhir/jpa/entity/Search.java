@@ -19,9 +19,9 @@ import static org.apache.commons.lang3.StringUtils.left;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,77 +39,61 @@ import static org.apache.commons.lang3.StringUtils.left;
 })
 public class Search implements Serializable {
 
-	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	@SuppressWarnings("WeakerAccess")
 	public static final int UUID_COLUMN_LENGTH = 36;
+	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
-
+	@Column(name = "SEARCH_DELETED", nullable = true)
+	private Boolean myDeleted;
 	@Column(name = "FAILURE_CODE", nullable = true)
 	private Integer myFailureCode;
-
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-
 	@OneToMany(mappedBy = "mySearch")
 	private Collection<SearchInclude> myIncludes;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_LOW", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedLow;
-
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
-
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
-
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
-
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-
 	@OneToMany(mappedBy = "mySearch")
 	private Collection<SearchResult> myResults;
-
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)
 	private Date mySearchLastReturned;
-
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
-
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
-
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
 	private SearchTypeEnum mySearchType;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
-
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-
 	@Column(name = "SEARCH_UUID", length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
 
@@ -118,6 +102,14 @@ public class Search implements Serializable {
 	 */
 	public Search() {
 		super();
+	}
+
+	public Boolean getDeleted() {
+		return myDeleted;
+	}
+
+	public void setDeleted(Boolean theDeleted) {
+		myDeleted = theDeleted;
 	}
 
 	public Date getCreated() {

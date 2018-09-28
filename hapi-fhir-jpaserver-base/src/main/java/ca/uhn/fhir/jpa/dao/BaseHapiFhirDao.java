@@ -1079,6 +1079,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		String resourceName = defaultIfBlank(theResourceName, null);
 
 		Search search = new Search();
+		search.setDeleted(false);
 		search.setCreated(new Date());
 		search.setSearchLastReturned(new Date());
 		search.setLastUpdated(theSince, theUntil);

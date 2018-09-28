@@ -29,6 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -70,8 +71,25 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
 			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-			mySearchResultDao.deleteForSearch(searchToDelete.getId());
-			mySearchDao.delete(searchToDelete);
+
+			/*
+			 * Note, we're only deleting up to 1000 results in an individual search here. This
+			 * is to prevent really long running transactions in cases where there are
+			 * huge searches with tons of results in them. By the time we've gotten here
+			 * we have marked the parent Search entity as deleted, so it's not such a
+			 * huge deal to be only partially deleting search results. They'll get deleted
+			 * eventually
+			 */
+			int max = 10000;
+			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
+			for (Long next : resultPids) {
+				mySearchResultDao.deleteById(next);
+			}
+
+			// Only delete if we don't have results left in this search
+			if (resultPids.getNumberOfElements() < max) {
+				mySearchDao.delete(searchToDelete);
+			}
 		});
 	}
 
@@ -95,20 +113,18 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
-		final Slice<Long> toDelete = tt.execute(new TransactionCallback<Slice<Long>>() {
-			@Override
-			public Slice<Long> doInTransaction(TransactionStatus theStatus) {
-				return mySearchDao.findWhereLastReturnedBefore(cutoff, new PageRequest(0, 1000));
-			}
-		});
-
+		final Slice<Long> toDelete = tt.execute(theStatus ->
+			mySearchDao.findWhereLastReturnedBefore(cutoff, new PageRequest(0, 1000))
+		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
-			tt.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					deleteSearch(nextSearchToDelete);
-				}
+			tt.execute(t->{
+				mySearchDao.updateDeleted(nextSearchToDelete, true);
+				return null;
+			});
+			tt.execute(t->{
+				deleteSearch(nextSearchToDelete);
+				return null;
 			});
 		}
 

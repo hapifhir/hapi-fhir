@@ -22,6 +22,20 @@
 				some database drivers did not automatically register and had to be manually added to
 				the classpath.
 			</action>
+			<action type="add">
+				The module which deletes stale searches has been modified so that it deletes very large
+				searches (searches with 10000+ results in the query cache) in smaller batches, in order
+				to avoid having very long running delete operations running.
+			</action>
+			<action type="fix">
+				When invoking an operation using the fluent client on an instance, the operation would
+				accidentally invoke against the server if the provided ID did not include a type. This
+				has been corrected so that an IllegalArgumentException is now thrown.
+			</action>
+			<action type="add">
+				A new operation has been added to the JPA server called $retrigger-subscription. This can
+				be used to cause a transaction to redeliver a resource that previously triggered.
+			</actiom>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

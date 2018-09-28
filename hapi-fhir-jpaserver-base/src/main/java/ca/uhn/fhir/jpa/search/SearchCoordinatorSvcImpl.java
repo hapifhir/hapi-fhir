@@ -321,6 +321,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		Search search = new Search();
+		search.setDeleted(false);
 		search.setUuid(searchUuid);
 		search.setCreated(new Date());
 		search.setSearchLastReturned(new Date());
