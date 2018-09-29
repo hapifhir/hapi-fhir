@@ -376,6 +376,11 @@
 				not try to read request parameters from the content stream. This avoids an incompatibility with
 				new versions of Jetty.
 			</action>
+			<action type="fix" issue="1050">
+				Custom profile names when not matching standard FHIR profile names, are now
+				handled properly by the validator. Thanks to Anthony Sute
+				for the Pull Request!
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

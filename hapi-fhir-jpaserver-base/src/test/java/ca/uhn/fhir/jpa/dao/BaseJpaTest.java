@@ -416,6 +416,7 @@ public abstract class BaseJpaTest {
 		if (sw.getMillis() >= theTimeout) {
 			fail("Size " + theCallable.call() + " is != target " + theTarget);
 		}
+		Thread.sleep(500);
 	}
 
 }

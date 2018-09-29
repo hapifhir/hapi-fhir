@@ -1867,6 +1867,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
 
+		/*
+		 * Filter out
+		 */
 		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
 			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
 
